@@ -23,6 +23,8 @@ class Auth extends CI_Controller {
                 redirect('dosen/dashboard');
             } else if($level == '3') {
                 redirect('mahasiswa/dashboard');
+            } else if($level == '4') {
+                redirect('kaprodi/dashboard');
             }
         }
         
@@ -44,6 +46,8 @@ class Auth extends CI_Controller {
                 redirect('dosen/dashboard');
             } else if($level == '3') {
                 redirect('mahasiswa/dashboard');
+            } else if($level == '4') {
+                redirect('kaprodi/dashboard');
             }
         } else {
             redirect('auth/login');

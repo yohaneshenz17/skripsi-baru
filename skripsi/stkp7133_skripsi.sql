@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 13, 2025 at 05:46 PM
+-- Generation Time: Jul 14, 2025 at 10:04 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.32
 
@@ -32,7 +32,7 @@ CREATE TABLE `bimbingan_dosen_v` (
 ,`nama` varchar(100)
 ,`nomor_telepon` varchar(30)
 ,`email` varchar(100)
-,`level` enum('1','2')
+,`level` enum('1','2','4')
 ,`nim` varchar(50)
 ,`nama_mahasiswa` varchar(100)
 ,`nama_prodi` varchar(50)
@@ -65,7 +65,7 @@ CREATE TABLE `dosen` (
   `nama` varchar(100) NOT NULL,
   `nomor_telepon` varchar(30) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `level` enum('1','2') NOT NULL DEFAULT '2' COMMENT '1 = admin, 2 = dosen'
+  `level` enum('1','2','4') NOT NULL DEFAULT '2' COMMENT '1 = admin, 2 = dosen, 4 = kaprodi'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
@@ -74,9 +74,9 @@ CREATE TABLE `dosen` (
 
 INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`) VALUES
 (2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1'),
-(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedimus@stkyakobus.ac.id', '2'),
-(11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '2'),
-(12, '2720067001', 1, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '2'),
+(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedimus@stkyakobus.ac.id', '4'),
+(11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '4'),
+(12, '2720067001', 1, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '4'),
 (14, '2709109301', 2, 'Lambertus Ayiriga, S.Pd., M.Pd.', '82197819425', 'lambertus@stkyakobus.ac.id', '2'),
 (15, '2728048001', 1, 'Rikardus Kristian Sarang, S.Fil., M.Pd.', '81248525845', 'rikardkristians@stkyakobus.ac.id', '2'),
 (16, '2730068501', 1, 'Raimundus Sedo, S.T., M.T.', '81338623494', 'raimundus@stkyakobus.ac.id', '2'),
@@ -239,6 +239,23 @@ INSERT INTO `home_template` (`id`, `carousel_bg1`, `carousel_subtitle1`, `carous
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `kaprodi_v`
+-- (See below for the actual view)
+--
+CREATE TABLE `kaprodi_v` (
+`id` bigint(20)
+,`nip` varchar(30)
+,`nama` varchar(100)
+,`email` varchar(100)
+,`nomor_telepon` varchar(30)
+,`prodi_id` bigint(20)
+,`nama_prodi` varchar(50)
+,`nama_fakultas` varchar(255)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `konsultasi`
 --
 
@@ -365,7 +382,7 @@ CREATE TABLE `penguji_dosen_v` (
 ,`nama` varchar(100)
 ,`nomor_telepon` varchar(30)
 ,`email` varchar(100)
-,`level` enum('1','2')
+,`level` enum('1','2','4')
 ,`id` bigint(20)
 ,`mahasiswa_id` bigint(20)
 ,`nim` varchar(50)
@@ -410,17 +427,50 @@ CREATE TABLE `proposal_mahasiswa` (
   `dosen_id` bigint(20) NOT NULL COMMENT 'pembimbing',
   `dosen2_id` int(11) NOT NULL DEFAULT 1 COMMENT 'pembimbing 2',
   `dosen_penguji_id` int(11) DEFAULT NULL,
+  `dosen_penguji2_id` bigint(20) DEFAULT NULL,
   `status` enum('1','0') NOT NULL DEFAULT '0' COMMENT '1 = disetujui, 2 = tidak disetujui',
-  `deadline` datetime DEFAULT NULL
+  `deadline` datetime DEFAULT NULL,
+  `tanggal_penetapan` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi menetapkan pembimbing & penguji',
+  `penetapan_oleh` bigint(20) DEFAULT NULL COMMENT 'ID kaprodi yang menetapkan'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `proposal_mahasiswa`
 --
 
-INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `status`, `deadline`) VALUES
-(34, 18, 'Pengaruh x terhadap Y bagi mahasiswa STK', 'Tes saja pak untuk proposalini', 10, 11, 11, '0', NULL),
-(35, 19, 'Pengaruh Miras terhadap Pergaulan Bebas', 'Tes saja', 10, 24, 22, '0', NULL);
+INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`) VALUES
+(34, 18, 'Pengaruh x terhadap Y bagi mahasiswa STK', 'Tes saja pak untuk proposalini', 10, 11, 11, NULL, '0', NULL, NULL, NULL),
+(35, 19, 'Pengaruh Miras terhadap Pergaulan Bebas', 'Tes saja', 10, 24, 22, NULL, '0', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `proposal_mahasiswa_detail_v`
+-- (See below for the actual view)
+--
+CREATE TABLE `proposal_mahasiswa_detail_v` (
+`id` bigint(20)
+,`mahasiswa_id` bigint(20)
+,`judul` varchar(100)
+,`ringkasan` varchar(5000)
+,`dosen_id` bigint(20)
+,`dosen2_id` int(11)
+,`dosen_penguji_id` int(11)
+,`dosen_penguji2_id` bigint(20)
+,`status` enum('1','0')
+,`deadline` datetime
+,`tanggal_penetapan` datetime
+,`penetapan_oleh` bigint(20)
+,`nim` varchar(50)
+,`nama_mahasiswa` varchar(100)
+,`email_mahasiswa` varchar(100)
+,`nama_prodi` varchar(50)
+,`nama_pembimbing` varchar(100)
+,`nama_pembimbing2` varchar(100)
+,`nama_penguji1` varchar(100)
+,`nama_penguji2` varchar(100)
+,`nama_kaprodi_penetapan` varchar(100)
+);
 
 -- --------------------------------------------------------
 
@@ -560,6 +610,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 -- --------------------------------------------------------
 
 --
+-- Structure for view `kaprodi_v`
+--
+DROP TABLE IF EXISTS `kaprodi_v`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `kaprodi_v`  AS SELECT `d`.`id` AS `id`, `d`.`nip` AS `nip`, `d`.`nama` AS `nama`, `d`.`email` AS `email`, `d`.`nomor_telepon` AS `nomor_telepon`, `p`.`id` AS `prodi_id`, `p`.`nama` AS `nama_prodi`, `f`.`nama` AS `nama_fakultas` FROM ((`dosen` `d` join `prodi` `p` on(`d`.`id` = `p`.`dosen_id`)) join `fakultas` `f` on(`p`.`fakultas_id` = `f`.`id`)) WHERE `d`.`level` = '4' ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `mahasiswa_v`
 --
 DROP TABLE IF EXISTS `mahasiswa_v`;
@@ -574,6 +633,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 DROP TABLE IF EXISTS `penguji_dosen_v`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `penguji_dosen_v`  AS SELECT `dosen`.`nip` AS `nip`, `dosen`.`nama` AS `nama`, `dosen`.`nomor_telepon` AS `nomor_telepon`, `dosen`.`email` AS `email`, `dosen`.`level` AS `level`, `dosen`.`id` AS `id`, `proposal_mahasiswa_v`.`mahasiswa_id` AS `mahasiswa_id`, `proposal_mahasiswa_v`.`nim` AS `nim`, `proposal_mahasiswa_v`.`nama_mahasiswa` AS `nama_mahasiswa`, `proposal_mahasiswa_v`.`nama_prodi` AS `nama_prodi` FROM (`dosen` join `proposal_mahasiswa_v` on(`dosen`.`id` = `proposal_mahasiswa_v`.`dosen_penguji_id`)) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `proposal_mahasiswa_detail_v`
+--
+DROP TABLE IF EXISTS `proposal_mahasiswa_detail_v`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `proposal_mahasiswa_detail_v`  AS SELECT `pm`.`id` AS `id`, `pm`.`mahasiswa_id` AS `mahasiswa_id`, `pm`.`judul` AS `judul`, `pm`.`ringkasan` AS `ringkasan`, `pm`.`dosen_id` AS `dosen_id`, `pm`.`dosen2_id` AS `dosen2_id`, `pm`.`dosen_penguji_id` AS `dosen_penguji_id`, `pm`.`dosen_penguji2_id` AS `dosen_penguji2_id`, `pm`.`status` AS `status`, `pm`.`deadline` AS `deadline`, `pm`.`tanggal_penetapan` AS `tanggal_penetapan`, `pm`.`penetapan_oleh` AS `penetapan_oleh`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pr`.`nama` AS `nama_prodi`, `d1`.`nama` AS `nama_pembimbing`, `d2`.`nama` AS `nama_pembimbing2`, `dp1`.`nama` AS `nama_penguji1`, `dp2`.`nama` AS `nama_penguji2`, `dk`.`nama` AS `nama_kaprodi_penetapan` FROM (((((((`proposal_mahasiswa` `pm` join `mahasiswa` `m` on(`pm`.`mahasiswa_id` = `m`.`id`)) join `prodi` `pr` on(`m`.`prodi_id` = `pr`.`id`)) left join `dosen` `d1` on(`pm`.`dosen_id` = `d1`.`id`)) left join `dosen` `d2` on(`pm`.`dosen2_id` = `d2`.`id`)) left join `dosen` `dp1` on(`pm`.`dosen_penguji_id` = `dp1`.`id`)) left join `dosen` `dp2` on(`pm`.`dosen_penguji2_id` = `dp2`.`id`)) left join `dosen` `dk` on(`pm`.`penetapan_oleh` = `dk`.`id`)) ;
 
 -- --------------------------------------------------------
 
@@ -789,6 +857,17 @@ ALTER TABLE `seminar`
 --
 ALTER TABLE `skripsi`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `proposal_mahasiswa`
+--
+ALTER TABLE `proposal_mahasiswa`
+  ADD CONSTRAINT `fk_penetapan` FOREIGN KEY (`penetapan_oleh`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_penguji2` FOREIGN KEY (`dosen_penguji2_id`) REFERENCES `dosen` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

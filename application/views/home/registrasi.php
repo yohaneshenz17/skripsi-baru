@@ -8,7 +8,6 @@
         <div class="card-title">Registrasi Akun Mahasiswa</div>
     </div>
     <div class="card-body">
-        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
         <span class="text-danger">*</span> Harus Diisi
         <form id="registrasi" style="margin-top: 10px;" onsubmit="loadingBtn()">
             <div class="row">
@@ -45,18 +44,18 @@
                     </div>
                     <div class="form-group">
                         <label>Email <span class="text-danger">*</span></label>
-                        <input type="email" name="email" autocomplete="off" class="form-control" placeholder="Masukkan Email Aktif">
+                        <input type="text" name="email" autocomplete="off" class="form-control" placeholder="Masukkan Email Aktif">
                     </div>
                     <div class="form-group">
                         <label>Alamat Domisili <span class="text-danger">*</span></label>
                         <textarea name="alamat" placeholder="Masukkan Alamat Tinggal Saat Ini" rows="5" class="form-control"></textarea>
                     </div>
-                </div>
-                <div class="col-md-6">
                     <div class="form-group">
                         <label>Nomor HP <span class="text-danger">*</span></label>
                         <input type="text" name="nomor_telepon" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Whatsapp Aktif">
                     </div>
+                </div>
+                <div class="col-md-6">
                     <div class="form-group">
                         <label>Nomor HP Orang Dekat <span class="text-danger">*</span></label>
                         <input type="text" name="nomor_telepon_orang_dekat" autocomplete="off" class="form-control" placeholder="Masukkan Nomor HP Orang Dekat">
@@ -67,23 +66,23 @@
                     </div>
                     <div class="form-group">
                         <label>Password <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control" name="password" autocomplete="off" placeholder="Masukkan Password (Mohon Diingat Baik)">
+                        <input type="text" class="form-control" name="password" autocomplete="off" placeholder="Masukkan Password (Mohon Diingat Baik)">
                     </div>
                     <div class="form-group">
                         <label>Password (Konfirmasi) <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control" name="password_konfirmasi" autocomplete="off" placeholder="Masukkan Password Sama dengan Di Atas">
+                        <input type="text" class="form-control" name="password_konfirmasi" autocomplete="off" placeholder="Masukkan Password Sama dengan Di Atas">
                     </div>
                     <div class="form-group">
-                        <label>Foto Mahasiswa (JPG/JPEG, Maks. 1 MB)</label>
+                        <label>Foto Mahasiswa (JPG Maks. 1 MB)</label>
                         <div class="custom-file pilih-foto">
-                            <input type="file" accept="image/jpeg, image/jpg" class="custom-file-input">
+                            <input type="file" accept="image/*" class="custom-file-input">
                             <label class="custom-file-label"></label>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="card shadow p-3 text-center" style="height: 300px">
                             <input type="hidden" name="foto">
-                            <img src="<?= base_url() ?>cdn/img/mahasiswa/default.png" class="foto img-fluid" style="object-fit: contain; height: 100%;">
+                            <img src="<?= base_url() ?>cdn/img/mahasiswa/default.png" class="foto foto-fluid">
                         </div>
                     </div>
                 </div>
@@ -91,7 +90,7 @@
             <hr>
             <div class="text-right">
                 <button class="btn btn-warning" type="reset">Reset</button>
-                <button type="submit" class="btn btn-primary btn-act">Submit</button>
+                <button type="submit" class="btn btn-default btn-act">Submit</button>
             </div>
         </form>
     </div>
@@ -107,60 +106,109 @@
 <script src="<?= base_url() ?>cdn/plugins/canvas-resize/zepto.min.js"></script>
 <script>
     function loadingBtn() {
-        $(".btn-act").attr('disabled', true).html('Loading...');
+        $(".btn-act").attr('disabled', true).html('Loading...')
     }
 
     $(document).ready(function() {
+        $("#nim").keyup(function() {
+            var nim_input = $(this).val();
+
+            // Cek apakah input hanya berisi angka (atau kosong)
+             if (/^\d*$/.test(nim_input)) {
+
+                 // Cek apakah panjangnya antara 7 dan 10 digit
+                  if (nim_input.length >= 7 && nim_input.length <= 10) {
+                     $(".btn-act").attr('disabled', false);
+                 } else {
+                    // Jika panjangnya di luar rentang (tapi tidak kosong), tampilkan notifikasi
+                    if (nim_input.length > 0) {
+                    notif('NIM harus terdiri dari 7 hingga 10 digit angka', 'info', true);
+                }
+                $(".btn-act").attr('disabled', true);
+             }
+
+         } else {
+            // Jika input berisi selain angka, tampilkan notifikasi error
+            notif('NIM hanya boleh berisi angka', 'error', true);
+            $(".btn-act").attr('disabled', true);
+        }
+    });
+        
+            // KODE BARU UNTUK DATEPICKER
+            $('#tanggal_lahir').datepicker({
+                format: "dd/mm/yyyy",
+                autoclose: true,
+                todayHighlight: true
+    });
         
         call('api/prodi').done(function(req) {
-            let prodi = '<option value="">- Pilih Prodi -</option>';
+            prodi = '<option value="">- Pilih Prodi -</option>';
             if (req.data) {
                 $.each(req.data, function(index, obj) {
-                    prodi += `<option value="${obj.id}">${obj.nama}</option>`;
-                });
+                    prodi += '<option value="' + obj.id + '">' + obj.nama + '</option>'
+                })
             }
             $('[name=prodi_id]').html(prodi);
-        });
+        })
 
         $(document).on('submit', 'form#registrasi', function(e) {
             e.preventDefault();
-
-            // [PERBAIKAN] Validasi Nomor HP ditambahkan di sini
-            const noHpPribadi = $('[name=nomor_telepon]').val();
-            const noHpDekat = $('[name=nomor_telepon_orang_dekat]').val();
-
-            if (noHpPribadi && noHpDekat && noHpPribadi === noHpDekat) {
-                notif('Nomor HP pribadi dan Nomor HP orang dekat tidak boleh sama.', 'error', true);
-                return; // Menghentikan proses submit
+            if ($('form#registrasi [name=password]').val() == $('form#registrasi [name=password_konfirmasi]').val()) {
+                call('api/mahasiswa/create', $(this).serialize()).done(function(req) {
+                    if (req.error == true) {
+                        notif(req.message, 'error', true);
+                        $(".btn-act").attr('disabled', false).html('Submit')
+                    } else {
+                        $('form#registrasi [name]').val('');
+                        $('img.foto').attr('src', '');
+                        notif(req.message, 'success');
+                        $(".btn-act").attr('disabled', false).html('Submit')
+                    }
+                })
+            } else {
+                notif('konfirmasi password harus sama', 'error', true);
+                $(".btn-act").attr('disabled', false).html('Submit')
             }
+        })
 
-            if ($('[name=password]').val() !== $('[name=password_konfirmasi]').val()) {
-                notif('Konfirmasi password harus sama', 'error', true);
-                return; // Menghentikan proses submit
+                $(document).on('change', '.pilih-foto [type=file]', function(e) {
+            const file = this.files[0];
+            const self = this;
+        
+            if (!file) {
+                return;
             }
-            
-            loadingBtn(); // Panggil fungsi loading
-
-            call('api/mahasiswa/create', $(this).serialize()).done(function(req) {
-                if (req.error == true) {
-                    notif(req.message, 'error', true);
-                } else {
-                    $('form#registrasi')[0].reset();
-                    $('img.foto').attr('src', '<?= base_url() ?>cdn/img/mahasiswa/default.png');
-                    notif(req.message, 'success');
+        
+            // Validasi Tipe File (hanya jpg/jpeg)
+            if (file.type !== 'image/jpeg' && file.type !== 'image/jpg') {
+                notif('Tipe file harus JPG atau JPEG', 'error', true);
+                $(self).val(null);
+                return;
+            }
+        
+            // Validasi Ukuran File (maksimal 1MB)
+            const maxSizeInBytes = 1024 * 1024; // 1MB
+            if (file.size > maxSizeInBytes) {
+                notif('Ukuran file tidak boleh melebihi 1 MB', 'error', true);
+                $(self).val(null);
+                return;
+            }
+        
+            // Jika lolos, langsung proses dan potong gambar menjadi 500x500
+            canvasResize(file, {
+                height: 500,
+                width: 500,
+                crop: true, // Opsi ini akan memotong gambar menjadi persegi
+                rotate: 0,
+                quality: 200,
+                callback: function(data) {
+                    $('img.foto').attr('src', data);
+                    $('[name=foto]').val(data);
                 }
-            }).fail(function() {
-                notif('Terjadi kesalahan sistem, coba lagi nanti', 'error', true);
-            }).always(function() {
-                $(".btn-act").attr('disabled', false).html('Submit');
             });
         });
 
-        $(document).on('change', '.pilih-foto [type=file]', function(e) {
-            // ... (kode untuk resize foto, tidak diubah) ...
-        });
-
-    });
+    })
 </script>
 <?php $this->app->endSection('script') ?>
 

@@ -22,7 +22,21 @@ class Mahasiswa extends REST_Controller
 
     public function create_post()
     {
-        $response = $this->model->create($this->input->post());
+        // [PERBAIKAN] Validasi nomor telepon ditambahkan di sini
+        $nomor_telepon = $this->post('nomor_telepon');
+        $nomor_telepon_orang_dekat = $this->post('nomor_telepon_orang_dekat');
+
+        if ($nomor_telepon && !empty($nomor_telepon) && $nomor_telepon == $nomor_telepon_orang_dekat) {
+            // Kirim respons error jika nomor HP sama
+            $this->response([
+                'error' => true,
+                'message' => 'Nomor HP pribadi dan Nomor HP orang dekat tidak boleh sama.'
+            ], REST_Controller::HTTP_BAD_REQUEST); // HTTP 400
+            return; // Hentikan eksekusi
+        }
+        
+        // Jika validasi lolos, lanjutkan proses ke model
+        $response = $this->model->create($this->post());
         return $this->response($response);
     }
 

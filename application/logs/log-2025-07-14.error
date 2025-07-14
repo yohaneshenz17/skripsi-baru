@@ -57,3 +57,7 @@ ERROR - 2025-07-14 12:21:02 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-07-14 12:32:08 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-07-14 12:32:58 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-07-14 13:50:06 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-14 14:20:59 --> 404 Page Not Found: Home/registrasi
+ERROR - 2025-07-14 14:20:59 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/Home.php:1) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-14 14:23:32 --> 404 Page Not Found: Home/index
+ERROR - 2025-07-14 14:23:32 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/Home.php:1) /home/stkp7133/public_html/skripsi/system/core/Common.php 578

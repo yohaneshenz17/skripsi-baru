@@ -1,0 +1,59 @@
+ERROR - 2025-07-14 05:51:04 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 09:20:41 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 09:31:33 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 09:33:34 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-14 10:51:02 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 10:51:51 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 10:56:58 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 10:57:11 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT COUNT(*) AS `numrows`
+FROM `proposal_mahasiswa`
+JOIN `mahasiswa` ON `proposal_mahasiswa`.`mahasiswa_id` = `mahasiswa`.`id`
+WHERE `status` = '0'
+AND `mahasiswa`.`prodi_id` IS NULL
+ERROR - 2025-07-14 10:57:28 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT COUNT(*) AS `numrows`
+FROM `proposal_mahasiswa`
+JOIN `mahasiswa` ON `proposal_mahasiswa`.`mahasiswa_id` = `mahasiswa`.`id`
+WHERE `status` = '0'
+AND `mahasiswa`.`prodi_id` IS NULL
+ERROR - 2025-07-14 10:57:30 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 11:07:36 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT COUNT(*) AS `numrows`
+FROM `proposal_mahasiswa`
+JOIN `mahasiswa` ON `proposal_mahasiswa`.`mahasiswa_id` = `mahasiswa`.`id`
+WHERE `status` = '0'
+AND `mahasiswa`.`prodi_id` IS NULL
+ERROR - 2025-07-14 11:10:52 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.*, " /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 138
+ERROR - 2025-07-14 11:16:13 --> 404 Page Not Found: Kaprodi/mahasiswa
+ERROR - 2025-07-14 11:16:25 --> 404 Page Not Found: Kaprodi/dosen
+ERROR - 2025-07-14 11:19:09 --> 404 Page Not Found: Kaprodi/mahasiswa
+ERROR - 2025-07-14 11:19:39 --> 404 Page Not Found: Kaprodi/laporan
+ERROR - 2025-07-14 11:23:16 --> 404 Page Not Found: Kaprodi/dosen
+ERROR - 2025-07-14 11:23:20 --> 404 Page Not Found: Kaprodi/laporan
+ERROR - 2025-07-14 11:29:43 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-14 11:29:57 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 11:30:02 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-14 11:30:56 --> 404 Page Not Found: Kaprodi/dosen
+ERROR - 2025-07-14 11:50:03 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-14 11:51:43 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-14 11:52:35 --> 404 Page Not Found: Kaprodi/dosen
+ERROR - 2025-07-14 12:01:56 --> 404 Page Not Found: Kaprodi/laporan
+ERROR - 2025-07-14 12:05:02 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.", expecting ")" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 36
+ERROR - 2025-07-14 12:05:04 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.", expecting ")" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 36
+ERROR - 2025-07-14 12:05:05 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.", expecting ")" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 36
+ERROR - 2025-07-14 12:05:06 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.", expecting ")" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 36
+ERROR - 2025-07-14 12:05:07 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.", expecting ")" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 36
+ERROR - 2025-07-14 12:05:12 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.", expecting ")" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 36
+ERROR - 2025-07-14 12:05:27 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.", expecting ")" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 36
+ERROR - 2025-07-14 12:10:56 --> Severity: error --> Exception: Unclosed '(' /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 32
+ERROR - 2025-07-14 12:10:57 --> Severity: error --> Exception: Unclosed '(' /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 32
+ERROR - 2025-07-14 12:11:07 --> Severity: error --> Exception: Unclosed '(' /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 32
+ERROR - 2025-07-14 12:12:01 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.*, mahasisw..." /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 76
+ERROR - 2025-07-14 12:12:02 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_mahasiswa.*, mahasisw..." /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 76
+ERROR - 2025-07-14 12:12:35 --> Severity: error --> Exception: Unclosed '(' /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 191
+ERROR - 2025-07-14 12:12:55 --> Severity: error --> Exception: Unclosed '(' /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 191
+ERROR - 2025-07-14 12:13:55 --> Severity: error --> Exception: syntax error, unexpected string content "kapro" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 85
+ERROR - 2025-07-14 12:13:56 --> Severity: error --> Exception: syntax error, unexpected string content "kapro" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 85
+ERROR - 2025-07-14 12:14:48 --> Severity: error --> Exception: syntax error, unexpected string content "proposal_ma", expecting ")" /home/stkp7133/public_html/skripsi/application/controllers/Kaprodi.php 60
+ERROR - 2025-07-14 12:21:02 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-14 12:32:08 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-14 12:32:58 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-14 13:50:06 --> 404 Page Not Found: Cdn/img

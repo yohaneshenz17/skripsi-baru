@@ -1,5 +1,3 @@
-<?php $this->load->view('template/mahasiswa', ['content' => '']); ob_start(); ?>
-
 <div class="row">
     <div class="col-lg-12">
         <?php if($this->session->flashdata('success')): ?>
@@ -127,6 +125,3 @@
         <?php endif; ?>
     </div>
 </div>
-
-<?php $content = ob_get_clean(); ?>
-<?php $this->load->view('template/mahasiswa', ['content' => $content]); ?>

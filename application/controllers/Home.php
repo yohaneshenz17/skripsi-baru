@@ -7,309 +7,136 @@ class Home extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->library('session');
+        $this->load->library('email');
+        $this->load->helper('url');
+        $this->load->database();
         date_default_timezone_set('Asia/Jakarta');
     }
 
     public function index()
     {
-        $template = $this->db->get('home_template')->result();
-
-        // Head
-        $data['page_title'] = '';
-
-        // Carousel
-        $data['carousel_bg1'] = '';
-        $data['carousel_subtitle1'] = '';
-        $data['carousel_title1'] = '';
-        $data['carousel_description1'] = '';
-        $data['carousel_btn_href1'] = '';
-        $data['carousel_btn_text1'] = '';
-
-        $data['carousel_bg2'] = '';
-        $data['carousel_subtitle2'] = '';
-        $data['carousel_title2'] = '';
-        $data['carousel_description2'] = '';
-        $data['carousel_btn_href2'] = '';
-        $data['carousel_btn_text2'] = '';
-
-        $data['carousel_bg3'] = '';
-        $data['carousel_subtitle3'] = '';
-        $data['carousel_title3'] = '';
-        $data['carousel_description3'] = '';
-        $data['carousel_btn_href3'] = '';
-        $data['carousel_btn_text3'] = '';
-        // End Carousel
-
-        // Tentang Kami
-        $data['tentang_kami_subtitle'] = '';
-        $data['tentang_kami_isi'] = '';
-        // End Tentang Kami
-
-        // Kontak
-        $data['social_description'] = '';
-        $data['link_fb'] = '';
-        $data['link_twitter'] = '';
-        $data['alamat'] = '';
-        $data['phone'] = '';
-        $data['email'] = '';
-        $data['kotak_subtitle'] = '';
-        // End Kontak
-
-        foreach ($template as $item) {
-            // Head
-            $data['page_title'] = $item->page_title;
-
-            // Carousel
-            $data['carousel_bg1'] = $item->carousel_bg1;
-            $data['carousel_subtitle1'] = $item->carousel_subtitle1;
-            $data['carousel_title1'] = $item->carousel_title1;
-            $data['carousel_description1'] = $item->carousel_description1;
-            $data['carousel_btn_href1'] = $item->carousel_btn_href1;
-            $data['carousel_btn_text1'] = $item->carousel_btn_text1;
-
-            $data['carousel_bg2'] = $item->carousel_bg2;
-            $data['carousel_subtitle2'] = $item->carousel_subtitle2;
-            $data['carousel_title2'] = $item->carousel_title2;
-            $data['carousel_description2'] = $item->carousel_description2;
-            $data['carousel_btn_href2'] = $item->carousel_btn_href2;
-            $data['carousel_btn_text2'] = $item->carousel_btn_text2;
-
-            $data['carousel_bg3'] = $item->carousel_bg3;
-            $data['carousel_subtitle3'] = $item->carousel_subtitle3;
-            $data['carousel_title3'] = $item->carousel_title3;
-            $data['carousel_description3'] = $item->carousel_description3;
-            $data['carousel_btn_href3'] = $item->carousel_btn_href3;
-            $data['carousel_btn_text3'] = $item->carousel_btn_text3;
-            // End Carousel
-
-            // Tentang Kami
-            $data['tentang_kami_subtitle'] = $item->tentang_kami_subtitle;
-            $data['tentang_kami_isi'] = $item->tentang_kami_isi;
-            // End Tentang Kami
-
-            // Kontak
-            $data['social_description'] = $item->social_description;
-            $data['link_fb'] = $item->link_fb;
-            $data['link_twitter'] = $item->link_twitter;
-            $data['alamat'] = $item->alamat;
-            $data['phone'] = $item->phone;
-            $data['email'] = $item->email;
-            $data['kontak_subtitle'] = $item->kontak_subtitle;
-            // End Kontak
-        }
+        $template = $this->db->get('home_template')->row();
+        $data = (array) $template;
         $this->load->view('home/index', $data);
     }
 
     public function registrasi()
     {
-        return $this->load->view('home/registrasi');
+        $data['prodi'] = $this->db->get('prodi')->result();
+        $data['old_input'] = $this->session->flashdata('old_input');
+        return $this->load->view('home/registrasi', $data);
+    }
+
+    public function proses_registrasi()
+    {
+        $input_data = $this->input->post();
+        $this->session->set_flashdata('old_input', $input_data);
+
+        // --- VALIDASI DATA ---
+        if ($input_data['nomor_telepon'] == $input_data['nomor_telepon_orang_dekat']) {
+            $this->session->set_flashdata('error', 'Nomor HP Pribadi dan Nomor HP Orang Dekat tidak boleh sama.');
+            redirect('home/registrasi');
+            return;
+        }
+
+        if ($input_data['password'] != $input_data['password_konfirmasi']) {
+            $this->session->set_flashdata('error', 'Password dan Konfirmasi Password tidak cocok.');
+            redirect('home/registrasi');
+            return;
+        }
+
+        $cek_nim = $this->db->get_where('mahasiswa', ['nim' => $input_data['nim']])->num_rows();
+        if ($cek_nim > 0) {
+            $this->session->set_flashdata('error', 'NIM sudah terdaftar.');
+            redirect('home/registrasi');
+            return;
+        }
+        
+        $cek_email = $this->db->get_where('mahasiswa', ['email' => $input_data['email']])->num_rows();
+        if ($cek_email > 0) {
+            $this->session->set_flashdata('error', 'Email sudah terdaftar.');
+            redirect('home/registrasi');
+            return;
+        }
+
+        // --- PERSIAPAN DATA UNTUK DATABASE ---
+        $data_to_save = [
+            'nim' => $input_data['nim'],
+            'nama' => $input_data['nama'],
+            'prodi_id' => $input_data['prodi_id'],
+            'email' => $input_data['email'],
+            'password' => password_hash($input_data['password'], PASSWORD_DEFAULT),
+            'nomor_telepon' => $input_data['nomor_telepon'],
+            'nomor_telepon_orang_dekat' => $input_data['nomor_telepon_orang_dekat'],
+            'jenis_kelamin' => $input_data['jenis_kelamin'],
+            'tempat_lahir' => $input_data['tempat_lahir'],
+            'tanggal_lahir' => date('Y-m-d', strtotime(str_replace('/', '-', $input_data['tanggal_lahir']))),
+            'alamat' => $input_data['alamat'],
+            'ipk' => $input_data['ipk'],
+            'status' => '1'
+        ];
+
+        if (!empty($input_data['foto'])) {
+            $img_data = $input_data['foto'];
+            list($type, $img_data) = explode(';', $img_data);
+            list(, $img_data) = explode(',', $img_data);
+            $decoded_image = base64_decode($img_data);
+            $filename = uniqid() . '.jpg';
+            $filepath = './cdn/img/mahasiswa/' . $filename;
+            file_put_contents($filepath, $decoded_image);
+            $data_to_save['foto'] = $filename;
+        }
+
+        // --- PROSES PENYIMPANAN & NOTIFIKASI ---
+        if ($this->db->insert('mahasiswa', $data_to_save)) {
+            $config_email = $this->db->get('email_sender')->row();
+            if ($config_email) {
+                $config = [
+                    'protocol'  => 'smtp', 'smtp_host' => $config_email->smtp_host,
+                    'smtp_port' => $config_email->smtp_port, 'smtp_user' => $config_email->email,
+                    'smtp_pass' => $config_email->password, 'mailtype'  => 'html', 
+                    'charset'   => 'utf-8', 'newline'   => "\r\n"
+                ];
+                $this->email->initialize($config);
+                $this->email->from($config_email->email, 'Sistem Informasi Skripsi STK');
+                $this->email->to($input_data['email']);
+                $this->email->subject('Akun Anda Telah Berhasil Didaftarkan');
+
+                $nama_mhs = htmlspecialchars($input_data['nama']);
+                $email_mhs = htmlspecialchars($input_data['email']);
+                $password_mhs = htmlspecialchars($input_data['password']);
+                $login_link = base_url('auth/login');
+
+                $message = <<<HTML
+                    <h3>Selamat Datang, {$nama_mhs}!</h3>
+                    <p>Pendaftaran akun Anda pada Sistem Informasi Manajemen Tugas Akhir STK St. Yakobus Merauke telah berhasil.</p>
+                    <p>Gunakan rincian berikut untuk login ke sistem:</p>
+                    <ul style="list-style-type: none; padding: 0;">
+                        <li style="margin-bottom: 5px;"><b>Username:</b> {$email_mhs}</li>
+                        <li><b>Password:</b> {$password_mhs}</li>
+                    </ul>
+                    <p>Silakan login melalui tautan di bawah ini.</p>
+                    <p><a href="{$login_link}" style="display: inline-block; padding: 10px 18px; background-color: #5e72e4; color: white; text-decoration: none; border-radius: 5px;">Login ke Sistem</a></p>
+                    <br>
+                    <p>Terima kasih.</p>
+                HTML;
+                
+                $this->email->message($message);
+                $this->email->send();
+            }
+            
+            // [PERBAIKAN] Hapus flashdata error yang lama sebelum mengatur yang baru
+            $this->session->set_flashdata('error', null);
+
+            $this->session->set_flashdata('old_input', null);
+            $this->session->set_flashdata('success', 'Registrasi berhasil! Silakan cek email Anda untuk detail akun dan link login.');
+            redirect('auth/login');
+        } 
     }
 
     public function cek()
     {
         return $this->load->view('home/cek');
     }
-
-    public function home_template()
-    {
-        $template = $this->db->get('home_template')->result();
-
-        // Head
-        $data['page_title'] = '';
-        $data['id'] = '';
-
-        // Carousel
-        $data['carousel_bg1'] = '';
-        $data['carousel_subtitle1'] = '';
-        $data['carousel_title1'] = '';
-        $data['carousel_description1'] = '';
-        $data['carousel_btn_href1'] = '';
-        $data['carousel_btn_text1'] = '';
-
-        $data['carousel_bg2'] = '';
-        $data['carousel_subtitle2'] = '';
-        $data['carousel_title2'] = '';
-        $data['carousel_description2'] = '';
-        $data['carousel_btn_href2'] = '';
-        $data['carousel_btn_text2'] = '';
-
-        $data['carousel_bg3'] = '';
-        $data['carousel_subtitle3'] = '';
-        $data['carousel_title3'] = '';
-        $data['carousel_description3'] = '';
-        $data['carousel_btn_href3'] = '';
-        $data['carousel_btn_text3'] = '';
-        // End Carousel
-
-        // Tentang Kami
-        $data['tentang_kami_subtitle'] = '';
-        $data['tentang_kami_isi'] = '';
-        // End Tentang Kami
-
-        // Kontak
-        $data['social_description'] = '';
-        $data['link_fb'] = '';
-        $data['link_twitter'] = '';
-        $data['alamat'] = '';
-        $data['phone'] = '';
-        $data['email'] = '';
-        $data['kotak_subtitle'] = '';
-        // End Kontak
-
-        foreach ($template as $item) {
-            // Head
-            $data['page_title'] = $item->page_title;
-            $data['id'] = $item->id;
-
-            // Carousel
-            $data['carousel_bg1'] = $item->carousel_bg1;
-            $data['carousel_subtitle1'] = $item->carousel_subtitle1;
-            $data['carousel_title1'] = $item->carousel_title1;
-            $data['carousel_description1'] = $item->carousel_description1;
-            $data['carousel_btn_href1'] = $item->carousel_btn_href1;
-            $data['carousel_btn_text1'] = $item->carousel_btn_text1;
-
-            $data['carousel_bg2'] = $item->carousel_bg2;
-            $data['carousel_subtitle2'] = $item->carousel_subtitle2;
-            $data['carousel_title2'] = $item->carousel_title2;
-            $data['carousel_description2'] = $item->carousel_description2;
-            $data['carousel_btn_href2'] = $item->carousel_btn_href2;
-            $data['carousel_btn_text2'] = $item->carousel_btn_text2;
-
-            $data['carousel_bg3'] = $item->carousel_bg3;
-            $data['carousel_subtitle3'] = $item->carousel_subtitle3;
-            $data['carousel_title3'] = $item->carousel_title3;
-            $data['carousel_description3'] = $item->carousel_description3;
-            $data['carousel_btn_href3'] = $item->carousel_btn_href3;
-            $data['carousel_btn_text3'] = $item->carousel_btn_text3;
-            // End Carousel
-
-            // Tentang Kami
-            $data['tentang_kami_subtitle'] = $item->tentang_kami_subtitle;
-            $data['tentang_kami_isi'] = $item->tentang_kami_isi;
-            // End Tentang Kami
-
-            // Kontak
-            $data['social_description'] = $item->social_description;
-            $data['link_fb'] = $item->link_fb;
-            $data['link_twitter'] = $item->link_twitter;
-            $data['alamat'] = $item->alamat;
-            $data['phone'] = $item->phone;
-            $data['email'] = $item->email;
-            $data['kontak_subtitle'] = $item->kontak_subtitle;
-            // End Kontak
-        }
-        $this->load->view('admin/home', $data);
-    }
-
-    public function update_home_template()
-    {
-        // Head
-        $page_title = $this->input->post('page_title');
-
-        // Carousel
-        $def_carousel_bg1 = $this->input->post('def_carousel_bg1');
-        $def_carousel_bg2 = $this->input->post('def_carousel_bg2');
-        $def_carousel_bg3 = $this->input->post('def_carousel_bg3');
-        $carousel_bg1 = $_FILES['carousel_bg1']['name'];
-        $carousel_bg2 = $_FILES['carousel_bg2']['name'];
-        $carousel_bg3 = $_FILES['carousel_bg3']['name'];
-        $carousel_subtitle1 = $this->input->post('carousel_subtitle1');
-        $carousel_subtitle2 = $this->input->post('carousel_subtitle2');
-        $carousel_subtitle3 = $this->input->post('carousel_subtitle3');
-        $carousel_title1 = $this->input->post('carousel_title1');
-        $carousel_title2 = $this->input->post('carousel_title2');
-        $carousel_title3 = $this->input->post('carousel_title3');
-        $carousel_description1 = $this->input->post('carousel_description1');
-        $carousel_description2 = $this->input->post('carousel_description2');
-        $carousel_description3 = $this->input->post('carousel_description3');
-
-        // Tentang Kami
-        $tentang_kami_subtitle = $this->input->post('tentang_kami_subtitle');
-        $tentang_kami_isi = $this->input->post('tentang_kami_isi');
-
-        // Kontak
-        $kontak_subtitle = $this->input->post('kontak_subtitle');
-        $social_description = $this->input->post('social_description');
-        $link_fb = $this->input->post('link_fb');
-        $link_twitter = $this->input->post('link_twitter');
-        $alamat = $this->input->post('alamat');
-        $phone = $this->input->post('phone');
-        $email = $this->input->post('email');
-
-        $dataUpdate = array(
-            'page_title' => $page_title,
-            'carousel_subtitle1' => $carousel_subtitle1,
-            'carousel_subtitle2' => $carousel_subtitle2,
-            'carousel_subtitle3' => $carousel_subtitle3,
-            'carousel_title1' => $carousel_title1,
-            'carousel_title2' => $carousel_title2,
-            'carousel_title3' => $carousel_title3,
-            'carousel_description1' => $carousel_description1,
-            'carousel_description2' => $carousel_description2,
-            'carousel_description3' => $carousel_description3,
-            'tentang_kami_subtitle' => $tentang_kami_subtitle,
-            'tentang_kami_isi' => $tentang_kami_isi,
-            'tentang_kami_subtitle' => $tentang_kami_subtitle,
-            'kontak_subtitle' => $kontak_subtitle,
-            'social_description' => $social_description,
-            'link_fb' => $link_fb,
-            'link_twitter' => $link_twitter,
-            'alamat' => $alamat,
-            'phone' => $phone,
-            'email' => $email,
-        );
-
-        $config['upload_path']          = './assets/essence/img/slider/';
-        $config['allowed_types']        = 'jpg|png';
-
-        $this->load->library('upload', $config);
-
-        if ($carousel_bg1 == null || $carousel_bg1 == "") {
-        } else {
-            $path = './assets/essence/img/slider/' . $def_carousel_bg1;
-            unlink($path);
-            if (!$this->upload->do_upload('carousel_bg1')) {
-                echo json_encode($this->upload->display_errors());
-            } else {
-                $data = $this->upload->data();
-                $dataUpdate['carousel_bg1'] = $data['file_name'];
-            }
-        }
-
-        if ($carousel_bg2 == null || $carousel_bg2 == "") {
-        } else {
-            $path = './assets/essence/img/slider/' . $def_carousel_bg2;
-            unlink($path);
-            if (!$this->upload->do_upload('carousel_bg2')) {
-                echo json_encode($this->upload->display_errors());
-            } else {
-                $data = $this->upload->data();
-                $dataUpdate['carousel_bg2'] = $data['file_name'];
-            }
-        }
-
-        if ($carousel_bg3 == null || $carousel_bg3 == "") {
-        } else {
-            $path = './assets/essence/img/slider/' . $def_carousel_bg3;
-            unlink($path);
-            if (!$this->upload->do_upload('carousel_bg3')) {
-                echo json_encode($this->upload->display_errors());
-            } else {
-                $data = $this->upload->data();
-                $dataUpdate['carousel_bg3'] = $data['file_name'];
-            }
-        }
-
-        $this->db->where('id', $this->input->post('id'));
-        if ($this->db->update('home_template', $dataUpdate)) {
-            $this->session->set_flashdata('succ_update', 'true');
-            redirect(base_url('home-template'), 'refresh');
-        } else {
-            $this->session->set_flashdata('err_update', 'true');
-            redirect(base_url('home-template'), 'refresh');
-        }
-    }
 }
-
-/* End of file Home.php */

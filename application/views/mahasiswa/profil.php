@@ -10,102 +10,108 @@
 		</div>
 	</div>
 	<div class="card-body">
-        
-    		<div>
-    			<span class="text-danger">*</span> Harus diisi
-    		</div>
-    		<form id="edit" style="margin-top: 10px;">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>NIM <span class="text-danger">*</span></label>
-                            <input type="text" name="nim" autocomplete="off" autofocus="true" class="form-control" placeholder="Masukkan NIM">
-                        </div>
-                        <div class="form-group">
-                            <label>Nama <span class="text-danger">*</span></label>
-                            <input type="text" name="nama" autocomplete="off" class="form-control" placeholder="Masukkan Nama">
-                        </div>
-                        <div class="form-group">
-                            <label>Prodi <span class="text-danger">*</span></label>
-                            <select name="prodi_id" class="form-control">
-                                <option value="">- Pilih Prodi -</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Jenis Kelamin <span class="text-danger">*</span></label>
-                            <select name="jenis_kelamin" class="form-control">
-                                <option value="">- Pilih Jenis Kelamin -</option>
-                                <option value="laki-laki">Laki-laki</option>
-                                <option value="perempuan">Perempuan</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Tempat Lahir <span class="text-danger">*</span></label>
-                            <input type="text" name="tempat_lahir" autocomplete="off" class="form-control" placeholder="Masukkan Tempat Lahir">
-                        </div>
-                        <div class="form-group">
-                            <label>Tanggal Lahir <span class="text-danger">*</span></label>
-                            <input type="date" name="tanggal_lahir" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Email <span class="text-danger">*</span></label>
-                            <input type="text" name="email" autocomplete="off" class="form-control" placeholder="Masukkan Email">
-                        </div>
-                        <div class="form-group">
-                            <label>Alamat <span class="text-danger">*</span></label>
-                            <textarea name="alamat" placeholder="Masukkan Alamat" rows="5" class="form-control"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Nomor Telepon <span class="text-danger">*</span></label>
-                            <input type="text" name="nomor_telepon" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Alamat Orang Tua <span class="text-danger">*</span></label>
-                            <textarea name="alamat_orang_tua" rows="5" class="form-control" placeholder="Masukkan Alamat Orang Tua"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Nomor Telepon Orang Tua <span class="text-danger">*</span></label>
-                            <input type="text" name="nomor_telepon_orang_tua" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon Orang Tua">
-                        </div>
-                        <div class="form-group">
-                            <label>Nomor Telepon Orang Dekat <span class="text-danger">*</span></label>
-                            <input type="text" name="nomor_telepon_orang_dekat" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon Orang Dekat">
-                        </div>
-                        <div class="form-group">
-                            <label>IPK <span class="text-danger">*</span></label>
-                            <input type="text" name="ipk" autocomplete="off" class="form-control" placeholder="Masukkan IPK">
-                        </div>
-                        <div class="form-group">
-                            <label>Status <span class="text-danger">*</span></label>
-                            <input type="hidden" name="def_status">
-                            <select name="status" class="form-control" disabled="">
-                                <option value="">- Pilih Status -</option>
-                                <option value="0">Nonaktif</option>
-                                <option value="1">Aktif</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Foto Mahasiswa</label>
-                            <div class="custom-file pilih-foto">
-                                <input type="file" accept="image/*" class="custom-file-input">
-                                <label class="custom-file-label"></label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="card shadow p-3 text-center" style="height: 300px">
-                                <input type="hidden" name="foto">
-                                <img src="<?= base_url() ?>cdn/img/mahasiswa/default.png" class="foto foto-profil">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <hr>
-                <div class="text-right">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
+		<div>
+			<span class="text-danger">*</span> Harus diisi
+		</div>
+		<form id="edit" style="margin-top: 10px;">
+			<div class="row">
+				<div class="col-md-8">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>NIM <span class="text-danger">*</span></label>
+								<input type="text" name="nim" autocomplete="off" autofocus="true" class="form-control" placeholder="Masukkan NIM">
+							</div>
+							<div class="form-group">
+								<label>Nama <span class="text-danger">*</span></label>
+								<input type="text" name="nama" autocomplete="off" class="form-control" placeholder="Masukkan Nama">
+							</div>
+							<div class="form-group">
+								<label>Prodi <span class="text-danger">*</span></label>
+								<select name="prodi_id" class="form-control">
+									<option value="">- Pilih Prodi -</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label>Jenis Kelamin <span class="text-danger">*</span></label>
+								<select name="jenis_kelamin" class="form-control">
+									<option value="">- Pilih Jenis Kelamin -</option>
+									<option value="laki-laki">Laki-laki</option>
+									<option value="perempuan">Perempuan</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label>Tempat Lahir <span class="text-danger">*</span></label>
+								<input type="text" name="tempat_lahir" autocomplete="off" class="form-control" placeholder="Masukkan Tempat Lahir">
+							</div>
+							<div class="form-group">
+								<label>Tanggal Lahir <span class="text-danger">*</span></label>
+								<input type="date" name="tanggal_lahir" class="form-control">
+							</div>
+							<div class="form-group">
+								<label>Alamat <span class="text-danger">*</span></label>
+								<textarea name="alamat" placeholder="Masukkan Alamat" rows="5" class="form-control"></textarea>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>Email <span class="text-danger">*</span></label>
+								<input type="text" name="email" autocomplete="off" class="form-control" placeholder="Masukkan Email">
+							</div>
+							<div class="form-group">
+								<label>Nomor Telepon <span class="text-danger">*</span></label>
+								<input type="text" name="nomor_telepon" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon">
+							</div>
+							<div class="form-group">
+								<label>Alamat Orang Tua <span class="text-danger">*</span></label>
+								<textarea name="alamat_orang_tua" rows="5" class="form-control" placeholder="Masukkan Alamat Orang Tua"></textarea>
+							</div>
+							<div class="form-group">
+								<label>Nomor Telepon Orang Tua <span class="text-danger">*</span></label>
+								<input type="text" name="nomor_telepon_orang_tua" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon Orang Tua">
+							</div>
+							<div class="form-group">
+								<label>Nomor Telepon Orang Dekat <span class="text-danger">*</span></label>
+								<input type="text" name="nomor_telepon_orang_dekat" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon Orang Dekat">
+							</div>
+							<div class="form-group">
+								<label>IPK <span class="text-danger">*</span></label>
+								<input type="text" name="ipk" autocomplete="off" class="form-control" placeholder="Masukkan IPK">
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-md-4">
+					<div class="form-group">
+						<label>Status <span class="text-danger">*</span></label>
+						<input type="hidden" name="def_status">
+						<select name="status" class="form-control" disabled="">
+							<option value="">- Pilih Status -</option>
+							<option value="0">Nonaktif</option>
+							<option value="1">Aktif</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Foto Mahasiswa</label>
+						<div class="card shadow-sm p-3 text-center">
+							<input type="hidden" name="foto">
+							<img src="<?= base_url() ?>cdn/img/mahasiswa/default.png" class="foto foto-profil img-fluid img-thumbnail mb-3">
+						</div>
+					</div>
+					<div class="form-group">
+						 <div class="custom-file pilih-foto">
+							<input type="file" accept="image/*" class="custom-file-input">
+							<label class="custom-file-label">Pilih Foto...</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<hr>
+			<div class="text-right">
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</div>
+		</form>
 	</div>
 	<div class="card-footer"></div>
 </div>

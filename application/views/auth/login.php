@@ -15,9 +15,9 @@
 
 <body class="bg-default">
   <div class="main-content">
-    <div class="header bg-gradient-primary py-5">
+    <div class="header bg-gradient-primary py-5 py-lg-6 pt-lg-7">
       <div class="container">
-        <div class="header-body text-center mb-6">
+        <div class="header-body text-center mb-7">
           <div class="row justify-content-center">
             <div class="col-xl-5 col-lg-6 col-md-8 px-5">
               <img src="<?= base_url('cdn/img/icons/Logo STK.png') ?>" style="max-width: 120px; margin-bottom: 1.5rem;" alt="Logo STK Yakobus Merauke">
@@ -43,9 +43,14 @@
               </div>
               
               <?php if($this->session->flashdata('error')): ?>
-              <div class="alert alert-danger text-center" role="alert">
-                  <?= $this->session->flashdata('error') ?>
-              </div>
+                <div class="alert alert-danger text-center" role="alert">
+                    <?= $this->session->flashdata('error') ?>
+                </div>
+              <?php endif; ?>
+              <?php if($this->session->flashdata('success')): ?>
+                <div class="alert alert-success text-center" role="alert">
+                    <?= $this->session->flashdata('success') ?>
+                </div>
               <?php endif; ?>
 
               <form role="form" method="post" action="<?= base_url('auth/cek_login') ?>">
@@ -105,5 +110,4 @@
     });
   </script>
 </body>
-
 </html>

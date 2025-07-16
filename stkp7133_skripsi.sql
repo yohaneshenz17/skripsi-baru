@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 14, 2025 at 01:54 PM
+-- Generation Time: Jul 16, 2025 at 08:42 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.32
 
@@ -65,30 +65,31 @@ CREATE TABLE `dosen` (
   `nama` varchar(100) NOT NULL,
   `nomor_telepon` varchar(30) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `level` enum('1','2','4') NOT NULL DEFAULT '2' COMMENT '1 = admin, 2 = dosen, 4 = kaprodi'
+  `level` enum('1','2','4') NOT NULL DEFAULT '2' COMMENT '1 = admin, 2 = dosen, 4 = kaprodi',
+  `foto` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `dosen`
 --
 
-INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`) VALUES
-(2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1'),
-(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedimus@stkyakobus.ac.id', '4'),
-(11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '4'),
-(12, '2720067001', 1, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '4'),
-(14, '2709109301', 2, 'Lambertus Ayiriga, S.Pd., M.Pd.', '82197819425', 'lambertus@stkyakobus.ac.id', '2'),
-(15, '2728048001', 1, 'Rikardus Kristian Sarang, S.Fil., M.Pd.', '81248525845', 'rikardkristians@stkyakobus.ac.id', '2'),
-(16, '2730068501', 1, 'Raimundus Sedo, S.T., M.T.', '81338623494', 'raimundus@stkyakobus.ac.id', '2'),
-(17, '2705077801', 2, 'Dr. Erly Lumban Gaol, M.Th.', '81239904548', 'erly@stkyakobus.ac.id', '2'),
-(18, '2727128101', 1, 'Yan Yusuf Subu, S.Fil., M.Hum.', '81227909867', 'yanyusuf@stkyakobus.ac.id', '2'),
-(19, '2729108301', 1, 'Rosmayasinta Makasau, S.Pd., M.Pd.', '85244236555', 'mayamakasau@stkyakobus.ac.id', '2'),
-(20, '2717077001', 1, 'Dr. Donatus Wea, Lic.Iur.', '81247719057', 'romodonwea@stkyakobus.ac.id', '2'),
-(21, '2719076301', 1, 'Drs. Xaverius Wonmut, M.Hum.', '81248202058', 'xaveriuswonmut@stkyakobus.ac.id', '2'),
-(22, '2729086901', 2, 'Agustinus Kia Wolomasi, S.Ag., M.Pd.', '81386503387', 'aguswolomasi@stkyakobus.ac.id', '2'),
-(23, '2709077801', 1, 'Markus Meran, S.Ag., M.Th.', '82248526104', 'markusmeran@stkyakobus.ac.id', '2'),
-(24, '1423056901', 1, 'Francisco Noerjanto, S.Ag., M.Si.', '8114890505', 'francisco@stkyakobus.ac.id', '2'),
-(25, '2717069001', 1, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '81295111706', 'yohaneshenz@stkyakobus.ac.id', '1');
+INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`, `foto`) VALUES
+(2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1', ''),
+(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedimus@stkyakobus.ac.id', '4', '9cc27fe949d6ee43f944b6453035f9d9.jpeg'),
+(11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '4', ''),
+(12, '2720067001', 1, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '4', ''),
+(14, '2709109301', 2, 'Lambertus Ayiriga, S.Pd., M.Pd.', '82197819425', 'lambertus@stkyakobus.ac.id', '2', ''),
+(15, '2728048001', 1, 'Rikardus Kristian Sarang, S.Fil., M.Pd.', '81248525845', 'rikardkristians@stkyakobus.ac.id', '2', ''),
+(16, '2730068501', 1, 'Raimundus Sedo, S.T., M.T.', '81338623494', 'raimundus@stkyakobus.ac.id', '2', ''),
+(17, '2705077801', 2, 'Dr. Erly Lumban Gaol, M.Th.', '81239904548', 'erly@stkyakobus.ac.id', '2', ''),
+(18, '2727128101', 1, 'Yan Yusuf Subu, S.Fil., M.Hum.', '81227909867', 'yanyusuf@stkyakobus.ac.id', '2', ''),
+(19, '2729108301', 1, 'Rosmayasinta Makasau, S.Pd., M.Pd.', '85244236555', 'mayamakasau@stkyakobus.ac.id', '2', ''),
+(20, '2717077001', 1, 'Dr. Donatus Wea, Lic.Iur.', '81247719057', 'romodonwea@stkyakobus.ac.id', '2', ''),
+(21, '2719076301', 1, 'Drs. Xaverius Wonmut, M.Hum.', '81248202058', 'xaveriuswonmut@stkyakobus.ac.id', '2', ''),
+(22, '2729086901', 2, 'Agustinus Kia Wolomasi, S.Ag., M.Pd.', '81386503387', 'aguswolomasi@stkyakobus.ac.id', '2', ''),
+(23, '2709077801', 1, 'Markus Meran, S.Ag., M.Th.', '82248526104', 'markusmeran@stkyakobus.ac.id', '2', ''),
+(24, '1423056901', 1, 'Francisco Noerjanto, S.Ag., M.Si.', '8114890505', 'francisco@stkyakobus.ac.id', '2', ''),
+(25, '2717069001', 1, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '81295111706', 'yohaneshenz@stkyakobus.ac.id', '1', '');
 
 -- --------------------------------------------------------
 
@@ -315,7 +316,8 @@ INSERT INTO `mahasiswa` (`id`, `nim`, `nama`, `prodi_id`, `jenis_kelamin`, `temp
 (27, '2202008', 'Test Mahasiswa 1', 10, 'laki-laki', 'Merauke', '2000-01-01', 'test1@stkyakobus.ac.id', 'Jl. Test No. 1 Merauke', '081234567890', '081234567890', '3.50', NULL, '$2y$10$UXJihdtpwt5MtDimlzCqi.4tH8590iNRwABpKfjgqXVTesVGUsntO', '1'),
 (28, '2202009', 'Test Mahasiswa 2', 11, 'perempuan', 'Merauke', '2000-02-02', 'test2@stkyakobus.ac.id', 'Jl. Test No. 2 Merauke', '081234567891', '081234567891', '3.75', NULL, '$2y$10$cQOubvRoNG27o/QKrZIaYOiKrHJFmbEBgDkrzhupTck7E2vackmdq', '1'),
 (29, '2202010', 'Test Mahasiswa 3', 12, 'laki-laki', 'Merauke', '2000-03-03', 'test3@stkyakobus.ac.id', 'Jl. Test No. 3 Merauke', '081234567892', '081234567892', '3.25', NULL, '$2y$10$xjqWJILHt0x5xU8CNxnI5eNGsmOCEv/.PvoaA0r.w4a/vIF3DYrYy', '1'),
-(30, '2717069001', 'Bertolomeus Belang', 11, 'laki-laki', 'Merauke', '0000-00-00', 'bertobelang@stkyakobus.ac.id', 'Merauke', '081245783334', '08129611551', '3', '20250713050742.png', '$2y$10$iN705ZhOaZ8u0U3O4F2H4eQFSoSW9cUCPGGdj30ba1dKXvPLXBpl6', '1');
+(30, '2717069001', 'Bertolomeus Belang', 11, 'laki-laki', 'Merauke', '0000-00-00', 'bertobelang@stkyakobus.ac.id', 'Merauke', '081245783334', '08129611551', '3', '20250713050742.png', '$2y$10$iN705ZhOaZ8u0U3O4F2H4eQFSoSW9cUCPGGdj30ba1dKXvPLXBpl6', '1'),
+(32, '25104544', 'Hendro Mahasiswa', 10, 'laki-laki', 'Merauke', '2025-07-22', 'yohaneshenz@gmail.com', 'Merauke', '081295111783', '081295111784', '3', '6874d661b1834.jpg', '$2y$10$Upai5wQDDl1XXxXAQjF5oOPElLJ6ztbHhpLHvpMTeI0z1ZrnAFFB6', '1');
 
 -- --------------------------------------------------------
 
@@ -393,6 +395,34 @@ CREATE TABLE `penguji_dosen_v` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `pengumuman_tahapan`
+--
+
+CREATE TABLE `pengumuman_tahapan` (
+  `id` int(11) NOT NULL,
+  `no` int(11) NOT NULL,
+  `tahapan` varchar(255) NOT NULL,
+  `tanggal_deadline` date NOT NULL,
+  `keterangan` text DEFAULT NULL,
+  `aktif` enum('1','0') DEFAULT '1' COMMENT '1=aktif, 0=non-aktif',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pengumuman_tahapan`
+--
+
+INSERT INTO `pengumuman_tahapan` (`id`, `no`, `tahapan`, `tanggal_deadline`, `keterangan`, `aktif`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Pengajuan Proposal', '2025-08-06', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-15 17:53:38'),
+(3, 2, 'Seminar Proposal', '2025-04-14', 'Seminar Proposal Bab 1-3', '1', '2025-07-15 17:29:36', '2025-07-15 20:00:03'),
+(4, 3, 'Ujian Skripsi', '2025-06-30', 'Seminar Hasil Bab 1-5', '1', '2025-07-15 17:29:36', '2025-07-15 20:00:13'),
+(5, 4, 'Revisi dan Publikasi', '2025-07-30', 'Perbaikan dan Publikasi Skripsi', '1', '2025-07-15 17:29:36', '2025-07-15 20:00:22'),
+(6, 5, 'Yudisium', '2025-08-08', 'Pengukuhan dan Wisuda', '1', '2025-07-15 17:29:36', '2025-07-15 20:00:31');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `prodi`
 --
 
@@ -422,9 +452,13 @@ INSERT INTO `prodi` (`id`, `kode`, `nama`, `dosen_id`, `fakultas_id`) VALUES
 CREATE TABLE `proposal_mahasiswa` (
   `id` bigint(20) NOT NULL,
   `mahasiswa_id` bigint(20) NOT NULL,
-  `judul` varchar(100) NOT NULL,
+  `judul` varchar(250) NOT NULL,
   `ringkasan` varchar(5000) NOT NULL,
-  `dosen_id` bigint(20) NOT NULL COMMENT 'pembimbing',
+  `jenis_penelitian` enum('Kuantitatif','Kualitatif','Mixed Method') DEFAULT NULL,
+  `lokasi_penelitian` varchar(255) DEFAULT NULL,
+  `uraian_masalah` text DEFAULT NULL,
+  `file_draft_proposal` varchar(255) DEFAULT NULL,
+  `dosen_id` bigint(20) DEFAULT NULL COMMENT 'pembimbing',
   `dosen2_id` int(11) NOT NULL DEFAULT 1 COMMENT 'pembimbing 2',
   `dosen_penguji_id` int(11) DEFAULT NULL,
   `dosen_penguji2_id` bigint(20) DEFAULT NULL,
@@ -438,9 +472,10 @@ CREATE TABLE `proposal_mahasiswa` (
 -- Dumping data for table `proposal_mahasiswa`
 --
 
-INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`) VALUES
-(34, 18, 'Pengaruh x terhadap Y bagi mahasiswa STK', 'Tes saja pak untuk proposalini', 10, 11, 11, NULL, '0', NULL, NULL, NULL),
-(35, 19, 'Pengaruh Miras terhadap Pergaulan Bebas', 'Tes saja', 10, 24, 22, 16, '1', NULL, '2025-07-14 12:33:58', 10);
+INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`) VALUES
+(34, 18, 'Pengaruh x terhadap Y bagi mahasiswa STK', 'Tes saja pak untuk proposalini', NULL, NULL, NULL, NULL, 10, 11, 11, NULL, '0', NULL, NULL, NULL),
+(35, 19, 'Pengaruh Miras terhadap Pergaulan Bebas', 'Tes saja', NULL, NULL, NULL, NULL, 10, 24, 22, 16, '1', NULL, '2025-07-14 12:33:58', 10),
+(36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', NULL, 1, NULL, NULL, '0', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -451,7 +486,7 @@ INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `d
 CREATE TABLE `proposal_mahasiswa_detail_v` (
 `id` bigint(20)
 ,`mahasiswa_id` bigint(20)
-,`judul` varchar(100)
+,`judul` varchar(250)
 ,`ringkasan` varchar(5000)
 ,`dosen_id` bigint(20)
 ,`dosen2_id` int(11)
@@ -481,7 +516,7 @@ CREATE TABLE `proposal_mahasiswa_detail_v` (
 CREATE TABLE `proposal_mahasiswa_v` (
 `id` bigint(20)
 ,`mahasiswa_id` bigint(20)
-,`judul` varchar(100)
+,`judul` varchar(250)
 ,`ringkasan` varchar(5000)
 ,`dosen_id` bigint(20)
 ,`dosen_penguji_id` int(11)
@@ -741,6 +776,12 @@ ALTER TABLE `penelitian`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `pengumuman_tahapan`
+--
+ALTER TABLE `pengumuman_tahapan`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `prodi`
 --
 ALTER TABLE `prodi`
@@ -826,13 +867,19 @@ ALTER TABLE `konsultasi`
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `penelitian`
 --
 ALTER TABLE `penelitian`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT for table `pengumuman_tahapan`
+--
+ALTER TABLE `pengumuman_tahapan`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `prodi`
@@ -844,7 +891,7 @@ ALTER TABLE `prodi`
 -- AUTO_INCREMENT for table `proposal_mahasiswa`
 --
 ALTER TABLE `proposal_mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `seminar`

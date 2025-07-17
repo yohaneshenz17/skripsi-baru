@@ -61,7 +61,7 @@ ob_start();
                 </div>
                 <p class="mt-3 mb-0 text-sm">
                     <span class="text-info mr-2"><i class="fa fa-users"></i></span>
-                    <span class="text-nowrap">Dosen di prodi</span>
+                    <span class="text-nowrap">Dosen semua prodi</span>
                 </p>
             </div>
         </div>
@@ -173,9 +173,10 @@ ob_start();
             <div class="card-header border-0">
                 <div class="row align-items-center">
                     <div class="col">
-                        <h3 class="mb-0">5 Proposal Terbaru Menunggu Penetapan</h3>
+                        <h3 class="mb-0">Proposal Menunggu Penetapan</h3>
                     </div>
                     <div class="col text-right">
+                        <!-- Link ke workflow yang sudah ada -->
                         <a href="<?= base_url() ?>kaprodi/proposal" class="btn btn-sm btn-primary">Lihat semua</a>
                     </div>
                 </div>
@@ -191,7 +192,7 @@ ob_start();
                     </thead>
                     <tbody>
                         <?php
-                        // Get 5 proposal terbaru yang belum ditetapkan
+                        // Get proposal terbaru yang belum ditetapkan (hanya yang valid)
                         $prodi_id = $this->session->userdata('prodi_id');
                         if ($prodi_id) {
                             $this->db->select('proposal_mahasiswa.*, mahasiswa.nim, mahasiswa.nama as nama_mahasiswa');
@@ -199,6 +200,8 @@ ob_start();
                             $this->db->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id');
                             $this->db->where('mahasiswa.prodi_id', $prodi_id);
                             $this->db->where('proposal_mahasiswa.status', '0');
+                            // Filter: hanya proposal yang valid (bukan data lama)
+                            $this->db->where('proposal_mahasiswa.id NOT IN (34, 35)');
                             $this->db->order_by('proposal_mahasiswa.id', 'DESC');
                             $this->db->limit(5);
                             $proposals = $this->db->get()->result();
@@ -209,7 +212,8 @@ ob_start();
                                     <td><?= $p->nim ?></td>
                                     <td><?= $p->nama_mahasiswa ?></td>
                                     <td>
-                                        <a href="<?= base_url() ?>kaprodi/penetapan/<?= $p->id ?>" class="btn btn-sm btn-primary">
+                                        <!-- Link ke review proposal yang sudah ada -->
+                                        <a href="<?= base_url() ?>kaprodi/review_proposal/<?= $p->id ?>" class="btn btn-sm btn-primary">
                                             <i class="fa fa-user-check"></i> Tetapkan
                                         </a>
                                     </td>
@@ -229,6 +233,65 @@ ob_start();
     </div>
 </div>
 
+<!-- Info Panel Dosen -->
+<div class="row mt-4">
+    <div class="col-lg-12">
+        <div class="card bg-gradient-success">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h3 class="text-white mb-0">Info Pemilihan Pembimbing</h3>
+                        <p class="text-white mt-2 mb-0">
+                            <strong>Kaprodi dapat memilih pembimbing dari semua dosen di semua prodi.</strong> 
+                            Total <?= isset($total_dosen) ? $total_dosen : 0 ?> dosen tersedia sebagai calon pembimbing.
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <span class="h2 text-white">👨‍🏫</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tools Development untuk membersihkan data -->
+<?php if (ENVIRONMENT === 'development'): ?>
+<div class="row mt-4">
+    <div class="col-lg-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0 text-white">Development Tools - Database Cleanup</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Perhatian:</strong> Tools ini hanya tersedia dalam mode development untuk membersihkan data lama.
+                </div>
+                
+                <div class="btn-group mb-3" role="group">
+                    <a href="<?= base_url() ?>kaprodi/dashboard/cleanup_old_proposals" 
+                       class="btn btn-danger"
+                       onclick="return confirm('Apakah Anda yakin ingin menghapus proposal lama (ID 34 dan 35)? Data akan dibackup terlebih dahulu.')">
+                        <i class="fa fa-trash"></i> Bersihkan Data Proposal Lama
+                    </a>
+                    
+                    <a href="<?= base_url() ?>kaprodi/dashboard/debug_data" 
+                       class="btn btn-secondary"
+                       target="_blank">
+                        <i class="fa fa-bug"></i> Debug Data
+                    </a>
+                </div>
+                
+                <small class="text-muted d-block">
+                    • <strong>Bersihkan Data:</strong> Akan menghapus proposal ID 34 dan 35 (data lama/tidak valid)<br>
+                    • <strong>Debug Data:</strong> Melihat detail data proposal saat ini
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Debug Info (hanya untuk development) -->
 <?php if (ENVIRONMENT === 'development'): ?>
 <div class="row mt-4">
@@ -238,11 +301,55 @@ ob_start();
                 <h5>Debug Information</h5>
             </div>
             <div class="card-body">
-                <p><strong>Session Level:</strong> <?= $this->session->userdata('level') ?></p>
-                <p><strong>Session Nama:</strong> <?= $this->session->userdata('nama') ?></p>
-                <p><strong>Session Prodi ID:</strong> <?= $this->session->userdata('prodi_id') ?></p>
-                <p><strong>Session Logged In:</strong> <?= $this->session->userdata('logged_in') ? 'Yes' : 'No' ?></p>
-                <p><strong>Table pengumuman_tahapan exists:</strong> <?= $this->db->table_exists('pengumuman_tahapan') ? 'Yes' : 'No' ?></p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Session Info:</h6>
+                        <p><strong>Level:</strong> <?= $this->session->userdata('level') ?></p>
+                        <p><strong>Nama:</strong> <?= $this->session->userdata('nama') ?></p>
+                        <p><strong>Prodi ID:</strong> <?= $this->session->userdata('prodi_id') ?></p>
+                        <p><strong>Logged In:</strong> <?= $this->session->userdata('logged_in') ? 'Yes' : 'No' ?></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Database Info:</h6>
+                        <p><strong>Table pengumuman_tahapan:</strong> <?= $this->db->table_exists('pengumuman_tahapan') ? 'Exists' : 'Not Found' ?></p>
+                        <p><strong>Environment:</strong> <?= ENVIRONMENT ?></p>
+                        <p><strong>Base URL:</strong> <?= base_url() ?></p>
+                        <p><strong>Total Dosen (All Prodi):</strong> <?= isset($total_dosen) ? $total_dosen : 0 ?></p>
+                    </div>
+                </div>
+                
+                <!-- Quick Data Preview -->
+                <h6 class="mt-4">Quick Data Preview:</h6>
+                <?php
+                $quick_data = $this->db->select('pm.id, pm.mahasiswa_id, m.nim, m.nama, pm.status')
+                    ->from('proposal_mahasiswa pm')
+                    ->join('mahasiswa m', 'pm.mahasiswa_id = m.id', 'left')
+                    ->limit(10)
+                    ->get()->result();
+                
+                if ($quick_data) {
+                    echo '<div class="table-responsive">';
+                    echo '<table class="table table-sm">';
+                    echo '<tr><th>ID</th><th>Mahasiswa ID</th><th>NIM</th><th>Nama</th><th>Status</th><th>Keterangan</th></tr>';
+                    foreach ($quick_data as $qd) {
+                        $keterangan = in_array($qd->id, [34, 35]) ? 
+                            '<span class="badge badge-warning">Data Lama</span>' : 
+                            '<span class="badge badge-success">Data Valid</span>';
+                        echo "<tr>";
+                        echo "<td>{$qd->id}</td>";
+                        echo "<td>{$qd->mahasiswa_id}</td>";
+                        echo "<td>" . ($qd->nim ?? 'NULL') . "</td>";
+                        echo "<td>" . ($qd->nama ?? 'NULL') . "</td>";
+                        echo "<td>{$qd->status}</td>";
+                        echo "<td>{$keterangan}</td>";
+                        echo "</tr>";
+                    }
+                    echo '</table>';
+                    echo '</div>';
+                } else {
+                    echo '<p>Tidak ada data proposal.</p>';
+                }
+                ?>
             </div>
         </div>
     </div>

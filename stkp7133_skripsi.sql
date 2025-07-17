@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 16, 2025 at 08:42 AM
+-- Generation Time: Jul 17, 2025 at 05:46 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
--- PHP Version: 8.1.32
+-- PHP Version: 8.1.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -75,8 +75,50 @@ CREATE TABLE `dosen` (
 
 INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`, `foto`) VALUES
 (2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1', ''),
-(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedimus@stkyakobus.ac.id', '4', '9cc27fe949d6ee43f944b6453035f9d9.jpeg'),
-(11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '4', ''),
+(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', '9cc27fe949d6ee43f944b6453035f9d9.jpeg'),
+(11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd. (Kaprodi PGSD)', '082271403437', 'pgsd@stkyakobus.ac.id', '4', ''),
+(12, '2720067001', 1, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '2', ''),
+(14, '2709109301', 2, 'Lambertus Ayiriga, S.Pd., M.Pd.', '82197819425', 'lambertus@stkyakobus.ac.id', '2', ''),
+(15, '2728048001', 1, 'Rikardus Kristian Sarang, S.Fil., M.Pd.', '81248525845', 'rikardkristians@stkyakobus.ac.id', '2', ''),
+(16, '2730068501', 1, 'Raimundus Sedo, S.T., M.T.', '81338623494', 'raimundus@stkyakobus.ac.id', '2', ''),
+(17, '2705077801', 2, 'Dr. Erly Lumban Gaol, M.Th.', '81239904548', 'erly@stkyakobus.ac.id', '2', ''),
+(18, '2727128101', 1, 'Yan Yusuf Subu, S.Fil., M.Hum.', '81227909867', 'yanyusuf@stkyakobus.ac.id', '2', ''),
+(19, '2729108301', 1, 'Rosmayasinta Makasau, S.Pd., M.Pd.', '85244236555', 'mayamakasau@stkyakobus.ac.id', '2', ''),
+(20, '2717077001', 1, 'Dr. Donatus Wea, Lic.Iur.', '81247719057', 'romodonwea@stkyakobus.ac.id', '2', ''),
+(21, '2719076301', 1, 'Drs. Xaverius Wonmut, M.Hum.', '81248202058', 'xaveriuswonmut@stkyakobus.ac.id', '2', ''),
+(22, '2729086901', 2, 'Agustinus Kia Wolomasi, S.Ag., M.Pd.', '081386503387', 'aguswolomasi@stkyakobus.ac.id', '2', ''),
+(23, '2709077801', 1, 'Markus Meran, S.Ag., M.Th.', '82248526104', 'markusmeran@stkyakobus.ac.id', '2', ''),
+(24, '1423056901', 1, 'Francisco Noerjanto, S.Ag., M.Si.', '8114890505', 'francisco@stkyakobus.ac.id', '2', ''),
+(25, '2717069001', 1, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '81295111706', 'yohaneshenz@stkyakobus.ac.id', '2', ''),
+(26, '2721128601', 10, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedydbeau@gmail.com', '2', ''),
+(27, '2706058401', 11, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '2', ''),
+(28, '2717069001', 1, 'Yohanes Hendro Pranyoto (Admin)', '081295111706', 'sipd@stkyakobus.ac.id', '1', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `dosen_backup_20250717`
+--
+
+CREATE TABLE `dosen_backup_20250717` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `nip` varchar(30) NOT NULL,
+  `prodi_id` bigint(20) NOT NULL DEFAULT 1,
+  `nama` varchar(100) NOT NULL,
+  `nomor_telepon` varchar(30) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `level` enum('1','2','4') NOT NULL DEFAULT '2' COMMENT '1 = admin, 2 = dosen, 4 = kaprodi',
+  `foto` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `dosen_backup_20250717`
+--
+
+INSERT INTO `dosen_backup_20250717` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`, `foto`) VALUES
+(2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1', ''),
+(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', '9cc27fe949d6ee43f944b6453035f9d9.jpeg'),
+(11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd. (Kaprodi PGSD)', '082271403437', 'steveahlaro@stkyakobus.ac.id', '4', ''),
 (12, '2720067001', 1, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '4', ''),
 (14, '2709109301', 2, 'Lambertus Ayiriga, S.Pd., M.Pd.', '82197819425', 'lambertus@stkyakobus.ac.id', '2', ''),
 (15, '2728048001', 1, 'Rikardus Kristian Sarang, S.Fil., M.Pd.', '81248525845', 'rikardkristians@stkyakobus.ac.id', '2', ''),
@@ -312,12 +354,8 @@ CREATE TABLE `mahasiswa` (
 --
 
 INSERT INTO `mahasiswa` (`id`, `nim`, `nama`, `prodi_id`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `email`, `alamat`, `nomor_telepon`, `nomor_telepon_orang_dekat`, `ipk`, `foto`, `password`, `status`) VALUES
-(19, '2202007', 'BLASIUS MOA DEDILADO', 10, 'laki-laki', 'Merauke', '0000-00-00', 'videlis@stkyakobus.ac.id', 'Merauke', '082199965283', '081295111706', '3,40', '20250706104049.png', '$2y$10$.8H3d3nEHSATJHxF.H5vOenOHsmYCkImDrWaVdo5r.pC5IXvBpkHy', '1'),
-(27, '2202008', 'Test Mahasiswa 1', 10, 'laki-laki', 'Merauke', '2000-01-01', 'test1@stkyakobus.ac.id', 'Jl. Test No. 1 Merauke', '081234567890', '081234567890', '3.50', NULL, '$2y$10$UXJihdtpwt5MtDimlzCqi.4tH8590iNRwABpKfjgqXVTesVGUsntO', '1'),
-(28, '2202009', 'Test Mahasiswa 2', 11, 'perempuan', 'Merauke', '2000-02-02', 'test2@stkyakobus.ac.id', 'Jl. Test No. 2 Merauke', '081234567891', '081234567891', '3.75', NULL, '$2y$10$cQOubvRoNG27o/QKrZIaYOiKrHJFmbEBgDkrzhupTck7E2vackmdq', '1'),
-(29, '2202010', 'Test Mahasiswa 3', 12, 'laki-laki', 'Merauke', '2000-03-03', 'test3@stkyakobus.ac.id', 'Jl. Test No. 3 Merauke', '081234567892', '081234567892', '3.25', NULL, '$2y$10$xjqWJILHt0x5xU8CNxnI5eNGsmOCEv/.PvoaA0r.w4a/vIF3DYrYy', '1'),
-(30, '2717069001', 'Bertolomeus Belang', 11, 'laki-laki', 'Merauke', '0000-00-00', 'bertobelang@stkyakobus.ac.id', 'Merauke', '081245783334', '08129611551', '3', '20250713050742.png', '$2y$10$iN705ZhOaZ8u0U3O4F2H4eQFSoSW9cUCPGGdj30ba1dKXvPLXBpl6', '1'),
-(32, '25104544', 'Hendro Mahasiswa', 10, 'laki-laki', 'Merauke', '2025-07-22', 'yohaneshenz@gmail.com', 'Merauke', '081295111783', '081295111784', '3', '6874d661b1834.jpg', '$2y$10$Upai5wQDDl1XXxXAQjF5oOPElLJ6ztbHhpLHvpMTeI0z1ZrnAFFB6', '1');
+(32, '25104544', 'Hendro Mahasiswa', 10, 'laki-laki', 'Merauke', '2025-07-22', 'yohaneshenz@gmail.com', 'Merauke', '081295111783', '081295111784', '3', '6874d661b1834.jpg', '$2y$10$Upai5wQDDl1XXxXAQjF5oOPElLJ6ztbHhpLHvpMTeI0z1ZrnAFFB6', '1'),
+(33, '2736373738', 'Herybertus Oktaviani', 10, 'laki-laki', 'Merauke', '1990-07-12', 'danielpuraka@student.stkyakobus.ac.id', 'Merauke', '081295111706', '081295111705', '3.20', '6877147cddd68.jpg', '$2y$10$Pq5WC53ySok2ae9Y4/hHZOCVLXavBZZKLRRnPYwi5RCfI78EbY4re', '1');
 
 -- --------------------------------------------------------
 
@@ -343,6 +381,24 @@ CREATE TABLE `mahasiswa_v` (
 ,`password` text
 ,`status` enum('1','0')
 );
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notifikasi`
+--
+
+CREATE TABLE `notifikasi` (
+  `id` bigint(20) NOT NULL,
+  `jenis` enum('proposal_masuk','proposal_disetujui','proposal_ditolak','pembimbing_ditunjuk','pembimbing_menyetujui','pembimbing_menolak') NOT NULL,
+  `untuk_role` enum('mahasiswa','dosen','kaprodi','admin') NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `proposal_id` bigint(20) DEFAULT NULL,
+  `judul` varchar(255) NOT NULL,
+  `pesan` text NOT NULL,
+  `dibaca` tinyint(1) DEFAULT 0,
+  `tanggal_dibuat` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -440,8 +496,7 @@ CREATE TABLE `prodi` (
 
 INSERT INTO `prodi` (`id`, `kode`, `nama`, `dosen_id`, `fakultas_id`) VALUES
 (10, '86208', 'Pendidikan Keagamaan Katolik', 10, 1),
-(11, '86206', 'Pendidikan Guru Sekolah Dasar', 11, 1),
-(12, '86905', 'Pendidikan Profesi Guru Pendidikan Agama Katolik', 12, 1);
+(11, '86206', 'Pendidikan Guru Sekolah Dasar', 11, 1);
 
 -- --------------------------------------------------------
 
@@ -463,6 +518,12 @@ CREATE TABLE `proposal_mahasiswa` (
   `dosen_penguji_id` int(11) DEFAULT NULL,
   `dosen_penguji2_id` bigint(20) DEFAULT NULL,
   `status` enum('1','0') NOT NULL DEFAULT '0' COMMENT '1 = disetujui, 2 = tidak disetujui',
+  `status_kaprodi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_kaprodi` text DEFAULT NULL,
+  `tanggal_review_kaprodi` datetime DEFAULT NULL,
+  `status_pembimbing` enum('0','1','2') DEFAULT '0' COMMENT '0=belum diminta, 1=menyetujui, 2=menolak',
+  `komentar_pembimbing` text DEFAULT NULL,
+  `tanggal_respon_pembimbing` datetime DEFAULT NULL,
   `deadline` datetime DEFAULT NULL,
   `tanggal_penetapan` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi menetapkan pembimbing & penguji',
   `penetapan_oleh` bigint(20) DEFAULT NULL COMMENT 'ID kaprodi yang menetapkan'
@@ -472,10 +533,47 @@ CREATE TABLE `proposal_mahasiswa` (
 -- Dumping data for table `proposal_mahasiswa`
 --
 
-INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`) VALUES
-(34, 18, 'Pengaruh x terhadap Y bagi mahasiswa STK', 'Tes saja pak untuk proposalini', NULL, NULL, NULL, NULL, 10, 11, 11, NULL, '0', NULL, NULL, NULL),
-(35, 19, 'Pengaruh Miras terhadap Pergaulan Bebas', 'Tes saja', NULL, NULL, NULL, NULL, 10, 24, 22, 16, '1', NULL, '2025-07-14 12:33:58', 10),
-(36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', NULL, 1, NULL, NULL, '0', NULL, NULL, NULL);
+INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`) VALUES
+(36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', 25, 1, NULL, NULL, '0', '1', 'Proposal sudah baik dan bisa langsung mulai bimbingan. Terimakasih', '2025-07-17 17:18:16', '0', NULL, NULL, NULL, '2025-07-17 17:18:16', 10),
+(37, 33, 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'd2ff01bd1f6cb9b54d4059526a3fb112.docx', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `proposal_mahasiswa_backup_20250717`
+--
+
+CREATE TABLE `proposal_mahasiswa_backup_20250717` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `mahasiswa_id` bigint(20) NOT NULL,
+  `judul` varchar(250) NOT NULL,
+  `ringkasan` varchar(5000) NOT NULL,
+  `jenis_penelitian` enum('Kuantitatif','Kualitatif','Mixed Method') DEFAULT NULL,
+  `lokasi_penelitian` varchar(255) DEFAULT NULL,
+  `uraian_masalah` text DEFAULT NULL,
+  `file_draft_proposal` varchar(255) DEFAULT NULL,
+  `dosen_id` bigint(20) DEFAULT NULL COMMENT 'pembimbing',
+  `dosen2_id` int(11) NOT NULL DEFAULT 1 COMMENT 'pembimbing 2',
+  `dosen_penguji_id` int(11) DEFAULT NULL,
+  `dosen_penguji2_id` bigint(20) DEFAULT NULL,
+  `status` enum('1','0') NOT NULL DEFAULT '0' COMMENT '1 = disetujui, 2 = tidak disetujui',
+  `status_kaprodi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_kaprodi` text DEFAULT NULL,
+  `tanggal_review_kaprodi` datetime DEFAULT NULL,
+  `status_pembimbing` enum('0','1','2') DEFAULT '0' COMMENT '0=belum diminta, 1=menyetujui, 2=menolak',
+  `komentar_pembimbing` text DEFAULT NULL,
+  `tanggal_respon_pembimbing` datetime DEFAULT NULL,
+  `deadline` datetime DEFAULT NULL,
+  `tanggal_penetapan` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi menetapkan pembimbing & penguji',
+  `penetapan_oleh` bigint(20) DEFAULT NULL COMMENT 'ID kaprodi yang menetapkan'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `proposal_mahasiswa_backup_20250717`
+--
+
+INSERT INTO `proposal_mahasiswa_backup_20250717` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`) VALUES
+(34, 18, 'Pengaruh x terhadap Y bagi mahasiswa STK', 'Tes saja pak untuk proposalini', NULL, NULL, NULL, NULL, 10, 11, 11, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -527,6 +625,30 @@ CREATE TABLE `proposal_mahasiswa_v` (
 ,`deadline` datetime
 ,`email` varchar(100)
 );
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `proposal_workflow`
+--
+
+CREATE TABLE `proposal_workflow` (
+  `id` bigint(20) NOT NULL,
+  `proposal_id` bigint(20) NOT NULL,
+  `tahap` enum('pengajuan','review_kaprodi','approval_pembimbing','penetapan_selesai') NOT NULL,
+  `status` enum('pending','approved','rejected') NOT NULL,
+  `komentar` text DEFAULT NULL,
+  `diproses_oleh` bigint(20) DEFAULT NULL,
+  `tanggal_proses` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `proposal_workflow`
+--
+
+INSERT INTO `proposal_workflow` (`id`, `proposal_id`, `tahap`, `status`, `komentar`, `diproses_oleh`, `tanggal_proses`) VALUES
+(3, 36, 'pengajuan', 'approved', NULL, 32, '2025-07-17 08:59:52'),
+(4, 37, 'pengajuan', 'approved', NULL, 33, '2025-07-17 08:59:52');
 
 -- --------------------------------------------------------
 
@@ -770,6 +892,14 @@ ALTER TABLE `mahasiswa`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `notifikasi`
+--
+ALTER TABLE `notifikasi`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_role` (`user_id`,`untuk_role`),
+  ADD KEY `idx_dibaca` (`dibaca`);
+
+--
 -- Indexes for table `penelitian`
 --
 ALTER TABLE `penelitian`
@@ -792,6 +922,14 @@ ALTER TABLE `prodi`
 --
 ALTER TABLE `proposal_mahasiswa`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `proposal_workflow`
+--
+ALTER TABLE `proposal_workflow`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_proposal_id` (`proposal_id`),
+  ADD KEY `idx_tahap` (`tahap`);
 
 --
 -- Indexes for table `seminar`
@@ -819,7 +957,7 @@ ALTER TABLE `dokumen_hasil`
 -- AUTO_INCREMENT for table `dosen`
 --
 ALTER TABLE `dosen`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `email_sender`
@@ -867,7 +1005,13 @@ ALTER TABLE `konsultasi`
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+
+--
+-- AUTO_INCREMENT for table `notifikasi`
+--
+ALTER TABLE `notifikasi`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `penelitian`
@@ -891,7 +1035,13 @@ ALTER TABLE `prodi`
 -- AUTO_INCREMENT for table `proposal_mahasiswa`
 --
 ALTER TABLE `proposal_mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
+-- AUTO_INCREMENT for table `proposal_workflow`
+--
+ALTER TABLE `proposal_workflow`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `seminar`

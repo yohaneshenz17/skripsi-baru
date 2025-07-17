@@ -23,7 +23,7 @@ class Proposal extends CI_Controller
         $mahasiswa_id = $this->session->userdata('id');
 
         // Query untuk mengambil data proposal yang sedang aktif atau menunggu
-        $this->db->select('p.*, d1.nama as nama_pembimbing, dp1.nama as nama_penguji1, dp2.nama as nama_penguji2');
+        $this->db->select('p.*, d1.nama as nama_pembimbing');
         $this->db->from('proposal_mahasiswa p');
         $this->db->join('dosen d1', 'p.dosen_id = d1.id', 'left');
         $this->db->join('dosen dp1', 'p.dosen_penguji_id = dp1.id', 'left');

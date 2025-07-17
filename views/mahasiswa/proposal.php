@@ -82,11 +82,29 @@ ob_start();
                 <div class="row align-items-center">
                     <div class="col"><h3 class="mb-0">Status Proposal Anda</h3></div>
                     <div class="col text-right">
-                        <?php if($proposal->status == '0'): ?>
-                            <span class="badge badge-warning">Menunggu Penetapan Kaprodi</span>
-                        <?php elseif($proposal->status == '1'): ?>
-                            <span class="badge badge-success">Disetujui & Ditetapkan</span>
-                        <?php endif; ?>
+                        <?php
+                        $status_text = '';
+                        $status_class = '';
+                    
+                        // Logika untuk menentukan teks dan warna status
+                        if ($proposal->status_kaprodi == '0') {
+                            $status_text = 'Menunggu Penetapan Kaprodi';
+                            $status_class = 'badge-warning';
+                        } elseif ($proposal->status_kaprodi == '1' && $proposal->status_pembimbing == '0') {
+                            $status_text = 'Menunggu Persetujuan Dosen Pembimbing';
+                            $status_class = 'badge-info';
+                        } elseif ($proposal->status_kaprodi == '1' && $proposal->status_pembimbing == '1') {
+                            $status_text = 'Proposal Disetujui';
+                            $status_class = 'badge-success';
+                        } elseif ($proposal->status_kaprodi == '1' && $proposal->status_pembimbing == '2') {
+                            $status_text = 'Pembimbing Menolak, Menunggu Penetapan Ulang';
+                            $status_class = 'badge-danger';
+                        } elseif ($proposal->status_kaprodi == '2') {
+                            $status_text = 'Proposal Ditolak Kaprodi';
+                            $status_class = 'badge-danger';
+                        }
+                        ?>
+                        <span class="badge <?= $status_class ?>"><?= $status_text ?></span>
                     </div>
                 </div>
             </div>
@@ -115,11 +133,6 @@ ob_start();
                     <div class="col-md-6">
                         <h5>Dosen Pembimbing:</h5>
                         <p class="text-success"><i class="fa fa-user-tie"></i> <?= $proposal->nama_pembimbing ?: 'Belum ditetapkan' ?></p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>Tim Dosen Penguji:</h5>
-                        <p class="mb-1"><i class="fa fa-user-check text-info"></i> Penguji 1: <?= $proposal->nama_penguji1 ?: 'Belum ditetapkan' ?></p>
-                        <p><i class="fa fa-user-check text-warning"></i> Penguji 2: <?= $proposal->nama_penguji2 ?: 'Belum ditetapkan' ?></p>
                     </div>
                 </div>
                 <?php else: ?>

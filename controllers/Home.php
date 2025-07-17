@@ -3,7 +3,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Home extends MY_Controller
 {
-
     public function __construct()
     {
         parent::__construct();
@@ -19,6 +18,18 @@ class Home extends MY_Controller
         $template = $this->db->get('home_template')->row();
         $data = (array) $template;
         $this->load->view('home/index', $data);
+    }
+
+    public function pengumuman()
+    {
+        $data['title'] = 'Pengumuman Tahapan Skripsi';
+        
+        // Ambil data pengumuman yang aktif
+        $this->db->where('aktif', '1');
+        $this->db->order_by('no', 'ASC');
+        $data['pengumuman'] = $this->db->get('pengumuman_tahapan')->result();
+        
+        $this->load->view('home/pengumuman', $data);
     }
 
     public function registrasi()
@@ -126,9 +137,7 @@ class Home extends MY_Controller
                 $this->email->send();
             }
             
-            // [PERBAIKAN] Hapus flashdata error yang lama sebelum mengatur yang baru
             $this->session->set_flashdata('error', null);
-
             $this->session->set_flashdata('old_input', null);
             $this->session->set_flashdata('success', 'Registrasi berhasil! Silakan cek email Anda untuk detail akun dan link login.');
             redirect('auth/login');

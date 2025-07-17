@@ -5,6 +5,11 @@ $route['default_controller'] = 'home';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+// =====================================================
+//      PENAMBAHAN ROUTE UNTUK PENGUMUMAN (BARU)
+// =====================================================
+$route['pengumuman'] = 'home/pengumuman';
+
 // Auth routes
 $route['auth'] = 'auth/index';
 $route['auth/login'] = 'auth/login';

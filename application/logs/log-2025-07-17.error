@@ -1,0 +1,135 @@
+ERROR - 2025-07-17 03:27:20 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-17 04:58:59 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-17 08:37:06 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-17 08:42:05 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-17 08:42:44 --> 404 Page Not Found: kaprodi/Penetapan/37
+ERROR - 2025-07-17 08:42:48 --> 404 Page Not Found: kaprodi/Penetapan/36
+ERROR - 2025-07-17 08:43:02 --> 404 Page Not Found: kaprodi/Proposal/index
+ERROR - 2025-07-17 09:03:57 --> 404 Page Not Found: kaprodi/Proposal/index
+ERROR - 2025-07-17 09:04:03 --> 404 Page Not Found: kaprodi/Riwayat/index
+ERROR - 2025-07-17 09:05:00 --> 404 Page Not Found: kaprodi/Penetapan/37
+ERROR - 2025-07-17 09:05:05 --> 404 Page Not Found: kaprodi/Proposal/index
+ERROR - 2025-07-17 09:12:24 --> 404 Page Not Found: kaprodi/Proposal/index
+ERROR - 2025-07-17 09:14:34 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:14:34 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:15:20 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:15:20 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:15:24 --> 404 Page Not Found: kaprodi/Kaprodi/review_proposal
+ERROR - 2025-07-17 09:15:26 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:15:26 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:15:38 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:15:38 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:15:40 --> 404 Page Not Found: kaprodi/Kaprodi/review_proposal
+ERROR - 2025-07-17 09:15:41 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:15:41 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:15:43 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:15:43 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:15:51 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:15:51 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:17:02 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:17:02 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:20:36 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:20:36 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:20:39 --> 404 Page Not Found: kaprodi/Kaprodi/review_proposal
+ERROR - 2025-07-17 09:20:40 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:20:40 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:21:55 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:21:55 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:21:57 --> 404 Page Not Found: kaprodi/Kaprodi/review_proposal
+ERROR - 2025-07-17 09:24:01 --> 404 Page Not Found: kaprodi/Kaprodi/review_proposal
+ERROR - 2025-07-17 09:25:58 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:25:58 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:30:20 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 151
+ERROR - 2025-07-17 09:30:20 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 253
+ERROR - 2025-07-17 09:33:29 --> Severity: error --> Exception: syntax error, unexpected identifier "level", expecting "," or ";" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 440
+ERROR - 2025-07-17 09:33:30 --> Severity: error --> Exception: syntax error, unexpected identifier "level", expecting "," or ";" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 440
+ERROR - 2025-07-17 09:33:32 --> Severity: error --> Exception: syntax error, unexpected identifier "level", expecting "," or ";" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 440
+ERROR - 2025-07-17 09:33:37 --> Severity: error --> Exception: syntax error, unexpected identifier "level", expecting "," or ";" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 440
+ERROR - 2025-07-17 09:33:42 --> Severity: error --> Exception: syntax error, unexpected identifier "level", expecting "," or ";" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 440
+ERROR - 2025-07-17 09:33:44 --> Severity: error --> Exception: syntax error, unexpected identifier "level", expecting "," or ";" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 440
+ERROR - 2025-07-17 09:33:48 --> Severity: error --> Exception: syntax error, unexpected identifier "level", expecting "," or ";" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 440
+ERROR - 2025-07-17 09:36:39 --> 404 Page Not Found: Cdn/uploads
+ERROR - 2025-07-17 09:36:51 --> 404 Page Not Found: Cdn/uploads
+ERROR - 2025-07-17 09:38:40 --> 404 Page Not Found: Cdn/uploads
+ERROR - 2025-07-17 09:44:39 --> Severity: error --> Exception: syntax error, unexpected token "public", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 4
+ERROR - 2025-07-17 09:44:40 --> Severity: error --> Exception: syntax error, unexpected token "public", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 4
+ERROR - 2025-07-17 09:44:41 --> Severity: error --> Exception: syntax error, unexpected token "public", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 4
+ERROR - 2025-07-17 09:44:47 --> Severity: error --> Exception: syntax error, unexpected token "public", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php 4
+ERROR - 2025-07-17 09:49:46 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT *
+FROM `dosen`
+WHERE `level` NOT IN('1', '4')
+AND `status` = '1'
+ORDER BY `nama` ASC
+ERROR - 2025-07-17 10:02:06 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT *
+FROM `dosen`
+WHERE `level` NOT IN('1', '4')
+AND `status` = '1'
+ORDER BY `nama` ASC
+ERROR - 2025-07-17 10:03:30 --> Severity: Warning --> Undefined property: stdClass::$file_proposal /home/stkp7133/public_html/skripsi/application/views/kaprodi/review_proposal.php 68
+ERROR - 2025-07-17 10:04:07 --> Severity: Warning --> Undefined property: stdClass::$file_proposal /home/stkp7133/public_html/skripsi/application/views/kaprodi/review_proposal.php 68
+ERROR - 2025-07-17 10:05:09 --> Severity: Warning --> Undefined property: stdClass::$file_proposal /home/stkp7133/public_html/skripsi/application/views/kaprodi/review_proposal.php 68
+ERROR - 2025-07-17 10:11:18 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT *
+FROM `dosen`
+WHERE `level` NOT IN('1', '4')
+AND `status` = '1'
+ORDER BY `nama` ASC
+ERROR - 2025-07-17 10:12:04 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT *
+FROM `dosen`
+WHERE `level` NOT IN('1', '4')
+AND `status` = '1'
+ORDER BY `nama` ASC
+ERROR - 2025-07-17 10:12:52 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT *
+FROM `dosen`
+WHERE `level` NOT IN('1', '4')
+AND `status` = '1'
+ORDER BY `nama` ASC
+ERROR - 2025-07-17 10:13:06 --> Query error: Unknown column 'status' in 'field list' - Invalid query: SELECT `id`, `nama`, `level`, `status`, `prodi_id`
+FROM `dosen`
+ERROR - 2025-07-17 10:13:06 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php:479) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 10:38:04 --> Severity: Warning --> Undefined property: stdClass::$nama_penguji1 /home/stkp7133/public_html/skripsi/application/views/kaprodi/riwayat.php 45
+ERROR - 2025-07-17 10:38:04 --> Severity: Warning --> Undefined property: stdClass::$nama_penguji2 /home/stkp7133/public_html/skripsi/application/views/kaprodi/riwayat.php 46
+ERROR - 2025-07-17 10:42:30 --> Severity: Warning --> Undefined property: stdClass::$nama_penguji1 /home/stkp7133/public_html/skripsi/application/views/kaprodi/riwayat.php 45
+ERROR - 2025-07-17 10:42:30 --> Severity: Warning --> Undefined property: stdClass::$nama_penguji2 /home/stkp7133/public_html/skripsi/application/views/kaprodi/riwayat.php 46
+ERROR - 2025-07-17 10:57:42 --> Query error: Unknown column 'pm.created_at' in 'where clause' - Invalid query: SELECT COUNT(*) as total
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+WHERE `m`.`prodi_id` = '10'
+AND `pm`.`created_at` >= '2024-01-01'
+ERROR - 2025-07-17 11:04:23 --> Severity: Notice --> Object of class CI_DB_mysqli_result could not be converted to int /home/stkp7133/public_html/skripsi/application/models/Prodi_model.php 105
+ERROR - 2025-07-17 11:04:23 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 11:04:28 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-17 11:05:12 --> Severity: Warning --> Undefined array key "nip" /home/stkp7133/public_html/skripsi/application/models/Dosen_model.php 68
+ERROR - 2025-07-17 11:05:12 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 11:05:55 --> Severity: Warning --> Undefined array key "nip" /home/stkp7133/public_html/skripsi/application/models/Dosen_model.php 68
+ERROR - 2025-07-17 11:05:55 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 11:06:07 --> Severity: Warning --> Undefined array key "nip" /home/stkp7133/public_html/skripsi/application/models/Dosen_model.php 68
+ERROR - 2025-07-17 11:06:07 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 11:06:20 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-17 11:06:30 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Konsultasi_model.php 41
+ERROR - 2025-07-17 11:06:30 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 11:06:31 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-17 11:06:31 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 11:06:42 --> 404 Page Not Found: Home-template/index
+ERROR - 2025-07-17 11:08:19 --> Severity: Warning --> Undefined array key "nip" /home/stkp7133/public_html/skripsi/application/models/Dosen_model.php 35
+ERROR - 2025-07-17 11:08:19 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 13:51:36 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-17 15:25:08 --> 404 Page Not Found: kaprodi/Penetapan_pembimbing/detail
+ERROR - 2025-07-17 15:25:12 --> 404 Page Not Found: kaprodi/Penetapan_pembimbing/detail
+ERROR - 2025-07-17 15:27:26 --> 404 Page Not Found: kaprodi/Penetapan_pembimbing/detail
+ERROR - 2025-07-17 15:34:49 --> 404 Page Not Found: kaprodi/Penetapan_pembimbing/detail
+ERROR - 2025-07-17 15:40:19 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 15:57:05 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 16:00:46 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 16:01:48 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 16:02:32 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 16:03:39 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 16:12:41 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-17 16:17:15 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 16:52:11 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 17:09:37 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-17 17:09:46 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-17 17:10:28 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Konsultasi_model.php 41
+ERROR - 2025-07-17 17:10:28 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-17 17:12:48 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-17 17:20:15 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-17 17:41:49 --> 404 Page Not Found: GetAllData/mahasiswa

@@ -1,7 +1,11 @@
+<?php 
+// File: application/views/dosen/usulan_proposal.php
+// JQUERY FIXED VERSION
+?>
+
 <!-- Alert Messages -->
 <?php if($this->session->flashdata('success')): ?>
 <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <span class="alert-icon"><i class="fa fa-check"></i></span>
     <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
@@ -11,7 +15,6 @@
 
 <?php if($this->session->flashdata('error')): ?>
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <span class="alert-icon"><i class="fa fa-exclamation-triangle"></i></span>
     <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
@@ -31,7 +34,7 @@
                             Usulan Proposal - Penunjukan Pembimbing
                         </h3>
                         <p class="text-white mt-2 mb-0">
-                            <strong>Phase 1 Workflow:</strong> Dosen menyetujui atau menolak penunjukan sebagai pembimbing yang telah ditetapkan oleh Kaprodi.
+                            <strong>Phase 1 Workflow:</strong> Kaprodi telah menunjuk Anda sebagai pembimbing. Silakan berikan persetujuan atau penolakan.
                         </p>
                     </div>
                     <div class="col-auto">
@@ -47,7 +50,7 @@
 
 <!-- Statistics Cards -->
 <div class="row">
-    <div class="col-xl-4 col-md-6">
+    <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
                 <div class="row">
@@ -67,7 +70,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-4 col-md-6">
+    <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
                 <div class="row">
@@ -87,7 +90,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-4 col-md-6">
+    <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
                 <div class="row">
@@ -104,6 +107,26 @@
                 <p class="mt-3 mb-0 text-sm">
                     <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> Ready</span>
                     <span class="text-nowrap">to review</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Riwayat</h5>
+                        <span class="h2 font-weight-bold mb-0"><?= isset($riwayat_proposals) ? count($riwayat_proposals) : 0 ?></span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-primary text-white rounded-circle shadow">
+                            <i class="fa fa-history"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <span class="text-nowrap">Sudah direspon</span>
                 </p>
             </div>
         </div>
@@ -237,17 +260,17 @@
                                 </small>
                             </td>
                             <td>
-                                <div class="btn-group" role="group">
-                                    <a class="btn btn-sm btn-primary" href="<?= base_url('dosen/usulan_proposal/detail/' . $proposal->id) ?>">
+                                <div class="btn-group-vertical" role="group">
+                                    <a class="btn btn-sm btn-primary mb-1" href="<?= base_url('dosen/usulan_proposal/detail/' . $proposal->id) ?>">
                                         <i class="fa fa-eye mr-1"></i>
                                         Detail & Respon
                                     </a>
                                     <?php if(isset($proposal->file_draft_proposal) && $proposal->file_draft_proposal): ?>
                                     <a class="btn btn-sm btn-outline-secondary" 
-                                       href="<?= base_url('cdn/vendor/proposal/' . $proposal->file_draft_proposal) ?>" 
+                                       href="<?= base_url('cdn/proposals/' . $proposal->file_draft_proposal) ?>" 
                                        target="_blank">
                                         <i class="fa fa-download mr-1"></i>
-                                        Download
+                                        Download File
                                     </a>
                                     <?php endif; ?>
                                 </div>
@@ -290,6 +313,76 @@
     </div>
 </div>
 
+<!-- Riwayat Proposals (Jika Ada) -->
+<?php if(isset($riwayat_proposals) && !empty($riwayat_proposals)): ?>
+<div class="row mt-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">
+                            <i class="fa fa-history mr-2 text-success"></i>
+                            Riwayat Respon Terakhir
+                        </h3>
+                        <p class="mb-0 text-sm">10 proposal yang sudah Anda respon</p>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Mahasiswa</th>
+                            <th>Proposal</th>
+                            <th>Tanggal Respon</th>
+                            <th>Keputusan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($riwayat_proposals as $riwayat): ?>
+                        <tr>
+                            <td>
+                                <div class="media align-items-center">
+                                    <div class="avatar rounded-circle mr-3 bg-secondary">
+                                        <i class="fa fa-user text-white"></i>
+                                    </div>
+                                    <div class="media-body">
+                                        <span class="mb-0 text-sm font-weight-bold"><?= $riwayat->nama_mahasiswa ?></span>
+                                        <br>
+                                        <small class="text-muted">NIM: <?= $riwayat->nim ?></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-sm"><?= substr($riwayat->judul, 0, 50) ?><?= strlen($riwayat->judul) > 50 ? '...' : '' ?></span>
+                            </td>
+                            <td>
+                                <span class="text-sm"><?= date('d/m/Y H:i', strtotime($riwayat->tanggal_respon_pembimbing)) ?></span>
+                            </td>
+                            <td>
+                                <?php if($riwayat->status_pembimbing == '1'): ?>
+                                    <span class="badge badge-success">
+                                        <i class="fa fa-check mr-1"></i>
+                                        Disetujui
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge badge-danger">
+                                        <i class="fa fa-times mr-1"></i>
+                                        Ditolak
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Quick Actions Panel -->
 <div class="row mt-4">
     <div class="col-lg-12">
@@ -316,3 +409,44 @@
         </div>
     </div>
 </div>
+
+<!-- jQuery Fallback & Safe Script -->
+<script>
+// Check if jQuery is loaded, if not load it
+if (typeof jQuery === 'undefined') {
+    console.log('jQuery not found, loading from CDN...');
+    var script = document.createElement('script');
+    script.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
+    script.onload = function() {
+        console.log('jQuery loaded successfully');
+        initializeFeatures();
+    };
+    document.head.appendChild(script);
+} else {
+    console.log('jQuery already loaded');
+    // Use jQuery when document ready
+    $(document).ready(function() {
+        initializeFeatures();
+    });
+}
+
+// Initialize features function
+function initializeFeatures() {
+    console.log('Initializing usulan proposal features...');
+    
+    // Auto-hide notifications after 5 seconds
+    if (typeof jQuery !== 'undefined') {
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    } else {
+        // Fallback without jQuery
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.display = 'none';
+            });
+        }, 5000);
+    }
+}
+</script>

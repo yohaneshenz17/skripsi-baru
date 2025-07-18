@@ -1,6 +1,7 @@
-<?php $this->load->view('template/dosen', ['title' => $title, 'content' => $this->load->view('dosen/usulan_proposal_detail_content', $this, true), 'script' => '']); ?>
-
-<!-- Content untuk usulan_proposal_detail_content.php -->
+<?php 
+// File: application/views/dosen/usulan_proposal_detail.php
+// FIXED VERSION - Mengatasi error undefined property
+?>
 
 <!-- Alert Messages -->
 <?php if($this->session->flashdata('success')): ?>
@@ -69,27 +70,33 @@
                 <div class="row">
                     <div class="col-12">
                         <strong>Program Studi:</strong>
-                        <p class="text-muted"><?= $proposal->nama_prodi ?></p>
+                        <p class="text-muted"><?= isset($proposal->nama_prodi) ? $proposal->nama_prodi : 'N/A' ?></p>
                         
+                        <?php if(isset($proposal->tempat_lahir) && isset($proposal->tanggal_lahir)): ?>
                         <strong>Tempat, Tanggal Lahir:</strong>
                         <p class="text-muted"><?= $proposal->tempat_lahir ?>, <?= date('d F Y', strtotime($proposal->tanggal_lahir)) ?></p>
+                        <?php endif; ?>
                         
+                        <?php if(isset($proposal->jenis_kelamin)): ?>
                         <strong>Jenis Kelamin:</strong>
                         <p class="text-muted"><?= $proposal->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' ?></p>
+                        <?php endif; ?>
                         
+                        <?php if(isset($proposal->alamat)): ?>
                         <strong>Alamat:</strong>
                         <p class="text-muted"><?= $proposal->alamat ?></p>
+                        <?php endif; ?>
                         
                         <strong>No. Telepon:</strong>
                         <p class="text-muted">
                             <i class="fa fa-phone text-primary"></i> 
-                            <a href="tel:<?= $proposal->nomor_telepon ?>"><?= $proposal->nomor_telepon ?></a>
+                            <a href="tel:<?= isset($proposal->nomor_telepon) ? $proposal->nomor_telepon : '' ?>"><?= isset($proposal->nomor_telepon) ? $proposal->nomor_telepon : 'N/A' ?></a>
                         </p>
                         
                         <strong>Email:</strong>
                         <p class="text-muted">
                             <i class="fa fa-envelope text-primary"></i> 
-                            <a href="mailto:<?= $proposal->email_mahasiswa ?>"><?= $proposal->email_mahasiswa ?></a>
+                            <a href="mailto:<?= isset($proposal->email_mahasiswa) ? $proposal->email_mahasiswa : '' ?>"><?= isset($proposal->email_mahasiswa) ? $proposal->email_mahasiswa : 'N/A' ?></a>
                         </p>
                     </div>
                 </div>
@@ -106,8 +113,9 @@
                         <h3 class="mb-0">Detail Proposal Skripsi</h3>
                     </div>
                     <div class="col-auto">
-                        <?php if($proposal->file_proposal): ?>
-                        <a href="<?= base_url('cdn/vendor/proposal/' . $proposal->file_proposal) ?>" 
+                        <!-- FIXED: Gunakan field yang benar dan path yang benar -->
+                        <?php if(isset($proposal->file_draft_proposal) && $proposal->file_draft_proposal): ?>
+                        <a href="<?= base_url('cdn/proposals/' . $proposal->file_draft_proposal) ?>" 
                            target="_blank" class="btn btn-sm btn-outline-primary">
                             <i class="fa fa-download"></i> Download Proposal
                         </a>
@@ -125,21 +133,23 @@
                             <div class="col-md-6">
                                 <strong>Jenis Penelitian:</strong>
                                 <p class="text-muted">
-                                    <span class="badge badge-secondary"><?= $proposal->jenis_penelitian ?></span>
+                                    <span class="badge badge-secondary"><?= isset($proposal->jenis_penelitian) ? $proposal->jenis_penelitian : 'N/A' ?></span>
                                 </p>
                             </div>
                             <div class="col-md-6">
                                 <strong>Lokasi Penelitian:</strong>
                                 <p class="text-muted">
-                                    <i class="fa fa-map-marker-alt text-danger"></i> <?= $proposal->lokasi_penelitian ?>
+                                    <i class="fa fa-map-marker-alt text-danger"></i> <?= isset($proposal->lokasi_penelitian) ? $proposal->lokasi_penelitian : 'N/A' ?>
                                 </p>
                             </div>
                         </div>
                         
+                        <?php if(isset($proposal->uraian_masalah) && $proposal->uraian_masalah): ?>
                         <strong>Uraian Masalah:</strong>
                         <div class="bg-light p-3 rounded">
                             <p class="text-dark mb-0"><?= nl2br($proposal->uraian_masalah) ?></p>
                         </div>
+                        <?php endif; ?>
                         
                         <hr class="my-4">
                         
@@ -151,7 +161,7 @@
                             <div class="col-md-6">
                                 <strong>Tanggal Penetapan:</strong>
                                 <p class="text-muted">
-                                    <?= $proposal->tanggal_penetapan ? date('d F Y H:i', strtotime($proposal->tanggal_penetapan)) . ' WIT' : '-' ?>
+                                    <?= isset($proposal->tanggal_penetapan) && $proposal->tanggal_penetapan ? date('d F Y H:i', strtotime($proposal->tanggal_penetapan)) . ' WIT' : 'Belum ditetapkan' ?>
                                 </p>
                             </div>
                         </div>
@@ -159,7 +169,7 @@
                         <strong>Status Kaprodi:</strong>
                         <p>
                             <span class="badge badge-success">
-                                <i class="fa fa-check"></i> Disetujui oleh <?= $proposal->nama_kaprodi ?>
+                                <i class="fa fa-check"></i> Disetujui oleh <?= isset($proposal->nama_kaprodi) ? $proposal->nama_kaprodi : 'Kaprodi' ?>
                             </span>
                         </p>
                     </div>
@@ -175,7 +185,7 @@
                 </h3>
             </div>
             <div class="card-body">
-                <?php if($proposal->status_pembimbing && $proposal->status_pembimbing != '0'): ?>
+                <?php if(isset($proposal->status_pembimbing) && $proposal->status_pembimbing && $proposal->status_pembimbing != '0'): ?>
                     <!-- Jika sudah direspon -->
                     <div class="alert <?= $proposal->status_pembimbing == '1' ? 'alert-success' : 'alert-danger' ?>" role="alert">
                         <span class="alert-icon">
@@ -184,16 +194,25 @@
                         <span class="alert-text">
                             <strong>Sudah Direspon:</strong> 
                             Anda telah <?= $proposal->status_pembimbing == '1' ? 'menyetujui' : 'menolak' ?> penunjukan ini pada 
-                            <?= date('d F Y H:i', strtotime($proposal->tanggal_respon_pembimbing)) ?> WIT
+                            <?= isset($proposal->tanggal_respon_pembimbing) ? date('d F Y H:i', strtotime($proposal->tanggal_respon_pembimbing)) . ' WIT' : 'tanggal tidak tersedia' ?>
                         </span>
                     </div>
                     
-                    <?php if($proposal->komentar_pembimbing): ?>
+                    <?php if(isset($proposal->komentar_pembimbing) && $proposal->komentar_pembimbing): ?>
                     <div class="form-group">
                         <label>Komentar Anda:</label>
                         <div class="bg-light p-3 rounded">
                             <?= nl2br($proposal->komentar_pembimbing) ?>
                         </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if($proposal->status_pembimbing == '1'): ?>
+                    <div class="text-center mt-3">
+                        <a href="<?= base_url('dosen/bimbingan') ?>" class="btn btn-success">
+                            <i class="fa fa-users mr-2"></i>
+                            Lihat Mahasiswa Bimbingan
+                        </a>
                     </div>
                     <?php endif; ?>
                     
@@ -290,14 +309,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 komentarGroup.style.display = 'block';
                 komentarSetujuGroup.style.display = 'none';
                 komentarGroup.querySelector('textarea').required = true;
-                komentarSetujuGroup.querySelector('textarea').required = false;
+                if (komentarSetujuGroup.querySelector('textarea')) {
+                    komentarSetujuGroup.querySelector('textarea').required = false;
+                }
             } else if (this.value === '1') { // Setuju
                 komentarGroup.style.display = 'none';
                 komentarSetujuGroup.style.display = 'block';
                 komentarGroup.querySelector('textarea').required = false;
-                komentarSetujuGroup.querySelector('textarea').required = false;
+                if (komentarSetujuGroup.querySelector('textarea')) {
+                    komentarSetujuGroup.querySelector('textarea').required = false;
+                }
             }
         });
     });
+    
+    // Auto-hide notifications after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut('slow');
+    }, 5000);
 });
 </script>

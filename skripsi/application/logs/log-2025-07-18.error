@@ -1,0 +1,95 @@
+ERROR - 2025-07-18 07:08:00 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-18 07:48:15 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-18 10:49:57 --> Severity: error --> Exception: syntax error, unexpected token "<", expecting end of file /home/stkp7133/public_html/skripsi/application/config/routes.php 100
+ERROR - 2025-07-18 10:50:23 --> Severity: error --> Exception: syntax error, unexpected token "<", expecting end of file /home/stkp7133/public_html/skripsi/application/config/routes.php 100
+ERROR - 2025-07-18 10:50:33 --> Severity: error --> Exception: syntax error, unexpected token "<", expecting end of file /home/stkp7133/public_html/skripsi/application/config/routes.php 100
+ERROR - 2025-07-18 10:50:37 --> Severity: error --> Exception: syntax error, unexpected token "<", expecting end of file /home/stkp7133/public_html/skripsi/application/config/routes.php 100
+ERROR - 2025-07-18 11:07:22 --> 404 Page Not Found: dosen/Seminar_proposal/index
+ERROR - 2025-07-18 11:07:34 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-18 11:07:34 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:07:34 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:07:38 --> 404 Page Not Found: dosen/Seminar_skripsi/index
+ERROR - 2025-07-18 11:07:40 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:07:40 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:45:03 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:45:03 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:45:08 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:45:08 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:45:37 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:45:37 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:45:41 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:45:41 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:45:43 --> 404 Page Not Found: dosen/Seminar_proposal/index
+ERROR - 2025-07-18 11:45:45 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:45:45 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:47:06 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-18 11:47:06 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:47:06 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:47:10 --> 404 Page Not Found: dosen/Seminar_skripsi/index
+ERROR - 2025-07-18 11:47:12 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:47:12 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:47:24 --> 404 Page Not Found: dosen/Publikasi/index
+ERROR - 2025-07-18 11:47:26 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:47:26 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:47:32 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:47:32 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:48:42 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:48:42 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:48:47 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:48:47 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:49:07 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:49:07 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:49:09 --> 404 Page Not Found: dosen/Seminar_proposal/index
+ERROR - 2025-07-18 11:49:24 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:49:24 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:49:26 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-18 11:49:26 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:49:26 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:49:44 --> 404 Page Not Found: dosen/Seminar_skripsi/index
+ERROR - 2025-07-18 11:50:01 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:50:01 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:50:03 --> 404 Page Not Found: dosen/Publikasi/index
+ERROR - 2025-07-18 11:50:51 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-18 11:50:51 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-18 11:51:17 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-18 11:51:26 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-18 11:51:57 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-18 12:29:24 --> Severity: error --> Exception: Call to undefined method App_lib::extends() /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal.php 2
+ERROR - 2025-07-18 12:31:26 --> Severity: error --> Exception: Call to undefined method App_lib::extends() /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal.php 2
+ERROR - 2025-07-18 12:34:17 --> Severity: error --> Exception: Too few arguments to function App_lib::endSection(), 0 passed in /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal.php on line 135 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/libraries/App_lib.php 65
+ERROR - 2025-07-18 13:01:04 --> Severity: Warning --> Undefined property: stdClass::$file_proposal /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal_detail.php 218
+ERROR - 2025-07-18 13:01:04 --> Severity: Warning --> Undefined property: stdClass::$file_proposal /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal_detail.php 376
+ERROR - 2025-07-18 13:01:48 --> Severity: Warning --> Undefined property: stdClass::$file_proposal /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal_detail.php 218
+ERROR - 2025-07-18 13:01:48 --> Severity: Warning --> Undefined property: stdClass::$file_proposal /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal_detail.php 376
+ERROR - 2025-07-18 13:19:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-18 13:19:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-18 13:33:08 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-18 13:33:08 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-18 13:36:45 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-18 15:14:23 --> Severity: Warning --> Undefined variable $data /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal.php 2
+ERROR - 2025-07-18 15:14:26 --> Severity: Warning --> Undefined variable $data /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal.php 2
+ERROR - 2025-07-18 16:02:33 --> Severity: error --> Exception: syntax error, unexpected token "public", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/dosen/Usulan_proposal.php 112
+ERROR - 2025-07-18 16:15:11 --> 404 Page Not Found: dosen/Debug_proposal/index
+ERROR - 2025-07-18 17:08:04 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "1" AND pm`.`workflow_status IS NULL THEN "bimbingan_pr...' at line 1 - Invalid query: SELECT `pm`.*, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `CASE WHEN pm`.`status_pembimbing IS NULL OR pm`.`status_pembimbing = "0" THEN "pengajuan_proposal" WHEN pm`.`status_pembimbing = "1" AND pm`.`workflow_status IS NULL THEN "bimbingan_proposal" WHEN pm`.`workflow_status = "bimbingan" THEN "bimbingan_proposal" WHEN pm`.`workflow_status = "seminar_proposal" THEN "seminar_proposal" WHEN pm`.`workflow_status = "penelitian" THEN "penelitian" WHEN pm`.`workflow_status = "seminar_skripsi" THEN "seminar_skripsi" WHEN pm`.`workflow_status = "publikasi" THEN "publikasi" ELSE "bimbingan_proposal" END` as `current_stage`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+ERROR - 2025-07-18 17:08:46 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "1" AND pm`.`workflow_status IS NULL THEN "bimbingan_pr...' at line 1 - Invalid query: SELECT `pm`.*, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `CASE WHEN pm`.`status_pembimbing IS NULL OR pm`.`status_pembimbing = "0" THEN "pengajuan_proposal" WHEN pm`.`status_pembimbing = "1" AND pm`.`workflow_status IS NULL THEN "bimbingan_proposal" WHEN pm`.`workflow_status = "bimbingan" THEN "bimbingan_proposal" WHEN pm`.`workflow_status = "seminar_proposal" THEN "seminar_proposal" WHEN pm`.`workflow_status = "penelitian" THEN "penelitian" WHEN pm`.`workflow_status = "seminar_skripsi" THEN "seminar_skripsi" WHEN pm`.`workflow_status = "publikasi" THEN "publikasi" ELSE "bimbingan_proposal" END` as `current_stage`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+ERROR - 2025-07-18 17:08:49 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "1" AND pm`.`workflow_status IS NULL THEN "bimbingan_pr...' at line 1 - Invalid query: SELECT `pm`.*, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `CASE WHEN pm`.`status_pembimbing IS NULL OR pm`.`status_pembimbing = "0" THEN "pengajuan_proposal" WHEN pm`.`status_pembimbing = "1" AND pm`.`workflow_status IS NULL THEN "bimbingan_proposal" WHEN pm`.`workflow_status = "bimbingan" THEN "bimbingan_proposal" WHEN pm`.`workflow_status = "seminar_proposal" THEN "seminar_proposal" WHEN pm`.`workflow_status = "penelitian" THEN "penelitian" WHEN pm`.`workflow_status = "seminar_skripsi" THEN "seminar_skripsi" WHEN pm`.`workflow_status = "publikasi" THEN "publikasi" ELSE "bimbingan_proposal" END` as `current_stage`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+ERROR - 2025-07-18 17:08:54 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "1" AND pm`.`workflow_status IS NULL THEN "bimbingan_pr...' at line 1 - Invalid query: SELECT `pm`.*, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `CASE WHEN pm`.`status_pembimbing IS NULL OR pm`.`status_pembimbing = "0" THEN "pengajuan_proposal" WHEN pm`.`status_pembimbing = "1" AND pm`.`workflow_status IS NULL THEN "bimbingan_proposal" WHEN pm`.`workflow_status = "bimbingan" THEN "bimbingan_proposal" WHEN pm`.`workflow_status = "seminar_proposal" THEN "seminar_proposal" WHEN pm`.`workflow_status = "penelitian" THEN "penelitian" WHEN pm`.`workflow_status = "seminar_skripsi" THEN "seminar_skripsi" WHEN pm`.`workflow_status = "publikasi" THEN "publikasi" ELSE "bimbingan_proposal" END` as `current_stage`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+ERROR - 2025-07-18 17:13:33 --> 404 Page Not Found: dosen/Seminar_proposal/index
+ERROR - 2025-07-18 17:43:18 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-18 17:44:11 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index

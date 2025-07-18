@@ -129,9 +129,11 @@ class PenetapanPembimbing extends CI_Controller {
             'dosen_id' => $dosen_pembimbing_id,
             'dosen_penguji_id' => $dosen_penguji1_id,
             'dosen_penguji2_id' => $dosen_penguji2_id,
-            'status' => '1', // Sudah ditetapkan
+            'status' => '1',
+            // TAMBAH BARIS INI:
             'tanggal_penetapan' => date('Y-m-d H:i:s'),
-            'penetapan_oleh' => $this->session->userdata('id')
+            'penetapan_oleh' => $this->session->userdata('id'),
+            'status_kaprodi' => '1'
         ];
         
         $this->db->where('id', $proposal_id);

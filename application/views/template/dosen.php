@@ -1,3 +1,4 @@
+<?php $app = json_decode(file_get_contents(base_url('cdn/db/app.json'))) ?>
 <!DOCTYPE html>
 <html>
 
@@ -34,64 +35,67 @@
         <div class="collapse navbar-collapse" id="sidenav-collapse-main">
           <!-- Nav items -->
           <ul class="navbar-nav">
+            <!-- Dashboard -->
             <li class="nav-item">
               <a class="nav-link" href="<?= base_url() ?>dosen/dashboard">
                 <i class="ni ni-tv-2 text-primary"></i>
                 <span class="nav-link-text">Dashboard</span>
               </a>
             </li>
+            
+            <!-- 1. Usulan Proposal -->
             <li class="nav-item">
-              <a class="nav-link" href="<?= base_url() ?>dosen/fakultas">
-                <i class="fa fa-building text-primary"></i>
-                <span class="nav-link-text">Fakultas</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="<?= base_url() ?>dosen/prodi">
-                <i class="fa fa-map text-green"></i>
-                <span class="nav-link-text">Prodi</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="<?= base_url() ?>dosen/dosen">
-                <i class="fa fa-user-tie text-purple"></i>
-                <span class="nav-link-text">Dosen</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="<?= base_url() ?>dosen/mahasiswa">
-                <i class="fa fa-users text-warning"></i>
-                <span class="nav-link-text">Mahasiswa</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="<?= base_url() ?>dosen/proposal">
+              <a class="nav-link" href="<?= base_url() ?>dosen/usulan_proposal">
                 <i class="ni ni-app text-red"></i>
-                <span class="nav-link-text">Usul Proposal</span>
+                <span class="nav-link-text">Usulan Proposal</span>
               </a>
             </li>
+            
+            <!-- 2. Bimbingan -->
             <li class="nav-item">
-              <a class="nav-link" href="<?= base_url() ?>dosen/seminar">
-                <i class="ni ni-books text-danger"></i>
-                <span class="nav-link-text">Seminar Proposal</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="<?= base_url() ?>dosen/konsultasi">
+              <a class="nav-link" href="<?= base_url() ?>dosen/bimbingan">
                 <i class="ni ni-pin-3 text-success"></i>
                 <span class="nav-link-text">Bimbingan</span>
               </a>
             </li>
+            
+            <!-- 3. Seminar Proposal -->
+            <li class="nav-item">
+              <a class="nav-link" href="<?= base_url() ?>dosen/seminar_proposal">
+                <i class="ni ni-books text-danger"></i>
+                <span class="nav-link-text">Seminar Proposal</span>
+              </a>
+            </li>
+            
+            <!-- 4. Penelitian -->
             <li class="nav-item">
               <a class="nav-link" href="<?= base_url() ?>dosen/penelitian">
                 <i class="ni ni-bulb-61 text-purple"></i>
-                <span class="nav-link-text">Seminar Hasil Penelitian</span>
+                <span class="nav-link-text">Penelitian</span>
               </a>
             </li>
+            
+            <!-- 5. Seminar Skripsi -->
             <li class="nav-item">
-              <a class="nav-link" href="<?= base_url() ?>dosen/skripsi">
+              <a class="nav-link" href="<?= base_url() ?>dosen/seminar_skripsi">
                 <i class="fa fa-list text-primary"></i>
-                <span class="nav-link-text">Seminar Akhir / Skripsi</span>
+                <span class="nav-link-text">Seminar Skripsi</span>
+              </a>
+            </li>
+            
+            <!-- 6. Publikasi -->
+            <li class="nav-item">
+              <a class="nav-link" href="<?= base_url() ?>dosen/publikasi">
+                <i class="fa fa-crown text-warning"></i>
+                <span class="nav-link-text">Publikasi</span>
+              </a>
+            </li>
+            
+            <!-- Profil -->
+            <li class="nav-item">
+              <a class="nav-link" href="<?= base_url() ?>dosen/profil">
+                <i class="fa fa-user text-info"></i>
+                <span class="nav-link-text">Profil</span>
               </a>
             </li>
           </ul>
@@ -99,6 +103,7 @@
       </div>
     </div>
   </nav>
+  
   <!-- Main content -->
   <div class="main-content" id="panel">
     <!-- Topnav -->
@@ -169,7 +174,6 @@
       </div>
     </nav>
     <!-- Header -->
-    <!-- Header -->
     <div class="header bg-primary pb-6">
       <div class="container-fluid">
         <div class="header-body">
@@ -209,7 +213,7 @@
         <div class="row align-items-center justify-content-lg-between">
           <div class="col-lg-6">
             <div class="copyright text-center  text-lg-left  text-muted">
-              &copy; 2022 <a href="https://Kodeaset.com" class="font-weight-bold ml-1" target="_blank">Kodeaset</a>
+              &copy; 2025 <a href="https://stkyakobus.ac.id" class="font-weight-bold ml-1" target="_blank">STK St. Yakobus</a>
             </div>
           </div>
         </div>

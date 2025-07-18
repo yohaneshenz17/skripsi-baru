@@ -8,6 +8,7 @@ class Bimbingan extends CI_Controller
         parent::__construct();
         $this->load->database();
         $this->load->library('session');
+        $this->load->library('email');
         $this->load->helper('url');
 
         // Cek apakah user sudah login sebagai mahasiswa
@@ -18,30 +19,69 @@ class Bimbingan extends CI_Controller
 
     public function index()
     {
-        $data['title'] = 'Bimbingan Skripsi';
+        $data['title'] = 'Bimbingan Skripsi - Phase 2';
         $mahasiswa_id = $this->session->userdata('id');
 
-        // Ambil data konsultasi/bimbingan mahasiswa
-        $this->db->select('k.*, d.nama as nama_dosen, pm.judul');
-        $this->db->from('konsultasi k');
-        $this->db->join('proposal_mahasiswa pm', 'k.proposal_mahasiswa_id = pm.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-        $this->db->order_by('k.tanggal', 'DESC');
-        $data['bimbingan'] = $this->db->get()->result();
-
         // Ambil data proposal dan dosen pembimbing
-        $this->db->select('pm.id as proposal_id, pm.judul, d.id as dosen_id, d.nama as nama_dosen');
+        $this->db->select('
+            pm.id as proposal_id, 
+            pm.judul, 
+            pm.jenis_penelitian,
+            pm.lokasi_penelitian,
+            pm.workflow_status,
+            d.id as dosen_id, 
+            d.nama as nama_dosen,
+            d.email as email_dosen,
+            d.nomor_telepon as telepon_dosen
+        ');
         $this->db->from('proposal_mahasiswa pm');
         $this->db->join('dosen d', 'pm.dosen_id = d.id');
         $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-        $this->db->where('pm.status', '1'); // Status disetujui
+        $this->db->where('pm.status_pembimbing', '1'); // Sudah disetujui pembimbing
         $data['proposal'] = $this->db->get()->row();
+
+        if (!$data['proposal']) {
+            // Cek apakah ada proposal yang masih pending approval pembimbing
+            $this->db->select('pm.*, d.nama as nama_dosen_ditunjuk');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+            $pending_proposal = $this->db->get()->row();
+            
+            if ($pending_proposal && $pending_proposal->status_pembimbing == '0') {
+                $data['pending_proposal'] = $pending_proposal;
+            }
+        }
+
+        // Ambil jurnal bimbingan mahasiswa
+        if (isset($data['proposal'])) {
+            $this->db->select('*');
+            $this->db->from('jurnal_bimbingan');
+            $this->db->where('proposal_id', $data['proposal']->proposal_id);
+            $this->db->order_by('pertemuan_ke', 'ASC');
+            $data['jurnal_bimbingan'] = $this->db->get()->result();
+
+            // Hitung statistik
+            $data['total_bimbingan'] = count($data['jurnal_bimbingan']);
+            $data['bimbingan_tervalidasi'] = count(array_filter($data['jurnal_bimbingan'], function($j) { return $j->status_validasi == '1'; }));
+            $data['bimbingan_pending'] = count(array_filter($data['jurnal_bimbingan'], function($j) { return $j->status_validasi == '0'; }));
+            $data['bimbingan_revisi'] = count(array_filter($data['jurnal_bimbingan'], function($j) { return $j->status_validasi == '2'; }));
+            
+            // Cek kelayakan untuk seminar proposal (minimal 8 pertemuan tervalidasi)
+            $data['siap_seminar'] = $data['bimbingan_tervalidasi'] >= 8;
+        } else {
+            $data['jurnal_bimbingan'] = [];
+            $data['total_bimbingan'] = 0;
+            $data['bimbingan_tervalidasi'] = 0;
+            $data['bimbingan_pending'] = 0;
+            $data['bimbingan_revisi'] = 0;
+            $data['siap_seminar'] = false;
+        }
 
         $this->load->view('mahasiswa/bimbingan', $data);
     }
 
-    public function ajukan()
+    public function tambah_jurnal()
     {
         if ($this->input->post()) {
             $mahasiswa_id = $this->session->userdata('id');
@@ -49,7 +89,7 @@ class Bimbingan extends CI_Controller
             // Cek apakah mahasiswa sudah memiliki proposal yang disetujui
             $proposal = $this->db->get_where('proposal_mahasiswa', [
                 'mahasiswa_id' => $mahasiswa_id,
-                'status' => '1',
+                'status_pembimbing' => '1',
                 'dosen_id !=' => NULL
             ])->row();
 
@@ -59,127 +99,265 @@ class Bimbingan extends CI_Controller
                 return;
             }
 
-            // Pastikan folder upload ada
-            if (!is_dir('./cdn/konsultasi/')) {
-                mkdir('./cdn/konsultasi/', 0755, true);
-            }
+            $pertemuan_ke = $this->input->post('pertemuan_ke');
+            $tanggal_bimbingan = $this->input->post('tanggal_bimbingan');
+            $materi_bimbingan = $this->input->post('materi_bimbingan');
+            $tindak_lanjut = $this->input->post('tindak_lanjut');
 
-            // Upload file bukti konsultasi
-            $config['upload_path'] = './cdn/konsultasi/';
-            $config['allowed_types'] = 'pdf|doc|docx';
-            $config['max_size'] = 2048; // 2MB
-            $config['encrypt_name'] = TRUE;
-
-            $this->load->library('upload', $config);
-            
-            if (!$this->upload->do_upload('bukti')) {
-                $error = $this->upload->display_errors('', '');
-                $this->session->set_flashdata('error', 'Gagal upload file bukti: ' . $error);
+            // Validasi input
+            if (!$pertemuan_ke || !$tanggal_bimbingan || !$materi_bimbingan) {
+                $this->session->set_flashdata('error', 'Semua field wajib diisi!');
                 redirect('mahasiswa/bimbingan');
                 return;
             }
 
-            $upload_data = $this->upload->data();
+            // Cek apakah pertemuan_ke sudah ada
+            $existing = $this->db->get_where('jurnal_bimbingan', [
+                'proposal_id' => $proposal->id,
+                'pertemuan_ke' => $pertemuan_ke
+            ])->row();
 
-            $data_to_save = [
-                'proposal_mahasiswa_id' => $proposal->id,
-                'tanggal' => date('Y-m-d'),
-                'jam' => date('H:i:s'),
-                'isi' => $this->input->post('isi_konsultasi'),
-                'bukti' => $upload_data['file_name'],
-                'persetujuan_pembimbing' => '0',
-                'persetujuan_kaprodi' => '0'
+            if ($existing) {
+                $this->session->set_flashdata('error', 'Pertemuan ke-' . $pertemuan_ke . ' sudah ada! Silakan edit yang sudah ada atau gunakan nomor pertemuan yang berbeda.');
+                redirect('mahasiswa/bimbingan');
+                return;
+            }
+
+            // Insert jurnal bimbingan baru
+            $data_jurnal = [
+                'proposal_id' => $proposal->id,
+                'pertemuan_ke' => $pertemuan_ke,
+                'tanggal_bimbingan' => $tanggal_bimbingan,
+                'materi_bimbingan' => $materi_bimbingan,
+                'tindak_lanjut' => $tindak_lanjut,
+                'status_validasi' => '0', // Pending validasi
+                'created_by' => 'mahasiswa',
+                'created_at' => date('Y-m-d H:i:s')
             ];
 
-            if ($this->db->insert('konsultasi', $data_to_save)) {
-                $this->session->set_flashdata('success', 'Permintaan konsultasi berhasil diajukan!');
+            $this->db->insert('jurnal_bimbingan', $data_jurnal);
+
+            if ($this->db->affected_rows() > 0) {
+                // Kirim notifikasi ke dosen pembimbing
+                $this->_kirim_notifikasi_jurnal_baru($proposal, $pertemuan_ke, $tanggal_bimbingan, $materi_bimbingan);
+                
+                $this->session->set_flashdata('success', 'Jurnal bimbingan pertemuan ke-' . $pertemuan_ke . ' berhasil ditambahkan! Menunggu validasi dari dosen pembimbing.');
             } else {
-                $this->session->set_flashdata('error', 'Gagal mengajukan permintaan konsultasi!');
+                $this->session->set_flashdata('error', 'Gagal menambahkan jurnal bimbingan!');
             }
-            
-            redirect('mahasiswa/bimbingan');
-        } else {
-            // Jika tidak ada POST data, redirect ke index
-            redirect('mahasiswa/bimbingan');
         }
+
+        redirect('mahasiswa/bimbingan');
     }
 
-    public function detail($id)
+    public function edit_jurnal($jurnal_id)
     {
         $mahasiswa_id = $this->session->userdata('id');
         
-        // Ambil detail konsultasi
-        $this->db->select('k.*, d.nama as nama_dosen, pm.judul');
-        $this->db->from('konsultasi k');
-        $this->db->join('proposal_mahasiswa pm', 'k.proposal_mahasiswa_id = pm.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id');
-        $this->db->where('k.id', $id);
-        $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-        $detail = $this->db->get()->row();
-        
-        if (!$detail) {
-            echo '<div class="alert alert-danger">Data konsultasi tidak ditemukan</div>';
+        // Validasi jurnal milik mahasiswa dan belum divalidasi
+        $jurnal = $this->db->select('jb.*, pm.mahasiswa_id')
+                          ->from('jurnal_bimbingan jb')
+                          ->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id')
+                          ->where('jb.id', $jurnal_id)
+                          ->where('pm.mahasiswa_id', $mahasiswa_id)
+                          ->where('jb.status_validasi', '0') // Hanya bisa edit yang belum divalidasi
+                          ->get()->row();
+
+        if (!$jurnal) {
+            $this->session->set_flashdata('error', 'Jurnal tidak ditemukan atau tidak dapat diedit (sudah divalidasi).');
+            redirect('mahasiswa/bimbingan');
             return;
         }
+
+        if ($this->input->post()) {
+            $tanggal_bimbingan = $this->input->post('tanggal_bimbingan');
+            $materi_bimbingan = $this->input->post('materi_bimbingan');
+            $tindak_lanjut = $this->input->post('tindak_lanjut');
+
+            // Update jurnal
+            $update_data = [
+                'tanggal_bimbingan' => $tanggal_bimbingan,
+                'materi_bimbingan' => $materi_bimbingan,
+                'tindak_lanjut' => $tindak_lanjut,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->where('id', $jurnal_id);
+            $this->db->update('jurnal_bimbingan', $update_data);
+
+            if ($this->db->affected_rows() > 0) {
+                $this->session->set_flashdata('success', 'Jurnal bimbingan berhasil diupdate!');
+            } else {
+                $this->session->set_flashdata('error', 'Tidak ada perubahan data atau gagal update!');
+            }
+
+            redirect('mahasiswa/bimbingan');
+        }
+
+        // Load form edit
+        $data['title'] = 'Edit Jurnal Bimbingan';
+        $data['jurnal'] = $jurnal;
+        $this->load->view('mahasiswa/bimbingan_edit', $data);
+    }
+
+    public function hapus_jurnal($jurnal_id)
+    {
+        $mahasiswa_id = $this->session->userdata('id');
         
-        // Output detail dalam format HTML
-        ?>
-        <div class="row">
-            <div class="col-md-6">
-                <strong>Tanggal:</strong> <?= date('d/m/Y', strtotime($detail->tanggal)) ?><br>
-                <strong>Jam:</strong> <?= date('H:i', strtotime($detail->jam)) ?><br>
-                <strong>Dosen Pembimbing:</strong> <?= $detail->nama_dosen ?><br>
-                <strong>Judul Proposal:</strong> <?= $detail->judul ?>
+        // Validasi jurnal milik mahasiswa dan belum divalidasi
+        $jurnal = $this->db->select('jb.*, pm.mahasiswa_id')
+                          ->from('jurnal_bimbingan jb')
+                          ->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id')
+                          ->where('jb.id', $jurnal_id)
+                          ->where('pm.mahasiswa_id', $mahasiswa_id)
+                          ->where('jb.status_validasi', '0') // Hanya bisa hapus yang belum divalidasi
+                          ->get()->row();
+
+        if (!$jurnal) {
+            $this->session->set_flashdata('error', 'Jurnal tidak ditemukan atau tidak dapat dihapus (sudah divalidasi).');
+            redirect('mahasiswa/bimbingan');
+            return;
+        }
+
+        // Hapus jurnal
+        $this->db->where('id', $jurnal_id);
+        $this->db->delete('jurnal_bimbingan');
+
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('success', 'Jurnal bimbingan berhasil dihapus!');
+        } else {
+            $this->session->set_flashdata('error', 'Gagal menghapus jurnal bimbingan!');
+        }
+
+        redirect('mahasiswa/bimbingan');
+    }
+
+    public function export_jurnal()
+    {
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        // Ambil data proposal dan jurnal
+        $proposal = $this->db->select('pm.*, d.nama as nama_dosen')
+                            ->from('proposal_mahasiswa pm')
+                            ->join('dosen d', 'pm.dosen_id = d.id')
+                            ->where('pm.mahasiswa_id', $mahasiswa_id)
+                            ->where('pm.status_pembimbing', '1')
+                            ->get()->row();
+
+        if (!$proposal) {
+            $this->session->set_flashdata('error', 'Data proposal tidak ditemukan.');
+            redirect('mahasiswa/bimbingan');
+            return;
+        }
+
+        $jurnal_list = $this->db->get_where('jurnal_bimbingan', ['proposal_id' => $proposal->id])->result();
+
+        // Generate PDF atau Excel
+        // Placeholder untuk export functionality
+        $this->session->set_flashdata('info', 'Fitur export jurnal akan segera tersedia.');
+        redirect('mahasiswa/bimbingan');
+    }
+
+    private function _kirim_notifikasi_jurnal_baru($proposal, $pertemuan_ke, $tanggal_bimbingan, $materi_bimbingan)
+    {
+        $config = [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug',
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls'
+        ];
+
+        $this->email->initialize($config);
+
+        $mahasiswa_nama = $this->session->userdata('nama');
+        $subject = 'Jurnal Bimbingan Baru - Pertemuan ke-' . $pertemuan_ke . ' - ' . $mahasiswa_nama;
+
+        $message = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Jurnal Bimbingan Baru</title>
+        </head>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+            <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                <div style='text-align: center; background-color: #007bff; color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;'>
+                    <h2 style='margin: 0;'>📚 Jurnal Bimbingan Baru</h2>
+                </div>
+                
+                <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                    Yth. Dosen Pembimbing,
+                </p>
+                
+                <p style='margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;'>
+                    Mahasiswa bimbingan Anda telah menambahkan jurnal bimbingan baru yang perlu divalidasi.
+                </p>
+                
+                <div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                    <h3 style='color: #495057; margin: 0 0 15px 0; font-size: 18px;'>Detail Jurnal Bimbingan:</h3>
+                    <table style='width: 100%; border-collapse: collapse;'>
+                        <tr>
+                            <td style='padding: 8px 0; font-weight: bold; width: 30%;'>Mahasiswa:</td>
+                            <td style='padding: 8px 0;'>{$mahasiswa_nama}</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; font-weight: bold;'>Judul Proposal:</td>
+                            <td style='padding: 8px 0;'>{$proposal->judul}</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; font-weight: bold;'>Pertemuan ke:</td>
+                            <td style='padding: 8px 0;'>{$pertemuan_ke}</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; font-weight: bold;'>Tanggal:</td>
+                            <td style='padding: 8px 0;'>" . date('d F Y', strtotime($tanggal_bimbingan)) . "</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; font-weight: bold;'>Materi:</td>
+                            <td style='padding: 8px 0;'>{$materi_bimbingan}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <h4 style='color: #856404; margin: 0 0 10px 0; font-size: 16px;'>⏰ Tindakan Diperlukan:</h4>
+                    <p style='margin: 0; color: #856404;'>Silakan login ke sistem untuk memvalidasi jurnal bimbingan ini.</p>
+                </div>
+                
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='" . base_url('dosen/bimbingan') . "' 
+                       style='background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                       📚 Validasi Jurnal Bimbingan
+                    </a>
+                </div>
+                
+                <!-- Footer -->
+                <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; border-radius: 0 0 8px 8px;'>
+                    <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                        Email ini dikirim secara otomatis oleh<br>
+                        <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                        STK Santo Yakobus Merauke
+                    </p>
+                </div>
             </div>
-            <div class="col-md-6">
-                <strong>Status Pembimbing:</strong> 
-                <?php if($detail->persetujuan_pembimbing == '1'): ?>
-                    <span class="badge badge-success">Disetujui</span>
-                <?php else: ?>
-                    <span class="badge badge-warning">Menunggu</span>
-                <?php endif; ?><br>
-                <strong>Status Kaprodi:</strong> 
-                <?php if($detail->persetujuan_kaprodi == '1'): ?>
-                    <span class="badge badge-success">Disetujui</span>
-                <?php else: ?>
-                    <span class="badge badge-warning">Menunggu</span>
-                <?php endif; ?>
-            </div>
-        </div>
-        <hr>
-        <div class="row">
-            <div class="col-md-12">
-                <strong>Isi Konsultasi:</strong>
-                <div class="alert alert-light"><?= nl2br($detail->isi) ?></div>
-            </div>
-        </div>
-        <?php if($detail->bukti): ?>
-        <div class="row">
-            <div class="col-md-12">
-                <strong>File Bukti:</strong><br>
-                <a href="<?= base_url('cdn/konsultasi/' . $detail->bukti) ?>" target="_blank" class="btn btn-sm btn-success">
-                    <i class="fa fa-download"></i> Download File
-                </a>
-            </div>
-        </div>
-        <?php endif; ?>
-        <?php if($detail->komentar_pembimbing): ?>
-        <hr>
-        <div class="row">
-            <div class="col-md-12">
-                <strong>Komentar Pembimbing:</strong>
-                <div class="alert alert-info"><?= nl2br($detail->komentar_pembimbing) ?></div>
-            </div>
-        </div>
-        <?php endif; ?>
-        <?php if($detail->komentar_kaprodi): ?>
-        <div class="row">
-            <div class="col-md-12">
-                <strong>Komentar Kaprodi:</strong>
-                <div class="alert alert-secondary"><?= nl2br($detail->komentar_kaprodi) ?></div>
-            </div>
-        </div>
-        <?php endif; ?>
-        <?php
+        </body>
+        </html>";
+
+        // Ambil email dosen
+        $dosen = $this->db->get_where('dosen', ['id' => $proposal->dosen_id])->row();
+        
+        if ($dosen && $dosen->email) {
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
+            $this->email->to($dosen->email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            $this->email->send();
+        }
     }
 }

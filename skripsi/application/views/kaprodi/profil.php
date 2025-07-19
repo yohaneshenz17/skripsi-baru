@@ -1,148 +1,93 @@
-<?php
-ob_start();
-?>
+<?php $this->app->extend('template/kaprodi') ?>
 
-<div class="row">
-    <div class="col-lg-12">
-        <?php if($this->session->flashdata('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
-        <?php endif; ?>
-        <?php if($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
-        <?php endif; ?>
+<?php $this->app->setVar('title', 'Profil Kaprodi') ?>
 
-        <div class="card">
-            <div class="card-header">
-                <h3 class="mb-0">
-                    <i class="ni ni-single-02 text-primary"></i> Profil Kaprodi
-                </h3>
+<?php $this->app->section() ?>
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">Profil Kaprodi</div>
+    </div>
+    <div class="card-body">
+        
+        <!-- Flash Messages -->
+        <?php if ($this->session->flashdata('success')): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?= $this->session->flashdata('success') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="card-body">
-                <form method="post" action="<?= base_url() ?>kaprodi/profil/update" enctype="multipart/form-data" id="form-profil">
-                    <div class="row">
-                        <!-- Kolom Foto -->
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Foto Profil</h5>
-                                </div>
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <?php 
-                                        // Cek apakah ada foto di database
-                                        $foto_name = isset($user->foto) && !empty($user->foto) ? $user->foto : 'default.png';
-                                        $foto_path = base_url('cdn/img/dosen/' . $foto_name);
-                                        ?>
-                                        <img id="preview-foto" src="<?= $foto_path ?>" class="img-fluid rounded-circle shadow" style="width: 200px; height: 200px; object-fit: cover;">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-control-label">Upload Foto Baru</label>
-                                        <input type="file" class="form-control" name="foto" id="foto" accept=".jpg,.jpeg" onchange="previewFoto()">
-                                        <small class="text-muted">Format: JPG/JPEG, Maksimal 500KB</small>
-                                    </div>
-                                    
-                                    <?php if (isset($user->foto) && !empty($user->foto)): ?>
-                                    <div class="mt-2">
-                                        <a href="<?= base_url() ?>kaprodi/profil/hapus_foto" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus foto profil?')">
-                                            <i class="fa fa-trash"></i> Hapus Foto
-                                        </a>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
+        <?php endif; ?>
 
-                        <!-- Kolom Form -->
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Informasi Profil</h5>
-                                </div>
-                                <div class="card-body">
-                                    <h6 class="heading-small text-muted mb-4">Informasi Pengguna</h6>
-                                    <div class="pl-lg-4">
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="form-group">
-                                                    <label class="form-control-label">Nama Lengkap <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="nama" value="<?= htmlspecialchars($user->nama) ?>" required placeholder="Masukkan nama lengkap">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <label class="form-control-label">NIDN <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="nip" value="<?= htmlspecialchars($user->nip) ?>" required placeholder="Masukkan NIDN">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <label class="form-control-label">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control" name="email" value="<?= htmlspecialchars($user->email) ?>" required placeholder="Masukkan email">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <label class="form-control-label">Nomor Telepon <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="nomor_telepon" value="<?= htmlspecialchars($user->nomor_telepon) ?>" required placeholder="Masukkan nomor telepon">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <label class="form-control-label">Level</label>
-                                                    <input type="text" class="form-control" value="Ketua Program Studi" readonly>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Informasi Program Studi -->
-                                        <h6 class="heading-small text-muted mb-4 mt-4">Informasi Program Studi</h6>
-                                        <div class="row">
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <label class="form-control-label">Program Studi</label>
-                                                    <?php
-                                                    // Ambil info prodi dari database
-                                                    $prodi_info = $this->db->select('p.nama as nama_prodi, f.nama as nama_fakultas')
-                                                        ->from('prodi p')
-                                                        ->join('fakultas f', 'p.fakultas_id = f.id', 'left')
-                                                        ->where('p.dosen_id', $user->id)
-                                                        ->get()->row();
-                                                    ?>
-                                                    <input type="text" class="form-control" value="<?= $prodi_info ? $prodi_info->nama_prodi : 'Tidak ada' ?>" readonly>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <label class="form-control-label">Fakultas</label>
-                                                    <input type="text" class="form-control" value="<?= $prodi_info ? $prodi_info->nama_fakultas : 'Tidak ada' ?>" readonly>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <?php if ($this->session->flashdata('error')): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?= $this->session->flashdata('error') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+
+        <div class="row">
+            <!-- Foto Profil Section -->
+            <div class="col-md-4">
+                <div class="text-center mb-4">
+                    <h6 class="heading-small text-muted mb-4">Foto Profil</h6>
+                    <?php
+                    $foto_name = !empty($user->foto) ? $user->foto : 'default.png';
+                    // Add timestamp untuk cache busting
+                    $foto_path = base_url('cdn/img/dosen/' . $foto_name) . '?t=' . time();
+                    ?>
+                    <img id="preview-foto" src="<?= $foto_path ?>" class="img-fluid rounded-circle shadow" style="width: 200px; height: 200px; object-fit: cover;">
+                </div>
+                
+                <!-- Form Upload Foto -->
+                <form action="<?= base_url('kaprodi/profil/update') ?>" method="post" enctype="multipart/form-data" id="form-foto">
+                    <!-- Add hidden fields untuk memastikan ini adalah upload foto -->
+                    <input type="hidden" name="action" value="upload_foto">
+                    <div class="form-group">
+                        <label class="form-control-label">Upload Foto Baru</label>
+                        <input type="file" class="form-control" name="foto" id="foto" accept=".jpg,.jpeg" onchange="previewFoto()" required>
+                        <small class="text-muted">Format: JPG/JPEG, Maksimal 1MB</small>
                     </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-upload"></i> Upload Foto
+                    </button>
+                </form>
+                
+                <?php if (isset($user->foto) && !empty($user->foto)): ?>
+                <div class="mt-2">
+                    <a href="<?= base_url() ?>kaprodi/profil/hapus_foto" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus foto profil?')">
+                        <i class="fa fa-trash"></i> Hapus Foto
+                    </a>
+                </div>
+                <?php endif; ?>
+            </div>
 
-                    <hr>
-
+            <!-- Data Profil Section -->
+            <div class="col-md-8">
+                <h6 class="heading-small text-muted mb-4">Informasi Kaprodi</h6>
+                
+                <form id="edit">
+                    <div class="form-group">
+                        <label>NIDN/NIP</label>
+                        <input type="text" class="form-control" name="nip" placeholder="Masukkan NIDN/NIP" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" class="form-control" name="nama" placeholder="Masukkan Nama Lengkap" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor Telepon</label>
+                        <input type="text" class="form-control" name="nomor_telepon" placeholder="Masukkan Nomor Telepon" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" name="email" placeholder="Masukkan Email" autocomplete="off">
+                    </div>
                     <div class="text-right">
-                        <button type="reset" class="btn btn-secondary">
-                            <i class="fa fa-refresh"></i> Reset
-                        </button>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fa fa-save"></i> Simpan Perubahan
+                            <i class="fa fa-save"></i> Simpan Data
                         </button>
                     </div>
                 </form>
@@ -150,83 +95,97 @@ ob_start();
         </div>
     </div>
 </div>
+<?php $this->app->endSection('content') ?>
 
-<?php 
-$content = ob_get_clean();
-ob_start();
-?>
-
+<?php $this->app->section() ?>
 <script>
+$(document).ready(function() {
+    var id = '<?= $this->session->userdata('id') ?>'
+    
+    function show() {
+        // Gunakan API dosen karena kaprodi juga tersimpan di tabel dosen
+        call('api/dosen/details/' + id).done(function(res) {
+            if (res.error == true) {
+                notif(res.message, 'warning').then(function() {
+                    window.location = base_url + 'auth/logout';
+                })
+            } else {
+                $('[name=nip]').val(res.data.nip);
+                $('[name=nama]').val(res.data.nama);
+                $('[name=nomor_telepon]').val(res.data.nomor_telepon);
+                $('[name=email]').val(res.data.email);
+            }
+        })
+    }
+
+    show();
+
+    // Form edit data (AJAX) - UPDATE ENDPOINT UNTUK KAPRODI
+    $(document).on('submit', 'form#edit', function(e) {
+        e.preventDefault();
+        console.log('Form edit submitted via AJAX - KAPRODI');
+        console.log('Form data:', $(this).serialize());
+        
+        // GUNAKAN ENDPOINT KAPRODI
+        $.ajax({
+            url: base_url + 'kaprodi/profil/update',
+            method: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(req) {
+                console.log('AJAX response:', req);
+                if (req.error == true) {
+                    notif(req.message, 'error', true);
+                } else {
+                    notif(req.message, 'success');
+                    show(); // Refresh data
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX failed:', error);
+                console.error('Response:', xhr.responseText);
+                notif('Error: ' + error, 'error');
+            }
+        });
+    })
+
+    // Form upload foto (Normal Submit) - ENDPOINT SUDAH BENAR
+    $(document).on('submit', 'form#form-foto', function(e) {
+        console.log('Form foto submitted - KAPRODI');
+        console.log('Form action:', this.action);
+        // Let the form submit normally for file upload
+        return true;
+    })
+})
+
+// Preview foto function
 function previewFoto() {
-    var file = document.getElementById('foto').files[0];
-    var preview = document.getElementById('preview-foto');
+    const file = document.getElementById('foto').files[0];
+    const preview = document.getElementById('preview-foto');
     
     if (file) {
-        // Validasi ukuran file (500KB = 500 * 1024 bytes)
-        if (file.size > 500 * 1024) {
-            alert('Ukuran file terlalu besar! Maksimal 500KB');
+        // Validasi file type
+        if (!file.type.match(/^image\/(jpeg|jpg)$/)) {
+            alert('Format file harus JPG atau JPEG!');
             document.getElementById('foto').value = '';
             return;
         }
         
-        // Validasi format file
-        var allowedTypes = ['image/jpeg', 'image/jpg'];
-        if (!allowedTypes.includes(file.type)) {
-            alert('Format file tidak didukung! Hanya JPG/JPEG yang diizinkan');
+        // Validasi file size (1MB = 1024 * 1024 bytes)
+        if (file.size > 1024 * 1024) {
+            alert('Ukuran file maksimal 1MB!');
             document.getElementById('foto').value = '';
             return;
         }
         
-        // Preview foto
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
-        };
+        }
         reader.readAsDataURL(file);
     }
 }
-
-$(document).ready(function() {
-    $('#form-profil').on('submit', function(e) {
-        // Validasi form sebelum submit
-        var nama = $('input[name="nama"]').val();
-        var nip = $('input[name="nip"]').val();
-        var email = $('input[name="email"]').val();
-        var nomor_telepon = $('input[name="nomor_telepon"]').val();
-        
-        if (nama == '' || nip == '' || email == '' || nomor_telepon == '') {
-            alert('Semua field wajib diisi!');
-            e.preventDefault();
-            return false;
-        }
-        
-        // Validasi format email
-        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) {
-            alert('Format email tidak valid!');
-            e.preventDefault();
-            return false;
-        }
-        
-        // Validasi nomor telepon (hanya angka)
-        var phonePattern = /^[0-9]+$/;
-        if (!phonePattern.test(nomor_telepon)) {
-            alert('Nomor telepon hanya boleh berisi angka!');
-            e.preventDefault();
-            return false;
-        }
-        
-        return true;
-    });
-});
 </script>
+<?php $this->app->endSection('script') ?>
 
-<?php 
-$script = ob_get_clean(); 
-
-$this->load->view('template/kaprodi', [
-    'title' => 'Profil Saya',
-    'content' => $content,
-    'script' => $script
-]); 
-?>
+<?php $this->app->init() ?>

@@ -1,4 +1,8 @@
 <?php
+// ============================================
+// FILE: application/controllers/kaprodi/Kaprodi.php (DIPERBAIKI)
+// ============================================
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Kaprodi extends CI_Controller {
@@ -31,39 +35,6 @@ class Kaprodi extends CI_Controller {
         redirect('kaprodi/dashboard');
     }
 
-    public function dashboard() {
-        $data['title'] = 'Dashboard Kaprodi';
-        
-        // Statistik proposal berdasarkan status kaprodi
-        $data['proposal_menunggu_review'] = $this->db->from('proposal_mahasiswa')
-            ->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id')
-            ->where('proposal_mahasiswa.status_kaprodi', '0')
-            ->where('mahasiswa.prodi_id', $this->prodi_id)
-            ->count_all_results();
-            
-        $data['proposal_disetujui_kaprodi'] = $this->db->from('proposal_mahasiswa')
-            ->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id')
-            ->where('proposal_mahasiswa.status_kaprodi', '1')
-            ->where('mahasiswa.prodi_id', $this->prodi_id)
-            ->count_all_results();
-            
-        $data['proposal_menunggu_pembimbing'] = $this->db->from('proposal_mahasiswa')
-            ->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id')
-            ->where('proposal_mahasiswa.status_kaprodi', '1')
-            ->where('proposal_mahasiswa.status_pembimbing', '0')
-            ->where('mahasiswa.prodi_id', $this->prodi_id)
-            ->count_all_results();
-            
-        // Statistik total mahasiswa dan dosen
-        $data['total_mahasiswa'] = $this->db->where('prodi_id', $this->prodi_id)
-            ->count_all_results('mahasiswa');
-            
-        $data['total_dosen'] = $this->db->where('level !=', '1')
-            ->count_all_results('dosen');
-        
-        $this->load->view('kaprodi/dashboard', $data);
-    }
-
     public function proposal() {
         $data['title'] = 'Review Proposal Mahasiswa';
         
@@ -83,7 +54,74 @@ class Kaprodi extends CI_Controller {
         
         $data['proposals'] = $this->db->get()->result();
         
-        $this->load->view('kaprodi/proposal', $data);
+        $this->load->view('template/kaprodi', [
+            'title' => $data['title'],
+            'content' => $this->_get_proposal_content($data),
+            'script' => $this->_get_proposal_script()
+        ]);
+    }
+
+    private function _get_proposal_content($data) {
+        ob_start();
+        include(APPPATH . 'views/kaprodi/proposal.php');
+        return ob_get_clean();
+    }
+
+    private function _get_proposal_script() {
+        ob_start();
+        ?>
+        <script>
+        $(document).ready(function() {
+            // Initialize DataTables untuk setiap tab
+            $('#table-menunggu').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                },
+                "order": [[ 4, "desc" ]]
+            });
+            
+            $('#table-disetujui').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                },
+                "order": [[ 6, "desc" ]]
+            });
+            
+            $('#table-ditolak').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                },
+                "order": [[ 5, "desc" ]]
+            });
+            
+            $('#table-menunggu-pembimbing').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                },
+                "order": [[ 6, "desc" ]]
+            });
+            
+            $('#table-riwayat').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                },
+                "order": [[ 6, "desc" ]]
+            });
+            
+            // Enable tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        // Function untuk menampilkan tab Riwayat Review
+        function showRiwayatTab() {
+            $('#tabs-icons-text-5-tab').tab('show');
+            $('html, body').animate({
+                scrollTop: $('#tabs-icons-text').offset().top - 100
+            }, 500);
+        }
+        </script>
+        <?php
+        return ob_get_clean();
     }
 
     public function review_proposal($proposal_id) {
@@ -110,24 +148,161 @@ class Kaprodi extends CI_Controller {
             redirect('kaprodi/proposal');
         }
         
-        // PERBAIKAN: Ambil SEMUA dosen dari SEMUA prodi sebagai calon pembimbing
-        // Kaprodi bisa memilih pembimbing dari dosen manapun
+        // Ambil SEMUA dosen dari SEMUA prodi sebagai calon pembimbing
         $this->db->select('dosen.*, prodi.nama as nama_prodi');
         $this->db->from('dosen');
         $this->db->join('prodi', 'dosen.prodi_id = prodi.id', 'left');
-        $this->db->where('dosen.level', '2'); // Exclude admin saja
+        $this->db->where('dosen.level', '2');
         $this->db->where('dosen.id !=', $this->session->userdata('id')); // Exclude kaprodi yang sedang login
         $this->db->order_by('dosen.nama', 'ASC');
         $data['dosens'] = $this->db->get()->result();
         
-        // Debug: Log jumlah dosen
-        log_message('debug', 'Jumlah dosen tersedia untuk pembimbing: ' . count($data['dosens']));
-        
-        $this->load->view('kaprodi/review_proposal', $data);
+        $this->load->view('template/kaprodi', [
+            'title' => $data['title'],
+            'content' => $this->_get_review_proposal_content($data),
+            'script' => $this->_get_review_proposal_script()
+        ]);
+    }
+
+    private function _get_review_proposal_content($data) {
+        ob_start();
+        ?>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h3 class="mb-0">Review Proposal Mahasiswa</h3>
+                                <p class="text-sm mb-0">Detail proposal dan form review</p>
+                            </div>
+                            <div class="col text-right">
+                                <a href="<?= base_url('kaprodi/proposal') ?>" class="btn btn-secondary btn-sm">
+                                    <i class="ni ni-bold-left"></i> Kembali
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Detail Mahasiswa -->
+                            <div class="col-md-6">
+                                <h5 class="heading-small text-muted mb-4">Data Mahasiswa</h5>
+                                <div class="pl-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">NIM</label>
+                                        <p class="form-control-static font-weight-bold"><?= $data['proposal']->nim ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Nama Mahasiswa</label>
+                                        <p class="form-control-static font-weight-bold"><?= $data['proposal']->nama_mahasiswa ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Email</label>
+                                        <p class="form-control-static"><?= $data['proposal']->email_mahasiswa ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Program Studi</label>
+                                        <p class="form-control-static"><?= $data['proposal']->nama_prodi ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Detail Proposal -->
+                            <div class="col-md-6">
+                                <h5 class="heading-small text-muted mb-4">Detail Proposal</h5>
+                                <div class="pl-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Judul Proposal</label>
+                                        <p class="form-control-static font-weight-bold"><?= $data['proposal']->judul ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Tanggal Pengajuan</label>
+                                        <p class="form-control-static"><?= date('d/m/Y H:i', strtotime($data['proposal']->created_at)) ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">File Proposal</label>
+                                        <div>
+                                            <?php if(!empty($data['proposal']->file_draft_proposal)): ?>
+                                            <a href="<?= base_url('kaprodi/download_proposal/' . $data['proposal']->id) ?>" class="btn btn-primary btn-sm">
+                                                <i class="fa fa-download"></i> Download
+                                            </a>
+                                            <a href="<?= base_url('kaprodi/view_proposal/' . $data['proposal']->id) ?>" class="btn btn-info btn-sm" target="_blank">
+                                                <i class="fa fa-eye"></i> Lihat
+                                            </a>
+                                            <?php else: ?>
+                                            <span class="text-muted">File tidak tersedia</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Form Review -->
+                        <h5 class="heading-small text-muted mb-4">Form Review Proposal</h5>
+                        <form method="post" action="<?= base_url('kaprodi/proses_review') ?>" id="form-review">
+                            <input type="hidden" name="proposal_id" value="<?= $data['proposal']->id ?>">
+                            
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Komentar Review</label>
+                                        <textarea class="form-control" name="komentar_kaprodi" rows="4" placeholder="Berikan komentar review untuk proposal ini..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Dosen Pembimbing</label>
+                                        <select class="form-control" name="dosen_id" id="dosen_id">
+                                            <option value="">-- Pilih Dosen Pembimbing --</option>
+                                            <?php foreach($data['dosens'] as $dosen): ?>
+                                            <option value="<?= $dosen->id ?>"><?= $dosen->nama ?> (<?= $dosen->nama_prodi ?? 'Prodi tidak ditemukan' ?>)</option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <small class="text-muted">Wajib dipilih jika proposal disetujui</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-right">
+                                <button type="submit" name="aksi" value="tolak" class="btn btn-danger" onclick="return confirm('Yakin ingin menolak proposal ini?')">
+                                    <i class="fa fa-times"></i> Tolak Proposal
+                                </button>
+                                <button type="submit" name="aksi" value="setujui" class="btn btn-success" onclick="return validateApproval()">
+                                    <i class="fa fa-check"></i> Setujui & Tetapkan Pembimbing
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    private function _get_review_proposal_script() {
+        ob_start();
+        ?>
+        <script>
+        function validateApproval() {
+            var dosenId = $('#dosen_id').val();
+            if (!dosenId) {
+                alert('Silakan pilih dosen pembimbing terlebih dahulu!');
+                return false;
+            }
+            return confirm('Yakin ingin menyetujui proposal ini dan menetapkan pembimbing?');
+        }
+        </script>
+        <?php
+        return ob_get_clean();
     }
 
     // Method untuk download file proposal
-       public function download_proposal($proposal_id) {
+    public function download_proposal($proposal_id) {
         // Validasi proposal
         $this->db->select('proposal_mahasiswa.*, mahasiswa.nama as nama_mahasiswa');
         $this->db->from('proposal_mahasiswa');
@@ -141,13 +316,11 @@ class Kaprodi extends CI_Controller {
             show_404();
         }
         
-        // PERBAIKAN: Gunakan field yang benar dan path yang benar
         if (empty($proposal->file_draft_proposal)) {
             $this->session->set_flashdata('error', 'File proposal tidak tersedia!');
             redirect('kaprodi/review_proposal/' . $proposal_id);
         }
         
-        // PERBAIKAN PATH: Gunakan cdn/proposals/ seperti mahasiswa
         $file_path = FCPATH . 'cdn/proposals/' . $proposal->file_draft_proposal;
         
         // Cek apakah file ada
@@ -164,7 +337,7 @@ class Kaprodi extends CI_Controller {
     }
     
     // Method untuk view file proposal di browser
-       public function view_proposal($proposal_id) {
+    public function view_proposal($proposal_id) {
         // Validasi proposal
         $this->db->select('proposal_mahasiswa.*, mahasiswa.nama as nama_mahasiswa');
         $this->db->from('proposal_mahasiswa');
@@ -178,13 +351,11 @@ class Kaprodi extends CI_Controller {
             show_404();
         }
         
-        // PERBAIKAN: Gunakan field yang benar
         if (empty($proposal->file_draft_proposal)) {
             echo '<div style="padding: 20px; font-family: Arial;"><h3>File tidak tersedia</h3><p>File proposal tidak ada atau belum diupload.</p></div>';
             return;
         }
         
-        // PERBAIKAN PATH: Gunakan cdn/proposals/ seperti mahasiswa
         $file_path = FCPATH . 'cdn/proposals/' . $proposal->file_draft_proposal;
         
         // Cek apakah file ada
@@ -223,6 +394,12 @@ class Kaprodi extends CI_Controller {
         $komentar = $this->input->post('komentar_kaprodi');
         $dosen_id = $this->input->post('dosen_id'); // hanya jika disetujui
         
+        // Validasi input
+        if (empty($proposal_id) || empty($aksi)) {
+            $this->session->set_flashdata('error', 'Data tidak lengkap!');
+            redirect('kaprodi/proposal');
+        }
+        
         // Validasi proposal
         $proposal = $this->db->select('proposal_mahasiswa.*, mahasiswa.nama as nama_mahasiswa, mahasiswa.email as email_mahasiswa')
                             ->from('proposal_mahasiswa')
@@ -249,62 +426,47 @@ class Kaprodi extends CI_Controller {
                 'tanggal_review_kaprodi' => date('Y-m-d H:i:s'),
                 'dosen_id' => $dosen_id,
                 'penetapan_oleh' => $this->session->userdata('id'),
-                'tanggal_penetapan' => date('Y-m-d H:i:s')
+                'tanggal_penetapan' => date('Y-m-d H:i:s'),
+                'status_pembimbing' => '0', // Menunggu persetujuan pembimbing
+                'workflow_status' => 'menunggu_pembimbing'
             ];
             
-            $this->db->where('id', $proposal_id)->update('proposal_mahasiswa', $data_update);
+            $result = $this->db->where('id', $proposal_id)->update('proposal_mahasiswa', $data_update);
             
-            // Kirim notifikasi ke dosen pembimbing
-            $this->_kirim_notifikasi_pembimbing($proposal_id, $dosen_id);
-            
-            // Kirim notifikasi ke mahasiswa
-            $this->_kirim_notifikasi_mahasiswa($proposal_id, 'disetujui');
-            
-            $this->session->set_flashdata('success', 'Proposal berhasil disetujui dan dosen pembimbing telah ditetapkan!');
+            if ($result) {
+                // Kirim notifikasi ke dosen pembimbing
+                $this->_kirim_notifikasi_pembimbing($proposal_id, $dosen_id);
+                
+                // Kirim notifikasi ke mahasiswa
+                $this->_kirim_notifikasi_mahasiswa($proposal_id, 'disetujui');
+                
+                $this->session->set_flashdata('success', 'Proposal berhasil disetujui dan dosen pembimbing telah ditetapkan!');
+            } else {
+                $this->session->set_flashdata('error', 'Gagal menyimpan review proposal!');
+            }
             
         } else if ($aksi == 'tolak') {
             // Update proposal - ditolak kaprodi
             $data_update = [
                 'status_kaprodi' => '2',
                 'komentar_kaprodi' => $komentar,
-                'tanggal_review_kaprodi' => date('Y-m-d H:i:s')
+                'tanggal_review_kaprodi' => date('Y-m-d H:i:s'),
+                'workflow_status' => 'ditolak'
             ];
             
-            $this->db->where('id', $proposal_id)->update('proposal_mahasiswa', $data_update);
+            $result = $this->db->where('id', $proposal_id)->update('proposal_mahasiswa', $data_update);
             
-            // Kirim notifikasi ke mahasiswa
-            $this->_kirim_notifikasi_mahasiswa($proposal_id, 'ditolak');
-            
-            $this->session->set_flashdata('success', 'Proposal telah ditolak dan mahasiswa telah diberi tahu.');
+            if ($result) {
+                // Kirim notifikasi ke mahasiswa
+                $this->_kirim_notifikasi_mahasiswa($proposal_id, 'ditolak');
+                
+                $this->session->set_flashdata('success', 'Proposal telah ditolak dan mahasiswa telah diberi tahu.');
+            } else {
+                $this->session->set_flashdata('error', 'Gagal menyimpan review proposal!');
+            }
         }
         
         redirect('kaprodi/proposal');
-    }
-
-    public function penetapan($proposal_id) {
-        $data['title'] = 'Form Penetapan Pembimbing & Penguji';
-        
-        $this->db->select('proposal_mahasiswa.*, mahasiswa.nim, mahasiswa.nama as nama_mahasiswa, mahasiswa.email');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id');
-        $this->db->where('proposal_mahasiswa.id', $proposal_id);
-        $this->db->where('mahasiswa.prodi_id', $this->prodi_id);
-        
-        $data['proposal'] = $this->db->get()->row();
-        
-        if(!$data['proposal']) {
-            redirect('kaprodi/proposal');
-        }
-        
-        // PERBAIKAN: Ambil SEMUA dosen dari SEMUA prodi untuk penetapan pembimbing & penguji
-        $this->db->select('dosen.*, prodi.nama as nama_prodi');
-        $this->db->from('dosen');
-        $this->db->join('prodi', 'dosen.prodi_id = prodi.id', 'left');
-        $this->db->where('dosen.level', '2'); // Exclude admin saja
-        $this->db->order_by('dosen.nama', 'ASC');
-        $data['dosens'] = $this->db->get()->result();
-        
-        $this->load->view('kaprodi/penetapan', $data);
     }
 
     private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
@@ -346,7 +508,7 @@ class Kaprodi extends CI_Controller {
                 <li>Prodi: {$data->nama_prodi}</li>
                 <li>Judul: {$data->judul}</li>
             </ul>
-            <p>Silakan login ke sistem untuk memberikan persetujuan: <a href='" . base_url('dosen/bimbingan') . "'>Login Sistem</a></p>
+            <p>Silakan login ke sistem untuk memberikan persetujuan: <a href='" . base_url('dosen/usulan_proposal') . "'>Login Sistem</a></p>
             <p>Terima kasih atas kesediaannya.</p>
             ";
             
@@ -412,29 +574,6 @@ class Kaprodi extends CI_Controller {
         }
     }
 
-    public function riwayat() {
-        $data['title'] = 'Riwayat Review Proposal';
-        
-        $this->db->select('
-            proposal_mahasiswa.*, 
-            mahasiswa.nim, 
-            mahasiswa.nama as nama_mahasiswa,
-            d1.nama as nama_pembimbing,
-            dk.nama as nama_kaprodi
-        ');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id');
-        $this->db->join('dosen d1', 'proposal_mahasiswa.dosen_id = d1.id', 'left');
-        $this->db->join('dosen dk', 'proposal_mahasiswa.penetapan_oleh = dk.id', 'left');
-        $this->db->where('mahasiswa.prodi_id', $this->prodi_id);
-        $this->db->where('proposal_mahasiswa.tanggal_review_kaprodi IS NOT NULL');
-        $this->db->order_by('proposal_mahasiswa.tanggal_review_kaprodi', 'DESC');
-        
-        $data['proposals'] = $this->db->get()->result();
-        
-        $this->load->view('kaprodi/riwayat', $data);
-    }
-
     public function mahasiswa() {
         $data['title'] = 'Daftar Mahasiswa Prodi';
         
@@ -443,21 +582,130 @@ class Kaprodi extends CI_Controller {
         $this->db->order_by('nim', 'ASC');
         $data['mahasiswa_list'] = $this->db->get()->result();
         
-        $this->load->view('kaprodi/mahasiswa', $data);
+        $this->load->view('template/kaprodi', [
+            'title' => $data['title'],
+            'content' => $this->_get_mahasiswa_content($data),
+            'script' => ''
+        ]);
+    }
+
+    private function _get_mahasiswa_content($data) {
+        ob_start();
+        ?>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Daftar Mahasiswa Program Studi</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-items-center table-flush datatable">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>NIM</th>
+                                        <th>Nama</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php $no = 1; foreach($data['mahasiswa_list'] as $mhs): ?>
+                                    <tr>
+                                        <td><?= $no++ ?></td>
+                                        <td><?= $mhs->nim ?></td>
+                                        <td><?= $mhs->nama ?></td>
+                                        <td><?= $mhs->email ?></td>
+                                        <td>
+                                            <?php if($mhs->status == '1'): ?>
+                                            <span class="badge badge-success">Aktif</span>
+                                            <?php else: ?>
+                                            <span class="badge badge-secondary">Tidak Aktif</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <a href="#" class="btn btn-sm btn-info">
+                                                <i class="fa fa-eye"></i> Detail
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 
     public function dosen() {
         $data['title'] = 'Daftar Seluruh Dosen';
         
-        // PERBAIKAN: Tampilkan semua dosen dari semua prodi dengan info prodi
+        // Tampilkan semua dosen dari semua prodi dengan info prodi
         $this->db->select('dosen.*, prodi.nama as nama_prodi');
         $this->db->from('dosen');
         $this->db->join('prodi', 'dosen.prodi_id = prodi.id', 'left');
-        $this->db->where('dosen.level', '2');; // Exclude admin saja
+        $this->db->where('dosen.level', '2');
         $this->db->order_by('dosen.nama', 'ASC');
         $data['dosen_list'] = $this->db->get()->result();
         
-        $this->load->view('kaprodi/dosen', $data);
+        $this->load->view('template/kaprodi', [
+            'title' => $data['title'],
+            'content' => $this->_get_dosen_content($data),
+            'script' => ''
+        ]);
+    }
+
+    private function _get_dosen_content($data) {
+        ob_start();
+        ?>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Daftar Seluruh Dosen</h3>
+                        <p class="text-sm mb-0">Dosen dari semua program studi yang dapat ditunjuk sebagai pembimbing</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-items-center table-flush datatable">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>NIP</th>
+                                        <th>Nama</th>
+                                        <th>Email</th>
+                                        <th>Program Studi</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php $no = 1; foreach($data['dosen_list'] as $dsn): ?>
+                                    <tr>
+                                        <td><?= $no++ ?></td>
+                                        <td><?= $dsn->nip ?></td>
+                                        <td><?= $dsn->nama ?></td>
+                                        <td><?= $dsn->email ?></td>
+                                        <td><?= $dsn->nama_prodi ?? 'Belum ditentukan' ?></td>
+                                        <td>
+                                            <span class="badge badge-success">Aktif</span>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
     }
     
     public function laporan() {
@@ -471,45 +719,89 @@ class Kaprodi extends CI_Controller {
         $this->db->order_by('proposal_mahasiswa.id', 'DESC');
         $data['all_proposals'] = $this->db->get()->result();
         
-        $this->load->view('kaprodi/laporan', $data);
+        $this->load->view('template/kaprodi', [
+            'title' => $data['title'],
+            'content' => $this->_get_laporan_content($data),
+            'script' => ''
+        ]);
     }
 
-    public function profil() {
-        $data['title'] = 'Profil Kaprodi';
-        $data['user'] = $this->db->get_where('dosen', array('id' => $this->session->userdata('id')))->row();
-        $this->load->view('kaprodi/profil', $data);
-    }
-
-    // Method debug yang sudah diperbaiki
-    public function debug_dosen() {
-        echo "<h3>Debug Dosen Query - UPDATED untuk Semua Prodi</h3>";
-        
-        // Cek total dosen di database
-        $total_dosen = $this->db->count_all('dosen');
-        echo "Total dosen di database: " . $total_dosen . "<br><br>";
-        
-        // Cek semua dosen dengan level (tanpa status)
-        echo "<h4>Semua Dosen dengan Level dan Prodi:</h4>";
-        $all_dosen = $this->db->select('dosen.id, dosen.nama, dosen.level, dosen.prodi_id, prodi.nama as nama_prodi')
-                              ->from('dosen')
-                              ->join('prodi', 'dosen.prodi_id = prodi.id', 'left')
-                              ->get()->result();
-        foreach($all_dosen as $d) {
-            echo "ID: {$d->id} | Nama: {$d->nama} | Level: {$d->level} | Prodi: {$d->nama_prodi}<br>";
-        }
-        
-        echo "<br><h4>Query untuk Review Proposal (semua dosen kecuali admin):</h4>";
-        $dosens_filter = $this->db->select('dosen.*, prodi.nama as nama_prodi')
-                                  ->from('dosen')
-                                  ->join('prodi', 'dosen.prodi_id = prodi.id', 'left')
-                                  ->where_not_in('level', ['1'])
-                                  ->where('dosen.id !=', $this->session->userdata('id'))
-                                  ->order_by('dosen.nama', 'ASC')
-                                  ->get()->result();
-        
-        echo "Jumlah dosen yang memenuhi criteria: " . count($dosens_filter) . "<br>";
-        foreach($dosens_filter as $d) {
-            echo "ID: {$d->id} | Nama: {$d->nama} | Level: {$d->level} | Prodi: {$d->nama_prodi}<br>";
-        }
+    private function _get_laporan_content($data) {
+        ob_start();
+        ?>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Rekapitulasi Laporan Tugas Akhir</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-items-center table-flush datatable">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>NIM</th>
+                                        <th>Nama</th>
+                                        <th>Judul</th>
+                                        <th>Status Kaprodi</th>
+                                        <th>Status Pembimbing</th>
+                                        <th>Workflow</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php $no = 1; foreach($data['all_proposals'] as $prop): ?>
+                                    <tr>
+                                        <td><?= $no++ ?></td>
+                                        <td><?= $prop->nim ?></td>
+                                        <td><?= $prop->nama_mahasiswa ?></td>
+                                        <td><?= substr($prop->judul, 0, 50) ?>...</td>
+                                        <td>
+                                            <?php 
+                                            switch($prop->status_kaprodi) {
+                                                case '0': echo '<span class="badge badge-warning">Menunggu Review</span>'; break;
+                                                case '1': echo '<span class="badge badge-success">Disetujui</span>'; break;
+                                                case '2': echo '<span class="badge badge-danger">Ditolak</span>'; break;
+                                                default: echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
+                                            }
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            switch($prop->status_pembimbing) {
+                                                case '0': echo '<span class="badge badge-warning">Menunggu Persetujuan</span>'; break;
+                                                case '1': echo '<span class="badge badge-success">Disetujui</span>'; break;
+                                                case '2': echo '<span class="badge badge-danger">Ditolak</span>'; break;
+                                                default: echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
+                                            }
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            switch($prop->workflow_status) {
+                                                case 'proposal': echo '<span class="badge badge-info">Tahap Proposal</span>'; break;
+                                                case 'menunggu_pembimbing': echo '<span class="badge badge-warning">Menunggu Pembimbing</span>'; break;
+                                                case 'bimbingan': echo '<span class="badge badge-primary">Bimbingan</span>'; break;
+                                                case 'seminar_proposal': echo '<span class="badge badge-info">Seminar Proposal</span>'; break;
+                                                case 'penelitian': echo '<span class="badge badge-warning">Penelitian</span>'; break;
+                                                case 'seminar_skripsi': echo '<span class="badge badge-success">Seminar Skripsi</span>'; break;
+                                                case 'publikasi': echo '<span class="badge badge-purple">Publikasi</span>'; break;
+                                                case 'selesai': echo '<span class="badge badge-success">Selesai</span>'; break;
+                                                case 'ditolak': echo '<span class="badge badge-danger">Ditolak</span>'; break;
+                                                default: echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
+                                            }
+                                            ?>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 }

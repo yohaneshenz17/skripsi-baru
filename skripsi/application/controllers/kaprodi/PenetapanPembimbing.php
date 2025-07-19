@@ -28,6 +28,9 @@ class PenetapanPembimbing extends CI_Controller {
     }
 
     public function index() {
+        // PERBAIKAN: Clear flash messages lama saat masuk halaman
+        $this->_clear_old_flash_messages();
+        
         $data['title'] = 'Penetapan Pembimbing - Workflow Terbaru';
         
         // Ambil proposal yang belum ditetapkan (hanya yang valid)
@@ -51,6 +54,9 @@ class PenetapanPembimbing extends CI_Controller {
     }
 
     public function detail($proposal_id) {
+        // PERBAIKAN: Clear flash messages lama
+        $this->_clear_old_flash_messages();
+        
         $data['title'] = 'Form Penetapan Pembimbing & Penguji';
         
         // Ambil detail proposal
@@ -77,7 +83,7 @@ class PenetapanPembimbing extends CI_Controller {
         $data['proposal'] = $this->db->get()->row();
         
         if (!$data['proposal']) {
-            $this->session->set_flashdata('error', 'Proposal tidak ditemukan atau tidak valid!');
+            $this->_set_safe_flash('error', 'Proposal tidak ditemukan atau tidak valid!');
             redirect('kaprodi/penetapan_pembimbing');
         }
         
@@ -92,6 +98,9 @@ class PenetapanPembimbing extends CI_Controller {
     }
 
     public function simpan_penetapan() {
+        // PERBAIKAN: Clear flash messages sebelum proses
+        $this->_clear_old_flash_messages();
+        
         $proposal_id = $this->input->post('proposal_id');
         $dosen_pembimbing_id = $this->input->post('dosen_pembimbing_id');
         $dosen_penguji1_id = $this->input->post('dosen_penguji1_id');
@@ -99,14 +108,14 @@ class PenetapanPembimbing extends CI_Controller {
         
         // Validasi input
         if (!$proposal_id || !$dosen_pembimbing_id || !$dosen_penguji1_id || !$dosen_penguji2_id) {
-            $this->session->set_flashdata('error', 'Semua field harus diisi!');
+            $this->_set_safe_flash('error', 'Semua field harus diisi!');
             redirect('kaprodi/penetapan_pembimbing/detail/' . $proposal_id);
         }
         
         // Validasi dosen tidak boleh sama
         $dosens = [$dosen_pembimbing_id, $dosen_penguji1_id, $dosen_penguji2_id];
         if (count($dosens) !== count(array_unique($dosens))) {
-            $this->session->set_flashdata('error', 'Dosen pembimbing dan penguji harus berbeda!');
+            $this->_set_safe_flash('error', 'Dosen pembimbing dan penguji harus berbeda!');
             redirect('kaprodi/penetapan_pembimbing/detail/' . $proposal_id);
         }
         
@@ -120,7 +129,7 @@ class PenetapanPembimbing extends CI_Controller {
                             ->get()->row();
         
         if (!$proposal) {
-            $this->session->set_flashdata('error', 'Proposal tidak ditemukan atau tidak valid!');
+            $this->_set_safe_flash('error', 'Proposal tidak ditemukan atau tidak valid!');
             redirect('kaprodi/penetapan_pembimbing');
         }
         
@@ -146,10 +155,10 @@ class PenetapanPembimbing extends CI_Controller {
             // Kirim notifikasi
             $this->_kirim_notifikasi($proposal_id, $dosen_pembimbing_id, $dosen_penguji1_id, $dosen_penguji2_id);
             
-            $this->session->set_flashdata('success', 'Penetapan pembimbing dan penguji berhasil disimpan!');
+            $this->_set_safe_flash('success', 'Penetapan pembimbing dan penguji berhasil disimpan!');
             redirect('kaprodi/penetapan_pembimbing');
         } else {
-            $this->session->set_flashdata('error', 'Gagal menyimpan penetapan!');
+            $this->_set_safe_flash('error', 'Gagal menyimpan penetapan!');
             redirect('kaprodi/penetapan_pembimbing/detail/' . $proposal_id);
         }
     }
@@ -315,6 +324,9 @@ class PenetapanPembimbing extends CI_Controller {
     }
 
     public function riwayat() {
+        // PERBAIKAN: Clear flash messages lama
+        $this->_clear_old_flash_messages();
+        
         $data['title'] = 'Riwayat Penetapan Pembimbing';
         
         // Ambil proposal yang sudah ditetapkan
@@ -343,5 +355,32 @@ class PenetapanPembimbing extends CI_Controller {
         $data['proposals'] = $this->db->get()->result();
         
         $this->load->view('kaprodi/penetapan_pembimbing/riwayat', $data);
+    }
+
+    // ==========================================
+    // PERBAIKAN: HELPER METHODS UNTUK FLASH MESSAGES
+    // ==========================================
+
+    /**
+     * Method untuk clear flash messages lama
+     */
+    private function _clear_old_flash_messages() {
+        $this->session->unset_userdata('__ci_flash');
+        $session_data = $this->session->all_userdata();
+        foreach($session_data as $key => $value) {
+            if (in_array($key, ['success', 'error', 'warning', 'info']) && 
+                strpos($key, 'flash:') === false) {
+                $this->session->unset_userdata($key);
+            }
+        }
+    }
+
+    /**
+     * Method untuk set flash message yang aman
+     */
+    private function _set_safe_flash($type, $message) {
+        $this->_clear_old_flash_messages();
+        $this->session->set_flashdata($type, $message);
+        log_message('debug', "Flash message set: {$type} = {$message}");
     }
 }

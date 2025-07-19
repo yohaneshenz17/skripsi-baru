@@ -203,3 +203,333 @@ ERROR - 2025-07-19 08:24:17 --> Severity: Warning --> Undefined variable $script
 ERROR - 2025-07-19 09:39:48 --> Severity: Warning --> Undefined variable $script /home/stkp7133/public_html/skripsi/application/views/template/dosen.php 238
 ERROR - 2025-07-19 09:42:18 --> Severity: Warning --> Undefined variable $script /home/stkp7133/public_html/skripsi/application/views/template/dosen.php 238
 ERROR - 2025-07-19 09:42:54 --> Severity: Warning --> Undefined variable $script /home/stkp7133/public_html/skripsi/application/views/template/dosen.php 238
+ERROR - 2025-07-19 15:54:07 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 15:56:21 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 15:59:08 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-19 15:59:21 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-19 16:53:42 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 16:55:49 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:55:49 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:55:49 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:55:49 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:55:52 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 1
+ERROR - 2025-07-19 16:55:52 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 1
+ERROR - 2025-07-19 16:55:52 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 83
+ERROR - 2025-07-19 16:55:52 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 83
+ERROR - 2025-07-19 16:56:34 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:56:34 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:56:34 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:56:34 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:56:51 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 1
+ERROR - 2025-07-19 16:56:51 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 1
+ERROR - 2025-07-19 16:56:51 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 83
+ERROR - 2025-07-19 16:56:51 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 83
+ERROR - 2025-07-19 16:56:58 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:56:58 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:56:58 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:56:58 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:57:04 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:57:04 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:57:04 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:57:04 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:59:15 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:59:15 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 1
+ERROR - 2025-07-19 16:59:15 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:59:15 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal.php 83
+ERROR - 2025-07-19 16:59:20 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 1
+ERROR - 2025-07-19 16:59:20 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 1
+ERROR - 2025-07-19 16:59:20 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 83
+ERROR - 2025-07-19 16:59:20 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 83
+ERROR - 2025-07-19 16:59:24 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 1
+ERROR - 2025-07-19 16:59:24 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 1
+ERROR - 2025-07-19 16:59:24 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 83
+ERROR - 2025-07-19 16:59:24 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 83
+ERROR - 2025-07-19 17:03:33 --> Severity: Warning --> include(template/kaprodi.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 1
+ERROR - 2025-07-19 17:03:33 --> Severity: Warning --> include(): Failed opening 'template/kaprodi.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 1
+ERROR - 2025-07-19 17:03:33 --> Severity: Warning --> include(template/_main/footer.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 83
+ERROR - 2025-07-19 17:03:33 --> Severity: Warning --> include(): Failed opening 'template/_main/footer.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/kaprodi/publikasi.php 83
+ERROR - 2025-07-19 17:11:29 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 17:11:32 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 17:13:34 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 209
+ERROR - 2025-07-19 17:13:36 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 209
+ERROR - 2025-07-19 17:13:37 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 209
+ERROR - 2025-07-19 17:13:42 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 209
+ERROR - 2025-07-19 17:13:43 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 209
+ERROR - 2025-07-19 17:13:49 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 209
+ERROR - 2025-07-19 17:13:50 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 209
+ERROR - 2025-07-19 17:14:21 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 209
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 284
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 296
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 306
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 316
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 317
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 318
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 319
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 377
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/drivers/Session_files_driver.php 108
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> session_set_save_handler(): Session save handler cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 110
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> session_start(): Session cannot be started after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 143
+ERROR - 2025-07-19 18:02:46 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Publikasi.php:1) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 284
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 296
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 306
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 316
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 317
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 318
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 319
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 377
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/drivers/Session_files_driver.php 108
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> session_set_save_handler(): Session save handler cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 110
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> session_start(): Session cannot be started after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 143
+ERROR - 2025-07-19 18:02:52 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Publikasi.php:1) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 284
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 296
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 306
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 316
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 317
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 318
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 319
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 377
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/drivers/Session_files_driver.php 108
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> session_set_save_handler(): Session save handler cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 110
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> session_start(): Session cannot be started after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 143
+ERROR - 2025-07-19 18:06:57 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:1) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 284
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 296
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 306
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 316
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 317
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 318
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 319
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 377
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/drivers/Session_files_driver.php 108
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> session_set_save_handler(): Session save handler cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 110
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> session_start(): Session cannot be started after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 143
+ERROR - 2025-07-19 18:07:00 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:1) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 284
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 296
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 306
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 316
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 317
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 318
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 319
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 377
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/drivers/Session_files_driver.php 108
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> session_set_save_handler(): Session save handler cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 110
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> session_start(): Session cannot be started after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 143
+ERROR - 2025-07-19 18:07:09 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:1) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-07-19 18:16:26 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 18:19:59 --> Query error: MySQL server has gone away - Invalid query: SELECT *
+FROM `pengumuman_tahapan`
+ORDER BY `no` ASC
+ERROR - 2025-07-19 18:19:59 --> Query error: MySQL server has gone away - Invalid query: SELECT *
+FROM `home_template`
+ERROR - 2025-07-19 18:22:53 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 18:23:38 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:23:39 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:23:40 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:23:41 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:23:42 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:23:47 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:23:48 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:23:49 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:23:49 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:24:27 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:24:29 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:24:30 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:28:04 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:28:32 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:28:33 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:28:34 --> Severity: error --> Exception: Call to undefined method CI_Session::unset_flashdata() /home/stkp7133/public_html/skripsi/application/views/template/kaprodi.php 203
+ERROR - 2025-07-19 18:30:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:30:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:30:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:30:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:30:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:31:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:31:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:31:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:31:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:31:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:32:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:33:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:33:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:33:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:33:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:33:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:33:15 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 18:34:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:34:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:34:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:34:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:34:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:35:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:37:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:38:04 --> Severity: error --> Exception: Unmatched '}' /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Publikasi.php 82
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:07 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:08 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:08 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:08 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:08 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:08 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:08 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:39:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:43 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:43 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:43 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:43 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:43 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:48 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:48 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:48 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:48 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:48 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:52 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:52 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:52 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:52 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:52 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 18:50:53 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:50:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:40 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 18:51:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:54 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:54 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:54 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:54 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:54 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:51:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:03 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:04 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:04 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:04 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:04 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 18:52:05 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor

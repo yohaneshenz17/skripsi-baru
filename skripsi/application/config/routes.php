@@ -42,50 +42,86 @@ $route['kaprodi/dashboard'] = 'kaprodi/dashboard';
 $route['kaprodi/dashboard/(:any)'] = 'kaprodi/dashboard/$1';
 
 // =====================================================
-//      WORKFLOW TERBARU - PENETAPAN PEMBIMBING
+//      MENU KAPRODI - URUTAN SESUAI SIDEBAR BARU
 // =====================================================
 
-// Penetapan Pembimbing (Workflow Terbaru)
-$route['kaprodi/penetapan_pembimbing'] = 'kaprodi/penetapan_pembimbing';
-$route['kaprodi/penetapan_pembimbing/(:any)'] = 'kaprodi/penetapan_pembimbing/$1';
-$route['kaprodi/penetapan_pembimbing/detail/(:num)'] = 'kaprodi/penetapan_pembimbing/detail/$1';
+// 1. Dashboard (sudah di atas)
 
-// Riwayat Penetapan
-$route['kaprodi/riwayat_penetapan'] = 'kaprodi/riwayat_penetapan';
-$route['kaprodi/riwayat'] = 'kaprodi/riwayat_penetapan'; // Alias
+// 2. Pengumuman Tahapan
+$route['kaprodi/pengumuman'] = 'kaprodi/pengumuman';
+$route['kaprodi/pengumuman/(:any)'] = 'kaprodi/pengumuman/$1';
+$route['kaprodi/pengumuman/tambah'] = 'kaprodi/pengumuman/tambah';
+$route['kaprodi/pengumuman/edit/(:num)'] = 'kaprodi/pengumuman/edit/$1';
+$route['kaprodi/pengumuman/hapus/(:num)'] = 'kaprodi/pengumuman/hapus/$1';
 
-// =====================================================
-//      ROUTE KAPRODI - SISTEM LAMA (FALLBACK)
-// =====================================================
-
-// Proposal System - Method di controller Kaprodi (sistem lama)
+// 3. Usulan Proposal (sebelumnya Penetapan Pembimbing)
 $route['kaprodi/proposal'] = 'kaprodi/kaprodi/proposal';                    // List proposal
 $route['kaprodi/review_proposal/(:num)'] = 'kaprodi/kaprodi/review_proposal/$1';  // Review detail
 $route['kaprodi/proses_review'] = 'kaprodi/kaprodi/proses_review';          // Submit review (POST)
 $route['kaprodi/penetapan/(:num)'] = 'kaprodi/kaprodi/penetapan/$1';        // Form penetapan LAMA
 $route['kaprodi/simpan_penetapan'] = 'kaprodi/kaprodi/simpan_penetapan';    // Simpan penetapan (POST)
 
+// 4. Seminar Proposal (BARU)
+$route['kaprodi/seminar_proposal'] = 'kaprodi/seminar_proposal';
+$route['kaprodi/seminar_proposal/(:any)'] = 'kaprodi/seminar_proposal/$1';
+$route['kaprodi/seminar_proposal/detail/(:num)'] = 'kaprodi/seminar_proposal/detail/$1';
+$route['kaprodi/seminar_proposal/validasi'] = 'kaprodi/seminar_proposal/validasi';
+$route['kaprodi/seminar_proposal/jadwal'] = 'kaprodi/seminar_proposal/jadwal';
+$route['kaprodi/seminar_proposal/tetapkan_penguji'] = 'kaprodi/seminar_proposal/tetapkan_penguji';
+
+// 5. Seminar Skripsi (BARU)
+$route['kaprodi/seminar_skripsi'] = 'kaprodi/seminar_skripsi';
+$route['kaprodi/seminar_skripsi/(:any)'] = 'kaprodi/seminar_skripsi/$1';
+$route['kaprodi/seminar_skripsi/detail/(:num)'] = 'kaprodi/seminar_skripsi/detail/$1';
+$route['kaprodi/seminar_skripsi/validasi'] = 'kaprodi/seminar_skripsi/validasi';
+$route['kaprodi/seminar_skripsi/jadwal'] = 'kaprodi/seminar_skripsi/jadwal';
+$route['kaprodi/seminar_skripsi/tetapkan_penguji'] = 'kaprodi/seminar_skripsi/tetapkan_penguji';
+
+// 6. Publikasi (BARU)
+$route['kaprodi/publikasi'] = 'kaprodi/publikasi';
+$route['kaprodi/publikasi/(:any)'] = 'kaprodi/publikasi/$1';
+$route['kaprodi/publikasi/detail/(:num)'] = 'kaprodi/publikasi/detail/$1';
+$route['kaprodi/publikasi/validasi'] = 'kaprodi/publikasi/validasi';
+$route['kaprodi/publikasi/input_repository'] = 'kaprodi/publikasi/input_repository';
+
+// 7. Daftar Mahasiswa
+$route['kaprodi/mahasiswa'] = 'kaprodi/kaprodi/mahasiswa';                  // Daftar mahasiswa
+$route['kaprodi/mahasiswa/detail/(:num)'] = 'kaprodi/kaprodi/mahasiswa_detail/$1';
+$route['kaprodi/mahasiswa/export'] = 'kaprodi/kaprodi/mahasiswa_export';
+
+// 8. Daftar Dosen
+$route['kaprodi/dosen'] = 'kaprodi/kaprodi/dosen';                          // Daftar dosen
+$route['kaprodi/dosen/detail/(:num)'] = 'kaprodi/kaprodi/dosen_detail/$1';
+$route['kaprodi/dosen/export'] = 'kaprodi/kaprodi/dosen_export';
+
+// 9. Laporan
+$route['kaprodi/laporan'] = 'kaprodi/kaprodi/laporan';                      // Laporan
+$route['kaprodi/laporan/export'] = 'kaprodi/kaprodi/laporan_export';
+$route['kaprodi/laporan/filter'] = 'kaprodi/kaprodi/laporan_filter';
+
+// 10. Profil (BARU - sesuai role dosen)
+$route['kaprodi/profil'] = 'kaprodi/profil';                                // Profil kaprodi
+$route['kaprodi/profil/update'] = 'kaprodi/profil/update';                  // Update profil kaprodi
+$route['kaprodi/profil/hapus_foto'] = 'kaprodi/profil/hapus_foto';          // Hapus foto profil kaprodi
+
+// =====================================================
+//      WORKFLOW TERBARU - PENETAPAN PEMBIMBING (FALLBACK)
+// =====================================================
+
+// Penetapan Pembimbing (Workflow Terbaru) - FALLBACK ke sistem lama
+$route['kaprodi/penetapan_pembimbing'] = 'kaprodi/penetapan_pembimbing';
+$route['kaprodi/penetapan_pembimbing/(:any)'] = 'kaprodi/penetapan_pembimbing/$1';
+$route['kaprodi/penetapan_pembimbing/detail/(:num)'] = 'kaprodi/penetapan_pembimbing/detail/$1';
+
+// Riwayat Penetapan - DIHAPUS DARI SIDEBAR, tapi route tetap ada untuk compatibility
+$route['kaprodi/riwayat_penetapan'] = 'kaprodi/riwayat_penetapan';
+$route['kaprodi/riwayat'] = 'kaprodi/riwayat_penetapan'; // Alias
+
 // =====================================================
 //      ROUTE UNTUK FILE PROPOSAL
 // =====================================================
 $route['kaprodi/download_proposal/(:num)'] = 'kaprodi/kaprodi/download_proposal/$1'; // Download file proposal
 $route['kaprodi/view_proposal/(:num)'] = 'kaprodi/kaprodi/view_proposal/$1';         // View file proposal
-
-// =====================================================
-//      ROUTE KAPRODI - MENU LAINNYA
-// =====================================================
-
-// Pengumuman Tahapan
-$route['kaprodi/pengumuman'] = 'kaprodi/pengumuman';
-$route['kaprodi/pengumuman/(:any)'] = 'kaprodi/pengumuman/$1';
-
-// Other Methods
-$route['kaprodi/mahasiswa'] = 'kaprodi/kaprodi/mahasiswa';                  // Daftar mahasiswa
-$route['kaprodi/dosen'] = 'kaprodi/kaprodi/dosen';                          // Daftar dosen
-$route['kaprodi/laporan'] = 'kaprodi/kaprodi/laporan';                      // Laporan
-$route['kaprodi/profil'] = 'kaprodi/profil';                                // Profil kaprodi
-$route['kaprodi/profil/update'] = 'kaprodi/profil/update';                  // Update profil kaprodi
-$route['kaprodi/profil/hapus_foto'] = 'kaprodi/profil/hapus_foto';          // Hapus foto profil kaprodi
 
 // =====================================================
 //      DEBUG DAN DEVELOPMENT (HANYA DEVELOPMENT)
@@ -207,51 +243,70 @@ $route['dosen/skripsi'] = 'dosen/seminar_skripsi';  // Redirect ke seminar_skrip
 $route['dosen/(:any)'] = 'dosen/$1';
 
 // =====================================================
-//      ROUTES UPDATE SUMMARY
+//      KAPRODI ROUTES SUMMARY - MENU BARU
 // =====================================================
 
 /*
-WORKFLOW ROUTES SUMMARY:
+KAPRODI MENU ROUTES (URUTAN SESUAI SIDEBAR):
 
-Phase 1 - Usulan Proposal:
-- dosen/usulan_proposal                     // List penunjukan pembimbing
-- dosen/usulan_proposal/detail/(:num)       // Detail proposal untuk persetujuan
-- dosen/usulan_proposal/proses_persetujuan  // POST - setuju/tolak pembimbing
+1. Dashboard:
+   - kaprodi/dashboard
 
-Phase 2 - Bimbingan:
-- dosen/bimbingan                           // List mahasiswa bimbingan
-- dosen/bimbingan/detail_mahasiswa/(:num)   // Detail jurnal bimbingan mahasiswa
-- dosen/bimbingan/validasi_jurnal           // POST - validasi jurnal
-- dosen/bimbingan/validasi_batch            // POST - validasi batch
-- dosen/bimbingan/tambah_jurnal             // POST - tambah jurnal bimbingan
-- dosen/bimbingan/export_jurnal/(:num)      // Export PDF jurnal
+2. Pengumuman Tahapan:
+   - kaprodi/pengumuman
+   - kaprodi/pengumuman/tambah
+   - kaprodi/pengumuman/edit/(:num)
+   - kaprodi/pengumuman/hapus/(:num)
 
-Phase 3 - Seminar Proposal:
-- dosen/seminar_proposal                    // List pengajuan seminar proposal
-- dosen/seminar_proposal/detail/(:num)      // Detail pengajuan
-- dosen/seminar_proposal/rekomendasi        // POST - beri rekomendasi
-- dosen/seminar_proposal/input_nilai        // POST - input nilai seminar
+3. Usulan Proposal:
+   - kaprodi/proposal                          // List usulan proposal
+   - kaprodi/review_proposal/(:num)            // Review & penetapan pembimbing
+   - kaprodi/proses_review                     // POST - setuju/tolak proposal
 
-Phase 4 - Penelitian:
-- dosen/penelitian                          // List surat ijin penelitian
-- dosen/penelitian/detail/(:num)            // Detail pengajuan
-- dosen/penelitian/rekomendasi              // POST - beri rekomendasi
+4. Seminar Proposal:
+   - kaprodi/seminar_proposal                  // List pengajuan seminar proposal
+   - kaprodi/seminar_proposal/detail/(:num)    // Detail & validasi
+   - kaprodi/seminar_proposal/validasi         // POST - setuju/tolak seminar
+   - kaprodi/seminar_proposal/jadwal           // POST - set jadwal seminar
+   - kaprodi/seminar_proposal/tetapkan_penguji // POST - tetapkan penguji
 
-Phase 5 - Seminar Skripsi:
-- dosen/seminar_skripsi                     // List pengajuan seminar skripsi
-- dosen/seminar_skripsi/detail/(:num)       // Detail pengajuan
-- dosen/seminar_skripsi/rekomendasi         // POST - beri rekomendasi
-- dosen/seminar_skripsi/input_nilai         // POST - input nilai seminar
+5. Seminar Skripsi:
+   - kaprodi/seminar_skripsi                   // List pengajuan seminar skripsi
+   - kaprodi/seminar_skripsi/detail/(:num)     // Detail & validasi
+   - kaprodi/seminar_skripsi/validasi          // POST - setuju/tolak seminar
+   - kaprodi/seminar_skripsi/jadwal            // POST - set jadwal seminar
+   - kaprodi/seminar_skripsi/tetapkan_penguji  // POST - tetapkan penguji
 
-Phase 6 - Publikasi:
-- dosen/publikasi                           // List pengajuan publikasi
-- dosen/publikasi/detail/(:num)             // Detail pengajuan
-- dosen/publikasi/rekomendasi               // POST - beri rekomendasi
+6. Publikasi:
+   - kaprodi/publikasi                         // List pengajuan publikasi
+   - kaprodi/publikasi/detail/(:num)           // Detail & validasi
+   - kaprodi/publikasi/validasi                // POST - setuju/tolak publikasi
+   - kaprodi/publikasi/input_repository        // POST - input link repository
 
-Support:
-- dosen/profil                              // Profil dosen
-- dosen/profil/update                       // Update profil dosen
-- dosen/profil/hapus_foto                   // Hapus foto profil dosen
-- dosen/notifikasi                          // Notifikasi
-- dosen/laporan                             // Laporan dan statistik
+7. Daftar Mahasiswa:
+   - kaprodi/mahasiswa                         // List mahasiswa
+   - kaprodi/mahasiswa/detail/(:num)           // Detail mahasiswa
+   - kaprodi/mahasiswa/export                  // Export data
+
+8. Daftar Dosen:
+   - kaprodi/dosen                            // List dosen
+   - kaprodi/dosen/detail/(:num)              // Detail dosen
+   - kaprodi/dosen/export                     // Export data
+
+9. Laporan:
+   - kaprodi/laporan                          // Laporan & statistik
+   - kaprodi/laporan/export                   // Export laporan
+   - kaprodi/laporan/filter                   // Filter laporan
+
+10. Profil:
+    - kaprodi/profil                          // Profil kaprodi
+    - kaprodi/profil/update                   // Update profil
+    - kaprodi/profil/hapus_foto               // Hapus foto profil
+
+CATATAN PENTING:
+- Menu "Riwayat Penetapan" sudah DIHAPUS dari sidebar
+- Menu "Penetapan Pembimbing" diubah nama menjadi "Usulan Proposal"
+- Menu "Pengumuman Tahapan" dipindah ke posisi kedua setelah Dashboard
+- Menambah 3 menu baru: Seminar Proposal, Seminar Skripsi, Publikasi
+- Menambah menu Profil seperti pada role dosen
 */

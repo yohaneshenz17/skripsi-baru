@@ -45,6 +45,7 @@ class Pengumuman extends CI_Controller
             ];
 
             if ($this->db->insert('pengumuman_tahapan', $data)) {
+                // SIMPLE: Hanya set flash message sekali, tanpa clear
                 $this->session->set_flashdata('success', 'Pengumuman berhasil ditambahkan!');
             } else {
                 $this->session->set_flashdata('error', 'Gagal menambahkan pengumuman!');
@@ -79,6 +80,7 @@ class Pengumuman extends CI_Controller
             ];
 
             if ($this->db->update('pengumuman_tahapan', $data, ['id' => $id])) {
+                // SIMPLE: Set flash message biasa tanpa kompleksitas
                 $this->session->set_flashdata('success', 'Pengumuman berhasil diperbarui!');
             } else {
                 $this->session->set_flashdata('error', 'Gagal memperbarui pengumuman!');

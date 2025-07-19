@@ -83,7 +83,9 @@ $route['kaprodi/pengumuman/(:any)'] = 'kaprodi/pengumuman/$1';
 $route['kaprodi/mahasiswa'] = 'kaprodi/kaprodi/mahasiswa';                  // Daftar mahasiswa
 $route['kaprodi/dosen'] = 'kaprodi/kaprodi/dosen';                          // Daftar dosen
 $route['kaprodi/laporan'] = 'kaprodi/kaprodi/laporan';                      // Laporan
-$route['kaprodi/profil'] = 'kaprodi/kaprodi/profil';                        // Profil kaprodi
+$route['kaprodi/profil'] = 'kaprodi/profil';                                // Profil kaprodi
+$route['kaprodi/profil/update'] = 'kaprodi/profil/update';                  // Update profil kaprodi
+$route['kaprodi/profil/hapus_foto'] = 'kaprodi/profil/hapus_foto';          // Hapus foto profil kaprodi
 
 // =====================================================
 //      DEBUG DAN DEVELOPMENT (HANYA DEVELOPMENT)
@@ -176,6 +178,9 @@ $route['dosen/publikasi/rekomendasi'] = 'dosen/publikasi/rekomendasi';
 // Profil Dosen
 $route['dosen/profil'] = 'dosen/profil';
 $route['dosen/profil/update'] = 'dosen/profil/update';
+$route['dosen/profil/hapus_foto'] = 'dosen/profil/hapus_foto';
+$route['dosen/profil/debug'] = 'dosen/profil/debug';
+$route['dosen/profil/test_upload'] = 'dosen/profil/test_upload';
 
 // Notifikasi dan Laporan
 $route['dosen/notifikasi'] = 'dosen/notifikasi';
@@ -245,6 +250,8 @@ Phase 6 - Publikasi:
 
 Support:
 - dosen/profil                              // Profil dosen
+- dosen/profil/update                       // Update profil dosen
+- dosen/profil/hapus_foto                   // Hapus foto profil dosen
 - dosen/notifikasi                          // Notifikasi
 - dosen/laporan                             // Laporan dan statistik
 */

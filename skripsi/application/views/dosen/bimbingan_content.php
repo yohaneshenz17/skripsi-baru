@@ -1,8 +1,26 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+
+<!-- CSS untuk spacing -->
+<style>
+.content-spacing {
+    margin-bottom: 100px;
+}
+.last-card {
+    margin-bottom: 80px !important;
+}
+@media (max-width: 768px) {
+    .content-spacing { margin-bottom: 120px; }
+    .last-card { margin-bottom: 100px !important; }
+}
+</style>
+
+<div class="content-spacing">
+
 <!-- Alert Messages -->
 <?php if($this->session->flashdata('success')): ?>
 <div class="alert alert-success alert-dismissible fade show" role="alert">
     <span class="alert-icon"><i class="fa fa-check"></i></span>
-    <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
+    <span class="alert-text"><?php echo $this->session->flashdata('success'); ?></span>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -12,7 +30,7 @@
 <?php if($this->session->flashdata('error')): ?>
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <span class="alert-icon"><i class="fa fa-exclamation-triangle"></i></span>
-    <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
+    <span class="alert-text"><?php echo $this->session->flashdata('error'); ?></span>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -51,7 +69,15 @@
                 <div class="row">
                     <div class="col">
                         <h5 class="card-title text-uppercase text-muted mb-0">Total Mahasiswa</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= count($mahasiswa_bimbingan) ?></span>
+                        <span class="h2 font-weight-bold mb-0">
+                            <?php 
+                            if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)) {
+                                echo count($mahasiswa_bimbingan);
+                            } else {
+                                echo '0';
+                            }
+                            ?>
+                        </span>
                     </div>
                     <div class="col-auto">
                         <div class="icon icon-shape bg-info text-white rounded-circle shadow">
@@ -75,10 +101,10 @@
                         <span class="h2 font-weight-bold mb-0">
                             <?php 
                             $siap_seminar = 0;
-                            if(!empty($mahasiswa_bimbingan)) {
+                            if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)) {
                                 foreach($mahasiswa_bimbingan as $mhs) {
-                                    if($mhs->workflow_status == 'bimbingan' && 
-                                       (!empty($mhs->total_bimbingan) && $mhs->total_bimbingan >= 16)) {
+                                    if(isset($mhs->workflow_status) && $mhs->workflow_status == 'bimbingan' && 
+                                       (isset($mhs->total_bimbingan) && $mhs->total_bimbingan >= 16)) {
                                         $siap_seminar++;
                                     }
                                 }
@@ -109,10 +135,10 @@
                         <span class="h2 font-weight-bold mb-0">
                             <?php 
                             $perlu_perhatian = 0;
-                            if(!empty($mahasiswa_bimbingan)) {
+                            if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)) {
                                 foreach($mahasiswa_bimbingan as $mhs) {
-                                    if($mhs->workflow_status == 'bimbingan' && 
-                                       (empty($mhs->total_bimbingan) || $mhs->total_bimbingan < 8)) {
+                                    if(isset($mhs->workflow_status) && $mhs->workflow_status == 'bimbingan' && 
+                                       (!isset($mhs->total_bimbingan) || $mhs->total_bimbingan < 8)) {
                                         $perlu_perhatian++;
                                     }
                                 }
@@ -165,31 +191,35 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if(!empty($mahasiswa_bimbingan)): ?>
+                        <?php if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)): ?>
                             <?php foreach($mahasiswa_bimbingan as $mahasiswa): ?>
                             <tr>
                                 <td>
                                     <div class="media align-items-center">
                                         <div class="media-body">
-                                            <span class="mb-0 text-sm font-weight-bold"><?= $mahasiswa->nama_mahasiswa ?></span>
+                                            <span class="mb-0 text-sm font-weight-bold"><?php echo isset($mahasiswa->nama_mahasiswa) ? $mahasiswa->nama_mahasiswa : 'N/A'; ?></span>
                                             <br>
-                                            <small class="text-muted">NIM: <?= $mahasiswa->nim ?></small>
+                                            <small class="text-muted">NIM: <?php echo isset($mahasiswa->nim) ? $mahasiswa->nim : 'N/A'; ?></small>
                                             <br>
-                                            <small class="text-muted"><?= $mahasiswa->nama_prodi ?></small>
+                                            <small class="text-muted"><?php echo isset($mahasiswa->nama_prodi) ? $mahasiswa->nama_prodi : 'N/A'; ?></small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="text-sm font-weight-bold"><?= substr($mahasiswa->judul, 0, 50) ?><?= strlen($mahasiswa->judul) > 50 ? '...' : '' ?></span>
-                                    <br>
-                                    <?php if(!empty($mahasiswa->lokasi_penelitian)): ?>
+                                    <?php if(isset($mahasiswa->judul)): ?>
+                                        <span class="text-sm font-weight-bold"><?php echo substr($mahasiswa->judul, 0, 50) . (strlen($mahasiswa->judul) > 50 ? '...' : ''); ?></span>
+                                        <br>
+                                    <?php endif; ?>
+                                    
+                                    <?php if(isset($mahasiswa->lokasi_penelitian) && !empty($mahasiswa->lokasi_penelitian)): ?>
                                     <small class="text-muted">
-                                        <i class="fa fa-map-marker-alt"></i> <?= $mahasiswa->lokasi_penelitian ?>
+                                        <i class="fa fa-map-marker-alt"></i> <?php echo $mahasiswa->lokasi_penelitian; ?>
                                     </small>
                                     <br>
                                     <?php endif; ?>
-                                    <?php if(!empty($mahasiswa->jenis_penelitian)): ?>
-                                    <span class="badge badge-pill badge-secondary"><?= $mahasiswa->jenis_penelitian ?></span>
+                                    
+                                    <?php if(isset($mahasiswa->jenis_penelitian) && !empty($mahasiswa->jenis_penelitian)): ?>
+                                    <span class="badge badge-pill badge-secondary"><?php echo $mahasiswa->jenis_penelitian; ?></span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -199,11 +229,11 @@
                                     if($progress_persen > 100) $progress_persen = 100;
                                     ?>
                                     <div class="d-flex align-items-center">
-                                        <span class="mr-2"><?= $total_bimbingan ?>/16</span>
+                                        <span class="mr-2"><?php echo $total_bimbingan; ?>/16</span>
                                         <div class="progress" style="width: 100px;">
                                             <div class="progress-bar bg-info" role="progressbar" 
-                                                 style="width: <?= $progress_persen ?>%" 
-                                                 aria-valuenow="<?= $progress_persen ?>" 
+                                                 style="width: <?php echo $progress_persen; ?>%" 
+                                                 aria-valuenow="<?php echo $progress_persen; ?>" 
                                                  aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </div>
@@ -236,16 +266,18 @@
                                             <i class="fas fa-ellipsis-v"></i>
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                            <a class="dropdown-item" href="<?= base_url('dosen/bimbingan/detail_mahasiswa/' . $mahasiswa->id) ?>">
+                                            <?php if(isset($mahasiswa->id)): ?>
+                                            <a class="dropdown-item" href="<?php echo base_url('dosen/bimbingan/detail_mahasiswa/' . $mahasiswa->id); ?>">
                                                 <i class="fa fa-eye"></i> Detail Bimbingan
                                             </a>
-                                            <a class="dropdown-item" href="#" onclick="tambahJurnalMahasiswa(<?= $mahasiswa->id ?>, '<?= addslashes($mahasiswa->nama_mahasiswa) ?>')">
+                                            <a class="dropdown-item" href="#" onclick="tambahJurnalMahasiswa(<?php echo $mahasiswa->id; ?>, '<?php echo addslashes($mahasiswa->nama_mahasiswa); ?>')">
                                                 <i class="fa fa-plus"></i> Tambah Jurnal
                                             </a>
                                             <?php if($total_bimbingan > 0): ?>
-                                            <a class="dropdown-item" href="<?= base_url('dosen/bimbingan/export_jurnal/' . $mahasiswa->id) ?>">
+                                            <a class="dropdown-item" href="<?php echo base_url('dosen/bimbingan/export_jurnal/' . $mahasiswa->id); ?>">
                                                 <i class="fa fa-download"></i> Export Jurnal
                                             </a>
+                                            <?php endif; ?>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -259,7 +291,7 @@
                                         <i class="fa fa-users fa-3x text-muted mb-3"></i>
                                         <h5 class="text-muted">Belum ada mahasiswa bimbingan</h5>
                                         <p class="text-muted">Mahasiswa yang Anda setujui sebagai pembimbing akan muncul di sini.</p>
-                                        <a href="<?= base_url('dosen/usulan_proposal') ?>" class="btn btn-primary">
+                                        <a href="<?php echo base_url('dosen/usulan_proposal'); ?>" class="btn btn-primary">
                                             <i class="fa fa-eye"></i> Cek Usulan Proposal
                                         </a>
                                     </div>
@@ -273,8 +305,8 @@
     </div>
 </div>
 
-<!-- Info Card -->
-<div class="row mt-4">
+<!-- Info Card - Tips Bimbingan -->
+<div class="row mt-4 last-card">
     <div class="col-lg-12">
         <div class="card bg-gradient-light">
             <div class="card-body">
@@ -298,11 +330,13 @@
     </div>
 </div>
 
+</div>
+
 <!-- Modal Tambah Jurnal Bimbingan -->
 <div class="modal fade" id="modalTambahJurnal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form action="<?= base_url('dosen/bimbingan/tambah_jurnal') ?>" method="POST">
+            <form action="<?php echo base_url('dosen/bimbingan/tambah_jurnal'); ?>" method="POST">
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Jurnal Bimbingan</h5>
                     <button type="button" class="close" data-dismiss="modal">
@@ -314,11 +348,13 @@
                         <label>Pilih Mahasiswa *</label>
                         <select class="form-control" name="proposal_id" id="select_mahasiswa" required>
                             <option value="">-- Pilih Mahasiswa --</option>
-                            <?php if(!empty($mahasiswa_bimbingan)): ?>
+                            <?php if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)): ?>
                                 <?php foreach($mahasiswa_bimbingan as $mhs): ?>
-                                <option value="<?= $mhs->id ?>">
-                                    <?= $mhs->nama_mahasiswa ?> (<?= $mhs->nim ?>)
+                                <?php if(isset($mhs->id) && isset($mhs->nama_mahasiswa) && isset($mhs->nim)): ?>
+                                <option value="<?php echo $mhs->id; ?>">
+                                    <?php echo $mhs->nama_mahasiswa . ' (' . $mhs->nim . ')'; ?>
                                 </option>
+                                <?php endif; ?>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </select>
@@ -328,7 +364,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Tanggal Bimbingan *</label>
-                                <input type="date" class="form-control" name="tanggal_bimbingan" required max="<?= date('Y-m-d') ?>">
+                                <input type="date" class="form-control" name="tanggal_bimbingan" required max="<?php echo date('Y-m-d'); ?>">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -369,27 +405,28 @@
 </div>
 
 <script>
-// Show Modal Tambah Jurnal
 function showTambahJurnalModal() {
-    $('#modalTambahJurnal').modal('show');
+    jQuery('#modalTambahJurnal').modal('show');
 }
 
-// Tambah Jurnal untuk Mahasiswa Spesifik
 function tambahJurnalMahasiswa(proposalId, namaMahasiswa) {
-    document.getElementById('select_mahasiswa').value = proposalId;
-    document.getElementById('select_mahasiswa').disabled = true;
-    $('#modalTambahJurnal').modal('show');
+    if (document.getElementById('select_mahasiswa')) {
+        document.getElementById('select_mahasiswa').value = proposalId;
+        document.getElementById('select_mahasiswa').disabled = true;
+        jQuery('#modalTambahJurnal').modal('show');
+    }
 }
 
-// Reset modal saat ditutup
-$('#modalTambahJurnal').on('hidden.bs.modal', function () {
-    document.getElementById('select_mahasiswa').disabled = false;
-    document.getElementById('select_mahasiswa').value = '';
-});
-
-// Set default date to today
-document.addEventListener('DOMContentLoaded', function() {
-    const dateInput = document.querySelector('input[name="tanggal_bimbingan"]');
+jQuery(document).ready(function($) {
+    $('#modalTambahJurnal').on('hidden.bs.modal', function () {
+        if (document.getElementById('select_mahasiswa')) {
+            document.getElementById('select_mahasiswa').disabled = false;
+            document.getElementById('select_mahasiswa').value = '';
+        }
+    });
+    
+    // Set default date to today
+    var dateInput = document.querySelector('input[name="tanggal_bimbingan"]');
     if (dateInput) {
         dateInput.value = new Date().toISOString().split('T')[0];
     }

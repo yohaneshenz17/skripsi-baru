@@ -64,12 +64,18 @@ class Dosen_model extends CI_Model
 
     public function update($input, $id)
     {
+        // Base data yang selalu ada
         $data = [
             'nip' => $input['nip'],
             'nama' => $input['nama'],
             'nomor_telepon' => $input['nomor_telepon'],
             'email' => $input['email']
         ];
+
+        // Tambahkan foto jika ada dalam input
+        if (isset($input['foto'])) {
+            $data['foto'] = $input['foto'];
+        }
 
         $kondisi = ['dosen.id' => $id];
         $cek = $this->db->get_where($this->table, $kondisi)->num_rows();

@@ -1,0 +1,320 @@
+[14-Jul-2025 17:02:35 Asia/Jakarta] PHP Deprecated:  Required parameter $data follows optional parameter $id in /home/stkp7133/public_html/skripsi/application/models/Hasil_kegiatan_model.php on line 59
+[15-Jul-2025 16:48:39 Asia/Jakarta] PHP Deprecated:  Required parameter $data follows optional parameter $id in /home/stkp7133/public_html/skripsi/application/models/Hasil_kegiatan_model.php on line 59
+[15-Jul-2025 19:50:43 Asia/Jakarta] PHP Deprecated:  Required parameter $data follows optional parameter $id in /home/stkp7133/public_html/skripsi/application/models/Hasil_kegiatan_model.php on line 59
+[16-Jul-2025 15:48:57 Asia/Jakarta] PHP Deprecated:  Required parameter $data follows optional parameter $id in /home/stkp7133/public_html/skripsi/application/models/Hasil_kegiatan_model.php on line 59
+[16-Jul-2025 17:14:14 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Home::pengumuman() in /home/stkp7133/public_html/skripsi/application/controllers/Home.php on line 152
+[16-Jul-2025 17:14:48 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Home::pengumuman() in /home/stkp7133/public_html/skripsi/application/controllers/Home.php on line 152
+[16-Jul-2025 17:15:17 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Home::pengumuman() in /home/stkp7133/public_html/skripsi/application/controllers/Home.php on line 152
+[16-Jul-2025 17:16:25 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Home::pengumuman() in /home/stkp7133/public_html/skripsi/application/controllers/Home.php on line 152
+[16-Jul-2025 17:16:30 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Home::pengumuman() in /home/stkp7133/public_html/skripsi/application/controllers/Home.php on line 152
+[19-Jul-2025 08:39:57 Asia/Jakarta] DEBUG: update() method called
+[19-Jul-2025 08:39:57 Asia/Jakarta] DEBUG: POST data: Array
+(
+)
+
+[19-Jul-2025 08:39:57 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => 250px-LambangUskupAgungMerauke.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php5typg8
+            [error] => 0
+            [size] => 21260
+        )
+
+)
+
+[19-Jul-2025 08:39:57 Asia/Jakarta] DEBUG: No POST data, redirecting to profile
+[19-Jul-2025 08:42:12 Asia/Jakarta] DEBUG: update() method called
+[19-Jul-2025 08:42:12 Asia/Jakarta] DEBUG: POST data: Array
+(
+)
+
+[19-Jul-2025 08:42:12 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => gambar_03_logo-keraton_foto-gamaliel-budiharga.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpswVZKm
+            [error] => 0
+            [size] => 47452
+        )
+
+)
+
+[19-Jul-2025 08:42:12 Asia/Jakarta] DEBUG: No POST data, redirecting to profile
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: update() method called
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2717069001
+    [nama] => Yohanes Hendro Pranyoto, S.Pd., M.Pd.
+    [nomor_telepon] => 081295111706
+    [email] => yohaneshenz@stkyakobus.ac.id
+)
+
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: Dosen ID from session: 25
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: Is photo upload: NO
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: Routing to data update handler
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 25
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: Input data - NIP: 2717069001, Email: yohaneshenz@stkyakobus.ac.id
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: Attempting database update
+[19-Jul-2025 08:46:44 Asia/Jakarta] DEBUG: Database update successful
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: update() method called
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Foto.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpMmlQqj
+            [error] => 0
+            [size] => 45815
+        )
+
+)
+
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: Dosen ID from session: 20
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: Is photo upload: YES
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 20
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Foto.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpMmlQqj
+            [error] => 0
+            [size] => 45815
+        )
+
+)
+
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 9759cfa94b69c11c6e36d5d41b5f777f.jpg
+    [message] => Foto berhasil diupload
+)
+
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: Database updated successfully with foto: 9759cfa94b69c11c6e36d5d41b5f777f.jpg
+[19-Jul-2025 08:52:30 Asia/Jakarta] DEBUG: Session updated with foto: 9759cfa94b69c11c6e36d5d41b5f777f.jpg
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: update() method called
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Pas Foto Biru.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php8vVDHI
+            [error] => 0
+            [size] => 117829
+        )
+
+)
+
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: Dosen ID from session: 25
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: Is photo upload: YES
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 25
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Pas Foto Biru.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php8vVDHI
+            [error] => 0
+            [size] => 117829
+        )
+
+)
+
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 78af977767e79451ad0b98e6c5280799.jpg
+    [message] => Foto berhasil diupload
+)
+
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/87ce95ebd8239e88ff7987dec50cc95f.jpg
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: Database updated successfully with foto: 78af977767e79451ad0b98e6c5280799.jpg
+[19-Jul-2025 16:13:45 Asia/Jakarta] DEBUG: Session updated with foto: 78af977767e79451ad0b98e6c5280799.jpg
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: update() method called - KAPRODI
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedi-Biru.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpPZzSus
+            [error] => 0
+            [size] => 94917
+        )
+
+)
+
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: Kaprodi ID from session: 10
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: Is photo upload: YES
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: _handle_photo_upload called with kaprodi_id: 10
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedi-Biru.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpPZzSus
+            [error] => 0
+            [size] => 94917
+        )
+
+)
+
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => afb27870334dfbd835d3c08abcffbbe7.jpg
+    [message] => Foto berhasil diupload
+)
+
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/9cc27fe949d6ee43f944b6453035f9d9.jpeg
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: Database updated successfully with foto: afb27870334dfbd835d3c08abcffbbe7.jpg
+[19-Jul-2025 16:53:13 Asia/Jakarta] DEBUG: Session updated with foto: afb27870334dfbd835d3c08abcffbbe7.jpg
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: update() method called - KAPRODI
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2721128601
+    [nama] => Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)
+    [nomor_telepon] => 081290909003
+    [email] => dedimus@stkyakobus.ac.id
+)
+
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: Kaprodi ID from session: 10
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: Is photo upload: NO
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: Routing to data update handler
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: _handle_data_update called with kaprodi_id: 10
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: Input data - NIP: 2721128601, Email: dedimus@stkyakobus.ac.id
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: Attempting database update
+[19-Jul-2025 16:53:22 Asia/Jakarta] DEBUG: Database update successful
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: update() method called - KAPRODI
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedi-Merah.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpVCPolB
+            [error] => 0
+            [size] => 463296
+        )
+
+)
+
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: Kaprodi ID from session: 10
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: Is photo upload: YES
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: _handle_photo_upload called with kaprodi_id: 10
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedi-Merah.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpVCPolB
+            [error] => 0
+            [size] => 463296
+        )
+
+)
+
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => aa6c3d06abf291b0ae23511283ef5698.jpg
+    [message] => Foto berhasil diupload
+)
+
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/afb27870334dfbd835d3c08abcffbbe7.jpg
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: Database updated successfully with foto: aa6c3d06abf291b0ae23511283ef5698.jpg
+[19-Jul-2025 19:17:52 Asia/Jakarta] DEBUG: Session updated with foto: aa6c3d06abf291b0ae23511283ef5698.jpg
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: update() method called - KAPRODI
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedi-Biru.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpZ8P1Hn
+            [error] => 0
+            [size] => 94917
+        )
+
+)
+
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Kaprodi ID from session: 10
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Is photo upload: YES
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: _handle_photo_upload called with kaprodi_id: 10
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedi-Biru.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpZ8P1Hn
+            [error] => 0
+            [size] => 94917
+        )
+
+)
+
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 47b8a620332e72136adead99e0b0120e.jpg
+    [message] => Foto berhasil diupload
+)
+
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/aa6c3d06abf291b0ae23511283ef5698.jpg
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Database updated successfully with foto: 47b8a620332e72136adead99e0b0120e.jpg
+[19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Session updated with foto: 47b8a620332e72136adead99e0b0120e.jpg

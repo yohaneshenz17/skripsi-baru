@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 19, 2025 at 06:54 PM
+-- Generation Time: Jul 20, 2025 at 05:52 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -75,7 +75,7 @@ CREATE TABLE `dosen` (
 
 INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`, `foto`) VALUES
 (2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1', ''),
-(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', 'afb27870334dfbd835d3c08abcffbbe7.jpg'),
+(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', '47b8a620332e72136adead99e0b0120e.jpg'),
 (11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd. (Kaprodi PGSD)', '082271403437', 'pgsd@stkyakobus.ac.id', '4', ''),
 (12, '2720067001', 1, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '2', ''),
 (14, '2709109301', 2, 'Lambertus Ayiriga, S.Pd., M.Pd.', '82197819425', 'lambertus@stkyakobus.ac.id', '2', ''),
@@ -492,7 +492,7 @@ CREATE TABLE `pengumuman_tahapan` (
 --
 
 INSERT INTO `pengumuman_tahapan` (`id`, `no`, `tahapan`, `tanggal_deadline`, `keterangan`, `aktif`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Pengajuan Proposal', '2025-08-06', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-19 18:16:39'),
+(1, 1, 'Pengajuan Proposal', '2025-08-08', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-19 19:41:19'),
 (3, 2, 'Seminar Proposal', '2025-10-31', 'Seminar Proposal Bab 1-3', '1', '2025-07-15 17:29:36', '2025-07-19 17:42:25'),
 (4, 3, 'Ujian Skripsi', '2026-05-25', 'Seminar Hasil Bab 1-5', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:31'),
 (5, 4, 'Revisi dan Publikasi', '2026-07-30', 'Perbaikan dan Publikasi Skripsi', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:52'),

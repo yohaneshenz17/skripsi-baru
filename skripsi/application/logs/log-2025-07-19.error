@@ -533,3 +533,206 @@ ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
 ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
 ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
 ERROR - 2025-07-19 18:52:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:56:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:56:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:56:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:56:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:56:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:57:26 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:57:26 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:57:26 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:57:26 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 18:57:26 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:57:26 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:58:33 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:58:33 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:58:33 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:58:33 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 18:58:33 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:12 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:04:57 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:04:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:04:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:05:01 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:05:01 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:05:01 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:07:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:07:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:07:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:07:09 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:07:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:07:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:07:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:07:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:07:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:08:03 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:08:03 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:08:03 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-19 19:08:27 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 19:08:31 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 19:08:36 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:10:22 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:10:24 --> 404 Page Not Found: kaprodi/Riwayat_penetapan/index
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:10:26 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:13:34 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:13:40 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:15:33 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:16:39 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:18:03 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:20:07 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:21:35 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:22:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:23:01 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:24:46 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 94
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 146
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 202
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 248
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> Undefined variable $proposals /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:24:51 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/kaprodi/proposal.php 292
+ERROR - 2025-07-19 19:40:57 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 20:03:56 --> 404 Page Not Found: Cdn/img

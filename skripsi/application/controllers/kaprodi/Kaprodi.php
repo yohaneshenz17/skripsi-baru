@@ -1,6 +1,6 @@
 <?php
 // ============================================
-// FILE: application/controllers/kaprodi/Kaprodi.php (DIPERBAIKI)
+// FILE: application/controllers/kaprodi/Kaprodi.php (DIPERBAIKI LENGKAP)
 // ============================================
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -35,6 +35,9 @@ class Kaprodi extends CI_Controller {
         redirect('kaprodi/dashboard');
     }
 
+    // ============================================
+    // METHOD PROPOSAL() - DIPERBAIKI
+    // ============================================
     public function proposal() {
         $data['title'] = 'Review Proposal Mahasiswa';
         
@@ -54,17 +57,33 @@ class Kaprodi extends CI_Controller {
         
         $data['proposals'] = $this->db->get()->result();
         
-        $this->load->view('template/kaprodi', [
-            'title' => $data['title'],
-            'content' => $this->_get_proposal_content($data),
-            'script' => $this->_get_proposal_script()
-        ]);
+        // PERBAIKAN: Pastikan $proposals tidak null
+        if (!$data['proposals']) {
+            $data['proposals'] = array(); // Atur sebagai array kosong jika null
+        }
+    
+        // PERBAIKAN: Langsung load view tanpa wrapper yang rumit
+        $this->load->view('kaprodi/proposal', $data);
     }
 
-    private function _get_proposal_content($data) {
+    // ============================================
+    // METHOD _get_proposal_content - DIPERBAIKI
+    // ============================================
+    private function _get_proposal_content_fixed($data) {
+        // PERBAIKAN: Extract data agar tersedia sebagai variabel lokal
+        extract($data);
+        
         ob_start();
         include(APPPATH . 'views/kaprodi/proposal.php');
         return ob_get_clean();
+    }
+
+    // ============================================
+    // METHOD ALTERNATIF YANG LEBIH AMAN
+    // ============================================
+    private function _get_proposal_content_safe($data) {
+        // PERBAIKAN: Gunakan CodeIgniter load view dengan return TRUE
+        return $this->load->view('kaprodi/proposal', $data, TRUE);
     }
 
     private function _get_proposal_script() {
@@ -72,44 +91,53 @@ class Kaprodi extends CI_Controller {
         ?>
         <script>
         $(document).ready(function() {
-            // Initialize DataTables untuk setiap tab
-            $('#table-menunggu').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                },
-                "order": [[ 4, "desc" ]]
-            });
+            // Initialize DataTables untuk setiap tab jika library tersedia
+            if (typeof $.fn.DataTable !== 'undefined') {
+                $('#table-menunggu').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                    },
+                    "order": [[ 4, "desc" ]]
+                });
+                
+                $('#table-disetujui').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                    },
+                    "order": [[ 6, "desc" ]]
+                });
+                
+                $('#table-ditolak').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                    },
+                    "order": [[ 5, "desc" ]]
+                });
+                
+                $('#table-menunggu-pembimbing').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                    },
+                    "order": [[ 6, "desc" ]]
+                });
+                
+                $('#table-riwayat').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                    },
+                    "order": [[ 6, "desc" ]]
+                });
+            }
             
-            $('#table-disetujui').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                },
-                "order": [[ 6, "desc" ]]
-            });
+            // Enable tooltips jika library tersedia
+            if (typeof $().tooltip !== 'undefined') {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
             
-            $('#table-ditolak').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                },
-                "order": [[ 5, "desc" ]]
-            });
-            
-            $('#table-menunggu-pembimbing').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                },
-                "order": [[ 6, "desc" ]]
-            });
-            
-            $('#table-riwayat').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                },
-                "order": [[ 6, "desc" ]]
-            });
-            
-            // Enable tooltips
-            $('[data-toggle="tooltip"]').tooltip();
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
         });
 
         // Function untuk menampilkan tab Riwayat Review
@@ -165,6 +193,9 @@ class Kaprodi extends CI_Controller {
     }
 
     private function _get_review_proposal_content($data) {
+        // PERBAIKAN: Extract data agar tersedia sebagai variabel lokal
+        extract($data);
+        
         ob_start();
         ?>
         <div class="row">
@@ -191,19 +222,19 @@ class Kaprodi extends CI_Controller {
                                 <div class="pl-lg-4">
                                     <div class="form-group">
                                         <label class="form-control-label">NIM</label>
-                                        <p class="form-control-static font-weight-bold"><?= $data['proposal']->nim ?></p>
+                                        <p class="form-control-static font-weight-bold"><?= $proposal->nim ?></p>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-control-label">Nama Mahasiswa</label>
-                                        <p class="form-control-static font-weight-bold"><?= $data['proposal']->nama_mahasiswa ?></p>
+                                        <p class="form-control-static font-weight-bold"><?= $proposal->nama_mahasiswa ?></p>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-control-label">Email</label>
-                                        <p class="form-control-static"><?= $data['proposal']->email_mahasiswa ?></p>
+                                        <p class="form-control-static"><?= $proposal->email_mahasiswa ?></p>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-control-label">Program Studi</label>
-                                        <p class="form-control-static"><?= $data['proposal']->nama_prodi ?></p>
+                                        <p class="form-control-static"><?= $proposal->nama_prodi ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -214,20 +245,20 @@ class Kaprodi extends CI_Controller {
                                 <div class="pl-lg-4">
                                     <div class="form-group">
                                         <label class="form-control-label">Judul Proposal</label>
-                                        <p class="form-control-static font-weight-bold"><?= $data['proposal']->judul ?></p>
+                                        <p class="form-control-static font-weight-bold"><?= $proposal->judul ?></p>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-control-label">Tanggal Pengajuan</label>
-                                        <p class="form-control-static"><?= date('d/m/Y H:i', strtotime($data['proposal']->created_at)) ?></p>
+                                        <p class="form-control-static"><?= date('d/m/Y H:i', strtotime($proposal->created_at)) ?></p>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-control-label">File Proposal</label>
                                         <div>
-                                            <?php if(!empty($data['proposal']->file_draft_proposal)): ?>
-                                            <a href="<?= base_url('kaprodi/download_proposal/' . $data['proposal']->id) ?>" class="btn btn-primary btn-sm">
+                                            <?php if(!empty($proposal->file_draft_proposal)): ?>
+                                            <a href="<?= base_url('kaprodi/download_proposal/' . $proposal->id) ?>" class="btn btn-primary btn-sm">
                                                 <i class="fa fa-download"></i> Download
                                             </a>
-                                            <a href="<?= base_url('kaprodi/view_proposal/' . $data['proposal']->id) ?>" class="btn btn-info btn-sm" target="_blank">
+                                            <a href="<?= base_url('kaprodi/view_proposal/' . $proposal->id) ?>" class="btn btn-info btn-sm" target="_blank">
                                                 <i class="fa fa-eye"></i> Lihat
                                             </a>
                                             <?php else: ?>
@@ -244,7 +275,7 @@ class Kaprodi extends CI_Controller {
                         <!-- Form Review -->
                         <h5 class="heading-small text-muted mb-4">Form Review Proposal</h5>
                         <form method="post" action="<?= base_url('kaprodi/proses_review') ?>" id="form-review">
-                            <input type="hidden" name="proposal_id" value="<?= $data['proposal']->id ?>">
+                            <input type="hidden" name="proposal_id" value="<?= $proposal->id ?>">
                             
                             <div class="row">
                                 <div class="col-md-8">
@@ -258,7 +289,7 @@ class Kaprodi extends CI_Controller {
                                         <label class="form-control-label">Dosen Pembimbing</label>
                                         <select class="form-control" name="dosen_id" id="dosen_id">
                                             <option value="">-- Pilih Dosen Pembimbing --</option>
-                                            <?php foreach($data['dosens'] as $dosen): ?>
+                                            <?php foreach($dosens as $dosen): ?>
                                             <option value="<?= $dosen->id ?>"><?= $dosen->nama ?> (<?= $dosen->nama_prodi ?? 'Prodi tidak ditemukan' ?>)</option>
                                             <?php endforeach; ?>
                                         </select>
@@ -590,6 +621,9 @@ class Kaprodi extends CI_Controller {
     }
 
     private function _get_mahasiswa_content($data) {
+        // PERBAIKAN: Extract data agar tersedia sebagai variabel lokal
+        extract($data);
+        
         ob_start();
         ?>
         <div class="row">
@@ -612,7 +646,7 @@ class Kaprodi extends CI_Controller {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $no = 1; foreach($data['mahasiswa_list'] as $mhs): ?>
+                                    <?php $no = 1; foreach($mahasiswa_list as $mhs): ?>
                                     <tr>
                                         <td><?= $no++ ?></td>
                                         <td><?= $mhs->nim ?></td>
@@ -662,6 +696,9 @@ class Kaprodi extends CI_Controller {
     }
 
     private function _get_dosen_content($data) {
+        // PERBAIKAN: Extract data agar tersedia sebagai variabel lokal
+        extract($data);
+        
         ob_start();
         ?>
         <div class="row">
@@ -685,7 +722,7 @@ class Kaprodi extends CI_Controller {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $no = 1; foreach($data['dosen_list'] as $dsn): ?>
+                                    <?php $no = 1; foreach($dosen_list as $dsn): ?>
                                     <tr>
                                         <td><?= $no++ ?></td>
                                         <td><?= $dsn->nip ?></td>
@@ -727,6 +764,9 @@ class Kaprodi extends CI_Controller {
     }
 
     private function _get_laporan_content($data) {
+        // PERBAIKAN: Extract data agar tersedia sebagai variabel lokal
+        extract($data);
+        
         ob_start();
         ?>
         <div class="row">
@@ -750,7 +790,7 @@ class Kaprodi extends CI_Controller {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $no = 1; foreach($data['all_proposals'] as $prop): ?>
+                                    <?php $no = 1; foreach($all_proposals as $prop): ?>
                                     <tr>
                                         <td><?= $no++ ?></td>
                                         <td><?= $prop->nim ?></td>
@@ -768,28 +808,36 @@ class Kaprodi extends CI_Controller {
                                         </td>
                                         <td>
                                             <?php 
-                                            switch($prop->status_pembimbing) {
-                                                case '0': echo '<span class="badge badge-warning">Menunggu Persetujuan</span>'; break;
-                                                case '1': echo '<span class="badge badge-success">Disetujui</span>'; break;
-                                                case '2': echo '<span class="badge badge-danger">Ditolak</span>'; break;
-                                                default: echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
-                                            }
+                                            if(isset($prop->status_pembimbing)):
+                                                switch($prop->status_pembimbing) {
+                                                    case '0': echo '<span class="badge badge-warning">Menunggu Persetujuan</span>'; break;
+                                                    case '1': echo '<span class="badge badge-success">Disetujui</span>'; break;
+                                                    case '2': echo '<span class="badge badge-danger">Ditolak</span>'; break;
+                                                    default: echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
+                                                }
+                                            else:
+                                                echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
+                                            endif;
                                             ?>
                                         </td>
                                         <td>
                                             <?php 
-                                            switch($prop->workflow_status) {
-                                                case 'proposal': echo '<span class="badge badge-info">Tahap Proposal</span>'; break;
-                                                case 'menunggu_pembimbing': echo '<span class="badge badge-warning">Menunggu Pembimbing</span>'; break;
-                                                case 'bimbingan': echo '<span class="badge badge-primary">Bimbingan</span>'; break;
-                                                case 'seminar_proposal': echo '<span class="badge badge-info">Seminar Proposal</span>'; break;
-                                                case 'penelitian': echo '<span class="badge badge-warning">Penelitian</span>'; break;
-                                                case 'seminar_skripsi': echo '<span class="badge badge-success">Seminar Skripsi</span>'; break;
-                                                case 'publikasi': echo '<span class="badge badge-purple">Publikasi</span>'; break;
-                                                case 'selesai': echo '<span class="badge badge-success">Selesai</span>'; break;
-                                                case 'ditolak': echo '<span class="badge badge-danger">Ditolak</span>'; break;
-                                                default: echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
-                                            }
+                                            if(isset($prop->workflow_status)):
+                                                switch($prop->workflow_status) {
+                                                    case 'proposal': echo '<span class="badge badge-info">Tahap Proposal</span>'; break;
+                                                    case 'menunggu_pembimbing': echo '<span class="badge badge-warning">Menunggu Pembimbing</span>'; break;
+                                                    case 'bimbingan': echo '<span class="badge badge-primary">Bimbingan</span>'; break;
+                                                    case 'seminar_proposal': echo '<span class="badge badge-info">Seminar Proposal</span>'; break;
+                                                    case 'penelitian': echo '<span class="badge badge-warning">Penelitian</span>'; break;
+                                                    case 'seminar_skripsi': echo '<span class="badge badge-success">Seminar Skripsi</span>'; break;
+                                                    case 'publikasi': echo '<span class="badge badge-purple">Publikasi</span>'; break;
+                                                    case 'selesai': echo '<span class="badge badge-success">Selesai</span>'; break;
+                                                    case 'ditolak': echo '<span class="badge badge-danger">Ditolak</span>'; break;
+                                                    default: echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
+                                                }
+                                            else:
+                                                echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
+                                            endif;
                                             ?>
                                         </td>
                                     </tr>

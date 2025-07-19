@@ -1,7 +1,3 @@
-<?php $this->load->view('template/dosen', ['title' => $title, 'content' => $this->load->view('dosen/bimbingan_content', $this, true), 'script' => '']); ?>
-
-<!-- Content untuk bimbingan_content.php -->
-
 <!-- Alert Messages -->
 <?php if($this->session->flashdata('success')): ?>
 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -79,10 +75,12 @@
                         <span class="h2 font-weight-bold mb-0">
                             <?php 
                             $siap_seminar = 0;
-                            foreach($mahasiswa_bimbingan as $mhs) {
-                                if($mhs->workflow_status == 'bimbingan' && 
-                                   (!empty($mhs->total_bimbingan) && $mhs->total_bimbingan >= 16)) {
-                                    $siap_seminar++;
+                            if(!empty($mahasiswa_bimbingan)) {
+                                foreach($mahasiswa_bimbingan as $mhs) {
+                                    if($mhs->workflow_status == 'bimbingan' && 
+                                       (!empty($mhs->total_bimbingan) && $mhs->total_bimbingan >= 16)) {
+                                        $siap_seminar++;
+                                    }
                                 }
                             }
                             echo $siap_seminar;
@@ -111,10 +109,12 @@
                         <span class="h2 font-weight-bold mb-0">
                             <?php 
                             $perlu_perhatian = 0;
-                            foreach($mahasiswa_bimbingan as $mhs) {
-                                if($mhs->workflow_status == 'bimbingan' && 
-                                   (empty($mhs->total_bimbingan) || $mhs->total_bimbingan < 8)) {
-                                    $perlu_perhatian++;
+                            if(!empty($mahasiswa_bimbingan)) {
+                                foreach($mahasiswa_bimbingan as $mhs) {
+                                    if($mhs->workflow_status == 'bimbingan' && 
+                                       (empty($mhs->total_bimbingan) || $mhs->total_bimbingan < 8)) {
+                                        $perlu_perhatian++;
+                                    }
                                 }
                             }
                             echo $perlu_perhatian;
@@ -182,11 +182,15 @@
                                 <td>
                                     <span class="text-sm font-weight-bold"><?= substr($mahasiswa->judul, 0, 50) ?><?= strlen($mahasiswa->judul) > 50 ? '...' : '' ?></span>
                                     <br>
+                                    <?php if(!empty($mahasiswa->lokasi_penelitian)): ?>
                                     <small class="text-muted">
                                         <i class="fa fa-map-marker-alt"></i> <?= $mahasiswa->lokasi_penelitian ?>
                                     </small>
                                     <br>
+                                    <?php endif; ?>
+                                    <?php if(!empty($mahasiswa->jenis_penelitian)): ?>
                                     <span class="badge badge-pill badge-secondary"><?= $mahasiswa->jenis_penelitian ?></span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php 
@@ -310,11 +314,13 @@
                         <label>Pilih Mahasiswa *</label>
                         <select class="form-control" name="proposal_id" id="select_mahasiswa" required>
                             <option value="">-- Pilih Mahasiswa --</option>
-                            <?php foreach($mahasiswa_bimbingan as $mhs): ?>
-                            <option value="<?= $mhs->id ?>">
-                                <?= $mhs->nama_mahasiswa ?> (<?= $mhs->nim ?>)
-                            </option>
-                            <?php endforeach; ?>
+                            <?php if(!empty($mahasiswa_bimbingan)): ?>
+                                <?php foreach($mahasiswa_bimbingan as $mhs): ?>
+                                <option value="<?= $mhs->id ?>">
+                                    <?= $mhs->nama_mahasiswa ?> (<?= $mhs->nim ?>)
+                                </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
                     </div>
                     

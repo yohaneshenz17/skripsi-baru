@@ -1,0 +1,191 @@
+ERROR - 2025-07-19 06:07:51 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-19 06:08:13 --> 404 Page Not Found: dosen/Seminar_proposal/index
+ERROR - 2025-07-19 06:08:17 --> 404 Page Not Found: dosen/Seminar_skripsi/index
+ERROR - 2025-07-19 06:11:23 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-19 06:11:23 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-19 06:11:23 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-19 06:11:59 --> 404 Page Not Found: dosen/Seminar_proposal/index
+ERROR - 2025-07-19 06:12:15 --> 404 Page Not Found: dosen/Seminar_skripsi/index
+ERROR - 2025-07-19 07:11:23 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:12:52 --> Query error: Table 'stkp7133_skripsi.seminar_skripsi' doesn't exist - Invalid query: SELECT `ss`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_skripsi` `ss`
+JOIN `proposal_mahasiswa` `pm` ON `ss`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `ss`.`created_at` DESC
+ERROR - 2025-07-19 07:13:35 --> Query error: Table 'stkp7133_skripsi.publikasi_tugas_akhir' doesn't exist - Invalid query: SELECT `pub`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `publikasi_tugas_akhir` `pub`
+JOIN `proposal_mahasiswa` `pm` ON `pub`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `pub`.`created_at` DESC
+ERROR - 2025-07-19 07:13:39 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:13:42 --> Query error: Table 'stkp7133_skripsi.surat_izin_penelitian' doesn't exist - Invalid query: SELECT `sip`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `surat_izin_penelitian` `sip`
+JOIN `proposal_mahasiswa` `pm` ON `sip`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sip`.`created_at` DESC
+ERROR - 2025-07-19 07:23:18 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:28:17 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:28:23 --> Query error: Table 'stkp7133_skripsi.surat_izin_penelitian' doesn't exist - Invalid query: SELECT `sip`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `surat_izin_penelitian` `sip`
+JOIN `proposal_mahasiswa` `pm` ON `sip`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sip`.`created_at` DESC
+ERROR - 2025-07-19 07:29:31 --> Query error: Table 'stkp7133_skripsi.surat_izin_penelitian' doesn't exist - Invalid query: SELECT `sip`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `surat_izin_penelitian` `sip`
+JOIN `proposal_mahasiswa` `pm` ON `sip`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sip`.`created_at` DESC
+ERROR - 2025-07-19 07:29:35 --> Query error: Table 'stkp7133_skripsi.surat_izin_penelitian' doesn't exist - Invalid query: SELECT `sip`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `surat_izin_penelitian` `sip`
+JOIN `proposal_mahasiswa` `pm` ON `sip`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sip`.`created_at` DESC
+ERROR - 2025-07-19 07:30:50 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:30:54 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:33:29 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:33:49 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:34:23 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:35:12 --> Query error: Table 'stkp7133_skripsi.seminar_proposal' doesn't exist - Invalid query: SELECT `sp`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal` `sp`
+JOIN `proposal_mahasiswa` `pm` ON `sp`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sp`.`created_at` DESC
+ERROR - 2025-07-19 07:35:14 --> Query error: Table 'stkp7133_skripsi.surat_izin_penelitian' doesn't exist - Invalid query: SELECT `sip`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `surat_izin_penelitian` `sip`
+JOIN `proposal_mahasiswa` `pm` ON `sip`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+ORDER BY `sip`.`created_at` DESC
+ERROR - 2025-07-19 07:36:44 --> Query error: Unknown column 'pm.updated_at' in 'order clause' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+AND `pm`.`workflow_status` = 'seminar_proposal'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-07-19 07:36:48 --> Query error: Unknown column 'pm.updated_at' in 'order clause' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+AND `pm`.`workflow_status` = 'seminar_proposal'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-07-19 07:41:35 --> Query error: Unknown column 'pm.updated_at' in 'order clause' - Invalid query: SELECT `pm`.*, `pm`.`lokasi_penelitian`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+AND `pm`.`workflow_status` = 'penelitian'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-07-19 07:42:13 --> Query error: Unknown column 'pm.updated_at' in 'order clause' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+AND `pm`.`workflow_status` = 'seminar_skripsi'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-07-19 07:43:44 --> Query error: Unknown column 'pm.updated_at' in 'order clause' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+AND `pm`.`workflow_status` = 'seminar_proposal'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-07-19 07:43:50 --> Query error: Unknown column 'pm.updated_at' in 'order clause' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+AND `pm`.`workflow_status` = 'seminar_proposal'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-07-19 07:45:01 --> Query error: Unknown column 'pm.updated_at' in 'order clause' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+AND `pm`.`workflow_status` = 'publikasi'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-07-19 07:46:21 --> Query error: Unknown column 'pm.updated_at' in 'order clause' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_pembimbing` = '1'
+AND `pm`.`workflow_status` = 'seminar_proposal'
+ORDER BY `pm`.`updated_at` DESC

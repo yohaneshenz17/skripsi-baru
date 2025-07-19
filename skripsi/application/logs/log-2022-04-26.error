@@ -1,0 +1,54 @@
+ERROR - 2022-04-26 03:58:30 --> Query error: Unknown column 'status' in 'field list' - Invalid query: UPDATE `penelitian` SET `status` = '1', `berita_acara` = '20220426035830.pdf', `masukan` = '20220426035830.pdf'
+WHERE `id` = '20'
+ERROR - 2022-04-26 04:22:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-04-26 04:22:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-04-26 04:22:48 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-04-26 04:22:48 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-04-26 04:23:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-04-26 04:23:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-04-26 04:35:49 --> Severity: Warning --> fsockopen(): unable to connect to ssl://mail.Kodeaset.com:465 (A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.
+) E:\xampp\htdocs\skripsi\system\libraries\Email.php 2023
+ERROR - 2022-04-26 04:59:23 --> Severity: Warning --> fsockopen(): unable to connect to ssl://mail.Kodeaset.com:465 (A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.
+) E:\xampp\htdocs\skripsi\system\libraries\Email.php 2023
+ERROR - 2022-04-26 06:00:39 --> Severity: Warning --> unlink(E:\xampp\htdocs\skripsi\cdn/vendor/bukti/Path File): No such file or directory E:\xampp\htdocs\skripsi\application\models\Konsultasi_model.php 166
+ERROR - 2022-04-26 06:41:02 --> Severity: Warning --> fsockopen(): unable to connect to ssl://mail.Kodeaset.com:465 (A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.
+) E:\xampp\htdocs\skripsi\system\libraries\Email.php 2023
+ERROR - 2022-04-26 08:05:12 --> Severity: Warning --> mysqli::real_connect(): (28000/1045): Access denied for user 'root'@'localhost' (using password: NO) /home/ivkudkre/skripsi.Kodeaset.com/system/database/drivers/mysqli/mysqli_driver.php 201
+ERROR - 2022-04-26 08:05:12 --> Unable to connect to the database
+ERROR - 2022-04-26 15:05:12 --> Severity: Warning --> mysqli::real_connect(): (28000/1045): Access denied for user 'root'@'localhost' (using password: NO) /home/ivkudkre/skripsi.Kodeaset.com/system/database/drivers/mysqli/mysqli_driver.php 201
+ERROR - 2022-04-26 15:05:12 --> Unable to connect to the database
+ERROR - 2022-04-26 15:05:12 --> Query error: Access denied for user 'root'@'localhost' (using password: NO) - Invalid query: SELECT *
+FROM `home_template`
+ERROR - 2022-04-26 15:05:12 --> Severity: Error --> Call to a member function result() on boolean /home/ivkudkre/skripsi.Kodeaset.com/application/controllers/Home.php 15
+ERROR - 2022-04-26 08:05:13 --> Severity: Warning --> mysqli::real_connect(): (28000/1045): Access denied for user 'root'@'localhost' (using password: NO) /home/ivkudkre/skripsi.Kodeaset.com/system/database/drivers/mysqli/mysqli_driver.php 201
+ERROR - 2022-04-26 08:05:13 --> Unable to connect to the database
+ERROR - 2022-04-26 15:05:13 --> Severity: Warning --> mysqli::real_connect(): (28000/1045): Access denied for user 'root'@'localhost' (using password: NO) /home/ivkudkre/skripsi.Kodeaset.com/system/database/drivers/mysqli/mysqli_driver.php 201
+ERROR - 2022-04-26 15:05:13 --> Unable to connect to the database
+ERROR - 2022-04-26 15:05:13 --> Query error: Access denied for user 'root'@'localhost' (using password: NO) - Invalid query: SELECT *
+FROM `home_template`
+ERROR - 2022-04-26 15:05:13 --> Severity: Error --> Call to a member function result() on boolean /home/ivkudkre/skripsi.Kodeaset.com/application/controllers/Home.php 15
+ERROR - 2022-04-26 08:05:53 --> Severity: Warning --> mysqli::real_connect(): (28000/1045): Access denied for user 'root'@'localhost' (using password: NO) /home/ivkudkre/skripsi.Kodeaset.com/system/database/drivers/mysqli/mysqli_driver.php 201
+ERROR - 2022-04-26 08:05:53 --> Unable to connect to the database
+ERROR - 2022-04-26 15:05:53 --> Severity: Warning --> mysqli::real_connect(): (28000/1045): Access denied for user 'root'@'localhost' (using password: NO) /home/ivkudkre/skripsi.Kodeaset.com/system/database/drivers/mysqli/mysqli_driver.php 201
+ERROR - 2022-04-26 15:05:53 --> Unable to connect to the database
+ERROR - 2022-04-26 15:05:53 --> Query error: Access denied for user 'root'@'localhost' (using password: NO) - Invalid query: SELECT *
+FROM `home_template`
+ERROR - 2022-04-26 15:05:53 --> Severity: Error --> Call to a member function result() on boolean /home/ivkudkre/skripsi.Kodeaset.com/application/controllers/Home.php 15
+ERROR - 2022-04-26 15:06:41 --> Query error: Table 'ivkudkre_skripsi.home_template' doesn't exist - Invalid query: SELECT *
+FROM `home_template`
+ERROR - 2022-04-26 15:06:41 --> Severity: Error --> Call to a member function result() on boolean /home/ivkudkre/skripsi.Kodeaset.com/application/controllers/Home.php 15
+ERROR - 2022-04-26 15:06:44 --> Query error: Table 'ivkudkre_skripsi.home_template' doesn't exist - Invalid query: SELECT *
+FROM `home_template`
+ERROR - 2022-04-26 15:06:44 --> Severity: Error --> Call to a member function result() on boolean /home/ivkudkre/skripsi.Kodeaset.com/application/controllers/Home.php 15
+ERROR - 2022-04-26 08:21:34 --> Query error: Table 'ivkudkre_skripsi.skripsi_vl' doesn't exist - Invalid query: SELECT *
+FROM `skripsi_vl`
+WHERE `skripsi_vl`.`mahasiswa_id` = '3'
+ERROR - 2022-04-26 08:21:34 --> Severity: Error --> Call to a member function result_array() on boolean /home/ivkudkre/skripsi.Kodeaset.com/application/models/Skripsi_model.php 24
+ERROR - 2022-04-26 08:28:16 --> Query error: Table 'ivkudkre_skripsi.skripsi_vl' doesn't exist - Invalid query: SELECT *
+FROM `skripsi_vl`
+WHERE `skripsi_vl`.`mahasiswa_id` = '3'
+ERROR - 2022-04-26 08:28:16 --> Severity: Error --> Call to a member function result_array() on boolean /home/ivkudkre/skripsi.Kodeaset.com/application/models/Skripsi_model.php 24
+ERROR - 2022-04-26 08:28:19 --> Query error: Table 'ivkudkre_skripsi.skripsi_vl' doesn't exist - Invalid query: SELECT *
+FROM `skripsi_vl`
+WHERE `skripsi_vl`.`mahasiswa_id` = '3'
+ERROR - 2022-04-26 08:28:19 --> Severity: Error --> Call to a member function result_array() on boolean /home/ivkudkre/skripsi.Kodeaset.com/application/models/Skripsi_model.php 24

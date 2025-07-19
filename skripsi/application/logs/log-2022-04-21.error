@@ -1,0 +1,15 @@
+ERROR - 2022-04-21 05:14:28 --> Severity: Warning --> mysqli::real_connect(): (HY000/1045): Access denied for user 'fopegram_skripsites'@'localhost' (using password: YES) E:\xampp\htdocs\skripsi\system\database\drivers\mysqli\mysqli_driver.php 201
+ERROR - 2022-04-21 05:14:28 --> Unable to connect to the database
+ERROR - 2022-04-21 10:14:28 --> Severity: Warning --> mysqli::real_connect(): (HY000/1045): Access denied for user 'fopegram_skripsites'@'localhost' (using password: YES) E:\xampp\htdocs\skripsi\system\database\drivers\mysqli\mysqli_driver.php 201
+ERROR - 2022-04-21 10:14:28 --> Unable to connect to the database
+ERROR - 2022-04-21 10:14:28 --> Query error: Access denied for user 'fopegram_skripsites'@'localhost' (using password: YES) - Invalid query: SELECT *
+FROM `home_template`
+ERROR - 2022-04-21 10:14:28 --> Severity: error --> Exception: Call to a member function result() on bool E:\xampp\htdocs\skripsi\application\controllers\Home.php 15
+ERROR - 2022-04-21 05:24:01 --> Severity: Warning --> mysqli::real_connect(): (HY000/1045): Access denied for user 'fopegram_skripsites'@'localhost' (using password: YES) E:\xampp\htdocs\skripsi\system\database\drivers\mysqli\mysqli_driver.php 201
+ERROR - 2022-04-21 05:24:01 --> Unable to connect to the database
+ERROR - 2022-04-21 10:24:02 --> Severity: Warning --> mysqli::real_connect(): (HY000/1045): Access denied for user 'fopegram_skripsites'@'localhost' (using password: YES) E:\xampp\htdocs\skripsi\system\database\drivers\mysqli\mysqli_driver.php 201
+ERROR - 2022-04-21 10:24:02 --> Unable to connect to the database
+ERROR - 2022-04-21 10:24:02 --> Query error: Access denied for user 'fopegram_skripsites'@'localhost' (using password: YES) - Invalid query: SELECT *
+FROM `home_template`
+ERROR - 2022-04-21 10:24:02 --> Severity: error --> Exception: Call to a member function result() on bool E:\xampp\htdocs\skripsi\application\controllers\Home.php 15
+ERROR - 2022-04-21 06:09:30 --> Severity: Warning --> unlink(E:\xampp\htdocs\skripsi\cdn/img/icon/20201201074408.png): No such file or directory E:\xampp\htdocs\skripsi\application\models\Pengaturan_model.php 45

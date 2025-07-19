@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 19, 2025 at 03:41 PM
+-- Generation Time: Jul 19, 2025 at 06:54 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -75,7 +75,7 @@ CREATE TABLE `dosen` (
 
 INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`, `foto`) VALUES
 (2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1', ''),
-(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', '9cc27fe949d6ee43f944b6453035f9d9.jpeg'),
+(10, '2721128601', 1, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', 'afb27870334dfbd835d3c08abcffbbe7.jpg'),
 (11, '2706058401', 1, 'Steven Ronald Ahlaro, S.Pd., M.Pd. (Kaprodi PGSD)', '082271403437', 'pgsd@stkyakobus.ac.id', '4', ''),
 (12, '2720067001', 1, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '2', ''),
 (14, '2709109301', 2, 'Lambertus Ayiriga, S.Pd., M.Pd.', '82197819425', 'lambertus@stkyakobus.ac.id', '2', ''),
@@ -89,7 +89,7 @@ INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, 
 (22, '2729086901', 2, 'Agustinus Kia Wolomasi, S.Ag., M.Pd.', '081386503387', 'aguswolomasi@stkyakobus.ac.id', '2', ''),
 (23, '2709077801', 1, 'Markus Meran, S.Ag., M.Th.', '82248526104', 'markusmeran@stkyakobus.ac.id', '2', ''),
 (24, '1423056901', 1, 'Francisco Noerjanto, S.Ag., M.Si.', '8114890505', 'francisco@stkyakobus.ac.id', '2', ''),
-(25, '2717069001', 1, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '081295111706', 'yohaneshenz@stkyakobus.ac.id', '2', '87ce95ebd8239e88ff7987dec50cc95f.jpg'),
+(25, '2717069001', 1, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '081295111706', 'yohaneshenz@stkyakobus.ac.id', '2', '78af977767e79451ad0b98e6c5280799.jpg'),
 (26, '2721128601', 10, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedydbeau@gmail.com', '2', ''),
 (27, '2706058401', 11, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '2', ''),
 (28, '2717069001', 1, 'Yohanes Hendro Pranyoto (Admin)', '081295111706', 'sipd@stkyakobus.ac.id', '1', '');
@@ -492,11 +492,11 @@ CREATE TABLE `pengumuman_tahapan` (
 --
 
 INSERT INTO `pengumuman_tahapan` (`id`, `no`, `tahapan`, `tanggal_deadline`, `keterangan`, `aktif`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Pengajuan Proposal', '2025-08-06', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-15 17:53:38'),
-(3, 2, 'Seminar Proposal', '2025-04-14', 'Seminar Proposal Bab 1-3', '1', '2025-07-15 17:29:36', '2025-07-15 20:00:03'),
-(4, 3, 'Ujian Skripsi', '2025-06-30', 'Seminar Hasil Bab 1-5', '1', '2025-07-15 17:29:36', '2025-07-15 20:00:13'),
-(5, 4, 'Revisi dan Publikasi', '2025-07-30', 'Perbaikan dan Publikasi Skripsi', '1', '2025-07-15 17:29:36', '2025-07-15 20:00:22'),
-(6, 5, 'Yudisium', '2025-08-08', 'Pengukuhan dan Wisuda', '1', '2025-07-15 17:29:36', '2025-07-15 20:00:31');
+(1, 1, 'Pengajuan Proposal', '2025-08-06', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-19 18:16:39'),
+(3, 2, 'Seminar Proposal', '2025-10-31', 'Seminar Proposal Bab 1-3', '1', '2025-07-15 17:29:36', '2025-07-19 17:42:25'),
+(4, 3, 'Ujian Skripsi', '2026-05-25', 'Seminar Hasil Bab 1-5', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:31'),
+(5, 4, 'Revisi dan Publikasi', '2026-07-30', 'Perbaikan dan Publikasi Skripsi', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:52'),
+(6, 5, 'Yudisium', '2026-08-05', 'Pengukuhan dan Wisuda', '1', '2025-07-15 17:29:36', '2025-07-19 16:55:19');
 
 -- --------------------------------------------------------
 
@@ -550,16 +550,36 @@ CREATE TABLE `proposal_mahasiswa` (
   `deadline` datetime DEFAULT NULL,
   `tanggal_penetapan` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi menetapkan pembimbing & penguji',
   `penetapan_oleh` bigint(20) DEFAULT NULL COMMENT 'ID kaprodi yang menetapkan',
-  `workflow_status` enum('proposal','bimbingan','seminar_proposal','penelitian','seminar_skripsi','publikasi','selesai') DEFAULT 'proposal' COMMENT 'Status workflow saat ini'
+  `workflow_status` enum('proposal','bimbingan','seminar_proposal','penelitian','seminar_skripsi','publikasi','selesai') DEFAULT 'proposal' COMMENT 'Status workflow saat ini: proposal->bimbingan->seminar_proposal->penelitian->seminar_skripsi->publikasi->selesai',
+  `status_seminar_proposal` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_seminar_proposal` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk seminar proposal',
+  `tanggal_review_seminar_proposal` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review seminar proposal',
+  `tanggal_seminar_proposal` date DEFAULT NULL COMMENT 'Tanggal pelaksanaan seminar proposal',
+  `tempat_seminar_proposal` varchar(255) DEFAULT NULL COMMENT 'Tempat pelaksanaan seminar proposal',
+  `status_seminar_skripsi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_seminar_skripsi` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk seminar skripsi',
+  `tanggal_review_seminar_skripsi` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review seminar skripsi',
+  `tanggal_seminar_skripsi` date DEFAULT NULL COMMENT 'Tanggal pelaksanaan seminar skripsi',
+  `tempat_seminar_skripsi` varchar(255) DEFAULT NULL COMMENT 'Tempat pelaksanaan seminar skripsi',
+  `status_publikasi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_publikasi` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk publikasi',
+  `tanggal_review_publikasi` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review publikasi',
+  `link_repository` varchar(500) DEFAULT NULL COMMENT 'Link repository publikasi tugas akhir',
+  `tanggal_publikasi` date DEFAULT NULL COMMENT 'Tanggal publikasi ke repository',
+  `file_seminar_proposal` varchar(255) DEFAULT NULL COMMENT 'File dokumen seminar proposal (Bab 1-3)',
+  `file_seminar_skripsi` varchar(255) DEFAULT NULL COMMENT 'File dokumen seminar skripsi (Bab 1-5)',
+  `file_skripsi_final` varchar(255) DEFAULT NULL COMMENT 'File skripsi final untuk publikasi',
+  `surat_izin_penelitian` varchar(255) DEFAULT NULL COMMENT 'File surat izin penelitian',
+  `status_izin_penelitian` enum('0','1','2') DEFAULT '0' COMMENT '0=belum diminta, 1=disetujui, 2=ditolak'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `proposal_mahasiswa`
 --
 
-INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`) VALUES
-(36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', '2025-07-18 10:21:14', 25, 1, NULL, NULL, '0', '1', 'Proposal sudah baik dan bisa langsung mulai bimbingan. Terimakasih', '2025-07-17 17:18:16', '0', NULL, NULL, NULL, '2025-07-17 17:18:16', 10, 'proposal'),
-(37, 33, 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'd2ff01bd1f6cb9b54d4059526a3fb112.docx', '2025-07-18 10:21:14', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal');
+INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`) VALUES
+(36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', '2025-07-18 10:21:14', 25, 1, NULL, NULL, '0', '1', 'Proposal sudah baik dan bisa langsung mulai bimbingan. Terimakasih', '2025-07-17 17:18:16', '0', NULL, NULL, NULL, '2025-07-17 17:18:16', 10, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0'),
+(37, 33, 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'd2ff01bd1f6cb9b54d4059526a3fb112.docx', '2025-07-18 10:21:14', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0');
 
 -- --------------------------------------------------------
 
@@ -956,7 +976,12 @@ ALTER TABLE `prodi`
 -- Indexes for table `proposal_mahasiswa`
 --
 ALTER TABLE `proposal_mahasiswa`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_workflow_status` (`workflow_status`),
+  ADD KEY `idx_status_seminar_proposal` (`status_seminar_proposal`),
+  ADD KEY `idx_status_seminar_skripsi` (`status_seminar_skripsi`),
+  ADD KEY `idx_status_publikasi` (`status_publikasi`),
+  ADD KEY `idx_mahasiswa_workflow` (`mahasiswa_id`,`workflow_status`);
 
 --
 -- Indexes for table `proposal_workflow`

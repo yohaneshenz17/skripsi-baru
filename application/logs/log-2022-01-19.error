@@ -1,0 +1,37 @@
+ERROR - 2022-01-19 12:05:55 --> 404 Page Not Found: admin/Fakultas/index
+ERROR - 2022-01-19 12:09:30 --> 404 Page Not Found: admin/Fakultas/index
+ERROR - 2022-01-19 12:09:32 --> 404 Page Not Found: admin/Fakultas/index
+ERROR - 2022-01-19 12:09:32 --> 404 Page Not Found: admin/Fakultas/index
+ERROR - 2022-01-19 12:09:33 --> 404 Page Not Found: admin/Fakultas/index
+ERROR - 2022-01-19 12:10:32 --> Query error: Table 'fopegram_skripsites.fakultas' doesn't exist - Invalid query: SELECT *
+FROM `fakultas`
+ERROR - 2022-01-19 12:10:32 --> Severity: error --> Exception: Call to a member function result_array() on bool /home/fopegram/public_html/demo-skripsi/application/models/Fakultas_model.php 11
+ERROR - 2022-01-19 12:11:32 --> Severity: Warning --> call_user_func_array() expects parameter 1 to be a valid callback, class 'Fakultas' does not have a method 'index_get' /home/fopegram/public_html/demo-skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2022-01-19 12:12:15 --> Query error: Table 'fopegram_skripsites.fakultas' doesn't exist - Invalid query: SELECT *
+FROM `fakultas`
+ERROR - 2022-01-19 12:12:15 --> Severity: error --> Exception: Call to a member function result_array() on bool /home/fopegram/public_html/demo-skripsi/application/models/Fakultas_model.php 11
+ERROR - 2022-01-19 12:12:16 --> Query error: Table 'fopegram_skripsites.fakultas' doesn't exist - Invalid query: SELECT *
+FROM `fakultas`
+ERROR - 2022-01-19 12:12:16 --> Severity: error --> Exception: Call to a member function result_array() on bool /home/fopegram/public_html/demo-skripsi/application/models/Fakultas_model.php 11
+ERROR - 2022-01-19 12:12:18 --> Query error: Table 'fopegram_skripsites.fakultas' doesn't exist - Invalid query: SELECT *
+FROM `fakultas`
+ERROR - 2022-01-19 12:12:18 --> Severity: error --> Exception: Call to a member function result_array() on bool /home/fopegram/public_html/demo-skripsi/application/models/Fakultas_model.php 11
+ERROR - 2022-01-19 12:12:36 --> Query error: Table 'fopegram_skripsites.fakultas' doesn't exist - Invalid query: SELECT *
+FROM `fakultas`
+ERROR - 2022-01-19 12:12:36 --> Severity: error --> Exception: Call to a member function result_array() on bool /home/fopegram/public_html/demo-skripsi/application/models/Fakultas_model.php 11
+ERROR - 2022-01-19 12:12:37 --> Query error: Table 'fopegram_skripsites.fakultas' doesn't exist - Invalid query: SELECT *
+FROM `fakultas`
+ERROR - 2022-01-19 12:12:37 --> Severity: error --> Exception: Call to a member function result_array() on bool /home/fopegram/public_html/demo-skripsi/application/models/Fakultas_model.php 11
+ERROR - 2022-01-19 12:15:00 --> Severity: Warning --> call_user_func_array() expects parameter 1 to be a valid callback, class 'Fakultas' does not have a method 'index_post' /home/fopegram/public_html/demo-skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2022-01-19 12:15:04 --> Severity: Warning --> call_user_func_array() expects parameter 1 to be a valid callback, class 'Fakultas' does not have a method 'index_post' /home/fopegram/public_html/demo-skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2022-01-19 12:15:08 --> Severity: Warning --> call_user_func_array() expects parameter 1 to be a valid callback, class 'Fakultas' does not have a method 'index_post' /home/fopegram/public_html/demo-skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2022-01-19 12:15:26 --> Severity: Warning --> call_user_func_array() expects parameter 1 to be a valid callback, class 'Fakultas' does not have a method 'index_post' /home/fopegram/public_html/demo-skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2022-01-19 12:17:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-01-19 12:17:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-01-19 12:18:08 --> Severity: Warning --> call_user_func_array() expects parameter 1 to be a valid callback, class 'Prodi' does not have a method 'index_get' /home/fopegram/public_html/demo-skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2022-01-19 12:57:19 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-01-19 12:57:19 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-01-19 12:59:14 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-01-19 12:59:14 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-01-19 13:00:49 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2022-01-19 13:00:49 --> 404 Page Not Found: Cdn/vendor

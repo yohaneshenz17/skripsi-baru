@@ -1,0 +1,18 @@
+ERROR - 2025-07-13 16:00:43 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-13 16:19:55 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-13 16:20:53 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-13 16:21:50 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-13 16:28:29 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-13 17:08:27 --> 404 Page Not Found: GetDeadline/index
+ERROR - 2025-07-13 17:20:47 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-13 17:22:52 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-13 17:29:51 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-13 17:29:57 --> 404 Page Not Found: Lihat-selengkapnya/10
+ERROR - 2025-07-13 17:30:00 --> Severity: Warning --> file_get_contents(): SSL: Success /home/stkp7133/public_html/skripsi/application/views/template/admin.php 1
+ERROR - 2025-07-13 17:30:00 --> Severity: Warning --> file_get_contents(): Failed to enable crypto /home/stkp7133/public_html/skripsi/application/views/template/admin.php 1
+ERROR - 2025-07-13 17:30:00 --> Severity: Warning --> file_get_contents(https://stkyakobus.ac.id/skripsi/cdn/db/app.json): Failed to open stream: operation failed /home/stkp7133/public_html/skripsi/application/views/template/admin.php 1
+ERROR - 2025-07-13 17:30:33 --> 404 Page Not Found: Lihat-selengkapnya/11
+ERROR - 2025-07-13 17:32:13 --> 404 Page Not Found: Lihat-selengkapnya/2
+ERROR - 2025-07-13 17:32:49 --> 404 Page Not Found: Lihat-selengkapnya/10
+ERROR - 2025-07-13 17:41:21 --> 404 Page Not Found: admin/Lihat_selengkapnya/10
+ERROR - 2025-07-13 17:56:22 --> 404 Page Not Found: GetAllData/mahasiswa

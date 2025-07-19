@@ -1,0 +1,4 @@
+ERROR - 2025-07-07 06:51:03 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Konsultasi_model.php 41
+ERROR - 2025-07-07 06:51:03 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-07 06:51:05 --> Severity: Warning --> Undefined array key "mahasiswa_id" /home/stkp7133/public_html/skripsi/application/models/Penelitian_model.php 29
+ERROR - 2025-07-07 06:51:05 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578

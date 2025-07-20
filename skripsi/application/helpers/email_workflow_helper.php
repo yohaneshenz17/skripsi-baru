@@ -338,7 +338,7 @@ if (!function_exists('template_email_footer')) {
                                     <p style='margin: 0 0 10px 0; font-size: 14px; color: #6c757d;'>
                                         <strong>STK Santo Yakobus Merauke</strong><br>
                                         Jl. Missi 2, Mandala, Merauke, Papua Selatan<br>
-                                        Telp: (0971) 321264 | Email: info@stkyakobus.ac.id
+                                        Telp: (0971) 3330264 | Email: sipd@stkyakobus.ac.id
                                     </p>
                                     <p style='margin: 0; font-size: 12px; color: #adb5bd;'>
                                         Email ini dikirim otomatis oleh sistem. Mohon tidak membalas email ini.

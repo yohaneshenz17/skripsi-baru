@@ -43,6 +43,7 @@ $config['email_template'] = [
     'institution_name' => 'STK Santo Yakobus Merauke',
     'institution_address' => 'Jl. Missi 2, Mandala, Merauke, Papua Selatan',
     'institution_phone' => '09713330264',
+    'institution_email' => 'sipd@stkyakobus.ac.id',
     'system_name' => 'Sistem Informasi Manajemen Tugas Akhir'
 ];
 

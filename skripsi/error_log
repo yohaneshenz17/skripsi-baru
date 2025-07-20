@@ -318,3 +318,32 @@
 [19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/aa6c3d06abf291b0ae23511283ef5698.jpg
 [19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Database updated successfully with foto: 47b8a620332e72136adead99e0b0120e.jpg
 [19-Jul-2025 19:17:59 Asia/Jakarta] DEBUG: Session updated with foto: 47b8a620332e72136adead99e0b0120e.jpg
+[20-Jul-2025 11:54:21 Asia/Jakarta] PHP Deprecated:  Required parameter $data follows optional parameter $id in /home/stkp7133/public_html/skripsi/application/models/Hasil_kegiatan_model.php on line 59
+[20-Jul-2025 12:41:32 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function mail() in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php:403
+Stack trace:
+#0 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(337): sendSimpleTestEmail(Array, 'yohaneshenz@stk...')
+#1 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(98): sendTestEmail()
+#2 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(47): handleAction('send_test_email')
+#3 {main}
+  thrown in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php on line 403
+[20-Jul-2025 12:45:47 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function mail() in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php:403
+Stack trace:
+#0 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(337): sendSimpleTestEmail(Array, 'yohaneshenz@stk...')
+#1 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(98): sendTestEmail()
+#2 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(47): handleAction('send_test_email')
+#3 {main}
+  thrown in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php on line 403
+[20-Jul-2025 12:46:56 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function mail() in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php:403
+Stack trace:
+#0 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(337): sendSimpleTestEmail(Array, 'yohaneshenz@stk...')
+#1 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(98): sendTestEmail()
+#2 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(47): handleAction('send_test_email')
+#3 {main}
+  thrown in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php on line 403
+[20-Jul-2025 12:47:24 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function mail() in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php:403
+Stack trace:
+#0 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(337): sendSimpleTestEmail(Array, 'dedydbeau@gmail...')
+#1 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(98): sendTestEmail()
+#2 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(47): handleAction('send_test_email')
+#3 {main}
+  thrown in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php on line 403

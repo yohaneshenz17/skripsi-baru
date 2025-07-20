@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 20, 2025 at 08:27 AM
+-- Generation Time: Jul 20, 2025 at 02:44 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -152,6 +152,27 @@ CREATE TABLE `email_sender` (
 --
 
 INSERT INTO `email_sender` (`id`, `email`, `password`, `smtp_port`, `smtp_host`) VALUES
+(1, 'stkyakobus@gmail.com', 'yonroxhraathnaug', '587', 'smtp.gmail.com');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `email_sender_backup_20250720_124531`
+--
+
+CREATE TABLE `email_sender_backup_20250720_124531` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `smtp_port` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `smtp_host` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `email_sender_backup_20250720_124531`
+--
+
+INSERT INTO `email_sender_backup_20250720_124531` (`id`, `email`, `password`, `smtp_port`, `smtp_host`) VALUES
 (1, 'stkyakobus@gmail.com', 'yonroxhraathnaug', '465', 'ssl://smtp.gmail.com');
 
 -- --------------------------------------------------------
@@ -1071,7 +1092,7 @@ ALTER TABLE `konsultasi`
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`

@@ -337,6 +337,10 @@ foreach ($dataUser as $du) {
 
 <?php $this->app->section() ?>
 <style>
+/* ============================================
+   WORKFLOW STEP COLOR FIXES - KONTRAS YANG BAIK
+============================================ */
+
 .workflow-step {
     transition: all 0.3s ease;
 }
@@ -374,15 +378,151 @@ foreach ($dataUser as $du) {
     border-radius: 50%;
     margin-right: 1rem;
 }
+
+/* Status Completed - Hijau */
+.workflow-icon-completed {
+    background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important;
+    color: white !important;
+}
+
+.workflow-text-completed {
+    color: #2dce89 !important;
+    font-weight: 600 !important;
+}
+
+/* Status Active - Biru */
+.workflow-icon-active {
+    background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 6px rgba(94, 114, 228, 0.4) !important;
+    animation: pulse-primary 2s infinite;
+}
+
+.workflow-text-active {
+    color: #5e72e4 !important;
+    font-weight: 700 !important;
+}
+
+/* Status Pending - Abu-abu dengan kontras yang baik */
+.workflow-icon-pending {
+    background: linear-gradient(87deg, #8898aa 0, #6c757d 100%) !important;
+    color: white !important;
+    border: 2px solid #dee2e6;
+}
+
+.workflow-text-pending {
+    color: #6c757d !important; /* Warna abu-abu gelap yang kontras */
+    font-weight: 500 !important;
+}
+
+/* Hover effects */
+.workflow-step:hover .workflow-icon-pending {
+    background: linear-gradient(87deg, #6c757d 0, #5a6169 100%) !important;
+    transform: scale(1.05);
+}
+
+.workflow-step:hover .workflow-text-pending {
+    color: #495057 !important;
+}
+
+.workflow-step:hover .workflow-icon-active {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(94, 114, 228, 0.6) !important;
+}
+
+.workflow-step:hover .workflow-icon-completed {
+    transform: scale(1.05);
+}
+
+/* Animation untuk status active */
+@keyframes pulse-primary {
+    0% {
+        box-shadow: 0 4px 6px rgba(94, 114, 228, 0.4);
+    }
+    50% {
+        box-shadow: 0 6px 12px rgba(94, 114, 228, 0.6);
+    }
+    100% {
+        box-shadow: 0 4px 6px rgba(94, 114, 228, 0.4);
+    }
+}
+
+/* Badge color overrides untuk konsistensi */
+.workflow-step .badge-secondary {
+    background-color: #6c757d !important;
+    color: white !important;
+    border: 1px solid #5a6169;
+}
+
+.workflow-step .badge-primary {
+    background-color: #5e72e4 !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(94, 114, 228, 0.3);
+}
+
+.workflow-step .badge-success {
+    background-color: #2dce89 !important;
+    color: white !important;
+}
+
+/* Override untuk memastikan tidak ada warna putih pada text pending */
+.text-secondary.workflow-text-pending {
+    color: #6c757d !important;
+}
+
+.text-muted.workflow-text-pending {
+    color: #6c757d !important;
+}
+
+/* Pastikan icon selalu putih di dalam circle */
+.workflow-icon-pending i,
+.workflow-icon-active i,
+.workflow-icon-completed i {
+    color: white !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 767.98px) {
+    .workflow-text-pending,
+    .workflow-text-active,
+    .workflow-text-completed {
+        font-size: 0.875rem !important;
+    }
+    
+    .workflow-icon-pending,
+    .workflow-icon-active,
+    .workflow-icon-completed {
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
 </style>
 
 <script>
+// FIXED: Definisi base_url dan fungsi call
+var base_url = '<?= base_url() ?>';
+
+// FIXED: Fungsi call() yang benar
+function call(url, data = null) {
+    return $.ajax({
+        url: base_url + url,
+        type: data ? 'POST' : 'GET',
+        data: data,
+        dataType: 'json'
+    });
+}
+
 $(document).ready(function() {
+    console.log('Dashboard script loaded'); // Debug
+    
     // Load data mahasiswa (existing functionality)
     call('api/mahasiswa/detail/<?= $this->session->userdata('id') ?>').done(function(req) {
         if (req.data) {
             $('.total-proposal').html(req.data.proposal.length);
         }
+    }).fail(function() {
+        console.log('Error loading mahasiswa data');
+        $('.total-proposal').html('0');
     });
 
     // Load workflow progress
@@ -398,8 +538,13 @@ $(document).ready(function() {
     loadRecentActivities();
 });
 
+// FIXED: loadWorkflowProgress dengan warna yang kontras
 function loadWorkflowProgress() {
+    console.log('Loading workflow progress...'); // Debug
+    
     call('mahasiswa/dashboard/get_workflow_progress').done(function(response) {
+        console.log('Workflow response:', response); // Debug
+        
         if (response.status === 'success') {
             const data = response.data;
             
@@ -410,26 +555,41 @@ function loadWorkflowProgress() {
             $('#progress-bar').css('width', data.progress_percentage + '%');
             $('#current-stage').text(data.current_stage_name);
             
-            // Update workflow steps
+            // FIXED: Update workflow steps dengan warna yang kontras
             let stepsHtml = '';
             Object.keys(data.stages).forEach(function(key) {
                 const stage = data.stages[key];
                 let statusBadge = '';
+                let iconColor = '';
+                let textColor = '';
+                let bgColor = '';
+                
+                // PERBAIKAN: Set warna berdasarkan status dengan kontras yang baik
                 if (stage.status === 'completed') {
                     statusBadge = '<span class="badge badge-success badge-sm">Selesai</span>';
+                    iconColor = 'success';
+                    textColor = 'success';
+                    bgColor = 'success';
                 } else if (stage.status === 'active') {
                     statusBadge = '<span class="badge badge-primary badge-sm">Aktif</span>';
+                    iconColor = 'primary';
+                    textColor = 'primary';
+                    bgColor = 'primary';
                 } else {
+                    // PENDING - WARNA YANG KONTRAS DAN MUDAH DIBACA
                     statusBadge = '<span class="badge badge-secondary badge-sm">Pending</span>';
+                    iconColor = 'secondary';
+                    textColor = 'muted'; // Gunakan text-muted untuk kontras yang baik
+                    bgColor = 'secondary';
                 }
                 
                 stepsHtml += `
                     <div class="col-md-2 text-center mb-3">
                         <div class="workflow-step">
-                            <div class="icon icon-shape bg-gradient-${stage.color} text-white rounded-circle shadow mb-2 mx-auto">
+                            <div class="icon icon-shape bg-gradient-${bgColor} text-white rounded-circle shadow mb-2 mx-auto workflow-icon-${stage.status}">
                                 <i class="ni ni-${getStageIcon(key)}"></i>
                             </div>
-                            <h6 class="text-${stage.color} text-sm font-weight-bold">
+                            <h6 class="text-${textColor} text-sm font-weight-bold workflow-text-${stage.status}">
                                 ${stage.name}
                             </h6>
                             ${statusBadge}
@@ -445,11 +605,23 @@ function loadWorkflowProgress() {
             $('#stage-description').text(getStageDescription(data.current_stage));
             $('#current-stage-info').show();
         }
+    }).fail(function(xhr, status, error) {
+        console.log('Error loading workflow:', error); // Debug
+        $('#workflow-steps').html(`
+            <div class="col-12 text-center">
+                <i class="ni ni-notification-70 fa-2x text-danger mb-2"></i>
+                <p class="text-muted">Gagal memuat progress workflow</p>
+            </div>
+        `);
     });
 }
 
 function loadNotifikasi() {
+    console.log('Loading notifikasi...'); // Debug
+    
     call('mahasiswa/dashboard/get_notifikasi').done(function(response) {
+        console.log('Notifikasi response:', response); // Debug
+        
         if (response.status === 'success') {
             const notifikasi = response.data;
             let html = '';
@@ -484,21 +656,41 @@ function loadNotifikasi() {
             
             $('#notifikasi-container').html(html);
         }
+    }).fail(function(xhr, status, error) {
+        console.log('Error loading notifikasi:', error); // Debug
+        $('#notifikasi-container').html(`
+            <div class="text-center py-3">
+                <i class="ni ni-notification-70 fa-2x text-danger mb-2"></i>
+                <p class="text-muted mb-0 text-sm">Gagal memuat notifikasi</p>
+            </div>
+        `);
     });
 }
 
 function loadStatistikBimbingan() {
+    console.log('Loading statistik bimbingan...'); // Debug
+    
     call('mahasiswa/dashboard/get_statistik_bimbingan').done(function(response) {
+        console.log('Statistik response:', response); // Debug
+        
         if (response.status === 'success') {
             const stats = response.data;
             $('#total-bimbingan').text(stats.total_bimbingan);
             $('#bimbingan-bulan-ini').text(stats.bimbingan_bulan_ini);
         }
+    }).fail(function(xhr, status, error) {
+        console.log('Error loading statistik:', error); // Debug
+        $('#total-bimbingan').text('0');
+        $('#bimbingan-bulan-ini').text('0');
     });
 }
 
 function loadRecentActivities() {
+    console.log('Loading recent activities...'); // Debug
+    
     call('mahasiswa/dashboard/get_recent_activities').done(function(response) {
+        console.log('Activities response:', response); // Debug
+        
         if (response.status === 'success') {
             const activities = response.data;
             let html = '';
@@ -555,6 +747,14 @@ function loadRecentActivities() {
             
             $('#recent-activities').html(html);
         }
+    }).fail(function(xhr, status, error) {
+        console.log('Error loading activities:', error); // Debug
+        $('#recent-activities').html(`
+            <div class="text-center py-4">
+                <i class="ni ni-time-alarm fa-3x text-danger mb-3"></i>
+                <p class="text-muted mb-0">Gagal memuat aktivitas</p>
+            </div>
+        `);
     });
 }
 

@@ -152,6 +152,10 @@ class Kaprodi extends CI_Controller {
         return ob_get_clean();
     }
 
+    // ============================================
+    // PERBAIKAN METHOD review_proposal() DAN _get_review_proposal_content()
+    // ============================================
+    
     public function review_proposal($proposal_id) {
         $data['title'] = 'Review Detail Proposal';
         
@@ -161,11 +165,15 @@ class Kaprodi extends CI_Controller {
             mahasiswa.nim, 
             mahasiswa.nama as nama_mahasiswa, 
             mahasiswa.email as email_mahasiswa,
-            prodi.nama as nama_prodi
+            prodi.nama as nama_prodi,
+            d1.nama as nama_pembimbing,
+            d2.nama as nama_kaprodi_reviewer
         ');
         $this->db->from('proposal_mahasiswa');
         $this->db->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id');
         $this->db->join('prodi', 'mahasiswa.prodi_id = prodi.id');
+        $this->db->join('dosen d1', 'proposal_mahasiswa.dosen_id = d1.id', 'left');
+        $this->db->join('dosen d2', 'proposal_mahasiswa.penetapan_oleh = d2.id', 'left');
         $this->db->where('proposal_mahasiswa.id', $proposal_id);
         $this->db->where('mahasiswa.prodi_id', $this->prodi_id);
         
@@ -196,6 +204,11 @@ class Kaprodi extends CI_Controller {
         // PERBAIKAN: Extract data agar tersedia sebagai variabel lokal
         extract($data);
         
+        // Tentukan apakah proposal sudah di-review
+        $is_reviewed = ($proposal->status_kaprodi != '0'); // 0 = belum di-review, 1 = disetujui, 2 = ditolak
+        $is_approved = ($proposal->status_kaprodi == '1');
+        $is_rejected = ($proposal->status_kaprodi == '2');
+        
         ob_start();
         ?>
         <div class="row">
@@ -215,6 +228,25 @@ class Kaprodi extends CI_Controller {
                         </div>
                     </div>
                     <div class="card-body">
+                        <!-- Status Alert -->
+                        <?php if($is_reviewed): ?>
+                        <div class="alert alert-<?= $is_approved ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
+                            <span class="alert-icon">
+                                <i class="fa fa-<?= $is_approved ? 'check-circle' : 'times-circle' ?>"></i>
+                            </span>
+                            <span class="alert-text">
+                                <strong>Proposal Sudah Di-review!</strong><br>
+                                Status: <strong><?= $is_approved ? 'DISETUJUI' : 'DITOLAK' ?></strong>
+                                <?php if(!empty($proposal->tanggal_review_kaprodi)): ?>
+                                pada <?= date('d/m/Y H:i', strtotime($proposal->tanggal_review_kaprodi)) ?>
+                                <?php endif; ?>
+                                <?php if(!empty($proposal->nama_kaprodi_reviewer)): ?>
+                                oleh <?= $proposal->nama_kaprodi_reviewer ?>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                        <?php endif; ?>
+    
                         <div class="row">
                             <!-- Detail Mahasiswa -->
                             <div class="col-md-6">
@@ -266,14 +298,129 @@ class Kaprodi extends CI_Controller {
                                             <?php endif; ?>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Status Current -->
+                                    <div class="form-group">
+                                        <label class="form-control-label">Status Workflow</label>
+                                        <div>
+                                            <?php 
+                                            switch($proposal->workflow_status) {
+                                                case 'proposal': echo '<span class="badge badge-info">Tahap Proposal</span>'; break;
+                                                case 'menunggu_pembimbing': echo '<span class="badge badge-warning">Menunggu Pembimbing</span>'; break;
+                                                case 'bimbingan': echo '<span class="badge badge-primary">Bimbingan</span>'; break;
+                                                case 'ditolak': echo '<span class="badge badge-danger">Ditolak</span>'; break;
+                                                default: echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
+    
                         <hr class="my-4">
-
+    
+                        <!-- History Review (jika sudah di-review) -->
+                        <?php if($is_reviewed): ?>
+                        <h5 class="heading-small text-muted mb-4">Riwayat Review</h5>
+                        <div class="card border-left-<?= $is_approved ? 'success' : 'danger' ?> shadow">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6 class="text-<?= $is_approved ? 'success' : 'danger' ?> font-weight-bold mb-2">
+                                            <i class="fa fa-<?= $is_approved ? 'check-circle' : 'times-circle' ?>"></i>
+                                            <?= $is_approved ? 'PROPOSAL DISETUJUI' : 'PROPOSAL DITOLAK' ?>
+                                        </h6>
+                                        <p class="text-sm text-muted mb-2">
+                                            <strong>Tanggal Review:</strong> 
+                                            <?= $proposal->tanggal_review_kaprodi ? date('d F Y, H:i', strtotime($proposal->tanggal_review_kaprodi)) : '-' ?>
+                                        </p>
+                                        <p class="text-sm text-muted mb-2">
+                                            <strong>Reviewer:</strong> 
+                                            <?= $proposal->nama_kaprodi_reviewer ?? 'Kaprodi' ?>
+                                        </p>
+                                        <?php if(!empty($proposal->komentar_kaprodi)): ?>
+                                        <div class="mt-3">
+                                            <label class="text-sm font-weight-bold">Komentar Review:</label>
+                                            <div class="alert alert-light">
+                                                <?= nl2br(htmlspecialchars($proposal->komentar_kaprodi)) ?>
+                                            </div>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <?php if($is_approved && !empty($proposal->nama_pembimbing)): ?>
+                                        <h6 class="text-success font-weight-bold mb-2">
+                                            <i class="fa fa-user-tie"></i> Dosen Pembimbing
+                                        </h6>
+                                        <div class="alert alert-success">
+                                            <strong><?= $proposal->nama_pembimbing ?></strong><br>
+                                            <small class="text-muted">
+                                                Ditetapkan: <?= $proposal->tanggal_penetapan ? date('d/m/Y', strtotime($proposal->tanggal_penetapan)) : '-' ?>
+                                            </small>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        <?php endif; ?>
+    
                         <!-- Form Review -->
-                        <h5 class="heading-small text-muted mb-4">Form Review Proposal</h5>
+                        <h5 class="heading-small text-muted mb-4">
+                            <?= $is_reviewed ? 'Form Review (Terkunci)' : 'Form Review Proposal' ?>
+                        </h5>
+                        
+                        <?php if($is_reviewed): ?>
+                        <!-- Form Terkunci -->
+                        <div class="alert alert-info">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <span class="alert-icon"><i class="fa fa-lock"></i></span>
+                                    <span class="alert-text">
+                                        <strong>Form Review Terkunci</strong><br>
+                                        Proposal ini sudah pernah di-review. 
+                                        <?php if($is_rejected): ?>
+                                        Jika ingin melakukan review ulang, gunakan tombol di bawah.
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                                <?php if($is_rejected): ?>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-warning btn-sm" onclick="unlockReviewForm()">
+                                        <i class="fa fa-unlock"></i> Review Ulang
+                                    </button>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <div id="locked-form">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Komentar Review</label>
+                                        <textarea class="form-control" rows="4" disabled><?= $proposal->komentar_kaprodi ?? 'Tidak ada komentar' ?></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Dosen Pembimbing</label>
+                                        <input type="text" class="form-control" value="<?= $proposal->nama_pembimbing ?? 'Belum ditetapkan' ?>" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-right">
+                                <button type="button" class="btn btn-secondary" disabled>
+                                    <i class="fa fa-lock"></i> Form Terkunci
+                                </button>
+                            </div>
+                        </div>
+                        <?php else: ?>
+                        <!-- Form Aktif -->
                         <form method="post" action="<?= base_url('kaprodi/proses_review') ?>" id="form-review">
                             <input type="hidden" name="proposal_id" value="<?= $proposal->id ?>">
                             
@@ -307,6 +454,55 @@ class Kaprodi extends CI_Controller {
                                 </button>
                             </div>
                         </form>
+                        <?php endif; ?>
+                        
+                        <!-- Form Review Ulang (hidden by default) -->
+                        <?php if($is_rejected): ?>
+                        <div id="unlock-form" style="display: none;">
+                            <div class="alert alert-warning">
+                                <strong>Review Ulang Proposal</strong><br>
+                                Anda akan melakukan review ulang untuk proposal yang sebelumnya ditolak.
+                            </div>
+                            
+                            <form method="post" action="<?= base_url('kaprodi/proses_review') ?>" id="form-review-ulang">
+                                <input type="hidden" name="proposal_id" value="<?= $proposal->id ?>">
+                                <input type="hidden" name="review_ulang" value="1">
+                                
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label class="form-control-label">Komentar Review Ulang</label>
+                                            <textarea class="form-control" name="komentar_kaprodi" rows="4" placeholder="Berikan komentar untuk review ulang..."></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-control-label">Dosen Pembimbing</label>
+                                            <select class="form-control" name="dosen_id" id="dosen_id_ulang">
+                                                <option value="">-- Pilih Dosen Pembimbing --</option>
+                                                <?php foreach($dosens as $dosen): ?>
+                                                <option value="<?= $dosen->id ?>"><?= $dosen->nama ?> (<?= $dosen->nama_prodi ?? 'Prodi tidak ditemukan' ?>)</option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <small class="text-muted">Wajib dipilih jika proposal disetujui</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-right">
+                                    <button type="button" class="btn btn-secondary" onclick="lockReviewForm()">
+                                        <i class="fa fa-times"></i> Batal
+                                    </button>
+                                    <button type="submit" name="aksi" value="tolak" class="btn btn-danger" onclick="return confirm('Yakin ingin menolak proposal ini lagi?')">
+                                        <i class="fa fa-times"></i> Tolak Proposal
+                                    </button>
+                                    <button type="submit" name="aksi" value="setujui" class="btn btn-success" onclick="return validateApprovalUlang()">
+                                        <i class="fa fa-check"></i> Setujui & Tetapkan Pembimbing
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -314,6 +510,7 @@ class Kaprodi extends CI_Controller {
         <?php
         return ob_get_clean();
     }
+
 
     private function _get_review_proposal_script() {
         ob_start();
@@ -326,6 +523,27 @@ class Kaprodi extends CI_Controller {
                 return false;
             }
             return confirm('Yakin ingin menyetujui proposal ini dan menetapkan pembimbing?');
+        }
+        
+        function validateApprovalUlang() {
+            var dosenId = $('#dosen_id_ulang').val();
+            if (!dosenId) {
+                alert('Silakan pilih dosen pembimbing terlebih dahulu!');
+                return false;
+            }
+            return confirm('Yakin ingin menyetujui proposal ini dan menetapkan pembimbing?');
+        }
+        
+        function unlockReviewForm() {
+            if (confirm('Yakin ingin melakukan review ulang untuk proposal ini?')) {
+                $('#locked-form').hide();
+                $('#unlock-form').show();
+            }
+        }
+        
+        function lockReviewForm() {
+            $('#unlock-form').hide();
+            $('#locked-form').show();
         }
         </script>
         <?php

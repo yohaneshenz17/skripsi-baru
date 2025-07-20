@@ -605,23 +605,31 @@ class Kaprodi extends CI_Controller {
         }
     }
 
+    // ============================================
+    // METHOD MAHASISWA() - DISEDERHANAKAN (hanya tampilkan tombol Detail)
+    // ============================================
     public function mahasiswa() {
         $data['title'] = 'Daftar Mahasiswa Prodi';
         
+        // Ambil data mahasiswa tanpa JOIN proposal (lebih sederhana)
+        $this->db->select('mahasiswa.*, prodi.nama as nama_prodi');
         $this->db->from('mahasiswa');
-        $this->db->where('prodi_id', $this->prodi_id);
-        $this->db->order_by('nim', 'ASC');
+        $this->db->join('prodi', 'mahasiswa.prodi_id = prodi.id');
+        $this->db->where('mahasiswa.prodi_id', $this->prodi_id);
+        $this->db->order_by('mahasiswa.nim', 'ASC');
         $data['mahasiswa_list'] = $this->db->get()->result();
         
         $this->load->view('template/kaprodi', [
             'title' => $data['title'],
             'content' => $this->_get_mahasiswa_content($data),
-            'script' => ''
+            'script' => $this->_get_mahasiswa_script()
         ]);
     }
 
+    // ============================================
+    // METHOD _get_mahasiswa_content() - DISEDERHANAKAN
+    // ============================================
     private function _get_mahasiswa_content($data) {
-        // PERBAIKAN: Extract data agar tersedia sebagai variabel lokal
         extract($data);
         
         ob_start();
@@ -631,10 +639,11 @@ class Kaprodi extends CI_Controller {
                 <div class="card">
                     <div class="card-header">
                         <h3 class="mb-0">Daftar Mahasiswa Program Studi</h3>
+                        <p class="text-sm mb-0">Data mahasiswa program studi - klik Detail untuk melihat biodata lengkap</p>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table align-items-center table-flush datatable">
+                            <table class="table align-items-center table-flush" id="datatable-mahasiswa">
                                 <thead class="thead-light">
                                     <tr>
                                         <th>No</th>
@@ -649,8 +658,16 @@ class Kaprodi extends CI_Controller {
                                     <?php $no = 1; foreach($mahasiswa_list as $mhs): ?>
                                     <tr>
                                         <td><?= $no++ ?></td>
-                                        <td><?= $mhs->nim ?></td>
-                                        <td><?= $mhs->nama ?></td>
+                                        <td>
+                                            <span class="badge badge-outline-primary"><?= $mhs->nim ?></span>
+                                        </td>
+                                        <td>
+                                            <div class="media align-items-center">
+                                                <div class="media-body">
+                                                    <span class="name mb-0 text-sm font-weight-bold"><?= $mhs->nama ?></span>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td><?= $mhs->email ?></td>
                                         <td>
                                             <?php if($mhs->status == '1'): ?>
@@ -660,8 +677,11 @@ class Kaprodi extends CI_Controller {
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <a href="#" class="btn btn-sm btn-info">
-                                                <i class="fa fa-eye"></i> Detail
+                                            <!-- Hanya tombol Detail -->
+                                            <a href="<?= base_url('kaprodi/detail_mahasiswa/' . $mhs->id) ?>" 
+                                               class="btn btn-sm btn-primary" title="Lihat Detail Mahasiswa"
+                                               data-toggle="tooltip">
+                                                <i class="fa fa-user"></i> Detail
                                             </a>
                                         </td>
                                     </tr>
@@ -673,6 +693,439 @@ class Kaprodi extends CI_Controller {
                 </div>
             </div>
         </div>
+        
+        <!-- Info Panel -->
+        <div class="row mt-4">
+            <div class="col-lg-12">
+                <div class="card bg-gradient-info">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h3 class="text-white mb-0">Informasi</h3>
+                                <p class="text-white mt-2 mb-0">
+                                    • <strong>Detail:</strong> Lihat biodata lengkap, foto, dan riwayat workflow mahasiswa<br>
+                                    • <strong>Manajemen Proposal:</strong> Gunakan menu "Usulan Proposal" untuk review dan kelola proposal<br>
+                                    • Data mahasiswa diurutkan berdasarkan NIM secara ascending
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    // ============================================
+    // METHOD BARU UNTUK SCRIPT JAVASCRIPT
+    // ============================================
+    private function _get_mahasiswa_script() {
+        ob_start();
+        ?>
+        <script>
+        $(document).ready(function() {
+            // Initialize DataTables jika library tersedia
+            if (typeof $.fn.DataTable !== 'undefined') {
+                $('#datatable-mahasiswa').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                    },
+                    "order": [[ 1, "asc" ]], // Urutkan berdasarkan NIM
+                    "pageLength": 25,
+                    "responsive": true,
+                    "columnDefs": [
+                        { "orderable": false, "targets": 6 } // Kolom aksi tidak bisa diurutkan
+                    ]
+                });
+            }
+            
+            // Enable tooltips jika library tersedia
+            if (typeof $().tooltip !== 'undefined') {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+            
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+        </script>
+        <?php
+        return ob_get_clean();
+    }
+
+    // ============================================
+    // METHOD DETAIL MAHASISWA - DIPERBAIKI LENGKAP
+    // ============================================
+    public function detail_mahasiswa($mahasiswa_id) {
+        $data['title'] = 'Detail Mahasiswa';
+        
+        // Ambil detail mahasiswa lengkap
+        $this->db->select('mahasiswa.*, prodi.nama as nama_prodi, fakultas.nama as nama_fakultas');
+        $this->db->from('mahasiswa');
+        $this->db->join('prodi', 'mahasiswa.prodi_id = prodi.id');
+        $this->db->join('fakultas', 'prodi.fakultas_id = fakultas.id', 'left');
+        $this->db->where('mahasiswa.id', $mahasiswa_id);
+        $this->db->where('mahasiswa.prodi_id', $this->prodi_id);
+        
+        $data['mahasiswa'] = $this->db->get()->row();
+        
+        if(!$data['mahasiswa']) {
+            $this->session->set_flashdata('error', 'Mahasiswa tidak ditemukan!');
+            redirect('kaprodi/mahasiswa');
+        }
+        
+        // Ambil riwayat proposal mahasiswa
+        $this->db->select('*');
+        $this->db->from('proposal_mahasiswa');
+        $this->db->where('mahasiswa_id', $mahasiswa_id);
+        $this->db->order_by('created_at', 'DESC');
+        $data['proposals'] = $this->db->get()->result();
+        
+        // Ambil riwayat jurnal bimbingan jika ada
+        $this->db->select('jurnal_bimbingan.*, proposal_mahasiswa.judul');
+        $this->db->from('jurnal_bimbingan');
+        $this->db->join('proposal_mahasiswa', 'jurnal_bimbingan.proposal_id = proposal_mahasiswa.id');
+        $this->db->where('proposal_mahasiswa.mahasiswa_id', $mahasiswa_id);
+        $this->db->order_by('jurnal_bimbingan.tanggal_bimbingan', 'DESC');
+        $this->db->limit(10); // 10 bimbingan terakhir
+        $data['bimbingan'] = $this->db->get()->result();
+        
+        $this->load->view('template/kaprodi', [
+            'title' => $data['title'],
+            'content' => $this->_get_detail_mahasiswa_content($data),
+            'script' => $this->_get_detail_mahasiswa_script()
+        ]);
+    }
+    
+    private function _get_detail_mahasiswa_content($data) {
+        extract($data);
+        
+        ob_start();
+        ?>
+        <div class="row">
+            <div class="col-lg-4">
+                <!-- Card Foto dan Data Utama -->
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h3 class="mb-0">Profil Mahasiswa</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <!-- Foto Mahasiswa -->
+                        <div class="mb-3">
+                            <?php 
+                            $foto_path = '';
+                            $has_foto = false;
+                            
+                            if (!empty($mahasiswa->foto)) {
+                                // Cek di path lama
+                                $path1 = FCPATH . 'cdn/img/mahasiswa/' . $mahasiswa->foto;
+                                // Cek di path baru  
+                                $path2 = FCPATH . 'cdn/mahasiswa/foto/' . $mahasiswa->foto;
+                                
+                                if (file_exists($path1)) {
+                                    $foto_path = base_url('cdn/img/mahasiswa/' . $mahasiswa->foto);
+                                    $has_foto = true;
+                                } elseif (file_exists($path2)) {
+                                    $foto_path = base_url('cdn/mahasiswa/foto/' . $mahasiswa->foto);
+                                    $has_foto = true;
+                                }
+                            }
+                            ?>
+                            
+                            <?php if($has_foto): ?>
+                                <img src="<?= $foto_path ?>" 
+                                     alt="Foto <?= $mahasiswa->nama ?>" 
+                                     class="img-fluid rounded-circle"
+                                     style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #e9ecef;">
+                            <?php else: ?>
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center"
+                                     style="width: 150px; height: 150px; border: 3px solid #e9ecef;">
+                                    <i class="fa fa-user fa-4x text-muted"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <h4 class="mb-1"><?= $mahasiswa->nama ?></h4>
+                        <p class="text-muted mb-0"><?= $mahasiswa->nim ?></p>
+                        <p class="text-sm text-muted"><?= $mahasiswa->nama_prodi ?></p>
+                        
+                        <div class="mt-3">
+                            <?php if($mahasiswa->status == '1'): ?>
+                            <span class="badge badge-success badge-lg">Mahasiswa Aktif</span>
+                            <?php else: ?>
+                            <span class="badge badge-secondary badge-lg">Tidak Aktif</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Kontak -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="mb-0">Informasi Kontak</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item px-0">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <i class="fa fa-envelope text-primary"></i>
+                                    </div>
+                                    <div class="col">
+                                        <small class="text-muted">Email</small><br>
+                                        <span class="font-weight-bold"><?= $mahasiswa->email ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item px-0">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <i class="fa fa-phone text-primary"></i>
+                                    </div>
+                                    <div class="col">
+                                        <small class="text-muted">Nomor Telepon</small><br>
+                                        <span class="font-weight-bold"><?= $mahasiswa->nomor_telepon ?? '-' ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item px-0">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <i class="fa fa-map-marker-alt text-primary"></i>
+                                    </div>
+                                    <div class="col">
+                                        <small class="text-muted">Alamat</small><br>
+                                        <span class="font-weight-bold"><?= $mahasiswa->alamat ?? '-' ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-8">
+                <!-- Card Biodata Lengkap -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h3 class="mb-0">Biodata Lengkap</h3>
+                            </div>
+                            <div class="col text-right">
+                                <a href="<?= base_url('kaprodi/mahasiswa') ?>" class="btn btn-secondary btn-sm">
+                                    <i class="ni ni-bold-left"></i> Kembali
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="heading-small text-muted mb-4">Identitas Pribadi</h6>
+                                <div class="pl-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Nama Lengkap</label>
+                                        <p class="form-control-static font-weight-bold"><?= $mahasiswa->nama ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">NIM</label>
+                                        <p class="form-control-static font-weight-bold"><?= $mahasiswa->nim ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Tempat, Tanggal Lahir</label>
+                                        <p class="form-control-static">
+                                            <?= ($mahasiswa->tempat_lahir ?? '-') ?>
+                                            <?php if(!empty($mahasiswa->tanggal_lahir)): ?>
+                                            , <?= date('d F Y', strtotime($mahasiswa->tanggal_lahir)) ?>
+                                            <?php endif; ?>
+                                        </p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Jenis Kelamin</label>
+                                        <p class="form-control-static">
+                                            <?php 
+                                            switch($mahasiswa->jenis_kelamin) {
+                                                case 'L': echo 'Laki-laki'; break;
+                                                case 'P': echo 'Perempuan'; break;
+                                                default: echo '-';
+                                            }
+                                            ?>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="heading-small text-muted mb-4">Informasi Akademik</h6>
+                                <div class="pl-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-control-label">Program Studi</label>
+                                        <p class="form-control-static font-weight-bold"><?= $mahasiswa->nama_prodi ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Fakultas</label>
+                                        <p class="form-control-static"><?= $mahasiswa->nama_fakultas ?? '-' ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Tahun Masuk</label>
+                                        <p class="form-control-static"><?= $mahasiswa->tahun_masuk ?? '-' ?></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-label">Status Mahasiswa</label>
+                                        <p class="form-control-static">
+                                            <?php if($mahasiswa->status == '1'): ?>
+                                            <span class="badge badge-success">Aktif</span>
+                                            <?php else: ?>
+                                            <span class="badge badge-secondary">Tidak Aktif</span>
+                                            <?php endif; ?>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Riwayat Proposal -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="mb-0">Riwayat Proposal & Workflow</h3>
+                    </div>
+                    <div class="card-body">
+                        <?php if(!empty($proposals)): ?>
+                            <div class="timeline timeline-one-side">
+                                <?php foreach($proposals as $prop): ?>
+                                <div class="timeline-block">
+                                    <span class="timeline-step 
+                                        <?php 
+                                        switch($prop->workflow_status) {
+                                            case 'selesai': echo 'badge-success'; break;
+                                            case 'publikasi': case 'seminar_skripsi': echo 'badge-info'; break;
+                                            case 'bimbingan': case 'penelitian': echo 'badge-primary'; break;
+                                            case 'ditolak': echo 'badge-danger'; break;
+                                            default: echo 'badge-warning';
+                                        }
+                                        ?>">
+                                        <i class="fa fa-file-alt"></i>
+                                    </span>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="text-sm font-weight-bold mb-1"><?= substr($prop->judul, 0, 80) ?>...</h6>
+                                            <small class="text-muted"><?= date('d/m/Y', strtotime($prop->created_at)) ?></small>
+                                        </div>
+                                        <p class="text-sm text-muted mb-2"><?= substr($prop->ringkasan, 0, 150) ?>...</p>
+                                        <div class="d-flex align-items-center">
+                                            <div class="mr-3">
+                                                <strong>Status Kaprodi:</strong>
+                                                <?php 
+                                                switch($prop->status_kaprodi) {
+                                                    case '0': echo '<span class="badge badge-warning badge-sm">Menunggu Review</span>'; break;
+                                                    case '1': echo '<span class="badge badge-success badge-sm">Disetujui</span>'; break;
+                                                    case '2': echo '<span class="badge badge-danger badge-sm">Ditolak</span>'; break;
+                                                    default: echo '<span class="badge badge-secondary badge-sm">Belum Ditentukan</span>';
+                                                }
+                                                ?>
+                                            </div>
+                                            <div>
+                                                <strong>Workflow:</strong>
+                                                <?php 
+                                                switch($prop->workflow_status) {
+                                                    case 'proposal': echo '<span class="badge badge-info badge-sm">Tahap Proposal</span>'; break;
+                                                    case 'menunggu_pembimbing': echo '<span class="badge badge-warning badge-sm">Menunggu Pembimbing</span>'; break;
+                                                    case 'bimbingan': echo '<span class="badge badge-primary badge-sm">Bimbingan</span>'; break;
+                                                    case 'seminar_proposal': echo '<span class="badge badge-info badge-sm">Seminar Proposal</span>'; break;
+                                                    case 'penelitian': echo '<span class="badge badge-warning badge-sm">Penelitian</span>'; break;
+                                                    case 'seminar_skripsi': echo '<span class="badge badge-success badge-sm">Seminar Skripsi</span>'; break;
+                                                    case 'publikasi': echo '<span class="badge badge-purple badge-sm">Publikasi</span>'; break;
+                                                    case 'selesai': echo '<span class="badge badge-success badge-sm">Selesai</span>'; break;
+                                                    case 'ditolak': echo '<span class="badge badge-danger badge-sm">Ditolak</span>'; break;
+                                                    default: echo '<span class="badge badge-secondary badge-sm">Belum Ditentukan</span>';
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <a href="<?= base_url('kaprodi/review_proposal/' . $prop->id) ?>" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fa fa-eye"></i> Lihat Detail
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-4">
+                                <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Belum Ada Proposal</h5>
+                                <p class="text-muted">Mahasiswa ini belum pernah mengajukan proposal tugas akhir</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <!-- Card Riwayat Bimbingan -->
+                <?php if(!empty($bimbingan)): ?>
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="mb-0">Riwayat Bimbingan Terbaru</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Pertemuan</th>
+                                        <th>Materi Bimbingan</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach($bimbingan as $bim): ?>
+                                    <tr>
+                                        <td><?= date('d/m/Y', strtotime($bim->tanggal_bimbingan)) ?></td>
+                                        <td><span class="badge badge-outline-primary"><?= $bim->pertemuan_ke ?></span></td>
+                                        <td><?= substr($bim->materi_bimbingan, 0, 50) ?>...</td>
+                                        <td>
+                                            <?php if($bim->status_validasi == '1'): ?>
+                                            <span class="badge badge-success badge-sm">Tervalidasi</span>
+                                            <?php else: ?>
+                                            <span class="badge badge-warning badge-sm">Belum Validasi</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    private function _get_detail_mahasiswa_script() {
+        ob_start();
+        ?>
+        <script>
+        $(document).ready(function() {
+            // Enable tooltips
+            if (typeof $().tooltip !== 'undefined') {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+            
+            // Timeline animations
+            $('.timeline-block').each(function(i) {
+                $(this).delay(i * 100).fadeIn('slow');
+            });
+        });
+        </script>
         <?php
         return ob_get_clean();
     }

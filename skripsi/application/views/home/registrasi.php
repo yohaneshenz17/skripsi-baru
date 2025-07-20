@@ -9,9 +9,45 @@
     </div>
     <div class="card-body">
         
+        <!-- PERBAIKAN: Tambah Flash Message Success -->
+        <?php if($this->session->flashdata('success')): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fa fa-check-circle mr-2"></i>
+                <strong>Berhasil!</strong> <?= $this->session->flashdata('success') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+
         <?php if($this->session->flashdata('error')): ?>
-            <div class="alert alert-danger" role="alert">
-                <?= $this->session->flashdata('error') ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fa fa-exclamation-triangle mr-2"></i>
+                <strong>Error!</strong> <?= $this->session->flashdata('error') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+
+        <!-- PERBAIKAN: Tambah Flash Message Info dan Warning -->
+        <?php if($this->session->flashdata('info')): ?>
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fa fa-info-circle mr-2"></i>
+                <strong>Info!</strong> <?= $this->session->flashdata('info') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+
+        <?php if($this->session->flashdata('warning')): ?>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fa fa-exclamation-circle mr-2"></i>
+                <strong>Peringatan!</strong> <?= $this->session->flashdata('warning') ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
         <?php endif; ?>
 
@@ -107,6 +143,15 @@
                 <button type="submit" class="btn btn-primary btn-act">Daftar</button>
             </div>
         </form>
+        
+        <!-- PERBAIKAN: Tambah info sudah punya akun -->
+        <hr>
+        <div class="text-center">
+            <p class="mb-2">Sudah punya akun?</p>
+            <a href="<?= base_url('auth/login') ?>" class="btn btn-outline-primary">
+                <i class="fa fa-sign-in-alt mr-2"></i> Login di sini
+            </a>
+        </div>
     </div>
 </div>
 <?php $this->app->endSection('content') ?>
@@ -119,6 +164,11 @@
 <script src="<?= base_url() ?>cdn/plugins/canvas-resize/canvasResize.js"></script>
 <script>
     $(document).ready(function() {
+        
+        // PERBAIKAN: Auto-hide alerts setelah 5 detik
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
         
         $('#tanggal_lahir').datepicker({
             format: "dd/mm/yyyy",
@@ -146,7 +196,8 @@
                 return;
             }
 
-            btn.prop('disabled', true).html('Loading...');
+            // PERBAIKAN: Loading state yang lebih baik
+            btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-2"></i>Mendaftar...');
         });
 
         $('#file-foto').on('change', function() {

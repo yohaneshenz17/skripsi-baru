@@ -208,14 +208,32 @@
                   <small>Silakan login untuk melanjutkan</small>
                 </div>
                 
+                <!-- PERBAIKAN: Flash Messages Lengkap -->
                 <?php if($this->session->flashdata('error')): ?>
                   <div class="alert alert-danger text-center" role="alert">
+                      <i class="fas fa-exclamation-triangle mr-2"></i>
                       <?= $this->session->flashdata('error') ?>
                   </div>
                 <?php endif; ?>
+                
                 <?php if($this->session->flashdata('success')): ?>
                   <div class="alert alert-success text-center" role="alert">
+                      <i class="fas fa-check-circle mr-2"></i>
                       <?= $this->session->flashdata('success') ?>
+                  </div>
+                <?php endif; ?>
+                
+                <?php if($this->session->flashdata('info')): ?>
+                  <div class="alert alert-info text-center" role="alert">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      <?= $this->session->flashdata('info') ?>
+                  </div>
+                <?php endif; ?>
+                
+                <?php if($this->session->flashdata('warning')): ?>
+                  <div class="alert alert-warning text-center" role="alert">
+                      <i class="fas fa-exclamation-circle mr-2"></i>
+                      <?= $this->session->flashdata('warning') ?>
                   </div>
                 <?php endif; ?>
 
@@ -249,8 +267,26 @@
                   </div>
                 </form>
                 
-                <div class="text-center mt-3">
-                    <a href="<?= base_url() ?>" class="text-muted"><small>Kembali ke Halaman Utama</small></a>
+                <!-- PERBAIKAN: Tambah Link Registrasi dan Navigasi -->
+                <div class="row px-3">
+                  <div class="col-12">
+                    <div class="text-center">
+                      <p class="text-muted mb-2"><small>Belum punya akun?</small></p>
+                      <a href="<?= base_url('home/registrasi') ?>" class="btn btn-outline-primary btn-sm">
+                        <i class="ni ni-circle-08 mr-1"></i>
+                        Registrasi Mahasiswa Baru
+                      </a>
+                    </div>
+                    <hr class="my-3">
+                    <div class="text-center">
+                      <a href="<?= base_url() ?>" class="text-muted mr-3">
+                        <small><i class="ni ni-shop mr-1"></i>Beranda</small>
+                      </a>
+                      <a href="<?= base_url('home/cek') ?>" class="text-muted">
+                        <small><i class="ni ni-zoom-split-in mr-1"></i>Cek Status</small>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -270,6 +306,7 @@
   <script src="<?= base_url() ?>cdn/js/argon.js?v=1.2.0"></script>
   <script>
     $(document).ready(function() {
+        // Existing password toggle
         $('#customCheckLogin').on('click', function() {
             var passwordInput = $('input[name="password"]');
             if ($(this).prop('checked')) {
@@ -277,6 +314,21 @@
             } else {
                 passwordInput.attr('type', 'password');
             }
+        });
+        
+        // PERBAIKAN: Auto-hide alerts setelah 6 detik (lebih lama untuk success message)
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 6000);
+        
+        // PERBAIKAN: Focus pada email field saat halaman dimuat
+        $('input[name="email"]').focus();
+        
+        // PERBAIKAN: Loading state untuk tombol submit
+        $('form').on('submit', function() {
+            var submitBtn = $(this).find('button[type="submit"]');
+            submitBtn.prop('disabled', true);
+            submitBtn.html('<i class="ni ni-notification-70 mr-2"></i>Memproses...');
         });
     });
   </script>

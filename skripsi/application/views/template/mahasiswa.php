@@ -47,6 +47,25 @@ $verifikasi = $dataUser ? $dataUser->status : '';
         color: #2dce89;
     }
     
+    /* PERBAIKAN: CSS untuk foto profil yang responsive */
+    #header-profile-photo, #sidebar-profile-photo {
+        transition: all 0.3s ease;
+    }
+    
+    #header-profile-photo:hover {
+        transform: scale(1.05);
+    }
+    
+    .loading-photo {
+        opacity: 0.6;
+        animation: pulse 1.5s ease-in-out infinite alternate;
+    }
+    
+    @keyframes pulse {
+        from { opacity: 0.6; }
+        to { opacity: 1; }
+    }    
+    
     /* FIXED: Perbaikan untuk menu sidebar yang kontras */
     .navbar-vertical .navbar-nav .nav-link {
         color: #525f7f;
@@ -432,12 +451,15 @@ $verifikasi = $dataUser ? $dataUser->status : '';
             <div class="row align-items-center">
               <div class="col-auto">
                 <a href="<?= base_url('mahasiswa/profil') ?>">
-                  <?php 
-                  $foto = $this->session->userdata('foto');
-                  $avatar_path = base_url('cdn/img/mahasiswa/' . ($foto ? $foto : 'default.png'));
-                  ?>
-                  <img src="<?= $avatar_path ?>" alt="Foto Profile" class="avatar rounded-circle" 
-                       style="width: 48px; height: 48px; object-fit: cover;">
+                    <?php 
+                    $foto = $this->session->userdata('foto');
+                    $avatar_path = base_url('cdn/img/mahasiswa/' . ($foto ? $foto : 'default.png')) . '?v=' . time();
+                    ?>
+                    <img src="<?= $avatar_path ?>" alt="Foto Profile" 
+                         class="avatar rounded-circle sidebar-profile-photo" 
+                         id="sidebar-profile-photo"
+                         style="width: 48px; height: 48px; object-fit: cover;"
+                         onerror="this.src='<?= base_url('cdn/img/mahasiswa/default.png') ?>'">
                 </a>
               </div>
               <div class="col ml-n2">
@@ -511,13 +533,41 @@ $verifikasi = $dataUser ? $dataUser->status : '';
             <li class="nav-item dropdown">
               <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div class="media align-items-center">
-                  <span class="avatar avatar-sm rounded-circle">
-                    <?php
-                      $foto = $this->session->userdata('foto');
-                      $foto_path = base_url('cdn/img/mahasiswa/' . ($foto ? $foto : 'default.png'));
-                    ?>
-                    <img alt="Image placeholder" src="<?= $foto_path ?>" style="width: 100%; height: 100%; object-fit: cover;">
-                  </span>
+                    <span class="avatar avatar-sm rounded-circle">
+                      <?php
+                        // PERBAIKAN: Multi-layer fallback untuk foto
+                        $mahasiswa_id = $this->session->userdata('id');
+                        $foto_session = $this->session->userdata('foto');
+                        
+                        $foto_name = 'default.png';
+                        
+                        // Layer 1: Cek session
+                        if (!empty($foto_session) && $foto_session !== 'default.png') {
+                            $foto_name = $foto_session;
+                        } else {
+                            // Layer 2: Query database
+                            try {
+                                $mahasiswa = $this->db->get_where('mahasiswa', ['id' => $mahasiswa_id])->row();
+                                if ($mahasiswa && !empty($mahasiswa->foto)) {
+                                    $foto_name = $mahasiswa->foto;
+                                    // Sync session dengan database
+                                    $this->session->set_userdata('foto', $foto_name);
+                                }
+                            } catch (Exception $e) {
+                                log_message('error', 'Error loading mahasiswa photo: ' . $e->getMessage());
+                                $foto_name = 'default.png';
+                            }
+                        }
+                        
+                        // Cache busting dengan timestamp
+                        $timestamp = time();
+                        $foto_url = base_url('cdn/img/mahasiswa/' . $foto_name) . '?v=' . $timestamp;
+                      ?>
+                      <img alt="Foto Profil" src="<?= $foto_url ?>" 
+                           id="header-profile-photo"
+                           style="width: 100%; height: 100%; object-fit: cover;"
+                           onerror="this.src='<?= base_url('cdn/img/mahasiswa/default.png') ?>'">
+                    </span>                 
                   <div class="media-body ml-2">
                     <span class="mb-0 text-sm font-weight-bold"><?= $this->session->userdata('nama') ?></span>
                   </div>
@@ -703,6 +753,45 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       return diffDays + ' hari yang lalu';
     }
   }
-  </script>
+      <!-- PERBAIKAN: JavaScript untuk update foto real-time -->
+    <script>
+    // Global function untuk update foto di header dan sidebar
+    window.updateHeaderProfilePhoto = function(newFotoName) {
+        console.log('Global updateHeaderProfilePhoto called with:', newFotoName);
+        
+        if (!newFotoName) {
+            newFotoName = 'default.png';
+        }
+        
+        const timestamp = new Date().getTime();
+        const newFotoUrl = base_url + 'cdn/img/mahasiswa/' + newFotoName + '?v=' + timestamp;
+        
+        console.log('Updating header photo to:', newFotoUrl);
+        
+        // Update header photo
+        const headerImg = document.getElementById('header-profile-photo');
+        if (headerImg) {
+            headerImg.src = newFotoUrl;
+            console.log('Header photo updated');
+        }
+        
+        // Update sidebar photo
+        const sidebarImg = document.getElementById('sidebar-profile-photo');
+        if (sidebarImg) {
+            sidebarImg.src = newFotoUrl;
+            console.log('Sidebar photo updated');
+        }
+        
+        // Update semua foto profil lain di halaman
+        $('.foto-profil, .header-avatar-img').attr('src', newFotoUrl);
+    };
+    
+    // Event listener untuk profile photo update
+    $(document).on('profilePhotoUpdated', function(event, fotoName) {
+        if (typeof window.updateHeaderProfilePhoto === 'function') {
+            window.updateHeaderProfilePhoto(fotoName);
+        }
+    });
+    </script>
 </body>
 </html>

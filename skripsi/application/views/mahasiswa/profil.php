@@ -63,14 +63,6 @@
 								<input type="text" name="nomor_telepon" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon">
 							</div>
 							<div class="form-group">
-								<label>Alamat Orang Tua <span class="text-danger">*</span></label>
-								<textarea name="alamat_orang_tua" rows="5" class="form-control" placeholder="Masukkan Alamat Orang Tua"></textarea>
-							</div>
-							<div class="form-group">
-								<label>Nomor Telepon Orang Tua <span class="text-danger">*</span></label>
-								<input type="text" name="nomor_telepon_orang_tua" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon Orang Tua">
-							</div>
-							<div class="form-group">
 								<label>Nomor Telepon Orang Dekat <span class="text-danger">*</span></label>
 								<input type="text" name="nomor_telepon_orang_dekat" autocomplete="off" class="form-control" placeholder="Masukkan Nomor Telepon Orang Dekat">
 							</div>
@@ -126,8 +118,31 @@
 <script src="<?= base_url() ?>cdn/plugins/canvas-resize/zepto.min.js"></script>
 <script>
 	const mahasiswa_id = '<?= $this->session->userdata('id') ?>'
+	
+    // Fungsi untuk update foto di seluruh halaman
+    function updateHeaderFoto(fotoUrl) {
+        console.log('Updating header foto to:', fotoUrl);
+        
+        // Update foto di dropdown header
+        $('.navbar .dropdown .avatar img').attr('src', fotoUrl);
+        
+        // Update foto di sidebar profile card
+        $('.sidebar-profile .avatar img').attr('src', fotoUrl);
+        
+        // Update foto di form profil
+        $('form#edit img.foto').attr('src', fotoUrl);
+        
+        // Force refresh gambar dengan timestamp untuk menghindari cache
+        const timestamp = new Date().getTime();
+        const finalUrl = fotoUrl + '?v=' + timestamp;
+        
+        $('.navbar .dropdown .avatar img').attr('src', finalUrl);
+        $('.sidebar-profile .avatar img').attr('src', finalUrl);
+        $('form#edit img.foto').attr('src', finalUrl);
+    }
+	
 	$(document).ready(function() {
-
+		// Load data prodi
 		call('api/prodi').done(function(req) {
 			prodi = '<option value="">- Pilih Prodi -</option>';
 			if (req.data) {
@@ -146,54 +161,148 @@
 					})
 				} else {
 					mahasiswa = req.data;
-					$('form#edit [name=nim]').val(mahasiswa.nim);
-					$('form#edit [name=nama]').val(mahasiswa.nama);
-					$('form#edit [name=prodi_id]').val(mahasiswa.prodi_id);
-					console.log(mahasiswa);
-					$('form#edit [name=jenis_kelamin]').val(mahasiswa.jenis_kelamin);
-					$('form#edit [name=tempat_lahir]').val(mahasiswa.tempat_lahir);
-					$('form#edit [name=tanggal_lahir]').val(mahasiswa.tanggal_lahir);
-					$('form#edit [name=email]').val(mahasiswa.email);
-					$('form#edit [name=alamat]').val(mahasiswa.alamat);
-					$('form#edit [name=nomor_telepon]').val(mahasiswa.nomor_telepon);
-					$('form#edit [name=alamat_orang_tua]').val(mahasiswa.alamat_orang_tua);
-					$('form#edit [name=nomor_telepon_orang_tua]').val(mahasiswa.nomor_telepon_orang_tua);
-					$('form#edit [name=nomor_telepon_orang_dekat]').val(mahasiswa.nomor_telepon_orang_dekat);
-					$('form#edit [name=ipk]').val(mahasiswa.ipk);
-                    $('form#edit [name=def_status]').val(mahasiswa.status);
-                    $('form#edit [name=status]').val(mahasiswa.status);
-					$('form#edit img.foto').attr('src', base_url+'/cdn/img/mahasiswa/'+((mahasiswa.foto) ? mahasiswa.foto : 'default.png'))
+					console.log('Data mahasiswa loaded:', mahasiswa);
+					
+					// Populate form dengan error handling
+					try {
+						$('form#edit [name=nim]').val(mahasiswa.nim || '');
+						$('form#edit [name=nama]').val(mahasiswa.nama || '');
+						$('form#edit [name=prodi_id]').val(mahasiswa.prodi_id || '');
+						$('form#edit [name=jenis_kelamin]').val(mahasiswa.jenis_kelamin || '');
+						$('form#edit [name=tempat_lahir]').val(mahasiswa.tempat_lahir || '');
+						$('form#edit [name=tanggal_lahir]').val(mahasiswa.tanggal_lahir || '');
+						$('form#edit [name=email]').val(mahasiswa.email || '');
+						$('form#edit [name=alamat]').val(mahasiswa.alamat || '');
+						$('form#edit [name=nomor_telepon]').val(mahasiswa.nomor_telepon || '');
+						$('form#edit [name=nomor_telepon_orang_dekat]').val(mahasiswa.nomor_telepon_orang_dekat || '');
+						$('form#edit [name=ipk]').val(mahasiswa.ipk || '');
+						$('form#edit [name=def_status]').val(mahasiswa.status || '');
+						$('form#edit [name=status]').val(mahasiswa.status || '');
+						
+						// Set foto
+						const currentFoto = base_url+'/cdn/img/mahasiswa/'+((mahasiswa.foto) ? mahasiswa.foto : 'default.png');
+						$('form#edit img.foto').attr('src', currentFoto);
+					} catch (error) {
+						console.error('Error populating form:', error);
+						notif('Error loading data profil', 'error');
+					}
 				}
-			})
+			}).fail(function(xhr, status, error) {
+				console.error('Error loading mahasiswa data:', xhr.responseText);
+				notif('Gagal memuat data profil: ' + error, 'error');
+			});
 		}
 
+		// Load data awal
 		show()
 
-        $(document).on('change', '.pilih-foto [type=file]', function (e) {
-            canvasResize(this.files[0], {
-                height: 500,
-                width: 500,
-                crop: true,
-                rotate: 0,
-                quality: 200,
-                callback: function(data) {
-                    $('img.foto').attr('src', data);
-                    $('[name=foto]').val(data);
-                }
-            })
-        })
+		// Handle foto upload
+		$(document).on('change', '.pilih-foto [type=file]', function (e) {
+			if (this.files && this.files[0]) {
+				console.log('Processing foto upload...');
+				canvasResize(this.files[0], {
+					height: 500,
+					width: 500,
+					crop: true,
+					rotate: 0,
+					quality: 200,
+					callback: function(data) {
+						console.log('Foto processed successfully');
+						$('img.foto').attr('src', data);
+						$('[name=foto]').val(data);
+					}
+				});
+			}
+		})
 
-        $(document).on('submit', 'form#edit', function(e) {
-        	e.preventDefault();
-        	call('api/mahasiswa/update2/'+mahasiswa_id, $(this).serialize()).done(function(req) {
-        		if (req.error == true) {
-        			notif(req.message, 'error', true);
-        		} else {
-        			notif(req.message, 'success');
-        			show();
-        		}
-        	})
-        })
+		// Handle form submit dengan debugging
+		$(document).on('submit', 'form#edit', function(e) {
+			e.preventDefault();
+			
+			console.log('=== DEBUGGING SUBMIT PROFIL ===');
+			console.log('Mahasiswa ID:', mahasiswa_id);
+			console.log('Form data:', $(this).serialize());
+			
+			// Validasi client-side
+			var requiredFields = ['nim', 'nama', 'prodi_id', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'email', 'alamat', 'nomor_telepon', 'nomor_telepon_orang_dekat', 'ipk'];
+			var emptyFields = [];
+			
+			requiredFields.forEach(function(field) {
+				var value = $('[name="' + field + '"]').val();
+				if (!value || value.trim() === '') {
+					emptyFields.push(field);
+				}
+			});
+			
+			if (emptyFields.length > 0) {
+				console.warn('Empty required fields:', emptyFields);
+				notif('Mohon lengkapi semua field yang wajib diisi: ' + emptyFields.join(', '), 'warning');
+				return;
+			}
+			
+			// Validasi khusus - nomor telepon tidak boleh sama
+			var nomor_telepon = $('[name="nomor_telepon"]').val();
+			var nomor_telepon_orang_dekat = $('[name="nomor_telepon_orang_dekat"]').val();
+			
+			if (nomor_telepon === nomor_telepon_orang_dekat) {
+				notif('Nomor telepon pribadi dan nomor telepon orang dekat tidak boleh sama', 'warning');
+				return;
+			}
+			
+			// Tampilkan loading
+			var $submitBtn = $('button[type="submit"]');
+			var originalText = $submitBtn.html();
+			$submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+			
+			// Kirim data ke server
+			call('api/mahasiswa/update2/'+mahasiswa_id, $(this).serialize())
+			.done(function(req) {
+				console.log('Server response:', req);
+				
+				if (req.error == true) {
+					console.error('Update error:', req.message);
+					notif(req.message, 'error', true);
+				} else {
+					console.log('Update success:', req.message);
+					notif(req.message || 'Profil berhasil diperbarui', 'success');
+					
+					// PERBAIKAN: Update foto di header jika foto berubah
+					if (req.foto_updated && $('[name=foto]').val()) {
+						// Ambil nama foto dari response atau generate ulang
+						const timestamp = new Date().getTime();
+						const fotoName = req.foto_updated || (Math.floor(Date.now() / 1000) + '.png');
+						const newFotoUrl = base_url + 'cdn/img/mahasiswa/' + fotoName;
+						console.log('Updating header foto after successful upload:', newFotoUrl);
+						updateHeaderFoto(newFotoUrl);
+					}
+					
+					show(); // Reload data
+				}
+			})
+			.fail(function(xhr, status, error) {
+				console.error('AJAX Error:', {
+					status: status,
+					error: error,
+					responseText: xhr.responseText
+				});
+				
+				var errorMsg = 'Terjadi kesalahan saat menyimpan data';
+				try {
+					var response = JSON.parse(xhr.responseText);
+					if (response.message) {
+						errorMsg = response.message;
+					}
+				} catch(e) {
+					console.error('Error parsing response:', e);
+				}
+				
+				notif(errorMsg, 'error');
+			})
+			.always(function() {
+				// Reset tombol submit
+				$submitBtn.prop('disabled', false).html(originalText);
+			});
+		})
 
 	})
 </script>

@@ -198,8 +198,12 @@ class Mahasiswa_model extends CI_Model
         return $hasil;
     }
 
+    // PERBAIKAN: Update method update2() di Mahasiswa_model.php
+    // Tambahkan update session setelah foto berhasil disimpan
+    
     public function update2($input, $id)
     {
+        // Data yang akan diupdate
         $data = [
             'nim' => $input['nim'],
             'nama' => $input['nama'],
@@ -208,121 +212,197 @@ class Mahasiswa_model extends CI_Model
             'tempat_lahir' => $input['tempat_lahir'],
             'tanggal_lahir' => $input['tanggal_lahir'],
             'email' => $input['email'],
-            'alamat_orang_tua' => $input['alamat_orang_tua'],
-            'nomor_telepon_orang_tua' => $input['nomor_telepon_orang_tua'],
             'alamat' => $input['alamat'],
             'nomor_telepon' => $input['nomor_telepon'],
             'nomor_telepon_orang_dekat' => $input['nomor_telepon_orang_dekat'],
             'ipk' => $input['ipk']
         ];
-
+    
         $kondisi = ['mahasiswa.id' => $id];
-
+    
         $this->db->where($kondisi);
         $cek = $this->db->get($this->table)->num_rows();
-
+    
         if ($cek <= 0) {
             $hasil = [
                 'error' => true,
-                'message' => "data tidak ditemukan"
+                'message' => "Data tidak ditemukan"
             ];
         } else {
             $validate = $this->app->validate($data);
-
+    
             if ($validate === true) {
-                $cek = $this->db->get_where($this->table, ['mahasiswa.id <>' => $id, 'mahasiswa.nim' => $data['nim']])->num_rows();
+                // Cek duplikasi NIM
+                $cek = $this->db->get_where($this->table, [
+                    'mahasiswa.id <>' => $id, 
+                    'mahasiswa.nim' => $data['nim']
+                ])->num_rows();
+                
                 if ($cek > 0) {
                     $hasil = [
                         'error' => true,
-                        'message' => "nim sudah digunakan"
+                        'message' => "NIM sudah digunakan"
                     ];
                 } else {
                     $data['status'] = 1;
-                    if ($input['foto']) {
-                        $foto = explode(';base64,', $input['foto'])[1];
-                        $foto_nama = date('Ymdhis') . '.png';
-                        file_put_contents(FCPATH . 'cdn/img/mahasiswa/' . $foto_nama, base64_decode($foto));
-                        $data['foto'] = $foto_nama;
-
-                        $foto = $this->db->get_where($this->table, $kondisi)->row_array()['foto'];
-                        if ($foto) {
-                            unlink(FCPATH . 'cdn/img/mahasiswa/' . $foto);
+                    $foto_baru = null;
+                    
+                    // PERBAIKAN: Handle foto upload dengan error handling yang lebih baik
+                    if (!empty($input['foto'])) {
+                        try {
+                            // Pastikan folder ada
+                            $upload_path = FCPATH . 'cdn/img/mahasiswa/';
+                            if (!is_dir($upload_path)) {
+                                mkdir($upload_path, 0755, true);
+                            }
+                            
+                            // Decode base64
+                            $foto_parts = explode(';base64,', $input['foto']);
+                            if (count($foto_parts) == 2) {
+                                $foto_data = base64_decode($foto_parts[1]);
+                                $foto_nama = date('Ymdhis') . '_' . $id . '.png';
+                                
+                                // Simpan file
+                                if (file_put_contents($upload_path . $foto_nama, $foto_data)) {
+                                    $data['foto'] = $foto_nama;
+                                    $foto_baru = $foto_nama;
+                                    
+                                    log_message('info', 'Foto mahasiswa berhasil disimpan: ' . $foto_nama);
+                                    
+                                    // Hapus foto lama jika ada dan bukan default
+                                    $mahasiswa_lama = $this->db->get_where($this->table, $kondisi)->row_array();
+                                    if ($mahasiswa_lama && !empty($mahasiswa_lama['foto']) && $mahasiswa_lama['foto'] !== 'default.png') {
+                                        $foto_lama_path = $upload_path . $mahasiswa_lama['foto'];
+                                        if (file_exists($foto_lama_path)) {
+                                            unlink($foto_lama_path);
+                                            log_message('info', 'Foto lama dihapus: ' . $mahasiswa_lama['foto']);
+                                        }
+                                    }
+                                } else {
+                                    log_message('error', 'Gagal menyimpan file foto mahasiswa');
+                                    throw new Exception('Gagal menyimpan file foto');
+                                }
+                            } else {
+                                throw new Exception('Format foto tidak valid');
+                            }
+                            
+                        } catch (Exception $e) {
+                            log_message('error', 'Error upload foto mahasiswa: ' . $e->getMessage());
+                            // Continue tanpa update foto, tapi beri peringatan
+                            $hasil = [
+                                'error' => true,
+                                'message' => "Data profil berhasil disimpan, tetapi foto gagal diupload: " . $e->getMessage()
+                            ];
+                            return $hasil;
                         }
                     }
-
-                    if ($input['def_status'] != $input['status']) {
-                        if ($input['def_status'] == 0) {
-                            $isi_email = '
-                        <p>Akun anda telah diaktifkan oleh admin kami.</p>
-                        ';
-                            $this->emailm->send('Akun Diaktifkan', $data['email'], $isi_email);
+    
+                    // Update database
+                    try {
+                        $this->db->update($this->table, $data, $kondisi);
+                        
+                        if ($this->db->affected_rows() > 0 || !$this->db->error()['code']) {
+                            
+                            // PERBAIKAN: Update session dengan data terbaru
+                            $CI =& get_instance();
+                            
+                            // Update session nama jika berubah
+                            if ($data['nama'] != $CI->session->userdata('nama')) {
+                                $CI->session->set_userdata('nama', $data['nama']);
+                                log_message('info', 'Session nama updated to: ' . $data['nama']);
+                            }
+                            
+                            // Update session foto jika ada foto baru
+                            if ($foto_baru) {
+                                $CI->session->set_userdata('foto', $foto_baru);
+                                log_message('info', 'Session foto updated to: ' . $foto_baru);
+                            }
+                            
+                            // PERBAIKAN: Return response dengan informasi foto yang jelas
+                            $hasil = [
+                                'error' => false,
+                                'message' => "Profil berhasil diperbarui",
+                                'foto_updated' => !empty($foto_baru),
+                                'new_foto_name' => $foto_baru,
+                                'affected_rows' => $this->db->affected_rows()
+                            ];
+                            
+                            log_message('info', 'Mahasiswa profile updated successfully: ' . $id);
+                            
                         } else {
-                            $isi_email = '
-                        <p>Akun anda telah dinonaktifkan oleh admin kami.</p>
-                        ';
-                            $this->emailm->send('Akun Dinonaktifkan', $data['email'], $isi_email);
+                            log_message('error', 'Database update failed for mahasiswa: ' . $id . ' - ' . print_r($this->db->error(), true));
+                            $hasil = [
+                                'error' => true,
+                                'message' => "Gagal menyimpan data ke database"
+                            ];
                         }
+                        
+                    } catch (Exception $e) {
+                        log_message('error', 'Error update mahasiswa database: ' . $e->getMessage());
+                        $hasil = [
+                            'error' => true,
+                            'message' => "Gagal menyimpan data: " . $e->getMessage()
+                        ];
                     }
-
-                    $this->db->update($this->table, $data, $kondisi);
-                    $hasil = [
-                        'error' => false,
-                        'message' => "data berhasil diedit"
-                    ];
                 }
             } else {
                 $hasil = $validate;
             }
         }
-
+    
         return $hasil;
     }
-
-    public function destroy($id)
-    {
-        $kondisi = ['mahasiswa.id' => $id];
-
-        $this->db->where($kondisi);
-        $cek = $this->db->get($this->table)->num_rows();
-
-        if ($cek <= 0) {
-            $hasil = [
-                'error' => true,
-                'message' => "data tidak ditemukan"
-            ];
-        } else {
-            $this->db->where($kondisi);
-            $this->db->delete($this->table);
-            $hasil = [
-                'error' => false,
-                'message' => "data berhasil dihapus"
-            ];
-        }
-
-        return $hasil;
-    }
-
+    
+    // PERBAIKAN: Method detail dengan better error handling
     public function detail($id)
     {
-        $mahasiswa = $this->db->get_where($this->table, ['id' => $id])->row_array();
-        if ($mahasiswa) {
-            $hasil = [
-                'error' => false,
-                'message' => "data berhasil ditemukan",
-                'data' => $mahasiswa
-            ];
-            $hasil['data']['proposal'] = $this->db->get_where('proposal_mahasiswa', ['proposal_mahasiswa.mahasiswa_id' => $hasil['data']['id']])->result_array();
+        try {
+            $mahasiswa = $this->db->get_where($this->table, ['id' => $id])->row_array();
             
-            $prodi = $this->db->get_where('prodi', ['prodi.id' => $hasil['data']['prodi_id']])->row_array();
-            $prodi['fakultas'] = $this->db->get_where('fakultas', ['fakultas.id' => $prodi['fakultas_id']])->row_array();
-            $hasil['data']['prodi'] = $prodi;
-        } else {
+            if ($mahasiswa) {
+                $hasil = [
+                    'error' => false,
+                    'message' => "Data berhasil ditemukan",
+                    'data' => $mahasiswa
+                ];
+                
+                // Load data proposal dengan error handling
+                try {
+                    $hasil['data']['proposal'] = $this->db->get_where('proposal_mahasiswa', [
+                        'proposal_mahasiswa.mahasiswa_id' => $hasil['data']['id']
+                    ])->result_array();
+                } catch (Exception $e) {
+                    log_message('error', 'Error loading proposal data: ' . $e->getMessage());
+                    $hasil['data']['proposal'] = [];
+                }
+                
+                // Load data prodi dengan error handling
+                try {
+                    $prodi = $this->db->get_where('prodi', ['prodi.id' => $hasil['data']['prodi_id']])->row_array();
+                    if ($prodi) {
+                        $prodi['fakultas'] = $this->db->get_where('fakultas', ['fakultas.id' => $prodi['fakultas_id']])->row_array();
+                    }
+                    $hasil['data']['prodi'] = $prodi;
+                } catch (Exception $e) {
+                    log_message('error', 'Error loading prodi data: ' . $e->getMessage());
+                    $hasil['data']['prodi'] = null;
+                }
+                
+            } else {
+                $hasil = [
+                    'error' => true,
+                    'message' => "Data tidak ditemukan"
+                ];
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error detail mahasiswa: ' . $e->getMessage());
             $hasil = [
                 'error' => true,
-                'message' => "data tidak ditemukan"
+                'message' => "Terjadi kesalahan sistem: " . $e->getMessage()
             ];
         }
-
+    
         return $hasil;
     }
 

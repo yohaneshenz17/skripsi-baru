@@ -98,7 +98,7 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
         <div class="container">
             <a class="navbar-brand" href="<?= base_url() ?>">
                 <img src="<?= base_url() ?>cdn/img/icons/<?= $app->icon ? $app->icon : 'default.png' ?>" alt="<?= $app->nama ?>">
-                <span class="ms-2 fw-bold">STK St. Yakobus</span>
+                <span class="ms-2 fw-bold" style="font-size: 1.0rem;">STK St. Yakobus Merauke</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -137,7 +137,7 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
                         Pengumuman Tahapan Skripsi
                     </h1>
                     <p class="lead mb-4">
-                        Informasi terkini mengenai jadwal dan tahapan tugas akhir mahasiswa STK St. Yakobus Merauke
+                        Informasi terkini mengenai jadwal dan tahapan tugas akhir mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke
                     </p>
                     <a href="<?= base_url() ?>" class="back-to-home">
                         <i class="fas fa-home me-2"></i> Kembali ke Beranda
@@ -247,7 +247,7 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <h5 class="mb-3">Sekolah Tinggi Katolik Santo Yakobus</h5>
+                    <h5 class="mb-3">Sekolah Tinggi Katolik Santo Yakobus Merauke</h5>
                     <p class="mb-0">Sistem Informasi Manajemen Tugas Akhir untuk memudahkan monitoring dan pengelolaan skripsi mahasiswa.</p>
                 </div>
                 <div class="col-lg-6 text-lg-end">
@@ -262,7 +262,7 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
                             <i class="fas fa-sign-in-alt"></i> Login
                         </a>
                     </div>
-                    <p class="mb-0">&copy; <?= date('Y') ?> STK St. Yakobus Merauke. All rights reserved.</p>
+                    <p class="mb-0">&copy; <?= date('Y') ?> SIPD STK St. Yakobus Merauke. All rights reserved.</p>
                 </div>
             </div>
         </div>

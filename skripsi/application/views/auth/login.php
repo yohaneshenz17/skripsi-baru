@@ -707,7 +707,7 @@
                       <p class="text-muted mb-2"><small>Belum punya akun?</small></p>
                       <a href="<?= base_url('home/registrasi') ?>" class="btn btn-outline-primary btn-sm">
                         <i class="ni ni-circle-08 mr-1"></i>
-                        Registrasi Mahasiswa Baru
+                        Registrasi Akun Mahasiswa
                       </a>
                     </div>
                     <hr class="my-3">

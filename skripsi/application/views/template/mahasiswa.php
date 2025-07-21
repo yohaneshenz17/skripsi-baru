@@ -15,7 +15,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
   <?php include('_main/css.php') ?>
   <?= isset($styles) ? $styles : '' ?>
   
-  <!-- Custom CSS untuk sidebar -->
+  <!-- FIXED: CSS untuk sidebar dengan kontras yang baik -->
   <style>
     .sidebar-profile {
         background: linear-gradient(87deg, #11cdef 0, #1171ef 100%);
@@ -47,10 +47,287 @@ $verifikasi = $dataUser ? $dataUser->status : '';
         color: #2dce89;
     }
     
-    .navbar-vertical .navbar-nav .nav-link.active {
-        background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%);
+    /* FIXED: Perbaikan untuk menu sidebar yang kontras */
+    .navbar-vertical .navbar-nav .nav-link {
+        color: #525f7f;
+        font-weight: 500;
+        transition: all 0.15s ease;
+    }
+    
+    .navbar-vertical .navbar-nav .nav-link:hover {
+        color: #5e72e4;
+        background-color: rgba(94, 114, 228, 0.05);
         border-radius: 0.375rem;
-        color: #fff;
+    }
+    
+    .navbar-vertical .navbar-nav .nav-link.active {
+        background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+        border-radius: 0.375rem !important;
+        color: #fff !important;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    
+    .navbar-vertical .navbar-nav .nav-link.active i {
+        color: #fff !important;
+    }
+    
+    .navbar-vertical .navbar-nav .nav-link.active .nav-link-text {
+        color: #fff !important;
+    }
+    
+    /* Hover effect untuk menu active */
+    .navbar-vertical .navbar-nav .nav-link.active:hover {
+        background: linear-gradient(87deg, #4c6ef5 0, #7048e8 100%) !important;
+        color: #fff !important;
+    }
+    
+    /* Better spacing untuk menu items */
+    .navbar-vertical .navbar-nav .nav-item {
+        margin-bottom: 0.25rem;
+    }
+    
+    .navbar-vertical .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+        margin: 0 0.5rem;
+    }
+    
+    /* Icon colors */
+    .navbar-vertical .navbar-nav .nav-link i {
+        margin-right: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    /* Responsive improvements */
+    @media (max-width: 1199.98px) {
+        .navbar-vertical.navbar-collapse .navbar-nav .nav-link {
+            padding: 0.875rem 1.5rem;
+        }
+    }
+
+    /* ========================================
+       PERBAIKAN MOBILE LAYOUT - HEADER BUTTONS
+       ======================================== */
+
+    /* Container untuk button group */
+    .header-button-group {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+
+    /* Styling untuk header buttons */
+    .header-btn {
+      white-space: nowrap;
+      font-size: 0.875rem;
+      padding: 6px 12px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+      min-width: auto;
+    }
+
+    /* Desktop dan Tablet */
+    @media (min-width: 768px) {
+      .header-button-group {
+        gap: 10px;
+      }
+      
+      .header-btn {
+        font-size: 0.875rem;
+        padding: 8px 16px;
+        min-width: 80px;
+      }
+    }
+
+    /* Mobile Large (576px - 767px) */
+    @media (max-width: 767.98px) and (min-width: 576px) {
+      .header-button-group {
+        gap: 6px;
+      }
+      
+      .header-btn {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        min-width: 70px;
+      }
+      
+      .mobile-title {
+        font-size: 1.3rem !important;
+      }
+    }
+
+    /* Mobile Medium (480px - 575px) */
+    @media (max-width: 575.98px) and (min-width: 480px) {
+      .header-button-group {
+        gap: 5px;
+        justify-content: center;
+        margin-top: 5px;
+      }
+      
+      .header-btn {
+        font-size: 0.75rem;
+        padding: 5px 8px;
+        min-width: 65px;
+        flex: 0 1 auto;
+      }
+      
+      .mobile-title {
+        font-size: 1.2rem !important;
+      }
+      
+      /* Center align pada mobile */
+      .col-12.text-right {
+        text-align: center !important;
+      }
+    }
+
+    /* Mobile Small (375px - 479px) */
+    @media (max-width: 479.98px) and (min-width: 375px) {
+      .header-button-group {
+        gap: 4px;
+        justify-content: center;
+        margin-top: 8px;
+      }
+      
+      .header-btn {
+        font-size: 0.7rem;
+        padding: 4px 6px;
+        min-width: 55px;
+        flex: 0 1 auto;
+      }
+      
+      .mobile-title {
+        font-size: 1.1rem !important;
+        text-align: center;
+        display: block !important;
+      }
+      
+      .col-12.text-right {
+        text-align: center !important;
+      }
+      
+      /* Adjust header padding */
+      .header-body .py-4 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+    }
+
+    /* Mobile Extra Small (320px - 374px) */
+    @media (max-width: 374.98px) {
+      .header-button-group {
+        gap: 3px;
+        justify-content: center;
+        margin-top: 10px;
+        flex-direction: row;
+      }
+      
+      .header-btn {
+        font-size: 0.65rem;
+        padding: 3px 5px;
+        min-width: 50px;
+        flex: 0 1 auto;
+      }
+      
+      .mobile-title {
+        font-size: 1rem !important;
+        text-align: center;
+        display: block !important;
+      }
+      
+      .col-12.text-right {
+        text-align: center !important;
+      }
+      
+      /* Kompak container */
+      .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      
+      .header-body .col-12 {
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+    }
+
+    /* Untuk layar sangat kecil - stack vertikal */
+    @media (max-width: 320px) {
+      .header-button-group {
+        flex-direction: column;
+        gap: 3px;
+        align-items: stretch;
+        margin-top: 10px;
+      }
+      
+      .header-btn {
+        width: 100%;
+        max-width: 120px;
+        margin: 0 auto;
+        text-align: center;
+        font-size: 0.65rem;
+        padding: 4px 8px;
+      }
+      
+      .mobile-title {
+        font-size: 0.9rem !important;
+      }
+    }
+
+    /* Hover effects */
+    .header-btn:hover {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-btn:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    /* Icon styling */
+    .header-btn i {
+      font-size: 0.875rem;
+      margin-right: 4px;
+    }
+
+    @media (max-width: 575.98px) {
+      .header-btn i {
+        font-size: 0.75rem;
+        margin-right: 2px;
+      }
+    }
+
+    /* iPhone specific fixes */
+    @media (max-width: 414px) and (orientation: portrait) {
+      .header-body .row {
+        margin-bottom: 0;
+      }
+      
+      .header-button-group {
+        margin-top: 8px;
+      }
+    }
+
+    /* Landscape mobile */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .header-body .py-4 {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+      }
+      
+      .mobile-title {
+        font-size: 1rem !important;
+      }
+      
+      .header-btn {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+      }
     }
   </style>
 </head>
@@ -123,13 +400,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
                 </a>
               </li>
               
-              <!-- HK3 - dipindah kebawah -->
-              <li class="nav-item">
-                <a class="nav-link <?= $this->uri->segment(2) == 'hasilkegiatan' ? 'active' : '' ?>" 
-                   href="<?= base_url() ?>mahasiswa/hasilkegiatan">
-                  <i class="fa fa-crown text-pink"></i><span class="nav-link-text">HK3</span>
-                </a>
-              </li>
+              <!-- REMOVED: HK3 Menu - Dihapus karena tidak ada di workflow -->
               
               <!-- Divider -->
               <li class="nav-item">
@@ -276,13 +547,14 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       </div>
     </nav>
     
-    <!-- Header dengan breadcrumb -->
+    <!-- FIXED: Header dengan breadcrumb - MOBILE RESPONSIVE -->
     <div class="header bg-primary pb-6">
       <div class="container-fluid">
         <div class="header-body">
           <div class="row align-items-center py-4">
-            <div class="col-lg-6 col-7">
-              <h6 class="h2 text-white d-inline-block mb-0"><?= isset($title) ? $title : 'Dashboard' ?></h6>
+            <!-- FIXED: Grid system responsive -->
+            <div class="col-lg-6 col-md-7 col-sm-6 col-12 mb-2 mb-sm-0">
+              <h6 class="h2 text-white d-inline-block mb-0 mobile-title"><?= isset($title) ? $title : 'Dashboard' ?></h6>
               <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
                 <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                   <li class="breadcrumb-item">
@@ -292,9 +564,20 @@ $verifikasi = $dataUser ? $dataUser->status : '';
                 </ol>
               </nav>
             </div>
-            <div class="col-lg-6 col-5 text-right">
-              <a href="<?= base_url('mahasiswa/kontak') ?>" class="btn btn-sm btn-neutral">Kontak</a>
-              <a href="<?= base_url('mahasiswa/profil') ?>" class="btn btn-sm btn-neutral">Profil</a>
+            <!-- FIXED: Button container responsive -->
+            <div class="col-lg-6 col-md-5 col-sm-6 col-12 text-right">
+              <div class="header-button-group">
+                <a href="<?= base_url('mahasiswa/kontak') ?>" class="btn btn-sm btn-neutral header-btn">
+                  <i class="ni ni-email-83 d-inline d-sm-none"></i>
+                  <span class="d-none d-sm-inline">Kontak</span>
+                  <span class="d-inline d-sm-none">Kontak</span>
+                </a>
+                <a href="<?= base_url('mahasiswa/profil') ?>" class="btn btn-sm btn-neutral header-btn">
+                  <i class="ni ni-single-02 d-inline d-sm-none"></i>
+                  <span class="d-none d-sm-inline">Profil</span>
+                  <span class="d-inline d-sm-none">Profil</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -328,8 +611,21 @@ $verifikasi = $dataUser ? $dataUser->status : '';
   <?php include('_main/js.php') ?>
   <?= isset($script) ? $script : '' ?>
   
-  <!-- Auto-load notifications -->
+  <!-- FIXED: Auto-load notifications dengan error handling -->
   <script>
+  // Definisi base_url global
+  var base_url = '<?= base_url() ?>';
+  
+  // Fungsi call yang benar
+  function call(url, data = null) {
+      return $.ajax({
+          url: base_url + url,
+          type: data ? 'POST' : 'GET',
+          data: data,
+          dataType: 'json'
+      });
+  }
+  
   $(document).ready(function() {
     // Load notifikasi untuk dropdown
     loadNotifikasiDropdown();
@@ -339,56 +635,56 @@ $verifikasi = $dataUser ? $dataUser->status : '';
   });
   
   function loadNotifikasiDropdown() {
-    if (typeof call === 'function') {
-      call('mahasiswa/dashboard/get_notifikasi').done(function(response) {
-        if (response.status === 'success') {
-          const notifikasi = response.data;
-          const count = notifikasi.length;
-          
-          // Update badge count
-          if (count > 0) {
-            $('#notif-count').text(count).show();
-          } else {
-            $('#notif-count').hide();
-          }
-          
-          // Update dropdown content
-          let html = '';
-          if (count > 0) {
-            notifikasi.forEach(function(notif) {
-              html += `
-                <a href="#!" class="list-group-item list-group-item-action">
-                  <div class="row align-items-center">
-                    <div class="col-auto">
-                      <i class="ni ni-bell-55 text-primary"></i>
-                    </div>
-                    <div class="col ml-n2">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <h4 class="mb-0 text-sm">${notif.judul}</h4>
-                        </div>
-                        <div class="text-right text-muted">
-                          <small>${formatTimeAgo(notif.created_at)}</small>
-                        </div>
-                      </div>
-                      <p class="text-sm mb-0">${notif.pesan.substring(0, 50)}...</p>
-                    </div>
-                  </div>
-                </a>
-              `;
-            });
-          } else {
-            html = `
-              <div class="text-center py-3">
-                <p class="text-muted mb-0">Tidak ada notifikasi</p>
-              </div>
-            `;
-          }
-          
-          $('#dropdown-notifications').html(html);
+    call('mahasiswa/dashboard/get_notifikasi').done(function(response) {
+      if (response.status === 'success') {
+        const notifikasi = response.data;
+        const count = notifikasi.length;
+        
+        // Update badge count
+        if (count > 0) {
+          $('#notif-count').text(count).show();
+        } else {
+          $('#notif-count').hide();
         }
-      });
-    }
+        
+        // Update dropdown content
+        let html = '';
+        if (count > 0) {
+          notifikasi.forEach(function(notif) {
+            html += `
+              <a href="#!" class="list-group-item list-group-item-action">
+                <div class="row align-items-center">
+                  <div class="col-auto">
+                    <i class="ni ni-bell-55 text-primary"></i>
+                  </div>
+                  <div class="col ml-n2">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h4 class="mb-0 text-sm">${notif.judul.substring(0, 30)}${notif.judul.length > 30 ? '...' : ''}</h4>
+                      </div>
+                      <div class="text-right text-muted">
+                        <small>${formatTimeAgo(notif.created_at)}</small>
+                      </div>
+                    </div>
+                    <p class="text-sm mb-0">${notif.pesan.substring(0, 50)}...</p>
+                  </div>
+                </div>
+              </a>
+            `;
+          });
+        } else {
+          html = `
+            <div class="text-center py-3">
+              <p class="text-muted mb-0">Tidak ada notifikasi</p>
+            </div>
+          `;
+        }
+        
+        $('#dropdown-notifications').html(html);
+      }
+    }).fail(function() {
+      console.log('Error loading notifications dropdown');
+    });
   }
   
   function formatTimeAgo(dateString) {

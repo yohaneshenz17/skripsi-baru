@@ -947,7 +947,7 @@
             <div class="footer-content">
                 <div class="footer-left">
                     <h3>STK St. Yakobus Merauke</h3>
-                    <p>Sistem Informasi Manajemen Tugas Akhir untuk memudahkan monitoring dan pengelolaan skripsi mahasiswa.</p>
+                    <p>Sistem Informasi Manajemen Tugas Akhir Terintegrasi</p>
                 </div>
                 
                 <div class="footer-right">
@@ -966,7 +966,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="site-info text-center">
-                            <p>&copy; <?= date('Y') ?> STK St. Yakobus Merauke. All rights reserved.</p>
+                            <p>&copy; <?= date('Y') ?> Made With Love by SIPD STK. All Rights Reserved.</p>
                         </div>
                     </div>
                 </div>

@@ -11,7 +11,7 @@
                     <div class="col">
                         <h3 class="mb-0">📧 Kirim Pesan</h3>
                         <p class="text-sm mb-0 text-muted">
-                            Kirim pesan ke dosen pembimbing, kaprodi, atau staf untuk konsultasi atau bantuan
+                            Kirim pesan via email ke kaprodi, dosen, atau staf untuk konsultasi dan bantuan
                         </p>
                     </div>
                 </div>
@@ -56,14 +56,20 @@
                         </label>
                         <select class="form-control" id="penerima_role" name="penerima_role" required>
                             <option value="">-- Pilih Penerima --</option>
+                            <option value="kaprodi">👑 Kaprodi</option>
+                            <option value="dosen">🎓 Dosen</option>
+                            <option value="staf">👨‍💼 Staf/Admin</option>
                         </select>
+                        <small class="form-text text-muted">
+                            Pilih kategori penerima pesan
+                        </small>
                     </div>
                     
                     <!-- Detail Penerima -->
                     <div class="form-group" id="detailPenerima" style="display: none;">
-                        <label class="form-control-label" for="penerima_id">Detail Penerima</label>
-                        <select class="form-control" id="penerima_id" name="penerima_id">
-                            <option value="">-- Pilih --</option>
+                        <label class="form-control-label" for="penerima_id">Detail Penerima *</label>
+                        <select class="form-control" id="penerima_id" name="penerima_id" required>
+                            <option value="">-- Pilih Nama Penerima --</option>
                         </select>
                         <div id="infoPenerima" class="mt-2"></div>
                     </div>
@@ -136,7 +142,7 @@
                             <i class="ni ni-curved-next"></i> Reset
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="ni ni-send"></i> Kirim Pesan
+                            <i class="ni ni-send"></i> Kirim Email
                         </button>
                     </div>
                     
@@ -163,33 +169,10 @@
             </div>
         </div>
         
-        <!-- System Status (Development Only) -->
-        <?php if (ENVIRONMENT === 'development'): ?>
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">🔧 Debug Tools</h5>
-            </div>
-            <div class="card-body">
-                <p class="text-sm text-muted mb-3">Tools untuk debugging (hanya mode development)</p>
-                <div class="btn-group-vertical btn-block">
-                    <a href="<?= base_url('mahasiswa/debug_kontak/check_system') ?>" class="btn btn-outline-info btn-sm" target="_blank">
-                        <i class="ni ni-settings-gear-65"></i> System Check
-                    </a>
-                    <a href="<?= base_url('mahasiswa/debug_kontak/test_ajax') ?>" class="btn btn-outline-success btn-sm" target="_blank">
-                        <i class="ni ni-bullet-list-67"></i> Test AJAX
-                    </a>
-                    <a href="<?= base_url('mahasiswa/debug_kontak/create_notifikasi') ?>" class="btn btn-outline-warning btn-sm" target="_blank">
-                        <i class="ni ni-database"></i> Create Notifikasi Table
-                    </a>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-        
         <!-- Tips -->
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">💡 Tips Komunikasi</h5>
+                <h5 class="mb-0">💡 Tips Komunikasi Email</h5>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled text-sm">
@@ -207,14 +190,19 @@
                     </li>
                     <li class="mb-2">
                         <i class="ni ni-check-bold text-success"></i>
-                        Berikan waktu respons yang wajar
+                        Berikan waktu respons yang wajar (1-2 hari)
+                    </li>
+                    <li class="mb-2">
+                        <i class="ni ni-check-bold text-success"></i>
+                        Periksa email Anda untuk balasan
                     </li>
                 </ul>
                 
                 <div class="alert alert-info">
                     <small>
-                        <i class="ni ni-notification-70"></i>
-                        <strong>Info:</strong> Pesan akan dikirim via email dan tersimpan di sistem
+                        <i class="ni ni-email-83"></i>
+                        <strong>Info:</strong> Pesan akan dikirim langsung ke email penerima. 
+                        Balasan akan dikirim ke email Anda.
                     </small>
                 </div>
             </div>
@@ -229,15 +217,15 @@
                 <p class="text-sm mb-2">
                     <i class="ni ni-pin-3 text-primary"></i>
                     <strong>Alamat:</strong><br>
-                    Jl. Raya Mandala, Merauke, Papua Selatan
+                    Jl. Missi 2, Mandala, Merauke, Papua Selatan
                 </p>
                 <p class="text-sm mb-2">
                     <i class="ni ni-mobile-button text-success"></i>
-                    <strong>Telepon:</strong> (0971) 321234
+                    <strong>Telepon:</strong> (0971) 333-0264
                 </p>
                 <p class="text-sm mb-0">
                     <i class="ni ni-email-83 text-info"></i>
-                    <strong>Email:</strong> info@stkyakobus.ac.id
+                    <strong>Email:</strong> sipd@stkyakobus.ac.id
                 </p>
             </div>
         </div>
@@ -255,12 +243,11 @@ var environment = '<?= ENVIRONMENT ?>';
 
 console.log('🏫 STK Yakobus Kontak Form initialized');
 console.log('Base URL:', base_url);
-console.log('Environment:', environment);
 
-// Global data storage
+// Global data storage - STRUKTUR BARU
 let dataKontak = {
-    pembimbing: null,
-    kaprodi: null,
+    kaprodi_list: [],
+    dosen_list: [],
     staf_list: []
 };
 
@@ -389,7 +376,7 @@ $(document).ready(function() {
     updateCharCount();
 });
 
-// Load kontak data with comprehensive error handling
+// Load kontak data - UPDATED untuk struktur baru
 function loadKontakData() {
     console.log('🔄 Loading kontak data...');
     
@@ -402,7 +389,6 @@ function loadKontakData() {
         .then(function(response) {
             if (response.status === 'success') {
                 dataKontak = response.data;
-                updateDropdownPenerima();
                 updateKontakInfo();
                 
                 // Show form
@@ -410,7 +396,7 @@ function loadKontakData() {
                 showElement('kontakForm');
                 formLoaded = true;
                 
-                showAlert('success', '✅ Data kontak berhasil dimuat', true);
+                showAlert('success', `✅ Data kontak berhasil dimuat: ${response.debug.kaprodi_count} kaprodi, ${response.debug.dosen_count} dosen, ${response.debug.staf_count} staf`, true);
                 console.log('✅ Kontak data loaded successfully');
                 
             } else {
@@ -428,30 +414,7 @@ function loadKontakData() {
         });
 }
 
-function updateDropdownPenerima() {
-    let options = '<option value="">-- Pilih Penerima --</option>';
-    let hasOptions = false;
-    
-    if (dataKontak.pembimbing) {
-        options += '<option value="pembimbing">🎓 Dosen Pembimbing</option>';
-        hasOptions = true;
-    }
-    if (dataKontak.kaprodi) {
-        options += '<option value="kaprodi">👑 Kaprodi</option>';
-        hasOptions = true;
-    }
-    if (dataKontak.staf_list && dataKontak.staf_list.length > 0) {
-        options += '<option value="staf">👨‍💼 Staf/Admin</option>';
-        hasOptions = true;
-    }
-    
-    if (!hasOptions) {
-        options += '<option value="" disabled>Tidak ada kontak tersedia</option>';
-    }
-    
-    $('#penerima_role').html(options);
-}
-
+// Update dropdown penerima berdasarkan role yang dipilih
 function updatePenerima() {
     const role = $('#penerima_role').val();
     const penerimaSelect = $('#penerima_id');
@@ -459,7 +422,7 @@ function updatePenerima() {
     const infoDiv = $('#infoPenerima');
     
     // Reset
-    penerimaSelect.html('<option value="">-- Pilih --</option>');
+    penerimaSelect.html('<option value="">-- Pilih Nama Penerima --</option>');
     infoDiv.html('');
     
     if (!role) {
@@ -469,36 +432,69 @@ function updatePenerima() {
     
     detailDiv.show();
     
-    if (role === 'pembimbing' && dataKontak.pembimbing) {
-        penerimaSelect.html(`<option value="${dataKontak.pembimbing.id}">${dataKontak.pembimbing.nama}</option>`);
-        penerimaSelect.val(dataKontak.pembimbing.id);
-        updateInfoPenerima();
-    } else if (role === 'kaprodi' && dataKontak.kaprodi) {
-        penerimaSelect.html(`<option value="${dataKontak.kaprodi.id}">${dataKontak.kaprodi.nama}</option>`);
-        penerimaSelect.val(dataKontak.kaprodi.id);
-        updateInfoPenerima();
-    } else if (role === 'staf' && dataKontak.staf_list.length > 0) {
-        dataKontak.staf_list.forEach(staf => {
-            penerimaSelect.append(`<option value="${staf.id}">${staf.nama}</option>`);
+    let listData = [];
+    let emptyMessage = 'Tidak ada data tersedia';
+    
+    if (role === 'kaprodi') {
+        listData = dataKontak.kaprodi_list || [];
+        emptyMessage = 'Tidak ada kaprodi tersedia';
+    } else if (role === 'dosen') {
+        listData = dataKontak.dosen_list || [];
+        emptyMessage = 'Tidak ada dosen tersedia';
+    } else if (role === 'staf') {
+        listData = dataKontak.staf_list || [];
+        emptyMessage = 'Tidak ada staf tersedia';
+    }
+    
+    if (listData.length > 0) {
+        listData.forEach(item => {
+            let displayName = item.nama;
+            if (item.nama_prodi) {
+                displayName += ` (${item.nama_prodi})`;
+            }
+            penerimaSelect.append(`<option value="${item.id}">${displayName}</option>`);
         });
+    } else {
+        penerimaSelect.append(`<option value="" disabled>${emptyMessage}</option>`);
     }
 }
 
+// Update info penerima berdasarkan pilihan
 function updateInfoPenerima() {
     const role = $('#penerima_role').val();
     const penerimaId = $('#penerima_id').val();
     const infoDiv = $('#infoPenerima');
     
+    if (!penerimaId || !role) {
+        infoDiv.html('');
+        return;
+    }
+    
     let data = null;
-    if (role === 'pembimbing' && dataKontak.pembimbing) {
-        data = dataKontak.pembimbing;
-    } else if (role === 'kaprodi' && dataKontak.kaprodi) {
-        data = dataKontak.kaprodi;
+    
+    if (role === 'kaprodi') {
+        data = dataKontak.kaprodi_list.find(item => item.id == penerimaId);
+    } else if (role === 'dosen') {
+        data = dataKontak.dosen_list.find(item => item.id == penerimaId);
     } else if (role === 'staf') {
-        data = dataKontak.staf_list.find(s => s.id == penerimaId);
+        data = dataKontak.staf_list.find(item => item.id == penerimaId);
     }
     
     if (data) {
+        let roleIcon = '👤';
+        let roleName = 'Kontak';
+        
+        if (role === 'kaprodi') {
+            roleIcon = '👑';
+            roleName = 'Kaprodi';
+        } else if (role === 'dosen') {
+            roleIcon = '🎓';
+            roleName = 'Dosen';
+        } else if (role === 'staf') {
+            roleIcon = '👨‍💼';
+            roleName = 'Staf/Admin';
+        }
+        
         infoDiv.html(`
             <div class="alert alert-info">
                 <div class="row align-items-center">
@@ -506,9 +502,11 @@ function updateInfoPenerima() {
                         <i class="ni ni-circle-08 fa-2x"></i>
                     </div>
                     <div class="col">
-                        <h6 class="mb-0">${data.nama}</h6>
-                        <small class="text-muted">${data.email || 'Email tidak tersedia'}</small>
-                        ${data.nomor_telepon ? `<br><small class="text-success"><i class="ni ni-mobile-button"></i> ${data.nomor_telepon}</small>` : ''}
+                        <h6 class="mb-0">${roleIcon} ${data.nama}</h6>
+                        <small class="text-muted">${roleName}</small>
+                        ${data.nama_prodi ? `<br><small class="text-primary">${data.nama_prodi}</small>` : ''}
+                        <br><small class="text-success"><i class="ni ni-email-83"></i> ${data.email}</small>
+                        ${data.nomor_telepon ? `<br><small class="text-info"><i class="ni ni-mobile-button"></i> ${data.nomor_telepon}</small>` : ''}
                     </div>
                 </div>
             </div>
@@ -516,10 +514,30 @@ function updateInfoPenerima() {
     }
 }
 
+// Update info kontak di sidebar
 function updateKontakInfo() {
     let html = '';
     
-    if (dataKontak.pembimbing) {
+    // Kaprodi
+    if (dataKontak.kaprodi_list && dataKontak.kaprodi_list.length > 0) {
+        html += `
+            <div class="media align-items-center mb-3">
+                <div class="media-object">
+                    <div class="avatar rounded-circle bg-warning">
+                        <i class="ni ni-hat-3"></i>
+                    </div>
+                </div>
+                <div class="media-body ml-3">
+                    <h6 class="mb-0">👑 Kaprodi</h6>
+                    <p class="text-sm text-muted mb-0">${dataKontak.kaprodi_list.length} kaprodi tersedia</p>
+                    <small class="text-success">• ${dataKontak.kaprodi_list.map(k => k.nama.split('(')[0].trim()).join(', ')}</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Dosen
+    if (dataKontak.dosen_list && dataKontak.dosen_list.length > 0) {
         html += `
             <div class="media align-items-center mb-3">
                 <div class="media-object">
@@ -528,31 +546,14 @@ function updateKontakInfo() {
                     </div>
                 </div>
                 <div class="media-body ml-3">
-                    <h6 class="mb-0">Dosen Pembimbing</h6>
-                    <p class="text-sm text-muted mb-0">${dataKontak.pembimbing.nama}</p>
-                    ${dataKontak.pembimbing.nomor_telepon ? `<small class="text-success"><i class="ni ni-mobile-button"></i> ${dataKontak.pembimbing.nomor_telepon}</small>` : ''}
+                    <h6 class="mb-0">🎓 Dosen</h6>
+                    <p class="text-sm text-muted mb-0">${dataKontak.dosen_list.length} dosen tersedia</p>
                 </div>
             </div>
         `;
     }
     
-    if (dataKontak.kaprodi) {
-        html += `
-            <div class="media align-items-center mb-3">
-                <div class="media-object">
-                    <div class="avatar rounded-circle bg-success">
-                        <i class="ni ni-hat-3"></i>
-                    </div>
-                </div>
-                <div class="media-body ml-3">
-                    <h6 class="mb-0">Kaprodi</h6>
-                    <p class="text-sm text-muted mb-0">${dataKontak.kaprodi.nama}</p>
-                    ${dataKontak.kaprodi.nomor_telepon ? `<small class="text-success"><i class="ni ni-mobile-button"></i> ${dataKontak.kaprodi.nomor_telepon}</small>` : ''}
-                </div>
-            </div>
-        `;
-    }
-    
+    // Staf
     if (dataKontak.staf_list && dataKontak.staf_list.length > 0) {
         html += `
             <div class="media align-items-center mb-3">
@@ -562,8 +563,9 @@ function updateKontakInfo() {
                     </div>
                 </div>
                 <div class="media-body ml-3">
-                    <h6 class="mb-0">Staf Tersedia</h6>
-                    <p class="text-sm text-muted mb-0">${dataKontak.staf_list.length} staf/admin</p>
+                    <h6 class="mb-0">👨‍💼 Staf/Admin</h6>
+                    <p class="text-sm text-muted mb-0">${dataKontak.staf_list.length} staf tersedia</p>
+                    <small class="text-success">• ${dataKontak.staf_list.map(s => s.nama).join(', ')}</small>
                 </div>
             </div>
         `;
@@ -578,11 +580,12 @@ function updateKontakInfo() {
             </div>
         `;
     } else {
+        const totalKontak = (dataKontak.kaprodi_list?.length || 0) + (dataKontak.dosen_list?.length || 0) + (dataKontak.staf_list?.length || 0);
         html += `
             <div class="alert alert-success">
                 <small>
                     <i class="ni ni-check-bold"></i>
-                    <strong>Status:</strong> Kontak tersedia dan siap digunakan
+                    <strong>Total ${totalKontak} kontak</strong> tersedia dan siap menerima email
                 </small>
             </div>
         `;
@@ -628,18 +631,10 @@ function updateCharCount() {
     }
 }
 
-function resetForm() {
-    $('#kontakForm')[0].reset();
-    $('#detailPenerima').hide();
-    $('#infoPenerima').html('');
-    $('#alertContainer').hide();
-    updateCharCount();
-    
-    showAlert('info', '🔄 Form telah direset', true);
-}
+// PERBAIKAN untuk function kirimPesan() dan resetForm()
 
 function kirimPesan() {
-    console.log('📨 Attempting to send message...');
+    console.log('📨 Attempting to send email...');
     
     // Validate form
     const pesan = $('#pesan').val().trim();
@@ -662,7 +657,7 @@ function kirimPesan() {
     const submitBtn = $('#submitBtn');
     const originalText = submitBtn.html();
     submitBtn.prop('disabled', true);
-    submitBtn.html('<span class="spinner-border spinner-border-sm" role="status"></span> Mengirim...');
+    submitBtn.html('<span class="spinner-border spinner-border-sm" role="status"></span> Mengirim Email...');
     
     // Get form data
     const formData = {
@@ -673,24 +668,33 @@ function kirimPesan() {
         prioritas: $('#prioritas').val()
     };
     
-    console.log('📤 Sending message data:', formData);
+    console.log('📤 Sending email data:', formData);
     
     // Send via AJAX
-    makeRequest('mahasiswa/kontak/kirim_pesan', formData, 45000)
+    makeRequest('mahasiswa/kontak/kirim_pesan', formData, 60000) // 1 minute timeout untuk email
         .then(function(response) {
             if (response.status === 'success') {
-                showAlert('success', '✅ ' + response.message);
-                resetForm();
-                console.log('✅ Message sent successfully');
+                // PERBAIKAN: Tampilkan pesan sukses terlebih dahulu
+                showAlert('success', '✅ ' + response.message, false); // false = tidak auto hide
+                
+                // Reset form TANPA showAlert
+                resetFormSilent();
+                
+                console.log('✅ Email sent successfully');
+                
+                // Auto hide success message setelah 8 detik
+                setTimeout(function() {
+                    $('#alertContainer').fadeOut();
+                }, 8000);
+                
             } else if (response.status === 'warning') {
                 showAlert('warning', '⚠️ ' + response.message);
-                resetForm();
             } else {
                 throw new Error(response.message || 'Terjadi kesalahan tidak dikenal');
             }
         })
         .catch(function(error) {
-            console.error('❌ Send message failed:', error);
+            console.error('❌ Send email failed:', error);
             showAlert('error', '❌ ' + error.message);
         })
         .finally(function() {
@@ -700,6 +704,66 @@ function kirimPesan() {
         });
 }
 
+// PERBAIKAN: Function reset form tanpa notifikasi
+function resetFormSilent() {
+    $('#kontakForm')[0].reset();
+    $('#detailPenerima').hide();
+    $('#infoPenerima').html('');
+    updateCharCount();
+    
+    console.log('Form direset tanpa notifikasi');
+}
+
+// Function resetForm yang lama (dengan alert) untuk tombol Reset
+function resetForm() {
+    resetFormSilent();
+    showAlert('info', '🔄 Form telah direset', true);
+}
+
+// PERBAIKAN: Function showAlert yang lebih robust
+function showAlert(type, message, autoHide = true) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertMessage = document.getElementById('alertMessage');
+    const alertDiv = alertContainer.querySelector('.alert');
+    
+    // Map type to Bootstrap classes
+    const typeMap = {
+        'error': 'danger',
+        'success': 'success',
+        'warning': 'warning',
+        'info': 'info'
+    };
+    
+    const bootstrapType = typeMap[type] || 'info';
+    
+    // Clear any existing timeouts
+    if (window.alertTimeout) {
+        clearTimeout(window.alertTimeout);
+    }
+    
+    alertMessage.innerHTML = message;
+    alertDiv.className = `alert alert-${bootstrapType} alert-dismissible fade show`;
+    alertContainer.style.display = 'block';
+    
+    // Scroll to alert
+    alertContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    // Auto hide with different timing based on type
+    if (autoHide) {
+        let hideDelay = 5000; // Default 5 seconds
+        
+        if (type === 'success') {
+            hideDelay = 8000; // Success message 8 seconds
+        } else if (type === 'error') {
+            hideDelay = 10000; // Error message 10 seconds
+        }
+        
+        window.alertTimeout = setTimeout(() => {
+            alertContainer.style.display = 'none';
+        }, hideDelay);
+    }
+}
+
 // Utility functions
 function showElement(id) {
     document.getElementById(id).style.display = 'block';
@@ -707,19 +771,6 @@ function showElement(id) {
 
 function hideElement(id) {
     document.getElementById(id).style.display = 'none';
-}
-
-// Development helpers
-if (environment === 'development') {
-    console.log('🔧 Development mode active');
-    
-    // Add global helpers for debugging
-    window.debugKontak = {
-        dataKontak: dataKontak,
-        loadKontakData: loadKontakData,
-        makeRequest: makeRequest,
-        resetForm: resetForm
-    };
 }
 </script>
 <?php $this->app->endSection('script') ?>

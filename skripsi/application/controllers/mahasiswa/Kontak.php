@@ -2,9 +2,11 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
- * Kontak Controller - Final Version for STK Yakobus
- * Disesuaikan dengan konfigurasi database: stkp7133_skripsi
- * Base URL: https://stkyakobus.ac.id/skripsi/
+ * Kontak Controller - Fixed Version for STK Yakobus
+ * Disesuaikan dengan permintaan:
+ * 1. Dropdown "Kirim Ke": Kaprodi, Dosen, Staf/Admin
+ * 2. Detail penerima sesuai database
+ * 3. Email real, bukan notifikasi sistem
  */
 class Kontak extends MY_Controller
 {
@@ -12,12 +14,10 @@ class Kontak extends MY_Controller
     {
         parent::__construct();
         
-        // Load basic libraries
         $this->load->database();
-        $this->load->library('session');
+        $this->load->library(['session', 'email']);
         $this->load->helper('url');
         
-        // Set error reporting untuk development
         if (ENVIRONMENT === 'development') {
             error_reporting(E_ALL);
             ini_set('display_errors', 1);
@@ -31,16 +31,14 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Get data untuk form kontak
-     * Disesuaikan dengan database stkp7133_skripsi
+     * Get data untuk form kontak - FIXED VERSION
+     * Mengembalikan: kaprodi_list, dosen_list, staf_list
      */
     public function get_kontak_data()
     {
-        // ALWAYS set JSON header first
         header('Content-Type: application/json');
         
         try {
-            // Get mahasiswa ID from session
             $mahasiswa_id = $this->session->userdata('id');
             
             if (!$mahasiswa_id) {
@@ -51,61 +49,69 @@ class Kontak extends MY_Controller
                 return;
             }
             
-            // Initialize response data
             $data = [
-                'pembimbing' => null,
-                'kaprodi' => null,
-                'staf_list' => [],
-                'riwayat_pesan' => []
+                'kaprodi_list' => [],
+                'dosen_list' => [],
+                'staf_list' => []
             ];
             
-            // Get mahasiswa data first
-            $mahasiswa = $this->db->get_where('mahasiswa', ['id' => $mahasiswa_id])->row();
+            // 1. Get KAPRODI (level = '4') - 2 kaprodi
+            $this->db->select('d.id, d.nama, d.email, d.nomor_telepon, p.nama as nama_prodi');
+            $this->db->from('dosen d');
+            $this->db->join('prodi p', 'd.id = p.dosen_id', 'left');
+            $this->db->where('d.level', '4');
+            $this->db->order_by('d.nama', 'ASC');
+            $query_kaprodi = $this->db->get();
             
-            if (!$mahasiswa) {
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Data mahasiswa tidak ditemukan di database'
-                ]);
-                return;
+            if ($query_kaprodi->num_rows() > 0) {
+                $data['kaprodi_list'] = $query_kaprodi->result();
             }
             
-            // 1. Get dosen pembimbing (SIMPLE QUERY)
-            $data['pembimbing'] = $this->_get_pembimbing_simple($mahasiswa_id);
+            // 2. Get DOSEN (level = '2') - 15 dosen
+            $this->db->select('d.id, d.nama, d.email, d.nomor_telepon, p.nama as nama_prodi');
+            $this->db->from('dosen d');
+            $this->db->join('prodi p', 'd.prodi_id = p.id', 'left');
+            $this->db->where('d.level', '2');
+            $this->db->order_by('d.nama', 'ASC');
+            $query_dosen = $this->db->get();
             
-            // 2. Get kaprodi (SIMPLE QUERY)
-            if ($mahasiswa->prodi_id) {
-                $data['kaprodi'] = $this->_get_kaprodi_simple($mahasiswa->prodi_id);
+            if ($query_dosen->num_rows() > 0) {
+                $data['dosen_list'] = $query_dosen->result();
             }
             
-            // 3. Get staff list (SIMPLE QUERY)
-            $data['staf_list'] = $this->_get_staf_simple();
+            // 3. Get STAF/ADMIN (level = '1') - 1 orang: Yohanes Hendro Pranyoto
+            $this->db->select('id, nama, email, nomor_telepon');
+            $this->db->from('dosen');
+            $this->db->where('level', '1');
+            $this->db->order_by('nama', 'ASC');
+            $query_staf = $this->db->get();
             
-            // 4. Get riwayat pesan (OPTIONAL - skip if error)
-            try {
-                $data['riwayat_pesan'] = $this->_get_riwayat_simple($mahasiswa_id);
-            } catch (Exception $e) {
-                // Skip riwayat if error - not critical
-                $data['riwayat_pesan'] = [];
-                log_message('error', 'Riwayat pesan error: ' . $e->getMessage());
+            if ($query_staf->num_rows() > 0) {
+                $data['staf_list'] = $query_staf->result();
             }
             
-            echo json_encode(['status' => 'success', 'data' => $data]);
+            echo json_encode([
+                'status' => 'success', 
+                'data' => $data,
+                'debug' => [
+                    'kaprodi_count' => count($data['kaprodi_list']),
+                    'dosen_count' => count($data['dosen_list']),
+                    'staf_count' => count($data['staf_list'])
+                ]
+            ]);
             
         } catch (Exception $e) {
-            // Log error untuk debugging
             log_message('error', 'Kontak get_kontak_data error: ' . $e->getMessage());
             
             echo json_encode([
                 'status' => 'error', 
-                'message' => 'Terjadi kesalahan sistem',
-                'debug' => (ENVIRONMENT === 'development') ? $e->getMessage() : null
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
             ]);
         }
     }
     
     /**
-     * Kirim pesan ke penerima
+     * Kirim pesan via EMAIL - REAL EMAIL, bukan notifikasi sistem
      */
     public function kirim_pesan()
     {
@@ -140,13 +146,6 @@ class Kontak extends MY_Controller
                 return;
             }
             
-            // Get penerima data
-            $penerima = $this->_get_penerima_data($input['penerima_role'], $input['penerima_id']);
-            if (!$penerima) {
-                echo json_encode(['status' => 'error', 'message' => 'Data penerima tidak ditemukan']);
-                return;
-            }
-            
             // Get mahasiswa data
             $mahasiswa = $this->db->get_where('mahasiswa', ['id' => $mahasiswa_id])->row();
             if (!$mahasiswa) {
@@ -154,256 +153,264 @@ class Kontak extends MY_Controller
                 return;
             }
             
-            // Try to save notification (optional)
-            $notif_saved = $this->_save_notification_simple($mahasiswa_id, $input['penerima_id'], $input['subjek'], $input['pesan']);
+            // Get penerima data
+            $penerima = $this->db->get_where('dosen', ['id' => $input['penerima_id']])->row();
+            if (!$penerima) {
+                echo json_encode(['status' => 'error', 'message' => 'Data penerima tidak ditemukan']);
+                return;
+            }
             
-            // Try to send email (optional)
-            $email_sent = $this->_send_email_simple($mahasiswa, $penerima, $input['subjek'], $input['pesan'], $input['prioritas']);
+            // SEND REAL EMAIL (menggunakan config yang sudah terbukti bekerja)
+            $email_sent = $this->_send_real_email($mahasiswa, $penerima, $input);
             
-            // Return success regardless of email/notification status
-            echo json_encode([
-                'status' => 'success', 
-                'message' => 'Pesan berhasil dikirim ke ' . $penerima->nama,
-                'details' => [
-                    'notification_saved' => $notif_saved,
-                    'email_sent' => $email_sent
-                ]
-            ]);
+            if ($email_sent) {
+                echo json_encode([
+                    'status' => 'success', 
+                    'message' => 'Email berhasil dikirim ke ' . $penerima->nama . ' (' . $penerima->email . ')'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => 'warning', 
+                    'message' => 'Email tidak dapat dikirim. Silakan coba lagi atau hubungi admin.'
+                ]);
+            }
             
         } catch (Exception $e) {
             log_message('error', 'Kontak kirim_pesan error: ' . $e->getMessage());
-            echo json_encode(['status' => 'error', 'message' => 'Terjadi kesalahan saat mengirim pesan']);
+            echo json_encode(['status' => 'error', 'message' => 'Terjadi kesalahan saat mengirim email']);
         }
     }
     
     /**
-     * SIMPLE: Get dosen pembimbing
+     * Send REAL EMAIL menggunakan konfigurasi yang sudah terbukti bekerja
      */
-    private function _get_pembimbing_simple($mahasiswa_id)
+    private function _send_real_email($mahasiswa, $penerima, $input)
     {
         try {
-            // Check if table exists
-            if (!$this->db->table_exists('proposal_mahasiswa')) {
-                return null;
-            }
-            
-            $sql = "
-                SELECT d.id, d.nama, d.email, d.nomor_telepon 
-                FROM proposal_mahasiswa pm 
-                INNER JOIN dosen d ON pm.dosen_id = d.id 
-                WHERE pm.mahasiswa_id = ? 
-                AND pm.status = '1' 
-                AND pm.dosen_id IS NOT NULL 
-                ORDER BY pm.id DESC 
-                LIMIT 1
-            ";
-            
-            $query = $this->db->query($sql, [$mahasiswa_id]);
-            
-            if ($query && $query->num_rows() > 0) {
-                return $query->row();
-            }
-            
-            return null;
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting pembimbing: ' . $e->getMessage());
-            return null;
-        }
-    }
-    
-    /**
-     * SIMPLE: Get kaprodi
-     */
-    private function _get_kaprodi_simple($prodi_id)
-    {
-        try {
-            if (!$this->db->table_exists('prodi')) {
-                return null;
-            }
-            
-            $sql = "
-                SELECT d.id, d.nama, d.email, d.nomor_telepon, p.nama as nama_prodi 
-                FROM prodi p 
-                INNER JOIN dosen d ON p.dosen_id = d.id 
-                WHERE p.id = ?
-            ";
-            
-            $query = $this->db->query($sql, [$prodi_id]);
-            
-            if ($query && $query->num_rows() > 0) {
-                return $query->row();
-            }
-            
-            return null;
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting kaprodi: ' . $e->getMessage());
-            return null;
-        }
-    }
-    
-    /**
-     * SIMPLE: Get staff list
-     */
-    private function _get_staf_simple()
-    {
-        try {
-            if (!$this->db->table_exists('dosen')) {
-                return [];
-            }
-            
-            $sql = "
-                SELECT id, nama, email, nomor_telepon 
-                FROM dosen 
-                WHERE level = '1' 
-                ORDER BY nama ASC 
-                LIMIT 10
-            ";
-            
-            $query = $this->db->query($sql);
-            
-            if ($query) {
-                return $query->result();
-            }
-            
-            return [];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting staf: ' . $e->getMessage());
-            return [];
-        }
-    }
-    
-    /**
-     * SIMPLE: Get riwayat pesan
-     */
-    private function _get_riwayat_simple($mahasiswa_id)
-    {
-        try {
-            // Skip if table doesn't exist
-            if (!$this->db->table_exists('notifikasi')) {
-                return [];
-            }
-            
-            $sql = "
-                SELECT judul as subjek, pesan, tanggal_dibuat as created_at, 'Sistem' as nama_penerima 
-                FROM notifikasi 
-                WHERE user_id = ? 
-                ORDER BY tanggal_dibuat DESC 
-                LIMIT 5
-            ";
-            
-            $query = $this->db->query($sql, [$mahasiswa_id]);
-            
-            if ($query) {
-                $result = $query->result();
-                // Add priority field for compatibility
-                foreach ($result as &$item) {
-                    $item->prioritas = 'normal';
-                }
-                return $result;
-            }
-            
-            return [];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting riwayat: ' . $e->getMessage());
-            return [];
-        }
-    }
-    
-    /**
-     * Get penerima data by role
-     */
-    private function _get_penerima_data($role, $id)
-    {
-        try {
-            if (in_array($role, ['pembimbing', 'kaprodi', 'staf'])) {
-                return $this->db->get_where('dosen', ['id' => $id])->row();
-            }
-            return null;
-        } catch (Exception $e) {
-            log_message('error', 'Error getting penerima: ' . $e->getMessage());
-            return null;
-        }
-    }
-    
-    /**
-     * SIMPLE: Save notification
-     */
-    private function _save_notification_simple($pengirim_id, $penerima_id, $subjek, $pesan)
-    {
-        try {
-            // Skip if table doesn't exist
-            if (!$this->db->table_exists('notifikasi')) {
-                return false;
-            }
-            
-            $data = [
-                'user_id' => $penerima_id,
-                'judul' => $subjek,
-                'pesan' => $pesan,
-                'tanggal_dibuat' => date('Y-m-d H:i:s')
-            ];
-            
-            // Add optional fields if they exist
-            $fields = $this->db->list_fields('notifikasi');
-            if (in_array('jenis', $fields)) {
-                $data['jenis'] = 'kontak_form';
-            }
-            if (in_array('untuk_role', $fields)) {
-                $data['untuk_role'] = 'dosen';
-            }
-            if (in_array('dibaca', $fields)) {
-                $data['dibaca'] = 0;
-            }
-            
-            return $this->db->insert('notifikasi', $data);
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error saving notification: ' . $e->getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * SIMPLE: Send email (placeholder for now)
-     */
-    private function _send_email_simple($mahasiswa, $penerima, $subjek, $pesan, $prioritas)
-    {
-        try {
-            // For now, just return true to indicate "sent"
-            // Email functionality can be implemented later
-            return true;
-            
-            /*
-            // Email implementation when ready:
-            $this->load->library('email');
-            
+            // Konfigurasi email yang sudah TERBUKTI BEKERJA di STK Yakobus
             $config = [
-                'protocol' => 'mail',
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_timeout' => 30,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
                 'mailtype' => 'html',
-                'charset' => 'utf8'
+                'validation' => TRUE,
+                'priority' => 3,
+                'crlf' => "\r\n",
+                'smtp_crypto' => 'tls',
+                'wordwrap' => TRUE,
+                'wrapchars' => 76,
+                'smtp_debug' => FALSE,
+                'smtp_keepalive' => FALSE,
+                'smtp_auto_tls' => TRUE
             ];
             
             $this->email->initialize($config);
+            $this->email->clear();
             
-            $subject = '[SIM-TA STK] ' . $subjek;
-            $message = "Pesan dari: {$mahasiswa->nama} ({$mahasiswa->nim})\nEmail: {$mahasiswa->email}\n\n{$pesan}";
+            // Setup email content
+            $prioritas_text = '';
+            if ($input['prioritas'] === 'high') {
+                $prioritas_text = '[PRIORITAS TINGGI] ';
+            } elseif ($input['prioritas'] === 'urgent') {
+                $prioritas_text = '[URGENT] ';
+            }
             
-            $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK St. Yakobus');
+            $subject = $prioritas_text . '[SIM-TA STK] ' . $input['subjek'];
+            
+            // HTML Email Template
+            $message = $this->_get_email_template($mahasiswa, $penerima, $input);
+            
+            // Setup email
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
             $this->email->to($penerima->email);
+            $this->email->reply_to($mahasiswa->email, $mahasiswa->nama);
             $this->email->subject($subject);
             $this->email->message($message);
             
-            return $this->email->send();
-            */
+            // Send email
+            $sent = $this->email->send();
+            
+            if ($sent) {
+                log_message('info', 'Email berhasil dikirim ke: ' . $penerima->email . ' dari mahasiswa: ' . $mahasiswa->nama);
+            } else {
+                log_message('error', 'Gagal mengirim email: ' . $this->email->print_debugger());
+            }
+            
+            return $sent;
             
         } catch (Exception $e) {
-            log_message('error', 'Error sending email: ' . $e->getMessage());
+            log_message('error', 'Error sending real email: ' . $e->getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Email template yang menarik dan profesional
+     */
+    private function _get_email_template($mahasiswa, $penerima, $input)
+    {
+        $prioritas_badge = '';
+        $prioritas_color = '#007bff';
+        
+        if ($input['prioritas'] === 'high') {
+            $prioritas_badge = '<span style="background: #ffc107; color: #000; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">PRIORITAS TINGGI</span>';
+            $prioritas_color = '#ffc107';
+        } elseif ($input['prioritas'] === 'urgent') {
+            $prioritas_badge = '<span style="background: #dc3545; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">URGENT</span>';
+            $prioritas_color = '#dc3545';
+        }
+        
+        $template = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>{$input['subjek']}</title>
+        </head>
+        <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f8f9fa;'>
+            <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #f8f9fa;'>
+                <tr>
+                    <td align='center' style='padding: 40px 20px;'>
+                        <table width='600' cellpadding='0' cellspacing='0' style='background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;'>
+                            <!-- Header -->
+                            <tr>
+                                <td style='background: linear-gradient(135deg, {$prioritas_color} 0%, #0056b3 100%); padding: 30px; text-align: center;'>
+                                    <h1 style='color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;'>
+                                        📧 Pesan dari Mahasiswa
+                                    </h1>
+                                    <p style='color: #ffffff; margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;'>
+                                        Sistem Informasi Manajemen Tugas Akhir
+                                    </p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Priority Badge -->";
+                            
+        if ($prioritas_badge) {
+            $template .= "
+                            <tr>
+                                <td style='padding: 15px 30px 0 30px; text-align: center;'>
+                                    {$prioritas_badge}
+                                </td>
+                            </tr>";
+        }
+        
+        $template .= "
+                            
+                            <!-- Content -->
+                            <tr>
+                                <td style='padding: 30px;'>
+                                    <h2 style='color: #333333; margin: 0 0 20px 0; font-size: 20px;'>
+                                        {$input['subjek']}
+                                    </h2>
+                                    
+                                    <p style='color: #333333; margin: 0 0 15px 0; font-size: 16px;'>
+                                        Yth. <strong>{$penerima->nama}</strong>,
+                                    </p>
+                                    
+                                    <div style='background-color: #f8f9fa; border-left: 4px solid {$prioritas_color}; padding: 20px; margin: 20px 0; border-radius: 4px;'>
+                                        " . nl2br(htmlspecialchars($input['pesan'])) . "
+                                    </div>
+                                    
+                                    <p style='color: #666666; margin: 20px 0 0 0; font-size: 14px;'>
+                                        Hormat saya,<br>
+                                        <strong>{$mahasiswa->nama}</strong>
+                                    </p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Sender Info -->
+                            <tr>
+                                <td style='background-color: #f8f9fa; padding: 20px 30px; border-top: 1px solid #dee2e6;'>
+                                    <h4 style='color: #333333; margin: 0 0 15px 0; font-size: 16px;'>
+                                        📋 Informasi Pengirim:
+                                    </h4>
+                                    <table width='100%' cellpadding='0' cellspacing='0'>
+                                        <tr>
+                                            <td style='color: #666666; font-size: 14px; padding: 3px 0; width: 100px;'>
+                                                <strong>Nama:</strong>
+                                            </td>
+                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
+                                                {$mahasiswa->nama}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style='color: #666666; font-size: 14px; padding: 3px 0;'>
+                                                <strong>NIM:</strong>
+                                            </td>
+                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
+                                                {$mahasiswa->nim}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style='color: #666666; font-size: 14px; padding: 3px 0;'>
+                                                <strong>Email:</strong>
+                                            </td>
+                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
+                                                <a href='mailto:{$mahasiswa->email}' style='color: {$prioritas_color}; text-decoration: none;'>
+                                                    {$mahasiswa->email}
+                                                </a>
+                                            </td>
+                                        </tr>";
+                                        
+        if ($mahasiswa->nomor_telepon) {
+            $template .= "
+                                        <tr>
+                                            <td style='color: #666666; font-size: 14px; padding: 3px 0;'>
+                                                <strong>Telepon:</strong>
+                                            </td>
+                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
+                                                <a href='tel:{$mahasiswa->nomor_telepon}' style='color: {$prioritas_color}; text-decoration: none;'>
+                                                    {$mahasiswa->nomor_telepon}
+                                                </a>
+                                            </td>
+                                        </tr>";
+        }
+        
+        $template .= "
+                                        <tr>
+                                            <td style='color: #666666; font-size: 14px; padding: 3px 0;'>
+                                                <strong>Waktu:</strong>
+                                            </td>
+                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
+                                                " . date('d F Y, H:i') . " WIT
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                                <td style='background-color: #333333; color: #ffffff; padding: 20px 30px; text-align: center;'>
+                                    <p style='margin: 0 0 10px 0; font-size: 16px; font-weight: bold;'>
+                                        🏫 STK Santo Yakobus Merauke
+                                    </p>
+                                    <p style='margin: 0; font-size: 12px; opacity: 0.8; line-height: 1.4;'>
+                                        Jl. Missi 2, Mandala, Merauke, Papua Selatan<br>
+                                        Telepon: (0971) 333-0264 | Email: sipd@stkyakobus.ac.id<br>
+                                        <a href='https://stkyakobus.ac.id' style='color: #ffffff; text-decoration: none;'>www.stkyakobus.ac.id</a>
+                                    </p>
+                                    <p style='margin: 15px 0 0 0; font-size: 11px; opacity: 0.6;'>
+                                        Email ini dikirim otomatis dari Sistem Informasi Manajemen Tugas Akhir. 
+                                        Silakan balas langsung ke email pengirim untuk merespons.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>";
+        
+        return $template;
     }
 }
 

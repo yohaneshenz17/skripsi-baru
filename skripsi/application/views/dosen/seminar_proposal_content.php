@@ -453,7 +453,7 @@
                     <div class="col">
                         <h5 class="mb-1">Tahap Seminar Proposal</h5>
                         <p class="mb-0 text-sm">
-                            Setelah mahasiswa menyelesaikan minimal 16x bimbingan dan proposal sudah lengkap (Bab 1-3), 
+                            Setelah mahasiswa menyelesaikan minimal 8x bimbingan dan proposal sudah lengkap (Bab 1-3), 
                             mereka dapat mengajukan seminar proposal. Sebagai pembimbing, Anda berperan dalam memberikan 
                             rekomendasi kelayakan untuk pelaksanaan seminar.
                         </p>

@@ -319,7 +319,7 @@
                     <div class="col">
                         <h5 class="mb-1">Tips Bimbingan Efektif</h5>
                         <p class="mb-0 text-sm">
-                            <strong>Minimal 16 pertemuan:</strong> Pastikan mahasiswa mencatat setiap bimbingan dengan detail. 
+                            <strong>Minimal 8 pertemuan:</strong> Pastikan mahasiswa mencatat setiap bimbingan dengan detail. 
                             <strong>Progress bertahap:</strong> Pantau pengembangan Bab 1-3 secara sistematis. 
                             <strong>Dokumentasi:</strong> Validasi jurnal bimbingan secara berkala untuk memastikan kualitas.
                         </p>

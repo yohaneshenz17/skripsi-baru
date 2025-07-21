@@ -197,14 +197,13 @@ class Usulan_proposal extends CI_Controller {
         $this->email->initialize($config);
         
         $dosen_nama = $this->session->userdata('nama');
-        
+    
         if ($status_pembimbing == '1') {
             // DISETUJUI - Kirim ke mahasiswa dan kaprodi
             $this->_kirim_email_persetujuan_mahasiswa($proposal, $dosen_nama);
             $this->_kirim_email_persetujuan_kaprodi($proposal, $dosen_nama);
         } else {
-            // DITOLAK - Kirim ke mahasiswa dan kaprodi
-            $this->_kirim_email_penolakan_mahasiswa($proposal, $dosen_nama, $komentar);
+            // DITOLAK - Kirim HANYA ke kaprodi (HAPUS kirim ke mahasiswa)
             $this->_kirim_email_penolakan_kaprodi($proposal, $dosen_nama, $komentar);
         }
     }
@@ -264,7 +263,7 @@ class Usulan_proposal extends CI_Controller {
                     <ol style='color: #155724; margin: 0; padding-left: 20px;'>
                         <li>Hubungi dosen pembimbing untuk memulai proses bimbingan</li>
                         <li>Kembangkan proposal menjadi lengkap (Bab 1-3)</li>
-                        <li>Lakukan bimbingan minimal 16x pertemuan</li>
+                        <li>Lakukan bimbingan minimal 8x pertemuan</li>
                         <li>Isi jurnal bimbingan secara rutin di sistem</li>
                         <li>Setelah siap, ajukan seminar proposal</li>
                     </ol>

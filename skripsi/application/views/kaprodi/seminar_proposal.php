@@ -122,7 +122,7 @@ ob_start();
                     <div class="col">
                         <h5 class="card-title text-white">📋 Informasi Seminar Proposal</h5>
                         <p class="card-text text-white-50">
-                            • Seminar proposal dilaksanakan setelah mahasiswa menyelesaikan minimum 16x bimbingan<br>
+                            • Seminar proposal dilaksanakan setelah mahasiswa menyelesaikan minimum 8x bimbingan<br>
                             • Mahasiswa mempresentasikan Bab 1-3 dari proposal skripsi<br>
                             • Kaprodi bertugas memvalidasi pengajuan dan menjadwalkan seminar<br>
                             • Setelah disetujui, mahasiswa dapat melanjutkan ke tahap penelitian

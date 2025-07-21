@@ -20,6 +20,13 @@ class Mahasiswa extends REST_Controller
         return $this->response($response);
     }
 
+    // TAMBAH METHOD GET untuk JavaScript call()
+    public function index_get()
+    {
+        $response = $this->model->get([]);
+        return $this->response($response);
+    }
+
     public function create_post()
     {
         // [PERBAIKAN] Validasi nomor telepon ditambahkan di sini
@@ -58,7 +65,15 @@ class Mahasiswa extends REST_Controller
         return $this->response($response);
     }
 
+    // METHOD POST (sudah ada)
     public function detail_post($id = null)
+    {
+        $response = $this->model->detail($id);
+        return $this->response($response);
+    }
+
+    // TAMBAH METHOD GET untuk JavaScript call('api/mahasiswa/detail/ID')
+    public function detail_get($id = null)
     {
         $response = $this->model->detail($id);
         return $this->response($response);

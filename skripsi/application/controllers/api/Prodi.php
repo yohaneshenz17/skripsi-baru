@@ -13,6 +13,14 @@ class Prodi extends REST_Controller {
         $this->load->model('Prodi_model', 'model');
     }
 
+    // TAMBAH METHOD GET untuk JavaScript call()
+    public function index_get()
+    {
+        $response = $this->model->get();
+        return $this->response($response);
+    }
+
+    // Method POST tetap ada untuk compatibility
     public function index_post()
     {
         $response = $this->model->get();

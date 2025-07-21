@@ -1,6 +1,16 @@
-<?php $this->load->view('template/mahasiswa', ['title' => $title, 'content' => $this->load->view('mahasiswa/bimbingan_content', $this, true), 'script' => '']); ?>
+<?php 
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-<!-- Content untuk bimbingan_content.php -->
+// Prepare data untuk template
+$template_data = array(
+    'title' => 'Bimbingan Skripsi - Phase 2',
+    'content' => '',
+    'script' => ''
+);
+
+// Load content view sebagai string
+ob_start();
+?>
 
 <!-- Alert Messages -->
 <?php if($this->session->flashdata('success')): ?>
@@ -33,8 +43,111 @@
 </div>
 <?php endif; ?>
 
-<?php if (isset($pending_proposal)): ?>
-<!-- Status Pending Approval -->
+<?php if (isset($waiting_kaprodi)): ?>
+<!-- STATUS 1: PROPOSAL BELUM DIREVIEW KAPRODI -->
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card bg-gradient-info">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="text-white mb-0">📋 Menunggu Review Kaprodi</h3>
+                        <p class="text-white mt-2 mb-0">
+                            Proposal Anda sedang ditinjau oleh <strong>Kaprodi</strong>. 
+                            Setelah disetujui, kaprodi akan menetapkan dosen pembimbing untuk Anda.
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-white text-info rounded-circle shadow">
+                            <i class="fa fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fa fa-file-search fa-4x text-info mb-3"></i>
+                <h4>Proposal Sedang Ditinjau Kaprodi</h4>
+                <p class="text-muted">
+                    <strong>Judul:</strong> <?= $waiting_kaprodi->judul ?><br>
+                    <strong>Tanggal Pengajuan:</strong> <?= isset($waiting_kaprodi->created_at) && $waiting_kaprodi->created_at ? date('d F Y', strtotime($waiting_kaprodi->created_at)) : '-' ?>
+                </p>
+                <p class="text-muted">
+                    Kaprodi sedang melakukan review terhadap proposal Anda. 
+                    Silakan tunggu konfirmasi lebih lanjut atau hubungi kaprodi untuk info lebih detail.
+                </p>
+                <div class="mt-4">
+                    <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
+                        <i class="fa fa-eye"></i> Lihat Status Proposal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php elseif (isset($rejected_kaprodi)): ?>
+<!-- STATUS 2: PROPOSAL DITOLAK KAPRODI -->
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card bg-gradient-danger">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="text-white mb-0">❌ Proposal Ditolak Kaprodi</h3>
+                        <p class="text-white mt-2 mb-0">
+                            Proposal Anda telah direview oleh <strong>Kaprodi</strong> dan memerlukan perbaikan. 
+                            Silakan lakukan revisi sesuai komentar yang diberikan.
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-white text-danger rounded-circle shadow">
+                            <i class="fa fa-times"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fa fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+                <h4>Proposal Memerlukan Perbaikan</h4>
+                <p class="text-muted">
+                    <strong>Judul:</strong> <?= $rejected_kaprodi->judul ?><br>
+                    <strong>Tanggal Review:</strong> <?= isset($rejected_kaprodi->tanggal_review_kaprodi) && $rejected_kaprodi->tanggal_review_kaprodi ? date('d F Y', strtotime($rejected_kaprodi->tanggal_review_kaprodi)) : '-' ?>
+                </p>
+                <?php if(isset($rejected_kaprodi->komentar_kaprodi) && $rejected_kaprodi->komentar_kaprodi): ?>
+                <div class="alert alert-warning">
+                    <strong>Komentar Kaprodi:</strong><br>
+                    <?= $rejected_kaprodi->komentar_kaprodi ?>
+                </div>
+                <?php endif; ?>
+                <p class="text-muted">
+                    Silakan lakukan revisi proposal sesuai dengan komentar kaprodi dan ajukan kembali.
+                </p>
+                <div class="mt-4">
+                    <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
+                        <i class="fa fa-edit"></i> Revisi Proposal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php elseif (isset($pending_proposal)): ?>
+<!-- STATUS 3: MENUNGGU PERSETUJUAN DOSEN PEMBIMBING -->
 <div class="row">
     <div class="col-lg-12 mb-4">
         <div class="card bg-gradient-warning">
@@ -43,7 +156,7 @@
                     <div class="col">
                         <h3 class="text-white mb-0">⏳ Menunggu Persetujuan Dosen Pembimbing</h3>
                         <p class="text-white mt-2 mb-0">
-                            <strong>Kaprodi</strong> telah menetapkan <strong><?= $pending_proposal->nama_dosen_ditunjuk ?></strong> sebagai dosen pembimbing Anda. 
+                            <strong>Kaprodi</strong> telah menetapkan <strong><?= isset($pending_proposal->nama_dosen) ? $pending_proposal->nama_dosen : 'Dosen' ?></strong> sebagai dosen pembimbing Anda. 
                             Saat ini menunggu persetujuan dari dosen yang bersangkutan.
                         </p>
                     </div>
@@ -63,7 +176,11 @@
         <div class="card">
             <div class="card-body text-center py-5">
                 <i class="fa fa-hourglass-half fa-4x text-warning mb-3"></i>
-                <h4>Proposal Anda Sedang Menunggu Persetujuan</h4>
+                <h4>Menunggu Konfirmasi Dosen Pembimbing</h4>
+                <p class="text-muted">
+                    <strong>Dosen Pembimbing:</strong> <?= isset($pending_proposal->nama_dosen) ? $pending_proposal->nama_dosen : 'Belum ditetapkan' ?><br>
+                    <strong>Tanggal Penetapan:</strong> <?= isset($pending_proposal->tanggal_penetapan) && $pending_proposal->tanggal_penetapan ? date('d F Y', strtotime($pending_proposal->tanggal_penetapan)) : '-' ?>
+                </p>
                 <p class="text-muted">
                     Dosen pembimbing yang ditunjuk kaprodi sedang melakukan review proposal Anda. 
                     Silakan tunggu konfirmasi lebih lanjut via email atau hubungi dosen yang bersangkutan.
@@ -78,17 +195,72 @@
     </div>
 </div>
 
+<?php elseif (isset($rejected_dosen)): ?>
+<!-- STATUS 4: DOSEN PEMBIMBING MENOLAK -->
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card bg-gradient-danger">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="text-white mb-0">❌ Dosen Pembimbing Menolak</h3>
+                        <p class="text-white mt-2 mb-0">
+                            <strong><?= isset($rejected_dosen->nama_dosen) ? $rejected_dosen->nama_dosen : 'Dosen' ?></strong> menolak penunjukan sebagai pembimbing. 
+                            <strong>Kaprodi</strong> akan menetapkan dosen pembimbing yang baru untuk Anda.
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-white text-danger rounded-circle shadow">
+                            <i class="fa fa-user-times"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fa fa-user-slash fa-4x text-danger mb-3"></i>
+                <h4>Penunjukan Pembimbing Ditolak</h4>
+                <p class="text-muted">
+                    <strong>Dosen:</strong> <?= isset($rejected_dosen->nama_dosen) ? $rejected_dosen->nama_dosen : 'Tidak diketahui' ?><br>
+                    <strong>Tanggal Respon:</strong> <?= isset($rejected_dosen->tanggal_respon_pembimbing) && $rejected_dosen->tanggal_respon_pembimbing ? date('d F Y', strtotime($rejected_dosen->tanggal_respon_pembimbing)) : '-' ?>
+                </p>
+                <?php if(isset($rejected_dosen->komentar_pembimbing) && $rejected_dosen->komentar_pembimbing): ?>
+                <div class="alert alert-warning">
+                    <strong>Komentar Dosen:</strong><br>
+                    <?= $rejected_dosen->komentar_pembimbing ?>
+                </div>
+                <?php endif; ?>
+                <p class="text-muted">
+                    Kaprodi akan segera menetapkan dosen pembimbing yang baru. 
+                    Silakan tunggu konfirmasi lebih lanjut.
+                </p>
+                <div class="mt-4">
+                    <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
+                        <i class="fa fa-eye"></i> Lihat Status Proposal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php elseif (!isset($proposal)): ?>
-<!-- Belum Ada Proposal -->
+<!-- STATUS 5: BELUM ADA PROPOSAL -->
 <div class="row">
     <div class="col-lg-12">
         <div class="card">
             <div class="card-body text-center py-5">
                 <i class="fa fa-file-alt fa-4x text-muted mb-3"></i>
-                <h4>Belum Ada Proposal yang Disetujui</h4>
+                <h4>Belum Ada Proposal</h4>
                 <p class="text-muted">
-                    Anda belum memiliki proposal yang disetujui dengan dosen pembimbing. 
-                    Silakan ajukan proposal terlebih dahulu atau tunggu persetujuan dari kaprodi dan dosen pembimbing.
+                    Anda belum mengajukan proposal tugas akhir. 
+                    Silakan ajukan proposal terlebih dahulu untuk memulai proses bimbingan.
                 </p>
                 <div class="mt-4">
                     <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
@@ -101,7 +273,7 @@
 </div>
 
 <?php else: ?>
-<!-- Main Content: Bimbingan Active -->
+<!-- STATUS 6: BIMBINGAN AKTIF -->
 
 <!-- Info Panel -->
 <div class="row">
@@ -112,7 +284,7 @@
                     <div class="col">
                         <h3 class="text-white mb-0">📚 Bimbingan Skripsi - Phase 2</h3>
                         <p class="text-white mt-2 mb-0">
-                            <strong>Dosen Pembimbing:</strong> <?= $proposal->nama_dosen ?> | 
+                            <strong>Dosen Pembimbing:</strong> <?= isset($proposal->nama_dosen) ? $proposal->nama_dosen : 'Belum ditetapkan' ?> | 
                             <strong>Judul:</strong> <?= substr($proposal->judul, 0, 50) ?><?= strlen($proposal->judul) > 50 ? '...' : '' ?>
                         </p>
                     </div>
@@ -258,7 +430,7 @@
     </div>
 </div>
 
-<!-- Info Dosen Pembimbing -->
+<!-- Info Dosen Pembimbing & Jurnal Bimbingan -->
 <div class="row mt-4">
     <div class="col-lg-4">
         <div class="card">
@@ -271,7 +443,7 @@
                         <i class="ni ni-single-02 text-white"></i>
                     </div>
                     <div class="media-body ml-3">
-                        <h4 class="mb-0"><?= $proposal->nama_dosen ?></h4>
+                        <h4 class="mb-0"><?= isset($proposal->nama_dosen) ? $proposal->nama_dosen : 'Dosen Pembimbing' ?></h4>
                         <p class="text-muted mb-0">Dosen Pembimbing</p>
                     </div>
                 </div>
@@ -280,7 +452,7 @@
                 
                 <div class="row">
                     <div class="col-12">
-                        <?php if($proposal->email_dosen): ?>
+                        <?php if(isset($proposal->email_dosen) && $proposal->email_dosen): ?>
                         <strong>Email:</strong>
                         <p class="text-muted">
                             <i class="fa fa-envelope text-primary"></i> 
@@ -288,7 +460,7 @@
                         </p>
                         <?php endif; ?>
                         
-                        <?php if($proposal->telepon_dosen): ?>
+                        <?php if(isset($proposal->telepon_dosen) && $proposal->telepon_dosen): ?>
                         <strong>No. Telepon:</strong>
                         <p class="text-muted">
                             <i class="fa fa-phone text-primary"></i> 
@@ -297,7 +469,7 @@
                         <?php endif; ?>
                         
                         <strong>Proposal:</strong>
-                        <p class="text-muted"><?= $proposal->judul ?></p>
+                        <p class="text-muted"><?= isset($proposal->judul) ? $proposal->judul : 'Tidak ada judul' ?></p>
                     </div>
                 </div>
             </div>
@@ -352,7 +524,7 @@
                                 </td>
                                 <td>
                                     <span class="text-sm"><?= substr($jurnal->materi_bimbingan, 0, 40) ?><?= strlen($jurnal->materi_bimbingan) > 40 ? '...' : '' ?></span>
-                                    <?php if($jurnal->tindak_lanjut): ?>
+                                    <?php if(isset($jurnal->tindak_lanjut) && $jurnal->tindak_lanjut): ?>
                                     <br>
                                     <small class="text-info"><strong>TL:</strong> <?= substr($jurnal->tindak_lanjut, 0, 30) ?>...</small>
                                     <?php endif; ?>
@@ -362,7 +534,7 @@
                                         <span class="badge badge-success">
                                             <i class="fa fa-check"></i> Tervalidasi
                                         </span>
-                                        <?php if($jurnal->catatan_dosen): ?>
+                                        <?php if(isset($jurnal->catatan_dosen) && $jurnal->catatan_dosen): ?>
                                         <br>
                                         <small class="text-muted" title="<?= $jurnal->catatan_dosen ?>">
                                             <i class="fa fa-comment"></i> Ada catatan
@@ -372,7 +544,7 @@
                                         <span class="badge badge-warning">
                                             <i class="fa fa-edit"></i> Perlu Revisi
                                         </span>
-                                        <?php if($jurnal->catatan_dosen): ?>
+                                        <?php if(isset($jurnal->catatan_dosen) && $jurnal->catatan_dosen): ?>
                                         <br>
                                         <small class="text-warning" title="<?= $jurnal->catatan_dosen ?>">
                                             <i class="fa fa-exclamation-triangle"></i> Lihat catatan
@@ -443,7 +615,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Pertemuan ke- *</label>
-                                <input type="number" class="form-control" name="pertemuan_ke" min="1" value="<?= $total_bimbingan + 1 ?>" required>
+                                <input type="number" class="form-control" name="pertemuan_ke" min="1" value="<?= isset($total_bimbingan) ? ($total_bimbingan + 1) : 1 ?>" required>
                                 <small class="form-text text-muted">Nomor urut pertemuan bimbingan</small>
                             </div>
                         </div>
@@ -504,74 +676,82 @@
 
 <?php endif; ?>
 
+<?php
+$template_data['content'] = ob_get_clean();
+
+// Add JavaScript untuk functionality
+$template_data['script'] = '
 <script>
 // Tambah Jurnal Bimbingan
 function tambahJurnalBimbingan() {
-    $('#modalTambahJurnal').modal('show');
+    $("#modalTambahJurnal").modal("show");
 }
 
 // Lihat Detail Jurnal
 function lihatDetailJurnal(jurnalId) {
     // Find jurnal data from PHP
-    <?php if(!empty($jurnal_bimbingan)): ?>
-    const jurnalData = <?= json_encode($jurnal_bimbingan) ?>;
-    const jurnal = jurnalData.find(j => j.id == jurnalId);
+    ' . ((!empty($jurnal_bimbingan)) ? '
+    var jurnalData = ' . json_encode($jurnal_bimbingan, JSON_UNESCAPED_SLASHES | JSON_HEX_QUOT) . ';
+    var jurnal = jurnalData.find(function(j) { return j.id == jurnalId; });
     
     if (jurnal) {
-        let statusBadge = '';
-        let catatanDosen = jurnal.catatan_dosen || 'Tidak ada catatan';
+        var statusBadge = "";
+        var catatanDosen = jurnal.catatan_dosen || "Tidak ada catatan";
         
-        if (jurnal.status_validasi == '1') {
-            statusBadge = '<span class="badge badge-success"><i class="fa fa-check"></i> Tervalidasi</span>';
-        } else if (jurnal.status_validasi == '2') {
-            statusBadge = '<span class="badge badge-warning"><i class="fa fa-edit"></i> Perlu Revisi</span>';
+        if (jurnal.status_validasi == "1") {
+            statusBadge = "<span class=\"badge badge-success\"><i class=\"fa fa-check\"></i> Tervalidasi</span>";
+        } else if (jurnal.status_validasi == "2") {
+            statusBadge = "<span class=\"badge badge-warning\"><i class=\"fa fa-edit\"></i> Perlu Revisi</span>";
         } else {
-            statusBadge = '<span class="badge badge-secondary"><i class="fa fa-clock"></i> Pending Validasi</span>';
+            statusBadge = "<span class=\"badge badge-secondary\"><i class=\"fa fa-clock\"></i> Pending Validasi</span>";
         }
         
-        const content = `
-            <div class="row">
-                <div class="col-md-6">
-                    <strong>Pertemuan ke:</strong> ${jurnal.pertemuan_ke}<br>
-                    <strong>Tanggal:</strong> ${new Date(jurnal.tanggal_bimbingan).toLocaleDateString('id-ID')}<br>
-                    <strong>Status:</strong> ${statusBadge}
-                </div>
-                <div class="col-md-6">
-                    <strong>Dibuat:</strong> ${new Date(jurnal.created_at).toLocaleString('id-ID')}<br>
-                    ${jurnal.tanggal_validasi ? '<strong>Divalidasi:</strong> ' + new Date(jurnal.tanggal_validasi).toLocaleString('id-ID') : ''}
-                </div>
-            </div>
-            <hr>
-            <div class="form-group">
-                <strong>Materi Bimbingan:</strong>
-                <div class="bg-light p-3 rounded mt-2">
-                    ${jurnal.materi_bimbingan}
-                </div>
-            </div>
-            <div class="form-group">
-                <strong>Tindak Lanjut:</strong>
-                <div class="bg-light p-3 rounded mt-2">
-                    ${jurnal.tindak_lanjut || 'Tidak ada tindak lanjut khusus'}
-                </div>
-            </div>
-            <div class="form-group">
-                <strong>Catatan Dosen:</strong>
-                <div class="bg-light p-3 rounded mt-2">
-                    ${catatanDosen}
-                </div>
-            </div>
-        `;
+        var content = "<div class=\"row\">" +
+            "<div class=\"col-md-6\">" +
+                "<strong>Pertemuan ke:</strong> " + jurnal.pertemuan_ke + "<br>" +
+                "<strong>Tanggal:</strong> " + new Date(jurnal.tanggal_bimbingan).toLocaleDateString(\"id-ID\") + "<br>" +
+                "<strong>Status:</strong> " + statusBadge +
+            "</div>" +
+            "<div class=\"col-md-6\">" +
+                "<strong>Dibuat:</strong> " + new Date(jurnal.created_at).toLocaleString(\"id-ID\") + "<br>" +
+                (jurnal.tanggal_validasi ? "<strong>Divalidasi:</strong> " + new Date(jurnal.tanggal_validasi).toLocaleString(\"id-ID\") : "") +
+            "</div>" +
+        "</div>" +
+        "<hr>" +
+        "<div class=\"form-group\">" +
+            "<strong>Materi Bimbingan:</strong>" +
+            "<div class=\"bg-light p-3 rounded mt-2\">" +
+                (jurnal.materi_bimbingan || "Tidak ada materi") +
+            "</div>" +
+        "</div>" +
+        "<div class=\"form-group\">" +
+            "<strong>Tindak Lanjut:</strong>" +
+            "<div class=\"bg-light p-3 rounded mt-2\">" +
+                (jurnal.tindak_lanjut || "Tidak ada tindak lanjut khusus") +
+            "</div>" +
+        "</div>" +
+        "<div class=\"form-group\">" +
+            "<strong>Catatan Dosen:</strong>" +
+            "<div class=\"bg-light p-3 rounded mt-2\">" +
+                catatanDosen +
+            "</div>" +
+        "</div>";
         
-        document.getElementById('modalDetailContent').innerHTML = content;
-        $('#modalDetailJurnal').modal('show');
+        document.getElementById("modalDetailContent").innerHTML = content;
+        $("#modalDetailJurnal").modal("show");
     }
-    <?php endif; ?>
+    ' : 'alert("Belum ada data jurnal bimbingan.");') . '
 }
 
 // Hapus Jurnal
 function hapusJurnal(jurnalId) {
-    if (confirm('Apakah Anda yakin ingin menghapus jurnal ini? Jurnal yang sudah divalidasi tidak dapat dihapus.')) {
-        window.location.href = '<?= base_url('mahasiswa/bimbingan/hapus_jurnal/') ?>' + jurnalId;
+    if (confirm("Apakah Anda yakin ingin menghapus jurnal ini? Jurnal yang sudah divalidasi tidak dapat dihapus.")) {
+        window.location.href = "' . base_url('mahasiswa/bimbingan/hapus_jurnal/') . '" + jurnalId;
     }
 }
 </script>
+';
+
+// Load template
+$this->load->view('template/mahasiswa', $template_data);
+?>

@@ -22,38 +22,69 @@ class Bimbingan extends CI_Controller
         $data['title'] = 'Bimbingan Skripsi - Phase 2';
         $mahasiswa_id = $this->session->userdata('id');
 
-        // Ambil data proposal dan dosen pembimbing
+        // PERBAIKAN LOGIKA: Cek status proposal berdasarkan workflow yang benar
         $this->db->select('
             pm.id as proposal_id, 
             pm.judul, 
             pm.jenis_penelitian,
             pm.lokasi_penelitian,
             pm.workflow_status,
+            pm.status_kaprodi,
+            pm.status_pembimbing,
+            pm.dosen_id,
+            pm.created_at,
+            pm.tanggal_review_kaprodi,
+            pm.komentar_kaprodi,
+            pm.tanggal_penetapan,
+            pm.tanggal_respon_pembimbing,
+            pm.komentar_pembimbing,
             d.id as dosen_id, 
             d.nama as nama_dosen,
             d.email as email_dosen,
             d.nomor_telepon as telepon_dosen
         ');
         $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left'); // LEFT JOIN karena dosen_id mungkin NULL
         $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-        $this->db->where('pm.status_pembimbing', '1'); // Sudah disetujui pembimbing
-        $data['proposal'] = $this->db->get()->row();
+        $this->db->order_by('pm.id', 'DESC'); // Ambil proposal terbaru
+        $proposal_data = $this->db->get()->row();
 
-        if (!$data['proposal']) {
-            // Cek apakah ada proposal yang masih pending approval pembimbing
-            $this->db->select('pm.*, d.nama as nama_dosen_ditunjuk');
-            $this->db->from('proposal_mahasiswa pm');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-            $pending_proposal = $this->db->get()->row();
+        // Reset variabel status
+        $data['proposal'] = null;
+        $data['pending_proposal'] = null;
+        $data['waiting_kaprodi'] = null;
+
+        if ($proposal_data) {
+            // WORKFLOW LOGIC YANG BENAR:
             
-            if ($pending_proposal && $pending_proposal->status_pembimbing == '0') {
-                $data['pending_proposal'] = $pending_proposal;
+            // 1. PROPOSAL BELUM DIREVIEW KAPRODI
+            if ($proposal_data->status_kaprodi == '0') {
+                // Mahasiswa sudah ajukan proposal, tapi kaprodi belum review
+                $data['waiting_kaprodi'] = $proposal_data;
+                
+            // 2. PROPOSAL DITOLAK KAPRODI  
+            } elseif ($proposal_data->status_kaprodi == '2') {
+                // Proposal ditolak kaprodi, mahasiswa perlu ajukan ulang
+                $data['rejected_kaprodi'] = $proposal_data;
+                
+            // 3. PROPOSAL DISETUJUI KAPRODI, MENUNGGU DOSEN PEMBIMBING
+            } elseif ($proposal_data->status_kaprodi == '1' && $proposal_data->status_pembimbing == '0') {
+                // Kaprodi sudah setujui dan tetapkan dosen, tapi dosen belum setuju
+                $data['pending_proposal'] = $proposal_data;
+                
+            // 4. DOSEN PEMBIMBING MENOLAK
+            } elseif ($proposal_data->status_kaprodi == '1' && $proposal_data->status_pembimbing == '2') {
+                // Dosen menolak, kaprodi perlu tetapkan dosen lain
+                $data['rejected_dosen'] = $proposal_data;
+                
+            // 5. BIMBINGAN AKTIF
+            } elseif ($proposal_data->status_kaprodi == '1' && $proposal_data->status_pembimbing == '1') {
+                // Semua approve, bimbingan dapat dimulai
+                $data['proposal'] = $proposal_data;
             }
         }
 
-        // Ambil jurnal bimbingan mahasiswa
+        // Ambil jurnal bimbingan hanya jika proposal sudah aktif
         if (isset($data['proposal'])) {
             $this->db->select('*');
             $this->db->from('jurnal_bimbingan');
@@ -86,15 +117,16 @@ class Bimbingan extends CI_Controller
         if ($this->input->post()) {
             $mahasiswa_id = $this->session->userdata('id');
             
-            // Cek apakah mahasiswa sudah memiliki proposal yang disetujui
+            // Cek apakah mahasiswa sudah memiliki proposal yang aktif untuk bimbingan
             $proposal = $this->db->get_where('proposal_mahasiswa', [
                 'mahasiswa_id' => $mahasiswa_id,
-                'status_pembimbing' => '1',
-                'dosen_id !=' => NULL
+                'status_kaprodi' => '1',      // Disetujui kaprodi
+                'status_pembimbing' => '1',   // Disetujui dosen pembimbing
+                'dosen_id !=' => NULL        // Ada dosen pembimbing
             ])->row();
 
             if (!$proposal) {
-                $this->session->set_flashdata('error', 'Anda belum memiliki proposal yang disetujui dengan dosen pembimbing.');
+                $this->session->set_flashdata('error', 'Anda belum memiliki proposal yang disetujui untuk memulai bimbingan.');
                 redirect('mahasiswa/bimbingan');
                 return;
             }
@@ -241,6 +273,7 @@ class Bimbingan extends CI_Controller
                             ->from('proposal_mahasiswa pm')
                             ->join('dosen d', 'pm.dosen_id = d.id')
                             ->where('pm.mahasiswa_id', $mahasiswa_id)
+                            ->where('pm.status_kaprodi', '1')
                             ->where('pm.status_pembimbing', '1')
                             ->get()->row();
 

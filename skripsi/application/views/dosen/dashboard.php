@@ -27,8 +27,32 @@
     </div>
 </div>
 
-<!-- Statistics Cards -->
+<!-- Statistics Cards - URUTAN BARU -->
 <div class="row">
+    <!-- 1. MENUNGGU PERSETUJUAN (Prioritas Pertama) -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Menunggu Persetujuan</h5>
+                        <span class="h2 font-weight-bold mb-0"><?= $stats_tambahan['menunggu_persetujuan'] ?></span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-warning text-white rounded-circle shadow">
+                            <i class="fa fa-hourglass-half"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <span class="text-warning mr-2"><i class="fa fa-exclamation-triangle"></i></span>
+                    <span class="text-nowrap">Perlu review</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 2. MAHASISWA BIMBINGAN (Kedua) -->
     <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
@@ -50,6 +74,8 @@
             </div>
         </div>
     </div>
+    
+    <!-- 3. BIMBINGAN BULAN INI (Ketiga) -->
     <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
@@ -71,6 +97,8 @@
             </div>
         </div>
     </div>
+    
+    <!-- 4. SUDAH PUBLIKASI (Keempat) -->
     <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
@@ -88,27 +116,6 @@
                 <p class="mt-3 mb-0 text-sm">
                     <span class="text-success mr-2"><i class="fa fa-check"></i></span>
                     <span class="text-nowrap">Selesai total</span>
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Menunggu Persetujuan</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= $stats_tambahan['menunggu_persetujuan'] ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-yellow text-white rounded-circle shadow">
-                            <i class="fa fa-hourglass-half"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-warning mr-2"><i class="fa fa-exclamation-triangle"></i></span>
-                    <span class="text-nowrap">Perlu review</span>
                 </p>
             </div>
         </div>

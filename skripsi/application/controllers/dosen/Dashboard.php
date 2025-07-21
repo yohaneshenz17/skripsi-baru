@@ -36,7 +36,7 @@ class Dashboard extends CI_Controller {
         // 4. RECENT ACTIVITIES
         $data['recent_activities'] = $this->_get_recent_activities($dosen_id);
         
-        // 5. STATISTIK TAMBAHAN (diperbaiki sesuai kebutuhan Quick Actions)
+        // 5. STATISTIK TAMBAHAN (FIXED)
         $data['stats_tambahan'] = $this->_get_stats_tambahan($dosen_id);
         
         $this->load->view('dosen/dashboard', $data);
@@ -53,7 +53,7 @@ class Dashboard extends CI_Controller {
         ];
         
         try {
-            // FIXED: Query sederhana tanpa CASE WHEN yang kompleks
+            // Query sederhana tanpa CASE WHEN yang kompleks
             $this->db->select('pm.status_pembimbing, pm.workflow_status');
             $this->db->from('proposal_mahasiswa pm');
             $this->db->where('pm.dosen_id', $dosen_id);
@@ -97,7 +97,7 @@ class Dashboard extends CI_Controller {
         $mahasiswa_bimbingan = [];
         
         try {
-            // FIXED: Query sederhana tanpa CASE WHEN yang bermasalah
+            // Query sederhana tanpa CASE WHEN yang bermasalah
             $this->db->select('pm.id, pm.judul, pm.workflow_status, pm.created_at, pm.status_pembimbing, m.nama as nama_mahasiswa, m.nim, m.foto, p.nama as nama_prodi');
             $this->db->from('proposal_mahasiswa pm');
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
@@ -226,14 +226,19 @@ class Dashboard extends CI_Controller {
         ];
         
         try {
-            // 1. Mahasiswa yang menunggu persetujuan sebagai pembimbing
+            // ===================================================
+            // FIXED: 1. Mahasiswa yang menunggu persetujuan sebagai pembimbing
+            // ===================================================
             $this->db->select('COUNT(*) as total');
             $this->db->from('proposal_mahasiswa');
             $this->db->where('dosen_id', $dosen_id);
-            $this->db->where('status', '1'); // Sudah disetujui kaprodi
+            $this->db->where('status_kaprodi', '1'); // PERBAIKAN: Gunakan status_kaprodi bukan status
             $this->db->where('(status_pembimbing IS NULL OR status_pembimbing = "0")'); // Belum direspon
             $result = $this->db->get()->row();
             $stats['menunggu_persetujuan'] = $result ? $result->total : 0;
+            
+            // Debug query jika diperlukan
+            log_message('info', 'Query menunggu persetujuan untuk dosen_id ' . $dosen_id . ': ' . $this->db->last_query());
             
             // 2. Total mahasiswa yang sedang dibimbing
             $this->db->select('COUNT(*) as total');

@@ -599,7 +599,7 @@ ob_start();
     </div>
 </div>
 
-<!-- Modal Tambah Jurnal -->
+<!-- Modal Tambah Jurnal - TEMPLATE DIPERBAIKI -->
 <div class="modal fade" id="modalTambahJurnal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -611,18 +611,33 @@ ob_start();
                     </button>
                 </div>
                 <div class="modal-body">
+                    <!-- Info Mahasiswa (Seragam dengan dosen) -->
+                    <div class="form-group">
+                        <label>Mahasiswa</label>
+                        <input type="text" class="form-control" value="<?= $this->session->userdata('nama') ?> (<?= $this->session->userdata('username') ?>)" readonly>
+                        <small class="form-text text-muted">Jurnal bimbingan akan tercatat atas nama Anda</small>
+                    </div>
+                    
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Pertemuan ke- *</label>
-                                <input type="number" class="form-control" name="pertemuan_ke" min="1" value="<?= isset($total_bimbingan) ? ($total_bimbingan + 1) : 1 ?>" required>
+                                <input type="number" class="form-control" name="pertemuan_ke" min="1" 
+                                       value="<?= isset($total_bimbingan) ? ($total_bimbingan + 1) : 1 ?>" required>
                                 <small class="form-text text-muted">Nomor urut pertemuan bimbingan</small>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Tanggal Bimbingan *</label>
                                 <input type="date" class="form-control" name="tanggal_bimbingan" value="<?= date('Y-m-d') ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Durasi (menit)</label>
+                                <input type="number" class="form-control" name="durasi_bimbingan" min="15" max="180" placeholder="60">
+                                <small class="form-text text-muted">Estimasi durasi (opsional)</small>
                             </div>
                         </div>
                     </div>
@@ -634,20 +649,36 @@ ob_start();
                     </div>
                     
                     <div class="form-group">
+                        <label>Catatan Mahasiswa</label>
+                        <textarea class="form-control" name="catatan_mahasiswa" rows="3" 
+                                  placeholder="Catatan atau pertanyaan dari Anda untuk dosen"></textarea>
+                        <small class="form-text text-muted">Field ini akan terlihat oleh dosen pembimbing</small>
+                    </div>
+                    
+                    <div class="form-group">
                         <label>Tindak Lanjut</label>
                         <textarea class="form-control" name="tindak_lanjut" rows="3" 
-                                  placeholder="Tugas atau tindak lanjut yang diberikan dosen (opsional)"></textarea>
+                                  placeholder="Tugas atau tindak lanjut yang diberikan dosen"></textarea>
+                    </div>
+
+                    <!-- Info untuk mahasiswa -->
+                    <div class="alert alert-success">
+                        <i class="fa fa-info-circle"></i> 
+                        <strong>PERBAIKAN BARU:</strong> Anda sekarang dapat membuat jurnal bimbingan baru meskipun ada jurnal sebelumnya yang masih pending validasi. 
+                        Jika ada pertemuan dengan nomor yang sama, sistem akan memperbarui jurnal yang sudah ada.
                     </div>
                     
                     <div class="alert alert-info">
-                        <i class="fa fa-info-circle"></i> 
-                        <strong>Catatan:</strong> Jurnal yang sudah diinput akan dikirim ke dosen pembimbing untuk divalidasi. 
+                        <i class="fa fa-envelope"></i> 
+                        <strong>Notifikasi:</strong> Jurnal yang sudah diinput akan dikirim ke dosen pembimbing untuk divalidasi. 
                         Pastikan informasi yang dimasukkan sudah benar.
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Jurnal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Simpan Jurnal
+                    </button>
                 </div>
             </form>
         </div>
@@ -687,16 +718,23 @@ function tambahJurnalBimbingan() {
     $("#modalTambahJurnal").modal("show");
 }
 
-// Lihat Detail Jurnal
+// Lihat Detail Jurnal - PERBAIKAN FUNCTION
 function lihatDetailJurnal(jurnalId) {
-    // Find jurnal data from PHP
     ' . ((!empty($jurnal_bimbingan)) ? '
-    var jurnalData = ' . json_encode($jurnal_bimbingan, JSON_UNESCAPED_SLASHES | JSON_HEX_QUOT) . ';
-    var jurnal = jurnalData.find(function(j) { return j.id == jurnalId; });
+    var jurnalData = ' . json_encode($jurnal_bimbingan ?? [], JSON_UNESCAPED_SLASHES | JSON_HEX_QUOT) . ';
+    var jurnal = null;
+    
+    // Find jurnal by ID
+    for (var i = 0; i < jurnalData.length; i++) {
+        if (jurnalData[i].id == jurnalId) {
+            jurnal = jurnalData[i];
+            break;
+        }
+    }
     
     if (jurnal) {
         var statusBadge = "";
-        var catatanDosen = jurnal.catatan_dosen || "Tidak ada catatan";
+        var catatanDosen = jurnal.catatan_dosen || "Belum ada catatan dari dosen";
         
         if (jurnal.status_validasi == "1") {
             statusBadge = "<span class=\"badge badge-success\"><i class=\"fa fa-check\"></i> Tervalidasi</span>";
@@ -709,12 +747,12 @@ function lihatDetailJurnal(jurnalId) {
         var content = "<div class=\"row\">" +
             "<div class=\"col-md-6\">" +
                 "<strong>Pertemuan ke:</strong> " + jurnal.pertemuan_ke + "<br>" +
-                "<strong>Tanggal:</strong> " + new Date(jurnal.tanggal_bimbingan).toLocaleDateString(\"id-ID\") + "<br>" +
+                "<strong>Tanggal:</strong> " + jurnal.tanggal_bimbingan + "<br>" +
                 "<strong>Status:</strong> " + statusBadge +
             "</div>" +
             "<div class=\"col-md-6\">" +
-                "<strong>Dibuat:</strong> " + new Date(jurnal.created_at).toLocaleString(\"id-ID\") + "<br>" +
-                (jurnal.tanggal_validasi ? "<strong>Divalidasi:</strong> " + new Date(jurnal.tanggal_validasi).toLocaleString(\"id-ID\") : "") +
+                "<strong>Dibuat:</strong> " + jurnal.created_at + "<br>" +
+                (jurnal.tanggal_validasi ? "<strong>Divalidasi:</strong> " + jurnal.tanggal_validasi + "<br>" : "") +
             "</div>" +
         "</div>" +
         "<hr>" +
@@ -739,16 +777,35 @@ function lihatDetailJurnal(jurnalId) {
         
         document.getElementById("modalDetailContent").innerHTML = content;
         $("#modalDetailJurnal").modal("show");
+    } else {
+        alert("Data jurnal tidak ditemukan.");
     }
     ' : 'alert("Belum ada data jurnal bimbingan.");') . '
 }
 
-// Hapus Jurnal
+// Hapus Jurnal - PERBAIKAN FUNCTION
 function hapusJurnal(jurnalId) {
     if (confirm("Apakah Anda yakin ingin menghapus jurnal ini? Jurnal yang sudah divalidasi tidak dapat dihapus.")) {
+        // Redirect ke URL hapus
         window.location.href = "' . base_url('mahasiswa/bimbingan/hapus_jurnal/') . '" + jurnalId;
     }
 }
+
+// Document ready function
+$(document).ready(function() {
+    console.log("JavaScript functions loaded successfully");
+    
+    // Test functions
+    if (typeof tambahJurnalBimbingan !== "function") {
+        console.error("tambahJurnalBimbingan function not defined");
+    }
+    if (typeof lihatDetailJurnal !== "function") {
+        console.error("lihatDetailJurnal function not defined");
+    }
+    if (typeof hapusJurnal !== "function") {
+        console.error("hapusJurnal function not defined");
+    }
+});
 </script>
 ';
 

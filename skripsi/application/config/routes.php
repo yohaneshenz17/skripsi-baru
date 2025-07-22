@@ -28,9 +28,34 @@ $route['admin/(:any)'] = 'admin/$1';
 $route['dosen'] = 'dosen/dashboard';
 $route['dosen/(:any)'] = 'dosen/$1';
 
-// Mahasiswa routes
+// =====================================================
+//      MAHASISWA ROUTES - ROUTING SPESIFIK (TAMBAHAN BARU)
+// =====================================================
+
+// Dashboard
 $route['mahasiswa'] = 'mahasiswa/dashboard';
+
+// =====================================================
+//      BIMBINGAN ROUTES - PRIORITAS TINGGI (SEBELUM GENERIC)
+// =====================================================
+
+// Bimbingan - Routing Spesifik (HARUS SEBELUM GENERIC!)
+$route['mahasiswa/bimbingan'] = 'mahasiswa/bimbingan/index';
+$route['mahasiswa/bimbingan/tambah_jurnal'] = 'mahasiswa/bimbingan/tambah_jurnal';
+$route['mahasiswa/bimbingan/edit_jurnal/(:num)'] = 'mahasiswa/bimbingan/edit_jurnal/$1';
+$route['mahasiswa/bimbingan/hapus_jurnal/(:num)'] = 'mahasiswa/bimbingan/hapus_jurnal/$1';
+$route['mahasiswa/bimbingan/detail_jurnal/(:num)'] = 'mahasiswa/bimbingan/detail_jurnal/$1';
+$route['mahasiswa/bimbingan/export_jurnal'] = 'mahasiswa/bimbingan/export_jurnal';
+
+// =====================================================
+//      GENERIC ROUTING (HARUS DI BAWAH ROUTING SPESIFIK)
+// =====================================================
+
+// Generic routing untuk controller/method lainnya
 $route['mahasiswa/(:any)'] = 'mahasiswa/$1';
+
+// ⚠️ PENTING: Routing spesifik HARUS ditempatkan SEBELUM routing generic
+// agar CodeIgniter bisa resolve URL dengan benar
 
 // =====================================================
 //      ROUTE KAPRODI - WORKFLOW TERBARU

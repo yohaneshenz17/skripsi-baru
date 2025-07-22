@@ -1,0 +1,33 @@
+ERROR - 2025-07-22 02:59:19 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 05:50:42 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 05:53:40 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:53:40 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:53:48 --> 404 Page Not Found: Home-template/index
+ERROR - 2025-07-22 05:53:51 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:53:51 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:53:55 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:53:58 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:53:58 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:54:02 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:54:03 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:54:03 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:54:06 --> 404 Page Not Found: GetAllData/mahasiswa
+ERROR - 2025-07-22 05:54:06 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:54:36 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:55:13 --> 404 Page Not Found: Home-template/index
+ERROR - 2025-07-22 05:55:16 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 05:56:35 --> 404 Page Not Found: Home-template/index
+ERROR - 2025-07-22 06:36:03 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 06:36:04 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 06:48:58 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 07:16:20 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 08:22:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:22:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:23:03 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:23:03 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:50:14 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:50:14 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:50:31 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:50:31 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:50:47 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 08:50:47 --> 404 Page Not Found: Cdn/vendor

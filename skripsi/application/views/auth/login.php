@@ -621,7 +621,7 @@
               <img src="<?= base_url('cdn/img/icons/Logo STK.png') ?>" class="logo-header" alt="Logo STK Yakobus Merauke">
               <h1 class="text-white welcome-title">Selamat Datang!</h1>
               <div class="welcome-text-container">
-                <p class="text-white welcome-desc">Sistem Informasi Manajemen Skripsi STK St. Yakobus Merauke</p>
+                <p class="text-white welcome-desc">Sistem Informasi Manajemen Tugas Akhir STK St. Yakobus Merauke</p>
               </div>
             </div>
           </div>

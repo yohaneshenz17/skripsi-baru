@@ -124,61 +124,95 @@ class Bimbingan extends CI_Controller
                 'status_pembimbing' => '1',   // Disetujui dosen pembimbing
                 'dosen_id !=' => NULL        // Ada dosen pembimbing
             ])->row();
-
+    
             if (!$proposal) {
                 $this->session->set_flashdata('error', 'Anda belum memiliki proposal yang disetujui untuk memulai bimbingan.');
                 redirect('mahasiswa/bimbingan');
                 return;
             }
-
+    
             $pertemuan_ke = $this->input->post('pertemuan_ke');
             $tanggal_bimbingan = $this->input->post('tanggal_bimbingan');
             $materi_bimbingan = $this->input->post('materi_bimbingan');
             $tindak_lanjut = $this->input->post('tindak_lanjut');
-
+    
             // Validasi input
             if (!$pertemuan_ke || !$tanggal_bimbingan || !$materi_bimbingan) {
                 $this->session->set_flashdata('error', 'Semua field wajib diisi!');
                 redirect('mahasiswa/bimbingan');
                 return;
             }
-
-            // Cek apakah pertemuan_ke sudah ada
-            $existing = $this->db->get_where('jurnal_bimbingan', [
+    
+            // PERBAIKAN BARU: IZINKAN MULTIPLE JURNAL PENDING
+            // Hapus constraint yang mencegah jurnal pending baru
+            
+            // Cek hanya untuk jurnal yang sudah divalidasi dengan pertemuan_ke yang sama
+            $existing_validated = $this->db->get_where('jurnal_bimbingan', [
                 'proposal_id' => $proposal->id,
-                'pertemuan_ke' => $pertemuan_ke
+                'pertemuan_ke' => $pertemuan_ke,
+                'status_validasi' => '1' // Hanya cek yang sudah divalidasi
             ])->row();
-
-            if ($existing) {
-                $this->session->set_flashdata('error', 'Pertemuan ke-' . $pertemuan_ke . ' sudah ada! Silakan edit yang sudah ada atau gunakan nomor pertemuan yang berbeda.');
+    
+            if ($existing_validated) {
+                $this->session->set_flashdata('error', 'Pertemuan ke-' . $pertemuan_ke . ' sudah ada dan telah divalidasi! Silakan gunakan nomor pertemuan yang berbeda.');
                 redirect('mahasiswa/bimbingan');
                 return;
             }
-
-            // Insert jurnal bimbingan baru
-            $data_jurnal = [
+    
+            // BARU: Untuk jurnal pending dengan pertemuan_ke yang sama, beri pilihan
+            $existing_pending = $this->db->get_where('jurnal_bimbingan', [
                 'proposal_id' => $proposal->id,
                 'pertemuan_ke' => $pertemuan_ke,
-                'tanggal_bimbingan' => $tanggal_bimbingan,
-                'materi_bimbingan' => $materi_bimbingan,
-                'tindak_lanjut' => $tindak_lanjut,
-                'status_validasi' => '0', // Pending validasi
-                'created_by' => 'mahasiswa',
-                'created_at' => date('Y-m-d H:i:s')
-            ];
-
-            $this->db->insert('jurnal_bimbingan', $data_jurnal);
-
-            if ($this->db->affected_rows() > 0) {
-                // Kirim notifikasi ke dosen pembimbing
-                $this->_kirim_notifikasi_jurnal_baru($proposal, $pertemuan_ke, $tanggal_bimbingan, $materi_bimbingan);
-                
-                $this->session->set_flashdata('success', 'Jurnal bimbingan pertemuan ke-' . $pertemuan_ke . ' berhasil ditambahkan! Menunggu validasi dari dosen pembimbing.');
+                'status_validasi !=' => '1' // Pending atau revisi
+            ])->row();
+    
+            if ($existing_pending) {
+                // Update jurnal yang ada daripada buat baru
+                $update_data = [
+                    'tanggal_bimbingan' => $tanggal_bimbingan,
+                    'materi_bimbingan' => $materi_bimbingan,
+                    'tindak_lanjut' => $tindak_lanjut,
+                    'status_validasi' => '0', // Reset ke pending
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+    
+                $this->db->where('id', $existing_pending->id);
+                $update_result = $this->db->update('jurnal_bimbingan', $update_data);
+    
+                if ($update_result) {
+                    // Kirim notifikasi ke dosen pembimbing
+                    $this->_kirim_notifikasi_jurnal_baru($proposal, $pertemuan_ke, $tanggal_bimbingan, $materi_bimbingan);
+                    
+                    $this->session->set_flashdata('success', 'Jurnal bimbingan pertemuan ke-' . $pertemuan_ke . ' berhasil diperbarui! Menunggu validasi dari dosen pembimbing.');
+                } else {
+                    $this->session->set_flashdata('error', 'Gagal memperbarui jurnal bimbingan!');
+                }
             } else {
-                $this->session->set_flashdata('error', 'Gagal menambahkan jurnal bimbingan!');
+                // Buat jurnal baru
+                $data_jurnal = [
+                    'proposal_id' => $proposal->id,
+                    'pertemuan_ke' => $pertemuan_ke,
+                    'tanggal_bimbingan' => $tanggal_bimbingan,
+                    'materi_bimbingan' => $materi_bimbingan,
+                    'tindak_lanjut' => $tindak_lanjut,
+                    'status_validasi' => '0', // Pending validasi
+                    'created_by' => 'mahasiswa',
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+    
+                $insert_result = $this->db->insert('jurnal_bimbingan', $data_jurnal);
+    
+                if ($insert_result) {
+                    // Kirim notifikasi ke dosen pembimbing
+                    $this->_kirim_notifikasi_jurnal_baru($proposal, $pertemuan_ke, $tanggal_bimbingan, $materi_bimbingan);
+                    
+                    $this->session->set_flashdata('success', 'Jurnal bimbingan pertemuan ke-' . $pertemuan_ke . ' berhasil ditambahkan! Menunggu validasi dari dosen pembimbing.');
+                } else {
+                    $this->session->set_flashdata('error', 'Gagal menambahkan jurnal bimbingan!');
+                }
             }
         }
-
+    
         redirect('mahasiswa/bimbingan');
     }
 
@@ -264,6 +298,53 @@ class Bimbingan extends CI_Controller
         redirect('mahasiswa/bimbingan');
     }
 
+    public function detail_jurnal($jurnal_id)
+    {
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        // Validasi jurnal milik mahasiswa
+        $jurnal = $this->db->select('jb.*, pm.mahasiswa_id, pm.judul, d.nama as nama_dosen')
+                          ->from('jurnal_bimbingan jb')
+                          ->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id')
+                          ->join('dosen d', 'pm.dosen_id = d.id')
+                          ->where('jb.id', $jurnal_id)
+                          ->where('pm.mahasiswa_id', $mahasiswa_id)
+                          ->get()->row();
+    
+        if (!$jurnal) {
+            $this->session->set_flashdata('error', 'Jurnal tidak ditemukan atau bukan milik Anda.');
+            redirect('mahasiswa/bimbingan');
+            return;
+        }
+    
+        // Return JSON untuk AJAX call
+        if ($this->input->is_ajax_request()) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'id' => $jurnal->id,
+                    'pertemuan_ke' => $jurnal->pertemuan_ke,
+                    'tanggal_bimbingan' => $jurnal->tanggal_bimbingan,
+                    'materi_bimbingan' => $jurnal->materi_bimbingan,
+                    'catatan_dosen' => $jurnal->catatan_dosen,
+                    'tindak_lanjut' => $jurnal->tindak_lanjut,
+                    'status_validasi' => $jurnal->status_validasi,
+                    'tanggal_validasi' => $jurnal->tanggal_validasi,
+                    'created_at' => $jurnal->created_at,
+                    'nama_dosen' => $jurnal->nama_dosen,
+                    'judul_proposal' => $jurnal->judul
+                ]
+            ]);
+            return;
+        }
+    
+        // Jika bukan AJAX, tampilkan halaman detail
+        $data['title'] = 'Detail Jurnal Bimbingan';
+        $data['jurnal'] = $jurnal;
+        $this->load->view('mahasiswa/bimbingan_detail', $data);
+    }
+    
     public function export_jurnal()
     {
         $mahasiswa_id = $this->session->userdata('id');

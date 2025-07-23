@@ -8,7 +8,19 @@
   <meta name="description" content="Start your development with a Dashboard for Bootstrap 4.">
   <meta name="author" content="Creative Tim">
   <title>Skripsi - <?= $title ?></title>
+  
   <?php include('_main/css.php') ?>
+  
+  <!-- TAMBAHAN: Bimbingan Enhancement CSS -->
+  <?php if (isset($enhancement_css) && $enhancement_css === true): ?>
+  <link rel="stylesheet" href="<?= base_url('assets/essence/css/bimbingan.css') ?>">
+  <?php endif; ?>
+  
+  <!-- ALTERNATIF: Selalu load untuk halaman bimbingan -->
+  <?php if (strpos(uri_string(), 'bimbingan') !== false): ?>
+  <link rel="stylesheet" href="<?= base_url('assets/essence/css/bimbingan.css') ?>">
+  <?php endif; ?>
+  
   <style>
     .admin {
       display: none;
@@ -232,10 +244,23 @@
       </footer>
     </div>
   </div>
+  
   <!-- Argon Scripts -->
   <!-- Core -->
   <?php include('_main/js.php') ?>
+  
+  <!-- TAMBAHAN: Bimbingan Enhancement JavaScript -->
+  <?php if (isset($enhancement_js) && $enhancement_js === true): ?>
+  <script src="<?= base_url('assets/essence/js/bimbingan.js') ?>"></script>
+  <?php endif; ?>
+  
+  <!-- ALTERNATIF: Selalu load untuk halaman bimbingan -->
+  <?php if (strpos(uri_string(), 'bimbingan') !== false): ?>
+  <script src="<?= base_url('assets/essence/js/bimbingan.js') ?>"></script>
+  <?php endif; ?>
+  
   <?= $script ?>
+  
   <script>
     level = '<?= $this->session->userdata('level') ?>';
     if (level == '1') {

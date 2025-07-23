@@ -420,7 +420,7 @@
                                             </a>
                                             <?php if($total_bimbingan > 0): ?>
                                             <a class="dropdown-item" href="<?php echo base_url('dosen/bimbingan/export_jurnal/' . $mahasiswa->proposal_id); ?>">
-                                                <i class="fa fa-download"></i> Export Jurnal
+                                                <i class="fa fa-download"></i> Export PDF
                                             </a>
                                             <?php endif; ?>
                                             <?php endif; ?>
@@ -450,44 +450,7 @@
     </div>
 </div>
 
-<!-- Debug Info (hanya untuk development) -->
-<?php if(ENVIRONMENT === 'development'): ?>
-<div class="row mt-4">
-    <div class="col-lg-12">
-        <div class="card bg-light">
-            <div class="card-header">
-                <h5 class="mb-0">🔍 Debug Info (Development Only)</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <strong>Total Mahasiswa:</strong> <?php echo isset($total_mahasiswa) ? $total_mahasiswa : 'NOT SET'; ?><br>
-                        <strong>Total Jurnal Pending:</strong> <?php echo isset($total_jurnal_pending) ? $total_jurnal_pending : 'NOT SET'; ?><br>
-                        <strong>Total Jurnal Tervalidasi:</strong> <?php echo isset($total_jurnal_tervalidasi) ? $total_jurnal_tervalidasi : 'NOT SET'; ?>
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Dosen ID:</strong> <?php echo $this->session->userdata('id'); ?><br>
-                        <strong>Jurnal Pending List:</strong> <?php echo isset($jurnal_pending_list) ? count($jurnal_pending_list) : 'NOT SET'; ?><br>
-                        <strong>Mahasiswa Bimbingan:</strong> <?php echo isset($mahasiswa_bimbingan) ? count($mahasiswa_bimbingan) : 'NOT SET'; ?>
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Session Level:</strong> <?php echo $this->session->userdata('level'); ?><br>
-                        <strong>Session Name:</strong> <?php echo $this->session->userdata('nama'); ?><br>
-                        <strong>Base URL:</strong> <?php echo base_url(); ?>
-                    </div>
-                </div>
-                <?php if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)): ?>
-                <hr>
-                <strong>Sample Data:</strong>
-                <pre style="font-size: 10px; max-height: 200px; overflow-y: scroll;"><?php print_r(array_slice($mahasiswa_bimbingan, 0, 1)); ?></pre>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
-<!-- Info Card - Tips Bimbingan -->
+<!-- INFO CARD DIKURANGI dan DIPINDAH SEBELUM MODAL -->
 <div class="row mt-4 last-card">
     <div class="col-lg-12">
         <div class="card bg-gradient-light shadow">
@@ -729,19 +692,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // Debug log untuk development
-    <?php if(ENVIRONMENT === 'development'): ?>
-    console.log('=== DOSEN BIMBINGAN DEBUG ===');
-    console.log('Dosen ID:', <?php echo $this->session->userdata('id'); ?>);
-    console.log('Total Mahasiswa:', <?php echo isset($total_mahasiswa) ? $total_mahasiswa : 0; ?>);
-    console.log('Jurnal Pending:', <?php echo isset($total_jurnal_pending) ? $total_jurnal_pending : 0; ?>);
-    console.log('Mahasiswa Bimbingan:', <?php echo isset($mahasiswa_bimbingan) ? count($mahasiswa_bimbingan) : 0; ?>);
-    
-    if (<?php echo isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan) ? 'true' : 'false'; ?>) {
-        console.log('Sample Mahasiswa Data:', <?php echo isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan) ? json_encode($mahasiswa_bimbingan[0]) : '{}'; ?>);
-    }
-    <?php endif; ?>
 });
 
 // Reset modal saat ditutup

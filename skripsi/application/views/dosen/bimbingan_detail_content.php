@@ -51,6 +51,11 @@
                         <button type="button" class="btn btn-sm btn-success" onclick="tambahJurnalBimbingan()">
                             <i class="fa fa-plus"></i> Tambah Jurnal
                         </button>
+                        <?php if(isset($jurnal_bimbingan) && !empty($jurnal_bimbingan)): ?>
+                        <button type="button" class="btn btn-sm btn-info" onclick="exportJurnal()">
+                            <i class="fa fa-download"></i> Export PDF
+                        </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -298,7 +303,7 @@
                     <tbody>
                         <?php if(isset($jurnal_bimbingan) && !empty($jurnal_bimbingan)): ?>
                             <?php foreach($jurnal_bimbingan as $jurnal): ?>
-                            <tr>
+                            <tr id="jurnal-row-<?= $jurnal->id ?>">
                                 <td>
                                     <span class="badge badge-pill badge-primary">
                                         Ke-<?= $jurnal->pertemuan_ke ?>
@@ -404,6 +409,7 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="proposal_id" value="<?= isset($mahasiswa->proposal_id) ? $mahasiswa->proposal_id : '' ?>">
+                    <input type="hidden" name="jurnal_id" id="edit_jurnal_id" value="">
                     
                     <div class="form-group">
                         <label>Mahasiswa</label>
@@ -414,38 +420,38 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Pertemuan ke- *</label>
-                                <input type="number" class="form-control" name="pertemuan_ke" min="1" value="<?= (isset($total_bimbingan) ? $total_bimbingan : 0) + 1 ?>" required>
+                                <input type="number" class="form-control" name="pertemuan_ke" id="input_pertemuan_ke" min="1" value="<?= (isset($total_bimbingan) ? $total_bimbingan : 0) + 1 ?>" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Tanggal Bimbingan *</label>
-                                <input type="date" class="form-control" name="tanggal_bimbingan" value="<?= date('Y-m-d') ?>" required max="<?= date('Y-m-d') ?>">
+                                <input type="date" class="form-control" name="tanggal_bimbingan" id="input_tanggal_bimbingan" value="<?= date('Y-m-d') ?>" required max="<?= date('Y-m-d') ?>">
                             </div>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label>Materi Bimbingan *</label>
-                        <textarea class="form-control" name="materi_bimbingan" rows="3" required 
+                        <textarea class="form-control" name="materi_bimbingan" id="input_materi_bimbingan" rows="3" required 
                                   placeholder="Jelaskan materi yang dibahas dalam bimbingan ini"></textarea>
                     </div>
                     
                     <div class="form-group">
                         <label>Catatan Dosen</label>
-                        <textarea class="form-control" name="catatan_dosen" rows="3" 
+                        <textarea class="form-control" name="catatan_dosen" id="input_catatan_dosen" rows="3" 
                                   placeholder="Catatan, saran, atau evaluasi dari dosen"></textarea>
                     </div>
                     
                     <div class="form-group">
                         <label>Tindak Lanjut</label>
-                        <textarea class="form-control" name="tindak_lanjut" rows="2" 
+                        <textarea class="form-control" name="tindak_lanjut" id="input_tindak_lanjut" rows="2" 
                                   placeholder="Tugas atau tindak lanjut untuk mahasiswa"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Jurnal</button>
+                    <button type="submit" class="btn btn-primary" id="submitJurnalBtn">Simpan Jurnal</button>
                 </div>
             </form>
         </div>
@@ -488,15 +494,89 @@
 </div>
 
 <script>
+// Variables untuk tracking modal state
+var isEditMode = false;
+var currentEditJurnalId = null;
+
 // Tambah Jurnal Bimbingan
 function tambahJurnalBimbingan() {
+    isEditMode = false;
+    currentEditJurnalId = null;
+    
     document.getElementById('modalJurnalTitle').textContent = 'Tambah Jurnal Bimbingan';
+    document.getElementById('formJurnal').action = '<?= base_url("dosen/bimbingan/tambah_jurnal") ?>';
     document.getElementById('formJurnal').reset();
+    document.getElementById('edit_jurnal_id').value = '';
+    document.getElementById('submitJurnalBtn').textContent = 'Simpan Jurnal';
+    
+    // Set default values
     document.querySelector('[name="pertemuan_ke"]').value = <?= (isset($total_bimbingan) ? $total_bimbingan : 0) + 1 ?>;
     document.querySelector('[name="tanggal_bimbingan"]').value = '<?= date('Y-m-d') ?>';
-    // Set proposal_id
     document.querySelector('[name="proposal_id"]').value = '<?= isset($mahasiswa->proposal_id) ? $mahasiswa->proposal_id : '' ?>';
+    
     $('#modalJurnal').modal('show');
+}
+
+// NEW: Edit Jurnal Bimbingan
+function editJurnal(jurnalId) {
+    isEditMode = true;
+    currentEditJurnalId = jurnalId;
+    
+    document.getElementById('modalJurnalTitle').textContent = 'Edit Jurnal Bimbingan';
+    document.getElementById('submitJurnalBtn').textContent = 'Update Jurnal';
+    
+    // Fetch data jurnal
+    fetch('<?= base_url("dosen/bimbingan/get_jurnal/") ?>' + jurnalId)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.message);
+            return;
+        }
+        
+        // Populate form
+        document.getElementById('edit_jurnal_id').value = data.data.id;
+        document.getElementById('input_pertemuan_ke').value = data.data.pertemuan_ke;
+        document.getElementById('input_tanggal_bimbingan').value = data.data.tanggal_bimbingan;
+        document.getElementById('input_materi_bimbingan').value = data.data.materi_bimbingan;
+        document.getElementById('input_catatan_dosen').value = data.data.catatan_dosen || '';
+        document.getElementById('input_tindak_lanjut').value = data.data.tindak_lanjut || '';
+        
+        $('#modalJurnal').modal('show');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengambil data jurnal!');
+    });
+}
+
+// NEW: Delete Jurnal Bimbingan
+function deleteJurnal(jurnalId) {
+    if (!confirm('Apakah Anda yakin ingin menghapus jurnal bimbingan ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('jurnal_id', jurnalId);
+    
+    fetch('<?= base_url("dosen/bimbingan/delete_jurnal") ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.message);
+        } else {
+            alert('Success: ' + data.message);
+            // Remove row from table atau refresh page
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan sistem!');
+    });
 }
 
 // Validasi Jurnal
@@ -531,15 +611,49 @@ function exportJurnal() {
     <?php endif; ?>
 }
 
-// Edit Jurnal (placeholder)
-function editJurnal(jurnalId) {
-    alert('Fitur edit jurnal akan dikembangkan selanjutnya.');
-}
-
-// Delete Jurnal (placeholder)
-function deleteJurnal(jurnalId) {
-    if (confirm('Apakah Anda yakin ingin menghapus jurnal ini?')) {
-        alert('Fitur hapus jurnal akan dikembangkan selanjutnya.');
+// Handle form submit untuk edit/tambah
+document.getElementById('formJurnal').addEventListener('submit', function(e) {
+    if (isEditMode && currentEditJurnalId) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        formData.append('jurnal_id', currentEditJurnalId);
+        
+        const submitBtn = document.getElementById('submitJurnalBtn');
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+        
+        fetch('<?= base_url("dosen/bimbingan/edit_jurnal") ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.message);
+            } else {
+                alert('Success: ' + data.message);
+                $('#modalJurnal').modal('hide');
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan sistem!');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
     }
-}
+    // Untuk mode tambah, biarkan form submit normal
+});
+
+// Reset modal saat ditutup
+$('#modalJurnal').on('hidden.bs.modal', function () {
+    isEditMode = false;
+    currentEditJurnalId = null;
+    document.getElementById('formJurnal').reset();
+});
 </script>

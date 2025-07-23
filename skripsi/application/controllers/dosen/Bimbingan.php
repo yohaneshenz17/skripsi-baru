@@ -300,13 +300,136 @@ class Bimbingan extends CI_Controller {
         }
     }
 
+    // NEW: Edit Jurnal Bimbingan
+    public function edit_jurnal() {
+        if ($this->input->method() !== 'post') {
+            echo json_encode(['error' => true, 'message' => 'Method not allowed']);
+            return;
+        }
+        
+        $jurnal_id = $this->input->post('jurnal_id');
+        $pertemuan_ke = $this->input->post('pertemuan_ke');
+        $tanggal_bimbingan = $this->input->post('tanggal_bimbingan');
+        $materi_bimbingan = $this->input->post('materi_bimbingan');
+        $catatan_dosen = $this->input->post('catatan_dosen');
+        $tindak_lanjut = $this->input->post('tindak_lanjut');
+        
+        if (empty($jurnal_id) || empty($tanggal_bimbingan) || empty($materi_bimbingan)) {
+            echo json_encode(['error' => true, 'message' => 'Data wajib tidak lengkap!']);
+            return;
+        }
+        
+        // Validasi kepemilikan jurnal
+        $this->db->select('jb.*, pm.dosen_id, pm.id as proposal_id');
+        $this->db->from('jurnal_bimbingan jb');
+        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+        $this->db->where('jb.id', $jurnal_id);
+        $this->db->where('pm.dosen_id', $this->session->userdata('id'));
+        $jurnal = $this->db->get()->row();
+        
+        if (!$jurnal) {
+            echo json_encode(['error' => true, 'message' => 'Jurnal tidak ditemukan atau bukan bimbingan Anda!']);
+            return;
+        }
+        
+        // Update jurnal bimbingan
+        $update_data = [
+            'pertemuan_ke' => $pertemuan_ke,
+            'tanggal_bimbingan' => $tanggal_bimbingan,
+            'materi_bimbingan' => $materi_bimbingan,
+            'catatan_dosen' => $catatan_dosen,
+            'tindak_lanjut' => $tindak_lanjut,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('id', $jurnal_id);
+        $result = $this->db->update('jurnal_bimbingan', $update_data);
+        
+        if ($result) {
+            echo json_encode(['error' => false, 'message' => 'Jurnal bimbingan berhasil diupdate!']);
+        } else {
+            echo json_encode(['error' => true, 'message' => 'Gagal mengupdate jurnal bimbingan!']);
+        }
+    }
+
+    // NEW: Get Detail Jurnal untuk Edit
+    public function get_jurnal($jurnal_id) {
+        if (!$jurnal_id) {
+            echo json_encode(['error' => true, 'message' => 'ID jurnal tidak valid']);
+            return;
+        }
+        
+        // Validasi kepemilikan jurnal
+        $this->db->select('jb.*, pm.dosen_id');
+        $this->db->from('jurnal_bimbingan jb');
+        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+        $this->db->where('jb.id', $jurnal_id);
+        $this->db->where('pm.dosen_id', $this->session->userdata('id'));
+        $jurnal = $this->db->get()->row();
+        
+        if (!$jurnal) {
+            echo json_encode(['error' => true, 'message' => 'Jurnal tidak ditemukan atau bukan bimbingan Anda!']);
+            return;
+        }
+        
+        echo json_encode(['error' => false, 'data' => $jurnal]);
+    }
+
+    // NEW: Hapus Jurnal Bimbingan  
+    public function delete_jurnal() {
+        if ($this->input->method() !== 'post') {
+            echo json_encode(['error' => true, 'message' => 'Method not allowed']);
+            return;
+        }
+        
+        $jurnal_id = $this->input->post('jurnal_id');
+        
+        if (empty($jurnal_id)) {
+            echo json_encode(['error' => true, 'message' => 'ID jurnal tidak valid!']);
+            return;
+        }
+        
+        // Validasi kepemilikan jurnal
+        $this->db->select('jb.*, pm.dosen_id, pm.id as proposal_id');
+        $this->db->from('jurnal_bimbingan jb');
+        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+        $this->db->where('jb.id', $jurnal_id);
+        $this->db->where('pm.dosen_id', $this->session->userdata('id'));
+        $jurnal = $this->db->get()->row();
+        
+        if (!$jurnal) {
+            echo json_encode(['error' => true, 'message' => 'Jurnal tidak ditemukan atau bukan bimbingan Anda!']);
+            return;
+        }
+        
+        // Hapus jurnal
+        $this->db->where('id', $jurnal_id);
+        $result = $this->db->delete('jurnal_bimbingan');
+        
+        if ($result) {
+            echo json_encode(['error' => false, 'message' => 'Jurnal bimbingan berhasil dihapus!']);
+        } else {
+            echo json_encode(['error' => true, 'message' => 'Gagal menghapus jurnal bimbingan!']);
+        }
+    }
+
+    // IMPROVED: Export Jurnal ke PDF
     public function export_jurnal($proposal_id) {
         $dosen_id = $this->session->userdata('id');
         
-        // Verify access
-        $this->db->select('pm.*, m.nama as nama_mahasiswa, m.nim');
+        // Verify access dan ambil data mahasiswa
+        $this->db->select('
+            pm.*,
+            m.nama as nama_mahasiswa,
+            m.nim,
+            m.email as email_mahasiswa,
+            p.nama as nama_prodi,
+            d.nama as nama_dosen
+        ');
         $this->db->from('proposal_mahasiswa pm');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi p', 'm.prodi_id = p.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id');
         $this->db->where('pm.id', $proposal_id);
         $this->db->where('pm.dosen_id', $dosen_id);
         
@@ -318,7 +441,33 @@ class Bimbingan extends CI_Controller {
             return;
         }
         
-        $this->session->set_flashdata('info', 'Fitur export jurnal akan segera tersedia!');
-        redirect('dosen/bimbingan/detail_mahasiswa/' . $proposal_id);
+        // Ambil data jurnal bimbingan
+        $this->db->select('*');
+        $this->db->from('jurnal_bimbingan');
+        $this->db->where('proposal_id', $proposal_id);
+        $this->db->order_by('pertemuan_ke', 'ASC');
+        $jurnal_list = $this->db->get()->result();
+        
+        if (empty($jurnal_list)) {
+            $this->session->set_flashdata('error', 'Tidak ada jurnal bimbingan untuk di-export!');
+            redirect('dosen/bimbingan/detail_mahasiswa/' . $proposal_id);
+            return;
+        }
+        
+        // Load library untuk PDF (menggunakan built-in PHP untuk HTML to PDF sederhana)
+        $this->load->library('pdf_generator');
+        
+        $data = [
+            'proposal' => $proposal,
+            'jurnal_list' => $jurnal_list,
+            'tanggal_export' => date('d F Y')
+        ];
+        
+        // Generate PDF
+        $html = $this->load->view('dosen/pdf/jurnal_bimbingan', $data, true);
+        
+        $filename = 'Jurnal_Bimbingan_' . $proposal->nim . '_' . date('Ymd_His') . '.pdf';
+        
+        $this->pdf_generator->generate($html, $filename, true, 'A4', 'portrait');
     }
 }

@@ -347,3 +347,49 @@ Stack trace:
 #2 /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php(47): handleAction('send_test_email')
 #3 {main}
   thrown in /home/stkp7133/public_html/skripsi/fix_remaining_registrasi.php on line 403
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: update() method called - KAPRODI
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => default.jpeg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpKZeiOO
+            [error] => 0
+            [size] => 32341
+        )
+
+)
+
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Kaprodi ID from session: 10
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Is photo upload: YES
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: _handle_photo_upload called with kaprodi_id: 10
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => default.jpeg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpKZeiOO
+            [error] => 0
+            [size] => 32341
+        )
+
+)
+
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 2ec0cb9edd6eeb951ce65dab0f0d4261.jpeg
+    [message] => Foto berhasil diupload
+)
+
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/47b8a620332e72136adead99e0b0120e.jpg
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Database updated successfully with foto: 2ec0cb9edd6eeb951ce65dab0f0d4261.jpeg
+[23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Session updated with foto: 2ec0cb9edd6eeb951ce65dab0f0d4261.jpeg

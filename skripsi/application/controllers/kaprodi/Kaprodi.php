@@ -718,56 +718,229 @@ class Kaprodi extends CI_Controller {
         redirect('kaprodi/proposal');
     }
 
-    private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
-        // Ambil data proposal dan mahasiswa
-        $data = $this->db->select('proposal_mahasiswa.*, mahasiswa.nama as nama_mahasiswa, mahasiswa.nim, mahasiswa.email as email_mahasiswa, prodi.nama as nama_prodi')
-                        ->from('proposal_mahasiswa')
-                        ->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id')
-                        ->join('prodi', 'mahasiswa.prodi_id = prodi.id')
-                        ->where('proposal_mahasiswa.id', $proposal_id)
-                        ->get()->row();
+/**
+ * METHOD YANG DIPERBAIKI: _kirim_notifikasi_pembimbing()
+ * Ganti method yang ada di file Kaprodi.php dengan method ini
+ */
+private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
+    // Ambil data proposal dan mahasiswa (hanya field yang sudah ada)
+    $data = $this->db->select('
+            proposal_mahasiswa.*, 
+            mahasiswa.nama as nama_mahasiswa, 
+            mahasiswa.nim, 
+            mahasiswa.email as email_mahasiswa, 
+            prodi.nama as nama_prodi
+        ')
+        ->from('proposal_mahasiswa')
+        ->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id')
+        ->join('prodi', 'mahasiswa.prodi_id = prodi.id')
+        ->where('proposal_mahasiswa.id', $proposal_id)
+        ->get()->row();
+    
+    $dosen = $this->db->get_where('dosen', ['id' => $dosen_id])->row();
+    
+    if ($data && $dosen) {
+        // Setup email
+        $config = [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug',
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls'
+        ];
         
-        $dosen = $this->db->get_where('dosen', ['id' => $dosen_id])->row();
+        $this->email->initialize($config);
         
-        if ($data && $dosen) {
-            // Setup email
-            $config = [
-                'protocol' => 'smtp',
-                'smtp_host' => 'smtp.gmail.com',
-                'smtp_port' => 587,
-                'smtp_user' => 'stkyakobus@gmail.com',
-                'smtp_pass' => 'yonroxhraathnaug',
-                'charset' => 'utf-8',
-                'newline' => "\r\n",
-                'mailtype' => 'html',
-                'smtp_crypto' => 'tls'
-            ];
-            
-            $this->email->initialize($config);
-            
-            $subject = 'Penunjukan sebagai Dosen Pembimbing - ' . $data->nama_mahasiswa;
-            
-            $message = "
-            <h3>Penunjukan sebagai Dosen Pembimbing</h3>
-            <p>Yth. {$dosen->nama},</p>
-            <p>Anda telah ditunjuk sebagai <strong>Dosen Pembimbing</strong> untuk mahasiswa:</p>
-            <ul>
-                <li>Nama: {$data->nama_mahasiswa}</li>
-                <li>NIM: {$data->nim}</li>
-                <li>Prodi: {$data->nama_prodi}</li>
-                <li>Judul: {$data->judul}</li>
-            </ul>
-            <p>Silakan login ke sistem untuk memberikan persetujuan: <a href='" . base_url('dosen/usulan_proposal') . "'>Login Sistem</a></p>
-            <p>Terima kasih atas kesediaannya.</p>
-            ";
-            
-            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
-            $this->email->to($dosen->email);
-            $this->email->subject($subject);
-            $this->email->message($message);
-            
-            $this->email->send();
+        $subject = 'Penunjukan sebagai Dosen Pembimbing - ' . $data->nama_mahasiswa;
+        
+        $message = $this->_get_formal_email_template($data, $dosen);
+        
+        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
+        $this->email->to($dosen->email);
+        $this->email->subject($subject);
+        $this->email->message($message);
+        
+        return $this->email->send();
+    }
+    
+    return false;
+}
+
+    /**
+     * METHOD BARU: Template email formal yang profesional
+     */
+    private function _get_formal_email_template($data, $dosen) {
+        // Dapatkan nama kaprodi yang menunjuk
+        $kaprodi = $this->db->get_where('dosen', ['id' => $this->session->userdata('id')])->row();
+        $nama_kaprodi = $kaprodi ? $kaprodi->nama : 'Kaprodi';
+        
+        $message = "
+        <!DOCTYPE html>
+        <html lang='id'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Penunjukan Dosen Pembimbing</title>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7fa; }
+                .container { max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+                .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+                .header p { margin: 10px 0 0 0; font-size: 14px; opacity: 0.9; }
+                .content { padding: 40px 30px; }
+                .greeting { font-size: 16px; margin-bottom: 20px; color: #333; }
+                .intro { font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 25px; }
+                .info-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; }
+                .info-title { font-size: 18px; font-weight: 600; color: #2d3748; margin: 0 0 15px 0; display: flex; align-items: center; }
+                .info-table { width: 100%; border-collapse: collapse; }
+                .info-table td { padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+                .info-table td:first-child { font-weight: 600; color: #4a5568; width: 35%; }
+                .info-table td:last-child { color: #2d3748; }
+                .proposal-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 20px; margin: 20px 0; }
+                .proposal-title { font-size: 16px; font-weight: 600; margin: 0 0 10px 0; }
+                .proposal-text { font-size: 14px; line-height: 1.5; margin: 0; }
+                .action-section { background-color: #fff8dc; border: 1px solid #f0e68c; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center; }
+                .action-title { font-size: 16px; font-weight: 600; color: #8b4513; margin: 0 0 10px 0; }
+                .action-text { font-size: 14px; color: #8b4513; margin: 0 0 20px 0; }
+                .btn-container { text-align: center; margin: 30px 0; }
+                .btn { display: inline-block; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; margin: 0 5px; transition: all 0.3s ease; }
+                .btn-primary { background-color: #4299e1; color: white; }
+                .btn-primary:hover { background-color: #3182ce; }
+                .footer { background-color: #2d3748; color: #a0aec0; padding: 25px 30px; text-align: center; }
+                .footer-logo { font-size: 18px; font-weight: 600; color: #ffffff; margin: 0 0 10px 0; }
+                .footer-text { font-size: 12px; margin: 5px 0; }
+                .divider { height: 1px; background-color: #e2e8f0; margin: 25px 0; }
+                .badge { display: inline-block; padding: 4px 8px; background-color: #4299e1; color: white; border-radius: 4px; font-size: 12px; font-weight: 600; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <!-- Header -->
+                <div class='header'>
+                    <h1>📋 Penunjukan Dosen Pembimbing</h1>
+                    <p>Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+                
+                <!-- Content -->
+                <div class='content'>
+                    <!-- Greeting -->
+                    <div class='greeting'>
+                        Yth. <strong>{$dosen->nama}</strong>,
+                    </div>
+                    
+                    <!-- Introduction -->
+                    <div class='intro'>
+                        Dengan hormat, melalui email ini kami mengundang Bapak/Ibu untuk menjadi 
+                        <strong>Dosen Pembimbing</strong> tugas akhir mahasiswa kami. Penunjukan ini 
+                        dilakukan berdasarkan keahlian dan kompetensi Bapak/Ibu yang sesuai dengan 
+                        bidang penelitian mahasiswa.
+                    </div>
+                    
+                    <!-- Student Information -->
+                    <div class='info-card'>
+                        <div class='info-title'>
+                            👨‍🎓 Profil Mahasiswa
+                        </div>
+                        <table class='info-table'>
+                            <tr>
+                                <td>Nama Lengkap</td>
+                                <td><strong>{$data->nama_mahasiswa}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Nomor Induk Mahasiswa</td>
+                                <td><span class='badge'>{$data->nim}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Program Studi</td>
+                                <td>{$data->nama_prodi}</td>
+                            </tr>
+                            <tr>
+                                <td>Email Mahasiswa</td>
+                                <td><a href='mailto:{$data->email_mahasiswa}' style='color: #4299e1; text-decoration: none;'>{$data->email_mahasiswa}</a></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Proposal Information -->
+                    <div class='proposal-card'>
+                        <div class='proposal-title'>📚 Judul Penelitian</div>
+                        <div class='proposal-text'>{$data->judul}</div>
+                    </div>
+                    
+                    <!-- Abstract/Summary if available -->";
+                    
+        if (!empty($data->ringkasan)) {
+            $ringkasan_preview = strlen($data->ringkasan) > 300 ? substr($data->ringkasan, 0, 300) . '...' : $data->ringkasan;
+            $message .= "
+                    <div class='info-card'>
+                        <div class='info-title'>📋 Ringkasan Penelitian</div>
+                        <p style='margin: 0; line-height: 1.6; color: #4a5568;'>{$ringkasan_preview}</p>
+                    </div>";
         }
+        
+        $message .= "
+                    <!-- Action Required -->
+                    <div class='action-section'>
+                        <div class='action-title'>⏳ Tindakan yang Diperlukan</div>
+                        <div class='action-text'>
+                            Mohon Bapak/Ibu berkenan untuk memberikan <strong>konfirmasi persetujuan atau penolakan</strong> 
+                            terhadap penunjukan ini melalui sistem dalam waktu <strong>maksimal 3 (tiga) hari kerja</strong> 
+                            setelah email ini diterima.
+                        </div>
+                    </div>
+                    
+                    <!-- Call to Action Button -->
+                    <div class='btn-container'>
+                        <a href='" . base_url('dosen/usulan_proposal') . "' class='btn btn-primary'>
+                            🔐 Login ke Sistem &amp; Berikan Respon
+                        </a>
+                    </div>
+                    
+                    <div class='divider'></div>
+                    
+                    <!-- Additional Information -->
+                    <div style='background-color: #f7fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #4299e1;'>
+                        <h4 style='margin: 0 0 10px 0; color: #2d3748; font-size: 16px;'>📌 Informasi Tambahan</h4>
+                        <ul style='margin: 0; padding-left: 20px; color: #4a5568; line-height: 1.6;'>
+                            <li>File proposal lengkap dapat diakses melalui sistem</li>
+                            <li>Komunikasi dengan mahasiswa dapat dilakukan melalui sistem atau email langsung</li>
+                            <li>Jadwal bimbingan dapat diatur secara fleksibel sesuai kesepakatan</li>
+                            <li>Dukungan teknis sistem tersedia melalui admin STK</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Closing -->
+                    <div style='margin-top: 30px; color: #4a5568; line-height: 1.6;'>
+                        <p>Demikian surat penunjukan ini kami sampaikan. Atas perhatian dan kesediaan 
+                        Bapak/Ibu untuk membimbing mahasiswa kami, kami mengucapkan terima kasih.</p>
+                        
+                        <div style='margin-top: 25px;'>
+                            <p style='margin: 0;'><strong>Hormat kami,</strong></p>
+                            <p style='margin: 5px 0 0 0;'><strong>{$nama_kaprodi}</strong><br>
+                            <span style='color: #718096;'>Ketua Program Studi {$data->nama_prodi}</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class='footer'>
+                    <div class='footer-logo'>🎓 STK Santo Yakobus Merauke</div>
+                    <div class='footer-text'>Sistem Informasi Manajemen Tugas Akhir</div>
+                    <div class='footer-text'>Email ini dikirim secara otomatis oleh sistem</div>
+                    <div class='footer-text' style='margin-top: 10px; font-size: 11px;'>
+                        Jl. Missi II, Mandala, Merauke, Papua Selatan 99616<br>
+                        📞 (0971) 3330264 | 📧 sipd@stkyakobus.ac.id
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>";
+        
+        return $message;
     }
 
     private function _kirim_notifikasi_mahasiswa($proposal_id, $status) {
@@ -1997,5 +2170,499 @@ class Kaprodi extends CI_Controller {
         </div>
         <?php
         return ob_get_clean();
+    }
+    // ============================================
+    // TAMBAHAN METHOD UNTUK PENETAPAN ULANG PEMBIMBING
+    // Tambahkan ini SEBELUM tanda kurung kurawal penutup class Kaprodi
+    // ============================================
+
+    /**
+     * Method untuk menampilkan form penetapan ulang pembimbing
+     * Khusus untuk proposal yang ditolak dosen pembimbing (status_pembimbing = 2)
+     */
+    public function penetapan_ulang($proposal_id) {
+        $data['title'] = 'Penetapan Ulang Pembimbing';
+        
+        // Ambil detail proposal yang ditolak dosen
+        $this->db->select('
+            pm.*, 
+            m.nim, 
+            m.nama as nama_mahasiswa, 
+            m.email as email_mahasiswa,
+            m.tempat_lahir,
+            m.tanggal_lahir,
+            m.jenis_kelamin,
+            m.alamat,
+            m.nomor_telepon,
+            p.nama as nama_prodi,
+            d_old.nama as nama_pembimbing_lama,
+            d_old.email as email_pembimbing_lama
+        ');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi p', 'm.prodi_id = p.id');
+        $this->db->join('dosen d_old', 'pm.dosen_id = d_old.id', 'left'); // Dosen pembimbing lama
+        $this->db->where('pm.id', $proposal_id);
+        $this->db->where('m.prodi_id', $this->prodi_id);
+        $this->db->where('pm.status_kaprodi', '1'); // Harus sudah disetujui kaprodi
+        $this->db->where('pm.status_pembimbing', '2'); // Harus ditolak dosen
+        
+        $data['proposal'] = $this->db->get()->row();
+        
+        if (!$data['proposal']) {
+            $this->session->set_flashdata('error', 'Proposal tidak ditemukan atau tidak memerlukan penetapan ulang!');
+            redirect('kaprodi/proposal#penetapan-ulang');
+        }
+        
+        // Ambil dosen yang bisa menjadi pembimbing (exclude dosen yang menolak sebelumnya)
+        $this->db->where('level', '2'); // Dosen biasa
+        $this->db->where('id !=', $data['proposal']->dosen_id); // Exclude dosen yang menolak
+        $this->db->where('id !=', $this->session->userdata('id')); // Exclude kaprodi yang login
+        $this->db->order_by('nama', 'ASC');
+        $data['dosens'] = $this->db->get('dosen')->result();
+        
+        $this->load->view('kaprodi/penetapan_ulang', $data);
+    }
+
+    /**
+     * Method untuk memproses penetapan ulang pembimbing
+     */
+    public function simpan_penetapan_ulang() {
+        $proposal_id = $this->input->post('proposal_id');
+        $dosen_pembimbing_baru_id = $this->input->post('dosen_pembimbing_baru_id');
+        $dosen_penguji1_id = $this->input->post('dosen_penguji1_id');
+        $dosen_penguji2_id = $this->input->post('dosen_penguji2_id');
+        $alasan_penetapan_ulang = $this->input->post('alasan_penetapan_ulang');
+        
+        // Validasi input
+        if (!$proposal_id || !$dosen_pembimbing_baru_id) {
+            $this->session->set_flashdata('error', 'Dosen pembimbing baru harus dipilih!');
+            redirect('kaprodi/proposal#penetapan-ulang');
+            return;
+        }
+        
+        // Ambil data proposal lengkap dengan data mahasiswa, dosen lama, dll
+        $proposal = $this->db->select('
+                pm.*, 
+                m.nama as nama_mahasiswa, 
+                m.nim,
+                m.email as email_mahasiswa, 
+                p.nama as nama_prodi,
+                d_lama.nama as nama_pembimbing_lama,
+                d_lama.email as email_pembimbing_lama
+            ')
+            ->from('proposal_mahasiswa pm')
+            ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
+            ->join('prodi p', 'm.prodi_id = p.id')
+            ->join('dosen d_lama', 'pm.dosen_id = d_lama.id', 'left')
+            ->where('pm.id', $proposal_id)
+            ->where('m.prodi_id', $this->prodi_id)
+            ->where('pm.status_kaprodi', '1')
+            ->where('pm.status_pembimbing', '2')
+            ->get()->row();
+        
+        if (!$proposal) {
+            $this->session->set_flashdata('error', 'Proposal tidak ditemukan atau tidak memerlukan penetapan ulang!');
+            redirect('kaprodi/proposal#penetapan-ulang');
+            return;
+        }
+        
+        // Ambil data dosen pembimbing baru
+        $dosen_baru = $this->db->get_where('dosen', ['id' => $dosen_pembimbing_baru_id])->row();
+        if (!$dosen_baru) {
+            $this->session->set_flashdata('error', 'Data dosen pembimbing baru tidak ditemukan!');
+            redirect('kaprodi/proposal#penetapan-ulang');
+            return;
+        }
+        
+        // Simpan data penetapan ulang
+        $update_data = [
+            'dosen_id' => $dosen_pembimbing_baru_id,
+            'status_pembimbing' => '0', // Reset ke menunggu respon dosen baru
+            'komentar_pembimbing' => null, // Reset komentar penolakan
+            'tanggal_respon_pembimbing' => null, // Reset tanggal respon
+            'tanggal_penetapan_ulang' => date('Y-m-d H:i:s'),
+            'penetapan_ulang_oleh' => $this->session->userdata('id'),
+            'alasan_penetapan_ulang' => $alasan_penetapan_ulang,
+            'workflow_status' => 'menunggu_pembimbing' // Set ulang ke menunggu pembimbing
+        ];
+        
+        // Update penguji jika ada perubahan
+        if ($dosen_penguji1_id) {
+            $update_data['dosen_penguji_id'] = $dosen_penguji1_id;
+        }
+        if ($dosen_penguji2_id) {
+            $update_data['dosen_penguji2_id'] = $dosen_penguji2_id;
+        }
+        
+        // Start transaction untuk memastikan konsistensi data
+        $this->db->trans_begin();
+        
+        try {
+            // Update proposal
+            $this->db->where('id', $proposal_id);
+            $update_result = $this->db->update('proposal_mahasiswa', $update_data);
+            
+            if (!$update_result) {
+                throw new Exception('Gagal mengupdate data proposal');
+            }
+            
+            // Insert log penetapan ulang
+            $this->_insert_log_penetapan_ulang($proposal_id, $proposal->dosen_id, $dosen_pembimbing_baru_id, $alasan_penetapan_ulang);
+            
+            // Commit transaction
+            $this->db->trans_commit();
+            
+            // KIRIM NOTIFIKASI EMAIL DENGAN ERROR HANDLING
+            $this->_kirim_notifikasi_penetapan_ulang_safe($proposal, $dosen_baru, $alasan_penetapan_ulang);
+            
+            $this->session->set_flashdata('success', 'Penetapan ulang pembimbing berhasil disimpan dan notifikasi telah dikirim!');
+            
+        } catch (Exception $e) {
+            // Rollback transaction jika ada error
+            $this->db->trans_rollback();
+            
+            log_message('error', 'Error simpan_penetapan_ulang: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Gagal menyimpan penetapan ulang: ' . $e->getMessage());
+        }
+        
+        redirect('kaprodi/proposal#penetapan-ulang');
+    }
+    
+    /**
+     * Method untuk kirim notifikasi penetapan ulang dengan error handling yang aman
+     */
+    private function _kirim_notifikasi_penetapan_ulang_safe($proposal, $dosen_baru, $alasan) {
+        try {
+            // Setup email config
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
+            
+            $this->email->initialize($config);
+            
+            // 1. Kirim notifikasi ke dosen pembimbing baru
+            $this->_kirim_email_dosen_pembimbing_baru_safe($proposal, $dosen_baru, $alasan);
+            
+            // 2. Kirim notifikasi ke mahasiswa
+            $this->_kirim_email_mahasiswa_penetapan_ulang_safe($proposal, $dosen_baru, $alasan);
+            
+            log_message('info', 'Notifikasi penetapan ulang berhasil dikirim untuk proposal ID: ' . $proposal->id);
+            
+        } catch (Exception $e) {
+            // Log error tapi jangan stop proses
+            log_message('error', 'Error kirim notifikasi penetapan ulang: ' . $e->getMessage());
+            
+            // Set flash message info bahwa email gagal tapi data tetap tersimpan
+            $this->session->set_flashdata('info', 'Data berhasil disimpan, namun notifikasi email gagal dikirim. Silakan informasikan secara manual.');
+        }
+    }
+    
+    /**
+     * Kirim email ke dosen pembimbing baru dengan error handling
+     */
+    private function _kirim_email_dosen_pembimbing_baru_safe($proposal, $dosen_baru, $alasan) {
+        try {
+            $subject = 'Penunjukan sebagai Dosen Pembimbing (Penetapan Ulang) - ' . $proposal->nama_mahasiswa;
+            
+            $message = "
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='UTF-8'>
+                <title>Penunjukan Pembimbing - Penetapan Ulang</title>
+            </head>
+            <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+                <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                    
+                    <!-- Header -->
+                    <div style='text-align: center; background-color: #f39c12; color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;'>
+                        <h2 style='margin: 0;'>🔄 Penunjukan Pembimbing (Penetapan Ulang)</h2>
+                    </div>
+                    
+                    <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                        Yth. <strong>{$dosen_baru->nama}</strong>,
+                    </p>
+                    
+                    <!-- Informasi Penetapan Ulang -->
+                    <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0; font-size: 16px;'>
+                            ℹ️ PENETAPAN ULANG PEMBIMBING
+                        </h4>
+                        <p style='margin: 0; color: #856404;'>
+                            Dosen pembimbing sebelumnya (<strong>{$proposal->nama_pembimbing_lama}</strong>) telah menolak penunjukan untuk mahasiswa ini.
+                        </p>
+                    </div>
+                    
+                    <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                        Anda telah ditunjuk sebagai <strong>Dosen Pembimbing</strong> untuk mahasiswa:
+                    </p>
+                    
+                    <!-- Data Mahasiswa -->
+                    <div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                        <h3 style='color: #495057; margin: 0 0 15px 0; font-size: 18px;'>📚 Data Mahasiswa:</h3>
+                        <table style='width: 100%; border-collapse: collapse;'>
+                            <tr>
+                                <td style='padding: 8px 0; font-weight: bold; width: 30%;'>Nama:</td>
+                                <td style='padding: 8px 0;'>{$proposal->nama_mahasiswa}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px 0; font-weight: bold;'>NIM:</td>
+                                <td style='padding: 8px 0;'>{$proposal->nim}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px 0; font-weight: bold;'>Program Studi:</td>
+                                <td style='padding: 8px 0;'>{$proposal->nama_prodi}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px 0; font-weight: bold;'>Email:</td>
+                                <td style='padding: 8px 0;'>{$proposal->email_mahasiswa}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Judul Proposal -->
+                    <div style='background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                        <h4 style='color: #0056b3; margin: 0 0 10px 0; font-size: 16px;'>📖 Judul Proposal:</h4>
+                        <p style='margin: 0; color: #0056b3; font-weight: bold;'>{$proposal->judul}</p>
+                    </div>
+                    
+                    <!-- Alasan Penetapan Ulang -->
+                    <div style='background-color: #f0f0f0; border: 1px solid #d0d0d0; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                        <h4 style='color: #666; margin: 0 0 10px 0; font-size: 16px;'>📝 Alasan Penetapan Ulang:</h4>
+                        <p style='margin: 0; color: #666;'>{$alasan}</p>
+                    </div>
+                    
+                    <!-- Call to Action -->
+                    <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0; font-size: 16px;'>⏳ Perlu Tindakan:</h4>
+                        <p style='margin: 0; color: #856404;'>
+                            Silakan login ke sistem untuk memberikan <strong>persetujuan atau penolakan</strong> 
+                            terhadap penunjukan ini dalam waktu <strong>3 hari kerja</strong>.
+                        </p>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='" . base_url('dosen/usulan_proposal') . "' 
+                           style='background-color: #28a745; color: white; padding: 12px 30px; 
+                                  text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 10px;'>
+                            ✅ Login & Respon
+                        </a>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; border-radius: 0 0 8px 8px;'>
+                        <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                            Email ini dikirim secara otomatis oleh<br>
+                            <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                            STK Santo Yakobus Merauke
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
+            $this->email->to($dosen_baru->email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            if (!$this->email->send()) {
+                throw new Exception('Gagal mengirim email ke dosen pembimbing baru: ' . $this->email->print_debugger());
+            }
+            
+            log_message('info', 'Email berhasil dikirim ke dosen pembimbing baru: ' . $dosen_baru->email);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error kirim email dosen pembimbing baru: ' . $e->getMessage());
+            throw $e; // Re-throw untuk ditangani di level atas
+        }
+    }
+    
+    /**
+     * Kirim email ke mahasiswa tentang penetapan ulang
+     */
+    private function _kirim_email_mahasiswa_penetapan_ulang_safe($proposal, $dosen_baru, $alasan) {
+        try {
+            $subject = 'Penetapan Ulang Dosen Pembimbing - ' . $proposal->nama_mahasiswa;
+            
+            $message = "
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='UTF-8'>
+                <title>Penetapan Ulang Dosen Pembimbing</title>
+            </head>
+            <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+                <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                    
+                    <!-- Header -->
+                    <div style='text-align: center; background-color: #17a2b8; color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;'>
+                        <h2 style='margin: 0;'>🔄 Penetapan Ulang Dosen Pembimbing</h2>
+                    </div>
+                    
+                    <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                        Yth. <strong>{$proposal->nama_mahasiswa}</strong>,
+                    </p>
+                    
+                    <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                        Terkait proposal Anda dengan judul <strong>{$proposal->judul}</strong>, terdapat perubahan dosen pembimbing:
+                    </p>
+                    
+                    <!-- Info Dosen Lama -->
+                    <div style='background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                        <h4 style='color: #721c24; margin: 0 0 10px 0; font-size: 16px;'>
+                            ❌ Dosen Pembimbing Sebelumnya:
+                        </h4>
+                        <p style='margin: 0; color: #721c24;'>
+                            <strong>{$proposal->nama_pembimbing_lama}</strong><br>
+                            <small>Menolak penunjukan sebagai pembimbing</small>
+                        </p>
+                    </div>
+                    
+                    <!-- Info Dosen Baru -->
+                    <div style='background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0; font-size: 16px;'>
+                            👨‍🏫 Dosen Pembimbing Baru:
+                        </h4>
+                        <p style='margin: 0; color: #155724;'>
+                            <strong>{$dosen_baru->nama}</strong><br>
+                            <small>Menunggu konfirmasi persetujuan</small>
+                        </p>
+                    </div>
+                    
+                    <!-- Alasan -->
+                    <div style='background-color: #f0f0f0; border: 1px solid #d0d0d0; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                        <h4 style='color: #666; margin: 0 0 10px 0; font-size: 16px;'>📝 Alasan Penetapan Ulang:</h4>
+                        <p style='margin: 0; color: #666;'>{$alasan}</p>
+                    </div>
+                    
+                    <!-- Informasi Selanjutnya -->
+                    <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0; font-size: 16px;'>ℹ️ Informasi:</h4>
+                        <p style='margin: 0; color: #856404;'>
+                            Mohon bersabar menunggu konfirmasi dari dosen pembimbing baru. 
+                            Anda akan mendapat notifikasi lanjutan setelah dosen memberikan respon.
+                        </p>
+                    </div>
+                    
+                    <!-- Button -->
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='" . base_url('mahasiswa/proposal') . "' 
+                           style='background-color: #007bff; color: white; padding: 12px 25px; 
+                                  text-decoration: none; border-radius: 5px; display: inline-block;'>
+                           📋 Cek Status Proposal
+                        </a>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; border-radius: 0 0 8px 8px;'>
+                        <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                            Email ini dikirim secara otomatis oleh<br>
+                            <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                            STK Santo Yakobus Merauke
+                        </p>
+                        <p style='margin: 10px 0 0 0; font-size: 12px; color: #6c757d;'>
+                            Terima kasih atas pengertiannya.<br><strong>Kaprodi</strong>
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
+            $this->email->to($proposal->email_mahasiswa);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            if (!$this->email->send()) {
+                throw new Exception('Gagal mengirim email ke mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            log_message('info', 'Email berhasil dikirim ke mahasiswa: ' . $proposal->email_mahasiswa);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error kirim email mahasiswa: ' . $e->getMessage());
+            throw $e; // Re-throw untuk ditangani di level atas
+        }
+    }
+    
+    /**
+     * Method untuk insert log penetapan ulang - DIPERBAIKI
+     */
+    private function _insert_log_penetapan_ulang($proposal_id, $dosen_lama_id, $dosen_baru_id, $alasan) {
+        try {
+            // Cek apakah tabel proposal_workflow exists
+            if (!$this->db->table_exists('proposal_workflow')) {
+                log_message('info', 'Tabel proposal_workflow tidak ada, skip insert log');
+                return true;
+            }
+            
+            $log_data = [
+                'proposal_id' => $proposal_id,
+                'tahap' => 'penetapan_ulang',
+                'status' => 'approved',
+                'komentar' => "Penetapan ulang pembimbing dari dosen ID {$dosen_lama_id} ke dosen ID {$dosen_baru_id}. Alasan: {$alasan}",
+                'diproses_oleh' => $this->session->userdata('id'),
+                'tanggal_proses' => date('Y-m-d H:i:s')
+            ];
+            
+            // Cek field yang ada di tabel
+            $fields = $this->db->list_fields('proposal_workflow');
+            $insert_data = [];
+            
+            foreach ($log_data as $key => $value) {
+                if (in_array($key, $fields)) {
+                    $insert_data[$key] = $value;
+                }
+            }
+            
+            if (!empty($insert_data)) {
+                $this->db->insert('proposal_workflow', $insert_data);
+                log_message('info', 'Log penetapan ulang berhasil disimpan untuk proposal ID: ' . $proposal_id);
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error insert log penetapan ulang: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Method untuk get data proposal yang ditolak dosen (untuk AJAX jika diperlukan)
+     */
+    public function get_proposals_ditolak_dosen() {
+        $this->db->select('
+            pm.*, 
+            m.nim, 
+            m.nama as nama_mahasiswa, 
+            m.email as email_mahasiswa,
+            d.nama as nama_pembimbing_lama
+        ');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->where('m.prodi_id', $this->prodi_id);
+        $this->db->where('pm.status_kaprodi', '1'); // Sudah disetujui kaprodi
+        $this->db->where('pm.status_pembimbing', '2'); // Ditolak dosen
+        $this->db->order_by('pm.tanggal_respon_pembimbing', 'DESC');
+        
+        $proposals = $this->db->get()->result();
+        
+        header('Content-Type: application/json');
+        echo json_encode($proposals);
     }
 }

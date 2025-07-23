@@ -100,8 +100,6 @@
 					$('.email').html(mahasiswa.email);
 					$('.alamat').html(mahasiswa.alamat);
 					$('.nomor_telepon').html(mahasiswa.nomor_telepon);
-					$('.alamat_orang_tua').html(mahasiswa.alamat_orang_tua);
-					$('.nomor_telepon_orang_tua').html(mahasiswa.nomor_telepon_orang_tua);
 					$('.nomor_telepon_orang_dekat').html(mahasiswa.nomor_telepon_orang_dekat);
 					$('.ipk').html(mahasiswa.ipk);
 					$('img.foto').attr('src', base_url+'/cdn/img/mahasiswa/'+((mahasiswa.foto) ? mahasiswa.foto : 'default.png'))

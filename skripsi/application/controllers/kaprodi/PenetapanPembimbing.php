@@ -28,22 +28,32 @@ class PenetapanPembimbing extends CI_Controller {
     }
 
     public function index() {
-        // PERBAIKAN: Clear flash messages lama saat masuk halaman
+        // Clear flash messages lama saat masuk halaman
         $this->_clear_old_flash_messages();
         
         $data['title'] = 'Penetapan Pembimbing - Workflow Terbaru';
         
-        // Ambil proposal yang belum ditetapkan (hanya yang valid)
+        // Ambil proposal yang belum ditetapkan ATAU yang ditolak dosen pembimbing
         $this->db->select('
             proposal_mahasiswa.*, 
             mahasiswa.nim, 
             mahasiswa.nama as nama_mahasiswa,
-            mahasiswa.email as email_mahasiswa
+            mahasiswa.email as email_mahasiswa,
+            dosen.nama as nama_dosen_sebelumnya
         ');
         $this->db->from('proposal_mahasiswa');
         $this->db->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id');
+        $this->db->join('dosen', 'proposal_mahasiswa.dosen_id = dosen.id', 'left'); // Left join untuk dosen yang mungkin NULL
         $this->db->where('mahasiswa.prodi_id', $this->prodi_id);
-        $this->db->where('proposal_mahasiswa.status', '0'); // Belum ditetapkan
+        
+        // PERBAIKAN: Tampilkan proposal yang:
+        // 1. Belum ditetapkan (status = 0) ATAU
+        // 2. Sudah ditetapkan tapi ditolak dosen (status_pembimbing = 2)
+        $this->db->group_start();
+            $this->db->where('proposal_mahasiswa.status', '0'); // Belum ditetapkan
+            $this->db->or_where('proposal_mahasiswa.status_pembimbing', '2'); // Ditolak dosen
+        $this->db->group_end();
+        
         // Filter: hanya proposal yang valid (bukan data lama)
         $this->db->where('proposal_mahasiswa.id NOT IN (34, 35)');
         $this->db->order_by('proposal_mahasiswa.id', 'DESC');

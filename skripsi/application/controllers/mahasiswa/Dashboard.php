@@ -147,7 +147,7 @@ class Dashboard extends MY_Controller
     }
 
     /**
-     * FIXED: Get notifikasi terbaru - DISESUAIKAN DENGAN TABEL EXISTING
+     * FIXED: Get notifikasi terbaru - PERBAIKI QUERY JOIN
      */
     public function get_notifikasi()
     {
@@ -155,38 +155,25 @@ class Dashboard extends MY_Controller
         $notifikasi = [];
         
         try {
-            // PERBAIKAN: Query sederhana tanpa JOIN kompleks yang bermasalah
-            $this->db->select('*');
-            $this->db->from('notifikasi');
-            $this->db->where('user_id', $mahasiswa_id);
-            $this->db->where('untuk_role', 'mahasiswa');
-            $this->db->where('dibaca', 0);
-            $this->db->order_by('tanggal_dibuat', 'DESC');
+            // PERBAIKAN: Query yang lebih sederhana dan aman
+            $this->db->select('n.*, COALESCE(d.nama, "Sistem") as nama_pengirim');
+            $this->db->from('notifikasi n');
+            $this->db->join('proposal_mahasiswa pm', 'n.proposal_id = pm.id', 'left');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('n.user_id', $mahasiswa_id);
+            $this->db->where('n.untuk_role', 'mahasiswa');
+            $this->db->where('n.dibaca', 0);
+            $this->db->order_by('n.tanggal_dibuat', 'DESC');
             $this->db->limit(5);
             $result = $this->db->get()->result();
             
             foreach($result as $row) {
-                // Cari nama pengirim secara terpisah jika diperlukan
-                $nama_pengirim = 'Sistem';
-                if (!empty($row->proposal_id)) {
-                    // Query terpisah untuk mendapatkan nama dosen
-                    $proposal = $this->db->select('pm.dosen_id, d.nama as nama_dosen')
-                                       ->from('proposal_mahasiswa pm')
-                                       ->join('dosen d', 'pm.dosen_id = d.id', 'left')
-                                       ->where('pm.id', $row->proposal_id)
-                                       ->get()->row();
-                    
-                    if ($proposal && !empty($proposal->nama_dosen)) {
-                        $nama_pengirim = $proposal->nama_dosen;
-                    }
-                }
-                
                 $notifikasi[] = [
                     'id' => $row->id,
                     'jenis' => $row->jenis,
                     'judul' => $row->judul,
                     'pesan' => $row->pesan,
-                    'nama_pengirim' => $nama_pengirim,
+                    'nama_pengirim' => $row->nama_pengirim,
                     'created_at' => $row->tanggal_dibuat,
                     'proposal_id' => $row->proposal_id
                 ];
@@ -194,48 +181,56 @@ class Dashboard extends MY_Controller
             
         } catch (Exception $e) {
             log_message('error', 'Dashboard notifikasi error: ' . $e->getMessage());
-            // Return empty data jika error
+            
+            // FALLBACK: Jika query JOIN bermasalah, gunakan query sederhana
+            try {
+                $this->db->select('id, jenis, judul, pesan, tanggal_dibuat, proposal_id');
+                $this->db->from('notifikasi');
+                $this->db->where('user_id', $mahasiswa_id);
+                $this->db->where('untuk_role', 'mahasiswa');
+                $this->db->where('dibaca', 0);
+                $this->db->order_by('tanggal_dibuat', 'DESC');
+                $this->db->limit(5);
+                $result = $this->db->get()->result();
+                
+                foreach($result as $row) {
+                    $notifikasi[] = [
+                        'id' => $row->id,
+                        'jenis' => $row->jenis,
+                        'judul' => $row->judul,
+                        'pesan' => $row->pesan,
+                        'nama_pengirim' => 'Sistem',
+                        'created_at' => $row->tanggal_dibuat,
+                        'proposal_id' => $row->proposal_id
+                    ];
+                }
+            } catch (Exception $e2) {
+                log_message('error', 'Dashboard fallback notifikasi error: ' . $e2->getMessage());
+                // Return empty array jika semua gagal
+            }
         }
         
         echo json_encode(['status' => 'success', 'data' => $notifikasi]);
     }
     
     /**
-     * ALTERNATIF: Versi yang lebih sederhana jika masih ada masalah
+     * PERBAIKAN: Method untuk mark notifikasi sebagai dibaca
      */
-    public function get_notifikasi_simple()
+    public function mark_notifikasi_dibaca()
     {
+        $notifikasi_id = $this->input->post('notifikasi_id');
         $mahasiswa_id = $this->session->userdata('id');
-        $notifikasi = [];
         
         try {
-            // Query super sederhana hanya dari tabel notifikasi
-            $this->db->select('id, jenis, judul, pesan, tanggal_dibuat, proposal_id');
-            $this->db->from('notifikasi');
+            $this->db->where('id', $notifikasi_id);
             $this->db->where('user_id', $mahasiswa_id);
-            $this->db->where('untuk_role', 'mahasiswa');
-            $this->db->where('dibaca', 0);
-            $this->db->order_by('tanggal_dibuat', 'DESC');
-            $this->db->limit(5);
-            $result = $this->db->get()->result();
+            $this->db->update('notifikasi', ['dibaca' => 1]);
             
-            foreach($result as $row) {
-                $notifikasi[] = [
-                    'id' => $row->id,
-                    'jenis' => $row->jenis,
-                    'judul' => $row->judul,
-                    'pesan' => $row->pesan,
-                    'nama_pengirim' => 'Sistem',
-                    'created_at' => $row->tanggal_dibuat,
-                    'proposal_id' => $row->proposal_id
-                ];
-            }
-            
+            echo json_encode(['status' => 'success', 'message' => 'Notifikasi ditandai sebagai dibaca']);
         } catch (Exception $e) {
-            log_message('error', 'Dashboard notifikasi error: ' . $e->getMessage());
+            log_message('error', 'Error mark notifikasi dibaca: ' . $e->getMessage());
+            echo json_encode(['status' => 'error', 'message' => 'Gagal update notifikasi']);
         }
-        
-        echo json_encode(['status' => 'success', 'data' => $notifikasi]);
     }
 
     /**

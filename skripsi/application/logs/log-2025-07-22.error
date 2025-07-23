@@ -31,3 +31,38 @@ ERROR - 2025-07-22 08:50:31 --> 404 Page Not Found: Cdn/vendor
 ERROR - 2025-07-22 08:50:31 --> 404 Page Not Found: Cdn/vendor
 ERROR - 2025-07-22 08:50:47 --> 404 Page Not Found: Cdn/vendor
 ERROR - 2025-07-22 08:50:47 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 09:45:33 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 09:56:15 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 09:57:46 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 09:57:49 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 09:59:56 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 10:00:03 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 10:00:16 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 10:00:24 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 10:29:35 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-22 10:29:43 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 10:29:49 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 10:30:41 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 10:30:46 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-07-22 10:30:51 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-22 14:09:39 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-22 14:13:23 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:13:23 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:13:43 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:13:43 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:15:28 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:15:28 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:42:46 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:42:46 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:42:51 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:42:51 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:52:51 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:52:51 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:52:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:52:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:53:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:53:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:58:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:58:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:59:01 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-22 14:59:01 --> 404 Page Not Found: Cdn/vendor

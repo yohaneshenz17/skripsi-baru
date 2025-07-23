@@ -125,16 +125,14 @@ class Usulan_proposal extends CI_Controller {
         if (!$proposal_id || !$status_pembimbing) {
             $this->session->set_flashdata('error', 'Data tidak lengkap!');
             redirect('dosen/usulan_proposal/detail/' . $proposal_id);
-            return;
         }
         
         if ($status_pembimbing == '2' && empty($komentar_pembimbing)) {
             $this->session->set_flashdata('error', 'Komentar wajib diisi jika menolak penunjukan!');
             redirect('dosen/usulan_proposal/detail/' . $proposal_id);
-            return;
         }
         
-        // FIXED: Validasi sederhana proposal exists dan dosen berhak
+        // Validasi proposal exists dan dosen berhak
         $proposal = $this->db->select('pm.*, m.nama as nama_mahasiswa, m.email as email_mahasiswa, m.nim, p.nama as nama_prodi, k.email as email_kaprodi')
                             ->from('proposal_mahasiswa pm')
                             ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
@@ -144,22 +142,32 @@ class Usulan_proposal extends CI_Controller {
                             ->where('pm.dosen_id', $dosen_id)
                             ->get()->row();
         
-        // REMOVED: Flash message error yang tidak perlu
         if (!$proposal) {
             redirect('dosen/usulan_proposal');
-            return;
         }
         
-        // Update status persetujuan pembimbing
-        $update_data = [
-            'status_pembimbing' => $status_pembimbing,
-            'komentar_pembimbing' => $komentar_pembimbing,
-            'tanggal_respon_pembimbing' => date('Y-m-d H:i:s')
-        ];
-        
-        // Jika disetujui, ubah status workflow ke fase bimbingan
+        // PERBAIKAN: Logic update berdasarkan keputusan dosen
         if ($status_pembimbing == '1') {
-            $update_data['workflow_status'] = 'bimbingan'; // Fase 2: Bimbingan
+            // DISETUJUI - update status ke bimbingan
+            $update_data = [
+                'status_pembimbing' => '1',
+                'komentar_pembimbing' => $komentar_pembimbing,
+                'tanggal_respon_pembimbing' => date('Y-m-d H:i:s'),
+                'workflow_status' => 'bimbingan' // Fase 2: Bimbingan
+            ];
+        } else {
+            // DITOLAK - RESET status agar kaprodi bisa pilih pembimbing baru
+            $update_data = [
+                'status_pembimbing' => '2',
+                'komentar_pembimbing' => $komentar_pembimbing,
+                'tanggal_respon_pembimbing' => date('Y-m-d H:i:s'),
+                // TAMBAHAN PENTING: Reset status agar muncul kembali di menu kaprodi
+                'status' => '0',              // Reset ke belum ditetapkan
+                'dosen_id' => NULL,           // Reset pembimbing
+                'tanggal_penetapan' => NULL,  // Reset tanggal penetapan
+                'penetapan_oleh' => NULL,     // Reset penetapan oleh
+                'workflow_status' => 'proposal' // Kembali ke fase proposal
+            ];
         }
         
         $this->db->where('id', $proposal_id);
@@ -171,7 +179,7 @@ class Usulan_proposal extends CI_Controller {
             
             $message = ($status_pembimbing == '1') ? 
                 'Penunjukan sebagai pembimbing berhasil disetujui! Mahasiswa dapat memulai proses bimbingan.' : 
-                'Penunjukan sebagai pembimbing berhasil ditolak. Kaprodi akan menentukan pembimbing yang baru.';
+                'Penunjukan sebagai pembimbing berhasil ditolak. Proposal akan dikembalikan ke Kaprodi untuk penetapan pembimbing baru.';
                 
             $this->session->set_flashdata('success', $message);
         } else {

@@ -148,6 +148,13 @@ $route['kaprodi/riwayat'] = 'kaprodi/riwayat_penetapan'; // Alias
 $route['kaprodi/download_proposal/(:num)'] = 'kaprodi/kaprodi/download_proposal/$1'; // Download file proposal
 $route['kaprodi/view_proposal/(:num)'] = 'kaprodi/kaprodi/view_proposal/$1';         // View file proposal
 
+// Route untuk penetapan ulang pembimbing (proposal yang ditolak dosen)
+$route['kaprodi/penetapan_ulang/(:num)'] = 'kaprodi/kaprodi/penetapan_ulang/$1';    // Form penetapan ulang
+$route['kaprodi/simpan_penetapan_ulang'] = 'kaprodi/kaprodi/simpan_penetapan_ulang'; // Submit penetapan ulang (POST)
+
+// Route AJAX untuk get data proposal ditolak dosen (opsional)
+$route['api/kaprodi/proposals_ditolak_dosen'] = 'kaprodi/kaprodi/get_proposals_ditolak_dosen';
+
 // =====================================================
 //      DEBUG DAN DEVELOPMENT (HANYA DEVELOPMENT)
 // =====================================================

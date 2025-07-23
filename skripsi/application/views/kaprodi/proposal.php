@@ -1,7 +1,7 @@
 <?php
 // ============================================
-// FILE: application/views/kaprodi/proposal.php (LAYOUT DIPERBAIKI)
-// PERBAIKAN: Layout mepet sidebar, tidak terlalu ke kanan
+// FILE: application/views/kaprodi/proposal.php (LAYOUT DIPERBAIKI + TAB PENETAPAN ULANG)
+// PERBAIKAN: Menambahkan tab khusus untuk proposal yang ditolak dosen
 // ============================================
 
 ob_start();
@@ -28,7 +28,7 @@ ob_start();
 </div>
 <?php endif; ?>
 
-<!-- PERBAIKAN: Container utama tanpa row agar full width -->
+<!-- Container utama -->
 <div class="card">
     <div class="card-header border-0">
         <div class="row align-items-center">
@@ -68,8 +68,14 @@ ob_start();
                         <i class="ni ni-single-02 mr-2"></i>Menunggu Pembimbing
                     </a>
                 </li>
+                <!-- TAB BARU: PENETAPAN ULANG -->
                 <li class="nav-item">
                     <a class="nav-link mb-sm-3 mb-md-0" id="tabs-icons-text-5-tab" data-toggle="tab" href="#tabs-icons-text-5" role="tab" aria-controls="tabs-icons-text-5" aria-selected="false">
+                        <i class="fas fa-redo mr-2"></i>Penetapan Ulang
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link mb-sm-3 mb-md-0" id="tabs-icons-text-6-tab" data-toggle="tab" href="#tabs-icons-text-6" role="tab" aria-controls="tabs-icons-text-6" aria-selected="false">
                         <i class="fas fa-history mr-2"></i>Riwayat Review
                     </a>
                 </li>
@@ -95,10 +101,8 @@ ob_start();
                             <?php 
                             $no = 1;
                             $count_menunggu = 0;
-                            // PERBAIKAN: Cek isset dan is_array dulu
                             if(isset($proposals) && is_array($proposals) && count($proposals) > 0): 
                                 foreach($proposals as $p): 
-                                    // PERBAIKAN: Cek property ada atau tidak
                                     if(isset($p->status_kaprodi) && $p->status_kaprodi == '0'): // Menunggu review
                                         $count_menunggu++;
                             ?>
@@ -117,7 +121,7 @@ ob_start();
                                         <?= isset($p->judul) ? substr($p->judul, 0, 50) . '...' : '-' ?>
                                     </span>
                                 </td>
-                                <td><?= isset($p->created_at) ? date('d/m/Y H:i', strtotime($p->created_at)) : (isset($p->id) ? date('d/m/Y H:i', strtotime($p->id)) : '-') ?></td>
+                                <td><?= isset($p->created_at) ? date('d/m/Y H:i', strtotime($p->created_at)) : '-' ?></td>
                                 <td>
                                     <a href="<?= base_url() ?>kaprodi/review_proposal/<?= isset($p->id) ? $p->id : '' ?>" class="btn btn-primary btn-sm">
                                         <i class="fas fa-eye"></i> Review
@@ -165,11 +169,10 @@ ob_start();
                             <?php 
                             $no = 1;
                             $count_disetujui = 0;
-                            // PERBAIKAN: Cek isset dan is_array dulu
                             if(isset($proposals) && is_array($proposals) && count($proposals) > 0): 
                                 foreach($proposals as $p): 
-                                    // PERBAIKAN: Cek property ada atau tidak
-                                    if(isset($p->status_kaprodi) && $p->status_kaprodi == '1'): // Disetujui
+                                    if(isset($p->status_kaprodi) && $p->status_kaprodi == '1' && 
+                                       (!isset($p->status_pembimbing) || $p->status_pembimbing != '2')): // Disetujui tapi bukan yang ditolak dosen
                                         $count_disetujui++;
                             ?>
                             <tr>
@@ -191,9 +194,6 @@ ob_start();
                                                 break;
                                             case '1':
                                                 echo '<span class="badge badge-success">Menyetujui</span>';
-                                                break;
-                                            case '2':
-                                                echo '<span class="badge badge-danger">Menolak</span>';
                                                 break;
                                             default:
                                                 echo '<span class="badge badge-secondary">Belum Ditentukan</span>';
@@ -245,10 +245,8 @@ ob_start();
                             <?php 
                             $no = 1;
                             $count_ditolak = 0;
-                            // PERBAIKAN: Cek isset dan is_array dulu
                             if(isset($proposals) && is_array($proposals) && count($proposals) > 0): 
                                 foreach($proposals as $p): 
-                                    // PERBAIKAN: Cek property ada atau tidak
                                     if(isset($p->status_kaprodi) && $p->status_kaprodi == '2'): // Ditolak
                                         $count_ditolak++;
                             ?>
@@ -309,10 +307,8 @@ ob_start();
                             <?php 
                             $no = 1;
                             $count_menunggu_pembimbing = 0;
-                            // PERBAIKAN: Cek isset dan is_array dulu
                             if(isset($proposals) && is_array($proposals) && count($proposals) > 0): 
                                 foreach($proposals as $p): 
-                                    // PERBAIKAN: Cek property ada atau tidak
                                     if(isset($p->status_kaprodi) && $p->status_kaprodi == '1' && 
                                        isset($p->status_pembimbing) && $p->status_pembimbing == '0'): // Disetujui tapi pembimbing belum respon
                                         $count_menunggu_pembimbing++;
@@ -352,8 +348,88 @@ ob_start();
                 </div>
             </div>
 
-            <!-- Tab Riwayat Review -->
+            <!-- TAB BARU: PENETAPAN ULANG (status_pembimbing = 2) -->
             <div class="tab-pane fade" id="tabs-icons-text-5" role="tabpanel" aria-labelledby="tabs-icons-text-5-tab">
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Penetapan Ulang Pembimbing</h6>
+                    <p class="mb-0">Proposal di bawah ini telah ditolak oleh dosen pembimbing yang ditunjuk sebelumnya. Silakan tetapkan pembimbing yang baru.</p>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table align-items-center table-flush" id="table-penetapan-ulang">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>No</th>
+                                <th>NIM</th>
+                                <th>Nama Mahasiswa</th>
+                                <th>Judul Proposal</th>
+                                <th>Pembimbing Sebelumnya</th>
+                                <th>Komentar Penolakan</th>
+                                <th>Tanggal Penolakan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            $no = 1;
+                            $count_penetapan_ulang = 0;
+                            if(isset($proposals) && is_array($proposals) && count($proposals) > 0): 
+                                foreach($proposals as $p): 
+                                    if(isset($p->status_kaprodi) && $p->status_kaprodi == '1' && 
+                                       isset($p->status_pembimbing) && $p->status_pembimbing == '2'): // Disetujui kaprodi tapi ditolak dosen
+                                        $count_penetapan_ulang++;
+                            ?>
+                            <tr>
+                                <td><?= $no++ ?></td>
+                                <td><span class="badge badge-dot mr-4"><i class="bg-danger"></i><?= isset($p->nim) ? $p->nim : '-' ?></span></td>
+                                <td><?= isset($p->nama_mahasiswa) ? $p->nama_mahasiswa : '-' ?></td>
+                                <td>
+                                    <span data-toggle="tooltip" data-placement="top" title="<?= isset($p->judul) ? htmlspecialchars($p->judul) : '' ?>">
+                                        <?= isset($p->judul) ? substr($p->judul, 0, 40) . '...' : '-' ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-danger font-weight-bold">
+                                        <?= isset($p->nama_pembimbing) ? $p->nama_pembimbing : 'Tidak diketahui' ?>
+                                    </span><br>
+                                    <small class="text-muted">(Menolak penunjukan)</small>
+                                </td>
+                                <td>
+                                    <span data-toggle="tooltip" data-placement="top" title="<?= isset($p->komentar_pembimbing) ? htmlspecialchars($p->komentar_pembimbing) : '' ?>">
+                                        <?= isset($p->komentar_pembimbing) && $p->komentar_pembimbing ? substr($p->komentar_pembimbing, 0, 30) . '...' : 'Tidak ada komentar' ?>
+                                    </span>
+                                </td>
+                                <td><?= isset($p->tanggal_respon_pembimbing) ? date('d/m/Y H:i', strtotime($p->tanggal_respon_pembimbing)) : '-' ?></td>
+                                <td>
+                                    <a href="<?= base_url() ?>kaprodi/penetapan_ulang/<?= isset($p->id) ? $p->id : '' ?>" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-redo"></i> Tetapkan Ulang
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php 
+                                    endif;
+                                endforeach; 
+                            endif;
+                            
+                            if($count_penetapan_ulang == 0):
+                            ?>
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fa fa-check-circle fa-2x mb-2 text-success"></i><br>
+                                        <strong>Tidak ada proposal yang perlu penetapan ulang</strong><br>
+                                        <small>Semua pembimbing telah menyetujui penunjukan mereka</small>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Riwayat Review -->
+            <div class="tab-pane fade" id="tabs-icons-text-6" role="tabpanel" aria-labelledby="tabs-icons-text-6-tab">
                 <div class="table-responsive">
                     <table class="table align-items-center table-flush" id="table-riwayat">
                         <thead class="thead-light">
@@ -372,11 +448,9 @@ ob_start();
                             <?php 
                             $no = 1;
                             $count_riwayat = 0;
-                            // PERBAIKAN: Cek isset dan is_array dulu
                             if(isset($proposals) && is_array($proposals) && count($proposals) > 0): 
                                 foreach($proposals as $p): 
-                                    // PERBAIKAN: Cek property ada atau tidak
-                                    if(isset($p->tanggal_review_kaprodi) && $p->tanggal_review_kaprodi): // Sudah direview (disetujui atau ditolak)
+                                    if(isset($p->tanggal_review_kaprodi) && $p->tanggal_review_kaprodi): // Sudah direview
                                         $count_riwayat++;
                             ?>
                             <tr>
@@ -452,7 +526,8 @@ ob_start();
                             1. Mahasiswa submit proposal → 
                             2. <strong>Kaprodi review & tetapkan pembimbing</strong> → 
                             3. Dosen pembimbing setujui/tolak → 
-                            4. Mulai bimbingan proposal
+                            4. <strong>Jika ditolak: Penetapan Ulang Pembimbing</strong> → 
+                            5. Mulai bimbingan proposal
                         </p>
                     </div>
                     <div class="col-auto">
@@ -509,6 +584,16 @@ $(document).ready(function() {
             "responsive": true
         });
         
+        // DataTable untuk tab PENETAPAN ULANG yang baru
+        $('#table-penetapan-ulang').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+            },
+            "order": [[ 6, "desc" ]], // Urutkan berdasarkan tanggal penolakan
+            "pageLength": 25,
+            "responsive": true
+        });
+        
         $('#table-riwayat').DataTable({
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
@@ -528,11 +613,27 @@ $(document).ready(function() {
     setTimeout(function() {
         $('.alert').fadeOut('slow');
     }, 5000);
+    
+    // Jika ada parameter URL untuk langsung membuka tab penetapan ulang
+    if (window.location.hash === '#penetapan-ulang') {
+        $('#tabs-icons-text-5-tab').tab('show');
+    }
 });
 
 // Function untuk menampilkan tab Riwayat Review
 function showRiwayatTab() {
     // Aktifkan tab Riwayat Review
+    $('#tabs-icons-text-6-tab').tab('show');
+    
+    // Scroll ke atas tabel
+    $('html, body').animate({
+        scrollTop: $('#tabs-icons-text').offset().top - 100
+    }, 500);
+}
+
+// Function untuk menampilkan tab Penetapan Ulang
+function showPenetapanUlangTab() {
+    // Aktifkan tab Penetapan Ulang
     $('#tabs-icons-text-5-tab').tab('show');
     
     // Scroll ke atas tabel

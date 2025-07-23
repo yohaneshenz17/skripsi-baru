@@ -31,6 +31,9 @@
 </div>
 <?php endif; ?>
 
+<!-- PERBAIKAN: Hidden input untuk proposal ID -->
+<input type="hidden" id="current_proposal_id" value="<?= isset($mahasiswa->proposal_id) ? $mahasiswa->proposal_id : (isset($mahasiswa->id) ? $mahasiswa->id : '') ?>">
+
 <!-- Header -->
 <div class="row">
     <div class="col-lg-12 mb-4">
@@ -52,7 +55,7 @@
                             <i class="fa fa-plus"></i> Tambah Jurnal
                         </button>
                         <?php if(isset($jurnal_bimbingan) && !empty($jurnal_bimbingan)): ?>
-                        <button type="button" class="btn btn-sm btn-info" onclick="exportJurnal()">
+                        <button type="button" class="btn btn-sm btn-info" onclick="exportJurnal()" data-proposal-id="<?= isset($mahasiswa->proposal_id) ? $mahasiswa->proposal_id : (isset($mahasiswa->id) ? $mahasiswa->id : '') ?>">
                             <i class="fa fa-download"></i> Export PDF
                         </button>
                         <?php endif; ?>
@@ -281,7 +284,7 @@
                             <i class="fa fa-plus"></i> Tambah Jurnal
                         </button>
                         <?php if(isset($jurnal_bimbingan) && !empty($jurnal_bimbingan)): ?>
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportJurnal()">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportJurnal()" data-proposal-id="<?= isset($mahasiswa->proposal_id) ? $mahasiswa->proposal_id : (isset($mahasiswa->id) ? $mahasiswa->id : '') ?>">
                             <i class="fa fa-download"></i> Export PDF
                         </button>
                         <?php endif; ?>
@@ -408,7 +411,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="proposal_id" value="<?= isset($mahasiswa->proposal_id) ? $mahasiswa->proposal_id : '' ?>">
+                    <input type="hidden" name="proposal_id" value="<?= isset($mahasiswa->proposal_id) ? $mahasiswa->proposal_id : (isset($mahasiswa->id) ? $mahasiswa->id : '') ?>">
                     <input type="hidden" name="jurnal_id" id="edit_jurnal_id" value="">
                     
                     <div class="form-group">
@@ -494,9 +497,75 @@
 </div>
 
 <script>
+// PERBAIKAN: Multiple fallback methods untuk mendapatkan proposal ID
+var currentProposalId = null;
+
+// Method 1: Ambil dari PHP variable
+<?php if(isset($mahasiswa->proposal_id) && !empty($mahasiswa->proposal_id)): ?>
+currentProposalId = '<?= $mahasiswa->proposal_id ?>';
+<?php elseif(isset($mahasiswa->id) && !empty($mahasiswa->id)): ?>
+currentProposalId = '<?= $mahasiswa->id ?>';
+<?php endif; ?>
+
+// Method 2: Ambil dari hidden input
+if (!currentProposalId) {
+    const hiddenInput = document.getElementById('current_proposal_id');
+    if (hiddenInput && hiddenInput.value) {
+        currentProposalId = hiddenInput.value;
+    }
+}
+
+// Method 3: Ambil dari URL
+if (!currentProposalId) {
+    const urlParts = window.location.href.split('/');
+    const detailIndex = urlParts.indexOf('detail_mahasiswa');
+    if (detailIndex !== -1 && urlParts[detailIndex + 1]) {
+        currentProposalId = urlParts[detailIndex + 1];
+    }
+}
+
+// Method 4: Ambil dari data attribute
+if (!currentProposalId) {
+    const buttonWithId = document.querySelector('[data-proposal-id]');
+    if (buttonWithId && buttonWithId.dataset.proposalId) {
+        currentProposalId = buttonWithId.dataset.proposalId;
+    }
+}
+
+// Debug log
+console.log('=== Export Debug Info ===');
+console.log('Current Proposal ID:', currentProposalId);
+console.log('PHP mahasiswa object available:', <?= isset($mahasiswa) ? 'true' : 'false' ?>);
+console.log('Current URL:', window.location.href);
+
 // Variables untuk tracking modal state
 var isEditMode = false;
 var currentEditJurnalId = null;
+
+// PERBAIKAN: Export function dengan robust proposal ID detection
+function exportJurnal() {
+    console.log('exportJurnal called, currentProposalId:', currentProposalId);
+    
+    if (!currentProposalId) {
+        // Last resort: try to extract from URL again
+        const urlParts = window.location.href.split('/');
+        const detailIndex = urlParts.indexOf('detail_mahasiswa');
+        if (detailIndex !== -1 && urlParts[detailIndex + 1]) {
+            currentProposalId = urlParts[detailIndex + 1];
+            console.log('Last resort: found proposal ID from URL:', currentProposalId);
+        }
+    }
+    
+    if (!currentProposalId) {
+        alert('ID proposal tidak ditemukan! Debug info sudah ditulis ke console.');
+        console.error('Export PDF Error: No proposal ID found after all methods');
+        return;
+    }
+    
+    const exportUrl = '<?= base_url() ?>dosen/bimbingan/export_jurnal/' + currentProposalId;
+    console.log('Opening export URL:', exportUrl);
+    window.open(exportUrl, '_blank');
+}
 
 // Tambah Jurnal Bimbingan
 function tambahJurnalBimbingan() {
@@ -512,12 +581,12 @@ function tambahJurnalBimbingan() {
     // Set default values
     document.querySelector('[name="pertemuan_ke"]').value = <?= (isset($total_bimbingan) ? $total_bimbingan : 0) + 1 ?>;
     document.querySelector('[name="tanggal_bimbingan"]').value = '<?= date('Y-m-d') ?>';
-    document.querySelector('[name="proposal_id"]').value = '<?= isset($mahasiswa->proposal_id) ? $mahasiswa->proposal_id : '' ?>';
+    document.querySelector('[name="proposal_id"]').value = currentProposalId || '';
     
     $('#modalJurnal').modal('show');
 }
 
-// NEW: Edit Jurnal Bimbingan
+// Edit Jurnal Bimbingan
 function editJurnal(jurnalId) {
     isEditMode = true;
     currentEditJurnalId = jurnalId;
@@ -525,32 +594,72 @@ function editJurnal(jurnalId) {
     document.getElementById('modalJurnalTitle').textContent = 'Edit Jurnal Bimbingan';
     document.getElementById('submitJurnalBtn').textContent = 'Update Jurnal';
     
-    // Fetch data jurnal
-    fetch('<?= base_url("dosen/bimbingan/get_jurnal/") ?>' + jurnalId)
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert('Error: ' + data.message);
-            return;
-        }
-        
-        // Populate form
-        document.getElementById('edit_jurnal_id').value = data.data.id;
-        document.getElementById('input_pertemuan_ke').value = data.data.pertemuan_ke;
-        document.getElementById('input_tanggal_bimbingan').value = data.data.tanggal_bimbingan;
-        document.getElementById('input_materi_bimbingan').value = data.data.materi_bimbingan;
-        document.getElementById('input_catatan_dosen').value = data.data.catatan_dosen || '';
-        document.getElementById('input_tindak_lanjut').value = data.data.tindak_lanjut || '';
-        
-        $('#modalJurnal').modal('show');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan saat mengambil data jurnal!');
-    });
+    // Fetch data jurnal - pastikan jQuery tersedia
+    if (typeof $ !== 'undefined') {
+        $.get('<?= base_url("dosen/bimbingan/get_jurnal/") ?>' + jurnalId)
+        .done(function(data) {
+            if (data.error) {
+                alert('Error: ' + data.message);
+                return;
+            }
+            
+            // Populate form
+            document.getElementById('edit_jurnal_id').value = data.data.id;
+            document.getElementById('input_pertemuan_ke').value = data.data.pertemuan_ke;
+            document.getElementById('input_tanggal_bimbingan').value = data.data.tanggal_bimbingan;
+            document.getElementById('input_materi_bimbingan').value = data.data.materi_bimbingan;
+            document.getElementById('input_catatan_dosen').value = data.data.catatan_dosen || '';
+            document.getElementById('input_tindak_lanjut').value = data.data.tindak_lanjut || '';
+            
+            $('#modalJurnal').modal('show');
+        })
+        .fail(function() {
+            alert('Terjadi kesalahan saat mengambil data jurnal!');
+        });
+    } else {
+        // Fallback untuk fetch API jika jQuery tidak tersedia
+        fetch('<?= base_url("dosen/bimbingan/get_jurnal/") ?>' + jurnalId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.message);
+                return;
+            }
+            
+            // Populate form
+            document.getElementById('edit_jurnal_id').value = data.data.id;
+            document.getElementById('input_pertemuan_ke').value = data.data.pertemuan_ke;
+            document.getElementById('input_tanggal_bimbingan').value = data.data.tanggal_bimbingan;
+            document.getElementById('input_materi_bimbingan').value = data.data.materi_bimbingan;
+            document.getElementById('input_catatan_dosen').value = data.data.catatan_dosen || '';
+            document.getElementById('input_tindak_lanjut').value = data.data.tindak_lanjut || '';
+            
+            // Jika jQuery tersedia gunakan, jika tidak gunakan vanilla JS
+            if (typeof $ !== 'undefined') {
+                $('#modalJurnal').modal('show');
+            } else {
+                // Vanilla JS modal show
+                const modal = document.getElementById('modalJurnal');
+                if (modal) {
+                    // Try Bootstrap 4 method
+                    if (window.bootstrap && window.bootstrap.Modal) {
+                        new window.bootstrap.Modal(modal).show();
+                    } else {
+                        // Fallback
+                        modal.style.display = 'block';
+                        modal.classList.add('show');
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat mengambil data jurnal!');
+        });
+    }
 }
 
-// NEW: Delete Jurnal Bimbingan
+// Delete Jurnal Bimbingan
 function deleteJurnal(jurnalId) {
     if (!confirm('Apakah Anda yakin ingin menghapus jurnal bimbingan ini?\n\nData yang dihapus tidak dapat dikembalikan!')) {
         return;
@@ -599,61 +708,76 @@ function validasiJurnal(jurnalId, status) {
         submitBtn.className = 'btn btn-warning';
     }
     
-    $('#modalValidasi').modal('show');
-}
-
-// Export Jurnal
-function exportJurnal() {
-    <?php if(isset($mahasiswa->proposal_id)): ?>
-    window.open('<?= base_url('dosen/bimbingan/export_jurnal/' . $mahasiswa->proposal_id) ?>', '_blank');
-    <?php else: ?>
-    alert('ID proposal tidak ditemukan!');
-    <?php endif; ?>
+    // Show modal
+    if (typeof $ !== 'undefined') {
+        $('#modalValidasi').modal('show');
+    } else {
+        const modal = document.getElementById('modalValidasi');
+        if (modal) {
+            modal.style.display = 'block';
+            modal.classList.add('show');
+        }
+    }
 }
 
 // Handle form submit untuk edit/tambah
-document.getElementById('formJurnal').addEventListener('submit', function(e) {
-    if (isEditMode && currentEditJurnalId) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        formData.append('jurnal_id', currentEditJurnalId);
-        
-        const submitBtn = document.getElementById('submitJurnalBtn');
-        submitBtn.disabled = true;
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
-        
-        fetch('<?= base_url("dosen/bimbingan/edit_jurnal") ?>', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert('Error: ' + data.message);
-            } else {
-                alert('Success: ' + data.message);
-                $('#modalJurnal').modal('hide');
-                location.reload();
+document.addEventListener('DOMContentLoaded', function() {
+    const formJurnal = document.getElementById('formJurnal');
+    if (formJurnal) {
+        formJurnal.addEventListener('submit', function(e) {
+            if (isEditMode && currentEditJurnalId) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                formData.append('jurnal_id', currentEditJurnalId);
+                
+                const submitBtn = document.getElementById('submitJurnalBtn');
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+                
+                fetch('<?= base_url("dosen/bimbingan/edit_jurnal") ?>', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.message);
+                    } else {
+                        alert('Success: ' + data.message);
+                        if (typeof $ !== 'undefined') {
+                            $('#modalJurnal').modal('hide');
+                        }
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan sistem!');
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                });
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan sistem!');
-        })
-        .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
+            // Untuk mode tambah, biarkan form submit normal
         });
     }
-    // Untuk mode tambah, biarkan form submit normal
 });
 
 // Reset modal saat ditutup
-$('#modalJurnal').on('hidden.bs.modal', function () {
-    isEditMode = false;
-    currentEditJurnalId = null;
-    document.getElementById('formJurnal').reset();
-});
+if (typeof $ !== 'undefined') {
+    $('#modalJurnal').on('hidden.bs.modal', function () {
+        isEditMode = false;
+        currentEditJurnalId = null;
+        document.getElementById('formJurnal').reset();
+    });
+}
+
+// Pastikan proposal ID tersedia global
+window.currentProposalId = currentProposalId;
+
+// Debug info on load
+console.log('Content page loaded. Final proposal ID:', currentProposalId);
 </script>

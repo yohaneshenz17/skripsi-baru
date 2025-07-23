@@ -1,8 +1,8 @@
 /*!
- * Bimbingan Enhancement JavaScript
+ * Bimbingan Enhancement JavaScript - ESSENCE STRUCTURE
  * STK Santo Yakobus Merauke
- * Version: 2.0.0
- * Path: assets/js/bimbingan.js
+ * Version: 2.2.0 - Fixed Function Conflicts
+ * Path: assets/essence/js/bimbingan.js
  */
 
 (function($) {
@@ -10,7 +10,7 @@
     
     /**
      * Bimbingan Manager Class
-     * Handles all bimbingan-related enhancements
+     * Handles all bimbingan-related enhancements WITHOUT conflicting with content page functions
      */
     class BimbinganManager {
         constructor() {
@@ -18,7 +18,7 @@
             this.baseUrl = window.location.origin + '/skripsi/';
             this.currentEditJurnalId = null;
             this.isProcessing = false;
-            this.debug = false; // Set to true for development
+            this.debug = true; // Enable debug untuk troubleshooting
             
             // Initialize when DOM is ready
             if (document.readyState === 'loading') {
@@ -32,18 +32,41 @@
          * Initialize all enhancements
          */
         init() {
-            this.log('Initializing Bimbingan Manager...');
+            this.log('Initializing Bimbingan Manager (Essence Structure)...');
             
             try {
                 this.bindEvents();
                 this.enhanceUI();
                 this.initializeTooltips();
                 this.setupQuickValidation();
+                this.checkExistingFunctions();
                 
                 this.log('Bimbingan Manager initialized successfully');
             } catch (error) {
                 console.error('Error initializing Bimbingan Manager:', error);
             }
+        }
+        
+        /**
+         * Check existing functions to avoid conflicts
+         */
+        checkExistingFunctions() {
+            const existingFunctions = [
+                'exportJurnal',
+                'tambahJurnalBimbingan', 
+                'validasiJurnal',
+                'editJurnal',
+                'deleteJurnal'
+            ];
+            
+            this.log('Checking existing functions:');
+            existingFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    this.log(`- ${funcName}: EXISTS (content page function)`);
+                } else {
+                    this.log(`- ${funcName}: NOT FOUND (will be provided by manager)`);
+                }
+            });
         }
         
         /**
@@ -56,13 +79,16 @@
                 this.handleActionClick(e);
             });
             
-            // Form submission events
-            $(document).on('submit', '#formJurnal', (e) => {
-                if (this.currentEditJurnalId) {
-                    e.preventDefault();
-                    this.handleEditJurnal(e.target);
-                }
-            });
+            // Form submission events - hanya handle jika tidak ada handler lain
+            if (!$('#formJurnal').data('hasHandler')) {
+                $(document).on('submit', '#formJurnal', (e) => {
+                    if (this.currentEditJurnalId) {
+                        e.preventDefault();
+                        this.handleEditJurnal(e.target);
+                    }
+                });
+                $('#formJurnal').data('hasHandler', true);
+            }
             
             // Modal events
             $('#modalJurnal').on('show.bs.modal', () => this.handleModalShow());
@@ -81,16 +107,33 @@
             
             switch (action) {
                 case 'edit-jurnal':
-                    this.editJurnal($button.data('jurnal-id'));
+                    // Check if content page has this function
+                    if (typeof window.editJurnal === 'function') {
+                        window.editJurnal($button.data('jurnal-id'));
+                    } else {
+                        this.editJurnal($button.data('jurnal-id'));
+                    }
                     break;
                 case 'delete-jurnal':
-                    this.deleteJurnal($button.data('jurnal-id'));
+                    // Check if content page has this function
+                    if (typeof window.deleteJurnal === 'function') {
+                        window.deleteJurnal($button.data('jurnal-id'));
+                    } else {
+                        this.deleteJurnal($button.data('jurnal-id'));
+                    }
                     break;
                 case 'quick-validasi':
                     this.quickValidasi($button.data('jurnal-id'), $button.data('status'));
                     break;
                 case 'export-pdf':
-                    this.exportPDF($button.data('proposal-id'));
+                    // Check if content page has exportJurnal function
+                    if (typeof window.exportJurnal === 'function') {
+                        this.log('Using content page exportJurnal function');
+                        window.exportJurnal();
+                    } else {
+                        this.log('Using manager exportPDF function');
+                        this.exportPDF($button.data('proposal-id'));
+                    }
                     break;
                 default:
                     this.log('Unknown action:', action);
@@ -98,7 +141,7 @@
         }
         
         /**
-         * Edit jurnal bimbingan
+         * Edit jurnal bimbingan - fallback jika tidak ada di content page
          */
         async editJurnal(jurnalId) {
             if (this.isProcessing || !jurnalId) return;
@@ -153,8 +196,10 @@
                 this.showToast('Jurnal berhasil diupdate!', 'success');
                 $('#modalJurnal').modal('hide');
                 
-                // Update row in table
-                this.updateJurnalRow(this.currentEditJurnalId, formData);
+                // Reload page to update data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
                 
             } catch (error) {
                 this.showToast('Error: ' + error.message, 'error');
@@ -167,7 +212,7 @@
         }
         
         /**
-         * Delete jurnal bimbingan
+         * Delete jurnal bimbingan - fallback jika tidak ada di content page
          */
         async deleteJurnal(jurnalId) {
             if (this.isProcessing || !jurnalId) return;
@@ -197,7 +242,11 @@
                 }
                 
                 this.showToast('Jurnal berhasil dihapus!', 'success');
-                this.removeJurnalRow(jurnalId);
+                
+                // Reload page to update data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
                 
             } catch (error) {
                 this.showToast('Error: ' + error.message, 'error');
@@ -212,54 +261,58 @@
          * Quick validation setup
          */
         setupQuickValidation() {
-            $('#quickValidasiSubmit').off('click').on('click', async () => {
-                const modal = $('#modalQuickValidasi');
-                const jurnalId = modal.data('jurnal-id');
-                const status = modal.data('status');
-                const catatan = $('#quickCatatanDosen').val().trim();
-                
-                if (status == 2 && catatan.length < 5) {
-                    this.showToast('Catatan wajib diisi untuk revisi (minimal 5 karakter)!', 'warning');
-                    $('#quickCatatanDosen').focus();
-                    return;
-                }
-                
-                try {
-                    this.isProcessing = true;
-                    const $submitBtn = $('#quickValidasiSubmit');
-                    this.setButtonLoading($submitBtn, true);
+            // Only setup if not already handled by content page
+            if (!$('#quickValidasiSubmit').data('hasHandler')) {
+                $('#quickValidasiSubmit').off('click').on('click', async () => {
+                    const modal = $('#modalQuickValidasi');
+                    const jurnalId = modal.data('jurnal-id');
+                    const status = modal.data('status');
+                    const catatan = $('#quickCatatanDosen').val().trim();
                     
-                    const formData = new FormData();
-                    formData.append('jurnal_id', jurnalId);
-                    formData.append('status_validasi', status);
-                    formData.append('catatan_dosen', catatan);
-                    
-                    const response = await this.apiCall('dosen/bimbingan/quick_validasi', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    if (response.error) {
-                        throw new Error(response.message);
+                    if (status == 2 && catatan.length < 5) {
+                        this.showToast('Catatan wajib diisi untuk revisi (minimal 5 karakter)!', 'warning');
+                        $('#quickCatatanDosen').focus();
+                        return;
                     }
                     
-                    this.showToast('Success: ' + response.message, 'success');
-                    
-                    // Reload page after short delay
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                    
-                } catch (error) {
-                    this.showToast('Error: ' + error.message, 'error');
-                    this.log('Quick validasi error:', error);
-                } finally {
-                    this.isProcessing = false;
-                    const $submitBtn = $('#quickValidasiSubmit');
-                    this.setButtonLoading($submitBtn, false);
-                    modal.modal('hide');
-                }
-            });
+                    try {
+                        this.isProcessing = true;
+                        const $submitBtn = $('#quickValidasiSubmit');
+                        this.setButtonLoading($submitBtn, true);
+                        
+                        const formData = new FormData();
+                        formData.append('jurnal_id', jurnalId);
+                        formData.append('status_validasi', status);
+                        formData.append('catatan_dosen', catatan);
+                        
+                        const response = await this.apiCall('dosen/bimbingan/quick_validasi', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.error) {
+                            throw new Error(response.message);
+                        }
+                        
+                        this.showToast('Success: ' + response.message, 'success');
+                        
+                        // Reload page after short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                        
+                    } catch (error) {
+                        this.showToast('Error: ' + error.message, 'error');
+                        this.log('Quick validasi error:', error);
+                    } finally {
+                        this.isProcessing = false;
+                        const $submitBtn = $('#quickValidasiSubmit');
+                        this.setButtonLoading($submitBtn, false);
+                        modal.modal('hide');
+                    }
+                });
+                $('#quickValidasiSubmit').data('hasHandler', true);
+            }
         }
         
         /**
@@ -295,16 +348,78 @@
         }
         
         /**
-         * Export PDF
+         * Export PDF - fallback function
          */
-        exportPDF(proposalId) {
+        exportPDF(proposalId = null) {
+            try {
+                // Method 1: Gunakan parameter yang diberikan
+                if (proposalId) {
+                    this.log('Using provided proposal ID:', proposalId);
+                    this.performExport(proposalId);
+                    return;
+                }
+                
+                // Method 2: Ambil dari URL current page
+                const currentUrl = window.location.href;
+                const urlParts = currentUrl.split('/');
+                const detailIndex = urlParts.indexOf('detail_mahasiswa');
+                
+                if (detailIndex !== -1 && urlParts[detailIndex + 1]) {
+                    proposalId = urlParts[detailIndex + 1];
+                    this.log('Found proposal ID in URL:', proposalId);
+                    this.performExport(proposalId);
+                    return;
+                }
+                
+                // Method 3: Ambil dari data attribute
+                const proposalElement = document.querySelector('[data-proposal-id]');
+                if (proposalElement) {
+                    proposalId = proposalElement.dataset.proposalId;
+                    this.log('Found proposal ID in data attribute:', proposalId);
+                    this.performExport(proposalId);
+                    return;
+                }
+                
+                // Jika semua method gagal
+                this.showToast('ID proposal tidak ditemukan! Pastikan Anda berada di halaman detail mahasiswa.', 'error');
+                console.error('Export PDF Error: Proposal ID not found. Current URL:', currentUrl);
+                
+            } catch (error) {
+                this.showToast('Error saat export PDF: ' + error.message, 'error');
+                this.log('Export PDF error:', error);
+            }
+        }
+        
+        /**
+         * Perform actual PDF export
+         */
+        performExport(proposalId) {
             if (!proposalId) {
-                this.showToast('ID proposal tidak ditemukan!', 'error');
+                this.showToast('ID proposal tidak valid!', 'error');
                 return;
             }
             
-            const url = this.baseUrl + `dosen/bimbingan/export_jurnal/${proposalId}`;
-            window.open(url, '_blank');
+            try {
+                const url = this.baseUrl + `dosen/bimbingan/export_jurnal/${proposalId}`;
+                this.log('Opening export URL:', url);
+                
+                // Show loading toast
+                this.showToast('Memproses export PDF...', 'info', 3000);
+                
+                // Open in new tab
+                const newWindow = window.open(url, '_blank');
+                
+                // Check if popup blocked
+                if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                    this.showToast('Popup diblokir! Silakan allow popup untuk download PDF.', 'warning');
+                    // Fallback: try direct navigation
+                    window.location.href = url;
+                }
+                
+            } catch (error) {
+                this.showToast('Error saat membuka PDF: ' + error.message, 'error');
+                this.log('Perform export error:', error);
+            }
         }
         
         /**
@@ -325,91 +440,6 @@
                 this.log('Form populated with data:', data);
             } catch (error) {
                 this.log('Error populating form:', error);
-            }
-        }
-        
-        /**
-         * Update jurnal row in table
-         */
-        updateJurnalRow(jurnalId, formData) {
-            try {
-                const $row = $(`#jurnal-row-${jurnalId}`);
-                if ($row.length === 0) {
-                    // If row not found, reload page
-                    setTimeout(() => window.location.reload(), 1000);
-                    return;
-                }
-                
-                // Update cells with new data
-                const cells = $row.find('td');
-                if (cells.length >= 4) {
-                    // Update pertemuan
-                    $(cells[0]).html(`<span class="badge badge-pill badge-primary">Ke-${formData.get('pertemuan_ke')}</span>`);
-                    
-                    // Update date
-                    const date = new Date(formData.get('tanggal_bimbingan'));
-                    $(cells[1]).html(`<span class="text-sm">${date.toLocaleDateString('id-ID')}</span><br><small class="text-muted">Baru diupdate</small>`);
-                    
-                    // Update material
-                    $(cells[2]).html(`<span class="text-sm">${formData.get('materi_bimbingan')}</span>`);
-                    
-                    // Update notes
-                    let catatanHtml = '';
-                    if (formData.get('catatan_dosen')) {
-                        catatanHtml += `<strong>Catatan:</strong><br><span class="text-sm">${formData.get('catatan_dosen')}</span><br>`;
-                    }
-                    if (formData.get('tindak_lanjut')) {
-                        catatanHtml += `<strong>Tindak Lanjut:</strong><br><span class="text-sm text-info">${formData.get('tindak_lanjut')}</span>`;
-                    }
-                    if (!catatanHtml) {
-                        catatanHtml = '<span class="text-muted">-</span>';
-                    }
-                    $(cells[3]).html(catatanHtml);
-                }
-                
-                // Visual feedback
-                $row.css('background-color', '#d4edda');
-                setTimeout(() => {
-                    $row.css('background-color', '');
-                }, 2000);
-                
-            } catch (error) {
-                this.log('Error updating row:', error);
-            }
-        }
-        
-        /**
-         * Remove jurnal row from table
-         */
-        removeJurnalRow(jurnalId) {
-            try {
-                const $row = $(`#jurnal-row-${jurnalId}`);
-                if ($row.length > 0) {
-                    $row.css({
-                        'transition': 'all 0.3s ease',
-                        'opacity': '0',
-                        'transform': 'translateX(-100%)'
-                    });
-                    
-                    setTimeout(() => {
-                        $row.remove();
-                        this.updateStatistics();
-                    }, 300);
-                }
-            } catch (error) {
-                this.log('Error removing row:', error);
-            }
-        }
-        
-        /**
-         * Update statistics after row changes
-         */
-        updateStatistics() {
-            try {
-                const totalRows = $('tbody tr[id^="jurnal-row-"]').length;
-                $('.stat-total-bimbingan').text(totalRows);
-            } catch (error) {
-                this.log('Error updating statistics:', error);
             }
         }
         
@@ -591,16 +621,20 @@
          * Enhance tables
          */
         enhanceTables() {
-            // Initialize DataTables if available
+            // Initialize DataTables if available and not already initialized
             if (typeof $.fn.DataTable !== 'undefined') {
-                $('.table-jurnal').DataTable({
-                    "language": {
-                        "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                    },
-                    "order": [[ 0, "desc" ]],
-                    "pageLength": 25,
-                    "responsive": true,
-                    "dom": 'frtip'
+                $('.table-jurnal').each(function() {
+                    if (!$.fn.DataTable.isDataTable(this)) {
+                        $(this).DataTable({
+                            "language": {
+                                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
+                            },
+                            "order": [[ 0, "desc" ]],
+                            "pageLength": 25,
+                            "responsive": true,
+                            "dom": 'frtip'
+                        });
+                    }
                 });
             }
         }
@@ -630,7 +664,9 @@
          */
         handleModalHide() {
             this.currentEditJurnalId = null;
-            $('#formJurnal')[0].reset();
+            if ($('#formJurnal').length > 0) {
+                $('#formJurnal')[0].reset();
+            }
         }
         
         /**
@@ -648,23 +684,41 @@
         // Create global instance
         window.bimbinganManager = new BimbinganManager();
         
-        // Global functions for backward compatibility
-        window.editJurnal = function(jurnalId) {
-            window.bimbinganManager.editJurnal(jurnalId);
-        };
+        // PERBAIKAN: Hanya provide fallback functions jika belum ada
+        // Ini memungkinkan content page functions tetap diutamakan
         
-        window.deleteJurnal = function(jurnalId) {
-            window.bimbinganManager.deleteJurnal(jurnalId);
-        };
+        if (typeof window.editJurnal !== 'function') {
+            window.editJurnal = function(jurnalId) {
+                window.bimbinganManager.editJurnal(jurnalId);
+            };
+        }
         
-        window.quickValidasi = function(jurnalId, status) {
-            window.bimbinganManager.quickValidasi(jurnalId, status);
-        };
+        if (typeof window.deleteJurnal !== 'function') {
+            window.deleteJurnal = function(jurnalId) {
+                window.bimbinganManager.deleteJurnal(jurnalId);
+            };
+        }
         
-        window.exportJurnal = function() {
-            const proposalId = document.querySelector('[data-proposal-id]')?.dataset.proposalId;
-            window.bimbinganManager.exportPDF(proposalId);
-        };
+        if (typeof window.quickValidasi !== 'function') {
+            window.quickValidasi = function(jurnalId, status) {
+                window.bimbinganManager.quickValidasi(jurnalId, status);
+            };
+        }
+        
+        // UNTUK EXPORT: Hanya provide fallback jika benar-benar tidak ada
+        // Content page punya priority
+        if (typeof window.exportJurnal !== 'function') {
+            window.exportJurnal = function(proposalId = null) {
+                window.bimbinganManager.exportPDF(proposalId);
+            };
+        }
+        
+        // Log final function availability
+        console.log('=== Final Function Status ===');
+        console.log('exportJurnal:', typeof window.exportJurnal, window.exportJurnal.toString().substring(0, 50) + '...');
+        console.log('editJurnal:', typeof window.editJurnal);
+        console.log('deleteJurnal:', typeof window.deleteJurnal);
+        console.log('quickValidasi:', typeof window.quickValidasi);
     });
     
 })(jQuery);

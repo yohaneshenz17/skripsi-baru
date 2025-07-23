@@ -11,16 +11,17 @@
   
   <?php include('_main/css.php') ?>
   
-  <!-- TAMBAHAN: Bimbingan Enhancement CSS -->
+  <!-- GUNAKAN STRUKTUR ESSENCE yang Anda inginkan -->
   <?php if (isset($enhancement_css) && $enhancement_css === true): ?>
   <link rel="stylesheet" href="<?= base_url('assets/essence/css/bimbingan.css') ?>">
   <?php endif; ?>
   
-  <!-- ALTERNATIF: Selalu load untuk halaman bimbingan -->
+  <!-- ALTERNATIF: Load CSS untuk halaman bimbingan -->
   <?php if (strpos(uri_string(), 'bimbingan') !== false): ?>
   <link rel="stylesheet" href="<?= base_url('assets/essence/css/bimbingan.css') ?>">
   <?php endif; ?>
   
+  <!-- PERBAIKAN: CSS untuk mengatasi container hitam -->
   <style>
     .admin {
       display: none;
@@ -28,6 +29,57 @@
 
     .dosen {
       display: none;
+    }
+    
+    /* PERBAIKAN: Override container hitam menjadi light */
+    .toast-custom {
+      background-color: #ffffff !important;
+      color: #495057 !important;
+      border: 1px solid #dee2e6 !important;
+    }
+    
+    .modal-enhanced .modal-content {
+      background-color: #ffffff !important;
+      color: #495057 !important;
+    }
+    
+    .card-enhanced {
+      background-color: #ffffff !important;
+      color: #495057 !important;
+    }
+    
+    /* Pastikan semua container menggunakan background light */
+    .container-fluid,
+    .card,
+    .modal-content,
+    .dropdown-menu {
+      background-color: #ffffff !important;
+      color: #495057 !important;
+    }
+    
+    /* Fix untuk alert/notification */
+    .alert {
+      background-color: #f8f9fa !important;
+    }
+    
+    .alert-success {
+      background-color: #d4edda !important;
+      color: #155724 !important;
+    }
+    
+    .alert-danger {
+      background-color: #f8d7da !important;
+      color: #721c24 !important;
+    }
+    
+    .alert-warning {
+      background-color: #fff3cd !important;
+      color: #856404 !important;
+    }
+    
+    .alert-info {
+      background-color: #d1ecf1 !important;
+      color: #0c5460 !important;
     }
   </style>
 </head>
@@ -249,18 +301,20 @@
   <!-- Core -->
   <?php include('_main/js.php') ?>
   
-  <!-- TAMBAHAN: Bimbingan Enhancement JavaScript -->
+  <!-- GUNAKAN STRUKTUR ESSENCE yang Anda inginkan -->
   <?php if (isset($enhancement_js) && $enhancement_js === true): ?>
   <script src="<?= base_url('assets/essence/js/bimbingan.js') ?>"></script>
   <?php endif; ?>
   
-  <!-- ALTERNATIF: Selalu load untuk halaman bimbingan -->
+  <!-- ALTERNATIF: Load JS untuk halaman bimbingan -->
   <?php if (strpos(uri_string(), 'bimbingan') !== false): ?>
   <script src="<?= base_url('assets/essence/js/bimbingan.js') ?>"></script>
   <?php endif; ?>
   
   <?= $script ?>
   
+  <!-- PERBAIKAN: HAPUS script inline exportJurnal() untuk menghindari conflict -->
+  <!-- Biarkan function exportJurnal() dari content pages dan bimbingan.js yang handle -->
   <script>
     level = '<?= $this->session->userdata('level') ?>';
     if (level == '1') {
@@ -268,6 +322,18 @@
     } else if (level == '2') {
       $('.dosen').css('display', 'block');
     }
+    
+    // DEBUG: Log basic info
+    console.log('Template dosen loaded with essence structure');
+    console.log('Current URL:', window.location.href);
+    
+    // DEBUG: Log available functions after page load
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded. Available functions:');
+      console.log('- exportJurnal:', typeof exportJurnal);
+      console.log('- tambahJurnalBimbingan:', typeof tambahJurnalBimbingan);
+      console.log('- validasiJurnal:', typeof validasiJurnal);
+    });
   </script>
 </body>
 

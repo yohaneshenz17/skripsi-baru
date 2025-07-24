@@ -30,6 +30,7 @@ class Auth extends CI_Controller {
             if($level == '2') redirect('dosen/dashboard');
             if($level == '3') redirect('mahasiswa/dashboard');
             if($level == '4') redirect('kaprodi/dashboard');
+            if($level == '5') redirect('staf/dashboard');
         }
         
         // Load view login
@@ -84,6 +85,8 @@ class Auth extends CI_Controller {
                     redirect('dosen/dashboard');
                 } elseif ($user_dosen->level == '4') {
                     redirect('kaprodi/dashboard');
+                } elseif ($user_dosen->level == '5') {
+                    redirect('staf/dashboard');
                 }
                 return;
             }
@@ -140,6 +143,7 @@ class Auth extends CI_Controller {
             if($level == '2') redirect('dosen/dashboard');
             if($level == '3') redirect('mahasiswa/dashboard');
             if($level == '4') redirect('kaprodi/dashboard');
+            if($level == '5') redirect('staf/dashboard');
         }
         
         if ($this->input->post()) {
@@ -469,6 +473,8 @@ class Auth extends CI_Controller {
                 return 'Dosen';
             case '4':
                 return 'Kepala Program Studi';
+            case '5':
+                return 'Staf Akademik';
             default:
                 return 'User';
         }

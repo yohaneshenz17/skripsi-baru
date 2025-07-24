@@ -1,0 +1,1534 @@
+skripsi/
+├── application/
+│	├───cache
+│	├───config
+│	│       autoload.php
+│	│       config.php
+│	│       constants.php
+│	│       database.php
+│	│       doctypes.php
+│	│       email.php
+│	│       foreign_chars.php
+│	│       hooks.php
+│	│       memcached.php
+│	│       migration.php
+│	│       mimes.php
+│	│       profiler.php
+│	│       rest.php
+│	│       routes.php
+│	│       smileys.php
+│	│       user_agents.php
+│	│
+│	├───controllers
+│	│   │   Auth.php
+│	│   │   Crud.php
+│	│   │   Debug_database.php
+│	│   │   Email_diagnostic.php
+│	│   │   Home.php
+│	│   │   Test_email.php
+│	│   │   Test_helper.php
+│	│   │   Test_pdf.php
+│	│   │
+│	│   ├───admin
+│	│   │       Dashboard.php
+│	│   │       Dosen.php
+│	│   │       Fakultas.php
+│	│   │       Hasilkegiatan.php
+│	│   │       Konsultasi.php
+│	│   │       Mahasiswa.php
+│	│   │       Penelitian.php
+│	│   │       Pengaturan.php
+│	│   │       Prodi.php
+│	│   │       Profil.php
+│	│   │       Proposal.php
+│	│   │       Report.php
+│	│   │       Seminar.php
+│	│   │       Skripsi.php
+│	│   │
+│	│   ├───api
+│	│   │       Auth.php
+│	│   │       Dosen.php
+│	│   │       Fakultas.php
+│	│   │       Hasil_kegiatan.php
+│	│   │       Hasil_penelitian.php
+│	│   │       Hasil_seminar.php
+│	│   │       Konsultasi.php
+│	│   │       Mahasiswa.php
+│	│   │       Penelitian.php
+│	│   │       Pengaturan.php
+│	│   │       Prodi.php
+│	│   │       Proposal_mahasiswa.php
+│	│   │       Seminar.php
+│	│   │       Skripsi.php
+│	│   │       Staf.php
+│	│   │
+│	│   ├───dosen
+│	│   │       Bimbingan.php
+│	│   │       Dashboard.php
+│	│   │       Dosen.php
+│	│   │       Fakultas.php
+│	│   │       Konsultasi.php
+│	│   │       Mahasiswa.php
+│	│   │       Penelitian.php
+│	│   │       Prodi.php
+│	│   │       Profil.php
+│	│   │       Proposal.php
+│	│   │       Publikasi.php
+│	│   │       Seminar.php
+│	│   │       Seminar_proposal.php
+│	│   │       Seminar_skripsi.php
+│	│   │       Skripsi.php
+│	│   │       Usulan_proposal.php
+│	│   │
+│	│   ├───kaprodi
+│	│   │       Dashboard.php
+│	│   │       Kaprodi.php
+│	│   │       PenetapanPembimbing.php
+│	│   │       Pengumuman.php
+│	│   │       Profil.php
+│	│   │       Publikasi.php
+│	│   │       Seminar_proposal.php
+│	│   │       Seminar_skripsi.php
+│	│   │
+│	│   ├───mahasiswa
+│	│   │       Bimbingan.php
+│	│   │       Dashboard.php
+│	│   │       Hasilkegiatan.php
+│	│   │       Konsultasi.php
+│	│   │       Kontak.php
+│	│   │       Penelitian.php
+│	│   │       Profil.php
+│	│   │       Proposal.php
+│	│   │       Seminar.php
+│	│   │       Skripsi.php
+│	│   │
+│	│   └───staf
+│	│           Bimbingan.php
+│	│           Dashboard.php
+│	│           Penelitian.php
+│	│           Publikasi.php
+│	│           SeminarProposal.php
+│	│           SeminarSkripsi.php
+│	│
+│	├───core
+│	│       MY_Controller.php
+│	│
+│	├───helpers
+│	│       email_helper.php
+│	│       email_workflow_helper.php
+│	│       foto_helper.php
+│	│
+│	├───hooks
+│	├───language
+│	│   └───indonesia
+│	│           rest_controller_lang.php
+│	│
+│	├───libraries
+│	│       App_lib.php
+│	│       Format.php
+│	│       Pdf.php
+│	│       Pdf_generator.php
+│	│       REST_Controller.php
+│	│
+│	├───logs
+│	├───models
+│	│       Auth_model.php
+│	│       Dosen_model.php
+│	│       Email_model.php
+│	│       Fakultas_model.php
+│	│       Hasil_kegiatan_model.php
+│	│       Hasil_penelitian_model.php
+│	│       Hasil_seminar_model.php
+│	│       Konsultasi_model - Ori.php
+│	│       Konsultasi_model.php
+│	│       Mahasiswa_model.php
+│	│       Penelitian_model.php
+│	│       Pengaturan_model.php
+│	│       Prodi_model.php
+│	│       Proposal_mahasiswa_model.php
+│	│       Seminar_model.php
+│	│       Skripsi_model.php
+│	│
+│	├───tests
+│	│   │   .gitignore
+│	│   │   Bootstrap.php
+│	│   │   DbTestCase.php
+│	│   │   phpunit.xml
+│	│   │   TestCase.php
+│	│   │
+│	│   ├───build
+│	│   │   └───logs
+│	│   ├───controllers
+│	│   │   │   Welcome_test.php
+│	│   │   │
+│	│   │   └───api
+│	│   │           Example_test.php
+│	│   │
+│	│   ├───helpers
+│	│   │       .gitkeep
+│	│   │
+│	│   ├───hooks
+│	│   │       .gitkeep
+│	│   │
+│	│   ├───libraries
+│	│   │       .gitkeep
+│	│   │
+│	│   ├───mocks
+│	│   │   │   autoloader.php
+│	│   │   │
+│	│   │   └───libraries
+│	│   │           email.php
+│	│   │
+│	│   ├───models
+│	│   │       .gitkeep
+│	│   │
+│	│   └───_ci_phpunit_test
+│	│       │   autoloader.php
+│	│       │   CIPHPUnitTest.php
+│	│       │   CIPHPUnitTestAutoloader.php
+│	│       │   CIPHPUnitTestCase.php
+│	│       │   CIPHPUnitTestDbTestCase.php
+│	│       │   CIPHPUnitTestDouble.php
+│	│       │   CIPHPUnitTestFileCache.php
+│	│       │   CIPHPUnitTestNullCodeIgniter.php
+│	│       │   CIPHPUnitTestReflection.php
+│	│       │   CIPHPUnitTestRequest.php
+│	│       │   CIPHPUnitTestRouter.php
+│	│       │   CIPHPUnitTestSuperGlobal.php
+│	│       │   functions.php
+│	│       │   TestSuiteProvider.php
+│	│       │
+│	│       ├───alias
+│	│       │       MonkeyPatch.php
+│	│       │       ReflectionHelper.php
+│	│       │
+│	│       ├───exceptions
+│	│       │       CIPHPUnitTestExitException.php
+│	│       │       CIPHPUnitTestRedirectException.php
+│	│       │       CIPHPUnitTestShow404Exception.php
+│	│       │       CIPHPUnitTestShowErrorException.php
+│	│       │
+│	│       ├───patcher
+│	│       │   │   bootstrap.php
+│	│       │   │   Cache.php
+│	│       │   │   IncludeStream.php
+│	│       │   │   InvocationVerifier.php
+│	│       │   │   MonkeyPatch.php
+│	│       │   │   MonkeyPatchManager.php
+│	│       │   │   PathChecker.php
+│	│       │   │
+│	│       │   ├───Exception
+│	│       │   │       ExitException.php
+│	│       │   │
+│	│       │   ├───functions
+│	│       │   │       exit__.php
+│	│       │   │
+│	│       │   ├───Patcher
+│	│       │   │   │   AbstractPatcher.php
+│	│       │   │   │   Backtrace.php
+│	│       │   │   │   ConstantPatcher.php
+│	│       │   │   │   ExitPatcher.php
+│	│       │   │   │   FunctionPatcher.php
+│	│       │   │   │   MethodPatcher.php
+│	│       │   │   │
+│	│       │   │   ├───ConstantPatcher
+│	│       │   │   │       NodeVisitor.php
+│	│       │   │   │       Proxy.php
+│	│       │   │   │
+│	│       │   │   ├───FunctionPatcher
+│	│       │   │   │       NodeVisitor.php
+│	│       │   │   │       Proxy.php
+│	│       │   │   │
+│	│       │   │   └───MethodPatcher
+│	│       │   │           NodeVisitor.php
+│	│       │   │           PatchManager.php
+│	│       │   │
+│	│       │   └───third_party
+│	│       │       └───PHP-Parser
+│	│       │           │   .gitignore
+│	│       │           │   .travis.yml
+│	│       │           │   CHANGELOG.md
+│	│       │           │   composer.json
+│	│       │           │   LICENSE
+│	│       │           │   phpunit.xml.dist
+│	│       │           │   README.md
+│	│       │           │   UPGRADE-1.0.md
+│	│       │           │   UPGRADE-2.0.md
+│	│       │           │
+│	│       │           ├───bin
+│	│       │           │       php-parse
+│	│       │           │
+│	│       │           ├───doc
+│	│       │           │   │   0_Introduction.markdown
+│	│       │           │   │   2_Usage_of_basic_components.markdown
+│	│       │           │   │   3_Other_node_tree_representations.markdown
+│	│       │           │   │   4_Code_generation.markdown
+│	│       │           │   │
+│	│       │           │   └───component
+│	│       │           │           Error.markdown
+│	│       │           │           Lexer.markdown
+│	│       │           │
+│	│       │           ├───grammar
+│	│       │           │       analyze.php
+│	│       │           │       parser.template
+│	│       │           │       php5.y
+│	│       │           │       php7.y
+│	│       │           │       README.md
+│	│       │           │       rebuildParsers.php
+│	│       │           │       tokens.template
+│	│       │           │       tokens.y
+│	│       │           │
+│	│       │           ├───lib
+│	│       │           │   │   bootstrap.php
+│	│       │           │   │
+│	│       │           │   └───PhpParser
+│	│       │           │       │   Autoloader.php
+│	│       │           │       │   Builder.php
+│	│       │           │       │   BuilderAbstract.php
+│	│       │           │       │   BuilderFactory.php
+│	│       │           │       │   Comment.php
+│	│       │           │       │   Error.php
+│	│       │           │       │   Lexer.php
+│	│       │           │       │   Node.php
+│	│       │           │       │   NodeAbstract.php
+│	│       │           │       │   NodeDumper.php
+│	│       │           │       │   NodeTraverser.php
+│	│       │           │       │   NodeTraverserInterface.php
+│	│       │           │       │   NodeVisitor.php
+│	│       │           │       │   NodeVisitorAbstract.php
+│	│       │           │       │   Parser.php
+│	│       │           │       │   ParserAbstract.php
+│	│       │           │       │   ParserFactory.php
+│	│       │           │       │   PrettyPrinterAbstract.php
+│	│       │           │       │   Serializer.php
+│	│       │           │       │   Unserializer.php
+│	│       │           │       │
+│	│       │           │       ├───Builder
+│	│       │           │       │       Class_.php
+│	│       │           │       │       Declaration.php
+│	│       │           │       │       FunctionLike.php
+│	│       │           │       │       Function_.php
+│	│       │           │       │       Interface_.php
+│	│       │           │       │       Method.php
+│	│       │           │       │       Namespace_.php
+│	│       │           │       │       Param.php
+│	│       │           │       │       Property.php
+│	│       │           │       │       Trait_.php
+│	│       │           │       │       Use_.php
+│	│       │           │       │
+│	│       │           │       ├───Comment
+│	│       │           │       │       Doc.php
+│	│       │           │       │
+│	│       │           │       ├───Lexer
+│	│       │           │       │       Emulative.php
+│	│       │           │       │
+│	│       │           │       ├───Node
+│	│       │           │       │   │   Arg.php
+│	│       │           │       │   │   Const_.php
+│	│       │           │       │   │   Expr.php
+│	│       │           │       │   │   FunctionLike.php
+│	│       │           │       │   │   Name.php
+│	│       │           │       │   │   Param.php
+│	│       │           │       │   │   Scalar.php
+│	│       │           │       │   │   Stmt.php
+│	│       │           │       │   │
+│	│       │           │       │   ├───Expr
+│	│       │           │       │   │   │   ArrayDimFetch.php
+│	│       │           │       │   │   │   ArrayItem.php
+│	│       │           │       │   │   │   Array_.php
+│	│       │           │       │   │   │   Assign.php
+│	│       │           │       │   │   │   AssignOp.php
+│	│       │           │       │   │   │   AssignRef.php
+│	│       │           │       │   │   │   BinaryOp.php
+│	│       │           │       │   │   │   BitwiseNot.php
+│	│       │           │       │   │   │   BooleanNot.php
+│	│       │           │       │   │   │   Cast.php
+│	│       │           │       │   │   │   ClassConstFetch.php
+│	│       │           │       │   │   │   Clone_.php
+│	│       │           │       │   │   │   Closure.php
+│	│       │           │       │   │   │   ClosureUse.php
+│	│       │           │       │   │   │   ConstFetch.php
+│	│       │           │       │   │   │   Empty_.php
+│	│       │           │       │   │   │   ErrorSuppress.php
+│	│       │           │       │   │   │   Eval_.php
+│	│       │           │       │   │   │   Exit_.php
+│	│       │           │       │   │   │   FuncCall.php
+│	│       │           │       │   │   │   Include_.php
+│	│       │           │       │   │   │   Instanceof_.php
+│	│       │           │       │   │   │   Isset_.php
+│	│       │           │       │   │   │   List_.php
+│	│       │           │       │   │   │   MethodCall.php
+│	│       │           │       │   │   │   New_.php
+│	│       │           │       │   │   │   PostDec.php
+│	│       │           │       │   │   │   PostInc.php
+│	│       │           │       │   │   │   PreDec.php
+│	│       │           │       │   │   │   PreInc.php
+│	│       │           │       │   │   │   Print_.php
+│	│       │           │       │   │   │   PropertyFetch.php
+│	│       │           │       │   │   │   ShellExec.php
+│	│       │           │       │   │   │   StaticCall.php
+│	│       │           │       │   │   │   StaticPropertyFetch.php
+│	│       │           │       │   │   │   Ternary.php
+│	│       │           │       │   │   │   UnaryMinus.php
+│	│       │           │       │   │   │   UnaryPlus.php
+│	│       │           │       │   │   │   Variable.php
+│	│       │           │       │   │   │   YieldFrom.php
+│	│       │           │       │   │   │   Yield_.php
+│	│       │           │       │   │   │
+│	│       │           │       │   │   ├───AssignOp
+│	│       │           │       │   │   │       BitwiseAnd.php
+│	│       │           │       │   │   │       BitwiseOr.php
+│	│       │           │       │   │   │       BitwiseXor.php
+│	│       │           │       │   │   │       Concat.php
+│	│       │           │       │   │   │       Div.php
+│	│       │           │       │   │   │       Minus.php
+│	│       │           │       │   │   │       Mod.php
+│	│       │           │       │   │   │       Mul.php
+│	│       │           │       │   │   │       Plus.php
+│	│       │           │       │   │   │       Pow.php
+│	│       │           │       │   │   │       ShiftLeft.php
+│	│       │           │       │   │   │       ShiftRight.php
+│	│       │           │       │   │   │
+│	│       │           │       │   │   ├───BinaryOp
+│	│       │           │       │   │   │       BitwiseAnd.php
+│	│       │           │       │   │   │       BitwiseOr.php
+│	│       │           │       │   │   │       BitwiseXor.php
+│	│       │           │       │   │   │       BooleanAnd.php
+│	│       │           │       │   │   │       BooleanOr.php
+│	│       │           │       │   │   │       Coalesce.php
+│	│       │           │       │   │   │       Concat.php
+│	│       │           │       │   │   │       Div.php
+│	│       │           │       │   │   │       Equal.php
+│	│       │           │       │   │   │       Greater.php
+│	│       │           │       │   │   │       GreaterOrEqual.php
+│	│       │           │       │   │   │       Identical.php
+│	│       │           │       │   │   │       LogicalAnd.php
+│	│       │           │       │   │   │       LogicalOr.php
+│	│       │           │       │   │   │       LogicalXor.php
+│	│       │           │       │   │   │       Minus.php
+│	│       │           │       │   │   │       Mod.php
+│	│       │           │       │   │   │       Mul.php
+│	│       │           │       │   │   │       NotEqual.php
+│	│       │           │       │   │   │       NotIdentical.php
+│	│       │           │       │   │   │       Plus.php
+│	│       │           │       │   │   │       Pow.php
+│	│       │           │       │   │   │       ShiftLeft.php
+│	│       │           │       │   │   │       ShiftRight.php
+│	│       │           │       │   │   │       Smaller.php
+│	│       │           │       │   │   │       SmallerOrEqual.php
+│	│       │           │       │   │   │       Spaceship.php
+│	│       │           │       │   │   │
+│	│       │           │       │   │   └───Cast
+│	│       │           │       │   │           Array_.php
+│	│       │           │       │   │           Bool_.php
+│	│       │           │       │   │           Double.php
+│	│       │           │       │   │           Int_.php
+│	│       │           │       │   │           Object_.php
+│	│       │           │       │   │           String_.php
+│	│       │           │       │   │           Unset_.php
+│	│       │           │       │   │
+│	│       │           │       │   ├───Name
+│	│       │           │       │   │       FullyQualified.php
+│	│       │           │       │   │       Relative.php
+│	│       │           │       │   │
+│	│       │           │       │   ├───Scalar
+│	│       │           │       │   │   │   DNumber.php
+│	│       │           │       │   │   │   Encapsed.php
+│	│       │           │       │   │   │   EncapsedStringPart.php
+│	│       │           │       │   │   │   LNumber.php
+│	│       │           │       │   │   │   MagicConst.php
+│	│       │           │       │   │   │   String_.php
+│	│       │           │       │   │   │
+│	│       │           │       │   │   └───MagicConst
+│	│       │           │       │   │           Class_.php
+│	│       │           │       │   │           Dir.php
+│	│       │           │       │   │           File.php
+│	│       │           │       │   │           Function_.php
+│	│       │           │       │   │           Line.php
+│	│       │           │       │   │           Method.php
+│	│       │           │       │   │           Namespace_.php
+│	│       │           │       │   │           Trait_.php
+│	│       │           │       │   │
+│	│       │           │       │   └───Stmt
+│	│       │           │       │       │   Break_.php
+│	│       │           │       │       │   Case_.php
+│	│       │           │       │       │   Catch_.php
+│	│       │           │       │       │   ClassConst.php
+│	│       │           │       │       │   ClassLike.php
+│	│       │           │       │       │   ClassMethod.php
+│	│       │           │       │       │   Class_.php
+│	│       │           │       │       │   Const_.php
+│	│       │           │       │       │   Continue_.php
+│	│       │           │       │       │   DeclareDeclare.php
+│	│       │           │       │       │   Declare_.php
+│	│       │           │       │       │   Do_.php
+│	│       │           │       │       │   Echo_.php
+│	│       │           │       │       │   ElseIf_.php
+│	│       │           │       │       │   Else_.php
+│	│       │           │       │       │   Foreach_.php
+│	│       │           │       │       │   For_.php
+│	│       │           │       │       │   Function_.php
+│	│       │           │       │       │   Global_.php
+│	│       │           │       │       │   Goto_.php
+│	│       │           │       │       │   GroupUse.php
+│	│       │           │       │       │   HaltCompiler.php
+│	│       │           │       │       │   If_.php
+│	│       │           │       │       │   InlineHTML.php
+│	│       │           │       │       │   Interface_.php
+│	│       │           │       │       │   Label.php
+│	│       │           │       │       │   Namespace_.php
+│	│       │           │       │       │   Nop.php
+│	│       │           │       │       │   Property.php
+│	│       │           │       │       │   PropertyProperty.php
+│	│       │           │       │       │   Return_.php
+│	│       │           │       │       │   StaticVar.php
+│	│       │           │       │       │   Static_.php
+│	│       │           │       │       │   Switch_.php
+│	│       │           │       │       │   Throw_.php
+│	│       │           │       │       │   TraitUse.php
+│	│       │           │       │       │   TraitUseAdaptation.php
+│	│       │           │       │       │   Trait_.php
+│	│       │           │       │       │   TryCatch.php
+│	│       │           │       │       │   Unset_.php
+│	│       │           │       │       │   UseUse.php
+│	│       │           │       │       │   Use_.php
+│	│       │           │       │       │   While_.php
+│	│       │           │       │       │
+│	│       │           │       │       └───TraitUseAdaptation
+│	│       │           │       │               Alias.php
+│	│       │           │       │               Precedence.php
+│	│       │           │       │
+│	│       │           │       ├───NodeVisitor
+│	│       │           │       │       NameResolver.php
+│	│       │           │       │
+│	│       │           │       ├───Parser
+│	│       │           │       │       Multiple.php
+│	│       │           │       │       Php5.php
+│	│       │           │       │       Php7.php
+│	│       │           │       │       Tokens.php
+│	│       │           │       │
+│	│       │           │       ├───PrettyPrinter
+│	│       │           │       │       Standard.php
+│	│       │           │       │
+│	│       │           │       ├───Serializer
+│	│       │           │       │       XML.php
+│	│       │           │       │
+│	│       │           │       └───Unserializer
+│	│       │           │               XML.php
+│	│       │           │
+│	│       │           ├───test
+│	│       │           │   │   bootstrap.php
+│	│       │           │   │
+│	│       │           │   ├───code
+│	│       │           │   │   ├───parser
+│	│       │           │   │   │   │   comments.test
+│	│       │           │   │   │   │   semiReserved.test
+│	│       │           │   │   │   │
+│	│       │           │   │   │   ├───errorHandling
+│	│       │           │   │   │   │       eofError.test
+│	│       │           │   │   │   │       recovery.test
+│	│       │           │   │   │   │
+│	│       │           │   │   │   ├───expr
+│	│       │           │   │   │   │   │   arrayDef.test
+│	│       │           │   │   │   │   │   assign.test
+│	│       │           │   │   │   │   │   cast.test
+│	│       │           │   │   │   │   │   clone.test
+│	│       │           │   │   │   │   │   closure.test
+│	│       │           │   │   │   │   │   comparison.test
+│	│       │           │   │   │   │   │   constant_expr.test
+│	│       │           │   │   │   │   │   errorSuppress.test
+│	│       │           │   │   │   │   │   exit.test
+│	│       │           │   │   │   │   │   includeAndEval.test
+│	│       │           │   │   │   │   │   issetAndEmpty.test
+│	│       │           │   │   │   │   │   logic.test
+│	│       │           │   │   │   │   │   math.test
+│	│       │           │   │   │   │   │   new.test
+│	│       │           │   │   │   │   │   newWithoutClass.test
+│	│       │           │   │   │   │   │   print.test
+│	│       │           │   │   │   │   │   shellExec.test
+│	│       │           │   │   │   │   │   ternaryAndCoalesce.test
+│	│       │           │   │   │   │   │   variable.test
+│	│       │           │   │   │   │   │
+│	│       │           │   │   │   │   ├───fetchAndCall
+│	│       │           │   │   │   │   │       args.test
+│	│       │           │   │   │   │   │       constantDeref.test
+│	│       │           │   │   │   │   │       constFetch.test
+│	│       │           │   │   │   │   │       funcCall.test
+│	│       │           │   │   │   │   │       newDeref.test
+│	│       │           │   │   │   │   │       objectAccess.test
+│	│       │           │   │   │   │   │       simpleArrayAccess.test
+│	│       │           │   │   │   │   │       staticCall.test
+│	│       │           │   │   │   │   │       staticPropertyFetch.test
+│	│       │           │   │   │   │   │
+│	│       │           │   │   │   │   └───uvs
+│	│       │           │   │   │   │           globalNonSimpleVarError.test
+│	│       │           │   │   │   │           indirectCall.test
+│	│       │           │   │   │   │           isset.test
+│	│       │           │   │   │   │           misc.test
+│	│       │           │   │   │   │           new.test
+│	│       │           │   │   │   │           staticProperty.test
+│	│       │           │   │   │   │
+│	│       │           │   │   │   ├───scalar
+│	│       │           │   │   │   │       constantString.test
+│	│       │           │   │   │   │       docString.test
+│	│       │           │   │   │   │       docStringNewlines.test
+│	│       │           │   │   │   │       encapsedString.test
+│	│       │           │   │   │   │       float.test
+│	│       │           │   │   │   │       int.test
+│	│       │           │   │   │   │       invalidOctal.test
+│	│       │           │   │   │   │       magicConst.test
+│	│       │           │   │   │   │       unicodeEscape.test
+│	│       │           │   │   │   │
+│	│       │           │   │   │   └───stmt
+│	│       │           │   │   │       │   blocklessStatement.test
+│	│       │           │   │   │       │   const.test
+│	│       │           │   │   │       │   controlFlow.test
+│	│       │           │   │   │       │   declare.test
+│	│       │           │   │   │       │   echo.test
+│	│       │           │   │   │       │   haltCompiler.test
+│	│       │           │   │   │       │   haltCompilerInvalidSyntax.test
+│	│       │           │   │   │       │   haltCompilerOffset.test
+│	│       │           │   │   │       │   haltCompilerOutermostScope.test
+│	│       │           │   │   │       │   hashbang.test
+│	│       │           │   │   │       │   if.test
+│	│       │           │   │   │       │   inlineHTML.test
+│	│       │           │   │   │       │   switch.test
+│	│       │           │   │   │       │   tryCatch.test
+│	│       │           │   │   │       │   tryWithoutCatch.test
+│	│       │           │   │   │       │   unset.test
+│	│       │           │   │   │       │
+│	│       │           │   │   │       ├───class
+│	│       │           │   │   │       │       abstract.test
+│	│       │           │   │   │       │       anonymous.test
+│	│       │           │   │   │       │       conditional.test
+│	│       │           │   │   │       │       final.test
+│	│       │           │   │   │       │       implicitPublic.test
+│	│       │           │   │   │       │       interface.test
+│	│       │           │   │   │       │       modifier.test
+│	│       │           │   │   │       │       name.test
+│	│       │           │   │   │       │       php4Style.test
+│	│       │           │   │   │       │       simple.test
+│	│       │           │   │   │       │       staticMethod.test
+│	│       │           │   │   │       │       trait.test
+│	│       │           │   │   │       │
+│	│       │           │   │   │       ├───function
+│	│       │           │   │   │       │       byRef.test
+│	│       │           │   │   │       │       conditional.test
+│	│       │           │   │   │       │       defaultValues.test
+│	│       │           │   │   │       │       returnTypes.test
+│	│       │           │   │   │       │       scalarTypeDeclarations.test
+│	│       │           │   │   │       │       specialVars.test
+│	│       │           │   │   │       │       typeDeclarations.test
+│	│       │           │   │   │       │       variadic.test
+│	│       │           │   │   │       │       variadicDefaultValue.test
+│	│       │           │   │   │       │
+│	│       │           │   │   │       ├───generator
+│	│       │           │   │   │       │       basic.test
+│	│       │           │   │   │       │       yieldPrecedence.test
+│	│       │           │   │   │       │       yieldUnaryPrecedence.test
+│	│       │           │   │   │       │
+│	│       │           │   │   │       ├───loop
+│	│       │           │   │   │       │       do.test
+│	│       │           │   │   │       │       for.test
+│	│       │           │   │   │       │       foreach.test
+│	│       │           │   │   │       │       while.test
+│	│       │           │   │   │       │
+│	│       │           │   │   │       └───namespace
+│	│       │           │   │   │               alias.test
+│	│       │           │   │   │               braced.test
+│	│       │           │   │   │               groupUse.test
+│	│       │           │   │   │               groupUseErrors.test
+│	│       │           │   │   │               invalidName.test
+│	│       │           │   │   │               mix.test
+│	│       │           │   │   │               name.test
+│	│       │           │   │   │               nested.test
+│	│       │           │   │   │               notBraced.test
+│	│       │           │   │   │               nsAfterHashbang.test
+│	│       │           │   │   │               outsideStmt.test
+│	│       │           │   │   │               outsideStmtInvalid.test
+│	│       │           │   │   │
+│	│       │           │   │   └───prettyPrinter
+│	│       │           │   │       │   comments.test
+│	│       │           │   │       │   inlineHTMLandPHPtest.file-test
+│	│       │           │   │       │   onlyInlineHTML.file-test
+│	│       │           │   │       │   onlyPHP.file-test
+│	│       │           │   │       │
+│	│       │           │   │       ├───expr
+│	│       │           │   │       │       anonymousClass.test
+│	│       │           │   │       │       call.test
+│	│       │           │   │       │       closure.test
+│	│       │           │   │       │       constant_deref.test
+│	│       │           │   │       │       docStrings.test
+│	│       │           │   │       │       include.test
+│	│       │           │   │       │       intrinsics.test
+│	│       │           │   │       │       list.test
+│	│       │           │   │       │       literals.test
+│	│       │           │   │       │       numbers.test
+│	│       │           │   │       │       operators.test
+│	│       │           │   │       │       parentheses.test
+│	│       │           │   │       │       shortArraySyntax.test
+│	│       │           │   │       │       uvs.test
+│	│       │           │   │       │       variables.test
+│	│       │           │   │       │       yield.test
+│	│       │           │   │       │
+│	│       │           │   │       └───stmt
+│	│       │           │   │               alias.test
+│	│       │           │   │               break_continue.test
+│	│       │           │   │               class.test
+│	│       │           │   │               const.test
+│	│       │           │   │               declare.test
+│	│       │           │   │               do_while.test
+│	│       │           │   │               for.test
+│	│       │           │   │               foreach.test
+│	│       │           │   │               function_signatures.test
+│	│       │           │   │               global_static_variables.test
+│	│       │           │   │               goto.test
+│	│       │           │   │               groupUse.test
+│	│       │           │   │               haltCompiler.file-test
+│	│       │           │   │               if.test
+│	│       │           │   │               namespaces.test
+│	│       │           │   │               switch.test
+│	│       │           │   │               throw.test
+│	│       │           │   │               traitUse.test
+│	│       │           │   │               tryCatch.test
+│	│       │           │   │               while.test
+│	│       │           │   │
+│	│       │           │   └───PhpParser
+│	│       │           │       │   AutoloaderTest.php
+│	│       │           │       │   BuilderFactoryTest.php
+│	│       │           │       │   CodeParsingTest.php
+│	│       │           │       │   CodeTestAbstract.php
+│	│       │           │       │   CommentTest.php
+│	│       │           │       │   ErrorTest.php
+│	│       │           │       │   LexerTest.php
+│	│       │           │       │   NodeAbstractTest.php
+│	│       │           │       │   NodeDumperTest.php
+│	│       │           │       │   NodeTraverserTest.php
+│	│       │           │       │   ParserFactoryTest.php
+│	│       │           │       │   ParserTest.php
+│	│       │           │       │   PrettyPrinterTest.php
+│	│       │           │       │
+│	│       │           │       ├───Builder
+│	│       │           │       │       ClassTest.php
+│	│       │           │       │       FunctionTest.php
+│	│       │           │       │       InterfaceTest.php
+│	│       │           │       │       MethodTest.php
+│	│       │           │       │       NamespaceTest.php
+│	│       │           │       │       ParamTest.php
+│	│       │           │       │       PropertyTest.php
+│	│       │           │       │       TraitTest.php
+│	│       │           │       │       UseTest.php
+│	│       │           │       │
+│	│       │           │       ├───Lexer
+│	│       │           │       │       EmulativeTest.php
+│	│       │           │       │
+│	│       │           │       ├───Node
+│	│       │           │       │   │   NameTest.php
+│	│       │           │       │   │
+│	│       │           │       │   ├───Scalar
+│	│       │           │       │   │       MagicConstTest.php
+│	│       │           │       │   │       StringTest.php
+│	│       │           │       │   │
+│	│       │           │       │   └───Stmt
+│	│       │           │       │           ClassMethodTest.php
+│	│       │           │       │           ClassTest.php
+│	│       │           │       │           InterfaceTest.php
+│	│       │           │       │           PropertyTest.php
+│	│       │           │       │
+│	│       │           │       ├───NodeVisitor
+│	│       │           │       │       NameResolverTest.php
+│	│       │           │       │
+│	│       │           │       ├───Parser
+│	│       │           │       │       MultipleTest.php
+│	│       │           │       │       Php5Test.php
+│	│       │           │       │       Php7Test.php
+│	│       │           │       │
+│	│       │           │       ├───Serializer
+│	│       │           │       │       XMLTest.php
+│	│       │           │       │
+│	│       │           │       └───Unserializer
+│	│       │           │               XMLTest.php
+│	│       │           │
+│	│       │           └───test_old
+│	│       │                   run-php-src.sh
+│	│       │                   run.php
+│	│       │
+│	│       └───replacing
+│	│           ├───core
+│	│           │       CodeIgniter.php
+│	│           │       CodeIgniter.php-3.0.3
+│	│           │       CodeIgniter.php-3.0.4
+│	│           │       CodeIgniter.php-3.0.5
+│	│           │       CodeIgniter.php-3.0.6
+│	│           │       CodeIgniter.php-3.1.0
+│	│           │       CodeIgniter.php-3.1.2
+│	│           │       Common.php
+│	│           │       Common.php-3.0.0
+│	│           │       Common.php-3.1.0
+│	│           │       Common.php-3.1.2
+│	│           │       Input.php
+│	│           │       Input.php-3.0.3
+│	│           │       Input.php-3.0.4
+│	│           │       Input.php-3.1.0
+│	│           │       Input.php-3.1.2
+│	│           │       Loader.php
+│	│           │       Loader.php-3.0.0
+│	│           │       Loader.php-3.0.1
+│	│           │       Loader.php-3.0.3
+│	│           │       Loader.php-3.0.4
+│	│           │       Loader.php-3.0.5
+│	│           │       Loader.php-3.1.0
+│	│           │       Loader.php-3.1.2
+│	│           │
+│	│           └───helpers
+│	│                   url_helper.php
+│	│
+│	├───third_party
+│	│   └───tcpdf
+│	│       │   CHANGELOG.TXT
+│	│       │   composer.json
+│	│       │   LICENSE.TXT
+│	│       │   README.md
+│	│       │   tcpdf.php
+│	│       │   tcpdf_autoconfig.php
+│	│       │   tcpdf_barcodes_1d.php
+│	│       │   tcpdf_barcodes_2d.php
+│	│       │   VERSION
+│	│       │
+│	│       ├───config
+│	│       │       tcpdf_config.php
+│	│       │
+│	│       ├───fonts
+│	│       │   │   aealarabiya.ctg.z
+│	│       │   │   aealarabiya.php
+│	│       │   │   aealarabiya.z
+│	│       │   │   aefurat.ctg.z
+│	│       │   │   aefurat.php
+│	│       │   │   aefurat.z
+│	│       │   │   cid0cs.php
+│	│       │   │   cid0ct.php
+│	│       │   │   cid0jp.php
+│	│       │   │   cid0kr.php
+│	│       │   │   courier.php
+│	│       │   │   courierb.php
+│	│       │   │   courierbi.php
+│	│       │   │   courieri.php
+│	│       │   │   dejavusans.ctg.z
+│	│       │   │   dejavusans.php
+│	│       │   │   dejavusans.z
+│	│       │   │   dejavusansb.ctg.z
+│	│       │   │   dejavusansb.php
+│	│       │   │   dejavusansb.z
+│	│       │   │   dejavusansbi.ctg.z
+│	│       │   │   dejavusansbi.php
+│	│       │   │   dejavusansbi.z
+│	│       │   │   dejavusanscondensed.ctg.z
+│	│       │   │   dejavusanscondensed.php
+│	│       │   │   dejavusanscondensed.z
+│	│       │   │   dejavusanscondensedb.ctg.z
+│	│       │   │   dejavusanscondensedb.php
+│	│       │   │   dejavusanscondensedb.z
+│	│       │   │   dejavusanscondensedbi.ctg.z
+│	│       │   │   dejavusanscondensedbi.php
+│	│       │   │   dejavusanscondensedbi.z
+│	│       │   │   dejavusanscondensedi.ctg.z
+│	│       │   │   dejavusanscondensedi.php
+│	│       │   │   dejavusanscondensedi.z
+│	│       │   │   dejavusansextralight.ctg.z
+│	│       │   │   dejavusansextralight.php
+│	│       │   │   dejavusansextralight.z
+│	│       │   │   dejavusansi.ctg.z
+│	│       │   │   dejavusansi.php
+│	│       │   │   dejavusansi.z
+│	│       │   │   dejavusansmono.ctg.z
+│	│       │   │   dejavusansmono.php
+│	│       │   │   dejavusansmono.z
+│	│       │   │   dejavusansmonob.ctg.z
+│	│       │   │   dejavusansmonob.php
+│	│       │   │   dejavusansmonob.z
+│	│       │   │   dejavusansmonobi.ctg.z
+│	│       │   │   dejavusansmonobi.php
+│	│       │   │   dejavusansmonobi.z
+│	│       │   │   dejavusansmonoi.ctg.z
+│	│       │   │   dejavusansmonoi.php
+│	│       │   │   dejavusansmonoi.z
+│	│       │   │   dejavuserif.ctg.z
+│	│       │   │   dejavuserif.php
+│	│       │   │   dejavuserif.z
+│	│       │   │   dejavuserifb.ctg.z
+│	│       │   │   pdfacourierbi.z
+│	│       │   │   pdfacourieri.php
+│	│       │   │   pdfacourieri.z
+│	│       │   │   pdfahelvetica.php
+│	│       │   │   pdfahelvetica.z
+│	│       │   │   pdfahelveticab.php
+│	│       │   │   pdfahelveticab.z
+│	│       │   │   pdfahelveticabi.php
+│	│       │   │   pdfahelveticabi.z
+│	│       │   │   pdfahelveticai.php
+│	│       │   │   pdfahelveticai.z
+│	│       │   │   pdfasymbol.php
+│	│       │   │   pdfasymbol.z
+│	│       │   │   pdfatimes.php
+│	│       │   │   pdfatimes.z
+│	│       │   │   pdfatimesb.php
+│	│       │   │   pdfatimesb.z
+│	│       │   │   pdfatimesbi.php
+│	│       │   │   pdfatimesbi.z
+│	│       │   │   pdfatimesi.php
+│	│       │   │   pdfatimesi.z
+│	│       │   │   pdfazapfdingbats.php
+│	│       │   │   pdfazapfdingbats.z
+│	│       │   │   stsongstdlight.php
+│	│       │   │   symbol.php
+│	│       │   │   times.php
+│	│       │   │   timesb.php
+│	│       │   │   timesbi.php
+│	│       │   │   timesi.php
+│	│       │   │   uni2cid_ac15.php
+│	│       │   │   uni2cid_ag15.php
+│	│       │   │   uni2cid_aj16.php
+│	│       │   │   uni2cid_ak12.php
+│	│       │   │   zapfdingbats.php
+│	│       │   │
+│	│       │   ├───ae_fonts_2.0
+│	│       │   │       ChangeLog
+│	│       │   │       COPYING
+│	│       │   │       README
+│	│       │   │
+│	│       │   ├───dejavu-fonts-ttf-2.33
+│	│       │   │       AUTHORS
+│	│       │   │       BUGS
+│	│       │   │       langcover.txt
+│	│       │   │       LICENSE
+│	│       │   │       NEWS
+│	│       │   │       README
+│	│       │   │       unicover.txt
+│	│       │   │
+│	│       │   ├───dejavu-fonts-ttf-2.34
+│	│       │   │       AUTHORS
+│	│       │   │       BUGS
+│	│       │   │       langcover.txt
+│	│       │   │       LICENSE
+│	│       │   │       NEWS
+│	│       │   │       README
+│	│       │   │       unicover.txt
+│	│       │   │
+│	│       │   ├───freefont-20100919
+│	│       │   │       AUTHORS
+│	│       │   │       ChangeLog
+│	│       │   │       COPYING
+│	│       │   │       CREDITS
+│	│       │   │       INSTALL
+│	│       │   │       README
+│	│       │   │
+│	│       │   └───freefont-20120503
+│	│       │           AUTHORS
+│	│       │           ChangeLog
+│	│       │           COPYING
+│	│       │           CREDITS
+│	│       │           INSTALL
+│	│       │           README
+│	│       │           TROUBLESHOOTING
+│	│       │           USAGE
+│	│       │
+│	│       ├───include
+│	│       │   │   sRGB.icc
+│	│       │   │   tcpdf_colors.php
+│	│       │   │   tcpdf_filters.php
+│	│       │   │   tcpdf_fonts.php
+│	│       │   │   tcpdf_font_data.php
+│	│       │   │   tcpdf_images.php
+│	│       │   │   tcpdf_static.php
+│	│       │   │
+│	│       │   └───barcodes
+│	│       │           datamatrix.php
+│	│       │           pdf417.php
+│	│       │           qrcode.php
+│	│       │
+│	│       └───tools
+│	│               .htaccess
+│	│               convert_fonts_examples.txt
+│	│               tcpdf_addfont.php
+│	│
+│	└───views
+│		├───admin
+│		│       dashboard.php
+│		│       dosen.php
+│		│       fakultas.php
+│		│       hasilkegiatan.php
+│		│       home.php
+│		│       konsultasi.php
+│		│       lihat_selengkapnya.php
+│		│       mahasiswa.php
+│		│       mahasiswa_detail.php
+│		│       pencarian_mahasiswa.php
+│		│       penelitian.php
+│		│       penelitian_detail.php
+│		│       pengaturan.php
+│		│       prodi.php
+│		│       profil.php
+│		│       proposal.php
+│		│       report.php
+│		│       seminar.php
+│		│       seminar_detail.php
+│		│       skripsi.php
+│		│
+│		├───auth
+│		│       forgot_password.php
+│		│       login.php
+│		│
+│		├───dosen
+│		│   │   bimbingan.php
+│		│   │   bimbingan_content.php
+│		│   │   bimbingan_detail.php
+│		│   │   bimbingan_detail_content.php
+│		│   │   dashboard.php
+│		│   │   dosen.php
+│		│   │   fakultas.php
+│		│   │   konsultasi.php
+│		│   │   mahasiswa.php
+│		│   │   mahasiswa_detail.php
+│		│   │   pencarian_mahasiswa.php
+│		│   │   penelitian.php
+│		│   │   penelitian_content.php
+│		│   │   penelitian_detail.php
+│		│   │   prodi.php
+│		│   │   profil.php
+│		│   │   proposal.php
+│		│   │   publikasi.php
+│		│   │   publikasi_content.php
+│		│   │   seminar.php
+│		│   │   seminar_detail.php
+│		│   │   seminar_proposal.php
+│		│   │   seminar_proposal_content.php
+│		│   │   seminar_skripsi.php
+│		│   │   seminar_skripsi_content.php
+│		│   │   skripsi.php
+│		│   │   usulan_proposal.php
+│		│   │   usulan_proposal_detail.php
+│		│   │
+│		│   └───pdf
+│		│           jurnal_bimbingan.php
+│		│
+│		├───errors
+│		│   ├───cli
+│		│   │       error_404.php
+│		│   │       error_db.php
+│		│   │       error_exception.php
+│		│   │       error_general.php
+│		│   │       error_php.php
+│		│   │
+│		│   └───html
+│		│           error_404.php
+│		│           error_db.php
+│		│           error_exception.php
+│		│           error_general.php
+│		│           error_php.php
+│		│
+│		├───home
+│		│       cek.php
+│		│       index.php
+│		│       pengumuman.php
+│		│       registrasi.php
+│		│
+│		├───kaprodi
+│		│   │   dashboard.php
+│		│   │   dosen.php
+│		│   │   laporan.php
+│		│   │   mahasiswa.php
+│		│   │   penetapan.php
+│		│   │   penetapan_pembimbing_detail.php
+│		│   │   penetapan_pembimbing_index.php
+│		│   │   penetapan_ulang.php
+│		│   │   profil.php
+│		│   │   proposal.php
+│		│   │   publikasi.php
+│		│   │   review_proposal.php
+│		│   │   riwayat.php
+│		│   │   seminar_proposal.php
+│		│   │   seminar_skripsi.php
+│		│   │
+│		│   ├───penetapan_pembimbing
+│		│   │       detail.php
+│		│   │
+│		│   └───pengumuman
+│		│           edit.php
+│		│           index.php
+│		│           tambah.php
+│		│
+│		├───mahasiswa
+│		│       bimbingan.php
+│		│       bimbingan_edit.php
+│		│       dashboard.php
+│		│       hasilkegiatan.php
+│		│       konsultasi.php
+│		│       kontak.php
+│		│       penelitian.php
+│		│       penelitian_detail.php
+│		│       profil.php
+│		│       proposal.php
+│		│       seminar.php
+│		│       seminar_detail.php
+│		│       skripsi.php
+│		│       skripsi_detail.php
+│		│
+│		├───staf
+│		│   │   bimbingan.php
+│		│   │   daftar_dosen.php
+│		│   │   daftar_mahasiswa.php
+│		│   │   dashboard.php
+│		│   │   penelitian.php
+│		│   │   profil.php
+│		│   │   publikasi.php
+│		│   │   seminar_proposal.php
+│		│   │   seminar_skripsi.php
+│		│   │
+│		│   ├───bimbingan
+│		│   │       detail.php
+│		│   │       excel_export.php
+│		│   │       index.php
+│		│   │       pdf_jurnal.php
+│		│   │
+│		│   ├───penelitian
+│		│   │       detail.php
+│		│   │       index.php
+│		│   │       pdf_surat_izin.php
+│		│   │
+│		│   ├───publikasi
+│		│   │       index.php
+│		│   │
+│		│   ├───seminar_proposal
+│		│   │       index.php
+│		│   │       pdf_berita_acara.php
+│		│   │       pdf_form_penilaian.php
+│		│   │       pdf_undangan.php
+│		│   │
+│		│   └───seminar_skripsi
+│		│           index.php
+│		│
+│		└───template
+│			│   admin.php
+│			│   dosen.php
+│			│   home.php
+│			│   kaprodi.php
+│			│   mahasiswa.php
+│			│   staf.php
+│			│
+│			└───_main
+│					css.php
+│					js.php
+│
+├── assets/
+│	├───countdown
+│	├───essence
+│	│   ├───css
+│	│   │   └───colors
+│	│   ├───fonts
+│	│   ├───img
+│	│   │   ├───about
+│	│   │   ├───bg
+│	│   │   ├───blog
+│	│   │   ├───clients
+│	│   │   ├───instagram
+│	│   │   ├───portfolio
+│	│   │   ├───slider
+│	│   │   ├───team
+│	│   │   └───testimonial
+│	│   └───js
+│	└───select2
+│  
+├── cdn/
+│	├───css
+│	│   └───bootstrap
+│	├───db
+│	├───documents
+│	│   ├───berita_acara
+│	│   ├───jurnal
+│	│   ├───sertifikat
+│	│   └───undangan
+│	├───fonts
+│	│   └───nucleo
+│	├───img
+│	│   ├───brand
+│	│   ├───dosen
+│	│   ├───icons
+│	│   │   └───common
+│	│   ├───mahasiswa
+│	│   ├───staf
+│	│   └───theme
+│	├───js
+│	│   └───components
+│	│       ├───charts
+│	│       ├───custom
+│	│       ├───init
+│	│       ├───maps
+│	│       └───vendor
+│	├───konsultasi
+│	├───plugins
+│	│   ├───canvas-resize
+│	│   ├───chartjs
+│	│   ├───datatables
+│	│   ├───datatables-bs4
+│	│   │   ├───css
+│	│   │   └───js
+│	│   ├───summernote
+│	│   │   ├───font
+│	│   │   ├───lang
+│	│   │   └───plugin
+│	│   │       ├───databasic
+│	│   │       ├───hello
+│	│   │       └───specialchars
+│	│   └───sweetalert2
+│	├───proposals
+│	├───scss
+│	│   ├───bootstrap
+│	│   │   ├───mixins
+│	│   │   ├───utilities
+│	│   │   └───vendor
+│	│   ├───core
+│	│   │   ├───alerts
+│	│   │   ├───avatars
+│	│   │   ├───badges
+│	│   │   ├───breadcrumbs
+│	│   │   ├───buttons
+│	│   │   ├───cards
+│	│   │   ├───charts
+│	│   │   ├───close
+│	│   │   ├───collapse
+│	│   │   ├───content
+│	│   │   ├───custom-forms
+│	│   │   ├───dropdowns
+│	│   │   ├───footers
+│	│   │   ├───forms
+│	│   │   ├───free
+│	│   │   │   ├───alerts
+│	│   │   │   ├───avatars
+│	│   │   │   ├───badges
+│	│   │   │   ├───breadcrumbs
+│	│   │   │   ├───buttons
+│	│   │   │   ├───cards
+│	│   │   │   ├───charts
+│	│   │   │   ├───close
+│	│   │   │   ├───collapse
+│	│   │   │   ├───content
+│	│   │   │   ├───custom-forms
+│	│   │   │   ├───dropdowns
+│	│   │   │   ├───footers
+│	│   │   │   ├───forms
+│	│   │   │   ├───grid
+│	│   │   │   ├───headers
+│	│   │   │   ├───icons
+│	│   │   │   ├───list-groups
+│	│   │   │   ├───maps
+│	│   │   │   ├───masks
+│	│   │   │   ├───mixins
+│	│   │   │   ├───modals
+│	│   │   │   ├───navbars
+│	│   │   │   ├───navs
+│	│   │   │   ├───paginations
+│	│   │   │   ├───popovers
+│	│   │   │   ├───progresses
+│	│   │   │   ├───reboot
+│	│   │   │   ├───sections
+│	│   │   │   ├───separators
+│	│   │   │   ├───tables
+│	│   │   │   ├───type
+│	│   │   │   ├───utilities
+│	│   │   │   └───vendors
+│	│   │   ├───grid
+│	│   │   ├───headers
+│	│   │   ├───icons
+│	│   │   ├───list-groups
+│	│   │   ├───maps
+│	│   │   ├───masks
+│	│   │   ├───medias
+│	│   │   ├───mixins
+│	│   │   ├───modals
+│	│   │   ├───navbars
+│	│   │   ├───navs
+│	│   │   ├───paginations
+│	│   │   ├───popovers
+│	│   │   ├───progresses
+│	│   │   ├───reboot
+│	│   │   ├───rtl
+│	│   │   ├───sections
+│	│   │   ├───separators
+│	│   │   ├───shortcuts
+│	│   │   ├───tables
+│	│   │   ├───timeline
+│	│   │   ├───type
+│	│   │   ├───utilities
+│	│   │   └───vendors
+│	│   └───custom
+│	├───uploads
+│	│   └───proposal
+│	└───vendor
+│		├───@fortawesome
+│		│   └───fontawesome-free
+│		│       ├───css
+│		│       ├───js
+│		│       ├───sprites
+│		│       ├───svgs
+│		│       │   ├───brands
+│		│       │   ├───regular
+│		│       │   └───solid
+│		│       └───webfonts
+│		├───anchor-js
+│		├───animate.css
+│		│   └───source
+│		│       ├───attention_seekers
+│		│       ├───bouncing_entrances
+│		│       ├───bouncing_exits
+│		│       ├───fading_entrances
+│		│       ├───fading_exits
+│		│       ├───flippers
+│		│       ├───lightspeed
+│		│       ├───rotating_entrances
+│		│       ├───rotating_exits
+│		│       ├───sliding_entrances
+│		│       ├───sliding_exits
+│		│       ├───specials
+│		│       ├───zooming_entrances
+│		│       └───zooming_exits
+│		├───berita_acara
+│		├───bootstrap
+│		│   └───dist
+│		│       ├───css
+│		│       └───js
+│		├───bootstrap-datepicker
+│		│   └───dist
+│		│       ├───css
+│		│       ├───js
+│		│       └───locales
+│		├───bootstrap-notify
+│		├───bootstrap-rtl
+│		├───bootstrap-tagsinput
+│		│   └───dist
+│		├───bukti
+│		├───bukti_konsultasi
+│		├───bukti_pembayaran
+│		├───chart.js
+│		│   └───dist
+│		├───clipboard
+│		│   └───dist
+│		├───datatables.net
+│		│   └───js
+│		├───datatables.net-bs4
+│		│   ├───css
+│		│   └───js
+│		├───datatables.net-buttons
+│		│   ├───js
+│		│   └───swf
+│		├───datatables.net-buttons-bs4
+│		│   ├───css
+│		│   └───js
+│		├───datatables.net-responsive-bs4
+│		│   ├───css
+│		│   └───js
+│		├───datatables.net-select
+│		│   └───js
+│		├───datatables.net-select-bs4
+│		│   ├───css
+│		│   └───js
+│		├───dropzone
+│		│   └───dist
+│		│       └───min
+│		├───file_proposal
+│		├───font-awesome
+│		│   ├───css
+│		│   └───fonts
+│		├───fullcalendar
+│		│   └───dist
+│		│       └───locale
+│		├───gulp-copy
+│		│   ├───lib
+│		│   └───node_modules
+│		│       ├───arr-diff
+│		│       ├───arr-union
+│		│       ├───array-slice
+│		│       ├───extend-shallow
+│		│       ├───glob-watcher
+│		│       ├───gulp
+│		│       │   ├───bin
+│		│       │   └───node_modules
+│		│       │       └───gulp-cli
+│		│       │           ├───bin
+│		│       │           ├───completion
+│		│       │           └───lib
+│		│       │               ├───shared
+│		│       │               │   ├───config
+│		│       │               │   └───log
+│		│       │               └───versioned
+│		│       │                   ├───^3.7.0
+│		│       │                   │   └───log
+│		│       │                   ├───^4.0.0
+│		│       │                   │   └───log
+│		│       │                   ├───^4.0.0-alpha.1
+│		│       │                   └───^4.0.0-alpha.2
+│		│       ├───kind-of
+│		│       ├───plugin-error
+│		│       ├───yargs
+│		│       │   ├───lib
+│		│       │   └───locales
+│		│       └───yargs-parser
+│		│           └───lib
+│		├───hasil_kegiatan
+│		│   ├───hasil
+│		│   └───kegiatan
+│		├───headroom.js
+│		│   └───dist
+│		├───holderjs
+│		├───jekyll
+│		│   ├───benchmark
+│		│   ├───bin
+│		│   ├───features
+│		│   │   ├───step_definitions
+│		│   │   └───support
+│		│   ├───lib
+│		│   │   ├───jekyll
+│		│   │   │   ├───commands
+│		│   │   │   ├───converters
+│		│   │   │   │   └───markdown
+│		│   │   │   └───tags
+│		│   │   └───site_template
+│		│   │       ├───_includes
+│		│   │       ├───_layouts
+│		│   │       └───_posts
+│		│   ├───script
+│		│   └───site
+│		│       ├───fonts
+│		│       ├───img
+│		│       ├───js
+│		│       ├───news
+│		│       │   └───releases
+│		│       ├───_includes
+│		│       ├───_layouts
+│		│       └───_posts
+│		├───jquery
+│		│   └───dist
+│		├───jquery-scroll-lock
+│		│   └───dist
+│		├───jquery.scrollbar
+│		│   ├───meteor
+│		│   └───sass
+│		├───js-cookie
+│		├───jvectormap-next
+│		├───khs
+│		├───lavalamp
+│		│   ├───css
+│		│   ├───images
+│		│   └───js
+│		├───list.js
+│		│   └───dist
+│		├───masukan
+│		├───minimatch
+│		├───moment
+│		│   ├───locale
+│		│   └───min
+│		├───nouislider
+│		│   └───distribute
+│		├───nucleo
+│		│   ├───css
+│		│   └───fonts
+│		├───onscreen
+│		│   └───dist
+│		├───penelitian
+│		│   ├───bukti_konsultasi
+│		│   ├───file_seminar
+│		│   └───sk_tim
+│		├───persetujuan
+│		├───prismjs
+│		│   ├───components
+│		│   ├───plugins
+│		│   │   ├───autolinker
+│		│   │   ├───autoloader
+│		│   │   ├───command-line
+│		│   │   ├───copy-to-clipboard
+│		│   │   ├───custom-class
+│		│   │   ├───data-uri-highlight
+│		│   │   ├───diff-highlight
+│		│   │   ├───download-button
+│		│   │   ├───file-highlight
+│		│   │   ├───filter-highlight-all
+│		│   │   ├───highlight-keywords
+│		│   │   ├───inline-color
+│		│   │   ├───jsonp-highlight
+│		│   │   ├───keep-markup
+│		│   │   ├───line-highlight
+│		│   │   ├───line-numbers
+│		│   │   ├───match-braces
+│		│   │   ├───normalize-whitespace
+│		│   │   ├───previewers
+│		│   │   ├───remove-initial-line-feed
+│		│   │   ├───show-invisibles
+│		│   │   ├───show-language
+│		│   │   ├───toolbar
+│		│   │   ├───unescaped-markup
+│		│   │   └───wpd
+│		│   └───themes
+│		├───quill
+│		│   └───dist
+│		├───select2
+│		│   └───dist
+│		│       ├───css
+│		│       └───js
+│		│           └───i18n
+│		├───skripsi
+│		│   ├───bukti_konsultasi
+│		│   ├───file_skripsi
+│		│   ├───persetujuan
+│		│   └───sk_tim
+│		├───sk_tim
+│		├───sudo
+│		│   └───lib
+│		└───sweetalert2
+│			└───dist
+│
+├── cdn/cgi-bin
+│ 
+├── Database/
+│	├───.DS_Store
+│ 	└───skripsi.sql
+├── system/
+│	├───core
+│	│   └───compat
+│	├───database
+│	│   └───drivers
+│	│       ├───cubrid
+│	│       ├───ibase
+│	│       ├───mssql
+│	│       ├───mysql
+│	│       ├───mysqli
+│	│       ├───oci8
+│	│       ├───odbc
+│	│       ├───pdo
+│	│       │   └───subdrivers
+│	│       ├───postgre
+│	│       ├───sqlite
+│	│       ├───sqlite3
+│	│       └───sqlsrv
+│	├───fonts
+│	├───helpers
+│	├───language
+│	│   └───english
+│	└───libraries
+│		├───Cache
+│		│   └───drivers
+│		├───Javascript
+│		└───Session
+│			└───drivers
+│  
+├──uploads/
+│    ├── repository_docs/
+│    ├── surat_izin/
+│    └── temp/
+├──.DS_Store
+├──.env
+├──.htaccess
+├──cleanup_mahasiswa
+├──composer.json
+├──debug_original
+├──error_log
+├──index
+└──reset_password

@@ -197,7 +197,7 @@ class Dashboard extends CI_Controller {
     }
 
     /**
-     * Data untuk chart/grafik
+     * Data untuk chart/grafik - FIXED VERSION
      */
     private function _get_chart_data() {
         // Data mahasiswa per prodi dan tahapan
@@ -210,7 +210,10 @@ class Dashboard extends CI_Controller {
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
         $this->db->group_by(['p.nama', 'pm.workflow_status']);
-        $this->db->order_by(['p.nama', 'pm.workflow_status']);
+        
+        // FIX: Use multiple order_by calls instead of array
+        $this->db->order_by('p.nama', 'ASC');
+        $this->db->order_by('pm.workflow_status', 'ASC');
         
         $results = $this->db->get()->result();
         

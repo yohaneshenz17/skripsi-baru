@@ -275,6 +275,132 @@ $route['dosen/skripsi'] = 'dosen/seminar_skripsi';  // Redirect ke seminar_skrip
 $route['dosen/(:any)'] = 'dosen/$1';
 
 // =====================================================
+//      ROUTE STAF - WORKFLOW SISTEM SIM-TA (BARU)
+// =====================================================
+
+// Dashboard Staf
+$route['staf'] = 'staf/dashboard';
+$route['staf/dashboard'] = 'staf/dashboard';
+$route['staf/dashboard/(:any)'] = 'staf/dashboard/$1';
+
+// =====================================================
+//      MENU STAF - SESUAI WORKFLOW SIM-TA
+// =====================================================
+
+// 1. Dashboard (sudah di atas)
+
+// 2. Bimbingan - Monitoring dan Export
+$route['staf/bimbingan'] = 'staf/bimbingan';
+$route['staf/bimbingan/index'] = 'staf/bimbingan/index';
+$route['staf/bimbingan/detail_mahasiswa/(:num)'] = 'staf/bimbingan/detail_mahasiswa/$1';
+$route['staf/bimbingan/export_jurnal/(:num)'] = 'staf/bimbingan/export_jurnal/$1';
+$route['staf/bimbingan/export_all'] = 'staf/bimbingan/export_all';
+$route['staf/bimbingan/cetak_jurnal/(:num)'] = 'staf/bimbingan/cetak_jurnal/$1';
+
+// 3. Seminar Proposal - Penjadwalan dan Berita Acara
+$route['staf/seminar-proposal'] = 'staf/seminar_proposal';
+$route['staf/seminar_proposal'] = 'staf/seminar_proposal';
+$route['staf/seminar_proposal/index'] = 'staf/seminar_proposal/index';
+$route['staf/seminar_proposal/detail/(:num)'] = 'staf/seminar_proposal/detail/$1';
+$route['staf/seminar_proposal/penjadwalan'] = 'staf/seminar_proposal/penjadwalan';
+$route['staf/seminar_proposal/berita_acara/(:num)'] = 'staf/seminar_proposal/berita_acara/$1';
+$route['staf/seminar_proposal/export_berita_acara/(:num)'] = 'staf/seminar_proposal/export_berita_acara/$1';
+$route['staf/seminar_proposal/cetak_berita_acara/(:num)'] = 'staf/seminar_proposal/cetak_berita_acara/$1';
+
+// 4. Penelitian - Surat Izin Penelitian
+$route['staf/penelitian'] = 'staf/penelitian';
+$route['staf/penelitian/index'] = 'staf/penelitian/index';
+$route['staf/penelitian/detail/(:num)'] = 'staf/penelitian/detail/$1';
+$route['staf/penelitian/proses_surat'] = 'staf/penelitian/proses_surat';
+$route['staf/penelitian/cetak_surat/(:num)'] = 'staf/penelitian/cetak_surat/$1';
+$route['staf/penelitian/upload_surat'] = 'staf/penelitian/upload_surat';
+$route['staf/penelitian/download_surat/(:num)'] = 'staf/penelitian/download_surat/$1';
+
+// 5. Seminar Skripsi - Penjadwalan dan Berita Acara
+$route['staf/seminar-skripsi'] = 'staf/seminar_skripsi';
+$route['staf/seminar_skripsi'] = 'staf/seminar_skripsi';
+$route['staf/seminar_skripsi/index'] = 'staf/seminar_skripsi/index';
+$route['staf/seminar_skripsi/detail/(:num)'] = 'staf/seminar_skripsi/detail/$1';
+$route['staf/seminar_skripsi/penjadwalan'] = 'staf/seminar_skripsi/penjadwalan';
+$route['staf/seminar_skripsi/berita_acara/(:num)'] = 'staf/seminar_skripsi/berita_acara/$1';
+$route['staf/seminar_skripsi/export_berita_acara/(:num)'] = 'staf/seminar_skripsi/export_berita_acara/$1';
+$route['staf/seminar_skripsi/cetak_berita_acara/(:num)'] = 'staf/seminar_skripsi/cetak_berita_acara/$1';
+
+// 6. Publikasi - Validasi Repository dan Link
+$route['staf/publikasi'] = 'staf/publikasi';
+$route['staf/publikasi/index'] = 'staf/publikasi/index';
+$route['staf/publikasi/detail/(:num)'] = 'staf/publikasi/detail/$1';
+$route['staf/publikasi/validasi'] = 'staf/publikasi/validasi';
+$route['staf/publikasi/input_repository'] = 'staf/publikasi/input_repository';
+$route['staf/publikasi/export'] = 'staf/publikasi/export';
+
+// =====================================================
+//      MENU STAF - MANAJEMEN DATA
+// =====================================================
+
+// 7. Daftar Mahasiswa
+$route['staf/mahasiswa'] = 'staf/mahasiswa';
+$route['staf/mahasiswa/index'] = 'staf/mahasiswa/index';
+$route['staf/mahasiswa/detail/(:num)'] = 'staf/mahasiswa/detail/$1';
+$route['staf/mahasiswa/export'] = 'staf/mahasiswa/export';
+$route['staf/mahasiswa/progress/(:num)'] = 'staf/mahasiswa/progress/$1';
+
+// 8. Daftar Dosen
+$route['staf/dosen'] = 'staf/dosen';
+$route['staf/dosen/index'] = 'staf/dosen/index';
+$route['staf/dosen/detail/(:num)'] = 'staf/dosen/detail/$1';
+$route['staf/dosen/export'] = 'staf/dosen/export';
+
+// =====================================================
+//      MENU STAF - LAPORAN DAN UTILITAS
+// =====================================================
+
+// 9. Laporan
+$route['staf/laporan'] = 'staf/laporan';
+$route['staf/laporan/index'] = 'staf/laporan/index';
+$route['staf/laporan/tahapan'] = 'staf/laporan/tahapan';
+$route['staf/laporan/progress'] = 'staf/laporan/progress';
+$route['staf/laporan/statistik'] = 'staf/laporan/statistik';
+$route['staf/laporan/export'] = 'staf/laporan/export';
+$route['staf/laporan/export_tahapan'] = 'staf/laporan/export_tahapan';
+
+// 10. Profil Staf
+$route['staf/profil'] = 'staf/profil';
+$route['staf/profil/index'] = 'staf/profil/index';
+$route['staf/profil/update'] = 'staf/profil/update';
+$route['staf/profil/hapus_foto'] = 'staf/profil/hapus_foto';
+
+// =====================================================
+//      API ROUTES UNTUK STAF (AJAX & DATATABLES)
+// =====================================================
+
+// API untuk DataTables dan AJAX calls staf
+$route['api/staf/mahasiswa'] = 'api/staf/mahasiswa';
+$route['api/staf/dosen'] = 'api/staf/dosen';
+$route['api/staf/bimbingan'] = 'api/staf/bimbingan';
+$route['api/staf/seminar_proposal'] = 'api/staf/seminar_proposal';
+$route['api/staf/seminar_skripsi'] = 'api/staf/seminar_skripsi';
+$route['api/staf/publikasi'] = 'api/staf/publikasi';
+$route['api/staf/statistik'] = 'api/staf/statistik';
+
+// =====================================================
+//      FALLBACK DAN COMPATIBILITY STAF
+// =====================================================
+
+// Alias routing untuk konsistensi URL (dengan dash)
+$route['staf/daftar-mahasiswa'] = 'staf/mahasiswa';
+$route['staf/daftar-dosen'] = 'staf/dosen';
+
+// Debug dan Development untuk staf
+if (ENVIRONMENT === 'development') {
+    $route['staf/debug/(:any)'] = 'staf/debug/$1';
+    $route['staf/test/(:any)'] = 'staf/test/$1';
+}
+
+// Catch-all untuk staf routes yang belum didefinisikan (HARUS DI BAWAH)
+$route['staf/(:any)'] = 'staf/$1';
+
+// =====================================================
 //      KAPRODI ROUTES SUMMARY - MENU BARU
 // =====================================================
 
@@ -341,4 +467,71 @@ CATATAN PENTING:
 - Menu "Pengumuman Tahapan" dipindah ke posisi kedua setelah Dashboard
 - Menambah 3 menu baru: Seminar Proposal, Seminar Skripsi, Publikasi
 - Menambah menu Profil seperti pada role dosen
+*/
+
+// =====================================================
+//      STAF ROUTES SUMMARY - MENU BARU (TAMBAHAN)
+// =====================================================
+
+/*
+STAF MENU ROUTES (SESUAI WORKFLOW SIM-TA):
+
+1. Dashboard:
+   - staf/dashboard
+
+2. Bimbingan (Monitoring & Export):
+   - staf/bimbingan                            // List mahasiswa bimbingan
+   - staf/bimbingan/detail_mahasiswa/(:num)    // Detail progress mahasiswa
+   - staf/bimbingan/export_jurnal/(:num)       // Export jurnal mahasiswa
+   - staf/bimbingan/cetak_jurnal/(:num)        // Cetak jurnal bimbingan
+
+3. Seminar Proposal (Penjadwalan & Berita Acara):
+   - staf/seminar_proposal                     // List seminar proposal
+   - staf/seminar_proposal/detail/(:num)       // Detail seminar
+   - staf/seminar_proposal/berita_acara/(:num) // Kelola berita acara
+   - staf/seminar_proposal/cetak_berita_acara/(:num) // Cetak berita acara
+
+4. Penelitian (Surat Izin):
+   - staf/penelitian                           // List pengajuan surat izin
+   - staf/penelitian/detail/(:num)             // Detail pengajuan
+   - staf/penelitian/cetak_surat/(:num)        // Cetak surat izin
+   - staf/penelitian/upload_surat              // Upload surat yang sudah TTD
+
+5. Seminar Skripsi (Penjadwalan & Berita Acara):
+   - staf/seminar_skripsi                      // List seminar skripsi
+   - staf/seminar_skripsi/detail/(:num)        // Detail seminar
+   - staf/seminar_skripsi/berita_acara/(:num)  // Kelola berita acara
+   - staf/seminar_skripsi/cetak_berita_acara/(:num) // Cetak berita acara
+
+6. Publikasi (Validasi Repository):
+   - staf/publikasi                            // List publikasi
+   - staf/publikasi/detail/(:num)              // Detail publikasi
+   - staf/publikasi/input_repository           // Input link repository
+   - staf/publikasi/validasi                   // Validasi publikasi
+
+7. Daftar Mahasiswa:
+   - staf/mahasiswa                            // List mahasiswa
+   - staf/mahasiswa/detail/(:num)              // Detail mahasiswa
+   - staf/mahasiswa/progress/(:num)            // Progress bar mahasiswa
+
+8. Daftar Dosen:
+   - staf/dosen                               // List dosen
+   - staf/dosen/detail/(:num)                 // Detail dosen
+
+9. Laporan:
+   - staf/laporan                             // Dashboard laporan
+   - staf/laporan/tahapan                     // Laporan per tahapan
+   - staf/laporan/progress                    // Laporan progress mahasiswa
+   - staf/laporan/statistik                   // Statistik keseluruhan
+
+10. Profil:
+    - staf/profil                             // Profil staf
+    - staf/profil/update                      // Update profil
+
+CATATAN WORKFLOW STAF:
+- Staf bertugas mendukung administrasi akademik sesuai workflow SIM-TA
+- Memantau progress setiap tahapan tugas akhir
+- Mengelola pencetakan dokumen (jurnal, berita acara, surat izin)
+- Menvalidasi link repository untuk publikasi
+- Menyediakan laporan komprehensif untuk monitoring
 */

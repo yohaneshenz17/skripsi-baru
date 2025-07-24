@@ -1,24 +1,7 @@
 <?php
-$this->load->view('template/staf', [
-    'title' => 'Dashboard Staf Akademik',
-    'content' => $this->load->view('staf/_partials/dashboard_content', [
-        'pengumuman' => $pengumuman,
-        'total_mahasiswa' => $total_mahasiswa,
-        'total_dosen' => $total_dosen,
-        'shortcuts' => $shortcuts,
-        'workflow_stats' => $workflow_stats,
-        'chart_data' => $chart_data
-    ], true),
-    'css' => '',
-    'script' => $this->load->view('staf/_partials/dashboard_script', [], true)
-]);
+// Prepare content with output buffering
+ob_start();
 ?>
-
-<!-- Dashboard Content Partial -->
-<?php $this->load->view('template/staf', [
-    'title' => 'Dashboard Staf Akademik',
-    'content' => ob_start()
-]); ?>
 
 <div class="row">
     <!-- Summary Cards -->
@@ -306,10 +289,13 @@ $this->load->view('template/staf', [
 </div>
 
 <?php 
+// Capture content dan buat script untuk chart
 $content = ob_get_clean();
-echo $content;
-?>
 
+// Script untuk chart
+ob_start();
+?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 $(document).ready(function() {
     // Workflow Chart
@@ -356,3 +342,14 @@ $(document).ready(function() {
     }, 300000);
 });
 </script>
+<?php 
+$script = ob_get_clean();
+
+// Load template dengan data yang sudah siap
+$this->load->view('template/staf', [
+    'title' => 'Dashboard Staf Akademik',
+    'content' => $content,
+    'css' => '',
+    'script' => $script
+]);
+?>

@@ -397,6 +397,22 @@ if (ENVIRONMENT === 'development') {
     $route['staf/test/(:any)'] = 'staf/test/$1';
 }
 
+// Export Documents - Seminar Proposal
+$route['staf/seminar_proposal/export_undangan/(:num)'] = 'staf/seminar_proposal/export_undangan/$1';
+$route['staf/seminar_proposal/export_form_penilaian/(:num)'] = 'staf/seminar_proposal/export_form_penilaian/$1';
+
+// Export Documents - Seminar Skripsi  
+$route['staf/seminar_skripsi/export_undangan/(:num)'] = 'staf/seminar_skripsi/export_undangan/$1';
+$route['staf/seminar_skripsi/export_form_penilaian/(:num)'] = 'staf/seminar_skripsi/export_form_penilaian/$1';
+$route['staf/seminar_skripsi/export_sertifikat/(:num)'] = 'staf/seminar_skripsi/export_sertifikat/$1';
+
+// Publikasi - Bulk Operations
+$route['staf/publikasi/bulk_validasi'] = 'staf/publikasi/bulk_validasi';
+$route['staf/publikasi/export_laporan'] = 'staf/publikasi/export_laporan';
+
+// Test PDF untuk troubleshooting
+$route['test_pdf'] = 'test_pdf';
+
 // Catch-all untuk staf routes yang belum didefinisikan (HARUS DI BAWAH)
 $route['staf/(:any)'] = 'staf/$1';
 

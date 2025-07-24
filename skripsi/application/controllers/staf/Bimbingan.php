@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Controller Staf - Menu Bimbingan
- * Mengelola jurnal bimbingan dan export PDF
+ * Mengelola monitoring dan export jurnal bimbingan
  */
 class Bimbingan extends CI_Controller {
 
@@ -12,7 +12,7 @@ class Bimbingan extends CI_Controller {
         $this->load->database();
         $this->load->library('session');
         $this->load->helper(['url', 'date', 'file']);
-        $this->load->library('pdf'); // Library untuk generate PDF
+        $this->load->library(['pdf', 'upload']);
         
         // Cek login dan level staf
         if (!$this->session->userdata('logged_in') || $this->session->userdata('level') != '5') {
@@ -26,32 +26,44 @@ class Bimbingan extends CI_Controller {
     public function index() {
         // Filter
         $prodi_id = $this->input->get('prodi_id');
-        $status_validasi = $this->input->get('status_validasi');
+        $dosen_id = $this->input->get('dosen_id');
+        $status = $this->input->get('status');
         $search = $this->input->get('search');
         
         // Base query
         $this->db->select('
-            jb.*,
-            pm.judul as judul_proposal,
-            m.nim, m.nama as nama_mahasiswa, m.email,
+            pm.*,
+            m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
             p.nama as nama_prodi,
-            d.nama as nama_pembimbing,
-            dv.nama as nama_validator
+            d1.nama as nama_pembimbing,
+            COUNT(jb.id) as total_bimbingan,
+            MAX(jb.tanggal_bimbingan) as last_bimbingan
         ');
-        $this->db->from('jurnal_bimbingan jb');
-        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+        $this->db->from('proposal_mahasiswa pm');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->join('dosen dv', 'jb.validasi_oleh = dv.id', 'left');
+        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
+        $this->db->join('jurnal_bimbingan jb', 'pm.id = jb.proposal_id', 'left');
+        
+        // Filter hanya yang sudah ada pembimbing
+        $this->db->where('pm.status_pembimbing', '1');
+        $this->db->where('pm.dosen_id IS NOT NULL');
         
         // Apply filters
         if ($prodi_id) {
             $this->db->where('m.prodi_id', $prodi_id);
         }
         
-        if ($status_validasi !== '') {
-            $this->db->where('jb.status_validasi', $status_validasi);
+        if ($dosen_id) {
+            $this->db->where('pm.dosen_id', $dosen_id);
+        }
+        
+        if ($status !== '') {
+            if ($status == 'aktif') {
+                $this->db->where_in('pm.workflow_status', ['bimbingan', 'seminar_proposal', 'penelitian', 'seminar_skripsi']);
+            } elseif ($status == 'selesai') {
+                $this->db->where_in('pm.workflow_status', ['publikasi', 'selesai']);
+            }
         }
         
         if ($search) {
@@ -59,20 +71,30 @@ class Bimbingan extends CI_Controller {
             $this->db->like('m.nama', $search);
             $this->db->or_like('m.nim', $search);
             $this->db->or_like('pm.judul', $search);
-            $this->db->or_like('jb.materi_bimbingan', $search);
+            $this->db->or_like('d1.nama', $search);
             $this->db->group_end();
         }
         
-        $this->db->order_by('jb.tanggal_bimbingan', 'DESC');
-        $this->db->order_by('jb.pertemuan_ke', 'DESC');
+        $this->db->group_by('pm.id');
+        $this->db->order_by('pm.created_at', 'DESC');
         
         $data['bimbingan'] = $this->db->get()->result();
         
         // Data untuk filter
         $data['prodi_list'] = $this->db->get('prodi')->result();
+        
+        // Daftar dosen pembimbing
+        $this->db->select('DISTINCT d.id, d.nama');
+        $this->db->from('dosen d');
+        $this->db->join('proposal_mahasiswa pm', 'd.id = pm.dosen_id');
+        $this->db->where('pm.status_pembimbing', '1');
+        $this->db->order_by('d.nama', 'ASC');
+        $data['dosen_list'] = $this->db->get()->result();
+        
         $data['filters'] = [
             'prodi_id' => $prodi_id,
-            'status_validasi' => $status_validasi,
+            'dosen_id' => $dosen_id,
+            'status' => $status,
             'search' => $search
         ];
         
@@ -83,132 +105,170 @@ class Bimbingan extends CI_Controller {
     }
 
     /**
-     * Export PDF Jurnal Bimbingan per Mahasiswa
+     * Detail mahasiswa bimbingan
      */
-    public function export_jurnal_pdf($mahasiswa_id) {
-        if (!$mahasiswa_id) {
+    public function detail_mahasiswa($proposal_id) {
+        if (!$proposal_id) {
             show_404();
         }
         
-        // Ambil data mahasiswa
-        $this->db->select('m.*, p.nama as nama_prodi, pm.judul, pm.id as proposal_id');
-        $this->db->from('mahasiswa m');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('proposal_mahasiswa pm', 'm.id = pm.mahasiswa_id');
-        $this->db->where('m.id', $mahasiswa_id);
-        $mahasiswa = $this->db->get()->row();
-        
-        if (!$mahasiswa) {
-            show_404();
-        }
-        
-        // Ambil data jurnal bimbingan
+        // Ambil data proposal dan mahasiswa
         $this->db->select('
-            jb.*,
-            d.nama as nama_pembimbing,
-            dv.nama as nama_validator
+            pm.*,
+            m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
+            p.nama as nama_prodi,
+            d1.nama as nama_pembimbing, d1.email as email_pembimbing
         ');
-        $this->db->from('jurnal_bimbingan jb');
-        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->join('dosen dv', 'jb.validasi_oleh = dv.id', 'left');
-        $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-        $this->db->order_by('jb.pertemuan_ke', 'ASC');
-        $jurnal = $this->db->get()->result();
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi p', 'm.prodi_id = p.id');
+        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
+        $this->db->where('pm.id', $proposal_id);
         
-        // Generate PDF
-        $this->_generate_jurnal_pdf($mahasiswa, $jurnal);
+        $data['proposal'] = $this->db->get()->row();
+        
+        if (!$data['proposal']) {
+            show_404();
+        }
+        
+        // Ambil jurnal bimbingan
+        $this->db->select('*');
+        $this->db->from('jurnal_bimbingan');
+        $this->db->where('proposal_id', $proposal_id);
+        $this->db->order_by('tanggal_bimbingan', 'DESC');
+        
+        $data['jurnal_bimbingan'] = $this->db->get()->result();
+        
+        $this->load->view('staf/bimbingan/detail', $data);
     }
 
     /**
-     * Export PDF Jurnal Bimbingan berdasarkan filter
+     * Export jurnal bimbingan mahasiswa ke PDF
      */
-    public function export_filtered_pdf() {
-        $prodi_id = $this->input->post('prodi_id');
-        $status_validasi = $this->input->post('status_validasi');
-        $tanggal_mulai = $this->input->post('tanggal_mulai');
-        $tanggal_selesai = $this->input->post('tanggal_selesai');
+    public function export_jurnal($proposal_id) {
+        if (!$proposal_id) {
+            show_404();
+        }
         
-        // Query dengan filter
+        // Ambil data proposal dan mahasiswa (sama seperti detail_mahasiswa)
         $this->db->select('
-            jb.*,
-            pm.judul as judul_proposal,
-            m.nim, m.nama as nama_mahasiswa,
+            pm.*,
+            m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
             p.nama as nama_prodi,
-            d.nama as nama_pembimbing
+            d1.nama as nama_pembimbing, d1.nip as nip_pembimbing
         ');
-        $this->db->from('jurnal_bimbingan jb');
-        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+        $this->db->from('proposal_mahasiswa pm');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
+        $this->db->where('pm.id', $proposal_id);
         
-        if ($prodi_id) {
-            $this->db->where('m.prodi_id', $prodi_id);
+        $data['proposal'] = $this->db->get()->row();
+        
+        if (!$data['proposal']) {
+            show_404();
         }
         
-        if ($status_validasi !== '') {
-            $this->db->where('jb.status_validasi', $status_validasi);
-        }
+        // Ambil jurnal bimbingan
+        $this->db->select('*');
+        $this->db->from('jurnal_bimbingan');
+        $this->db->where('proposal_id', $proposal_id);
+        $this->db->order_by('tanggal_bimbingan', 'ASC');
         
-        if ($tanggal_mulai) {
-            $this->db->where('jb.tanggal_bimbingan >=', $tanggal_mulai);
-        }
+        $data['jurnal_bimbingan'] = $this->db->get()->result();
         
-        if ($tanggal_selesai) {
-            $this->db->where('jb.tanggal_bimbingan <=', $tanggal_selesai);
-        }
+        // Generate PDF
+        $this->pdf->filename = 'Jurnal_Bimbingan_' . $data['proposal']->nim . '_' . date('Y-m-d') . '.pdf';
         
-        $this->db->order_by('m.nama', 'ASC');
-        $this->db->order_by('jb.pertemuan_ke', 'ASC');
+        $html = $this->load->view('staf/bimbingan/pdf_jurnal', [
+            'proposal' => $data['proposal'],
+            'jurnal_bimbingan' => $data['jurnal_bimbingan'],
+            'generated_by' => $this->session->userdata('nama'),
+            'generated_at' => date('d/m/Y H:i:s')
+        ], true);
         
-        $data = $this->db->get()->result();
+        $this->pdf->load_html($html);
+        $this->pdf->render();
         
-        if (empty($data)) {
-            $this->session->set_flashdata('error', 'Tidak ada data untuk di-export');
+        // Log aktivitas
+        $this->_log_aktivitas('export_jurnal', $data['proposal']->mahasiswa_id, $proposal_id, 
+                             "Export jurnal bimbingan {$data['proposal']->nama_mahasiswa}");
+        
+        $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
+    }
+
+    /**
+     * Export semua jurnal bimbingan (bulk export)
+     */
+    public function export_all() {
+        $proposal_ids = $this->input->post('proposal_ids');
+        
+        if (empty($proposal_ids)) {
+            $this->session->set_flashdata('error', 'Pilih minimal satu mahasiswa untuk di-export');
             redirect('staf/bimbingan');
         }
         
-        // Generate PDF laporan
-        $this->_generate_laporan_bimbingan_pdf($data, [
-            'prodi_id' => $prodi_id,
-            'status_validasi' => $status_validasi,
-            'tanggal_mulai' => $tanggal_mulai,
-            'tanggal_selesai' => $tanggal_selesai
-        ]);
+        // Buat ZIP file untuk multiple PDF
+        $this->load->library('zip');
+        
+        foreach ($proposal_ids as $proposal_id) {
+            // Generate PDF untuk setiap mahasiswa
+            $pdf_content = $this->_generate_jurnal_pdf($proposal_id);
+            
+            if ($pdf_content) {
+                $filename = "Jurnal_Bimbingan_{$proposal_id}.pdf";
+                $this->zip->add_data($filename, $pdf_content);
+            }
+        }
+        
+        // Download ZIP file
+        $zip_filename = 'Jurnal_Bimbingan_' . date('Y-m-d') . '.zip';
+        $this->zip->download($zip_filename);
     }
 
     /**
-     * Detail jurnal bimbingan mahasiswa
+     * Generate PDF untuk jurnal bimbingan (helper function)
      */
-    public function detail($mahasiswa_id) {
-        if (!$mahasiswa_id) {
-            show_404();
-        }
-        
-        // Data mahasiswa
-        $this->db->select('m.*, p.nama as nama_prodi, pm.judul, pm.id as proposal_id, d.nama as nama_pembimbing');
-        $this->db->from('mahasiswa m');
+    private function _generate_jurnal_pdf($proposal_id) {
+        // Sama seperti export_jurnal tapi return string
+        $this->db->select('
+            pm.*,
+            m.nim, m.nama as nama_mahasiswa,
+            p.nama as nama_prodi,
+            d1.nama as nama_pembimbing, d1.nip as nip_pembimbing
+        ');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('proposal_mahasiswa pm', 'm.id = pm.mahasiswa_id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->where('m.id', $mahasiswa_id);
-        $data['mahasiswa'] = $this->db->get()->row();
+        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
+        $this->db->where('pm.id', $proposal_id);
         
-        if (!$data['mahasiswa']) {
-            show_404();
+        $proposal = $this->db->get()->row();
+        
+        if (!$proposal) {
+            return false;
         }
         
-        // Data jurnal bimbingan
-        $this->db->select('jb.*, dv.nama as nama_validator');
-        $this->db->from('jurnal_bimbingan jb');
-        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
-        $this->db->join('dosen dv', 'jb.validasi_oleh = dv.id', 'left');
-        $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-        $this->db->order_by('jb.pertemuan_ke', 'ASC');
-        $data['jurnal'] = $this->db->get()->result();
+        $this->db->select('*');
+        $this->db->from('jurnal_bimbingan');
+        $this->db->where('proposal_id', $proposal_id);
+        $this->db->order_by('tanggal_bimbingan', 'ASC');
         
-        $this->load->view('staf/bimbingan/detail', $data);
+        $jurnal_bimbingan = $this->db->get()->result();
+        
+        // Generate PDF
+        $pdf = new Pdf();
+        $html = $this->load->view('staf/bimbingan/pdf_jurnal', [
+            'proposal' => $proposal,
+            'jurnal_bimbingan' => $jurnal_bimbingan,
+            'generated_by' => $this->session->userdata('nama'),
+            'generated_at' => date('d/m/Y H:i:s')
+        ], true);
+        
+        $pdf->load_html($html);
+        $pdf->render();
+        
+        return $pdf->output_string();
     }
 
     /**
@@ -217,85 +277,34 @@ class Bimbingan extends CI_Controller {
     private function _get_bimbingan_stats() {
         $stats = [];
         
-        // Total jurnal bimbingan
-        $stats['total_jurnal'] = $this->db->count_all('jurnal_bimbingan');
+        // Total mahasiswa bimbingan aktif
+        $this->db->where('status_pembimbing', '1');
+        $this->db->where('dosen_id IS NOT NULL');
+        $stats['total_bimbingan'] = $this->db->count_all_results('proposal_mahasiswa');
         
-        // Jurnal yang sudah divalidasi
+        // Jurnal yang valid
+        $this->db->select('COUNT(*) as total');
+        $this->db->from('jurnal_bimbingan');
         $this->db->where('status_validasi', '1');
-        $stats['jurnal_valid'] = $this->db->count_all_results('jurnal_bimbingan');
-        
-        // Jurnal pending
-        $this->db->where('status_validasi', '0');
-        $stats['jurnal_pending'] = $this->db->count_all_results('jurnal_bimbingan');
-        
-        // Jurnal perlu revisi
-        $this->db->where('status_validasi', '2');
-        $stats['jurnal_revisi'] = $this->db->count_all_results('jurnal_bimbingan');
-        
-        // Mahasiswa aktif bimbingan
-        $this->db->select('COUNT(DISTINCT pm.mahasiswa_id) as total');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->where('pm.workflow_status', 'bimbingan');
         $result = $this->db->get()->row();
-        $stats['mahasiswa_aktif'] = $result ? $result->total : 0;
+        $stats['jurnal_valid'] = $result ? $result->total : 0;
+        
+        // Jurnal yang belum valid
+        $this->db->select('COUNT(*) as total');
+        $this->db->from('jurnal_bimbingan');
+        $this->db->where('status_validasi', '0');
+        $result = $this->db->get()->row();
+        $stats['jurnal_pending'] = $result ? $result->total : 0;
+        
+        // Bimbingan bulan ini
+        $this->db->select('COUNT(*) as total');
+        $this->db->from('jurnal_bimbingan');
+        $this->db->where('MONTH(tanggal_bimbingan)', date('m'));
+        $this->db->where('YEAR(tanggal_bimbingan)', date('Y'));
+        $result = $this->db->get()->row();
+        $stats['bimbingan_bulan_ini'] = $result ? $result->total : 0;
         
         return $stats;
-    }
-
-    /**
-     * Generate PDF jurnal bimbingan individual
-     */
-    private function _generate_jurnal_pdf($mahasiswa, $jurnal) {
-        // Setup PDF
-        $this->pdf->setPaper('A4', 'portrait');
-        $this->pdf->filename = "Jurnal_Bimbingan_{$mahasiswa->nim}_{$mahasiswa->nama}.pdf";
-        
-        // Load view untuk PDF
-        $html = $this->load->view('staf/bimbingan/pdf_jurnal', [
-            'mahasiswa' => $mahasiswa,
-            'jurnal' => $jurnal,
-            'generated_by' => $this->session->userdata('nama'),
-            'generated_at' => date('d/m/Y H:i:s')
-        ], true);
-        
-        $this->pdf->load_html($html);
-        $this->pdf->render();
-        
-        // Log aktivitas
-        $this->_log_aktivitas('export_jurnal', $mahasiswa->id, null, "Export jurnal bimbingan {$mahasiswa->nama}");
-        
-        $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
-    }
-
-    /**
-     * Generate PDF laporan bimbingan
-     */
-    private function _generate_laporan_bimbingan_pdf($data, $filters) {
-        $this->pdf->setPaper('A4', 'landscape');
-        $this->pdf->filename = "Laporan_Bimbingan_" . date('Y-m-d') . ".pdf";
-        
-        // Siapkan data untuk view
-        $prodi_name = '';
-        if ($filters['prodi_id']) {
-            $prodi = $this->db->get_where('prodi', ['id' => $filters['prodi_id']])->row();
-            $prodi_name = $prodi ? $prodi->nama : '';
-        }
-        
-        $html = $this->load->view('staf/bimbingan/pdf_laporan', [
-            'data' => $data,
-            'filters' => $filters,
-            'prodi_name' => $prodi_name,
-            'generated_by' => $this->session->userdata('nama'),
-            'generated_at' => date('d/m/Y H:i:s')
-        ], true);
-        
-        $this->pdf->load_html($html);
-        $this->pdf->render();
-        
-        // Log aktivitas
-        $this->_log_aktivitas('export_jurnal', null, null, "Export laporan bimbingan dengan filter");
-        
-        $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
     }
 
     /**

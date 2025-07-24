@@ -12,7 +12,7 @@ class Penelitian extends CI_Controller {
         $this->load->database();
         $this->load->library('session');
         $this->load->helper(['url', 'date', 'file']);
-        $this->load->library(['pdf', 'upload']);
+        $this->load->library(['pdf', 'upload', 'form_validation']);
         
         // Cek login dan level staf
         if (!$this->session->userdata('logged_in') || $this->session->userdata('level') != '5') {
@@ -92,220 +92,77 @@ class Penelitian extends CI_Controller {
         $this->db->select('
             pm.*,
             m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
-            m.tempat_lahir, m.tanggal_lahir, m.jenis_kelamin, m.alamat,
-            p.nama as nama_prodi, p.kode as kode_prodi,
-            f.nama as nama_fakultas,
-            d1.nama as nama_pembimbing, d1.nip as nip_pembimbing, d1.nomor_telepon as telp_pembimbing
+            p.nama as nama_prodi,
+            d1.nama as nama_pembimbing, d1.nip as nip_pembimbing, d1.email as email_pembimbing
         ');
         $this->db->from('proposal_mahasiswa pm');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('fakultas f', 'p.fakultas_id = f.id');
         $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
         $this->db->where('pm.id', $proposal_id);
         
         $data['proposal'] = $this->db->get()->row();
         
-        if (!$data['proposal'] || !in_array($data['proposal']->workflow_status, ['penelitian', 'seminar_skripsi', 'publikasi', 'selesai'])) {
+        if (!$data['proposal']) {
             show_404();
         }
+        
+        // Ambil log aktivitas penelitian
+        $this->db->select('sa.*, d.nama as nama_staf');
+        $this->db->from('staf_aktivitas sa');
+        $this->db->join('dosen d', 'sa.staf_id = d.id');
+        $this->db->where('sa.proposal_id', $proposal_id);
+        $this->db->where_in('sa.aktivitas', ['export_surat_izin', 'upload_surat_izin']);
+        $this->db->order_by('sa.tanggal_aktivitas', 'DESC');
+        
+        $data['log_aktivitas'] = $this->db->get()->result();
         
         $this->load->view('staf/penelitian/detail', $data);
     }
 
     /**
-     * Export PDF Surat Izin Penelitian
+     * Cetak surat izin penelitian
      */
-    public function export_surat_izin($proposal_id) {
+    public function cetak_surat($proposal_id) {
         if (!$proposal_id) {
             show_404();
         }
         
-        // Ambil data lengkap untuk surat izin
-        $data = $this->_get_penelitian_data($proposal_id);
-        
-        if (!$data['proposal']) {
-            show_404();
-        }
-        
-        // Generate PDF Surat Izin Penelitian
-        $this->_generate_surat_izin_pdf($data);
-    }
-
-    /**
-     * Upload surat izin penelitian yang sudah ditandatangani
-     */
-    public function upload_surat_izin($proposal_id) {
-        if (!$proposal_id) {
-            show_404();
-        }
-        
-        // Validasi proposal
-        $proposal = $this->db->get_where('proposal_mahasiswa', ['id' => $proposal_id])->row();
-        if (!$proposal || !in_array($proposal->workflow_status, ['penelitian', 'seminar_skripsi', 'publikasi', 'selesai'])) {
-            show_404();
-        }
-        
-        // Konfigurasi upload
-        $config['upload_path'] = './uploads/surat_izin_penelitian/';
-        $config['allowed_types'] = 'pdf';
-        $config['max_size'] = 5120; // 5MB
-        $config['encrypt_name'] = TRUE;
-        
-        // Buat folder jika belum ada
-        if (!is_dir($config['upload_path'])) {
-            mkdir($config['upload_path'], 0755, true);
-        }
-        
-        $this->upload->initialize($config);
-        
-        if ($this->upload->do_upload('surat_izin_file')) {
-            $upload_data = $this->upload->data();
-            
-            // Update data proposal
-            $update_data = [
-                'surat_izin_penelitian' => $upload_data['file_name'],
-                'status_izin_penelitian' => '1' // Disetujui setelah upload
-            ];
-            
-            $this->db->where('id', $proposal_id);
-            $update = $this->db->update('proposal_mahasiswa', $update_data);
-            
-            if ($update) {
-                // Hapus file lama jika ada
-                if ($proposal->surat_izin_penelitian && file_exists('./uploads/surat_izin_penelitian/' . $proposal->surat_izin_penelitian)) {
-                    unlink('./uploads/surat_izin_penelitian/' . $proposal->surat_izin_penelitian);
-                }
-                
-                // Log aktivitas
-                $this->_log_aktivitas('upload_surat_izin', $proposal->mahasiswa_id, $proposal_id, 
-                                     "Upload surat izin penelitian yang sudah ditandatangani");
-                
-                $this->session->set_flashdata('success', 'Surat izin penelitian berhasil diupload');
-            } else {
-                // Hapus file yang sudah diupload jika gagal update database
-                unlink($config['upload_path'] . $upload_data['file_name']);
-                $this->session->set_flashdata('error', 'Gagal menyimpan data surat izin penelitian');
-            }
-        } else {
-            $this->session->set_flashdata('error', $this->upload->display_errors());
-        }
-        
-        redirect('staf/penelitian/detail/' . $proposal_id);
-    }
-
-    /**
-     * Download surat izin penelitian
-     */
-    public function download_surat_izin($proposal_id) {
-        if (!$proposal_id) {
-            show_404();
-        }
-        
-        $proposal = $this->db->get_where('proposal_mahasiswa', ['id' => $proposal_id])->row();
-        
-        if (!$proposal || !$proposal->surat_izin_penelitian) {
-            show_404();
-        }
-        
-        $file_path = './uploads/surat_izin_penelitian/' . $proposal->surat_izin_penelitian;
-        
-        if (!file_exists($file_path)) {
-            show_404();
-        }
-        
-        // Download file
-        $this->load->helper('download');
-        $filename = "Surat_Izin_Penelitian_{$proposal->mahasiswa_id}.pdf";
-        force_download($filename, file_get_contents($file_path));
-    }
-
-    /**
-     * Update status izin penelitian
-     */
-    public function update_status_izin($proposal_id) {
-        if (!$proposal_id) {
-            show_404();
-        }
-        
-        $status = $this->input->post('status_izin_penelitian');
-        $catatan = $this->input->post('catatan_izin');
-        
-        if (!in_array($status, ['0', '1', '2'])) {
-            $this->session->set_flashdata('error', 'Status tidak valid');
-            redirect('staf/penelitian/detail/' . $proposal_id);
-        }
-        
-        $update_data = [
-            'status_izin_penelitian' => $status
-        ];
-        
-        // Jika ada catatan, simpan sebagai komentar
-        if ($catatan) {
-            // Bisa ditambahkan field catatan_izin_penelitian di tabel proposal_mahasiswa
-            $update_data['komentar_kaprodi'] = $catatan; // Sementara pakai field ini
-        }
-        
-        $this->db->where('id', $proposal_id);
-        $update = $this->db->update('proposal_mahasiswa', $update_data);
-        
-        if ($update) {
-            // Log aktivitas
-            $proposal = $this->db->get_where('proposal_mahasiswa', ['id' => $proposal_id])->row();
-            $status_text = ['0' => 'Pending', '1' => 'Disetujui', '2' => 'Ditolak'][$status];
-            $this->_log_aktivitas('validasi_publikasi', $proposal->mahasiswa_id, $proposal_id, 
-                                 "Update status izin penelitian: {$status_text}");
-            
-            $this->session->set_flashdata('success', 'Status izin penelitian berhasil diperbarui');
-        } else {
-            $this->session->set_flashdata('error', 'Gagal memperbarui status izin penelitian');
-        }
-        
-        redirect('staf/penelitian/detail/' . $proposal_id);
-    }
-
-    /**
-     * Ambil data lengkap penelitian untuk PDF
-     */
-    private function _get_penelitian_data($proposal_id) {
-        // Data proposal dan mahasiswa
+        // Ambil data proposal
         $this->db->select('
             pm.*,
-            m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
-            m.tempat_lahir, m.tanggal_lahir, m.jenis_kelamin, m.alamat,
-            p.nama as nama_prodi, p.kode as kode_prodi,
-            f.nama as nama_fakultas, f.dekan as nama_dekan,
+            m.nim, m.nama as nama_mahasiswa, m.tempat_lahir, m.tanggal_lahir,
+            m.alamat, m.nomor_telepon, m.email,
+            p.nama as nama_prodi,
             d1.nama as nama_pembimbing, d1.nip as nip_pembimbing
         ');
         $this->db->from('proposal_mahasiswa pm');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('fakultas f', 'p.fakultas_id = f.id');
         $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
         $this->db->where('pm.id', $proposal_id);
-        $proposal = $this->db->get()->row();
+        $this->db->where('pm.workflow_status', 'penelitian');
         
-        return [
-            'proposal' => $proposal
-        ];
-    }
-
-    /**
-     * Generate PDF Surat Izin Penelitian
-     */
-    private function _generate_surat_izin_pdf($data) {
-        $this->pdf->setPaper('A4', 'portrait');
-        $this->pdf->filename = "Surat_Izin_Penelitian_{$data['proposal']->nim}.pdf";
+        $data['proposal'] = $this->db->get()->row();
         
-        // Generate nomor surat otomatis
+        if (!$data['proposal']) {
+            show_404();
+        }
+        
+        // Generate nomor surat
         $tahun = date('Y');
         $bulan = date('m');
         
-        // Hitung urutan surat bulan ini
-        $this->db->like('surat_izin_penelitian', $tahun . $bulan, 'after');
+        // Hitung jumlah surat izin yang sudah dibuat bulan ini
+        $this->db->where('workflow_status', 'penelitian');
+        $this->db->where('DATE_FORMAT(created_at, "%Y-%m") <=', date('Y-m'));
+        $this->db->where('status_izin_penelitian !=', '0');
         $count = $this->db->count_all_results('proposal_mahasiswa') + 1;
         
         $nomor_surat = sprintf("%03d/STK-SY/IP/%s/%s", $count, $bulan, $tahun);
+        
+        // Generate PDF
+        $this->pdf->filename = 'Surat_Izin_Penelitian_' . $data['proposal']->nim . '.pdf';
         
         $html = $this->load->view('staf/penelitian/pdf_surat_izin', [
             'proposal' => $data['proposal'],
@@ -318,11 +175,132 @@ class Penelitian extends CI_Controller {
         $this->pdf->load_html($html);
         $this->pdf->render();
         
+        // Update status jika belum ada
+        if ($data['proposal']->status_izin_penelitian == '0') {
+            $this->db->where('id', $proposal_id);
+            $this->db->update('proposal_mahasiswa', [
+                'status_izin_penelitian' => '1',
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+        
         // Log aktivitas
-        $this->_log_aktivitas('export_surat_izin', $data['proposal']->mahasiswa_id, $data['proposal']->id, 
-                             "Export surat izin penelitian {$data['proposal']->nama_mahasiswa}");
+        $this->_log_aktivitas('export_surat_izin', $data['proposal']->mahasiswa_id, $proposal_id, 
+                             "Export surat izin penelitian nomor: {$nomor_surat}");
         
         $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
+    }
+
+    /**
+     * Upload surat izin yang sudah ditandatangani
+     */
+    public function upload_surat() {
+        if ($this->input->method() == 'post') {
+            $proposal_id = $this->input->post('proposal_id');
+            
+            // Validasi
+            $this->form_validation->set_rules('proposal_id', 'Proposal ID', 'required|numeric');
+            
+            if ($this->form_validation->run() == FALSE) {
+                $this->session->set_flashdata('error', validation_errors());
+                redirect('staf/penelitian/detail/' . $proposal_id);
+            }
+            
+            // Cek proposal
+            $this->db->where('id', $proposal_id);
+            $this->db->where('workflow_status', 'penelitian');
+            $proposal = $this->db->get('proposal_mahasiswa')->row();
+            
+            if (!$proposal) {
+                $this->session->set_flashdata('error', 'Proposal tidak ditemukan');
+                redirect('staf/penelitian');
+            }
+            
+            // Config upload
+            $config['upload_path'] = './uploads/surat_izin/';
+            $config['allowed_types'] = 'pdf';
+            $config['max_size'] = 5120; // 5MB
+            $config['encrypt_name'] = TRUE;
+            
+            if (!is_dir($config['upload_path'])) {
+                mkdir($config['upload_path'], 0755, true);
+            }
+            
+            $this->upload->initialize($config);
+            
+            if (!$this->upload->do_upload('surat_file')) {
+                $this->session->set_flashdata('error', $this->upload->display_errors());
+                redirect('staf/penelitian/detail/' . $proposal_id);
+            }
+            
+            $upload_data = $this->upload->data();
+            
+            // Update database
+            $update_data = [
+                'surat_izin_penelitian' => $upload_data['file_name'],
+                'tanggal_upload_surat' => date('Y-m-d H:i:s'),
+                'status_izin_penelitian' => '1',
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->db->where('id', $proposal_id);
+            $update = $this->db->update('proposal_mahasiswa', $update_data);
+            
+            if ($update) {
+                // Hapus file lama jika ada
+                if ($proposal->surat_izin_penelitian && file_exists('./uploads/surat_izin/' . $proposal->surat_izin_penelitian)) {
+                    unlink('./uploads/surat_izin/' . $proposal->surat_izin_penelitian);
+                }
+                
+                // Log aktivitas
+                $this->_log_aktivitas('upload_surat_izin', $proposal->mahasiswa_id, $proposal_id, 
+                                     "Upload surat izin penelitian: {$upload_data['file_name']}");
+                
+                $this->session->set_flashdata('success', 'Surat izin penelitian berhasil diupload');
+            } else {
+                $this->session->set_flashdata('error', 'Gagal menyimpan data surat');
+            }
+            
+            redirect('staf/penelitian/detail/' . $proposal_id);
+        }
+        
+        // Jika GET request, redirect ke halaman utama
+        redirect('staf/penelitian');
+    }
+
+    /**
+     * Download surat izin penelitian
+     */
+    public function download_surat($proposal_id) {
+        if (!$proposal_id) {
+            show_404();
+        }
+        
+        // Ambil data proposal
+        $this->db->select('pm.surat_izin_penelitian, m.nim, m.nama as nama_mahasiswa');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->where('pm.id', $proposal_id);
+        $this->db->where('pm.surat_izin_penelitian IS NOT NULL');
+        
+        $proposal = $this->db->get()->row();
+        
+        if (!$proposal) {
+            $this->session->set_flashdata('error', 'Surat tidak ditemukan');
+            redirect('staf/penelitian');
+        }
+        
+        $file_path = './uploads/surat_izin/' . $proposal->surat_izin_penelitian;
+        
+        if (!file_exists($file_path)) {
+            $this->session->set_flashdata('error', 'File surat tidak ditemukan');
+            redirect('staf/penelitian/detail/' . $proposal_id);
+        }
+        
+        // Force download
+        $this->load->helper('download');
+        $filename = 'Surat_Izin_Penelitian_' . $proposal->nim . '.pdf';
+        force_download($filename, file_get_contents($file_path));
     }
 
     /**

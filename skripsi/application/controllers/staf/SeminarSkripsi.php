@@ -3,16 +3,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Controller Staf - Menu Seminar Skripsi
- * Mengelola seminar skripsi dan export PDF berita acara
+ * Mengelola penjadwalan, berita acara, dan export dokumen seminar skripsi
  */
-class SeminarSkripsi extends CI_Controller {
+class Seminar_Skripsi extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
         $this->load->database();
         $this->load->library('session');
         $this->load->helper(['url', 'date', 'file']);
-        $this->load->library('pdf');
+        $this->load->library(['pdf', 'upload']);
         
         // Cek login dan level staf
         if (!$this->session->userdata('logged_in') || $this->session->userdata('level') != '5') {
@@ -27,8 +27,8 @@ class SeminarSkripsi extends CI_Controller {
         // Filter
         $prodi_id = $this->input->get('prodi_id');
         $status = $this->input->get('status');
-        $bulan = $this->input->get('bulan');
-        $tahun = $this->input->get('tahun');
+        $periode = $this->input->get('periode');
+        $search = $this->input->get('search');
         
         // Base query
         $this->db->select('
@@ -36,17 +36,17 @@ class SeminarSkripsi extends CI_Controller {
             m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
             p.nama as nama_prodi,
             d1.nama as nama_pembimbing,
-            d2.nama as nama_penguji1,
-            d3.nama as nama_penguji2
+            d2.nama as nama_penguji,
+            r.nama as nama_ruangan
         ');
         $this->db->from('proposal_mahasiswa pm');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
         $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
-        $this->db->join('dosen d2', 'pm.dosen_penguji_id = d2.id', 'left');
-        $this->db->join('dosen d3', 'pm.dosen_penguji2_id = d3.id', 'left');
+        $this->db->join('dosen d2', 'pm.dosen_penguji_skripsi_id = d2.id', 'left');
+        $this->db->join('ruangan r', 'pm.ruangan_seminar_skripsi = r.id', 'left');
         
-        // Filter hanya yang sudah masuk tahap seminar skripsi atau lebih
+        // Filter hanya yang sudah tahap seminar skripsi
         $this->db->where_in('pm.workflow_status', ['seminar_skripsi', 'publikasi', 'selesai']);
         
         // Apply filters
@@ -54,28 +54,45 @@ class SeminarSkripsi extends CI_Controller {
             $this->db->where('m.prodi_id', $prodi_id);
         }
         
-        if ($status) {
-            $this->db->where('pm.status_seminar_skripsi', $status);
+        if ($status !== '') {
+            if ($status == 'dijadwalkan') {
+                $this->db->where('pm.status_seminar_skripsi', '1');
+                $this->db->where('pm.tanggal_seminar_skripsi IS NOT NULL');
+            } elseif ($status == 'menunggu_jadwal') {
+                $this->db->where('pm.status_seminar_skripsi', '1');
+                $this->db->where('pm.tanggal_seminar_skripsi IS NULL');
+            } elseif ($status == 'selesai') {
+                $this->db->where('pm.status_seminar_skripsi', '2');
+            } elseif ($status == 'lulus') {
+                $this->db->where_in('pm.workflow_status', ['publikasi', 'selesai']);
+            }
         }
         
-        if ($bulan && $tahun) {
-            $this->db->where('MONTH(pm.tanggal_seminar_skripsi)', $bulan);
-            $this->db->where('YEAR(pm.tanggal_seminar_skripsi)', $tahun);
-        } elseif ($tahun) {
-            $this->db->where('YEAR(pm.tanggal_seminar_skripsi)', $tahun);
+        if ($periode) {
+            $this->db->where('DATE_FORMAT(pm.tanggal_seminar_skripsi, "%Y-%m")', $periode);
         }
         
-        $this->db->order_by('pm.tanggal_seminar_skripsi', 'DESC');
+        if ($search) {
+            $this->db->group_start();
+            $this->db->like('m.nama', $search);
+            $this->db->or_like('m.nim', $search);
+            $this->db->or_like('pm.judul', $search);
+            $this->db->or_like('d1.nama', $search);
+            $this->db->group_end();
+        }
+        
+        $this->db->order_by('pm.tanggal_seminar_skripsi', 'ASC');
         
         $data['seminar_skripsi'] = $this->db->get()->result();
         
         // Data untuk filter
         $data['prodi_list'] = $this->db->get('prodi')->result();
+        
         $data['filters'] = [
             'prodi_id' => $prodi_id,
             'status' => $status,
-            'bulan' => $bulan,
-            'tahun' => $tahun
+            'periode' => $periode,
+            'search' => $search
         ];
         
         // Statistik
@@ -85,7 +102,7 @@ class SeminarSkripsi extends CI_Controller {
     }
 
     /**
-     * Detail seminar skripsi
+     * Detail seminar skripsi mahasiswa
      */
     public function detail($proposal_id) {
         if (!$proposal_id) {
@@ -96,20 +113,17 @@ class SeminarSkripsi extends CI_Controller {
         $this->db->select('
             pm.*,
             m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
-            m.tempat_lahir, m.tanggal_lahir, m.jenis_kelamin, m.alamat, m.ipk,
-            p.nama as nama_prodi, p.kode as kode_prodi,
-            f.nama as nama_fakultas,
-            d1.nama as nama_pembimbing, d1.nip as nip_pembimbing, d1.nomor_telepon as telp_pembimbing,
-            d2.nama as nama_penguji1, d2.nip as nip_penguji1, d2.nomor_telepon as telp_penguji1,
-            d3.nama as nama_penguji2, d3.nip as nip_penguji2, d3.nomor_telepon as telp_penguji2
+            p.nama as nama_prodi,
+            d1.nama as nama_pembimbing, d1.nip as nip_pembimbing,
+            d2.nama as nama_penguji, d2.nip as nip_penguji,
+            r.nama as nama_ruangan, r.kapasitas
         ');
         $this->db->from('proposal_mahasiswa pm');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('fakultas f', 'p.fakultas_id = f.id');
         $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
-        $this->db->join('dosen d2', 'pm.dosen_penguji_id = d2.id', 'left');
-        $this->db->join('dosen d3', 'pm.dosen_penguji2_id = d3.id', 'left');
+        $this->db->join('dosen d2', 'pm.dosen_penguji_skripsi_id = d2.id', 'left');
+        $this->db->join('ruangan r', 'pm.ruangan_seminar_skripsi = r.id', 'left');
         $this->db->where('pm.id', $proposal_id);
         
         $data['proposal'] = $this->db->get()->row();
@@ -118,55 +132,26 @@ class SeminarSkripsi extends CI_Controller {
             show_404();
         }
         
-        // Cek apakah ada hasil seminar skripsi dari tabel penelitian
+        // Ambil berita acara jika ada
+        $this->db->select('*');
+        $this->db->from('berita_acara_seminar');
+        $this->db->where('proposal_id', $proposal_id);
+        $this->db->where('jenis_seminar', 'skripsi');
+        
+        $data['berita_acara'] = $this->db->get()->row();
+        
+        // Ambil hasil penelitian jika ada
         $this->db->select('*');
         $this->db->from('hasil_penelitian');
-        $this->db->where('penelitian_id', $proposal_id);
-        $data['hasil_seminar'] = $this->db->get()->row();
+        $this->db->where('proposal_id', $proposal_id);
+        
+        $data['hasil_penelitian'] = $this->db->get()->row();
         
         $this->load->view('staf/seminar_skripsi/detail', $data);
     }
 
     /**
-     * Export PDF Berita Acara Seminar Skripsi
-     */
-    public function export_berita_acara($proposal_id) {
-        if (!$proposal_id) {
-            show_404();
-        }
-        
-        // Ambil data lengkap untuk berita acara
-        $data = $this->_get_seminar_data($proposal_id);
-        
-        if (!$data['proposal']) {
-            show_404();
-        }
-        
-        // Generate PDF Berita Acara
-        $this->_generate_berita_acara_pdf($data);
-    }
-
-    /**
-     * Export PDF Form Penilaian Seminar Skripsi
-     */
-    public function export_form_penilaian($proposal_id) {
-        if (!$proposal_id) {
-            show_404();
-        }
-        
-        // Ambil data lengkap untuk form penilaian
-        $data = $this->_get_seminar_data($proposal_id);
-        
-        if (!$data['proposal']) {
-            show_404();
-        }
-        
-        // Generate PDF Form Penilaian
-        $this->_generate_form_penilaian_pdf($data);
-    }
-
-    /**
-     * Export PDF Undangan Seminar Skripsi
+     * Export undangan seminar skripsi
      */
     public function export_undangan($proposal_id) {
         if (!$proposal_id) {
@@ -179,14 +164,30 @@ class SeminarSkripsi extends CI_Controller {
             show_404();
         }
         
-        // Generate PDF Undangan
-        $this->_generate_undangan_pdf($data);
+        // Generate PDF undangan
+        $this->pdf->filename = 'Undangan_Seminar_Skripsi_' . $data['proposal']->nim . '.pdf';
+        
+        $html = $this->load->view('staf/seminar_skripsi/pdf_undangan', [
+            'proposal' => $data['proposal'],
+            'nomor_undangan' => $this->_generate_nomor_undangan(),
+            'generated_by' => $this->session->userdata('nama'),
+            'generated_at' => date('d/m/Y H:i:s')
+        ], true);
+        
+        $this->pdf->load_html($html);
+        $this->pdf->render();
+        
+        // Log aktivitas
+        $this->_log_aktivitas('export_undangan_skripsi', $data['proposal']->mahasiswa_id, $proposal_id, 
+                             "Export undangan seminar skripsi {$data['proposal']->nama_mahasiswa}");
+        
+        $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
     }
 
     /**
-     * Export PDF Daftar Hadir Seminar Skripsi
+     * Export berita acara seminar skripsi
      */
-    public function export_daftar_hadir($proposal_id) {
+    public function export_berita_acara($proposal_id) {
         if (!$proposal_id) {
             show_404();
         }
@@ -197,106 +198,29 @@ class SeminarSkripsi extends CI_Controller {
             show_404();
         }
         
-        // Generate PDF Daftar Hadir
-        $this->_generate_daftar_hadir_pdf($data);
-    }
-
-    /**
-     * Update hasil seminar skripsi
-     */
-    public function update_hasil($proposal_id) {
-        if (!$proposal_id) {
-            show_404();
-        }
+        // Ambil atau buat berita acara
+        $this->db->select('*');
+        $this->db->from('berita_acara_seminar');
+        $this->db->where('proposal_id', $proposal_id);
+        $this->db->where('jenis_seminar', 'skripsi');
         
-        $this->form_validation->set_rules('berita_acara', 'Berita Acara', 'required');
-        $this->form_validation->set_rules('masukan', 'Masukan/Catatan', 'required');
-        $this->form_validation->set_rules('status', 'Status', 'required|in_list[1,2]');
+        $berita_acara = $this->db->get()->row();
         
-        if ($this->form_validation->run() == FALSE) {
-            $this->session->set_flashdata('error', validation_errors());
-            redirect('staf/seminar_skripsi/detail/' . $proposal_id);
-        }
+        // Ambil hasil penelitian
+        $this->db->select('*');
+        $this->db->from('hasil_penelitian');
+        $this->db->where('proposal_id', $proposal_id);
         
-        $data_hasil = [
-            'penelitian_id' => $proposal_id,
-            'berita_acara' => $this->input->post('berita_acara'),
-            'masukan' => $this->input->post('masukan'),
-            'status' => $this->input->post('status')
-        ];
+        $hasil_penelitian = $this->db->get()->row();
         
-        // Cek apakah sudah ada hasil sebelumnya
-        $existing = $this->db->get_where('hasil_penelitian', ['penelitian_id' => $proposal_id])->row();
-        
-        if ($existing) {
-            $this->db->where('penelitian_id', $proposal_id);
-            $update = $this->db->update('hasil_penelitian', $data_hasil);
-        } else {
-            $update = $this->db->insert('hasil_penelitian', $data_hasil);
-        }
-        
-        if ($update) {
-            // Jika lulus, update workflow status ke publikasi
-            if ($this->input->post('status') == '1') {
-                $this->db->where('id', $proposal_id);
-                $this->db->update('proposal_mahasiswa', ['workflow_status' => 'publikasi']);
-            }
-            
-            // Log aktivitas
-            $this->_log_aktivitas('export_berita_acara', null, $proposal_id, "Update hasil seminar skripsi");
-            
-            $this->session->set_flashdata('success', 'Hasil seminar skripsi berhasil disimpan');
-        } else {
-            $this->session->set_flashdata('error', 'Gagal menyimpan hasil seminar skripsi');
-        }
-        
-        redirect('staf/seminar_skripsi/detail/' . $proposal_id);
-    }
-
-    /**
-     * Ambil data lengkap seminar untuk PDF
-     */
-    private function _get_seminar_data($proposal_id) {
-        // Data proposal dan mahasiswa
-        $this->db->select('
-            pm.*,
-            m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
-            m.tempat_lahir, m.tanggal_lahir, m.jenis_kelamin, m.alamat, m.ipk,
-            p.nama as nama_prodi, p.kode as kode_prodi,
-            f.nama as nama_fakultas, f.dekan as nama_dekan,
-            d1.nama as nama_pembimbing, d1.nip as nip_pembimbing, d1.nomor_telepon as telp_pembimbing,
-            d2.nama as nama_penguji1, d2.nip as nip_penguji1, d2.nomor_telepon as telp_penguji1,
-            d3.nama as nama_penguji2, d3.nip as nip_penguji2, d3.nomor_telepon as telp_penguji2
-        ');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('fakultas f', 'p.fakultas_id = f.id');
-        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
-        $this->db->join('dosen d2', 'pm.dosen_penguji_id = d2.id', 'left');
-        $this->db->join('dosen d3', 'pm.dosen_penguji2_id = d3.id', 'left');
-        $this->db->where('pm.id', $proposal_id);
-        $proposal = $this->db->get()->row();
-        
-        // Data hasil seminar jika ada
-        $hasil_seminar = $this->db->get_where('hasil_penelitian', ['penelitian_id' => $proposal_id])->row();
-        
-        return [
-            'proposal' => $proposal,
-            'hasil_seminar' => $hasil_seminar
-        ];
-    }
-
-    /**
-     * Generate PDF Berita Acara Seminar Skripsi
-     */
-    private function _generate_berita_acara_pdf($data) {
-        $this->pdf->setPaper('A4', 'portrait');
-        $this->pdf->filename = "Berita_Acara_Seminar_Skripsi_{$data['proposal']->nim}.pdf";
+        // Generate PDF berita acara
+        $this->pdf->filename = 'Berita_Acara_Seminar_Skripsi_' . $data['proposal']->nim . '.pdf';
         
         $html = $this->load->view('staf/seminar_skripsi/pdf_berita_acara', [
             'proposal' => $data['proposal'],
-            'hasil_seminar' => $data['hasil_seminar'],
+            'berita_acara' => $berita_acara,
+            'hasil_penelitian' => $hasil_penelitian,
+            'nomor_berita_acara' => $this->_generate_nomor_berita_acara(),
             'generated_by' => $this->session->userdata('nama'),
             'generated_at' => date('d/m/Y H:i:s')
         ], true);
@@ -305,22 +229,31 @@ class SeminarSkripsi extends CI_Controller {
         $this->pdf->render();
         
         // Log aktivitas
-        $this->_log_aktivitas('export_berita_acara', $data['proposal']->mahasiswa_id, $data['proposal']->id, 
+        $this->_log_aktivitas('export_berita_acara_skripsi', $data['proposal']->mahasiswa_id, $proposal_id, 
                              "Export berita acara seminar skripsi {$data['proposal']->nama_mahasiswa}");
         
         $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
     }
 
     /**
-     * Generate PDF Form Penilaian Seminar Skripsi
+     * Export form penilaian seminar skripsi
      */
-    private function _generate_form_penilaian_pdf($data) {
-        $this->pdf->setPaper('A4', 'portrait');
-        $this->pdf->filename = "Form_Penilaian_Seminar_Skripsi_{$data['proposal']->nim}.pdf";
+    public function export_form_penilaian($proposal_id) {
+        if (!$proposal_id) {
+            show_404();
+        }
+        
+        $data = $this->_get_seminar_data($proposal_id);
+        
+        if (!$data['proposal']) {
+            show_404();
+        }
+        
+        // Generate PDF form penilaian
+        $this->pdf->filename = 'Form_Penilaian_Seminar_Skripsi_' . $data['proposal']->nim . '.pdf';
         
         $html = $this->load->view('staf/seminar_skripsi/pdf_form_penilaian', [
             'proposal' => $data['proposal'],
-            'hasil_seminar' => $data['hasil_seminar'],
             'generated_by' => $this->session->userdata('nama'),
             'generated_at' => date('d/m/Y H:i:s')
         ], true);
@@ -329,21 +262,38 @@ class SeminarSkripsi extends CI_Controller {
         $this->pdf->render();
         
         // Log aktivitas
-        $this->_log_aktivitas('export_berita_acara', $data['proposal']->mahasiswa_id, $data['proposal']->id, 
+        $this->_log_aktivitas('export_form_penilaian_skripsi', $data['proposal']->mahasiswa_id, $proposal_id, 
                              "Export form penilaian seminar skripsi {$data['proposal']->nama_mahasiswa}");
         
         $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
     }
 
     /**
-     * Generate PDF Undangan Seminar Skripsi
+     * Export sertifikat lulus
      */
-    private function _generate_undangan_pdf($data) {
-        $this->pdf->setPaper('A4', 'portrait');
-        $this->pdf->filename = "Undangan_Seminar_Skripsi_{$data['proposal']->nim}.pdf";
+    public function export_sertifikat($proposal_id) {
+        if (!$proposal_id) {
+            show_404();
+        }
         
-        $html = $this->load->view('staf/seminar_skripsi/pdf_undangan', [
+        $data = $this->_get_seminar_data($proposal_id);
+        
+        if (!$data['proposal']) {
+            show_404();
+        }
+        
+        // Cek apakah sudah lulus
+        if (!in_array($data['proposal']->workflow_status, ['publikasi', 'selesai'])) {
+            $this->session->set_flashdata('error', 'Mahasiswa belum lulus seminar skripsi');
+            redirect('staf/seminar_skripsi/detail/' . $proposal_id);
+        }
+        
+        // Generate PDF sertifikat
+        $this->pdf->filename = 'Sertifikat_Lulus_' . $data['proposal']->nim . '.pdf';
+        
+        $html = $this->load->view('staf/seminar_skripsi/pdf_sertifikat', [
             'proposal' => $data['proposal'],
+            'nomor_sertifikat' => $this->_generate_nomor_sertifikat(),
             'generated_by' => $this->session->userdata('nama'),
             'generated_at' => date('d/m/Y H:i:s')
         ], true);
@@ -352,33 +302,78 @@ class SeminarSkripsi extends CI_Controller {
         $this->pdf->render();
         
         // Log aktivitas
-        $this->_log_aktivitas('export_berita_acara', $data['proposal']->mahasiswa_id, $data['proposal']->id, 
-                             "Export undangan seminar skripsi {$data['proposal']->nama_mahasiswa}");
+        $this->_log_aktivitas('export_sertifikat_lulus', $data['proposal']->mahasiswa_id, $proposal_id, 
+                             "Export sertifikat lulus {$data['proposal']->nama_mahasiswa}");
         
         $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
     }
 
     /**
-     * Generate PDF Daftar Hadir Seminar Skripsi
+     * Helper: Ambil data seminar lengkap
      */
-    private function _generate_daftar_hadir_pdf($data) {
-        $this->pdf->setPaper('A4', 'portrait');
-        $this->pdf->filename = "Daftar_Hadir_Seminar_Skripsi_{$data['proposal']->nim}.pdf";
+    private function _get_seminar_data($proposal_id) {
+        $this->db->select('
+            pm.*,
+            m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
+            p.nama as nama_prodi,
+            d1.nama as nama_pembimbing, d1.nip as nip_pembimbing,
+            d2.nama as nama_penguji, d2.nip as nip_penguji,
+            r.nama as nama_ruangan, r.lantai, r.gedung
+        ');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi p', 'm.prodi_id = p.id');
+        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
+        $this->db->join('dosen d2', 'pm.dosen_penguji_skripsi_id = d2.id', 'left');
+        $this->db->join('ruangan r', 'pm.ruangan_seminar_skripsi = r.id', 'left');
+        $this->db->where('pm.id', $proposal_id);
         
-        $html = $this->load->view('staf/seminar_skripsi/pdf_daftar_hadir', [
-            'proposal' => $data['proposal'],
-            'generated_by' => $this->session->userdata('nama'),
-            'generated_at' => date('d/m/Y H:i:s')
-        ], true);
+        $data['proposal'] = $this->db->get()->row();
         
-        $this->pdf->load_html($html);
-        $this->pdf->render();
+        return $data;
+    }
+
+    /**
+     * Generate nomor undangan
+     */
+    private function _generate_nomor_undangan() {
+        $tahun = date('Y');
+        $bulan = date('m');
         
-        // Log aktivitas
-        $this->_log_aktivitas('export_berita_acara', $data['proposal']->mahasiswa_id, $data['proposal']->id, 
-                             "Export daftar hadir seminar skripsi {$data['proposal']->nama_mahasiswa}");
+        // Hitung jumlah undangan bulan ini
+        $this->db->where('MONTH(tanggal_seminar_skripsi)', $bulan);
+        $this->db->where('YEAR(tanggal_seminar_skripsi)', $tahun);
+        $count = $this->db->count_all_results('proposal_mahasiswa') + 1;
         
-        $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
+        return sprintf("%03d/STK-SY/UND-SS/%s/%s", $count, $bulan, $tahun);
+    }
+
+    /**
+     * Generate nomor berita acara
+     */
+    private function _generate_nomor_berita_acara() {
+        $tahun = date('Y');
+        $bulan = date('m');
+        
+        $this->db->where('MONTH(created_at)', $bulan);
+        $this->db->where('YEAR(created_at)', $tahun);
+        $this->db->where('jenis_seminar', 'skripsi');
+        $count = $this->db->count_all_results('berita_acara_seminar') + 1;
+        
+        return sprintf("%03d/STK-SY/BA-SS/%s/%s", $count, $bulan, $tahun);
+    }
+
+    /**
+     * Generate nomor sertifikat
+     */
+    private function _generate_nomor_sertifikat() {
+        $tahun = date('Y');
+        
+        $this->db->where_in('workflow_status', ['publikasi', 'selesai']);
+        $this->db->where('YEAR(updated_at)', $tahun);
+        $count = $this->db->count_all_results('proposal_mahasiswa') + 1;
+        
+        return sprintf("%03d/STK-SY/SERT/%s", $count, $tahun);
     }
 
     /**

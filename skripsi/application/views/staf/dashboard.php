@@ -1,404 +1,216 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Staf - SIM Tugas Akhir STK St. Yakobus</title>
-    
-    <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Custom CSS -->
-    <style>
-        .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-        }
-        
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            border-radius: 8px;
-            margin: 2px 0;
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background-color: rgba(255,255,255,0.1);
-            color: white;
-            transform: translateX(5px);
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border: none;
-            border-radius: 15px;
-            color: white;
-            transition: transform 0.3s ease;
-        }
-        
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .shortcut-card {
-            border: none;
-            border-radius: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .shortcut-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .pengumuman-card {
-            border-left: 4px solid #667eea;
-            border-radius: 10px;
-        }
-        
-        .workflow-progress {
-            height: 300px;
-        }
-        
-        .badge-custom {
-            font-size: 0.8rem;
-            padding: 0.5rem 1rem;
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 px-0">
-                <div class="sidebar p-3">
-                    <!-- Logo/Header -->
-                    <div class="text-center mb-4">
-                        <h5 class="mb-1">SIM-TA</h5>
-                        <small>STK St. Yakobus</small>
-                        <hr class="border-light">
+<?php
+$this->load->view('template/staf', [
+    'title' => 'Dashboard Staf Akademik',
+    'content' => $this->load->view('staf/_partials/dashboard_content', [
+        'pengumuman' => $pengumuman,
+        'total_mahasiswa' => $total_mahasiswa,
+        'total_dosen' => $total_dosen,
+        'shortcuts' => $shortcuts,
+        'workflow_stats' => $workflow_stats,
+        'chart_data' => $chart_data
+    ], true),
+    'css' => '',
+    'script' => $this->load->view('staf/_partials/dashboard_script', [], true)
+]);
+?>
+
+<!-- Dashboard Content Partial -->
+<?php $this->load->view('template/staf', [
+    'title' => 'Dashboard Staf Akademik',
+    'content' => ob_start()
+]); ?>
+
+<div class="row">
+    <!-- Summary Cards -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Total Mahasiswa</h5>
+                        <span class="h2 font-weight-bold mb-0"><?= $total_mahasiswa['total'] ?></span>
                     </div>
-                    
-                    <!-- User Info -->
-                    <div class="text-center mb-4">
-                        <div class="d-flex align-items-center justify-content-center mb-2">
-                            <i class="fas fa-user-tie fa-2x me-2"></i>
-                            <div>
-                                <div class="fw-bold"><?= $this->session->userdata('nama') ?></div>
-                                <small class="opacity-75">Staf Akademik</small>
-                            </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-red text-white rounded-circle shadow">
+                            <i class="fas fa-users"></i>
                         </div>
                     </div>
-                    
-                    <!-- Navigation Menu -->
-                    <nav class="nav flex-column">
-                        <a class="nav-link active" href="<?= base_url('staf/dashboard') ?>">
-                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-                        </a>
-                        <a class="nav-link" href="<?= base_url('staf/bimbingan') ?>">
-                            <i class="fas fa-book-open me-2"></i> Bimbingan
-                        </a>
-                        <a class="nav-link" href="<?= base_url('staf/seminar-proposal') ?>">
-                            <i class="fas fa-presentation me-2"></i> Seminar Proposal
-                        </a>
-                        <a class="nav-link" href="<?= base_url('staf/penelitian') ?>">
-                            <i class="fas fa-search me-2"></i> Penelitian
-                        </a>
-                        <a class="nav-link" href="<?= base_url('staf/seminar-skripsi') ?>">
-                            <i class="fas fa-graduation-cap me-2"></i> Seminar Skripsi
-                        </a>
-                        <a class="nav-link" href="<?= base_url('staf/publikasi') ?>">
-                            <i class="fas fa-globe me-2"></i> Publikasi
-                        </a>
-                        <hr class="border-light">
-                        <a class="nav-link" href="<?= base_url('staf/dashboard/daftar_mahasiswa') ?>">
-                            <i class="fas fa-users me-2"></i> Daftar Mahasiswa
-                        </a>
-                        <a class="nav-link" href="<?= base_url('staf/dashboard/daftar_dosen') ?>">
-                            <i class="fas fa-chalkboard-teacher me-2"></i> Daftar Dosen
-                        </a>
-                        <a class="nav-link" href="<?= base_url('staf/dashboard/profil') ?>">
-                            <i class="fas fa-user-cog me-2"></i> Profil
-                        </a>
-                        <hr class="border-light">
-                        <a class="nav-link" href="<?= base_url('auth/logout') ?>">
-                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                        </a>
-                    </nav>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> <?= $total_mahasiswa['mengajukan_proposal'] ?></span>
+                    <span class="text-nowrap">mengajukan proposal</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Total Dosen</h5>
+                        <span class="h2 font-weight-bold mb-0"><?= $total_dosen['total'] ?></span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-orange text-white rounded-circle shadow">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <span class="text-info mr-2"><i class="fa fa-arrow-up"></i> <?= $total_dosen['membimbing'] ?></span>
+                    <span class="text-nowrap">sedang membimbing</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Tugas Pending</h5>
+                        <span class="h2 font-weight-bold mb-0"><?= array_sum($shortcuts) ?></span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <span class="text-warning mr-2"><i class="fa fa-clock"></i></span>
+                    <span class="text-nowrap">perlu ditindaklanjuti</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Tahun Akademik</h5>
+                        <span class="h2 font-weight-bold mb-0"><?= date('Y') ?></span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                    <span class="text-success mr-2"><i class="fa fa-calendar"></i></span>
+                    <span class="text-nowrap">Ganjil <?= date('Y') ?>/<?= date('Y')+1 ?></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <!-- Quick Shortcuts -->
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h6 class="h3 mb-0">⚡ Quick Shortcuts</h6>
+                        <p class="text-sm mb-0">Akses cepat ke tugas-tugas yang perlu ditindaklanjuti</p>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Main Content -->
-            <div class="col-md-10">
-                <!-- Header -->
-                <div class="bg-white shadow-sm p-3 mb-4">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h4 class="mb-0">Dashboard Staf Akademik</h4>
-                            <small class="text-muted">Sistem Informasi Manajemen Tugas Akhir</small>
-                        </div>
-                        <div class="col-auto">
-                            <span class="badge bg-primary"><?= date('d F Y') ?></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Alert Messages -->
-                <?php if($this->session->flashdata('success')): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <?= $this->session->flashdata('success') ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php endif; ?>
-                
-                <?php if($this->session->flashdata('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <?= $this->session->flashdata('error') ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Statistics Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-6 mb-3">
-                        <div class="card stats-card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-users fa-2x mb-3"></i>
-                                <h2 class="mb-1"><?= $total_mahasiswa['total'] ?></h2>
-                                <p class="mb-1">Total Mahasiswa</p>
-                                <small><?= $total_mahasiswa['mengajukan_proposal'] ?> mengajukan proposal</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="card stats-card h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                            <div class="card-body text-center">
-                                <i class="fas fa-chalkboard-teacher fa-2x mb-3"></i>
-                                <h2 class="mb-1"><?= $total_dosen['total'] ?></h2>
-                                <p class="mb-1">Total Dosen</p>
-                                <small><?= $total_dosen['membimbing'] ?> sedang membimbing</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quick Shortcuts -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <h5 class="mb-3">
-                            <i class="fas fa-bolt text-warning me-2"></i>
-                            Quick Shortcuts
-                        </h5>
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <a href="<?= base_url('staf/bimbingan') ?>" class="text-decoration-none">
-                            <div class="card shortcut-card text-center h-100">
-                                <div class="card-body">
-                                    <i class="fas fa-book-open fa-2x text-primary mb-2"></i>
-                                    <h6>Bimbingan</h6>
-                                    <span class="badge bg-primary badge-custom"><?= $shortcuts['bimbingan'] ?></span>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <a href="<?= base_url('staf/seminar-proposal') ?>" class="text-decoration-none">
-                            <div class="card shortcut-card text-center h-100">
-                                <div class="card-body">
-                                    <i class="fas fa-presentation fa-2x text-success mb-2"></i>
-                                    <h6>Seminar Proposal</h6>
-                                    <span class="badge bg-success badge-custom"><?= $shortcuts['seminar_proposal'] ?></span>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <a href="<?= base_url('staf/penelitian') ?>" class="text-decoration-none">
-                            <div class="card shortcut-card text-center h-100">
-                                <div class="card-body">
-                                    <i class="fas fa-search fa-2x text-info mb-2"></i>
-                                    <h6>Penelitian</h6>
-                                    <span class="badge bg-info badge-custom"><?= $shortcuts['penelitian'] ?></span>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <a href="<?= base_url('staf/seminar-skripsi') ?>" class="text-decoration-none">
-                            <div class="card shortcut-card text-center h-100">
-                                <div class="card-body">
-                                    <i class="fas fa-graduation-cap fa-2x text-warning mb-2"></i>
-                                    <h6>Seminar Skripsi</h6>
-                                    <span class="badge bg-warning badge-custom"><?= $shortcuts['seminar_skripsi'] ?></span>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <a href="<?= base_url('staf/publikasi') ?>" class="text-decoration-none">
-                            <div class="card shortcut-card text-center h-100">
-                                <div class="card-body">
-                                    <i class="fas fa-globe fa-2x text-danger mb-2"></i>
-                                    <h6>Publikasi</h6>
-                                    <span class="badge bg-danger badge-custom"><?= $shortcuts['publikasi'] ?></span>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Main Content Row -->
+            <div class="card-body">
                 <div class="row">
-                    <!-- Pengumuman Tahapan -->
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-bullhorn me-2"></i>
-                                    Pengumuman Tahapan
-                                </h6>
-                            </div>
-                            <div class="card-body p-2">
-                                <?php if(!empty($pengumuman)): ?>
-                                    <?php foreach($pengumuman as $item): ?>
-                                    <div class="pengumuman-card p-3 mb-2 bg-light">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="mb-1"><?= $item->tahapan ?></h6>
-                                                <small class="text-muted"><?= $item->keterangan ?></small>
-                                            </div>
-                                            <span class="badge bg-warning text-dark">
-                                                <?= date('d/m/Y', strtotime($item->tanggal_deadline)) ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <div class="text-center text-muted py-4">
-                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
-                                        <p>Tidak ada pengumuman</p>
-                                    </div>
-                                <?php endif; ?>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-0 bg-gradient-primary">
+                            <div class="card-body text-center text-white">
+                                <div class="icon icon-shape icon-lg bg-white shadow rounded-circle text-primary mb-3">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <h4 class="text-white"><?= $shortcuts['bimbingan'] ?></h4>
+                                <p class="text-white text-sm mb-0">Jurnal Bimbingan</p>
+                                <a href="<?= base_url('staf/bimbingan') ?>" class="btn btn-sm btn-outline-white mt-3">
+                                    <i class="fas fa-eye"></i> Lihat Detail
+                                </a>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Infografis Workflow -->
-                    <div class="col-md-8 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-success text-white">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-chart-pie me-2"></i>
-                                    Infografis Data Tahapan Workflow
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="workflow-progress">
-                                    <canvas id="workflowChart"></canvas>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-0 bg-gradient-success">
+                            <div class="card-body text-center text-white">
+                                <div class="icon icon-shape icon-lg bg-white shadow rounded-circle text-success mb-3">
+                                    <i class="fas fa-presentation"></i>
                                 </div>
+                                <h4 class="text-white"><?= $shortcuts['seminar_proposal'] ?></h4>
+                                <p class="text-white text-sm mb-0">Seminar Proposal</p>
+                                <a href="<?= base_url('staf/seminar-proposal') ?>" class="btn btn-sm btn-outline-white mt-3">
+                                    <i class="fas fa-eye"></i> Lihat Detail
+                                </a>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Workflow Statistics Table -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header bg-dark text-white">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-list me-2"></i>
-                                    Detail Statistik Workflow
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>No</th>
-                                                <th>Tahapan Workflow</th>
-                                                <th>Jumlah Mahasiswa</th>
-                                                <th>Persentase</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php 
-                                            $total_all = array_sum(array_column($workflow_stats, 'total'));
-                                            foreach($workflow_stats as $i => $stat): 
-                                                $percentage = $total_all > 0 ? round(($stat['total'] / $total_all) * 100, 1) : 0;
-                                                $status_class = '';
-                                                switch($stat['stage']) {
-                                                    case 'proposal': $status_class = 'bg-secondary'; break;
-                                                    case 'bimbingan': $status_class = 'bg-primary'; break;
-                                                    case 'seminar_proposal': $status_class = 'bg-info'; break;
-                                                    case 'penelitian': $status_class = 'bg-warning'; break;
-                                                    case 'seminar_skripsi': $status_class = 'bg-danger'; break;
-                                                    case 'publikasi': $status_class = 'bg-dark'; break;
-                                                    case 'selesai': $status_class = 'bg-success'; break;
-                                                }
-                                            ?>
-                                            <tr>
-                                                <td><?= $i + 1 ?></td>
-                                                <td>
-                                                    <strong><?= $stat['label'] ?></strong>
-                                                </td>
-                                                <td>
-                                                    <span class="badge <?= $status_class ?> fs-6">
-                                                        <?= $stat['total'] ?> mahasiswa
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="progress" style="height: 20px;">
-                                                        <div class="progress-bar <?= str_replace('bg-', 'bg-', $status_class) ?>" 
-                                                             style="width: <?= $percentage ?>%">
-                                                            <?= $percentage ?>%
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <?php if($stat['total'] > 0): ?>
-                                                        <i class="fas fa-check-circle text-success"></i> Aktif
-                                                    <?php else: ?>
-                                                        <i class="fas fa-minus-circle text-muted"></i> Kosong
-                                                    <?php endif; ?>
-                                                </td>
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                        <tfoot class="table-dark">
-                                            <tr>
-                                                <th colspan="2">Total Keseluruhan</th>
-                                                <th>
-                                                    <span class="badge bg-light text-dark fs-6">
-                                                        <?= $total_all ?> mahasiswa
-                                                    </span>
-                                                </th>
-                                                <th>100%</th>
-                                                <th>
-                                                    <i class="fas fa-chart-bar text-light"></i> Semua Tahapan
-                                                </th>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
+                    
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-0 bg-gradient-info">
+                            <div class="card-body text-center text-white">
+                                <div class="icon icon-shape icon-lg bg-white shadow rounded-circle text-info mb-3">
+                                    <i class="fas fa-search"></i>
                                 </div>
+                                <h4 class="text-white"><?= $shortcuts['penelitian'] ?></h4>
+                                <p class="text-white text-sm mb-0">Surat Izin Penelitian</p>
+                                <a href="<?= base_url('staf/penelitian') ?>" class="btn btn-sm btn-outline-white mt-3">
+                                    <i class="fas fa-eye"></i> Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-0 bg-gradient-warning">
+                            <div class="card-body text-center text-white">
+                                <div class="icon icon-shape icon-lg bg-white shadow rounded-circle text-warning mb-3">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h4 class="text-white"><?= $shortcuts['seminar_skripsi'] ?></h4>
+                                <p class="text-white text-sm mb-0">Seminar Skripsi</p>
+                                <a href="<?= base_url('staf/seminar-skripsi') ?>" class="btn btn-sm btn-outline-white mt-3">
+                                    <i class="fas fa-eye"></i> Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-0 bg-gradient-danger">
+                            <div class="card-body text-center text-white">
+                                <div class="icon icon-shape icon-lg bg-white shadow rounded-circle text-danger mb-3">
+                                    <i class="fas fa-globe"></i>
+                                </div>
+                                <h4 class="text-white"><?= $shortcuts['publikasi'] ?></h4>
+                                <p class="text-white text-sm mb-0">Publikasi Repository</p>
+                                <a href="<?= base_url('staf/publikasi') ?>" class="btn btn-sm btn-outline-white mt-3">
+                                    <i class="fas fa-eye"></i> Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-0 bg-gradient-secondary">
+                            <div class="card-body text-center text-white">
+                                <div class="icon icon-shape icon-lg bg-white shadow rounded-circle text-secondary mb-3">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <h4 class="text-white">∞</h4>
+                                <p class="text-white text-sm mb-0">Laporan</p>
+                                <a href="<?= base_url('staf/laporan') ?>" class="btn btn-sm btn-outline-white mt-3">
+                                    <i class="fas fa-eye"></i> Lihat Detail
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -406,63 +218,141 @@
             </div>
         </div>
     </div>
-
-    <!-- Bootstrap 5.3 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Chart.js Implementation -->
-    <script>
-        // Workflow Chart
-        const workflowData = <?= json_encode($workflow_stats) ?>;
-        
-        const ctx = document.getElementById('workflowChart').getContext('2d');
-        const workflowChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: workflowData.map(item => item.label),
-                datasets: [{
-                    data: workflowData.map(item => item.total),
-                    backgroundColor: [
-                        '#6c757d', // proposal - secondary
-                        '#0d6efd', // bimbingan - primary  
-                        '#0dcaf0', // seminar_proposal - info
-                        '#ffc107', // penelitian - warning
-                        '#dc3545', // seminar_skripsi - danger
-                        '#212529', // publikasi - dark
-                        '#198754'  // selesai - success
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' mahasiswa (' + percentage + '%)';
-                            }
-                        }
-                    }
+    <!-- Pengumuman Tahapan -->
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h6 class="h3 mb-0">📢 Pengumuman Tahapan</h6>
+                        <p class="text-sm mb-0">Deadline dan informasi penting</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <?php if(!empty($pengumuman)): ?>
+                    <?php foreach($pengumuman as $p): ?>
+                        <div class="timeline-block mb-3">
+                            <div class="timeline-step bg-gradient-primary">
+                                <span class="text-white font-weight-bold"><?= $p->no ?></span>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="text-sm font-weight-bold mb-1"><?= $p->tahapan ?></h6>
+                                <p class="text-xs text-muted mb-2">
+                                    <i class="fas fa-calendar"></i> 
+                                    Deadline: <?= date('d M Y', strtotime($p->tanggal_deadline)) ?>
+                                </p>
+                                <?php if($p->keterangan): ?>
+                                    <p class="text-xs mb-0"><?= $p->keterangan ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="fas fa-info-circle fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Belum ada pengumuman tahapan</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <!-- Workflow Statistics Chart -->
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h6 class="h3 mb-0">📊 Statistik Workflow Mahasiswa</h6>
+                        <p class="text-sm mb-0">Distribusi mahasiswa per tahapan tugas akhir</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart">
+                    <canvas id="workflowChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Workflow Progress -->
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="h3 mb-0">🎯 Progress Tahapan</h6>
+            </div>
+            <div class="card-body">
+                <?php foreach($workflow_stats as $stat): ?>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-sm font-weight-bold"><?= $stat['label'] ?></span>
+                            <span class="badge badge-primary"><?= $stat['total'] ?></span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-gradient-primary" role="progressbar" 
+                                 style="width: <?= $stat['total'] > 0 ? ($stat['total'] / max(array_column($workflow_stats, 'total')) * 100) : 0 ?>%">
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php 
+$content = ob_get_clean();
+echo $content;
+?>
+
+<script>
+$(document).ready(function() {
+    // Workflow Chart
+    var ctx = document.getElementById('workflowChart').getContext('2d');
+    var workflowData = <?= json_encode($workflow_stats) ?>;
+    
+    var labels = workflowData.map(function(item) {
+        return item.label;
+    });
+    
+    var data = workflowData.map(function(item) {
+        return item.total;
+    });
+    
+    var colors = [
+        '#5e72e4', '#11cdef', '#2dce89', '#fb6340', 
+        '#f5365c', '#ffd600', '#6c757d'
+    ];
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
-        });
-        
-        // Auto refresh setiap 5 menit
-        setTimeout(function(){
-            location.reload();
-        }, 300000);
-    </script>
-</body>
-</html>
+        }
+    });
+    
+    // Auto refresh data setiap 5 menit
+    setInterval(function() {
+        location.reload();
+    }, 300000);
+});
+</script>

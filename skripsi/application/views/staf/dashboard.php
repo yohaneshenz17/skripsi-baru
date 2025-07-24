@@ -277,8 +277,12 @@ ob_start();
                             <span class="badge badge-primary"><?= $stat['total'] ?></span>
                         </div>
                         <div class="progress" style="height: 8px;">
+                            <?php 
+                            $max_total = max(array_column($workflow_stats, 'total'));
+                            $percentage = $max_total > 0 ? ($stat['total'] / $max_total * 100) : 0;
+                            ?>
                             <div class="progress-bar bg-gradient-primary" role="progressbar" 
-                                 style="width: <?= $stat['total'] > 0 ? ($stat['total'] / max(array_column($workflow_stats, 'total')) * 100) : 0 ?>%">
+                                 style="width: <?= $percentage ?>%">
                             </div>
                         </div>
                     </div>
@@ -287,6 +291,37 @@ ob_start();
         </div>
     </div>
 </div>
+
+<!-- Timeline Styling -->
+<style>
+.timeline-block {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline-step {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.timeline-content {
+    border-left: 2px solid #e9ecef;
+    padding-left: 15px;
+    padding-bottom: 15px;
+}
+
+.timeline-block:last-child .timeline-content {
+    border-left: none;
+}
+</style>
 
 <?php 
 // Capture content dan buat script untuk chart
@@ -340,6 +375,12 @@ $(document).ready(function() {
     setInterval(function() {
         location.reload();
     }, 300000);
+    
+    // Smooth hover effects
+    $('.card').hover(
+        function() { $(this).addClass('shadow-lg').removeClass('shadow'); },
+        function() { $(this).removeClass('shadow-lg').addClass('shadow'); }
+    );
 });
 </script>
 <?php 

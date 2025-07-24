@@ -1,10 +1,9 @@
-<?php
+<?php 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Controller Staf - Sistem Informasi Manajemen Tugas Akhir STK St. Yakobus
- * Role: Staf Akademik
- * Level: 5
+ * Dashboard Controller untuk Staf Akademik
+ * File: application/controllers/staf/Dashboard.php
  */
 class Dashboard extends CI_Controller {
 
@@ -12,372 +11,267 @@ class Dashboard extends CI_Controller {
         parent::__construct();
         $this->load->database();
         $this->load->library('session');
-        $this->load->helper(['url', 'date', 'file']);
-        $this->load->library(['form_validation', 'upload']);
-        
-        // Cek login dan level
-        if (!$this->session->userdata('logged_in')) {
-            redirect('auth/login');
-        }
-        
-        if ($this->session->userdata('level') != '5') {
+        $this->load->helper('url');
+
+        // Cek login dan level staf
+        if(!$this->session->userdata('logged_in') || $this->session->userdata('level') != '5') {
             redirect('auth/login');
         }
     }
 
-    /**
-     * Dashboard Utama Staf
-     */
     public function index() {
-        $data = $this->_prepare_dashboard_data();
+        $data['title'] = 'Dashboard Staf Akademik';
+        $staf_id = $this->session->userdata('id');
+        
+        try {
+            // 1. STATISTIK TOTAL MAHASISWA
+            $data['total_mahasiswa'] = $this->_get_total_mahasiswa();
+            
+            // 2. STATISTIK TOTAL DOSEN
+            $data['total_dosen'] = $this->_get_total_dosen();
+            
+            // 3. QUICK SHORTCUTS - Tasks yang perlu ditindaklanjuti
+            $data['shortcuts'] = $this->_get_shortcuts();
+            
+            // 4. PENGUMUMAN TAHAPAN
+            $data['pengumuman'] = $this->_get_pengumuman();
+            
+            // 5. WORKFLOW STATISTICS untuk Chart
+            $data['workflow_stats'] = $this->_get_workflow_statistics();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Dashboard Staf Error: ' . $e->getMessage());
+            // Set default values jika ada error
+            $data['total_mahasiswa'] = ['total' => 0, 'mengajukan_proposal' => 0];
+            $data['total_dosen'] = ['total' => 0, 'membimbing' => 0];
+            $data['shortcuts'] = [
+                'bimbingan' => 0,
+                'seminar_proposal' => 0,
+                'penelitian' => 0,
+                'seminar_skripsi' => 0,
+                'publikasi' => 0
+            ];
+            $data['pengumuman'] = [];
+            $data['workflow_stats'] = [];
+        }
+        
         $this->load->view('staf/dashboard', $data);
     }
-
+    
     /**
-     * Menyiapkan data untuk dashboard
-     */
-    private function _prepare_dashboard_data() {
-        $data = [];
-        
-        // 1. Data Pengumuman Tahapan
-        $data['pengumuman'] = $this->_get_pengumuman_tahapan();
-        
-        // 2. Total Mahasiswa (semua prodi)
-        $data['total_mahasiswa'] = $this->_get_total_mahasiswa();
-        
-        // 3. Total Dosen (semua prodi)
-        $data['total_dosen'] = $this->_get_total_dosen();
-        
-        // 4. Data untuk Quick Shortcuts
-        $data['shortcuts'] = $this->_get_shortcuts_data();
-        
-        // 5. Infografis Data Tahapan Workflow
-        $data['workflow_stats'] = $this->_get_workflow_statistics();
-        
-        // 6. Data mahasiswa per tahapan untuk chart
-        $data['chart_data'] = $this->_get_chart_data();
-        
-        return $data;
-    }
-
-    /**
-     * Mengambil data pengumuman tahapan
-     */
-    private function _get_pengumuman_tahapan() {
-        $this->db->select('*');
-        $this->db->from('pengumuman_tahapan');
-        $this->db->where('aktif', '1');
-        $this->db->order_by('no', 'ASC');
-        return $this->db->get()->result();
-    }
-
-    /**
-     * Mengambil total mahasiswa semua prodi
+     * Get total mahasiswa dan yang mengajukan proposal
      */
     private function _get_total_mahasiswa() {
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('mahasiswa');
-        $this->db->where('status', '1'); // Hanya mahasiswa aktif
-        $result = $this->db->get()->row();
-        
-        // Total yang sudah mengajukan proposal
-        $this->db->select('COUNT(DISTINCT mahasiswa_id) as total_proposal');
-        $this->db->from('proposal_mahasiswa');
-        $proposal_result = $this->db->get()->row();
-        
-        return [
-            'total' => $result ? $result->total : 0,
-            'mengajukan_proposal' => $proposal_result ? $proposal_result->total_proposal : 0
+        $total_mahasiswa = [
+            'total' => 0,
+            'mengajukan_proposal' => 0
         ];
+        
+        try {
+            // Total mahasiswa
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('mahasiswa');
+            $result = $this->db->get()->row();
+            $total_mahasiswa['total'] = $result ? $result->total : 0;
+            
+            // Mahasiswa yang mengajukan proposal
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('created_at >=', date('Y-01-01')); // Tahun ini
+            $result = $this->db->get()->row();
+            $total_mahasiswa['mengajukan_proposal'] = $result ? $result->total : 0;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting total mahasiswa: ' . $e->getMessage());
+        }
+        
+        return $total_mahasiswa;
     }
-
+    
     /**
-     * Mengambil total dosen semua prodi
+     * Get total dosen dan yang sedang membimbing
      */
     private function _get_total_dosen() {
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('dosen');
-        $this->db->where('level', '2'); // Hanya dosen
-        $result = $this->db->get()->row();
-        
-        // Dosen yang sedang membimbing
-        $this->db->select('COUNT(DISTINCT dosen_id) as total_membimbing');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->where('status_kaprodi', '1');
-        $this->db->where('dosen_id IS NOT NULL');
-        $membimbing_result = $this->db->get()->row();
-        
-        return [
-            'total' => $result ? $result->total : 0,
-            'membimbing' => $membimbing_result ? $membimbing_result->total_membimbing : 0
+        $total_dosen = [
+            'total' => 0,
+            'membimbing' => 0
         ];
+        
+        try {
+            // Total dosen
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('dosen');
+            $this->db->where('level', '2'); // Level dosen
+            $result = $this->db->get()->row();
+            $total_dosen['total'] = $result ? $result->total : 0;
+            
+            // Dosen yang sedang membimbing
+            $this->db->distinct();
+            $this->db->select('pm.dosen_id');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->where('pm.status_pembimbing', '1');
+            $this->db->where('pm.dosen_id IS NOT NULL');
+            $result = $this->db->get()->num_rows();
+            $total_dosen['membimbing'] = $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting total dosen: ' . $e->getMessage());
+        }
+        
+        return $total_dosen;
     }
-
+    
     /**
-     * Data untuk quick shortcuts
+     * Get shortcuts - Tasks yang perlu ditindaklanjuti staf
      */
-    private function _get_shortcuts_data() {
-        $shortcuts = [];
+    private function _get_shortcuts() {
+        $shortcuts = [
+            'bimbingan' => 0,
+            'seminar_proposal' => 0,
+            'penelitian' => 0,
+            'seminar_skripsi' => 0,
+            'publikasi' => 0
+        ];
         
-        // Bimbingan - Jurnal yang perlu di-export
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('jurnal_bimbingan jb');
-        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
-        $this->db->where('jb.status_validasi', '1');
-        $result = $this->db->get()->row();
-        $shortcuts['bimbingan'] = $result ? $result->total : 0;
-        
-        // Seminar Proposal - yang sudah dijadwalkan
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->where('status_seminar_proposal', '1');
-        $this->db->where('tanggal_seminar_proposal IS NOT NULL');
-        $result = $this->db->get()->row();
-        $shortcuts['seminar_proposal'] = $result ? $result->total : 0;
-        
-        // Penelitian - yang butuh surat izin
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->where('workflow_status', 'penelitian');
-        $this->db->where('status_izin_penelitian', '0');
-        $result = $this->db->get()->row();
-        $shortcuts['penelitian'] = $result ? $result->total : 0;
-        
-        // Seminar Skripsi - yang sudah dijadwalkan
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->where('status_seminar_skripsi', '1');
-        $this->db->where('tanggal_seminar_skripsi IS NOT NULL');
-        $result = $this->db->get()->row();
-        $shortcuts['seminar_skripsi'] = $result ? $result->total : 0;
-        
-        // Publikasi - yang perlu validasi staf
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->where('workflow_status', 'publikasi');
-        $this->db->where('status_publikasi', '1');
-        $this->db->where('(validasi_staf_publikasi = "0" OR validasi_staf_publikasi IS NULL)');
-        $result = $this->db->get()->row();
-        $shortcuts['publikasi'] = $result ? $result->total : 0;
+        try {
+            // 1. Mahasiswa dalam tahap bimbingan
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('status_pembimbing', '1');
+            $this->db->where('workflow_status', 'bimbingan');
+            $result = $this->db->get()->row();
+            $shortcuts['bimbingan'] = $result ? $result->total : 0;
+            
+            // 2. Seminar proposal yang perlu dijadwalkan
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('workflow_status', 'seminar_proposal');
+            $result = $this->db->get()->row();
+            $shortcuts['seminar_proposal'] = $result ? $result->total : 0;
+            
+            // 3. Surat izin penelitian yang perlu diproses
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('workflow_status', 'penelitian');
+            $result = $this->db->get()->row();
+            $shortcuts['penelitian'] = $result ? $result->total : 0;
+            
+            // 4. Seminar skripsi yang perlu dijadwalkan
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('workflow_status', 'seminar_skripsi');
+            $result = $this->db->get()->row();
+            $shortcuts['seminar_skripsi'] = $result ? $result->total : 0;
+            
+            // 5. Publikasi yang perlu divalidasi
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('workflow_status', 'publikasi');
+            $result = $this->db->get()->row();
+            $shortcuts['publikasi'] = $result ? $result->total : 0;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting shortcuts: ' . $e->getMessage());
+        }
         
         return $shortcuts;
     }
-
+    
     /**
-     * Statistik workflow mahasiswa
+     * Get pengumuman tahapan (dummy data atau dari database jika ada)
+     */
+    private function _get_pengumuman() {
+        $pengumuman = [];
+        
+        try {
+            // Cek apakah tabel pengumuman ada
+            if ($this->db->table_exists('pengumuman_tahapan')) {
+                $this->db->select('*');
+                $this->db->from('pengumuman_tahapan');
+                $this->db->where('tanggal_deadline >=', date('Y-m-d'));
+                $this->db->order_by('tanggal_deadline', 'ASC');
+                $this->db->limit(5);
+                $pengumuman = $this->db->get()->result();
+            } else {
+                // Dummy data jika tabel belum ada
+                $dummy_pengumuman = [
+                    (object)[
+                        'no' => 1,
+                        'tahapan' => 'Pengajuan Proposal',
+                        'tanggal_deadline' => date('Y-m-d', strtotime('+30 days')),
+                        'keterangan' => 'Batas akhir pengajuan proposal semester ini'
+                    ],
+                    (object)[
+                        'no' => 2,
+                        'tahapan' => 'Seminar Proposal',
+                        'tanggal_deadline' => date('Y-m-d', strtotime('+45 days')),
+                        'keterangan' => 'Pendaftaran seminar proposal dibuka'
+                    ],
+                    (object)[
+                        'no' => 3,
+                        'tahapan' => 'Penelitian',
+                        'tanggal_deadline' => date('Y-m-d', strtotime('+60 days')),
+                        'keterangan' => 'Pengajuan surat izin penelitian'
+                    ]
+                ];
+                $pengumuman = array_slice($dummy_pengumuman, 0, 3);
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting pengumuman: ' . $e->getMessage());
+        }
+        
+        return $pengumuman;
+    }
+    
+    /**
+     * Get workflow statistics untuk chart
      */
     private function _get_workflow_statistics() {
-        $stats = [];
+        $workflow_stats = [];
         
-        $workflow_stages = [
-            'proposal' => 'Pengajuan Proposal',
-            'bimbingan' => 'Bimbingan',
-            'seminar_proposal' => 'Seminar Proposal',
-            'penelitian' => 'Penelitian',
-            'seminar_skripsi' => 'Seminar Skripsi',
-            'publikasi' => 'Publikasi',
-            'selesai' => 'Selesai'
-        ];
-        
-        foreach ($workflow_stages as $stage => $label) {
-            $this->db->select('COUNT(*) as total');
-            $this->db->from('proposal_mahasiswa pm');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->where('pm.workflow_status', $stage);
-            $result = $this->db->get()->row();
-            
-            $stats[] = [
-                'stage' => $stage,
-                'label' => $label,
-                'total' => $result ? $result->total : 0
+        try {
+            $stages = [
+                'proposal' => 'Pengajuan Proposal',
+                'bimbingan' => 'Bimbingan',
+                'seminar_proposal' => 'Seminar Proposal',
+                'penelitian' => 'Penelitian',
+                'seminar_skripsi' => 'Seminar Skripsi',
+                'publikasi' => 'Publikasi',
+                'selesai' => 'Selesai'
             ];
-        }
-        
-        return $stats;
-    }
-
-    /**
-     * Data untuk chart/grafik - FIXED VERSION
-     */
-    private function _get_chart_data() {
-        // Data mahasiswa per prodi dan tahapan
-        $this->db->select('
-            p.nama as nama_prodi,
-            pm.workflow_status,
-            COUNT(*) as total
-        ');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->group_by(['p.nama', 'pm.workflow_status']);
-        
-        // FIX: Use multiple order_by calls instead of array
-        $this->db->order_by('p.nama', 'ASC');
-        $this->db->order_by('pm.workflow_status', 'ASC');
-        
-        $results = $this->db->get()->result();
-        
-        // Organize data for chart
-        $chart_data = [];
-        $prodi_list = [];
-        
-        foreach ($results as $row) {
-            if (!in_array($row->nama_prodi, $prodi_list)) {
-                $prodi_list[] = $row->nama_prodi;
-            }
             
-            $chart_data[$row->nama_prodi][$row->workflow_status] = $row->total;
-        }
-        
-        return [
-            'prodi_list' => $prodi_list,
-            'data' => $chart_data
-        ];
-    }
-
-    /**
-     * Halaman Profil Staf
-     */
-    public function profil() {
-        $staf_id = $this->session->userdata('id');
-        
-        $this->db->select('*');
-        $this->db->from('dosen');
-        $this->db->where('id', $staf_id);
-        $this->db->where('level', '5');
-        $data['staf'] = $this->db->get()->row();
-        
-        if (!$data['staf']) {
-            show_404();
-        }
-        
-        $this->load->view('staf/profil', $data);
-    }
-
-    /**
-     * Update Profil Staf
-     */
-    public function update_profil() {
-        $staf_id = $this->session->userdata('id');
-        
-        $this->form_validation->set_rules('nama', 'Nama', 'required|max_length[100]');
-        $this->form_validation->set_rules('nip', 'NIP', 'required|max_length[30]');
-        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|max_length[100]');
-        $this->form_validation->set_rules('nomor_telepon', 'Nomor Telepon', 'required|max_length[30]');
-        
-        if ($this->form_validation->run() == FALSE) {
-            $this->session->set_flashdata('error', validation_errors());
-            redirect('staf/dashboard/profil');
-        }
-        
-        $data = [
-            'nama' => $this->input->post('nama'),
-            'nip' => $this->input->post('nip'),
-            'email' => $this->input->post('email'),
-            'nomor_telepon' => $this->input->post('nomor_telepon')
-        ];
-        
-        // Handle upload foto jika ada
-        if ($_FILES['foto']['name']) {
-            $config['upload_path'] = './uploads/staf/';
-            $config['allowed_types'] = 'jpg|jpeg|png|gif';
-            $config['max_size'] = 2048; // 2MB
-            $config['encrypt_name'] = TRUE;
-            
-            if (!is_dir($config['upload_path'])) {
-                mkdir($config['upload_path'], 0755, true);
-            }
-            
-            $this->upload->initialize($config);
-            
-            if ($this->upload->do_upload('foto')) {
-                $upload_data = $this->upload->data();
-                $data['foto'] = $upload_data['file_name'];
+            foreach ($stages as $stage => $label) {
+                $this->db->select('COUNT(*) as total');
+                $this->db->from('proposal_mahasiswa');
                 
-                // Hapus foto lama jika ada
-                $old_staf = $this->db->get_where('dosen', ['id' => $staf_id])->row();
-                if ($old_staf->foto && file_exists('./uploads/staf/' . $old_staf->foto)) {
-                    unlink('./uploads/staf/' . $old_staf->foto);
+                if ($stage == 'proposal') {
+                    // Proposal yang belum disetujui atau baru diajukan
+                    $this->db->where('(status_kaprodi IS NULL OR status_kaprodi = "0")');
+                } elseif ($stage == 'selesai') {
+                    // Mahasiswa yang sudah selesai semua tahapan
+                    $this->db->where('workflow_status', 'publikasi');
+                    // Bisa ditambah kondisi lain untuk menentukan "selesai"
+                } else {
+                    $this->db->where('workflow_status', $stage);
                 }
+                
+                $result = $this->db->get()->row();
+                $total = $result ? $result->total : 0;
+                
+                $workflow_stats[] = [
+                    'label' => $label,
+                    'total' => $total,
+                    'stage' => $stage
+                ];
             }
-        }
-        
-        $this->db->where('id', $staf_id);
-        $this->db->where('level', '5');
-        $update = $this->db->update('dosen', $data);
-        
-        if ($update) {
-            // Update session data
-            $this->session->set_userdata('nama', $data['nama']);
-            $this->session->set_userdata('email', $data['email']);
             
-            $this->session->set_flashdata('success', 'Profil berhasil diperbarui');
-        } else {
-            $this->session->set_flashdata('error', 'Gagal memperbarui profil');
+        } catch (Exception $e) {
+            log_message('error', 'Error getting workflow statistics: ' . $e->getMessage());
         }
         
-        redirect('staf/dashboard/profil');
-    }
-
-    /**
-     * Daftar Mahasiswa Semua Prodi
-     */
-    public function daftar_mahasiswa() {
-        // Pagination setup
-        $this->load->library('pagination');
-        
-        $config['base_url'] = base_url('staf/dashboard/daftar_mahasiswa');
-        $config['total_rows'] = $this->db->count_all('mahasiswa');
-        $config['per_page'] = 20;
-        $config['uri_segment'] = 4;
-        
-        // Pagination styling
-        $config['full_tag_open'] = '<nav><ul class="pagination justify-content-center">';
-        $config['full_tag_close'] = '</ul></nav>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
-        $config['cur_tag_close'] = '</span></li>';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tagl_close'] = '</li>';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tagl_close'] = '</li>';
-        $config['first_tag_open'] = '<li class="page-item">';
-        $config['first_tagl_close'] = '</li>';
-        $config['last_tag_open'] = '<li class="page-item">';
-        $config['last_tagl_close'] = '</li>';
-        $config['attributes'] = ['class' => 'page-link'];
-        
-        $this->pagination->initialize($config);
-        
-        $page = ($this->uri->segment(4)) ? $this->uri->segment(4) : 0;
-        
-        // Get mahasiswa with pagination
-        $this->db->select('m.*, p.nama as nama_prodi, pm.workflow_status, pm.judul');
-        $this->db->from('mahasiswa m');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('proposal_mahasiswa pm', 'm.id = pm.mahasiswa_id', 'left');
-        $this->db->order_by('m.nama', 'ASC');
-        $this->db->limit($config['per_page'], $page);
-        
-        $data['mahasiswa'] = $this->db->get()->result();
-        $data['pagination'] = $this->pagination->create_links();
-        
-        $this->load->view('staf/daftar_mahasiswa', $data);
-    }
-
-    /**
-     * Daftar Dosen Semua Prodi
-     */
-    public function daftar_dosen() {
-        $this->db->select('d.*, p.nama as nama_prodi');
-        $this->db->from('dosen d');
-        $this->db->join('prodi p', 'd.prodi_id = p.id', 'left');
-        $this->db->where_in('d.level', ['2', '4']); // Dosen dan Kaprodi
-        $this->db->order_by('d.nama', 'ASC');
-        
-        $data['dosen'] = $this->db->get()->result();
-        
-        $this->load->view('staf/daftar_dosen', $data);
+        return $workflow_stats;
     }
 }
+
+/* End of file Dashboard.php */

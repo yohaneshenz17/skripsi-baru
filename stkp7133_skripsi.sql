@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 24, 2025 at 06:58 PM
+-- Generation Time: Jul 25, 2025 at 05:57 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -329,6 +329,37 @@ CREATE TABLE `jurnal_bimbingan` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Jurnal bimbingan mahasiswa';
+
+--
+-- Dumping data for table `jurnal_bimbingan`
+--
+
+INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `catatan_dosen`, `tindak_lanjut`, `durasi_bimbingan`, `catatan_mahasiswa`, `status_validasi`, `tanggal_validasi`, `validasi_oleh`, `created_by`, `created_at`, `updated_at`) VALUES
+(19, 41, 1, '2025-07-25', 'Test jurnal setelah perbaikan database lengkap', NULL, 'Lanjutkan ke BAB berikutnya', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-07-24 19:26:36', '2025-07-24 19:26:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `jurnal_bimbingan_backup_20250724`
+--
+
+CREATE TABLE `jurnal_bimbingan_backup_20250724` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `proposal_id` bigint(20) NOT NULL,
+  `pertemuan_ke` int(11) NOT NULL COMMENT 'Urutan pertemuan (1, 2, 3, dst)',
+  `tanggal_bimbingan` date NOT NULL COMMENT 'Tanggal pelaksanaan bimbingan',
+  `materi_bimbingan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Materi yang dibahas dalam bimbingan',
+  `catatan_dosen` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Catatan dari dosen pembimbing (setelah validasi)',
+  `tindak_lanjut` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Tindak lanjut untuk mahasiswa',
+  `durasi_bimbingan` int(3) DEFAULT NULL COMMENT 'Durasi bimbingan dalam menit',
+  `catatan_mahasiswa` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Catatan atau pertanyaan dari mahasiswa',
+  `status_validasi` enum('0','1','2') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '0=pending, 1=valid, 2=revisi',
+  `tanggal_validasi` datetime DEFAULT NULL COMMENT 'Tanggal dosen memvalidasi',
+  `validasi_oleh` bigint(20) DEFAULT NULL,
+  `created_by` enum('mahasiswa','dosen') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'mahasiswa' COMMENT 'Dibuat oleh mahasiswa atau dosen',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -668,6 +699,76 @@ CREATE TABLE `proposal_mahasiswa_backup_20250717` (
 
 INSERT INTO `proposal_mahasiswa_backup_20250717` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`) VALUES
 (34, 18, 'Pengaruh x terhadap Y bagi mahasiswa STK', 'Tes saja pak untuk proposalini', NULL, NULL, NULL, NULL, 10, 11, 11, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `proposal_mahasiswa_backup_20250724`
+--
+
+CREATE TABLE `proposal_mahasiswa_backup_20250724` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `mahasiswa_id` bigint(20) NOT NULL,
+  `judul` varchar(250) NOT NULL,
+  `ringkasan` varchar(5000) NOT NULL,
+  `jenis_penelitian` enum('Kuantitatif','Kualitatif','Mixed Method') DEFAULT NULL,
+  `lokasi_penelitian` varchar(255) DEFAULT NULL,
+  `uraian_masalah` text DEFAULT NULL,
+  `file_draft_proposal` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Tanggal pengajuan proposal oleh mahasiswa',
+  `dosen_id` bigint(20) DEFAULT NULL COMMENT 'pembimbing',
+  `dosen2_id` int(11) NOT NULL DEFAULT 1 COMMENT 'pembimbing 2',
+  `dosen_penguji_id` int(11) DEFAULT NULL,
+  `dosen_penguji2_id` bigint(20) DEFAULT NULL,
+  `status` enum('1','0') NOT NULL DEFAULT '0' COMMENT '1 = disetujui, 2 = tidak disetujui',
+  `status_kaprodi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_kaprodi` text DEFAULT NULL,
+  `tanggal_review_kaprodi` datetime DEFAULT NULL,
+  `status_pembimbing` enum('0','1','2') DEFAULT '0' COMMENT '0=belum diminta, 1=menyetujui, 2=menolak',
+  `komentar_pembimbing` text DEFAULT NULL,
+  `tanggal_respon_pembimbing` datetime DEFAULT NULL,
+  `deadline` datetime DEFAULT NULL,
+  `tanggal_penetapan` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi menetapkan pembimbing & penguji',
+  `penetapan_oleh` bigint(20) DEFAULT NULL COMMENT 'ID kaprodi yang menetapkan',
+  `workflow_status` enum('proposal','bimbingan','seminar_proposal','penelitian','seminar_skripsi','publikasi','selesai') DEFAULT 'proposal' COMMENT 'Status workflow saat ini: proposal->bimbingan->seminar_proposal->penelitian->seminar_skripsi->publikasi->selesai',
+  `status_seminar_proposal` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_seminar_proposal` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk seminar proposal',
+  `tanggal_review_seminar_proposal` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review seminar proposal',
+  `tanggal_seminar_proposal` date DEFAULT NULL COMMENT 'Tanggal pelaksanaan seminar proposal',
+  `tempat_seminar_proposal` varchar(255) DEFAULT NULL COMMENT 'Tempat pelaksanaan seminar proposal',
+  `status_seminar_skripsi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_seminar_skripsi` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk seminar skripsi',
+  `tanggal_review_seminar_skripsi` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review seminar skripsi',
+  `tanggal_seminar_skripsi` date DEFAULT NULL COMMENT 'Tanggal pelaksanaan seminar skripsi',
+  `tempat_seminar_skripsi` varchar(255) DEFAULT NULL COMMENT 'Tempat pelaksanaan seminar skripsi',
+  `status_publikasi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_publikasi` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk publikasi',
+  `tanggal_review_publikasi` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review publikasi',
+  `link_repository` varchar(500) DEFAULT NULL COMMENT 'Link repository publikasi tugas akhir',
+  `tanggal_publikasi` date DEFAULT NULL COMMENT 'Tanggal publikasi ke repository',
+  `file_seminar_proposal` varchar(255) DEFAULT NULL COMMENT 'File dokumen seminar proposal (Bab 1-3)',
+  `file_seminar_skripsi` varchar(255) DEFAULT NULL COMMENT 'File dokumen seminar skripsi (Bab 1-5)',
+  `file_skripsi_final` varchar(255) DEFAULT NULL COMMENT 'File skripsi final untuk publikasi',
+  `surat_izin_penelitian` varchar(255) DEFAULT NULL COMMENT 'File surat izin penelitian',
+  `status_izin_penelitian` enum('0','1','2') DEFAULT '0' COMMENT '0=belum diminta, 1=disetujui, 2=ditolak',
+  `tanggal_penetapan_ulang` datetime DEFAULT NULL,
+  `penetapan_ulang_oleh` bigint(20) DEFAULT NULL,
+  `alasan_penetapan_ulang` text DEFAULT NULL,
+  `jumlah_penetapan_ulang` int(11) DEFAULT 0,
+  `validasi_staf_publikasi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu, 1=valid, 2=perlu perbaikan',
+  `staf_validator_id` bigint(20) DEFAULT NULL COMMENT 'ID staf yang memvalidasi',
+  `tanggal_validasi_staf` datetime DEFAULT NULL,
+  `catatan_staf` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `proposal_mahasiswa_backup_20250724`
+--
+
+INSERT INTO `proposal_mahasiswa_backup_20250724` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
+(36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', '2025-07-18 10:21:14', 25, 1, NULL, NULL, '0', '1', 'Proposal sudah baik dan bisa langsung mulai bimbingan. Terimakasih', '2025-07-17 17:18:16', '1', 'Baik saya menerima', '2025-07-23 17:55:14', NULL, NULL, NULL, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '2025-07-23 17:45:02', 10, 'Dosen pembimbing sebelumnya () menolak penunjukan. Menetapkan dosen pembimbing baru untuk melanjutkan proses bimbingan mahasiswa.', 0, '0', NULL, NULL, NULL),
+(37, 33, 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'd2ff01bd1f6cb9b54d4059526a3fb112.docx', '2025-07-18 10:21:14', 26, 1, NULL, NULL, '0', '1', 'Lanjutkan', '2025-07-23 18:35:54', '1', 'Ya saya setuju membimbing ', '2025-07-23 19:25:53', NULL, '2025-07-23 18:35:54', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(41, 42, 'Pengaruh Tes Saja', 'Pengaruh Tes Saja', 'Kuantitatif', 'Merauke', 'Pengaruh Tes Saja', '68795a1fa5ea2fa268d3bfe05362db14.docx', '2025-07-23 19:10:29', 25, 1, NULL, NULL, '0', '1', 'Lanjutkan bimbingan', '2025-07-23 19:11:52', '1', 'Ok saya setuju\r\n', '2025-07-24 18:34:07', NULL, '2025-07-23 19:11:52', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1235,7 +1336,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`
@@ -1277,7 +1378,7 @@ ALTER TABLE `prodi`
 -- AUTO_INCREMENT for table `proposal_mahasiswa`
 --
 ALTER TABLE `proposal_mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `proposal_workflow`
@@ -1313,6 +1414,13 @@ ALTER TABLE `staf_aktivitas`
 ALTER TABLE `jurnal_bimbingan`
   ADD CONSTRAINT `fk_jurnal_dosen` FOREIGN KEY (`validasi_oleh`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_jurnal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `proposal_mahasiswa`
+--
+ALTER TABLE `proposal_mahasiswa`
+  ADD CONSTRAINT `fk_penetapan` FOREIGN KEY (`penetapan_oleh`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_penguji2` FOREIGN KEY (`dosen_penguji2_id`) REFERENCES `dosen` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

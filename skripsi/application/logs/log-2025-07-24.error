@@ -213,3 +213,360 @@ FROM `dosen` `d`
 JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
 WHERE `pm`.`status_pembimbing` = '1'
 ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 11:52:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 11:52:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 11:52:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 11:52:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 11:56:54 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 11:56:54 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 11:56:54 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 11:56:54 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:01:56 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 12:01:56 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 12:01:56 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:01:56 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:06:58 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 12:06:58 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:06:58 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:06:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 12:07:00 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:07:15 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:12:30 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:12:34 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:17:48 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+AND `d`.`level` = '2'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:18:36 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+AND `d`.`level` = '2'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:18:37 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+AND `d`.`level` = '2'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:19:28 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 12:19:30 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+AND `d`.`level` = '2'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:20:16 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+AND `d`.`level` = '2'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:20:18 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 12:20:18 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 12:20:18 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:20:18 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:20:20 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 12:20:24 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id`...' at line 1 - Invalid query: SELECT `DISTINCT` `d`.`id`, `d`.`nama`
+FROM `dosen` `d`
+JOIN `proposal_mahasiswa` `pm` ON `d`.`id` = `pm`.`dosen_id`
+WHERE `pm`.`status_pembimbing` = '1'
+AND `d`.`level` = '2'
+ORDER BY `d`.`nama` ASC
+ERROR - 2025-07-24 12:26:40 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 12:26:40 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:26:40 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 12:26:40 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 15:44:35 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 15:44:35 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 15:44:35 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 15:44:35 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 15:44:59 --> 404 Page Not Found: staf/Bimbingan/export_all
+ERROR - 2025-07-24 15:45:15 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 15:48:20 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 15:48:20 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 15:48:20 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 15:48:20 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 15:48:24 --> 404 Page Not Found: staf/Profil/index
+ERROR - 2025-07-24 15:49:41 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-24 15:53:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 15:53:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 15:53:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 15:53:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 15:55:21 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 15:55:21 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 15:55:21 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 15:55:21 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 15:59:53 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 15:59:53 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 15:59:54 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:02:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:04:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:04:16 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:04:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:04:20 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:04:20 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:04:20 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:04:27 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:04:27 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:04:27 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:04:39 --> 404 Page Not Found: staf/Mahasiswa/index
+ERROR - 2025-07-24 16:09:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:09:42 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:09:43 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:14:44 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:14:44 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:14:45 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:19:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:19:47 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:19:47 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:24:48 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:24:48 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:24:49 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:29:51 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:29:51 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:29:51 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:34:53 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:34:53 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:34:53 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:39:54 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:39:54 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:39:55 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:44:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:44:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:44:57 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:49:58 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:49:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:49:59 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 16:55:00 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 16:55:00 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 16:55:01 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:00:02 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:00:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:00:02 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:05:04 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:05:04 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:05:04 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:10:06 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:10:06 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:10:06 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:12:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:12:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:12:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:12:30 --> 404 Page Not Found: staf/Seminar_skripsi/index
+ERROR - 2025-07-24 17:12:47 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 17:12:55 --> 404 Page Not Found: staf/Seminar_skripsi/index
+ERROR - 2025-07-24 17:12:57 --> Query error: Unknown column 'validasi_kaprodi_publikasi' in 'where clause' - Invalid query: SELECT COUNT(*) AS `numrows`
+FROM `proposal_mahasiswa`
+WHERE `validasi_kaprodi_publikasi` = '1'
+AND `workflow_status` = 'selesai'
+ERROR - 2025-07-24 17:13:31 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 17:13:55 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:13:55 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:13:55 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:18:30 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:18:30 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:18:30 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:18:38 --> 404 Page Not Found: staf/Profil/index
+ERROR - 2025-07-24 17:19:24 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 17:26:44 --> Query error: Unknown column 'hp.status_surat_izin' in 'field list' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d`.`nama` as `nama_pembimbing`, `hp`.`status_surat_izin`, `hp`.`file_surat_izin`, `hp`.`tanggal_pengajuan_penelitian`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+LEFT JOIN `hasil_penelitian` `hp` ON `pm`.`id` = `hp`.`proposal_id`
+WHERE `pm`.`workflow_status` IN('penelitian', 'seminar_skripsi', 'publikasi', 'selesai')
+ORDER BY `hp`.`tanggal_pengajuan_penelitian` DESC
+ERROR - 2025-07-24 17:30:05 --> Query error: Unknown column 'jb.mahasiswa_id' in 'on clause' - Invalid query: SELECT `m`.`id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `pm`.`judul`, `pm`.`workflow_status`, `pm`.`created_at`, `d`.`nama` as `nama_pembimbing`, COUNT(jb.id) as total_bimbingan, MAX(jb.tanggal_bimbingan) as bimbingan_terakhir
+FROM `mahasiswa` `m`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `m`.`id` = `pm`.`mahasiswa_id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+LEFT JOIN `jurnal_bimbingan` `jb` ON `m`.`id` = `jb`.`mahasiswa_id`
+GROUP BY `m`.`id`
+ORDER BY `bimbingan_terakhir` DESC
+ERROR - 2025-07-24 17:30:14 --> Query error: Unknown column 'jb.mahasiswa_id' in 'on clause' - Invalid query: SELECT `m`.`id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `pm`.`judul`, `pm`.`workflow_status`, `pm`.`created_at`, `d`.`nama` as `nama_pembimbing`, COUNT(jb.id) as total_bimbingan, MAX(jb.tanggal_bimbingan) as bimbingan_terakhir
+FROM `mahasiswa` `m`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `m`.`id` = `pm`.`mahasiswa_id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+LEFT JOIN `jurnal_bimbingan` `jb` ON `m`.`id` = `jb`.`mahasiswa_id`
+GROUP BY `m`.`id`
+ORDER BY `bimbingan_terakhir` DESC
+ERROR - 2025-07-24 17:30:17 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:30:17 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:30:17 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:30:18 --> Query error: Unknown column 'jb.mahasiswa_id' in 'on clause' - Invalid query: SELECT `m`.`id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `pm`.`judul`, `pm`.`workflow_status`, `pm`.`created_at`, `d`.`nama` as `nama_pembimbing`, COUNT(jb.id) as total_bimbingan, MAX(jb.tanggal_bimbingan) as bimbingan_terakhir
+FROM `mahasiswa` `m`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `m`.`id` = `pm`.`mahasiswa_id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+LEFT JOIN `jurnal_bimbingan` `jb` ON `m`.`id` = `jb`.`mahasiswa_id`
+GROUP BY `m`.`id`
+ORDER BY `bimbingan_terakhir` DESC
+ERROR - 2025-07-24 17:31:00 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:31:00 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:31:00 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:31:12 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:31:12 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:31:12 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:31:15 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 17:31:39 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 17:32:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:32:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:32:10 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:32:17 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:32:17 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:32:17 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:34:33 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:34:33 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:34:33 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:35:35 --> 404 Page Not Found: staf/Bimbingan/export_all
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 12
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nama" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 12
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 100
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nama_prodi" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 100
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 105
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nama" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 105
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 108
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nim" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 108
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 111
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nama_prodi" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 111
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 114
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "judul" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 114
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 117
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nama_pembimbing" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 117
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 120
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "workflow_status" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 120
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 193
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nama" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 193
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 194
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nim" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 194
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 199
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nama_pembimbing" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 199
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Undefined variable $mahasiswa /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 207
+ERROR - 2025-07-24 17:36:42 --> Severity: Warning --> Attempt to read property "nama_prodi" on null /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/pdf_jurnal.php 207
+ERROR - 2025-07-24 17:39:36 --> 404 Page Not Found: staf/Bimbingan/export_all
+ERROR - 2025-07-24 17:44:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:44:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:44:14 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:44:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:44:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:44:16 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:44:23 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:44:23 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:44:23 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:44:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:44:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:44:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:44:31 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:44:31 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:44:31 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:44:35 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:44:35 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:44:35 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:46:25 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:46:25 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:46:25 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:46:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:46:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:46:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:46:27 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:46:27 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:46:27 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:46:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:46:57 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:46:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:47:08 --> Severity: Warning --> Undefined property: stdClass::$email /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/detail.php 34
+ERROR - 2025-07-24 17:47:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:47:08 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:47:08 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:53:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:53:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:53:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:53:28 --> Unable to load the requested class: Excel
+ERROR - 2025-07-24 17:53:55 --> Unable to load the requested class: Excel
+ERROR - 2025-07-24 17:58:36 --> Severity: Warning --> Undefined property: stdClass::$email /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/detail.php 34
+ERROR - 2025-07-24 17:58:40 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:58:40 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:58:40 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 17:58:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 17:58:42 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 17:58:42 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 18:04:38 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 18:04:38 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 18:04:38 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 18:08:38 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 18:08:38 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 18:08:38 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 18:12:19 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 18:12:19 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 18:12:19 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 18:32:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 18:32:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 18:32:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 18:35:24 --> Query error: Cannot add or update a child row: a foreign key constraint fails (`stkp7133_skripsi`.`jurnal_bimbingan`, CONSTRAINT `fk_jurnal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE) - Invalid query: INSERT INTO `jurnal_bimbingan` (`proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `tindak_lanjut`, `status_validasi`, `created_by`, `created_at`) VALUES ('41', '1', '2025-07-24', 'Latar belakang masalah 1', 'lanjutkan', '0', 'mahasiswa', '2025-07-24 18:35:24')
+ERROR - 2025-07-24 18:36:03 --> Query error: Cannot add or update a child row: a foreign key constraint fails (`stkp7133_skripsi`.`jurnal_bimbingan`, CONSTRAINT `fk_jurnal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE) - Invalid query: INSERT INTO `jurnal_bimbingan` (`proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `tindak_lanjut`, `status_validasi`, `created_by`, `created_at`) VALUES ('41', '1', '2025-07-24', 'Latar belakang masalah 1', 'lanjutkan', '0', 'mahasiswa', '2025-07-24 18:36:03')
+ERROR - 2025-07-24 19:05:08 --> Query error: Unknown column 'CASE jb.status_validasi WHEN "0" THEN "Pending" WHEN "1" THEN "Valid" WHEN "2" THEN "Revisi" ELSE "Unknown" END' in 'field list' - Invalid query: SELECT `jb`.`id`, `jb`.`proposal_id`, `pm`.`id` as `proposal_exists`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `jb`.`pertemuan_ke`, `jb`.`tanggal_bimbingan`, `jb`.`status_validasi`, `CASE jb`.`status_validasi WHEN "0" THEN "Pending" WHEN "1" THEN "Valid" WHEN "2" THEN "Revisi" ELSE "Unknown" END` as `status_text`
+FROM `jurnal_bimbingan` `jb`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `jb`.`proposal_id` = `pm`.`id`
+LEFT JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+ORDER BY `jb`.`proposal_id`, `jb`.`pertemuan_ke`
+ERROR - 2025-07-24 19:05:08 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/Debug_database.php:19) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-24 19:08:47 --> Query error: Cannot add or update a child row: a foreign key constraint fails (`stkp7133_skripsi`.`jurnal_bimbingan`, CONSTRAINT `fk_jurnal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE) - Invalid query: INSERT INTO `jurnal_bimbingan` (`proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `tindak_lanjut`, `status_validasi`, `created_by`, `created_at`) VALUES ('41', '1', '2025-07-24', 'Tes saja', 'Tes saja', '0', 'mahasiswa', '2025-07-24 19:08:47')
+ERROR - 2025-07-24 19:11:15 --> Query error: Cannot add or update a child row: a foreign key constraint fails (`stkp7133_skripsi`.`jurnal_bimbingan`, CONSTRAINT `fk_jurnal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE) - Invalid query: INSERT INTO `jurnal_bimbingan` (`proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `tindak_lanjut`, `status_validasi`, `created_by`, `created_at`) VALUES ('41', '1', '2025-07-24', 'Tes saja', 'Tes saja', '0', 'mahasiswa', '2025-07-24 19:11:15')
+ERROR - 2025-07-24 19:11:52 --> Query error: Cannot add or update a child row: a foreign key constraint fails (`stkp7133_skripsi`.`jurnal_bimbingan`, CONSTRAINT `fk_jurnal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE) - Invalid query: INSERT INTO `jurnal_bimbingan` (`proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `tindak_lanjut`, `status_validasi`, `created_by`, `created_at`) VALUES ('41', '1', '2025-07-24', 'Tes saja', 'Tes saja', '0', 'mahasiswa', '2025-07-24 19:11:52')
+ERROR - 2025-07-24 19:28:55 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-24 19:28:58 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 19:28:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 19:28:58 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 19:29:00 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 19:29:00 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 19:29:00 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 19:29:07 --> Severity: Warning --> Undefined property: stdClass::$email /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/detail.php 34
+ERROR - 2025-07-24 19:29:07 --> Severity: Warning --> Undefined property: stdClass::$catatan_pembimbing /home/stkp7133/public_html/skripsi/application/views/staf/bimbingan/detail.php 143
+ERROR - 2025-07-24 19:29:07 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 19:29:07 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 19:29:07 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 19:29:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-24 19:29:14 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-24 19:29:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-24 19:50:07 --> 404 Page Not Found: Cdn/img

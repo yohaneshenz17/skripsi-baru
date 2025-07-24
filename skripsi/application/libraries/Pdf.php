@@ -1,38 +1,46 @@
 <?php
-// File: application/libraries/Pdf.php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 require_once(APPPATH . 'third_party/tcpdf/tcpdf.php');
 
+/**
+ * PDF Library using TCPDF
+ * Wrapper class untuk TCPDF di CodeIgniter
+ */
 class Pdf extends TCPDF {
     
     public $filename = '';
     
-    public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
-        parent::__construct($orientation, $unit, $format, $unicode, $encoding, $diskcache, $pdfa);
+    public function __construct() {
+        parent::__construct(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         
-        // Set default properties
-        $this->SetCreator('SIM-TA STK St. Yakobus');
-        $this->SetAuthor('STK St. Yakobus');
+        // Set document information
+        $this->SetCreator(PDF_CREATOR);
+        $this->SetAuthor('STK Santo Yakobus');
         $this->SetTitle('Dokumen SIM-TA');
         $this->SetSubject('Sistem Informasi Manajemen Tugas Akhir');
-        $this->SetKeywords('TCPDF, PDF, STK, Tugas Akhir');
         
-        // Set default header/footer
-        $this->setPrintHeader(false);
-        $this->setPrintFooter(false);
+        // Set default header and footer fonts
+        $this->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+        $this->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+        
+        // Set default monospaced font
+        $this->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
         
         // Set margins
-        $this->SetMargins(20, 20, 20);
-        $this->SetAutoPageBreak(TRUE, 20);
+        $this->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        $this->SetHeaderMargin(PDF_MARGIN_HEADER);
+        $this->SetFooterMargin(PDF_MARGIN_FOOTER);
+        
+        // Set auto page breaks
+        $this->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
         
         // Set image scale factor
         $this->setImageScale(PDF_IMAGE_SCALE_RATIO);
         
-        // Set font
-        $this->SetFont('times', '', 12);
-        
-        $this->filename = 'document_' . date('Y-m-d_H-i-s') . '.pdf';
+        // Remove default header/footer
+        $this->setPrintHeader(false);
+        $this->setPrintFooter(false);
     }
     
     /**
@@ -44,61 +52,23 @@ class Pdf extends TCPDF {
     }
     
     /**
-     * Render PDF
+     * Output PDF to browser
      */
-    public function render() {
-        // PDF is ready to be output
-        return true;
+    public function stream($filename = 'document.pdf', $options = array()) {
+        $this->Output($filename, 'I');
     }
     
     /**
-     * Stream PDF to browser
+     * Download PDF
      */
-    public function stream($filename = null, $options = array()) {
-        if ($filename) {
-            $this->filename = $filename;
-        }
-        
-        $attachment = isset($options['Attachment']) ? $options['Attachment'] : false;
-        $dest = $attachment ? 'D' : 'I';
-        
-        $this->Output($this->filename, $dest);
+    public function download($filename = 'document.pdf') {
+        $this->Output($filename, 'D');
     }
     
     /**
      * Save PDF to file
      */
-    public function save($path) {
-        $this->Output($path, 'F');
-        return file_exists($path);
-    }
-    
-    /**
-     * Get PDF as string
-     */
-    public function output_string() {
-        return $this->Output('', 'S');
-    }
-    
-    /**
-     * Custom header for STK documents
-     */
-    public function setCustomHeader($title = '', $subtitle = '') {
-        $this->setPrintHeader(true);
-        $this->setHeaderFont(Array('times', 'B', 14));
-        $this->setHeaderData('', 0, $title, $subtitle);
-    }
-    
-    /**
-     * Custom footer for STK documents
-     */
-    public function setCustomFooter($text = '') {
-        $this->setPrintFooter(true);
-        $this->setFooterFont(Array('times', '', 10));
-        $this->setFooterData(array(0,0,0), array(0,0,0));
-        
-        if ($text) {
-            $this->setFooterMargin(15);
-        }
+    public function save($filepath) {
+        $this->Output($filepath, 'F');
     }
 }

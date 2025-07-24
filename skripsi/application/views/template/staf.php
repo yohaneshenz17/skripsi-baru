@@ -89,6 +89,13 @@ $uri_string = str_replace("staf/", "", uri_string());
       padding: 6px 15px;
       font-size: 13px;
     }
+    
+    /* Pastikan icon workflow tampil */
+    .workflow-icon {
+      width: 16px;
+      text-align: center;
+      margin-right: 8px;
+    }
   </style>
   
   <!-- Custom CSS -->
@@ -132,31 +139,32 @@ $uri_string = str_replace("staf/", "", uri_string());
                 <ul class="nav nav-sm flex-column">
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/bimbingan" class="nav-link <?= strpos($uri_string, 'bimbingan') !== false ? 'active' : '' ?>">
-                      <i class="fas fa-book-open"></i>
+                      <i class="fas fa-book-open workflow-icon text-info"></i>
                       <span class="nav-link-text">Bimbingan</span>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/seminar-proposal" class="nav-link <?= strpos($uri_string, 'seminar_proposal') !== false ? 'active' : '' ?>">
-                      <i class="fas fa-presentation"></i>
+                      <!-- FIXED: Gunakan icon yang lebih kompatibel untuk Seminar Proposal -->
+                      <i class="fas fa-chalkboard workflow-icon text-success"></i>
                       <span class="nav-link-text">Seminar Proposal</span>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/penelitian" class="nav-link <?= strpos($uri_string, 'penelitian') !== false ? 'active' : '' ?>">
-                      <i class="fas fa-search"></i>
+                      <i class="fas fa-search workflow-icon text-primary"></i>
                       <span class="nav-link-text">Penelitian</span>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/seminar-skripsi" class="nav-link <?= strpos($uri_string, 'seminar_skripsi') !== false ? 'active' : '' ?>">
-                      <i class="fas fa-graduation-cap"></i>
+                      <i class="fas fa-graduation-cap workflow-icon text-warning"></i>
                       <span class="nav-link-text">Seminar Skripsi</span>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/publikasi" class="nav-link <?= strpos($uri_string, 'publikasi') !== false ? 'active' : '' ?>">
-                      <i class="fas fa-globe"></i>
+                      <i class="fas fa-globe workflow-icon text-danger"></i>
                       <span class="nav-link-text">Publikasi</span>
                     </a>
                   </li>

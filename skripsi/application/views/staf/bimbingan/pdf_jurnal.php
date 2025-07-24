@@ -1,7 +1,8 @@
 <?php
 // ========================================
-// 1. JURNAL BIMBINGAN PDF TEMPLATE
+// PDF JURNAL BIMBINGAN TEMPLATE - FIXED 16 ROWS
 // File: application/views/staf/bimbingan/pdf_jurnal.php
+// FIXED: 16 baris bimbingan & field names sesuai database
 // ========================================
 ?>
 
@@ -9,152 +10,483 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Jurnal Bimbingan</title>
+    <title>Jurnal Bimbingan - <?= $proposal->nama_mahasiswa ?></title>
     <style>
         body {
             font-family: 'Times New Roman', serif;
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.4;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
+            color: #333;
         }
+        
+        /* Header dengan Logo */
         .header {
-            text-align: center;
+            width: 100%;
             margin-bottom: 30px;
-            border-bottom: 3px solid #000;
+            border-bottom: 3px solid #2c5aa0;
             padding-bottom: 20px;
         }
-        .logo {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 10px;
+        
+        .header-content {
+            display: table;
+            width: 100%;
         }
-        .title {
+        
+        .logo-section {
+            display: table-cell;
+            width: 120px;
+            vertical-align: top;
+            text-align: center;
+            padding-right: 20px;
+        }
+        
+        .logo-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+        
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+        
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            color: #2c5aa0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .header-subtitle {
             font-size: 16px;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 0 0 3px 0;
+            color: #333;
         }
-        .subtitle {
+        
+        .header-prodi {
             font-size: 14px;
-            margin: 5px 0;
+            margin: 0;
+            color: #666;
+            font-style: italic;
         }
+        
+        .header-address {
+            font-size: 11px;
+            margin: 5px 0 0 0;
+            color: #666;
+            text-align: center;
+        }
+        
+        /* Info Mahasiswa */
         .info-mahasiswa {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
         }
-        .info-row {
-            margin-bottom: 5px;
-        }
-        .label {
+        
+        .info-title {
+            font-size: 14px;
             font-weight: bold;
-            display: inline-block;
-            width: 150px;
+            margin-bottom: 10px;
+            color: #2c5aa0;
+            border-bottom: 1px solid #2c5aa0;
+            padding-bottom: 5px;
         }
-        .table-jurnal {
+        
+        .info-row {
+            margin-bottom: 8px;
+            display: table;
+            width: 100%;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            display: table-cell;
+            width: 180px;
+            vertical-align: top;
+            color: #555;
+        }
+        
+        .info-value {
+            display: table-cell;
+            color: #333;
+        }
+        
+        /* Tabel Jurnal */
+        .jurnal-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 30px 0 15px 0;
+            color: #2c5aa0;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .jurnal-subtitle {
+            font-size: 12px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .jurnal-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin: 20px 0;
+            font-size: 11px;
         }
-        .table-jurnal th,
-        .table-jurnal td {
-            border: 1px solid #000;
-            padding: 8px;
+        
+        .jurnal-table th,
+        .jurnal-table td {
+            border: 1px solid #333;
+            padding: 8px 6px;
             text-align: left;
             vertical-align: top;
         }
-        .table-jurnal th {
-            background-color: #f0f0f0;
+        
+        .jurnal-table th {
+            background-color: #2c5aa0;
+            color: white;
             font-weight: bold;
             text-align: center;
+            font-size: 11px;
         }
-        .footer {
+        
+        .no-column {
+            width: 4%;
+            text-align: center;
+        }
+        
+        .tanggal-column {
+            width: 12%;
+            text-align: center;
+        }
+        
+        .materi-column {
+            width: 40%;
+        }
+        
+        .catatan-column {
+            width: 30%;
+        }
+        
+        .status-column {
+            width: 14%;
+            text-align: center;
+        }
+        
+        /* Row styling */
+        .jurnal-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .jurnal-table tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+        
+        .status-valid {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .status-revisi {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        /* Signature Area */
+        .signature-area {
             margin-top: 40px;
-            text-align: right;
+            page-break-inside: avoid;
         }
-        .signature {
-            margin-top: 50px;
+        
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .page-break {
-            page-break-after: always;
+        
+        .signature-table td {
+            padding: 20px;
+            text-align: center;
+            vertical-align: top;
+            width: 33.33%;
+        }
+        
+        .signature-title {
+            font-weight: bold;
+            margin-bottom: 60px;
+            color: #333;
+        }
+        
+        .signature-name {
+            border-bottom: 1px solid #333;
+            padding-bottom: 2px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .signature-nip {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        /* Footer */
+        .footer-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            line-height: 1.5;
+        }
+        
+        .footer-info .generated-info {
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        
+        .footer-info .copyright {
+            font-weight: bold;
+            color: #2c5aa0;
+        }
+        
+        /* Print specific styles */
+        @media print {
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            
+            .header {
+                margin-bottom: 20px;
+            }
+            
+            .signature-area {
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
+
 <body>
+    <!-- Header dengan Logo Kampus -->
     <div class="header">
-        <div class="title">JURNAL BIMBINGAN TUGAS AKHIR</div>
-        <div class="subtitle">SEKOLAH TINGGI KEGURUAN ST. YAKOBUS</div>
-        <div class="subtitle">PROGRAM STUDI <?= strtoupper($proposal->nama_prodi) ?></div>
+        <div class="header-content">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <img src="https://stkyakobus.ac.id/skripsi/cdn/img/icons/20250703062346.png" 
+                     alt="Logo STK Santo Yakobus" 
+                     class="logo-img">
+            </div>
+            
+            <!-- Header Text -->
+            <div class="header-text">
+                <div class="header-title">Jurnal Bimbingan Tugas Akhir</div>
+                <div class="header-subtitle">Sekolah Tinggi Katolik Santo Yakobus Merauke</div>
+                <div class="header-prodi">Program Studi <?= $proposal->nama_prodi ?></div>
+                <div class="header-address">
+                    Jl. Missi 2, Mandala, Merauke, Papua Selatan<br>
+                    Telp. (0971) 3330264 | Email: sipd@stkyakobus.ac.id
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Informasi Mahasiswa -->
     <div class="info-mahasiswa">
+        <div class="info-title">📋 Informasi Mahasiswa dan Tugas Akhir</div>
+        
         <div class="info-row">
-            <span class="label">Nama Mahasiswa</span>: <?= $proposal->nama_mahasiswa ?>
+            <div class="info-label">Nama Mahasiswa</div>
+            <div class="info-value">: <strong><?= $proposal->nama_mahasiswa ?></strong></div>
         </div>
+        
         <div class="info-row">
-            <span class="label">NIM</span>: <?= $proposal->nim ?>
+            <div class="info-label">NIM</div>
+            <div class="info-value">: <strong><?= $proposal->nim ?></strong></div>
         </div>
+        
         <div class="info-row">
-            <span class="label">Program Studi</span>: <?= $proposal->nama_prodi ?>
+            <div class="info-label">Program Studi</div>
+            <div class="info-value">: <?= $proposal->nama_prodi ?></div>
         </div>
+        
         <div class="info-row">
-            <span class="label">Judul Tugas Akhir</span>: <?= $proposal->judul ?>
+            <div class="info-label">Judul Tugas Akhir</div>
+            <div class="info-value">: <em><?= $proposal->judul ?: 'Belum ditentukan' ?></em></div>
         </div>
+        
         <div class="info-row">
-            <span class="label">Dosen Pembimbing</span>: <?= $proposal->nama_pembimbing ?>
+            <div class="info-label">Dosen Pembimbing</div>
+            <div class="info-value">: <strong><?= $proposal->nama_pembimbing ?: 'Belum ditentukan' ?></strong></div>
         </div>
+        
         <div class="info-row">
-            <span class="label">NIP Pembimbing</span>: <?= $proposal->nip_pembimbing ?>
+            <div class="info-label">Status Workflow</div>
+            <div class="info-value">: <?= ucfirst(str_replace('_', ' ', $proposal->workflow_status)) ?></div>
         </div>
     </div>
 
-    <table class="table-jurnal">
+    <!-- Judul Tabel -->
+    <div class="jurnal-title">📚 Riwayat Bimbingan Tugas Akhir</div>
+    <div class="jurnal-subtitle">
+        Minimal 16 pertemuan bimbingan diperlukan untuk menyelesaikan tugas akhir<br>
+        Status: ✓ Valid (Disetujui Dosen) | ⏳ Pending (Menunggu Validasi) | ⚠️ Revisi (Perlu Perbaikan)
+    </div>
+
+    <!-- Tabel Jurnal Bimbingan -->
+    <table class="jurnal-table">
         <thead>
             <tr>
-                <th width="5%">No</th>
-                <th width="15%">Tanggal</th>
-                <th width="25%">Materi Bimbingan</th>
-                <th width="25%">Catatan Pembimbing</th>
-                <th width="15%">Status</th>
-                <th width="15%">Paraf Pembimbing</th>
+                <th class="no-column">No</th>
+                <th class="tanggal-column">Tanggal</th>
+                <th class="materi-column">Materi Bimbingan</th>
+                <th class="catatan-column">Catatan Pembimbing</th>
+                <th class="status-column">Status</th>
             </tr>
         </thead>
         <tbody>
             <?php if(!empty($jurnal_bimbingan)): ?>
-                <?php $no = 1; foreach($jurnal_bimbingan as $jurnal): ?>
+                <?php $no = 1; ?>
+                <?php foreach($jurnal_bimbingan as $jurnal): ?>
                     <tr>
-                        <td style="text-align: center;"><?= $no++ ?></td>
-                        <td><?= date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)) ?></td>
-                        <td><?= $jurnal->materi_bimbingan ?></td>
-                        <td><?= $jurnal->catatan_pembimbing ?: '-' ?></td>
-                        <td style="text-align: center;">
-                            <?= $jurnal->status_validasi == '1' ? 'Valid' : 'Pending' ?>
+                        <td class="no-column"><?= $no++ ?></td>
+                        <td class="tanggal-column">
+                            <?= date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)) ?>
                         </td>
-                        <td style="text-align: center;">
-                            <?= $jurnal->status_validasi == '1' ? '✓' : '-' ?>
+                        <td class="materi-column">
+                            <?= nl2br(htmlspecialchars($jurnal->materi_bimbingan)) ?>
+                            <?php if (!empty($jurnal->catatan_mahasiswa)): ?>
+                                <br><em><small>Catatan mahasiswa: <?= htmlspecialchars($jurnal->catatan_mahasiswa) ?></small></em>
+                            <?php endif; ?>
+                        </td>
+                        <td class="catatan-column">
+                            <?= nl2br(htmlspecialchars($jurnal->catatan_dosen ?: '-')) ?>
+                            <?php if (!empty($jurnal->tindak_lanjut)): ?>
+                                <br><strong><small>Tindak lanjut: <?= htmlspecialchars($jurnal->tindak_lanjut) ?></small></strong>
+                            <?php endif; ?>
+                        </td>
+                        <td class="status-column">
+                            <?php if($jurnal->status_validasi == '1'): ?>
+                                <span class="status-valid">✓ VALID</span><br>
+                                <small><?= $jurnal->tanggal_validasi ? date('d/m/Y', strtotime($jurnal->tanggal_validasi)) : '' ?></small>
+                            <?php elseif($jurnal->status_validasi == '2'): ?>
+                                <span class="status-revisi">⚠️ REVISI</span><br>
+                                <small>Perlu perbaikan</small>
+                            <?php else: ?>
+                                <span class="status-pending">⏳ PENDING</span><br>
+                                <small>Menunggu validasi</small>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
+                
+                <!-- FIXED: Tambahkan baris kosong untuk mencapai 16 total -->
+                <?php 
+                $sisa_baris = 16 - count($jurnal_bimbingan);
+                for($i = 0; $i < $sisa_baris; $i++): 
+                ?>
+                    <tr>
+                        <td class="no-column"><?= $no + $i ?></td>
+                        <td class="tanggal-column">___________</td>
+                        <td class="materi-column">&nbsp;</td>
+                        <td class="catatan-column">&nbsp;</td>
+                        <td class="status-column">&nbsp;</td>
+                    </tr>
+                <?php endfor; ?>
             <?php else: ?>
-                <tr>
-                    <td colspan="6" style="text-align: center; font-style: italic;">
-                        Belum ada jurnal bimbingan
-                    </td>
-                </tr>
+                <!-- FIXED: Jika belum ada jurnal, tampilkan 16 baris kosong -->
+                <?php for($i = 1; $i <= 16; $i++): ?>
+                    <tr>
+                        <td class="no-column"><?= $i ?></td>
+                        <td class="tanggal-column">___________</td>
+                        <td class="materi-column">&nbsp;</td>
+                        <td class="catatan-column">&nbsp;</td>
+                        <td class="status-column">&nbsp;</td>
+                    </tr>
+                <?php endfor; ?>
             <?php endif; ?>
         </tbody>
     </table>
 
-    <div class="footer">
-        <div>Jakarta, <?= date('d F Y') ?></div>
-        <div class="signature">
-            <div>Dosen Pembimbing</div>
-            <br><br><br>
-            <div><u><?= $proposal->nama_pembimbing ?></u></div>
-            <div>NIP. <?= $proposal->nip_pembimbing ?></div>
+    <!-- Summary Box -->
+    <div style="background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; margin: 20px 0; border-radius: 5px;">
+        <div style="font-weight: bold; color: #2c5aa0; margin-bottom: 10px;">📊 Ringkasan Bimbingan:</div>
+        <div style="font-size: 11px; line-height: 1.6;">
+            <?php 
+            $total_bimbingan = count($jurnal_bimbingan);
+            $total_valid = 0;
+            $total_pending = 0;
+            $total_revisi = 0;
+            
+            foreach ($jurnal_bimbingan as $jurnal) {
+                if ($jurnal->status_validasi == '1') $total_valid++;
+                elseif ($jurnal->status_validasi == '2') $total_revisi++;
+                else $total_pending++;
+            }
+            ?>
+            • <strong>Total Pertemuan:</strong> <?= $total_bimbingan ?> dari 16 minimal yang diperlukan<br>
+            • <strong>Status:</strong> <?= $total_valid ?> Valid | <?= $total_pending ?> Pending | <?= $total_revisi ?> Perlu Revisi<br>
+            • <strong>Progress:</strong> <?= $total_bimbingan >= 16 ? '✅ Memenuhi syarat minimal' : '⚠️ Masih perlu ' . (16 - $total_bimbingan) . ' pertemuan lagi' ?>
         </div>
     </div>
 
-    <div style="margin-top: 30px; font-size: 10px; color: #666;">
-        <em>Dokumen ini digenerate oleh <?= $generated_by ?> pada <?= $generated_at ?></em>
+    <!-- Area Tanda Tangan -->
+    <div class="signature-area">
+        <div style="text-align: right; margin-bottom: 20px;">
+            Merauke, <?= date('d F Y') ?>
+        </div>
+        
+        <table class="signature-table">
+            <tr>
+                <td>
+                    <div class="signature-title">Mahasiswa</div>
+                    <div class="signature-name"><?= $proposal->nama_mahasiswa ?></div>
+                    <div class="signature-nip">NIM. <?= $proposal->nim ?></div>
+                </td>
+                <td>
+                    <div class="signature-title">Dosen Pembimbing</div>
+                    <div class="signature-name"><?= $proposal->nama_pembimbing ?: '______________________' ?></div>
+                    <div class="signature-nip">NIDN. <?= isset($proposal->nip_pembimbing) ? $proposal->nip_pembimbing : '______________________' ?></div>
+                </td>
+                <td>
+                    <div class="signature-title">Ketua Program Studi</div>
+                    <div class="signature-name">_______________________</div>
+                    <div class="signature-nip">NIDN. ___________________</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="footer-info">
+        <div class="generated-info">
+            📄 Dokumen ini digenerate secara otomatis oleh <strong><?= $generated_by ?></strong> pada <strong><?= $generated_at ?></strong><br>
+            📊 Total Bimbingan: <strong><?= count($jurnal_bimbingan) ?> sesi</strong> | 
+            📈 Status Workflow: <strong><?= ucfirst(str_replace('_', ' ', $proposal->workflow_status)) ?></strong><br>
+            🎯 Target Minimal: <strong>16 pertemuan bimbingan</strong> untuk menyelesaikan tugas akhir
+        </div>
+        <div class="copyright">
+            © <?= date('Y') ?> Sekolah Tinggi Katolik Santo Yakobus Merauke<br>
+            Sistem Informasi Manajemen Tugas Akhir (SIM-TA)
+        </div>
     </div>
 </body>
 </html>

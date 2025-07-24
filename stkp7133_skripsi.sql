@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 24, 2025 at 03:40 PM
+-- Generation Time: Jul 24, 2025 at 06:39 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -629,7 +629,7 @@ CREATE TABLE `proposal_mahasiswa` (
 INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
 (36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', '2025-07-18 10:21:14', 25, 1, NULL, NULL, '0', '1', 'Proposal sudah baik dan bisa langsung mulai bimbingan. Terimakasih', '2025-07-17 17:18:16', '1', 'Baik saya menerima', '2025-07-23 17:55:14', NULL, NULL, NULL, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '2025-07-23 17:45:02', 10, 'Dosen pembimbing sebelumnya () menolak penunjukan. Menetapkan dosen pembimbing baru untuk melanjutkan proses bimbingan mahasiswa.', 0, '0', NULL, NULL, NULL),
 (37, 33, 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'd2ff01bd1f6cb9b54d4059526a3fb112.docx', '2025-07-18 10:21:14', 26, 1, NULL, NULL, '0', '1', 'Lanjutkan', '2025-07-23 18:35:54', '1', 'Ya saya setuju membimbing ', '2025-07-23 19:25:53', NULL, '2025-07-23 18:35:54', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
-(41, 42, 'Pengaruh Tes Saja', 'Pengaruh Tes Saja', 'Kuantitatif', 'Merauke', 'Pengaruh Tes Saja', '68795a1fa5ea2fa268d3bfe05362db14.docx', '2025-07-23 19:10:29', 25, 1, NULL, NULL, '0', '1', 'Lanjutkan bimbingan', '2025-07-23 19:11:52', '0', NULL, NULL, NULL, '2025-07-23 19:11:52', 10, '', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
+(41, 42, 'Pengaruh Tes Saja', 'Pengaruh Tes Saja', 'Kuantitatif', 'Merauke', 'Pengaruh Tes Saja', '68795a1fa5ea2fa268d3bfe05362db14.docx', '2025-07-23 19:10:29', 25, 1, NULL, NULL, '0', '1', 'Lanjutkan bimbingan', '2025-07-23 19:11:52', '1', 'Ok saya setuju\r\n', '2025-07-24 18:34:07', NULL, '2025-07-23 19:11:52', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -923,7 +923,13 @@ CREATE TABLE `staf_aktivitas` (
 --
 
 INSERT INTO `staf_aktivitas` (`id`, `staf_id`, `aktivitas`, `mahasiswa_id`, `proposal_id`, `keterangan`, `file_output`, `tanggal_aktivitas`) VALUES
-(1, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 12:25:03');
+(1, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 12:25:03'),
+(2, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:36:42'),
+(3, 29, 'export_jurnal', 32, 36, 'Export jurnal bimbingan mahasiswa Hendro Mahasiswa', NULL, '2025-07-24 17:37:38'),
+(4, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:47:18'),
+(5, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:48:27'),
+(6, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:49:50'),
+(7, 29, '', NULL, NULL, 'Export semua data bimbingan format Excel XML (2 records)', NULL, '2025-07-24 18:04:41');
 
 -- --------------------------------------------------------
 
@@ -1229,7 +1235,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`
@@ -1295,7 +1301,7 @@ ALTER TABLE `skripsi`
 -- AUTO_INCREMENT for table `staf_aktivitas`
 --
 ALTER TABLE `staf_aktivitas`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables

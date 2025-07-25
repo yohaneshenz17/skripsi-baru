@@ -1,6 +1,6 @@
 <?php
 // File: application/views/staf/bimbingan/index.php
-// FIXED - Menggunakan template staf untuk konsistensi sidebar
+// FIXED - Menggunakan template staf untuk konsistensi sidebar + JavaScript loading overlay diperbaiki
 
 // Capture content untuk template
 ob_start();
@@ -14,7 +14,9 @@ ob_start();
                 <i class="fas fa-book-open"></i>
             </div>
             <div>
-                <h2 class="mb-1 text-light font-weight-bold"><?= isset($title) ? $title : 'Monitoring Bimbingan' ?></h2>
+                <!-- FIXED: Menggunakan text-dark untuk kontras yang lebih baik -->
+                <h2 class="mb-1 text-dark font-weight-bold"><?= isset($title) ? $title : 'Monitoring Bimbingan' ?></h2>
+                <!-- FIXED: Menggunakan text-secondary dengan font-weight-medium untuk keterbacaan yang lebih baik -->
                 <p class="text-secondary mb-0 font-weight-medium">Kelola dan pantau jurnal bimbingan mahasiswa tugas akhir</p>
             </div>
         </div>
@@ -413,7 +415,7 @@ ob_start();
 <?php 
 $content = ob_get_clean();
 
-// Script untuk interaktivitas
+// FIXED: Script untuk interaktivitas dengan loading overlay yang diperbaiki
 ob_start();
 ?>
 <script>
@@ -460,9 +462,75 @@ function refreshData() {
     location.reload();
 }
 
-// Show loading when navigating
-$(document).on('click', 'a[href]:not([href="#"]):not([target="_blank"])', function() {
-    $('body').append('<div id="loading" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+// FIXED: Loading overlay yang lebih selektif dan aman
+$(document).on('click', 'a[href]', function(e) {
+    var $link = $(this);
+    var href = $link.attr('href');
+    var target = $link.attr('target');
+    
+    // EXCLUDE kondisi berikut dari loading overlay:
+    // 1. Link dengan href="#" (anchor links)
+    // 2. Link dengan target="_blank" (open new tab)
+    // 3. Link dengan data-toggle (Bootstrap components)
+    // 4. Link dengan class "no-loading" 
+    // 5. Dropdown toggle links
+    // 6. Links di dalam dropdown menus
+    
+    if (href === '#' || 
+        target === '_blank' || 
+        $link.attr('data-toggle') || 
+        $link.hasClass('no-loading') ||
+        $link.hasClass('dropdown-toggle') ||
+        $link.closest('.dropdown').length > 0 ||
+        $link.closest('[data-toggle]').length > 0 ||
+        href.indexOf('javascript:') === 0) {
+        // Jangan tampilkan loading untuk kondisi di atas
+        return;
+    }
+    
+    // Tampilkan loading overlay hanya untuk navigasi real
+    showLoadingOverlay();
+    
+    // Auto-remove loading overlay setelah 10 detik sebagai failsafe
+    setTimeout(function() {
+        removeLoadingOverlay();
+    }, 10000);
+});
+
+function showLoadingOverlay() {
+    // Hapus loading overlay yang mungkin sudah ada
+    removeLoadingOverlay();
+    
+    // Buat loading overlay baru
+    var loadingHtml = '<div id="loading-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;">' +
+                      '<div class="text-center text-white">' +
+                      '<div class="spinner-border text-light mb-3" role="status" style="width: 3rem; height: 3rem;">' +
+                      '<span class="sr-only">Loading...</span>' +
+                      '</div>' +
+                      '<div>Memuat halaman...</div>' +
+                      '</div>' +
+                      '</div>';
+    
+    $('body').append(loadingHtml);
+}
+
+function removeLoadingOverlay() {
+    $('#loading-overlay').remove();
+}
+
+// Remove loading overlay saat halaman selesai dimuat
+$(window).on('load', function() {
+    removeLoadingOverlay();
+});
+
+// Remove loading overlay saat browser back/forward
+$(window).on('pageshow', function() {
+    removeLoadingOverlay();
+});
+
+// Cleanup saat leave page
+$(window).on('beforeunload', function() {
+    removeLoadingOverlay();
 });
 </script>
 <?php 

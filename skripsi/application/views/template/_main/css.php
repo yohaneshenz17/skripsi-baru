@@ -96,6 +96,179 @@
         font-size: 1rem;
     }
 
+    /* ============================================
+       🔥 CRITICAL: HEADER CONTRAST FIX
+       ============================================ */
+    
+    /* FORCE HEADER BACKGROUND WITH HIGH SPECIFICITY */
+    html body div.main-content div.header.bg-primary,
+    body div.main-content div.header.bg-primary,
+    div.main-content div.header.bg-primary,
+    .main-content .header.bg-primary,
+    .header.bg-primary,
+    #panel .header.bg-primary {
+        background: #1a365d !important;
+        background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%) !important;
+        position: relative !important;
+    }
+    
+    /* FORCE TITLE COLOR WITH MAXIMUM SPECIFICITY */
+    html body div.main-content div.header.bg-primary h6.h2.text-white,
+    html body div.main-content div.header.bg-primary h6.h2,
+    html body div.main-content div.header.bg-primary .h2,
+    body .main-content .header.bg-primary h6.h2,
+    body .main-content .header.bg-primary .h2,
+    .main-content .header.bg-primary h6.h2.text-white,
+    .main-content .header.bg-primary h6.h2,
+    .main-content .header.bg-primary .h2,
+    .header.bg-primary h6.h2.text-white,
+    .header.bg-primary h6.h2,
+    .header.bg-primary .h2,
+    .header.bg-primary h6,
+    .header.bg-primary h1,
+    .header.bg-primary h2,
+    .header.bg-primary h3,
+    .header.bg-primary h4,
+    .header.bg-primary h5 {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: inline-block !important;
+        font-size: 1.5rem !important;
+        line-height: 1.3 !important;
+    }
+    
+    /* FORCE BREADCRUMB COLOR WITH MAXIMUM SPECIFICITY */
+    html body div.main-content div.header.bg-primary .breadcrumb-dark .breadcrumb-item,
+    body .main-content .header.bg-primary .breadcrumb-dark .breadcrumb-item,
+    .main-content .header.bg-primary .breadcrumb-dark .breadcrumb-item,
+    .header.bg-primary .breadcrumb-dark .breadcrumb-item,
+    .header.bg-primary .breadcrumb .breadcrumb-item,
+    .header.bg-primary nav .breadcrumb-item,
+    .header.bg-primary .breadcrumb-item {
+        color: rgba(255, 255, 255, 0.95) !important;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        font-weight: 500 !important;
+    }
+    
+    /* FORCE BREADCRUMB LINKS */
+    html body div.main-content div.header.bg-primary .breadcrumb-dark .breadcrumb-item a,
+    body .main-content .header.bg-primary .breadcrumb-dark .breadcrumb-item a,
+    .main-content .header.bg-primary .breadcrumb-dark .breadcrumb-item a,
+    .header.bg-primary .breadcrumb-dark .breadcrumb-item a,
+    .header.bg-primary .breadcrumb .breadcrumb-item a,
+    .header.bg-primary nav .breadcrumb-item a,
+    .header.bg-primary .breadcrumb-item a {
+        color: #ffffff !important;
+        text-decoration: none !important;
+        font-weight: 600 !important;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* FORCE BREADCRUMB ACTIVE */
+    html body div.main-content div.header.bg-primary .breadcrumb-dark .breadcrumb-item.active,
+    body .main-content .header.bg-primary .breadcrumb-dark .breadcrumb-item.active,
+    .main-content .header.bg-primary .breadcrumb-dark .breadcrumb-item.active,
+    .header.bg-primary .breadcrumb-dark .breadcrumb-item.active,
+    .header.bg-primary .breadcrumb .breadcrumb-item.active,
+    .header.bg-primary nav .breadcrumb-item.active,
+    .header.bg-primary .breadcrumb-item.active {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* FORCE BREADCRUMB SEPARATOR */
+    html body div.main-content div.header.bg-primary .breadcrumb-dark .breadcrumb-item + .breadcrumb-item::before,
+    body .main-content .header.bg-primary .breadcrumb-dark .breadcrumb-item + .breadcrumb-item::before,
+    .main-content .header.bg-primary .breadcrumb-dark .breadcrumb-item + .breadcrumb-item::before,
+    .header.bg-primary .breadcrumb-dark .breadcrumb-item + .breadcrumb-item::before,
+    .header.bg-primary .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        content: ">" !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-weight: 700 !important;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+    }
+    
+    /* FORCE HOME ICON */
+    html body div.main-content div.header.bg-primary .fas.fa-home,
+    body .main-content .header.bg-primary .fas.fa-home,
+    .main-content .header.bg-primary .fas.fa-home,
+    .header.bg-primary .fas.fa-home,
+    .header.bg-primary i.fas.fa-home {
+        color: #ffffff !important;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* FORCE BACK BUTTON */
+    html body div.main-content div.header.bg-primary .btn-neutral,
+    body .main-content .header.bg-primary .btn-neutral,
+    .main-content .header.bg-primary .btn-neutral,
+    .header.bg-primary .btn-neutral,
+    .header.bg-primary button.btn-neutral {
+        background-color: #ffffff !important;
+        color: #1a365d !important;
+        border: 2px solid #ffffff !important;
+        font-weight: 700 !important;
+        text-shadow: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .header.bg-primary .btn-neutral:hover {
+        background-color: #f7fafc !important;
+        color: #1a365d !important;
+        border-color: #f7fafc !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* NAVBAR TOP */
+    html body .navbar-top.bg-primary,
+    body .navbar-top.bg-primary,
+    .navbar-top.bg-primary {
+        background: #1a365d !important;
+        background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%) !important;
+    }
+    
+    /* NAVBAR USER TEXT */
+    html body .navbar-top.bg-primary .nav-link .media-body span,
+    body .navbar-top.bg-primary .nav-link .media-body span,
+    .navbar-top.bg-primary .nav-link .media-body span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* SEARCH FORM */
+    .navbar-top.bg-primary .navbar-search .input-group-text {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+        color: #ffffff !important;
+    }
+    
+    .navbar-top.bg-primary .navbar-search .form-control {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+        color: #ffffff !important;
+    }
+    
+    .navbar-top.bg-primary .navbar-search .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
     /* Badge improvements for Dashboard */
     .badge-soft-primary {
         color: #5e72e4;
@@ -323,6 +496,28 @@
 
         .navbar-vertical.navbar-collapse .navbar-nav .nav-link {
             padding: 0.875rem 1.5rem;
+        }
+        
+        /* Mobile header fixes */
+        .header.bg-primary h6.h2,
+        .header.bg-primary .h2 {
+            font-size: 1.25rem !important;
+        }
+        
+        .header.bg-primary .btn-neutral {
+            padding: 0.375rem 0.75rem !important;
+            font-size: 0.875rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .header.bg-primary h6.h2,
+        .header.bg-primary .h2 {
+            font-size: 1.1rem !important;
+        }
+        
+        .header.bg-primary .breadcrumb-dark {
+            display: none !important;
         }
     }
 

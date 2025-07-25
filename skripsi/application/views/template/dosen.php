@@ -11,17 +11,7 @@
   
   <?php include('_main/css.php') ?>
   
-  <!-- GUNAKAN STRUKTUR ESSENCE yang Anda inginkan -->
-  <?php if (isset($enhancement_css) && $enhancement_css === true): ?>
-  <link rel="stylesheet" href="<?= base_url('assets/essence/css/bimbingan.css') ?>">
-  <?php endif; ?>
-  
-  <!-- ALTERNATIF: Load CSS untuk halaman bimbingan -->
-  <?php if (strpos(uri_string(), 'bimbingan') !== false): ?>
-  <link rel="stylesheet" href="<?= base_url('assets/essence/css/bimbingan.css') ?>">
-  <?php endif; ?>
-  
-  <!-- PERBAIKAN: CSS untuk mengatasi container hitam -->
+  <!-- 🎯 INLINE CSS ONLY - NO EXTERNAL FILES -->
   <style>
     .admin {
       display: none;
@@ -31,55 +21,65 @@
       display: none;
     }
     
-    /* PERBAIKAN: Override container hitam menjadi light */
-    .toast-custom {
+    /* ============================================
+       🔥 HEADER CONTRAST FIX - INLINE ONLY
+       ============================================ */
+    
+    /* Header Background */
+    .header.bg-primary {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+      background-color: #1e3a8a !important;
+    }
+    
+    /* Title Header */
+    .header.bg-primary h6.h2,
+    .header.bg-primary .h2 {
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7) !important;
+    }
+    
+    /* Breadcrumb */
+    .header.bg-primary .breadcrumb-item,
+    .header.bg-primary .breadcrumb-item a {
+      color: rgba(255, 255, 255, 0.9) !important;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+    }
+    
+    .header.bg-primary .breadcrumb-item.active {
+      color: #ffffff !important;
+      font-weight: 600 !important;
+    }
+    
+    /* Home Icon */
+    .header.bg-primary .fas.fa-home {
+      color: #ffffff !important;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+    }
+    
+    /* Back Button */
+    .header.bg-primary .btn-neutral {
       background-color: #ffffff !important;
-      color: #495057 !important;
-      border: 1px solid #dee2e6 !important;
+      color: #1e3a8a !important;
+      border: 2px solid #ffffff !important;
+      font-weight: 600 !important;
     }
     
-    .modal-enhanced .modal-content {
-      background-color: #ffffff !important;
-      color: #495057 !important;
+    .header.bg-primary .btn-neutral:hover {
+      background-color: #f8fafc !important;
+      color: #1e3a8a !important;
     }
     
-    .card-enhanced {
-      background-color: #ffffff !important;
-      color: #495057 !important;
+    /* Navbar Top */
+    .navbar-top.bg-primary {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
     }
     
-    /* Pastikan semua container menggunakan background light */
-    .container-fluid,
-    .card,
-    .modal-content,
-    .dropdown-menu {
-      background-color: #ffffff !important;
-      color: #495057 !important;
-    }
-    
-    /* Fix untuk alert/notification */
-    .alert {
-      background-color: #f8f9fa !important;
-    }
-    
-    .alert-success {
-      background-color: #d4edda !important;
-      color: #155724 !important;
-    }
-    
-    .alert-danger {
-      background-color: #f8d7da !important;
-      color: #721c24 !important;
-    }
-    
-    .alert-warning {
-      background-color: #fff3cd !important;
-      color: #856404 !important;
-    }
-    
-    .alert-info {
-      background-color: #d1ecf1 !important;
-      color: #0c5460 !important;
+    /* User Name in Navbar */
+    .navbar-top.bg-primary .nav-link .media-body span {
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
     }
   </style>
 </head>
@@ -249,25 +249,38 @@
         </div>
       </div>
     </nav>
-    <!-- Header -->
-    <div class="header bg-primary pb-6">
+    
+    <!-- 🎯 Header with Inline Styles -->
+    <div class="header bg-primary pb-6" 
+         style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important; background-color: #1e3a8a !important;">
       <div class="container-fluid">
         <div class="header-body">
           <div class="row align-items-center py-4">
             <div class="col-lg-6 col-7">
-              <h6 class="h2 text-white d-inline-block mb-0"><?= $title ?></h6>
+              <h6 class="h2 text-white d-inline-block mb-0" 
+                  style="color: #ffffff !important; font-weight: 700 !important; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7) !important;">
+                <?= $title ?>
+              </h6>
               <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
-                <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
-                  <li class="breadcrumb-item"><a href="<?= base_url() ?>dosen/dashboard"><i class="fas fa-home"></i></a></li>
+                <ol class="breadcrumb breadcrumb-links breadcrumb-dark" style="background: transparent !important;">
+                  <li class="breadcrumb-item" 
+                      style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;">
+                    <a href="<?= base_url() ?>dosen/dashboard" 
+                       style="color: #ffffff !important; text-decoration: none !important; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;">
+                      <i class="fas fa-home" style="color: #ffffff !important; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;"></i>
+                    </a>
+                  </li>
                   <?php
                   $url = explode('/', str_replace("dosen/", "", uri_string()));
                   $link = '';
                   for ($i = 0; $i < count($url); $i++) {
                     $link .= $url[$i] . '/';
                     if (($i + 1) !== count($url)) {
-                      echo '<li class="breadcrumb-item"><a href="' . base_url("dosen/" . $link) . '">' . ucfirst($url[$i]) . '</a></li>';
+                      echo '<li class="breadcrumb-item" style="color: rgba(255, 255, 255, 0.9) !important; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;">
+                              <a href="' . base_url("dosen/" . $link) . '" style="color: rgba(255, 255, 255, 0.9) !important; text-decoration: none !important; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;">' . ucfirst($url[$i]) . '</a>
+                            </li>';
                     } else {
-                      echo '<li class="breadcrumb-item active">' . ucfirst($url[$i]) . '</li>';
+                      echo '<li class="breadcrumb-item active" style="color: #ffffff !important; font-weight: 600 !important; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;">' . ucfirst($url[$i]) . '</li>';
                     }
                   }
                   ?>
@@ -275,12 +288,16 @@
               </nav>
             </div>
             <div class="col-lg-6 col-5 text-right">
-              <button type="button" class="btn btn-sm btn-neutral" onclick="window.history.back()">Back</button>
+              <button type="button" class="btn btn-sm btn-neutral" onclick="window.history.back()" 
+                      style="background-color: #ffffff !important; color: #1e3a8a !important; border: 2px solid #ffffff !important; font-weight: 600 !important;">
+                Back
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
+    
     <!-- Page content -->
     <div class="container-fluid mt--6">
       <?= $content ?>
@@ -300,21 +317,9 @@
   <!-- Argon Scripts -->
   <!-- Core -->
   <?php include('_main/js.php') ?>
-  
-  <!-- GUNAKAN STRUKTUR ESSENCE yang Anda inginkan -->
-  <?php if (isset($enhancement_js) && $enhancement_js === true): ?>
-  <script src="<?= base_url('assets/essence/js/bimbingan.js') ?>"></script>
-  <?php endif; ?>
-  
-  <!-- ALTERNATIF: Load JS untuk halaman bimbingan -->
-  <?php if (strpos(uri_string(), 'bimbingan') !== false): ?>
-  <script src="<?= base_url('assets/essence/js/bimbingan.js') ?>"></script>
-  <?php endif; ?>
-  
   <?= $script ?>
   
-  <!-- PERBAIKAN: HAPUS script inline exportJurnal() untuk menghindari conflict -->
-  <!-- Biarkan function exportJurnal() dari content pages dan bimbingan.js yang handle -->
+  <!-- 🎯 INLINE JAVASCRIPT ONLY -->
   <script>
     level = '<?= $this->session->userdata('level') ?>';
     if (level == '1') {
@@ -323,17 +328,93 @@
       $('.dosen').css('display', 'block');
     }
     
-    // DEBUG: Log basic info
-    console.log('Template dosen loaded with essence structure');
-    console.log('Current URL:', window.location.href);
-    
-    // DEBUG: Log available functions after page load
+    // Inline JavaScript untuk memastikan styling
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM loaded. Available functions:');
-      console.log('- exportJurnal:', typeof exportJurnal);
-      console.log('- tambahJurnalBimbingan:', typeof tambahJurnalBimbingan);
-      console.log('- validasiJurnal:', typeof validasiJurnal);
+      console.log('Applying inline header styling...');
+      
+      // Function untuk apply styling secara inline
+      function applyInlineHeaderStyling() {
+        // Header background
+        var headers = document.querySelectorAll('.header.bg-primary');
+        headers.forEach(function(header) {
+          header.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)';
+          header.style.backgroundColor = '#1e3a8a';
+        });
+        
+        // Title styling
+        var titles = document.querySelectorAll('.header.bg-primary h6.h2, .header.bg-primary .h2');
+        titles.forEach(function(title) {
+          title.style.color = '#ffffff';
+          title.style.fontWeight = '700';
+          title.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.7)';
+        });
+        
+        // Breadcrumb styling
+        var breadcrumbs = document.querySelectorAll('.header.bg-primary .breadcrumb-item, .header.bg-primary .breadcrumb-item a');
+        breadcrumbs.forEach(function(item) {
+          item.style.color = 'rgba(255, 255, 255, 0.9)';
+          item.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.5)';
+        });
+        
+        // Home icon
+        var homeIcons = document.querySelectorAll('.header.bg-primary .fas.fa-home');
+        homeIcons.forEach(function(icon) {
+          icon.style.color = '#ffffff';
+          icon.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.5)';
+        });
+        
+        // Back button
+        var backButtons = document.querySelectorAll('.header.bg-primary .btn-neutral');
+        backButtons.forEach(function(btn) {
+          btn.style.backgroundColor = '#ffffff';
+          btn.style.color = '#1e3a8a';
+          btn.style.border = '2px solid #ffffff';
+          btn.style.fontWeight = '600';
+        });
+        
+        // Navbar top
+        var navbarTop = document.querySelectorAll('.navbar-top.bg-primary');
+        navbarTop.forEach(function(nav) {
+          nav.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)';
+        });
+        
+        // User name
+        var userNames = document.querySelectorAll('.navbar-top.bg-primary .nav-link .media-body span');
+        userNames.forEach(function(span) {
+          span.style.color = '#ffffff';
+          span.style.fontWeight = '600';
+          span.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.5)';
+        });
+        
+        console.log('Inline header styling applied successfully!');
+      }
+      
+      // Apply immediately
+      applyInlineHeaderStyling();
+      
+      // Apply after delays untuk catch dynamic content
+      setTimeout(applyInlineHeaderStyling, 100);
+      setTimeout(applyInlineHeaderStyling, 500);
+      
+      // Apply on window load
+      window.addEventListener('load', applyInlineHeaderStyling);
     });
+    
+    // Enhanced active menu state
+    function setActiveMenu() {
+      var currentPath = window.location.pathname;
+      var menuItems = document.querySelectorAll('.sidenav .nav-link');
+      
+      menuItems.forEach(function(item) {
+        var href = item.getAttribute('href');
+        if (href && currentPath.includes(href.replace(window.location.origin, ''))) {
+          item.classList.add('active');
+        }
+      });
+    }
+    
+    // Set active menu on load
+    document.addEventListener('DOMContentLoaded', setActiveMenu);
   </script>
 </body>
 

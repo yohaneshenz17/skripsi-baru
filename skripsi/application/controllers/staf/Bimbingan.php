@@ -153,7 +153,7 @@ class Bimbingan extends CI_Controller {
         $data['title'] = 'Detail Progress Bimbingan';
         
         try {
-            // Ambil detail mahasiswa dan proposal
+            // ✅ FIXED: Ambil detail mahasiswa dan proposal dengan field yang benar
             $this->db->select('
                 pm.*,
                 m.nim,
@@ -183,10 +183,25 @@ class Bimbingan extends CI_Controller {
             
             $data['proposal'] = $mahasiswa;
             
-            // ✅ FIXED: Query jurnal bimbingan yang benar
+            // ✅ FIXED: Query jurnal bimbingan dengan field yang benar sesuai database
             $this->db->select('
-                jb.*,
-                d.nama as nama_dosen_validator
+                jb.id,
+                jb.proposal_id,
+                jb.pertemuan_ke,
+                jb.tanggal_bimbingan,
+                jb.materi_bimbingan,
+                jb.catatan_dosen,
+                jb.tindak_lanjut,
+                jb.durasi_bimbingan,
+                jb.catatan_mahasiswa,
+                jb.status_validasi,
+                jb.tanggal_validasi,
+                jb.validasi_oleh,
+                jb.created_by,
+                jb.created_at,
+                jb.updated_at,
+                d.nama as nama_dosen_validator,
+                d.nip as nip_dosen_validator
             ');
             $this->db->from('jurnal_bimbingan jb');
             $this->db->join('dosen d', 'jb.validasi_oleh = d.id', 'left');
@@ -197,8 +212,12 @@ class Bimbingan extends CI_Controller {
             // Progress workflow
             $data['progress_data'] = $this->_get_progress_workflow($mahasiswa);
             
-            // TAMBAHAN: Statistik bimbingan untuk monitoring staf
+            // ✅ FIXED: Statistik bimbingan untuk monitoring staf
             $data['statistik_bimbingan'] = $this->_get_detailed_jurnal_statistics($proposal_id);
+            
+            // Log aktivitas staf
+            $this->_log_staf_aktivitas('view_detail_mahasiswa', $mahasiswa->mahasiswa_id, $proposal_id, 
+                                      'Melihat detail bimbingan mahasiswa ' . $mahasiswa->nama_mahasiswa);
             
         } catch (Exception $e) {
             log_message('error', 'Error in detail_mahasiswa: ' . $e->getMessage());

@@ -20,9 +20,16 @@ $uri_string = str_replace("staf/", "", uri_string());
   <!-- Argon CSS -->
   <link rel="stylesheet" href="<?= base_url() ?>assets/css/argon.css?v=1.2.0" type="text/css">
   
-  <!-- ========== TAMBAHAN CSS UNTUK SIDEBAR RAPAT ========== -->
+  <!-- ========== PERBAIKAN STYLING STAF (MINIMAL & CLEAN) ========== -->
   <style>
-    /* Logo Kampus Styling */
+    /* Perbaikan Typography */
+    body {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Logo Kampus */
     .navbar-brand img {
       max-width: 140px;
       max-height: 45px;
@@ -30,77 +37,153 @@ $uri_string = str_replace("staf/", "", uri_string());
       height: auto;
     }
     
-    /* Sidebar Menu Rapat */
+    /* Sidebar Menu Spacing */
     .sidenav .navbar-nav .nav-item {
-      margin-bottom: 2px !important; /* Sangat rapat */
+      margin-bottom: 4px;
     }
     
     .sidenav .navbar-nav .nav-item .nav-link {
-      padding: 10px 20px;
-      margin: 0;
+      padding: 12px 20px;
+      margin: 0 8px;
       border-radius: 8px;
+      font-weight: 500;
       transition: all 0.3s ease;
     }
     
     .sidenav .navbar-nav .nav-item .nav-link:hover {
-      background-color: rgba(0,0,0,0.05);
-      transform: translateX(3px);
+      background-color: #f8f9fa;
+      transform: translateX(2px);
     }
     
-    /* Divider lebih tipis */
-    .sidenav hr {
-      margin: 8px 0 !important; /* Dari my-3 jadi sangat rapat */
-      border-color: rgba(0,0,0,0.1);
+    .sidenav .navbar-nav .nav-item .nav-link.active {
+      background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%);
+      color: #fff;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11);
     }
-    
-    /* Profile card lebih compact */
-    .profile-card-compact {
-      margin-top: 10px !important;
-      padding: 15px !important;
-    }
-    
-    .profile-card-compact .avatar {
-      width: 50px !important;
-      height: 50px !important;
-    }
-    
-    .profile-card-compact h6 {
-      font-size: 14px;
-      margin: 8px 0 4px;
-    }
-    
-    .profile-card-compact p {
-      font-size: 12px;
-      margin-bottom: 10px;
-    }
-    
-    /* Submenu styling */
+
+    /* Submenu */
     .sidenav .collapse .nav {
-      padding-left: 15px;
-      padding-top: 5px;
-      padding-bottom: 5px;
-    }
-    
-    .sidenav .collapse .nav .nav-item {
-      margin-bottom: 1px;
+      padding: 8px 0;
+      margin-left: 12px;
+      border-left: 2px solid #e9ecef;
     }
     
     .sidenav .collapse .nav .nav-link {
-      padding: 6px 15px;
+      padding: 8px 16px;
+      margin: 0 4px;
       font-size: 13px;
+      color: #6c757d;
     }
     
-    /* Pastikan icon workflow tampil */
+    .sidenav .collapse .nav .nav-link:hover {
+      background-color: #f1f3f4;
+      color: #5e72e4;
+    }
+    
+    .sidenav .collapse .nav .nav-link.active {
+      background-color: #e3f2fd;
+      color: #2196f3;
+      border-left: 3px solid #2196f3;
+      font-weight: 600;
+    }
+
+    /* Profile Card Improvements */
+    .profile-card-compact {
+      margin: 16px 8px 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: 0;
+    }
+
+    .profile-card-compact .card-body {
+      padding: 20px 16px;
+    }
+
+    .profile-card-compact .avatar {
+      width: 56px !important;
+      height: 56px !important;
+      border: 3px solid rgba(255,255,255,0.2);
+    }
+
+    .profile-card-compact h6 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 12px 0 4px;
+      color: #fff;
+    }
+
+    .profile-card-compact p {
+      font-size: 12px;
+      margin-bottom: 12px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .profile-card-compact .btn-outline-white {
+      border-color: rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 20px;
+    }
+
+    .profile-card-compact .btn-outline-white:hover {
+      background-color: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    /* Divider */
+    .sidenav hr {
+      margin: 16px 8px;
+      border-color: #e9ecef;
+    }
+
+    /* Workflow icons */
     .workflow-icon {
       width: 16px;
       text-align: center;
-      margin-right: 8px;
+      margin-right: 10px;
+    }
+
+    /* Card improvements */
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Button improvements */
+    .btn-neutral {
+      background-color: #fff;
+      border-color: #fff;
+      color: #5e72e4;
+      transition: all 0.3s ease;
+    }
+
+    .btn-neutral:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1);
+    }
+
+    /* Alert improvements */
+    .alert {
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    /* Form improvements */
+    .form-control {
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: #5e72e4;
+      box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.1);
     }
   </style>
   
   <!-- Custom CSS -->
   <?php include('_main/css.php') ?>
-  <?= $css ?>
+  <?= isset($css) ? $css : '' ?>
 </head>
 
 <body>
@@ -110,7 +193,6 @@ $uri_string = str_replace("staf/", "", uri_string());
       <!-- Brand dengan Logo Kampus -->
       <div class="sidenav-header align-items-center">
         <a class="navbar-brand" href="<?= base_url() ?>staf/dashboard">
-          <!-- GANTI LOGO: Dari blue.png ke logo kampus -->
           <img src="https://stkyakobus.ac.id/skripsi/cdn/img/icons/20250703062346.png" 
                class="navbar-brand-img" 
                alt="STK Santo Yakobus Logo">
@@ -145,7 +227,6 @@ $uri_string = str_replace("staf/", "", uri_string());
                   </li>
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/seminar-proposal" class="nav-link <?= strpos($uri_string, 'seminar_proposal') !== false ? 'active' : '' ?>">
-                      <!-- FIXED: Gunakan icon yang lebih kompatibel untuk Seminar Proposal -->
                       <i class="fas fa-chalkboard workflow-icon text-success"></i>
                       <span class="nav-link-text">Seminar Proposal</span>
                     </a>
@@ -172,8 +253,8 @@ $uri_string = str_replace("staf/", "", uri_string());
               </div>
             </li>
 
-            <!-- Divider RAPAT: Dari my-3 dikurangi -->
-            <hr class="my-1">
+            <!-- Divider -->
+            <hr class="my-3">
             
             <!-- Data Management Section -->
             <li class="nav-item">
@@ -185,19 +266,19 @@ $uri_string = str_replace("staf/", "", uri_string());
                 <ul class="nav nav-sm flex-column">
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/mahasiswa" class="nav-link <?= strpos($uri_string, 'mahasiswa') !== false ? 'active' : '' ?>">
-                      <i class="fas fa-users"></i>
+                      <i class="fas fa-users workflow-icon"></i>
                       <span class="nav-link-text">Daftar Mahasiswa</span>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/dosen" class="nav-link <?= strpos($uri_string, 'dosen') !== false ? 'active' : '' ?>">
-                      <i class="fas fa-chalkboard-teacher"></i>
+                      <i class="fas fa-chalkboard-teacher workflow-icon"></i>
                       <span class="nav-link-text">Daftar Dosen</span>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="<?= base_url() ?>staf/laporan" class="nav-link <?= strpos($uri_string, 'laporan') !== false ? 'active' : '' ?>">
-                      <i class="fas fa-chart-bar"></i>
+                      <i class="fas fa-chart-bar workflow-icon"></i>
                       <span class="nav-link-text">Laporan</span>
                     </a>
                   </li>
@@ -205,8 +286,8 @@ $uri_string = str_replace("staf/", "", uri_string());
               </div>
             </li>
 
-            <!-- Divider RAPAT: Dari my-3 dikurangi -->
-            <hr class="my-1">
+            <!-- Divider -->
+            <hr class="my-3">
             
             <!-- Profil -->
             <li class="nav-item">
@@ -218,26 +299,26 @@ $uri_string = str_replace("staf/", "", uri_string());
           </ul>
           
           <!-- Divider -->
-          <hr class="my-2">
+          <hr class="my-3">
           
           <!-- Heading -->
           <h6 class="navbar-heading p-0 text-muted">
             <span class="docs-normal">Informasi</span>
           </h6>
           
-          <!-- Profile Card in Sidebar - LEBIH COMPACT -->
-          <div class="card border-0 bg-gradient-info profile-card-compact">
+          <!-- Profile Card in Sidebar -->
+          <div class="card border-0 profile-card-compact">
             <div class="card-body text-center text-white">
               <div class="avatar avatar-sm mx-auto">
                 <?php if($this->session->userdata('foto')): ?>
-                  <img alt="Profile" src="<?= base_url('uploads/staf/' . $this->session->userdata('foto')) ?>" class="rounded-circle">
+                  <img alt="Profile" src="<?= base_url('cdn/img/staf/' . $this->session->userdata('foto')) ?>" class="rounded-circle">
                 <?php else: ?>
                   <img alt="Profile" src="<?= base_url() ?>assets/img/theme/default-avatar.png" class="rounded-circle">
                 <?php endif; ?>
               </div>
-              <h6 class="text-white mt-2 mb-1"><?= $this->session->userdata('nama') ?></h6>
-              <p class="text-white text-sm mb-0">Staf Akademik</p>
-              <div class="mt-2">
+              <h6 class="text-white mt-3 mb-1"><?= $this->session->userdata('nama') ?></h6>
+              <p class="text-white-80 mb-0">Staf Akademik</p>
+              <div class="mt-3">
                 <a href="<?= base_url() ?>staf/profil" class="btn btn-sm btn-outline-white">
                   <i class="ni ni-settings-gear-65"></i> Profil
                 </a>
@@ -289,7 +370,7 @@ $uri_string = str_replace("staf/", "", uri_string());
                 <div class="media align-items-center">
                   <span class="avatar avatar-sm rounded-circle">
                     <?php if($this->session->userdata('foto')): ?>
-                      <img alt="Profile" src="<?= base_url('uploads/staf/' . $this->session->userdata('foto')) ?>">
+                      <img alt="Profile" src="<?= base_url('cdn/img/staf/' . $this->session->userdata('foto')) ?>">
                     <?php else: ?>
                       <img alt="Profile" src="<?= base_url() ?>assets/img/theme/default-avatar.png">
                     <?php endif; ?>
@@ -384,11 +465,10 @@ $uri_string = str_replace("staf/", "", uri_string());
   <!-- Argon Scripts -->
   <!-- Core -->
   <?php include('_main/js.php') ?>
-  <?= $script ?>
+  <?= isset($script) ? $script : '' ?>
   
   <!-- Custom Scripts for Staf -->
   <script>
-    // Auto-collapse sidebar menus
     $(document).ready(function() {
         // Expand active menu
         $('.nav-link.active').closest('.collapse').addClass('show');
@@ -406,6 +486,14 @@ $uri_string = str_replace("staf/", "", uri_string());
             $(target).on('show.bs.collapse', function() {
                 $(this).css('transition', 'height 0.3s ease');
             });
+        });
+
+        // Auto hide alerts
+        $('.alert').each(function() {
+            var alert = $(this);
+            setTimeout(function() {
+                alert.fadeOut('slow');
+            }, 5000);
         });
     });
   </script>

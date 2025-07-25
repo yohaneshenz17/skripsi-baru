@@ -14,8 +14,8 @@ ob_start();
                 <i class="fas fa-book-open"></i>
             </div>
             <div>
-                <h2 class="mb-1"><?= isset($title) ? $title : 'Monitoring Bimbingan' ?></h2>
-                <p class="text-muted mb-0">Kelola dan pantau jurnal bimbingan mahasiswa tugas akhir</p>
+                <h2 class="mb-1 text-light font-weight-bold"><?= isset($title) ? $title : 'Monitoring Bimbingan' ?></h2>
+                <p class="text-secondary mb-0 font-weight-medium">Kelola dan pantau jurnal bimbingan mahasiswa tugas akhir</p>
             </div>
         </div>
     </div>

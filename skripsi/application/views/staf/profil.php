@@ -1,94 +1,47 @@
 <?php
-$this->load->view('template/staf', [
-    'title' => 'Profil Staf Akademik',
-    'content' => ob_start(),
-    'css' => '
-        <style>
-            .profile-card {
-                border: none;
-                border-radius: 15px;
-                box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-            }
-            .profile-header {
-                background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%);
-                border-radius: 15px 15px 0 0;
-            }
-            .avatar-upload {
-                position: relative;
-                display: inline-block;
-            }
-            .avatar-upload .avatar-edit {
-                position: absolute;
-                right: 12px;
-                z-index: 1;
-                top: 10px;
-            }
-            .avatar-upload .avatar-edit input {
-                display: none;
-            }
-            .avatar-upload .avatar-edit label {
-                display: inline-block;
-                width: 34px;
-                height: 34px;
-                margin-bottom: 0;
-                border-radius: 100%;
-                background: #FFFFFF;
-                border: 1px solid transparent;
-                box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
-                cursor: pointer;
-                font-weight: normal;
-                transition: all 0.2s ease-in-out;
-            }
-            .avatar-upload .avatar-edit label:hover {
-                background: #f1f1f1;
-                border-color: #d6d6d6;
-            }
-            .avatar-upload .avatar-edit label:after {
-                content: "\\f040";
-                font-family: "Font Awesome 5 Free";
-                color: #757575;
-                position: absolute;
-                top: 10px;
-                left: 0;
-                right: 0;
-                text-align: center;
-                margin: auto;
-            }
-            .avatar-upload .avatar-preview {
-                width: 150px;
-                height: 150px;
-                position: relative;
-                border-radius: 100%;
-                border: 6px solid #F8F8F8;
-                box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
-            }
-            .avatar-upload .avatar-preview > div {
-                width: 100%;
-                height: 100%;
-                border-radius: 100%;
-                background-size: cover;
-                background-repeat: no-repeat;
-                background-position: center;
-            }
-        </style>
-    ',
-    'script' => ''
-]);
+// File: application/views/staf/profil.php
+// FIXED - Menggunakan template pattern yang benar sesuai sistem
+
+// Capture content untuk template
+ob_start();
 ?>
+
+<!-- Flash Messages -->
+<?php if($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <span class="alert-icon"><i class="ni ni-check-bold"></i></span>
+        <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
+        <button type="button" class="close" data-dismiss="alert">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php endif; ?>
+
+<?php if($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span class="alert-icon"><i class="ni ni-fat-remove"></i></span>
+        <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
+        <button type="button" class="close" data-dismiss="alert">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php endif; ?>
 
 <!-- Content -->
 <div class="row">
     <!-- Profile Info Card -->
     <div class="col-xl-4">
         <div class="card profile-card">
-            <div class="profile-header text-white text-center py-5">
-                <div class="avatar-upload">
-                    <div class="avatar-edit">
-                        <input type="file" id="imageUpload" accept=".png, .jpg, .jpeg" />
-                        <label for="imageUpload"></label>
+            <div class="profile-header text-white text-center py-5" style="background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%); border-radius: 15px 15px 0 0;">
+                <div class="avatar-upload" style="position: relative; display: inline-block;">
+                    <div class="avatar-edit" style="position: absolute; right: 12px; z-index: 1; top: 10px;">
+                        <input type="file" id="imageUpload" accept=".png, .jpg, .jpeg" style="display: none;" />
+                        <label for="imageUpload" style="display: inline-block; width: 34px; height: 34px; margin-bottom: 0; border-radius: 100%; background: #FFFFFF; border: 1px solid transparent; box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12); cursor: pointer; font-weight: normal; transition: all 0.2s ease-in-out;">
+                            <i class="fas fa-edit" style="color: #757575; position: absolute; top: 8px; left: 0; right: 0; text-align: center; margin: auto;"></i>
+                        </label>
                     </div>
-                    <div class="avatar-preview">
-                        <div id="imagePreview" style="background-image: url('<?= $staf->foto ? base_url('uploads/staf/' . $staf->foto) : base_url('assets/img/theme/default-avatar.png') ?>');"></div>
+                    <div class="avatar-preview" style="width: 150px; height: 150px; position: relative; border-radius: 100%; border: 6px solid #F8F8F8; box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);">
+                        <div id="imagePreview" style="width: 100%; height: 100%; border-radius: 100%; background-size: cover; background-repeat: no-repeat; background-position: center; background-image: url('<?= $staf->foto ? base_url('cdn/img/staf/' . $staf->foto) : base_url('assets/img/theme/default-avatar.png') ?>');"></div>
                     </div>
                 </div>
                 <h3 class="text-white mt-4 mb-1"><?= $staf->nama ?></h3>
@@ -138,6 +91,15 @@ $this->load->view('template/staf', [
                         <?php endif; ?>
                     </div>
                 </div>
+                
+                <!-- Tombol Hapus Foto -->
+                <?php if($staf->foto): ?>
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="deletePhoto()">
+                        <i class="fas fa-trash"></i> Hapus Foto
+                    </button>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         
@@ -151,6 +113,7 @@ $this->load->view('template/staf', [
                     <div class="col-6 text-center">
                         <span class="h2 font-weight-bold d-block">
                             <?php
+                            // Hitung publikasi yang divalidasi staf ini
                             $this->db->where('staf_validator_id', $staf->id);
                             echo $this->db->count_all_results('proposal_mahasiswa');
                             ?>
@@ -160,6 +123,7 @@ $this->load->view('template/staf', [
                     <div class="col-6 text-center">
                         <span class="h2 font-weight-bold d-block">
                             <?php
+                            // Hitung total aktivitas staf ini
                             $this->db->where('staf_id', $staf->id);
                             echo $this->db->count_all_results('staf_aktivitas');
                             ?>
@@ -183,28 +147,8 @@ $this->load->view('template/staf', [
                 </div>
             </div>
             <div class="card-body">
-                <!-- Alert Messages -->
-                <?php if($this->session->flashdata('success')): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <span class="alert-icon"><i class="ni ni-check-bold"></i></span>
-                        <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
-                        <button type="button" class="close" data-dismiss="alert">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if($this->session->flashdata('error')): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <span class="alert-icon"><i class="ni ni-fat-remove"></i></span>
-                        <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
-                        <button type="button" class="close" data-dismiss="alert">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                <?php endif; ?>
-                
-                <form action="<?= base_url('staf/dashboard/update_profil') ?>" method="POST" enctype="multipart/form-data">
+                <!-- FORM ACTION DIPERBAIKI -->
+                <form action="<?= base_url('staf/profil/update') ?>" method="POST" enctype="multipart/form-data">
                     <h6 class="heading-small text-muted mb-4">Informasi Personal</h6>
                     <div class="pl-lg-4">
                         <div class="row">
@@ -325,74 +269,53 @@ $this->load->view('template/staf', [
             </div>
             <div class="card-body">
                 <div class="timeline timeline-one-side">
-                    <!-- Sample activity log -->
+                    <?php
+                    // Ambil 5 aktivitas terbaru staf ini
+                    $this->db->where('staf_id', $staf->id);
+                    $this->db->order_by('tanggal_aktivitas', 'DESC');
+                    $this->db->limit(5);
+                    $aktivitas_list = $this->db->get('staf_aktivitas')->result();
+                    
+                    if($aktivitas_list):
+                        foreach($aktivitas_list as $aktivitas):
+                    ?>
                     <div class="timeline-block py-2">
                         <span class="timeline-step">
                             <i class="ni ni-check-bold text-success"></i>
                         </span>
                         <div class="timeline-content">
                             <div class="d-flex justify-content-between">
-                                <h6 class="text-sm mb-1">Validasi Publikasi</h6>
-                                <small class="text-muted">2 jam yang lalu</small>
+                                <h6 class="text-sm mb-1"><?= ucfirst(str_replace('_', ' ', $aktivitas->aktivitas)) ?></h6>
+                                <small class="text-muted"><?= date('d M Y H:i', strtotime($aktivitas->tanggal_aktivitas)) ?></small>
                             </div>
-                            <p class="text-xs mb-0">Memvalidasi repository publikasi untuk mahasiswa: Hendro Mahasiswa</p>
+                            <p class="text-xs mb-0"><?= $aktivitas->keterangan ?></p>
                         </div>
                     </div>
-                    
+                    <?php 
+                        endforeach;
+                    else:
+                    ?>
                     <div class="timeline-block py-2">
                         <span class="timeline-step">
-                            <i class="ni ni-single-copy-04 text-info"></i>
+                            <i class="ni ni-info text-info"></i>
                         </span>
                         <div class="timeline-content">
-                            <div class="d-flex justify-content-between">
-                                <h6 class="text-sm mb-1">Export Jurnal Bimbingan</h6>
-                                <small class="text-muted">1 hari yang lalu</small>
-                            </div>
-                            <p class="text-xs mb-0">Mengexport jurnal bimbingan untuk periode Juli 2025</p>
+                            <h6 class="text-sm mb-1">Belum Ada Aktivitas</h6>
+                            <p class="text-xs mb-0">Aktivitas Anda akan muncul di sini</p>
                         </div>
                     </div>
-                    
-                    <div class="timeline-block py-2">
-                        <span class="timeline-step">
-                            <i class="ni ni-calendar-grid-58 text-warning"></i>
-                        </span>
-                        <div class="timeline-content">
-                            <div class="d-flex justify-content-between">
-                                <h6 class="text-sm mb-1">Penjadwalan Seminar</h6>
-                                <small class="text-muted">3 hari yang lalu</small>
-                            </div>
-                            <p class="text-xs mb-0">Menjadwalkan seminar proposal untuk 5 mahasiswa</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-block py-2">
-                        <span class="timeline-step">
-                            <i class="ni ni-settings text-secondary"></i>
-                        </span>
-                        <div class="timeline-content">
-                            <div class="d-flex justify-content-between">
-                                <h6 class="text-sm mb-1">Update Profil</h6>
-                                <small class="text-muted">1 minggu yang lalu</small>
-                            </div>
-                            <p class="text-xs mb-0">Memperbarui informasi profil dan foto</p>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="text-center mt-3">
-                    <button class="btn btn-outline-primary btn-sm">
+                    <a href="<?= base_url('staf/laporan') ?>" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-history"></i> Lihat Semua Aktivitas
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<?php 
-$content = ob_get_clean();
-echo $content;
-?>
 
 <script>
 $(document).ready(function() {
@@ -492,33 +415,27 @@ $(document).ready(function() {
 
 function deletePhoto() {
     if (confirm('Apakah Anda yakin ingin menghapus foto profil?')) {
-        $.post('<?= base_url("staf/dashboard/hapus_foto") ?>', function(response) {
-            if (response.success) {
-                $('#imagePreview').css('background-image', 'url(<?= base_url("assets/img/theme/default-avatar.png") ?>)');
-                showAlert('success', 'Foto profil berhasil dihapus');
-            } else {
-                showAlert('error', 'Gagal menghapus foto profil');
-            }
-        }).fail(function() {
-            showAlert('error', 'Terjadi kesalahan server');
-        });
+        window.location.href = '<?= base_url("staf/profil/hapus_foto") ?>';
     }
 }
-
-function showAlert(type, message) {
-    var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-    var alert = `
-        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-            <span class="alert-text">${message}</span>
-            <button type="button" class="close" data-dismiss="alert">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    `;
-    $('.card-body').first().prepend(alert);
-    
-    setTimeout(function() {
-        $('.alert').fadeOut();
-    }, 3000);
-}
 </script>
+
+<?php 
+$content = ob_get_clean();
+
+// Load template staf dengan content yang sudah di-capture
+$this->load->view('template/staf', [
+    'title' => 'Profil Staf Akademik',
+    'content' => $content,
+    'css' => '
+        <style>
+            .profile-card {
+                border: none;
+                border-radius: 15px;
+                box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            }
+        </style>
+    ',
+    'script' => ''
+]);
+?>

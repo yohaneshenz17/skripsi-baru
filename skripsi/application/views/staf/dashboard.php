@@ -183,10 +183,11 @@ ob_start();
                         </div>
                     </div>
                     
+                    <!-- PERBAIKAN: Container Laporan dengan warna coklat gradasi -->
                     <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card border-0 bg-gradient-secondary">
+                        <div class="card border-0 bg-gradient-brown-custom">
                             <div class="card-body text-center text-white">
-                                <div class="icon icon-shape icon-lg bg-white shadow rounded-circle text-secondary mb-3">
+                                <div class="icon icon-shape icon-lg bg-white shadow rounded-circle text-brown-custom mb-3">
                                     <i class="fas fa-chart-bar"></i>
                                 </div>
                                 <h4 class="text-white">∞</h4>
@@ -321,6 +322,59 @@ ob_start();
 .timeline-block:last-child .timeline-content {
     border-left: none;
 }
+
+/* ============================================
+   🎯 PERBAIKAN: CSS UNTUK CONTAINER LAPORAN
+   ============================================ */
+
+/* Custom Brown Gradient untuk Container Laporan */
+.bg-gradient-brown-custom {
+    background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #cd853f 100%) !important;
+    color: white !important;
+}
+
+/* Alternatif - Warna Teal yang lebih kontras */
+.bg-gradient-teal-custom {
+    background: linear-gradient(135deg, #008080 0%, #20b2aa 50%, #40e0d0 100%) !important;
+    color: white !important;
+}
+
+/* Icon color untuk brown theme */
+.text-brown-custom {
+    color: #8b4513 !important;
+}
+
+/* Icon color untuk teal theme */
+.text-teal-custom {
+    color: #008080 !important;
+}
+
+/* Hover effects untuk container laporan */
+.bg-gradient-brown-custom:hover {
+    background: linear-gradient(135deg, #a0522d 0%, #cd853f 50%, #deb887 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(139, 69, 19, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Alternative: Jika ingin menggunakan warna yang sudah ada di sistem */
+.bg-gradient-dark-custom {
+    background: linear-gradient(135deg, #32325d 0%, #6c757d 50%, #8e9aaf 100%) !important;
+    color: white !important;
+}
+
+.text-dark-custom {
+    color: #32325d !important;
+}
+
+/* Responsiveness untuk mobile */
+@media (max-width: 768px) {
+    .bg-gradient-brown-custom,
+    .bg-gradient-teal-custom,
+    .bg-gradient-dark-custom {
+        margin-bottom: 1rem;
+    }
+}
 </style>
 
 <?php 
@@ -347,7 +401,7 @@ $(document).ready(function() {
     
     var colors = [
         '#5e72e4', '#11cdef', '#2dce89', '#fb6340', 
-        '#f5365c', '#ffd600', '#6c757d'
+        '#f5365c', '#ffd600', '#8b4513' // Added brown for reports
     ];
     
     new Chart(ctx, {
@@ -381,6 +435,9 @@ $(document).ready(function() {
         function() { $(this).addClass('shadow-lg').removeClass('shadow'); },
         function() { $(this).removeClass('shadow-lg').addClass('shadow'); }
     );
+    
+    // Console log untuk debugging container laporan
+    console.log('✅ Container Laporan berhasil diubah ke warna coklat gradasi');
 });
 </script>
 <?php 

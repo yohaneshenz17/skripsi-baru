@@ -348,10 +348,127 @@ $verifikasi = $dataUser ? $dataUser->status : '';
         font-size: 0.7rem;
       }
     }
+
+    /* ========================================
+       TAMBAHAN: CSS UNTUK HEADER SISTEM BARU
+       ======================================== */
+    
+    .system-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 1000;
+    }
+    
+    .system-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.2;
+      letter-spacing: 0.5px;
+    }
+    
+    .system-subtitle {
+      font-size: 13px;
+      margin: 2px 0 0 0;
+      opacity: 0.95;
+      font-weight: 500;
+    }
+    
+    .system-header-icon {
+      font-size: 24px;
+      margin-right: 12px;
+      opacity: 0.9;
+    }
+    
+    /* Responsive untuk system header */
+    @media (max-width: 768px) {
+      .system-header {
+        padding: 10px 0;
+      }
+      
+      .system-title {
+        font-size: 16px;
+      }
+      
+      .system-subtitle {
+        font-size: 12px;
+      }
+      
+      .system-header-icon {
+        font-size: 20px;
+        margin-right: 8px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .system-header {
+        padding: 8px 0;
+      }
+      
+      .system-title {
+        font-size: 14px;
+        line-height: 1.3;
+      }
+      
+      .system-subtitle {
+        font-size: 11px;
+      }
+      
+      .system-header-icon {
+        font-size: 18px;
+        margin-right: 6px;
+      }
+    }
+    
+    @media (max-width: 400px) {
+      .system-title {
+        font-size: 13px;
+      }
+      
+      .system-subtitle {
+        font-size: 10px;
+      }
+    }
+    
+    /* Animasi untuk header */
+    .system-header {
+      animation: slideDown 0.5s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 
 <body>
+  <!-- ========================================
+       TAMBAHAN: HEADER SISTEM YANG FORMAL
+       ======================================== -->
+  <div class="system-header">
+    <div class="container-fluid">
+      <div class="text-center">
+        <div class="d-flex justify-content-center align-items-center">
+          <i class="ni ni-hat-3 system-header-icon"></i>
+          <div>
+            <h1 class="system-title">SISTEM INFORMASI MANAJEMEN TUGAS AKHIR</h1>
+            <p class="system-subtitle">Sekolah Tinggi Katolik Santo Yakobus Merauke</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white" id="sidenav-main">
     <div class="scrollbar-inner">
       <div class="sidenav-header  align-items-center">

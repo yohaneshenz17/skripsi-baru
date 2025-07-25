@@ -1,396 +1,315 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+/**
+ * PERBAIKAN EMAIL FORMAL - PENUNJUKAN DOSEN PEMBIMBING
+ * 
+ * File: application/controllers/kaprodi/PenetapanPembimbing.php
+ * 
+ * Ganti method _kirim_email_dosen_pembimbing() dengan kode di bawah ini
+ * untuk format email yang lebih formal dan konsisten
+ */
 
-class PenetapanPembimbing extends CI_Controller {
-
-    public function __construct() {
-        parent::__construct();
-        $this->load->database();
-        $this->load->library('session');
-        $this->load->library('email');
-        $this->load->helper('url');
-        
-        // Cek login dan level kaprodi
-        if(!$this->session->userdata('logged_in') || $this->session->userdata('level') != '4') {
-            redirect('auth/login');
-        }
-        
-        // Get prodi_id kaprodi
-        $this->prodi_id = $this->session->userdata('prodi_id');
-        if (!$this->prodi_id) {
-            // Coba ambil dari database jika tidak ada di session
-            $kaprodi = $this->db->get_where('prodi', ['dosen_id' => $this->session->userdata('id')])->row();
-            if ($kaprodi) {
-                $this->session->set_userdata('prodi_id', $kaprodi->id);
-                $this->prodi_id = $kaprodi->id;
-            }
-        }
+private function _kirim_email_dosen_pembimbing($proposal, $dosen) {
+    if (!$dosen) return false;
+    
+    // Validasi data sebelum kirim email
+    if (!$this->_validate_email_data($proposal, $dosen)) {
+        log_message('error', 'Email validation failed for proposal ID: ' . $proposal->id);
+        return false;
     }
-
-    public function index() {
-        // Clear flash messages lama saat masuk halaman
-        $this->_clear_old_flash_messages();
-        
-        $data['title'] = 'Penetapan Pembimbing - Workflow Terbaru';
-        
-        // Ambil proposal yang belum ditetapkan ATAU yang ditolak dosen pembimbing
-        $this->db->select('
-            proposal_mahasiswa.*, 
-            mahasiswa.nim, 
-            mahasiswa.nama as nama_mahasiswa,
-            mahasiswa.email as email_mahasiswa,
-            dosen.nama as nama_dosen_sebelumnya
-        ');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id');
-        $this->db->join('dosen', 'proposal_mahasiswa.dosen_id = dosen.id', 'left'); // Left join untuk dosen yang mungkin NULL
-        $this->db->where('mahasiswa.prodi_id', $this->prodi_id);
-        
-        // PERBAIKAN: Tampilkan proposal yang:
-        // 1. Belum ditetapkan (status = 0) ATAU
-        // 2. Sudah ditetapkan tapi ditolak dosen (status_pembimbing = 2)
-        $this->db->group_start();
-            $this->db->where('proposal_mahasiswa.status', '0'); // Belum ditetapkan
-            $this->db->or_where('proposal_mahasiswa.status_pembimbing', '2'); // Ditolak dosen
-        $this->db->group_end();
-        
-        // Filter: hanya proposal yang valid (bukan data lama)
-        $this->db->where('proposal_mahasiswa.id NOT IN (34, 35)');
-        $this->db->order_by('proposal_mahasiswa.id', 'DESC');
-        
-        $data['proposals'] = $this->db->get()->result();
-        
-        $this->load->view('kaprodi/penetapan_pembimbing/index', $data);
-    }
-
-    public function detail($proposal_id) {
-        // PERBAIKAN: Clear flash messages lama
-        $this->_clear_old_flash_messages();
-        
-        $data['title'] = 'Form Penetapan Pembimbing & Penguji';
-        
-        // Ambil detail proposal
-        $this->db->select('
-            proposal_mahasiswa.*, 
-            mahasiswa.nim, 
-            mahasiswa.nama as nama_mahasiswa, 
-            mahasiswa.email,
-            mahasiswa.tempat_lahir,
-            mahasiswa.tanggal_lahir,
-            mahasiswa.jenis_kelamin,
-            mahasiswa.alamat,
-            mahasiswa.nomor_telepon,
-            prodi.nama as nama_prodi
-        ');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id');
-        $this->db->join('prodi', 'mahasiswa.prodi_id = prodi.id');
-        $this->db->where('proposal_mahasiswa.id', $proposal_id);
-        $this->db->where('mahasiswa.prodi_id', $this->prodi_id);
-        // Filter: hanya proposal yang valid
-        $this->db->where('proposal_mahasiswa.id NOT IN (34, 35)');
-        
-        $data['proposal'] = $this->db->get()->row();
-        
-        if (!$data['proposal']) {
-            $this->_set_safe_flash('error', 'Proposal tidak ditemukan atau tidak valid!');
-            redirect('kaprodi/penetapan_pembimbing');
-        }
-        
-        // Ambil dosen yang bisa menjadi pembimbing dan penguji
-        // Level 2 = dosen biasa, level 4 = kaprodi (tapi exclude kaprodi yang sedang login)
-        $this->db->where('level', '2');
-        $this->db->where('id !=', $this->session->userdata('id')); // Exclude kaprodi yang sedang login
-        $this->db->order_by('nama', 'ASC');
-        $data['dosens'] = $this->db->get('dosen')->result();
-        
-        $this->load->view('kaprodi/penetapan_pembimbing/detail', $data);
-    }
-
-    public function simpan_penetapan() {
-        // PERBAIKAN: Clear flash messages sebelum proses
-        $this->_clear_old_flash_messages();
-        
-        $proposal_id = $this->input->post('proposal_id');
-        $dosen_pembimbing_id = $this->input->post('dosen_pembimbing_id');
-        $dosen_penguji1_id = $this->input->post('dosen_penguji1_id');
-        $dosen_penguji2_id = $this->input->post('dosen_penguji2_id');
-        
-        // Validasi input
-        if (!$proposal_id || !$dosen_pembimbing_id || !$dosen_penguji1_id || !$dosen_penguji2_id) {
-            $this->_set_safe_flash('error', 'Semua field harus diisi!');
-            redirect('kaprodi/penetapan_pembimbing/detail/' . $proposal_id);
-        }
-        
-        // Validasi dosen tidak boleh sama
-        $dosens = [$dosen_pembimbing_id, $dosen_penguji1_id, $dosen_penguji2_id];
-        if (count($dosens) !== count(array_unique($dosens))) {
-            $this->_set_safe_flash('error', 'Dosen pembimbing dan penguji harus berbeda!');
-            redirect('kaprodi/penetapan_pembimbing/detail/' . $proposal_id);
-        }
-        
-        // Validasi proposal exists dan valid
-        $proposal = $this->db->select('pm.*, m.nama as nama_mahasiswa, m.email as email_mahasiswa')
-                            ->from('proposal_mahasiswa pm')
-                            ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
-                            ->where('pm.id', $proposal_id)
-                            ->where('m.prodi_id', $this->prodi_id)
-                            ->where('pm.id NOT IN (34, 35)') // Hanya proposal valid
-                            ->get()->row();
-        
-        if (!$proposal) {
-            $this->_set_safe_flash('error', 'Proposal tidak ditemukan atau tidak valid!');
-            redirect('kaprodi/penetapan_pembimbing');
-        }
-        
-        // Update proposal dengan penetapan
-        $update_data = [
-            'dosen_id' => $dosen_pembimbing_id,
-            'dosen_penguji_id' => $dosen_penguji1_id,
-            'dosen_penguji2_id' => $dosen_penguji2_id,
-            'status' => '1',
-            // TAMBAH BARIS INI:
-            'tanggal_penetapan' => date('Y-m-d H:i:s'),
-            'penetapan_oleh' => $this->session->userdata('id'),
-            'status_kaprodi' => '1'
-        ];
-        
-        $this->db->where('id', $proposal_id);
-        $update_result = $this->db->update('proposal_mahasiswa', $update_data);
-        
-        if ($update_result) {
-            // Update workflow tracking
-            $this->_update_workflow_tracking($proposal_id);
+    
+    $config = [
+        'protocol' => 'smtp',
+        'smtp_host' => 'smtp.gmail.com',
+        'smtp_port' => 587,
+        'smtp_user' => 'stkyakobus@gmail.com',
+        'smtp_pass' => 'yonroxhraathnaug',
+        'charset' => 'utf-8',
+        'newline' => "\r\n",
+        'mailtype' => 'html',
+        'smtp_crypto' => 'tls'
+    ];
+    
+    $this->email->initialize($config);
+    
+    $subject = 'Penunjukan sebagai Dosen Pembimbing - ' . $proposal->nama_mahasiswa;
+    
+    // Ambil nama kaprodi dari session
+    $kaprodi_nama = $this->session->userdata('nama');
+    
+    // Ambil nama prodi (pastikan tersedia)
+    $nama_prodi = isset($proposal->nama_prodi) ? $proposal->nama_prodi : 'Program Studi';
+    
+    $message = "
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <title>Penunjukan sebagai Dosen Pembimbing</title>
+    </head>
+    <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+        <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
             
-            // Kirim notifikasi
-            $this->_kirim_notifikasi($proposal_id, $dosen_pembimbing_id, $dosen_penguji1_id, $dosen_penguji2_id);
+            <!-- Header -->
+            <div style='text-align: center; background-color: #28a745; color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;'>
+                <h2 style='margin: 0;'>🎓 Penunjukan sebagai Dosen Pembimbing</h2>
+            </div>
             
-            $this->_set_safe_flash('success', 'Penetapan pembimbing dan penguji berhasil disimpan!');
-            redirect('kaprodi/penetapan_pembimbing');
+            <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                Yth. <strong>{$dosen->nama}</strong>,<br>
+                S.Pd., M.Pd.
+            </p>
+            
+            <p style='margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;'>
+                Dengan hormat, melalui email ini kami sampaikan bahwa Bapak/Ibu telah <strong>ditunjuk sebagai Dosen Pembimbing</strong> 
+                untuk mahasiswa dalam proses penyusunan Tugas Akhir (Skripsi).
+            </p>
+            
+            <!-- Data Mahasiswa -->
+            <div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <h3 style='color: #495057; margin: 0 0 15px 0; font-size: 18px;'>📚 Data Mahasiswa:</h3>
+                <table style='width: 100%; border-collapse: collapse;'>
+                    <tr>
+                        <td style='padding: 8px 0; font-weight: bold; width: 30%; border-bottom: 1px solid #dee2e6;'>Nama:</td>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #dee2e6;'>{$proposal->nama_mahasiswa}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px 0; font-weight: bold; border-bottom: 1px solid #dee2e6;'>NIM:</td>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #dee2e6;'>{$proposal->nim}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px 0; font-weight: bold; border-bottom: 1px solid #dee2e6;'>Program Studi:</td>
+                        <td style='padding: 8px 0; border-bottom: 1px solid #dee2e6;'>{$nama_prodi}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px 0; font-weight: bold;'>Email Mahasiswa:</td>
+                        <td style='padding: 8px 0;'>{$proposal->email_mahasiswa}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Judul Proposal -->
+            <div style='background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                <h4 style='color: #0056b3; margin: 0 0 10px 0; font-size: 16px;'>📖 Judul Proposal:</h4>
+                <p style='margin: 0; color: #0056b3; font-weight: bold; font-style: italic;'>\"{$proposal->judul}\"</p>
+            </div>
+            
+            <!-- Informasi Tugas -->
+            <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                <h4 style='color: #856404; margin: 0 0 10px 0; font-size: 16px;'>📋 Tugas Sebagai Pembimbing:</h4>
+                <ul style='color: #856404; margin: 0; padding-left: 20px;'>
+                    <li>Membimbing mahasiswa dalam penyusunan proposal dan skripsi</li>
+                    <li>Memberikan arahan akademik dan metodologi penelitian</li>
+                    <li>Memvalidasi jurnal bimbingan melalui sistem</li>
+                    <li>Memberikan rekomendasi untuk seminar proposal dan akhir</li>
+                </ul>
+            </div>
+            
+            <!-- Call to Action -->
+            <div style='text-align: center; margin: 30px 0;'>
+                <p style='margin: 0 0 15px 0; font-size: 16px; color: #dc3545; font-weight: bold;'>
+                    ⚠️ Silakan memberikan persetujuan melalui sistem:
+                </p>
+                <a href='" . base_url('dosen/usulan_proposal') . "' 
+                   style='background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
+                   🔗 Login Sistem & Berikan Persetujuan
+                </a>
+            </div>
+            
+            <!-- Workflow Info -->
+            <div style='background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                <h4 style='color: #0c5460; margin: 0 0 10px 0; font-size: 16px;'>🔄 Langkah Selanjutnya:</h4>
+                <ol style='color: #0c5460; margin: 0; padding-left: 20px;'>
+                    <li><strong>Login ke sistem</strong> menggunakan link di atas</li>
+                    <li><strong>Tinjau proposal</strong> dan data mahasiswa</li>
+                    <li><strong>Berikan persetujuan</strong> atau penolakan dengan alasan</li>
+                    <li>Jika disetujui, <strong>mulai proses bimbingan</strong> dengan mahasiswa</li>
+                </ol>
+            </div>
+            
+            <!-- Contact Info -->
+            <div style='background-color: #f1f3f4; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                <h4 style='color: #495057; margin: 0 0 10px 0; font-size: 16px;'>📞 Informasi Kontak:</h4>
+                <p style='margin: 0; color: #495057;'>
+                    <strong>Mahasiswa:</strong> {$proposal->email_mahasiswa}<br>
+                    <strong>Kaprodi:</strong> {$kaprodi_nama}<br>
+                    <strong>Program Studi:</strong> {$nama_prodi}
+                </p>
+            </div>
+            
+            <!-- Penutup -->
+            <p style='margin: 20px 0; font-size: 16px; line-height: 1.5;'>
+                Demikian pemberitahuan ini kami sampaikan. Atas perhatian dan kesediaan Bapak/Ibu untuk membimbing mahasiswa, 
+                kami ucapkan terima kasih.
+            </p>
+            
+            <p style='margin: 20px 0 30px 0; font-size: 16px;'>
+                Hormat kami,<br>
+                <strong>{$kaprodi_nama}</strong><br>
+                Ketua Program Studi {$nama_prodi}<br>
+                STK Santo Yakobus Merauke
+            </p>
+            
+            <!-- Footer -->
+            <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; border-radius: 0 0 8px 8px;'>
+                <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                    Email ini dikirim secara otomatis oleh<br>
+                    <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                    STK Santo Yakobus Merauke<br>
+                    <em>Mohon tidak membalas email ini</em>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>";
+    
+    try {
+        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
+        $this->email->to($dosen->email);
+        $this->email->subject($subject);
+        $this->email->message($message);
+        
+        $result = $this->email->send();
+        
+        if ($result) {
+            log_message('info', 'Email berhasil dikirim ke dosen: ' . $dosen->email . ' untuk proposal ID: ' . $proposal->id);
         } else {
-            $this->_set_safe_flash('error', 'Gagal menyimpan penetapan!');
-            redirect('kaprodi/penetapan_pembimbing/detail/' . $proposal_id);
+            log_message('error', 'Email gagal dikirim ke dosen: ' . $dosen->email . ' - ' . $this->email->print_debugger());
         }
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Exception saat kirim email ke dosen: ' . $e->getMessage());
+        return false;
     }
+}
 
-    private function _update_workflow_tracking($proposal_id) {
-        // Insert workflow tracking
-        $workflow_data = [
-            'proposal_id' => $proposal_id,
-            'tahap' => 'penetapan_selesai',
-            'status' => 'approved',
-            'komentar' => 'Pembimbing dan penguji telah ditetapkan',
-            'diproses_oleh' => $this->session->userdata('id'),
-            'tanggal_proses' => date('Y-m-d H:i:s')
-        ];
-        
-        $this->db->insert('proposal_workflow', $workflow_data);
+/**
+ * PERBAIKI JUGA METHOD _kirim_notifikasi UNTUK MEMASTIKAN DATA LENGKAP
+ * Ganti method _kirim_notifikasi() di PenetapanPembimbing.php dengan ini:
+ */
+private function _kirim_notifikasi($proposal_id, $dosen_pembimbing_id, $dosen_penguji1_id, $dosen_penguji2_id) {
+    // Ambil data proposal dan mahasiswa DENGAN JOIN KE PRODI
+    $proposal = $this->db->select('
+            pm.*, 
+            m.nama as nama_mahasiswa, 
+            m.nim, 
+            m.email as email_mahasiswa,
+            p.nama as nama_prodi
+        ')
+        ->from('proposal_mahasiswa pm')
+        ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
+        ->join('prodi p', 'm.prodi_id = p.id') // PASTIKAN JOIN KE PRODI
+        ->where('pm.id', $proposal_id)
+        ->get()->row();
+    
+    if (!$proposal) {
+        log_message('error', 'Proposal tidak ditemukan untuk ID: ' . $proposal_id);
+        return false;
     }
-
-    private function _kirim_notifikasi($proposal_id, $dosen_pembimbing_id, $dosen_penguji1_id, $dosen_penguji2_id) {
-        // Ambil data proposal dan mahasiswa
-        $proposal = $this->db->select('pm.*, m.nama as nama_mahasiswa, m.nim, m.email as email_mahasiswa')
-                            ->from('proposal_mahasiswa pm')
-                            ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
-                            ->where('pm.id', $proposal_id)
-                            ->get()->row();
-        
-        if (!$proposal) return;
-        
-        // Ambil data dosen
-        $dosen_pembimbing = $this->db->get_where('dosen', ['id' => $dosen_pembimbing_id])->row();
-        $dosen_penguji1 = $this->db->get_where('dosen', ['id' => $dosen_penguji1_id])->row();
-        $dosen_penguji2 = $this->db->get_where('dosen', ['id' => $dosen_penguji2_id])->row();
-        
+    
+    // Ambil data dosen
+    $dosen_pembimbing = $this->db->get_where('dosen', ['id' => $dosen_pembimbing_id])->row();
+    $dosen_penguji1 = $this->db->get_where('dosen', ['id' => $dosen_penguji1_id])->row();
+    $dosen_penguji2 = $this->db->get_where('dosen', ['id' => $dosen_penguji2_id])->row();
+    
+    try {
         // Kirim notifikasi ke mahasiswa
         $this->_kirim_email_mahasiswa($proposal, $dosen_pembimbing, $dosen_penguji1, $dosen_penguji2);
         
-        // Kirim notifikasi ke dosen pembimbing
-        $this->_kirim_email_dosen_pembimbing($proposal, $dosen_pembimbing);
+        // Kirim notifikasi ke dosen pembimbing - MENGGUNAKAN METHOD YANG SUDAH DIPERBAIKI
+        $result_pembimbing = $this->_kirim_email_dosen_pembimbing($proposal, $dosen_pembimbing);
         
         // Kirim notifikasi ke dosen penguji
         $this->_kirim_email_dosen_penguji($proposal, $dosen_penguji1, 'Penguji 1');
         $this->_kirim_email_dosen_penguji($proposal, $dosen_penguji2, 'Penguji 2');
+        
+        log_message('info', 'Notifikasi penetapan pembimbing berhasil dikirim untuk proposal ID: ' . $proposal_id);
+        return true;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error saat kirim notifikasi: ' . $e->getMessage());
+        return false;
     }
+}
 
-    private function _kirim_email_mahasiswa($proposal, $dosen_pembimbing, $dosen_penguji1, $dosen_penguji2) {
-        // Setup email config
-        $config = [
-            'protocol' => 'smtp',
-            'smtp_host' => 'smtp.gmail.com',
-            'smtp_port' => 587,
-            'smtp_user' => 'stkyakobus@gmail.com',
-            'smtp_pass' => 'yonroxhraathnaug',
-            'charset' => 'utf-8',
-            'newline' => "\r\n",
-            'mailtype' => 'html',
-            'smtp_crypto' => 'tls'
-        ];
-        
-        $this->email->initialize($config);
-        
-        $subject = 'Penetapan Pembimbing dan Penguji - ' . $proposal->nama_mahasiswa;
-        
-        $message = "
-        <h3>Penetapan Pembimbing dan Penguji</h3>
-        <p>Yth. {$proposal->nama_mahasiswa},</p>
-        <p>Proposal Anda dengan judul <strong>{$proposal->judul}</strong> telah ditetapkan pembimbing dan pengujinya:</p>
-        <ul>
-            <li><strong>Dosen Pembimbing:</strong> {$dosen_pembimbing->nama}</li>
-            <li><strong>Dosen Penguji 1:</strong> {$dosen_penguji1->nama}</li>
-            <li><strong>Dosen Penguji 2:</strong> {$dosen_penguji2->nama}</li>
-        </ul>
-        <p>Silakan menghubungi dosen pembimbing untuk memulai proses bimbingan.</p>
-        <p>Login ke sistem: <a href='" . base_url('mahasiswa/proposal') . "'>Klik di sini</a></p>
-        <p><br>Terima kasih.<br>Kaprodi</p>
-        ";
-        
-        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
-        $this->email->to($proposal->email_mahasiswa);
-        $this->email->subject($subject);
-        $this->email->message($message);
-        
-        $this->email->send();
-    }
-
-    private function _kirim_email_dosen_pembimbing($proposal, $dosen) {
-        if (!$dosen) return;
-        
-        $config = [
-            'protocol' => 'smtp',
-            'smtp_host' => 'smtp.gmail.com',
-            'smtp_port' => 587,
-            'smtp_user' => 'stkyakobus@gmail.com',
-            'smtp_pass' => 'yonroxhraathnaug',
-            'charset' => 'utf-8',
-            'newline' => "\r\n",
-            'mailtype' => 'html',
-            'smtp_crypto' => 'tls'
-        ];
-        
-        $this->email->initialize($config);
-        
-        $subject = 'Penunjukan sebagai Dosen Pembimbing - ' . $proposal->nama_mahasiswa;
-        
-        $message = "
-        <h3>Penunjukan sebagai Dosen Pembimbing</h3>
-        <p>Yth. {$dosen->nama},</p>
-        <p>Anda telah ditunjuk sebagai <strong>Dosen Pembimbing</strong> untuk mahasiswa:</p>
-        <ul>
-            <li><strong>Nama:</strong> {$proposal->nama_mahasiswa}</li>
-            <li><strong>NIM:</strong> {$proposal->nim}</li>
-            <li><strong>Judul:</strong> {$proposal->judul}</li>
-        </ul>
-        <p>Silakan login ke sistem untuk memulai proses bimbingan: <a href='" . base_url('dosen/bimbingan') . "'>Login Sistem</a></p>
-        <p><br>Terima kasih atas kesediaannya.<br>Kaprodi</p>
-        ";
-        
-        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
-        $this->email->to($dosen->email);
-        $this->email->subject($subject);
-        $this->email->message($message);
-        
-        $this->email->send();
-    }
-
-    private function _kirim_email_dosen_penguji($proposal, $dosen, $role) {
-        if (!$dosen) return;
-        
-        $config = [
-            'protocol' => 'smtp',
-            'smtp_host' => 'smtp.gmail.com',
-            'smtp_port' => 587,
-            'smtp_user' => 'stkyakobus@gmail.com',
-            'smtp_pass' => 'yonroxhraathnaug',
-            'charset' => 'utf-8',
-            'newline' => "\r\n",
-            'mailtype' => 'html',
-            'smtp_crypto' => 'tls'
-        ];
-        
-        $this->email->initialize($config);
-        
-        $subject = 'Penunjukan sebagai Dosen ' . $role . ' - ' . $proposal->nama_mahasiswa;
-        
-        $message = "
-        <h3>Penunjukan sebagai Dosen {$role}</h3>
-        <p>Yth. {$dosen->nama},</p>
-        <p>Anda telah ditunjuk sebagai <strong>Dosen {$role}</strong> untuk mahasiswa:</p>
-        <ul>
-            <li><strong>Nama:</strong> {$proposal->nama_mahasiswa}</li>
-            <li><strong>NIM:</strong> {$proposal->nim}</li>
-            <li><strong>Judul:</strong> {$proposal->judul}</li>
-        </ul>
-        <p>Silakan login ke sistem untuk melihat detail proposal: <a href='" . base_url('dosen/penguji') . "'>Login Sistem</a></p>
-        <p><br>Terima kasih atas kesediaannya.<br>Kaprodi</p>
-        ";
-        
-        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
-        $this->email->to($dosen->email);
-        $this->email->subject($subject);
-        $this->email->message($message);
-        
-        $this->email->send();
-    }
-
-    public function riwayat() {
-        // PERBAIKAN: Clear flash messages lama
-        $this->_clear_old_flash_messages();
-        
-        $data['title'] = 'Riwayat Penetapan Pembimbing';
-        
-        // Ambil proposal yang sudah ditetapkan
-        $this->db->select('
-            pm.*, 
-            m.nim, 
-            m.nama as nama_mahasiswa,
-            dp.nama as nama_pembimbing,
-            dp1.nama as nama_penguji1,
-            dp2.nama as nama_penguji2,
-            dk.nama as nama_kaprodi
-        ');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->join('dosen dp', 'pm.dosen_id = dp.id', 'left');
-        $this->db->join('dosen dp1', 'pm.dosen_penguji_id = dp1.id', 'left');
-        $this->db->join('dosen dp2', 'pm.dosen_penguji2_id = dp2.id', 'left');
-        $this->db->join('dosen dk', 'pm.penetapan_oleh = dk.id', 'left');
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        $this->db->where('pm.status', '1'); // Sudah ditetapkan
-        $this->db->where('pm.tanggal_penetapan IS NOT NULL');
-        // Filter: hanya proposal yang valid
-        $this->db->where('pm.id NOT IN (34, 35)');
-        $this->db->order_by('pm.tanggal_penetapan', 'DESC');
-        
-        $data['proposals'] = $this->db->get()->result();
-        
-        $this->load->view('kaprodi/penetapan_pembimbing/riwayat', $data);
-    }
-
-    // ==========================================
-    // PERBAIKAN: HELPER METHODS UNTUK FLASH MESSAGES
-    // ==========================================
-
-    /**
-     * Method untuk clear flash messages lama
-     */
-    private function _clear_old_flash_messages() {
-        $this->session->unset_userdata('__ci_flash');
-        $session_data = $this->session->all_userdata();
-        foreach($session_data as $key => $value) {
-            if (in_array($key, ['success', 'error', 'warning', 'info']) && 
-                strpos($key, 'flash:') === false) {
-                $this->session->unset_userdata($key);
-            }
+/**
+ * TAMBAHKAN METHOD ERROR HANDLING UNTUK EMAIL INI JUGA DI CONTROLLER YANG SAMA
+ */
+private function _handle_email_error($error_message, $proposal_id = null, $dosen_email = null) {
+    $context = '';
+    if ($proposal_id) $context .= "Proposal ID: $proposal_id ";
+    if ($dosen_email) $context .= "Dosen Email: $dosen_email ";
+    
+    log_message('error', "Email Error [$context]: $error_message");
+    
+    // Bisa ditambahkan notifikasi ke admin atau system monitor di sini
+    // contoh: kirim email ke admin tentang kegagalan sistem
+}
+private function _validate_email_data($proposal, $dosen) {
+    $required_fields = [
+        'proposal' => ['nama_mahasiswa', 'nim', 'judul', 'email_mahasiswa'],
+        'dosen' => ['nama', 'email']
+    ];
+    
+    foreach ($required_fields['proposal'] as $field) {
+        if (empty($proposal->$field)) {
+            log_message('error', "Email validation failed: Missing proposal field '$field'");
+            return false;
         }
     }
+    
+    foreach ($required_fields['dosen'] as $field) {
+        if (empty($dosen->$field)) {
+            log_message('error', "Email validation failed: Missing dosen field '$field'");
+            return false;
+        }
+    }
+    
+    return true;
+}
 
-    /**
-     * Method untuk set flash message yang aman
-     */
-    private function _set_safe_flash($type, $message) {
-        $this->_clear_old_flash_messages();
-        $this->session->set_flashdata($type, $message);
-        log_message('debug', "Flash message set: {$type} = {$message}");
+/**
+ * BONUS: Method untuk validasi data sebelum kirim email
+ * Tambahkan method ini di controller yang sama
+ */
+private function _validate_email_data($proposal, $dosen) {
+    $required_fields = [
+        'proposal' => ['nama_mahasiswa', 'nim', 'judul', 'email_mahasiswa', 'nama_prodi'],
+        'dosen' => ['nama', 'email']
+    ];
+    
+    foreach ($required_fields['proposal'] as $field) {
+        if (empty($proposal->$field)) {
+            log_message('error', "Email validation failed: Missing proposal field '$field'");
+            return false;
+        }
+    }
+    
+    foreach ($required_fields['dosen'] as $field) {
+        if (empty($dosen->$field)) {
+            log_message('error', "Email validation failed: Missing dosen field '$field'");
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+/**
+ * ENHANCED: Method kirim email dengan error handling
+ * Ganti pemanggilan _kirim_email_dosen_pembimbing() dengan method ini
+ */
+private function _kirim_email_dosen_pembimbing_safe($proposal, $dosen) {
+    if (!$this->_validate_email_data($proposal, $dosen)) {
+        log_message('error', 'Email not sent: Invalid data');
+        return false;
+    }
+    
+    try {
+        return $this->_kirim_email_dosen_pembimbing($proposal, $dosen);
+    } catch (Exception $e) {
+        log_message('error', 'Email sending failed: ' . $e->getMessage());
+        return false;
     }
 }

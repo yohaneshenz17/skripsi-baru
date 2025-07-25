@@ -943,16 +943,27 @@ private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
         return $message;
     }
 
+    /**
+     * PERBAIKAN METHOD _kirim_notifikasi_mahasiswa()
+     * Ganti method yang ada di Kaprodi.php dengan kode ini
+     */
     private function _kirim_notifikasi_mahasiswa($proposal_id, $status) {
-        // Ambil data proposal dan mahasiswa
-        $data = $this->db->select('proposal_mahasiswa.*, mahasiswa.nama as nama_mahasiswa, mahasiswa.email as email_mahasiswa')
-                        ->from('proposal_mahasiswa')
-                        ->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id')
-                        ->where('proposal_mahasiswa.id', $proposal_id)
-                        ->get()->row();
+        // Ambil data proposal dan mahasiswa dengan informasi lengkap
+        $data = $this->db->select('
+                proposal_mahasiswa.*, 
+                mahasiswa.nama as nama_mahasiswa, 
+                mahasiswa.nim,
+                mahasiswa.email as email_mahasiswa,
+                prodi.nama as nama_prodi
+            ')
+            ->from('proposal_mahasiswa')
+            ->join('mahasiswa', 'proposal_mahasiswa.mahasiswa_id = mahasiswa.id')
+            ->join('prodi', 'mahasiswa.prodi_id = prodi.id')
+            ->where('proposal_mahasiswa.id', $proposal_id)
+            ->get()->row();
         
         if ($data) {
-            // Setup email
+            // Setup email configuration
             $config = [
                 'protocol' => 'smtp',
                 'smtp_host' => 'smtp.gmail.com',
@@ -968,23 +979,12 @@ private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
             $this->email->initialize($config);
             
             if ($status == 'disetujui') {
-                $subject = 'Proposal Disetujui - Menunggu Persetujuan Dosen Pembimbing';
-                $message = "
-                <h3>Proposal Disetujui</h3>
-                <p>Yth. {$data->nama_mahasiswa},</p>
-                <p>Proposal Anda dengan judul <strong>{$data->judul}</strong> telah <strong>DISETUJUI</strong> oleh Kaprodi.</p>
-                <p>Status saat ini: <strong>Menunggu persetujuan dosen pembimbing</strong></p>
-                <p>Silakan pantau perkembangan di sistem: <a href='" . base_url('mahasiswa/proposal') . "'>Login Sistem</a></p>
-                ";
+                $subject = '[SIM Tugas Akhir] Proposal Disetujui - Menunggu Persetujuan Dosen Pembimbing';
+                $message = $this->_get_template_proposal_disetujui_mahasiswa($data);
+                
             } else {
-                $subject = 'Proposal Ditolak - Perlu Perbaikan';
-                $message = "
-                <h3>Proposal Ditolak</h3>
-                <p>Yth. {$data->nama_mahasiswa},</p>
-                <p>Proposal Anda dengan judul <strong>{$data->judul}</strong> belum dapat disetujui.</p>
-                <p>Komentar: {$data->komentar_kaprodi}</p>
-                <p>Silakan lakukan perbaikan dan ajukan kembali.</p>
-                ";
+                $subject = '[SIM Tugas Akhir] Proposal Memerlukan Perbaikan';
+                $message = $this->_get_template_proposal_ditolak_mahasiswa($data);
             }
             
             $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
@@ -992,10 +992,384 @@ private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
             $this->email->subject($subject);
             $this->email->message($message);
             
-            $this->email->send();
+            return $this->email->send();
         }
+        
+        return false;
     }
-
+    /**
+     * Template email formal untuk mahasiswa ketika proposal disetujui kaprodi
+     * TAMBAHKAN method ini di class Kaprodi sebelum kurung kurawal penutup
+     */
+    private function _get_template_proposal_disetujui_mahasiswa($data) {
+        $tanggal_review = !empty($data->tanggal_review_kaprodi) ? 
+            date('d F Y, H:i', strtotime($data->tanggal_review_kaprodi)) : 
+            date('d F Y, H:i');
+        
+        $judul_singkat = strlen($data->judul) > 80 ? 
+            substr($data->judul, 0, 80) . '...' : 
+            $data->judul;
+            
+        $ringkasan_singkat = !empty($data->ringkasan) ? 
+            (strlen($data->ringkasan) > 200 ? substr($data->ringkasan, 0, 200) . '...' : $data->ringkasan) :
+            'Tidak ada ringkasan.';
+        
+        $message = "
+        <!DOCTYPE html>
+        <html lang='id'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Proposal Disetujui</title>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7fa; }
+                .container { max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+                .header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px; text-align: center; }
+                .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+                .header p { margin: 10px 0 0 0; font-size: 14px; opacity: 0.9; }
+                .content { padding: 40px 30px; }
+                .greeting { font-size: 16px; margin-bottom: 20px; color: #333; }
+                .success-message { background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+                .success-title { font-size: 20px; font-weight: 600; color: #155724; margin: 0 0 10px 0; }
+                .success-text { font-size: 16px; color: #155724; margin: 0; }
+                .info-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; }
+                .info-title { font-size: 18px; font-weight: 600; color: #2d3748; margin: 0 0 15px 0; display: flex; align-items: center; }
+                .info-table { width: 100%; border-collapse: collapse; }
+                .info-table td { padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+                .info-table td:first-child { font-weight: 600; color: #4a5568; width: 35%; }
+                .info-table td:last-child { color: #2d3748; }
+                .next-steps { background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 8px; padding: 20px; margin: 25px 0; }
+                .next-steps-title { font-size: 16px; font-weight: 600; color: #0d47a1; margin: 0 0 15px 0; }
+                .next-steps ul { margin: 0; padding-left: 20px; color: #1565c0; }
+                .next-steps li { margin-bottom: 8px; line-height: 1.5; }
+                .warning-box { background-color: #fff8e1; border: 1px solid #ffecb3; border-radius: 8px; padding: 20px; margin: 25px 0; }
+                .warning-title { font-size: 16px; font-weight: 600; color: #f57f17; margin: 0 0 10px 0; }
+                .warning-text { font-size: 14px; color: #f57f17; margin: 0; }
+                .btn-container { text-align: center; margin: 30px 0; }
+                .btn { display: inline-block; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; margin: 0 5px; transition: all 0.3s ease; }
+                .btn-primary { background-color: #007bff; color: white; }
+                .btn-success { background-color: #28a745; color: white; }
+                .footer { background-color: #2d3748; color: #a0aec0; padding: 25px 30px; text-align: center; }
+                .footer-logo { font-size: 18px; font-weight: 600; color: #ffffff; margin: 0 0 10px 0; }
+                .footer-text { font-size: 12px; margin: 5px 0; }
+                .divider { height: 1px; background-color: #e2e8f0; margin: 25px 0; }
+                .badge { display: inline-block; padding: 4px 8px; background-color: #28a745; color: white; border-radius: 4px; font-size: 12px; font-weight: 600; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <!-- Header -->
+                <div class='header'>
+                    <h1>🎉 Proposal Disetujui!</h1>
+                    <p>Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+                
+                <!-- Content -->
+                <div class='content'>
+                    <!-- Greeting -->
+                    <div class='greeting'>
+                        Yth. <strong>{$data->nama_mahasiswa}</strong>,
+                    </div>
+                    
+                    <!-- Success Message -->
+                    <div class='success-message'>
+                        <div class='success-title'>
+                            ✅ Selamat! Proposal Anda Telah Disetujui
+                        </div>
+                        <div class='success-text'>
+                            Proposal skripsi Anda telah mendapatkan persetujuan dari Ketua Program Studi pada tanggal <strong>{$tanggal_review}</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Proposal Information -->
+                    <div class='info-card'>
+                        <div class='info-title'>
+                            📚 Detail Proposal Anda
+                        </div>
+                        <table class='info-table'>
+                            <tr>
+                                <td>Nama Mahasiswa</td>
+                                <td><strong>{$data->nama_mahasiswa}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>NIM</td>
+                                <td><span class='badge'>{$data->nim}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Program Studi</td>
+                                <td>{$data->nama_prodi}</td>
+                            </tr>
+                            <tr>
+                                <td>Judul Proposal</td>
+                                <td><strong>{$judul_singkat}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Tanggal Disetujui</td>
+                                <td>{$tanggal_review}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Current Status -->
+                    <div class='warning-box'>
+                        <div class='warning-title'>⏳ Status Saat Ini</div>
+                        <div class='warning-text'>
+                            <strong>Menunggu Persetujuan Dosen Pembimbing</strong><br>
+                            Kaprodi telah menunjuk seorang dosen pembimbing untuk Anda. 
+                            Sistem sedang menunggu konfirmasi persetujuan dari dosen tersebut.
+                            <br><br>
+                            <em>Catatan: Nama dosen pembimbing akan diinformasikan setelah beliau menyetujui penunjukan ini.</em>
+                        </div>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class='next-steps'>
+                        <div class='next-steps-title'>📋 Langkah Selanjutnya</div>
+                        <ul>
+                            <li><strong>Pantau Status:</strong> Cek dashboard SIM Tugas Akhir secara berkala untuk update status terbaru</li>
+                            <li><strong>Persiapan Berkas:</strong> Siapkan dokumen pendukung yang mungkin diperlukan untuk tahap berikutnya</li>
+                            <li><strong>Komunikasi:</strong> Pastikan email dan nomor telepon Anda selalu aktif untuk menerima notifikasi</li>
+                            <li><strong>Bersabar:</strong> Proses persetujuan dosen pembimbing biasanya memerlukan waktu 1-3 hari kerja</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class='btn-container'>
+                        <a href='" . base_url('mahasiswa/proposal') . "' class='btn btn-primary'>
+                            📊 Lihat Status Proposal
+                        </a>
+                        <a href='" . base_url('mahasiswa/dashboard') . "' class='btn btn-success'>
+                            🏠 Dashboard Mahasiswa
+                        </a>
+                    </div>
+                    
+                    <div class='divider'></div>
+                    
+                    <!-- Important Note -->
+                    <div style='background-color: #f7fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #4299e1;'>
+                        <h4 style='margin: 0 0 10px 0; color: #2d3748; font-size: 16px;'>📌 Informasi Penting</h4>
+                        <ul style='margin: 0; padding-left: 20px; color: #4a5568; line-height: 1.6;'>
+                            <li>Anda akan menerima notifikasi email lanjutan ketika dosen pembimbing memberikan respon</li>
+                            <li>Jika dosen pembimbing menyetujui, Anda dapat segera memulai proses bimbingan</li>
+                            <li>Jika terjadi penolakan, Kaprodi akan menunjuk dosen pembimbing pengganti</li>
+                            <li>Untuk pertanyaan urgent, Anda dapat menghubungi Kaprodi melalui sistem</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Closing -->
+                    <div style='margin-top: 30px; color: #4a5568; line-height: 1.6;'>
+                        <p>Terima kasih atas dedikasi Anda dalam proses pengajuan proposal. 
+                        Semoga proses selanjutnya berjalan lancar dan sukses!</p>
+                        
+                        <div style='margin-top: 25px;'>
+                            <p style='margin: 0;'><strong>Salam hormat,</strong></p>
+                            <p style='margin: 5px 0 0 0;'><strong>Ketua Program Studi {$data->nama_prodi}</strong><br>
+                            <span style='color: #718096;'>STK Santo Yakobus Merauke</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class='footer'>
+                    <div class='footer-logo'>🎓 STK Santo Yakobus Merauke</div>
+                    <div class='footer-text'>Sistem Informasi Manajemen Tugas Akhir</div>
+                    <div class='footer-text'>Email ini dikirim secara otomatis oleh sistem</div>
+                    <div class='footer-text' style='margin-top: 10px; font-size: 11px;'>
+                        Jl. Missi II, Mandala, Merauke, Papua Selatan 99616<br>
+                        📞 (0971) 3330264 | 📧 sipd@stkyakobus.ac.id
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>";
+        
+        return $message;
+    }
+    /**
+     * Template email formal untuk mahasiswa ketika proposal ditolak kaprodi
+     * TAMBAHKAN method ini di class Kaprodi sebelum kurung kurawal penutup
+     */
+    private function _get_template_proposal_ditolak_mahasiswa($data) {
+        $tanggal_review = !empty($data->tanggal_review_kaprodi) ? 
+            date('d F Y, H:i', strtotime($data->tanggal_review_kaprodi)) : 
+            date('d F Y, H:i');
+        
+        $judul_singkat = strlen($data->judul) > 80 ? 
+            substr($data->judul, 0, 80) . '...' : 
+            $data->judul;
+            
+        $komentar_kaprodi = !empty($data->komentar_kaprodi) ? 
+            $data->komentar_kaprodi : 
+            'Silakan lakukan perbaikan sesuai panduan penulisan proposal yang berlaku.';
+        
+        $message = "
+        <!DOCTYPE html>
+        <html lang='id'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Proposal Memerlukan Perbaikan</title>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7fa; }
+                .container { max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+                .header { background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); color: white; padding: 30px; text-align: center; }
+                .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+                .header p { margin: 10px 0 0 0; font-size: 14px; opacity: 0.9; }
+                .content { padding: 40px 30px; }
+                .greeting { font-size: 16px; margin-bottom: 20px; color: #333; }
+                .review-message { background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+                .review-title { font-size: 20px; font-weight: 600; color: #721c24; margin: 0 0 10px 0; }
+                .review-text { font-size: 16px; color: #721c24; margin: 0; }
+                .info-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; }
+                .info-title { font-size: 18px; font-weight: 600; color: #2d3748; margin: 0 0 15px 0; display: flex; align-items: center; }
+                .info-table { width: 100%; border-collapse: collapse; }
+                .info-table td { padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+                .info-table td:first-child { font-weight: 600; color: #4a5568; width: 35%; }
+                .info-table td:last-child { color: #2d3748; }
+                .comment-box { background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 25px 0; }
+                .comment-title { font-size: 16px; font-weight: 600; color: #856404; margin: 0 0 15px 0; }
+                .comment-text { font-size: 14px; color: #856404; margin: 0; line-height: 1.6; background-color: white; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; }
+                .next-steps { background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin: 25px 0; }
+                .next-steps-title { font-size: 16px; font-weight: 600; color: #155724; margin: 0 0 15px 0; }
+                .next-steps ul { margin: 0; padding-left: 20px; color: #155724; }
+                .next-steps li { margin-bottom: 8px; line-height: 1.5; }
+                .btn-container { text-align: center; margin: 30px 0; }
+                .btn { display: inline-block; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; margin: 0 5px; transition: all 0.3s ease; }
+                .btn-primary { background-color: #007bff; color: white; }
+                .btn-warning { background-color: #ffc107; color: #212529; }
+                .footer { background-color: #2d3748; color: #a0aec0; padding: 25px 30px; text-align: center; }
+                .footer-logo { font-size: 18px; font-weight: 600; color: #ffffff; margin: 0 0 10px 0; }
+                .footer-text { font-size: 12px; margin: 5px 0; }
+                .divider { height: 1px; background-color: #e2e8f0; margin: 25px 0; }
+                .badge { display: inline-block; padding: 4px 8px; background-color: #dc3545; color: white; border-radius: 4px; font-size: 12px; font-weight: 600; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <!-- Header -->
+                <div class='header'>
+                    <h1>📝 Proposal Memerlukan Perbaikan</h1>
+                    <p>Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+                
+                <!-- Content -->
+                <div class='content'>
+                    <!-- Greeting -->
+                    <div class='greeting'>
+                        Yth. <strong>{$data->nama_mahasiswa}</strong>,
+                    </div>
+                    
+                    <!-- Review Message -->
+                    <div class='review-message'>
+                        <div class='review-title'>
+                            📋 Hasil Review Proposal
+                        </div>
+                        <div class='review-text'>
+                            Proposal skripsi Anda telah direview pada tanggal <strong>{$tanggal_review}</strong> dan <strong>memerlukan perbaikan</strong> sebelum dapat disetujui.
+                        </div>
+                    </div>
+                    
+                    <!-- Proposal Information -->
+                    <div class='info-card'>
+                        <div class='info-title'>
+                            📚 Detail Proposal Anda
+                        </div>
+                        <table class='info-table'>
+                            <tr>
+                                <td>Nama Mahasiswa</td>
+                                <td><strong>{$data->nama_mahasiswa}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>NIM</td>
+                                <td><span class='badge'>{$data->nim}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Program Studi</td>
+                                <td>{$data->nama_prodi}</td>
+                            </tr>
+                            <tr>
+                                <td>Judul Proposal</td>
+                                <td><strong>{$judul_singkat}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Tanggal Review</td>
+                                <td>{$tanggal_review}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Comments -->
+                    <div class='comment-box'>
+                        <div class='comment-title'>💬 Catatan dan Saran Perbaikan</div>
+                        <div class='comment-text'>
+                            {$komentar_kaprodi}
+                        </div>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class='next-steps'>
+                        <div class='next-steps-title'>🔧 Langkah Perbaikan</div>
+                        <ul>
+                            <li><strong>Review Catatan:</strong> Baca dengan teliti semua catatan dan saran perbaikan dari reviewer</li>
+                            <li><strong>Konsultasi:</strong> Diskusikan dengan dosen wali atau pembimbing akademik jika diperlukan</li>
+                            <li><strong>Perbaiki Dokumen:</strong> Lakukan revisi proposal sesuai dengan masukan yang diberikan</li>
+                            <li><strong>Periksa Format:</strong> Pastikan format penulisan sesuai dengan panduan yang berlaku</li>
+                            <li><strong>Ajukan Ulang:</strong> Submit proposal yang telah diperbaiki melalui sistem</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class='btn-container'>
+                        <a href='" . base_url('mahasiswa/proposal') . "' class='btn btn-primary'>
+                            📊 Lihat Detail Review
+                        </a>
+                        <a href='" . base_url('mahasiswa/proposal/add') . "' class='btn btn-warning'>
+                            ✏️ Perbaiki & Ajukan Ulang
+                        </a>
+                    </div>
+                    
+                    <div class='divider'></div>
+                    
+                    <!-- Encouragement -->
+                    <div style='background-color: #f7fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #4299e1;'>
+                        <h4 style='margin: 0 0 10px 0; color: #2d3748; font-size: 16px;'>💪 Jangan Berkecil Hati!</h4>
+                        <p style='margin: 0; color: #4a5568; line-height: 1.6;'>
+                            Proses review dan perbaikan adalah bagian normal dari pengembangan proposal yang berkualitas. 
+                            Catatan yang diberikan bertujuan untuk membantu Anda menghasilkan proposal yang lebih baik 
+                            dan sesuai dengan standar akademik yang berlaku.
+                        </p>
+                    </div>
+                    
+                    <!-- Closing -->
+                    <div style='margin-top: 30px; color: #4a5568; line-height: 1.6;'>
+                        <p>Kami percaya Anda dapat melakukan perbaikan dengan baik. 
+                        Jangan ragu untuk berkonsultasi jika memerlukan bantuan lebih lanjut.</p>
+                        
+                        <div style='margin-top: 25px;'>
+                            <p style='margin: 0;'><strong>Semangat dan sukses selalu,</strong></p>
+                            <p style='margin: 5px 0 0 0;'><strong>Ketua Program Studi {$data->nama_prodi}</strong><br>
+                            <span style='color: #718096;'>STK Santo Yakobus Merauke</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class='footer'>
+                    <div class='footer-logo'>🎓 STK Santo Yakobus Merauke</div>
+                    <div class='footer-text'>Sistem Informasi Manajemen Tugas Akhir</div>
+                    <div class='footer-text'>Email ini dikirim secara otomatis oleh sistem</div>
+                    <div class='footer-text' style='margin-top: 10px; font-size: 11px;'>
+                        Jl. Missi II, Mandala, Merauke, Papua Selatan 99616<br>
+                        📞 (0971) 3330264 | 📧 sipd@stkyakobus.ac.id
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>";
+        
+        return $message;
+    }
+    
     // ============================================
     // METHOD MAHASISWA() - DISEDERHANAKAN (hanya tampilkan tombol Detail)
     // ============================================

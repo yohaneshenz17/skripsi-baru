@@ -5,9 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Profil Controller untuk Staf Akademik
  * File: application/controllers/staf/Profil.php
  * 
- * CATATAN PENTING:
- * - Auth.php SUDAH MENDUKUNG login staf (level = '5') dengan sempurna
- * - Controller ini melengkapi fungsionalitas profil yang belum ada
+ * PERBAIKAN: Mengatasi masalah foto tidak terupdate di header/sidebar
  */
 class Profil extends CI_Controller {
 
@@ -86,6 +84,10 @@ class Profil extends CI_Controller {
             $data_update['prodi_id'] = $prodi_id;
         }
         
+        // PERBAIKAN: Flag untuk tracking foto update
+        $foto_updated = false;
+        $new_foto_name = null;
+        
         // Handle upload foto jika ada
         if (!empty($_FILES['foto']['name'])) {
             $upload_result = $this->_upload_foto();
@@ -96,6 +98,8 @@ class Profil extends CI_Controller {
                     unlink('./cdn/img/staf/' . $old_staf->foto);
                 }
                 $data_update['foto'] = $upload_result['filename'];
+                $foto_updated = true;
+                $new_foto_name = $upload_result['filename'];
             } else {
                 $this->session->set_flashdata('error', $upload_result['message']);
                 redirect('staf/profil');
@@ -106,12 +110,20 @@ class Profil extends CI_Controller {
         // Update data ke database
         $this->db->where('id', $staf_id);
         if ($this->db->update('dosen', $data_update)) {
-            // Update session data
-            $this->session->set_userdata([
+            // PERBAIKAN: Update session data TERMASUK FOTO
+            $session_update_data = [
                 'nama' => $nama,
                 'email' => $email
-            ]);
+            ];
             
+            // KUNCI PERBAIKAN: Update session foto jika ada foto baru
+            if ($foto_updated && $new_foto_name) {
+                $session_update_data['foto'] = $new_foto_name;
+                // Set flag untuk JavaScript detection
+                $this->session->set_flashdata('foto_updated', $new_foto_name);
+            }
+            
+            $this->session->set_userdata($session_update_data);
             $this->session->set_flashdata('success', 'Profil berhasil diperbarui!');
         } else {
             $this->session->set_flashdata('error', 'Gagal memperbarui profil!');
@@ -136,6 +148,10 @@ class Profil extends CI_Controller {
             // Update database
             $this->db->where('id', $staf_id);
             $this->db->update('dosen', ['foto' => '']);
+            
+            // PERBAIKAN: Update session foto juga
+            $this->session->set_userdata('foto', '');
+            $this->session->set_flashdata('foto_deleted', true);
             
             $this->session->set_flashdata('success', 'Foto profil berhasil dihapus!');
         } else {

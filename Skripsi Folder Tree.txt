@@ -1095,6 +1095,15 @@ skripsi/
 │		│   │       index.php
 │		│   │       pdf_surat_izin.php
 │		│   │
+│		│   ├───dosen
+│		│   │       index.php
+│		│   │
+│		│   ├───laporan
+│		│   │       index.php
+│		│   │
+│		│   ├───mahasiswa
+│		│   │       index.php
+│		│   │
 │		│   ├───publikasi
 │		│   │       index.php
 │		│   │
@@ -1158,12 +1167,13 @@ skripsi/
 │	│   ├───staf
 │	│   └───theme
 │	├───js
-│	│   └───components
-│	│       ├───charts
-│	│       ├───custom
-│	│       ├───init
-│	│       ├───maps
-│	│       └───vendor
+│	│   ├───components
+│	│   │   ├───charts
+│	│   │   ├───custom
+│	│   │   ├───init
+│	│   │   ├───maps
+│	│   │   └───vendor
+│	│	└───staf-photo-helper.js
 │	├───konsultasi
 │	├───plugins
 │	│   ├───canvas-resize

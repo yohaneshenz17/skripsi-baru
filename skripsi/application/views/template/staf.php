@@ -179,6 +179,39 @@ $uri_string = str_replace("staf/", "", uri_string());
       border-color: #5e72e4;
       box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.1);
     }
+
+    /* PERBAIKAN: CSS untuk foto profil staf yang konsisten */
+    .staf-profile-photo {
+        transition: all 0.3s ease;
+        object-fit: cover;
+    }
+    
+    .staf-profile-photo:hover {
+        transform: scale(1.05);
+    }
+    
+    .staf-header-avatar {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .staf-sidebar-avatar {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 50%;
+    }
+    
+    .loading-photo {
+        opacity: 0.6;
+        animation: pulse 1.5s ease-in-out infinite alternate;
+    }
+    
+    @keyframes pulse {
+        from { opacity: 0.6; }
+        to { opacity: 1; }
+    }
   </style>
   
   <!-- Custom CSS -->
@@ -310,10 +343,17 @@ $uri_string = str_replace("staf/", "", uri_string());
           <div class="card border-0 profile-card-compact">
             <div class="card-body text-center text-white">
               <div class="avatar avatar-sm mx-auto">
+                <!-- PERBAIKAN: Tambahkan ID dan class yang konsisten -->
                 <?php if($this->session->userdata('foto')): ?>
-                  <img alt="Profile" src="<?= base_url('cdn/img/staf/' . $this->session->userdata('foto')) ?>" class="rounded-circle">
+                  <img id="sidebar-staf-photo" 
+                       class="staf-profile-photo staf-sidebar-avatar" 
+                       alt="Profile" 
+                       src="<?= base_url('cdn/img/staf/' . $this->session->userdata('foto')) ?>">
                 <?php else: ?>
-                  <img alt="Profile" src="<?= base_url() ?>assets/img/theme/default-avatar.png" class="rounded-circle">
+                  <img id="sidebar-staf-photo" 
+                       class="staf-profile-photo staf-sidebar-avatar" 
+                       alt="Profile" 
+                       src="<?= base_url() ?>assets/img/theme/default-avatar.png">
                 <?php endif; ?>
               </div>
               <h6 class="text-white mt-3 mb-1"><?= $this->session->userdata('nama') ?></h6>
@@ -369,10 +409,17 @@ $uri_string = str_replace("staf/", "", uri_string());
               <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <div class="media align-items-center">
                   <span class="avatar avatar-sm rounded-circle">
+                    <!-- PERBAIKAN: Tambahkan ID dan class yang konsisten -->
                     <?php if($this->session->userdata('foto')): ?>
-                      <img alt="Profile" src="<?= base_url('cdn/img/staf/' . $this->session->userdata('foto')) ?>">
+                      <img id="header-staf-photo" 
+                           class="staf-profile-photo staf-header-avatar" 
+                           alt="Profile" 
+                           src="<?= base_url('cdn/img/staf/' . $this->session->userdata('foto')) ?>">
                     <?php else: ?>
-                      <img alt="Profile" src="<?= base_url() ?>assets/img/theme/default-avatar.png">
+                      <img id="header-staf-photo" 
+                           class="staf-profile-photo staf-header-avatar" 
+                           alt="Profile" 
+                           src="<?= base_url() ?>assets/img/theme/default-avatar.png">
                     <?php endif; ?>
                   </span>
                   <div class="media-body ml-2 d-none d-lg-block">
@@ -467,8 +514,13 @@ $uri_string = str_replace("staf/", "", uri_string());
   <?php include('_main/js.php') ?>
   <?= isset($script) ? $script : '' ?>
   
-  <!-- Custom Scripts for Staf -->
+  <!-- PERBAIKAN: JavaScript untuk update foto staf real-time -->
   <script>
+    // Pastikan variabel global tersedia
+    if (typeof base_url === 'undefined') {
+        var base_url = '<?= base_url() ?>';
+    }
+    
     $(document).ready(function() {
         // Expand active menu
         $('.nav-link.active').closest('.collapse').addClass('show');
@@ -495,7 +547,76 @@ $uri_string = str_replace("staf/", "", uri_string());
                 alert.fadeOut('slow');
             }, 5000);
         });
+        
+        // PERBAIKAN: Auto-refresh foto jika ada flashdata update
+        <?php if($this->session->flashdata('foto_updated')): ?>
+            const updatedFoto = '<?= $this->session->flashdata('foto_updated') ?>';
+            console.log('Foto updated detected:', updatedFoto);
+            setTimeout(function() {
+                updateStafProfilePhoto(updatedFoto);
+            }, 1000);
+        <?php endif; ?>
+        
+        <?php if($this->session->flashdata('foto_deleted')): ?>
+            console.log('Foto deleted detected');
+            setTimeout(function() {
+                updateStafProfilePhoto('');
+            }, 1000);
+        <?php endif; ?>
     });
+    
+    // PERBAIKAN: Function global untuk update foto staf
+    window.updateStafProfilePhoto = function(fotoName) {
+        console.log('Updating staf profile photo:', fotoName);
+        
+        const timestamp = new Date().getTime();
+        let fotoUrl;
+        
+        if (!fotoName || fotoName === '' || fotoName === 'default.png') {
+            fotoUrl = base_url + 'assets/img/theme/default-avatar.png';
+        } else {
+            fotoUrl = base_url + 'cdn/img/staf/' + fotoName;
+        }
+        
+        // Tambahkan timestamp untuk cache busting
+        const finalUrl = fotoUrl + '?v=' + timestamp;
+        
+        console.log('Final photo URL:', finalUrl);
+        
+        // Update foto di header
+        updatePhotoElement('#header-staf-photo', finalUrl);
+        
+        // Update foto di sidebar
+        updatePhotoElement('#sidebar-staf-photo', finalUrl);
+        
+        // Update semua foto staf lainnya dengan class
+        $('.staf-profile-photo').each(function() {
+            updatePhotoElement(this, finalUrl);
+        });
+        
+        console.log('All staf profile photos updated successfully');
+    };
+    
+    // Helper function untuk update foto dengan loading state
+    function updatePhotoElement(selector, url) {
+        const $element = $(selector);
+        if ($element.length > 0) {
+            $element.addClass('loading-photo');
+            
+            // Test load gambar terlebih dahulu
+            const testImg = new Image();
+            testImg.onload = function() {
+                $element.attr('src', url);
+                $element.removeClass('loading-photo');
+                console.log('Photo updated:', selector);
+            };
+            testImg.onerror = function() {
+                console.warn('Failed to load photo:', url);
+                $element.removeClass('loading-photo');
+            };
+            testImg.src = url;
+        }
+    }
   </script>
 </body>
 

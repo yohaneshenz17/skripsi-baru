@@ -1,6 +1,6 @@
 <?php
 // File: application/views/staf/profil.php
-// FIXED - Menggunakan template pattern yang benar sesuai sistem
+// PERBAIKAN: Menambahkan JavaScript untuk update foto real-time setelah berhasil submit
 
 // Capture content untuk template
 ob_start();
@@ -41,6 +41,7 @@ ob_start();
                         </label>
                     </div>
                     <div class="avatar-preview" style="width: 150px; height: 150px; position: relative; border-radius: 100%; border: 6px solid #F8F8F8; box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);">
+                        <!-- PERBAIKAN: Tambahkan ID untuk preview dan sinkronisasi dengan template -->
                         <div id="imagePreview" style="width: 100%; height: 100%; border-radius: 100%; background-size: cover; background-repeat: no-repeat; background-position: center; background-image: url('<?= $staf->foto ? base_url('cdn/img/staf/' . $staf->foto) : base_url('assets/img/theme/default-avatar.png') ?>');"></div>
                     </div>
                 </div>
@@ -147,8 +148,8 @@ ob_start();
                 </div>
             </div>
             <div class="card-body">
-                <!-- FORM ACTION DIPERBAIKI -->
-                <form action="<?= base_url('staf/profil/update') ?>" method="POST" enctype="multipart/form-data">
+                <!-- PERBAIKAN: Tambahkan ID untuk form dan loading state -->
+                <form id="profileForm" action="<?= base_url('staf/profil/update') ?>" method="POST" enctype="multipart/form-data">
                     <h6 class="heading-small text-muted mb-4">Informasi Personal</h6>
                     <div class="pl-lg-4">
                         <div class="row">
@@ -200,7 +201,8 @@ ob_start();
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label class="form-control-label" for="foto">Foto Profil</label>
-                                    <input type="file" id="foto" name="foto" class="form-control" accept="image/*">
+                                    <!-- PERBAIKAN: Tambahkan ID dan event listener -->
+                                    <input type="file" id="foto" name="foto" class="form-control" accept="image/*" onchange="previewFoto(this)">
                                     <small class="text-muted">Format: JPG, PNG. Maksimal 2MB</small>
                                 </div>
                             </div>
@@ -246,7 +248,8 @@ ob_start();
                     
                     <!-- Action Buttons -->
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary">
+                        <!-- PERBAIKAN: Tambahkan ID untuk button submit -->
+                        <button type="submit" id="submitBtn" class="btn btn-primary">
                             <i class="fas fa-save"></i> Simpan Perubahan
                         </button>
                         <button type="button" class="btn btn-secondary" onclick="window.location.reload()">
@@ -317,27 +320,84 @@ ob_start();
     </div>
 </div>
 
+<!-- PERBAIKAN: JavaScript yang diperbaiki untuk integrasi dengan template -->
 <script>
 $(document).ready(function() {
-    // Image upload preview
-    function readURL(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                $('#imagePreview').css('background-image', 'url('+e.target.result +')');
-                $('#imagePreview').hide();
-                $('#imagePreview').fadeIn(650);
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
+    console.log('Staf profil page loaded');
     
-    $("#imageUpload").change(function() {
-        readURL(this);
+    // PERBAIKAN: Flag untuk tracking jika ada foto yang diupload
+    let fotoUploaded = false;
+    let uploadedFotoName = '';
+    
+    // PERBAIHAN: Image upload preview dan tracking
+    window.previewFoto = function(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            fotoUploaded = true; // Set flag bahwa ada foto yang diupload
+            
+            // Validasi file
+            if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+                alert('Format file harus JPG, JPEG, atau PNG!');
+                input.value = '';
+                fotoUploaded = false;
+                return;
+            }
+            
+            if (file.size > 2048000) { // 2MB dalam bytes
+                alert('Ukuran file maksimal 2MB!');
+                input.value = '';
+                fotoUploaded = false;
+                return;
+            }
+            
+            // Preview foto
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').css('background-image', 'url(' + e.target.result + ')');
+                $('#imagePreview').hide().fadeIn(650);
+                console.log('Photo preview updated');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            fotoUploaded = false;
+        }
+    };
+    
+    // PERBAIKAN: Form submit dengan deteksi foto update
+    $('#profileForm').on('submit', function(e) {
+        const $submitBtn = $('#submitBtn');
+        const originalText = $submitBtn.html();
+        
+        // Set loading state
+        $submitBtn.prop('disabled', true)
+                  .html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
+        
+        // PERBAIKAN: Jika ada foto yang diupload, siapkan untuk update setelah submit
+        if (fotoUploaded) {
+            console.log('Photo upload detected, will update header/sidebar after success');
+            
+            // Set timeout untuk update foto setelah redirect berhasil
+            // Ini akan berjalan setelah halaman reload dan flashdata diproses
+            setTimeout(function() {
+                // Check apakah ada flashdata foto_updated di template
+                if (typeof window.updateStafProfilePhoto === 'function') {
+                    // Function ini akan dipanggil otomatis oleh template jika ada flashdata
+                    console.log('updateStafProfilePhoto function is available');
+                }
+            }, 500);
+        }
+        
+        // Form akan submit secara normal, tidak mencegah default behavior
+        // Controller akan handle upload dan set flashdata untuk update foto
+        
+        // Reset button jika ada error (failsafe)
+        setTimeout(function() {
+            $submitBtn.prop('disabled', false).html(originalText);
+        }, 10000);
     });
     
-    // Form validation
-    $('form').on('submit', function(e) {
+    // Form validation yang sudah ada
+    $('#profileForm').on('submit', function(e) {
         var email = $('#email').val();
         var nip = $('#nip').val();
         var nama = $('#nama').val();
@@ -378,7 +438,7 @@ $(document).ready(function() {
             return false;
         }
         
-        // File size validation
+        // File size validation (sudah ada di previewFoto, tapi double check)
         var fileInput = $('#foto')[0];
         if (fileInput.files.length > 0) {
             var fileSize = fileInput.files[0].size / 1024 / 1024; // in MB
@@ -411,6 +471,8 @@ $(document).ready(function() {
         var value = $(this).val().replace(/\D/g, '');
         $(this).val(value);
     });
+    
+    console.log('Staf profil JavaScript initialized');
 });
 
 function deletePhoto() {

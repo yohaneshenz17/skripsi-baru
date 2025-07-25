@@ -2,8 +2,9 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Controller Staf - Daftar Mahasiswa (VERIFIED untuk database yang ada)
+ * Controller Staf - Daftar Mahasiswa (SIMPLIFIED - No Action Column)
  * File: application/controllers/staf/Mahasiswa.php
+ * PERBAIKAN: Simplified table dengan kolom: NIM + Nama + Prodi + Jenis Kelamin + Email + Status Workflow
  */
 class Mahasiswa extends CI_Controller {
 
@@ -29,20 +30,26 @@ class Mahasiswa extends CI_Controller {
             $status = $this->input->get('status');
             $search = $this->input->get('search');
             
-            // Build query - DISESUAIKAN dengan database yang ada
+            // PERBAIKAN: Query yang lebih sederhana dan fokus pada kolom yang dibutuhkan
             $this->db->select('
-                m.*,
+                m.id,
+                m.nim,
+                m.nama,
+                m.email,
+                m.jenis_kelamin,
+                m.status,
                 p.nama as nama_prodi,
-                p.kode as kode_prodi,
-                (SELECT COUNT(*) FROM proposal_mahasiswa pm WHERE pm.mahasiswa_id = m.id) as total_proposal
+                p.kode as kode_prodi
             ');
             
-            // Cek apakah field workflow_status ada
-            if ($this->db->field_exists('workflow_status', 'proposal_mahasiswa')) {
-                $this->db->select('(SELECT workflow_status FROM proposal_mahasiswa pm WHERE pm.mahasiswa_id = m.id ORDER BY pm.created_at DESC LIMIT 1) as current_workflow', FALSE);
-            } else {
-                $this->db->select('NULL as current_workflow', FALSE);
-            }
+            // PERBAIKAN: Tambahkan status workflow dari proposal_mahasiswa
+            $this->db->select('
+                (SELECT workflow_status 
+                 FROM proposal_mahasiswa pm 
+                 WHERE pm.mahasiswa_id = m.id 
+                 ORDER BY pm.created_at DESC 
+                 LIMIT 1) as current_workflow
+            ', FALSE);
             
             $this->db->from('mahasiswa m');
             $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
@@ -64,246 +71,128 @@ class Mahasiswa extends CI_Controller {
                 $this->db->group_end();
             }
             
+            // PERBAIKAN: Order by nama untuk konsistensi
             $this->db->order_by('m.nama', 'ASC');
             $data['mahasiswa_list'] = $this->db->get()->result();
             
             // Get prodi list for filter
             $data['prodi_list'] = $this->db->get('prodi')->result();
             
-            // Get statistics
-            $data['statistics'] = $this->_get_statistics();
+            // PERBAIKAN: Statistik yang lebih sederhana
+            $data['statistics'] = $this->_get_simple_statistics();
             
         } catch (Exception $e) {
             log_message('error', 'Error in Mahasiswa controller: ' . $e->getMessage());
             $data['mahasiswa_list'] = [];
             $data['prodi_list'] = [];
-            $data['statistics'] = ['total' => 0, 'aktif' => 0, 'nonaktif' => 0, 'mengerjakan_ta' => 0];
+            $data['statistics'] = [
+                'total' => 0,
+                'aktif' => 0,
+                'tidak_aktif' => 0
+            ];
+            
             $this->session->set_flashdata('error', 'Terjadi kesalahan saat memuat data mahasiswa.');
         }
         
         $this->load->view('staf/mahasiswa/index', $data);
     }
-    
-    public function detail($mahasiswa_id) {
-        $data['title'] = 'Detail Mahasiswa';
-        
+
+    /**
+     * PERBAIKAN: Statistik yang disederhanakan
+     */
+    private function _get_simple_statistics() {
         try {
-            // Get mahasiswa detail with prodi
-            $this->db->select('m.*, p.nama as nama_prodi, p.kode as kode_prodi');
-            $this->db->from('mahasiswa m');
-            $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
-            $this->db->where('m.id', $mahasiswa_id);
-            $mahasiswa = $this->db->get()->row();
+            // Total mahasiswa
+            $total = $this->db->count_all_results('mahasiswa');
             
-            if (!$mahasiswa) {
-                $this->session->set_flashdata('error', 'Data mahasiswa tidak ditemukan!');
-                redirect('staf/mahasiswa');
+            // Mahasiswa aktif
+            $this->db->where('status', 'aktif');
+            $aktif = $this->db->count_all_results('mahasiswa');
+            
+            // Mahasiswa tidak aktif/nonaktif
+            $this->db->where('status !=', 'aktif');
+            $tidak_aktif = $this->db->count_all_results('mahasiswa');
+            
+            // Status workflow distribution
+            $workflow_stats = $this->db->query("
+                SELECT 
+                    workflow_status, 
+                    COUNT(*) as count 
+                FROM proposal_mahasiswa 
+                WHERE workflow_status IS NOT NULL 
+                GROUP BY workflow_status
+            ")->result();
+            
+            $workflow_distribution = [];
+            foreach ($workflow_stats as $stat) {
+                $workflow_distribution[$stat->workflow_status] = $stat->count;
             }
             
-            $data['mahasiswa'] = $mahasiswa;
-            
-            // Get proposal history dengan data yang ada
-            $this->db->select('
-                pm.*,
-                d.nama as nama_pembimbing
-            ');
-            
-            // Cek apakah tabel jurnal_bimbingan ada
-            if ($this->db->table_exists('jurnal_bimbingan')) {
-                $this->db->select('(SELECT COUNT(*) FROM jurnal_bimbingan jb WHERE jb.proposal_id = pm.id) as total_jurnal', FALSE);
-            } else if ($this->db->table_exists('konsultasi')) {
-                $this->db->select('(SELECT COUNT(*) FROM konsultasi k WHERE k.proposal_mahasiswa_id = pm.id) as total_jurnal', FALSE);
-            } else {
-                $this->db->select('0 as total_jurnal', FALSE);
-            }
-            
-            $this->db->from('proposal_mahasiswa pm');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-            $this->db->order_by('pm.created_at', 'DESC');
-            $data['proposal_history'] = $this->db->get()->result();
+            return [
+                'total' => $total,
+                'aktif' => $aktif,
+                'tidak_aktif' => $tidak_aktif,
+                'workflow' => $workflow_distribution
+            ];
             
         } catch (Exception $e) {
-            log_message('error', 'Error getting mahasiswa detail: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan saat memuat detail mahasiswa.');
-            redirect('staf/mahasiswa');
+            log_message('error', 'Error getting statistics: ' . $e->getMessage());
+            return [
+                'total' => 0,
+                'aktif' => 0,
+                'tidak_aktif' => 0,
+                'workflow' => []
+            ];
         }
-        
-        $this->load->view('staf/mahasiswa/detail', $data);
     }
-    
-    public function progress($mahasiswa_id) {
-        $data['title'] = 'Progress Tugas Akhir';
-        
-        try {
-            // Get current proposal
-            $this->db->select('
-                pm.*,
-                m.nama as nama_mahasiswa,
-                m.nim,
-                p.nama as nama_prodi,
-                d.nama as nama_pembimbing
-            ');
-            $this->db->from('proposal_mahasiswa pm');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-            $this->db->order_by('pm.created_at', 'DESC');
-            $this->db->limit(1);
-            $proposal = $this->db->get()->row();
-            
-            if (!$proposal) {
-                $this->session->set_flashdata('error', 'Mahasiswa belum mengajukan proposal!');
-                redirect('staf/mahasiswa');
-            }
-            
-            $data['proposal'] = $proposal;
-            
-            // Get workflow progress
-            $workflow_status = isset($proposal->workflow_status) ? $proposal->workflow_status : 'proposal';
-            $data['workflow_progress'] = $this->_get_workflow_progress($workflow_status);
-            
-            // Get jurnal/konsultasi data
-            $data['jurnal_list'] = [];
-            if ($this->db->table_exists('jurnal_bimbingan')) {
-                $this->db->select('*');
-                $this->db->from('jurnal_bimbingan');
-                $this->db->where('proposal_id', $proposal->id);
-                $this->db->order_by('tanggal_bimbingan', 'DESC');
-                $data['jurnal_list'] = $this->db->get()->result();
-            } else if ($this->db->table_exists('konsultasi')) {
-                $this->db->select('*, tanggal as tanggal_bimbingan, isi as catatan_mahasiswa');
-                $this->db->from('konsultasi');
-                $this->db->where('proposal_mahasiswa_id', $proposal->id);
-                $this->db->order_by('tanggal', 'DESC');
-                $data['jurnal_list'] = $this->db->get()->result();
-            }
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting progress: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan saat memuat progress mahasiswa.');
-            redirect('staf/mahasiswa');
-        }
-        
-        $this->load->view('staf/mahasiswa/progress', $data);
-    }
-    
+
+    /**
+     * Export data mahasiswa ke Excel (OPTIONAL)
+     */
     public function export() {
+        // Load library untuk export Excel jika diperlukan
+        $this->load->library('excel');
+        
         try {
-            // Set headers for Excel download
-            header('Content-Type: application/vnd.ms-excel');
-            header('Content-Disposition: attachment;filename="daftar_mahasiswa_' . date('Y-m-d') . '.xls"');
-            header('Cache-Control: max-age=0');
-            
-            // Get all mahasiswa data
+            // Get data mahasiswa
             $this->db->select('
                 m.nim,
                 m.nama,
-                p.nama as nama_prodi,
-                m.jenis_kelamin,
                 m.email,
-                m.nomor_telepon,
-                CASE 
-                    WHEN m.status = "1" THEN "Aktif"
-                    ELSE "Nonaktif"
-                END as status,
-                (SELECT COUNT(*) FROM proposal_mahasiswa pm WHERE pm.mahasiswa_id = m.id) as total_proposal
+                m.jenis_kelamin,
+                m.status,
+                p.nama as nama_prodi
             ');
             $this->db->from('mahasiswa m');
             $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
-            $this->db->order_by('p.nama, m.nama');
-            $mahasiswa_list = $this->db->get()->result();
+            $this->db->order_by('m.nama', 'ASC');
             
-            // Generate Excel content
-            echo "<table border='1'>";
-            echo "<tr>";
-            echo "<th>No</th>";
-            echo "<th>NIM</th>";
-            echo "<th>Nama</th>";
-            echo "<th>Program Studi</th>";
-            echo "<th>Jenis Kelamin</th>";
-            echo "<th>Email</th>";
-            echo "<th>No. Telepon</th>";
-            echo "<th>Status</th>";
-            echo "<th>Total Proposal</th>";
-            echo "</tr>";
+            $mahasiswa_data = $this->db->get()->result();
             
-            $no = 1;
-            foreach ($mahasiswa_list as $mhs) {
-                echo "<tr>";
-                echo "<td>$no</td>";
-                echo "<td>" . htmlspecialchars($mhs->nim) . "</td>";
-                echo "<td>" . htmlspecialchars($mhs->nama) . "</td>";
-                echo "<td>" . htmlspecialchars($mhs->nama_prodi ?: 'Tidak Ada') . "</td>";
-                echo "<td>" . ucfirst($mhs->jenis_kelamin) . "</td>";
-                echo "<td>" . htmlspecialchars($mhs->email) . "</td>";
-                echo "<td>" . htmlspecialchars($mhs->nomor_telepon) . "</td>";
-                echo "<td>" . $mhs->status . "</td>";
-                echo "<td>" . $mhs->total_proposal . "</td>";
-                echo "</tr>";
-                $no++;
+            // Set headers untuk download
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="data_mahasiswa_' . date('Y-m-d') . '.xls"');
+            header('Cache-Control: max-age=0');
+            
+            // Output Excel content
+            echo "NIM\tNama Mahasiswa\tProgram Studi\tJenis Kelamin\tEmail\tStatus\n";
+            
+            foreach ($mahasiswa_data as $mhs) {
+                echo "{$mhs->nim}\t{$mhs->nama}\t{$mhs->nama_prodi}\t{$mhs->jenis_kelamin}\t{$mhs->email}\t{$mhs->status}\n";
             }
-            echo "</table>";
             
         } catch (Exception $e) {
-            log_message('error', 'Error exporting mahasiswa: ' . $e->getMessage());
+            log_message('error', 'Error exporting mahasiswa data: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Gagal mengexport data mahasiswa.');
             redirect('staf/mahasiswa');
         }
     }
-    
+
     /**
-     * Get statistics mahasiswa
+     * REMOVED: Detail, edit, dan delete functions karena tidak diperlukan action column
+     * Hanya fokus pada view dan export data
      */
-    private function _get_statistics() {
-        $stats = [
-            'total' => 0,
-            'aktif' => 0,
-            'nonaktif' => 0,
-            'mengerjakan_ta' => 0
-        ];
-        
-        try {
-            // Total mahasiswa
-            $stats['total'] = $this->db->count_all('mahasiswa');
-            
-            // Mahasiswa aktif
-            $stats['aktif'] = $this->db->where('status', '1')->count_all_results('mahasiswa');
-            
-            // Mahasiswa nonaktif
-            $stats['nonaktif'] = $stats['total'] - $stats['aktif'];
-            
-            // Mahasiswa yang sedang mengerjakan TA
-            $this->db->distinct();
-            $this->db->select('mahasiswa_id');
-            $this->db->from('proposal_mahasiswa');
-            $this->db->where('status_kaprodi', '1');
-            $stats['mengerjakan_ta'] = $this->db->count_all_results();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting statistics: ' . $e->getMessage());
-        }
-        
-        return $stats;
-    }
-    
-    /**
-     * Get workflow progress percentage
-     */
-    private function _get_workflow_progress($current_status) {
-        $stages = [
-            'proposal' => 10,
-            'bimbingan' => 30,
-            'seminar_proposal' => 50,
-            'penelitian' => 70,
-            'seminar_skripsi' => 90,
-            'publikasi' => 100,
-            'selesai' => 100
-        ];
-        
-        return isset($stages[$current_status]) ? $stages[$current_status] : 0;
-    }
 }
 
 /* End of file Mahasiswa.php */
+/* Location: ./application/controllers/staf/Mahasiswa.php */

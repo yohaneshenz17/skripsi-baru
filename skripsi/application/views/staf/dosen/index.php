@@ -1,6 +1,7 @@
 <?php
 // File: application/views/staf/dosen/index.php
-// Daftar Dosen untuk Staf Akademik - FOKUS HANYA DOSEN LEVEL 2
+// PERBAIKAN: Menghilangkan foto dosen, hanya nama dosen saja
+// Kolom lainnya tetap dipertahankan
 
 // Capture content untuk template
 ob_start();
@@ -54,9 +55,9 @@ ob_start();
     </div>
 <?php endif; ?>
 
-<!-- Statistics Cards - FOKUS PADA DATA RELEVAN -->
+<!-- Statistics Cards -->
 <div class="row">
-    <div class="col-xl-4 col-md-6">
+    <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
                 <div class="row">
@@ -72,17 +73,10 @@ ob_start();
                         </div>
                     </div>
                 </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-success mr-2">
-                        <i class="fas fa-users"></i>
-                    </span>
-                    <span class="text-nowrap">Dosen level 2</span>
-                </p>
             </div>
         </div>
     </div>
-    
-    <div class="col-xl-4 col-md-6">
+    <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
                 <div class="row">
@@ -93,22 +87,15 @@ ob_start();
                         </span>
                     </div>
                     <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-warning text-white rounded-circle shadow">
-                            <i class="fas fa-user-tie"></i>
+                        <div class="icon icon-shape bg-gradient-success text-white rounded-circle shadow">
+                            <i class="fas fa-crown"></i>
                         </div>
                     </div>
                 </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-warning mr-2">
-                        <i class="fas fa-crown"></i>
-                    </span>
-                    <span class="text-nowrap">Mengelola prodi</span>
-                </p>
             </div>
         </div>
     </div>
-    
-    <div class="col-xl-4 col-md-6">
+    <div class="col-xl-3 col-md-6">
         <div class="card card-stats">
             <div class="card-body">
                 <div class="row">
@@ -119,202 +106,190 @@ ob_start();
                         </span>
                     </div>
                     <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-success text-white rounded-circle shadow">
-                            <i class="fas fa-user-friends"></i>
+                        <div class="icon icon-shape bg-gradient-warning text-white rounded-circle shadow">
+                            <i class="fas fa-user-graduate"></i>
                         </div>
                     </div>
                 </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-success mr-2">
-                        <i class="fas fa-handshake"></i>
-                    </span>
-                    <span class="text-nowrap">Aktif membimbing</span>
-                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Tidak Membimbing</h5>
+                        <span class="h2 font-weight-bold mb-0">
+                            <?= isset($statistics['total_tidak_membimbing']) ? $statistics['total_tidak_membimbing'] : 0 ?>
+                        </span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Filter Section - TANPA FILTER LEVEL -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="mb-0">
-                            <i class="fas fa-search text-primary"></i>
-                            Pencarian Dosen
-                        </h3>
-                    </div>
-                </div>
+<!-- Filter & Search Section -->
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h6 class="h3 mb-0">
+                    <i class="fas fa-search"></i> Pencarian Data Dosen
+                </h6>
             </div>
-            <div class="card-body">
-                <form method="GET" action="<?= site_url('staf/dosen') ?>" class="row" id="filterForm">
-                    <div class="col-md-8 mb-3">
-                        <div class="form-group">
-                            <label for="search" class="form-control-label">Pencarian</label>
-                            <div class="input-group">
-                                <input type="text" name="search" id="search" class="form-control" 
-                                       placeholder="Nama/NIP/Email dosen..." 
-                                       value="<?= htmlspecialchars($this->input->get('search') ?: '') ?>">
-                                <div class="input-group-append">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-search"></i> Cari
-                                    </button>
-                                </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="<?= base_url('staf/dosen') ?>" id="filterForm">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label>Pencarian</label>
+                        <div class="input-group">
+                            <input type="text" name="search" id="search" class="form-control" 
+                                   placeholder="Cari nama dosen, NIP, atau email..." 
+                                   value="<?= htmlspecialchars($this->input->get('search') ?: '') ?>">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Cari
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3 d-flex align-items-end">
-                        <div class="btn-group w-100">
-                            <a href="<?= site_url('staf/dosen') ?>" class="btn btn-outline-secondary">
-                                <i class="fas fa-sync-alt"></i> Reset
-                            </a>
-                            <a href="<?= site_url('staf/dosen/export') ?>" class="btn btn-outline-success" target="_blank">
-                                <i class="fas fa-file-excel"></i> Export Excel
-                            </a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Main Data Table - TANPA AKSI DETAIL -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="mb-0">
-                            <i class="fas fa-table text-primary"></i>
-                            Data Dosen Aktif
-                        </h3>
-                        <p class="text-sm mb-0 text-muted">
-                            Total: <?= isset($dosen_list) ? count($dosen_list) : 0 ?> dosen aktif
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <button class="btn btn-primary btn-sm no-loading" onclick="location.reload()">
-                            <i class="fas fa-sync-alt"></i> Refresh
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="btn-group w-100">
+                        <a href="<?= base_url('staf/dosen') ?>" class="btn btn-secondary">
+                            <i class="fas fa-sync-alt"></i> Reset
+                        </a>
+                        <button type="button" class="btn btn-success" onclick="exportData()">
+                            <i class="fas fa-file-excel"></i> Export Excel
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table align-items-center table-flush">
-                        <thead class="thead-light">
+        </form>
+    </div>
+</div>
+
+<!-- Main Data Table -->
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h6 class="h3 mb-0">
+                    <i class="fas fa-table"></i> Data Dosen Aktif
+                </h6>
+                <p class="text-sm mb-0 text-muted">
+                    Total: <?= isset($dosen_list) ? count($dosen_list) : 0 ?> dosen aktif
+                </p>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary btn-sm" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-items-center table-flush">
+                <thead class="thead-light">
+                    <tr>
+                        <th width="5%">No</th>
+                        <th width="12%">NIP</th>
+                        <!-- PERBAIKAN: Kolom nama tanpa foto -->
+                        <th width="25%">Nama Dosen</th>
+                        <th width="25%">Email</th>
+                        <th width="15%">No. Telepon</th>
+                        <th width="10%">Status</th>
+                        <th width="8%">Bimbingan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (isset($dosen_list) && count($dosen_list) > 0): ?>
+                        <?php foreach ($dosen_list as $index => $dsn): ?>
                             <tr>
-                                <th width="5%">No</th>
-                                <th width="12%">NIP</th>
-                                <th width="30%">Nama Dosen</th>
-                                <th width="25%">Email</th>
-                                <th width="15%">No. Telepon</th>
-                                <th width="8%">Bimbingan</th>
-                                <th width="5%">Status</th>
+                                <td class="text-center"><?= $index + 1 ?></td>
+                                <td>
+                                    <span class="badge badge-primary"><?= htmlspecialchars($dsn->nip) ?></span>
+                                </td>
+                                <td>
+                                    <!-- PERBAIKAN: Hanya nama dosen, tanpa foto -->
+                                    <div>
+                                        <strong><?= htmlspecialchars($dsn->nama) ?></strong>
+                                        <?php if ($dsn->is_kaprodi): ?>
+                                            <br><small class="text-muted">
+                                                <i class="fas fa-crown text-warning"></i> 
+                                                Kaprodi <?= htmlspecialchars($dsn->prodi_kelola) ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-sm"><?= htmlspecialchars($dsn->email) ?></span>
+                                </td>
+                                <td>
+                                    <span class="text-sm">
+                                        <?= !empty($dsn->nomor_telepon) ? htmlspecialchars($dsn->nomor_telepon) : '-' ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if ($dsn->is_kaprodi): ?>
+                                        <span class="badge badge-warning">Kaprodi</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-primary">Dosen</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-center">
+                                    <?php if ($dsn->total_bimbingan > 0): ?>
+                                        <span class="badge badge-success"><?= $dsn->total_bimbingan ?></span>
+                                    <?php else: ?>
+                                        <span class="badge badge-light">0</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (isset($dosen_list) && count($dosen_list) > 0): ?>
-                                <?php foreach ($dosen_list as $index => $dsn): ?>
-                                    <tr>
-                                        <td class="text-center"><?= $index + 1 ?></td>
-                                        <td>
-                                            <span class="badge badge-info"><?= htmlspecialchars($dsn->nip) ?></span>
-                                        </td>
-                                        <td>
-                                            <div class="media align-items-center">
-                                                <span class="avatar avatar-sm rounded-circle mr-2">
-                                                    <?php if (!empty($dsn->foto)): ?>
-                                                        <img alt="Foto" src="<?= base_url('uploads/dosen/' . $dsn->foto) ?>">
-                                                    <?php else: ?>
-                                                        <img alt="Foto" src="<?= base_url('assets/img/theme/default-avatar.png') ?>">
-                                                    <?php endif; ?>
-                                                </span>
-                                                <div class="media-body">
-                                                    <span class="name mb-0 text-sm font-weight-bold">
-                                                        <?= htmlspecialchars($dsn->nama) ?>
-                                                    </span>
-                                                    <?php if ($dsn->is_kaprodi > 0): ?>
-                                                        <br><small class="text-warning"><i class="fas fa-crown"></i> Kaprodi</small>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="text-sm"><?= htmlspecialchars($dsn->email) ?></span>
-                                        </td>
-                                        <td>
-                                            <span class="text-sm"><?= htmlspecialchars($dsn->nomor_telepon ?: '-') ?></span>
-                                        </td>
-                                        <td class="text-center">
-                                            <?php if ($dsn->total_bimbingan > 0): ?>
-                                                <span class="badge badge-success"><?= $dsn->total_bimbingan ?></span>
-                                            <?php else: ?>
-                                                <span class="badge badge-light">0</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge badge-success">Aktif</span>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="7" class="text-center py-4">
-                                        <div class="text-center">
-                                            <i class="fas fa-info-circle fa-2x mb-3 text-muted"></i>
-                                            <h5 class="text-muted">Tidak ada data dosen</h5>
-                                            <p class="text-muted mb-0">
-                                                <?php if ($this->input->get('search')): ?>
-                                                    Tidak ditemukan dosen dengan kata kunci: <strong><?= htmlspecialchars($this->input->get('search')) ?></strong>
-                                                <?php else: ?>
-                                                    Belum ada dosen aktif terdaftar di sistem.
-                                                <?php endif; ?>
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <p>Tidak ada data dosen yang ditemukan.</p>
+                                    <?php if ($this->input->get('search')): ?>
+                                        <small>Coba ubah kata kunci pencarian.</small>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
-
-<!-- Info Sistem -->
-<div class="row">
-    <div class="col-12">
-        <div class="alert alert-info">
+    <?php if (isset($dosen_list) && count($dosen_list) > 0): ?>
+        <div class="card-footer">
             <div class="row align-items-center">
-                <div class="col-auto">
-                    <i class="fas fa-info-circle fa-2x"></i>
-                </div>
                 <div class="col">
-                    <h5 class="mb-1">Informasi Daftar Dosen</h5>
-                    <p class="mb-0">
-                        Halaman ini menampilkan <strong>dosen aktif</strong> dengan level 2 di database. 
-                        Admin dan super admin tidak ditampilkan dalam daftar ini. 
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Daftar ini hanya menampilkan dosen aktif (bukan admin atau kaprodi yang tidak mengajar).
                         Status Kaprodi ditunjukkan dengan ikon crown pada nama dosen.
-                    </p>
+                    </small>
                 </div>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
 </div>
 
-<?php 
-$content = ob_get_clean();
-
-// Script untuk interaktivitas
-ob_start();
-?>
+<!-- JavaScript untuk functionality -->
 <script>
 $(document).ready(function() {
     // Auto-hide alerts after 5 seconds
@@ -332,18 +307,65 @@ $(document).ready(function() {
         }
     });
     
-    // Focus pada search input
-    $('#search').focus();
+    // Focus pada search input jika tidak ada parameter search
+    <?php if (!$this->input->get('search')): ?>
+        $('#search').focus();
+    <?php endif; ?>
 });
+
+// Export function
+function exportData() {
+    // Get current search parameter
+    const search = $('#search').val();
+    let exportUrl = '<?= base_url("staf/dosen/export") ?>';
+    
+    // Add search to export URL
+    if (search) {
+        exportUrl += '?search=' + encodeURIComponent(search);
+    }
+    
+    window.location.href = exportUrl;
+}
+
+// Refresh data function
+function refreshData() {
+    location.reload();
+}
 </script>
+
 <?php 
-$script = ob_get_clean();
+$content = ob_get_clean();
 
 // Load template staf dengan data yang sudah disiapkan
 $this->load->view('template/staf', [
     'title' => isset($title) ? $title : 'Daftar Dosen',
     'content' => $content,
-    'css' => '',
-    'script' => $script
+    'css' => '
+        <style>
+            .table th {
+                border-top: none;
+                padding: 1rem 0.75rem;
+                font-weight: 600;
+                color: #8898aa;
+                background-color: #f6f9fc;
+            }
+            
+            .table td {
+                padding: 1rem 0.75rem;
+                border-top: 1px solid #dee2e6;
+            }
+            
+            .card-stats .icon {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .badge-warning {
+                background-color: #ffc107;
+                color: #212529;
+            }
+        </style>
+    ',
+    'script' => ''
 ]);
 ?>

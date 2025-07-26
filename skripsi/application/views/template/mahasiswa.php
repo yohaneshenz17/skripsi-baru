@@ -15,8 +15,11 @@ $verifikasi = $dataUser ? $dataUser->status : '';
   <?php include('_main/css.php') ?>
   <?= isset($styles) ? $styles : '' ?>
   
-  <!-- FIXED: CSS untuk sidebar dengan kontras yang baik -->
+  <!-- ========================================
+       🔧 FIXED CSS - SIDEBAR & LAYOUT RESPONSIVE
+       ======================================== -->
   <style>
+    /* ORIGINAL STYLES - PRESERVED */
     .sidebar-profile {
         background: linear-gradient(87deg, #11cdef 0, #1171ef 100%);
         border-radius: 0.5rem;
@@ -47,7 +50,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
         color: #2dce89;
     }
     
-    /* PERBAIKAN: CSS untuk foto profil yang responsive */
+    /* CSS untuk foto profil yang responsive */
     #header-profile-photo, #sidebar-profile-photo {
         transition: all 0.3s ease;
     }
@@ -66,7 +69,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
         to { opacity: 1; }
     }    
     
-    /* FIXED: Perbaikan untuk menu sidebar yang kontras */
+    /* Perbaikan untuk menu sidebar yang kontras */
     .navbar-vertical .navbar-nav .nav-link {
         color: #525f7f;
         font-weight: 500;
@@ -125,7 +128,170 @@ $verifikasi = $dataUser ? $dataUser->status : '';
     }
 
     /* ========================================
-       PERBAIKAN MOBILE LAYOUT - HEADER BUTTONS
+       🔧 FIXED: LAYOUT SIDEBAR & MAIN CONTENT
+       ======================================== */
+
+    /* 1. PERBAIKAN UTAMA: Main Content Margin untuk Sidebar */
+    @media (min-width: 1200px) {
+        /* Desktop: Main content harus memiliki margin-left sebesar lebar sidebar */
+        .main-content {
+            margin-left: 250px !important;
+            transition: margin-left 0.3s ease;
+            width: calc(100vw - 250px);
+            overflow-x: auto;
+        }
+        
+        /* System header juga perlu margin-left yang sama */
+        .system-header {
+            margin-left: 250px !important;
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* Saat sidebar tersembunyi */
+        body.g-sidenav-hidden .main-content,
+        body.g-sidenav-hidden .system-header {
+            margin-left: 0 !important;
+            width: 100vw;
+        }
+        
+        /* Container adjustments untuk desktop */
+        .main-content .container-fluid {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        /* Hide hamburger di desktop */
+        .sidenav-toggler {
+            display: none !important;
+        }
+        
+        /* Navbar top adjustment */
+        .navbar-top {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+    }
+
+    /* 2. TABLET LANDSCAPE (992px - 1199px) */
+    @media (min-width: 992px) and (max-width: 1199.98px) {
+        .main-content {
+            margin-left: 0 !important;
+            width: 100vw;
+        }
+        
+        .system-header {
+            margin-left: 0 !important;
+        }
+        
+        /* Sidebar overlay mode */
+        .sidenav {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            position: fixed;
+            z-index: 1050;
+        }
+        
+        /* Show sidebar saat toggle active */
+        body.g-sidenav-show .sidenav {
+            transform: translateX(0);
+        }
+        
+        /* Show hamburger di tablet */
+        .sidenav-toggler {
+            display: inline-block !important;
+        }
+    }
+
+    /* 3. TABLET PORTRAIT & MOBILE (768px - 991px) */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .main-content {
+            margin-left: 0 !important;
+            width: 100vw;
+        }
+        
+        .system-header {
+            margin-left: 0 !important;
+        }
+        
+        /* Sidebar overlay mode */
+        .sidenav {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            position: fixed;
+            z-index: 1050;
+            width: 280px !important;
+        }
+        
+        /* Show sidebar saat toggle active */
+        body.g-sidenav-show .sidenav {
+            transform: translateX(0);
+        }
+        
+        /* Show hamburger */
+        .sidenav-toggler {
+            display: inline-block !important;
+        }
+    }
+
+    /* 4. MOBILE (max-width: 767px) */
+    @media (max-width: 767.98px) {
+        .main-content {
+            margin-left: 0 !important;
+            padding-left: 0;
+            padding-right: 0;
+            width: 100vw;
+        }
+        
+        .system-header {
+            margin-left: 0 !important;
+        }
+        
+        /* Sidebar full overlay pada mobile */
+        .sidenav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px !important;
+            height: 100vh;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1050;
+        }
+        
+        body.g-sidenav-show .sidenav {
+            transform: translateX(0);
+        }
+        
+        /* Container fluid adjustments untuk mobile */
+        .main-content .container-fluid {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        
+        /* Show hamburger */
+        .sidenav-toggler {
+            display: inline-block !important;
+        }
+    }
+
+    /* 5. BACKDROP UNTUK OVERLAY */
+    .backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+    }
+    
+    body.g-sidenav-show .backdrop {
+        display: block;
+    }
+
+    /* ========================================
+       MOBILE LAYOUT - HEADER BUTTONS (PRESERVED)
        ======================================== */
 
     /* Container untuk button group */
@@ -161,7 +327,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       }
     }
 
-    /* Mobile Large (576px - 767px) */
+    /* Mobile responsive untuk header buttons */
     @media (max-width: 767.98px) and (min-width: 576px) {
       .header-button-group {
         gap: 6px;
@@ -178,7 +344,6 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       }
     }
 
-    /* Mobile Medium (480px - 575px) */
     @media (max-width: 575.98px) and (min-width: 480px) {
       .header-button-group {
         gap: 5px;
@@ -197,13 +362,11 @@ $verifikasi = $dataUser ? $dataUser->status : '';
         font-size: 1.2rem !important;
       }
       
-      /* Center align pada mobile */
       .col-12.text-right {
         text-align: center !important;
       }
     }
 
-    /* Mobile Small (375px - 479px) */
     @media (max-width: 479.98px) and (min-width: 375px) {
       .header-button-group {
         gap: 4px;
@@ -227,15 +390,8 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       .col-12.text-right {
         text-align: center !important;
       }
-      
-      /* Adjust header padding */
-      .header-body .py-4 {
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
-      }
     }
 
-    /* Mobile Extra Small (320px - 374px) */
     @media (max-width: 374.98px) {
       .header-button-group {
         gap: 3px;
@@ -256,44 +412,6 @@ $verifikasi = $dataUser ? $dataUser->status : '';
         text-align: center;
         display: block !important;
       }
-      
-      .col-12.text-right {
-        text-align: center !important;
-      }
-      
-      /* Kompak container */
-      .container-fluid {
-        padding-left: 10px;
-        padding-right: 10px;
-      }
-      
-      .header-body .col-12 {
-        padding-left: 5px;
-        padding-right: 5px;
-      }
-    }
-
-    /* Untuk layar sangat kecil - stack vertikal */
-    @media (max-width: 320px) {
-      .header-button-group {
-        flex-direction: column;
-        gap: 3px;
-        align-items: stretch;
-        margin-top: 10px;
-      }
-      
-      .header-btn {
-        width: 100%;
-        max-width: 120px;
-        margin: 0 auto;
-        text-align: center;
-        font-size: 0.65rem;
-        padding: 4px 8px;
-      }
-      
-      .mobile-title {
-        font-size: 0.9rem !important;
-      }
     }
 
     /* Hover effects */
@@ -308,49 +426,8 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       box-shadow: none;
     }
 
-    /* Icon styling */
-    .header-btn i {
-      font-size: 0.875rem;
-      margin-right: 4px;
-    }
-
-    @media (max-width: 575.98px) {
-      .header-btn i {
-        font-size: 0.75rem;
-        margin-right: 2px;
-      }
-    }
-
-    /* iPhone specific fixes */
-    @media (max-width: 414px) and (orientation: portrait) {
-      .header-body .row {
-        margin-bottom: 0;
-      }
-      
-      .header-button-group {
-        margin-top: 8px;
-      }
-    }
-
-    /* Landscape mobile */
-    @media (max-height: 500px) and (orientation: landscape) {
-      .header-body .py-4 {
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
-      }
-      
-      .mobile-title {
-        font-size: 1rem !important;
-      }
-      
-      .header-btn {
-        padding: 3px 6px;
-        font-size: 0.7rem;
-      }
-    }
-
     /* ========================================
-       TAMBAHAN: CSS UNTUK HEADER SISTEM BARU
+       SYSTEM HEADER STYLES (PRESERVED & ENHANCED)
        ======================================== */
     
     .system-header {
@@ -360,6 +437,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
       z-index: 1000;
+      /* Removed fixed margin-left - now handled by responsive CSS above */
     }
     
     .system-title {
@@ -423,51 +501,398 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       }
     }
     
-    @media (max-width: 400px) {
-      .system-title {
+    /* Layout header mahasiswa */
+    .system-header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .system-info {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    
+    /* Profil mahasiswa di header */
+    .mahasiswa-profile-header {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      padding: 8px 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .mahasiswa-profile-header:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mahasiswa-avatar-header {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      object-fit: cover;
+    }
+    
+    .mahasiswa-info-header {
+      text-align: right;
+    }
+    
+    .mahasiswa-name-header {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .mahasiswa-role-header {
+      font-size: 11px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 400;
+    }
+    
+    /* Dropdown styling untuk header mahasiswa */
+    .system-header .dropdown {
+      position: relative;
+    }
+    
+    .system-header .dropdown-menu {
+      background-color: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0.375rem;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      margin-top: 0.5rem;
+      min-width: 160px;
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      z-index: 1000;
+    }
+    
+    .system-header .dropdown-menu.show {
+      display: block;
+    }
+    
+    .system-header .dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 0.5rem 1rem;
+      clear: both;
+      font-weight: 400;
+      color: #212529;
+      text-align: inherit;
+      text-decoration: none;
+      white-space: nowrap;
+      background-color: transparent;
+      border: 0;
+      transition: all 0.15s ease;
+    }
+    
+    .system-header .dropdown-item:hover,
+    .system-header .dropdown-item:focus {
+      color: #16181b;
+      background-color: #f8f9fa;
+    }
+    
+    .system-header .dropdown-item i {
+      margin-right: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    /* Desktop: Enable dropdown functionality */
+    @media (min-width: 769px) {
+      .mahasiswa-profile-header {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+      }
+    }
+    
+    /* Mobile: Centered layout */
+    @media (max-width: 768px) {
+      .system-header-container {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      
+      .system-info {
+        justify-content: center;
+      }
+      
+      .mahasiswa-profile-header {
+        justify-content: center;
+        cursor: default !important;
+        pointer-events: none;
+      }
+      
+      .mahasiswa-profile-header:hover {
+        transform: none !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+      }
+      
+      .mahasiswa-info-header {
+        text-align: center;
+      }
+      
+      .system-header .dropdown-menu {
+        display: none !important;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .mahasiswa-avatar-header {
+        width: 35px;
+        height: 35px;
+        margin-right: 10px;
+      }
+      
+      .mahasiswa-name-header {
         font-size: 13px;
       }
       
-      .system-subtitle {
+      .mahasiswa-role-header {
         font-size: 10px;
       }
     }
     
-    /* Animasi untuk header */
-    .system-header {
-      animation: slideDown 0.5s ease-out;
+    /* Hide original navbar user profile on larger screens */
+    @media (min-width: 769px) {
+      .navbar-top .nav-item.dropdown {
+        display: none !important;
+      }
     }
     
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+    /* Show navbar user profile only on mobile */
+    @media (max-width: 768px) {
+      .navbar-top .nav-item.dropdown {
+        display: block !important;
       }
     }
+
+    /* ========================================
+       PERFORMANCE & ACCESSIBILITY
+       ======================================== */
+    
+    /* Performance optimizations */
+    .sidenav,
+    .main-content,
+    .system-header {
+      will-change: transform, margin-left;
+      backface-visibility: hidden;
+    }
+    
+    /* Accessibility improvements */
+    @media (prefers-reduced-motion: reduce) {
+      .sidenav,
+      .main-content,
+      .system-header {
+        transition: none !important;
+      }
+    }
+    
+    /* Prevent horizontal scroll */
+    body {
+      overflow-x: hidden;
+    }
+    
+    /* General improvements */
+    .main-content {
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    .header.bg-primary {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .footer {
+      margin-top: 2rem;
+      padding-bottom: 1rem;
+    }
+    
+    @media (min-width: 1200px) {
+      .footer {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+    }
+
+    /* PERBAIKAN UTAMA: Header Dashboard Terlalu Besar */
+    .header.bg-primary {
+        padding-bottom: 4rem !important; /* Kurangi dari pb-6 (6rem) */
+        min-height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* Container dengan negative margin yang tepat */
+    .container-fluid.mt--6 {
+        margin-top: -4rem !important; /* Sesuaikan dengan padding-bottom header */
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Header body padding adjustment */
+    .header .header-body {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    /* Welcome card styling */
+    .card.bg-gradient-info {
+        margin-bottom: 1.5rem !important;
+        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+        border: none !important;
+    }
+    
+    /* Text visibility ensure */
+    .text-white, .text-white-50 {
+        color: #ffffff !important;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* RESPONSIVE ADJUSTMENTS */
+    @media (max-width: 768px) {
+        .header.bg-primary {
+            padding-bottom: 3rem !important;
+        }
+        
+        .container-fluid.mt--6 {
+            margin-top: -3rem !important;
+        }
+        
+        .header .header-body {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        .card.bg-gradient-info h3 {
+            font-size: 1.375rem !important;
+        }
+        
+        .card.bg-gradient-info p {
+            font-size: 0.9rem !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .header.bg-primary {
+            padding-bottom: 2.5rem !important;
+        }
+        
+        .container-fluid.mt--6 {
+            margin-top: -2.5rem !important;
+        }
+        
+        .card.bg-gradient-info h3 {
+            font-size: 1.25rem !important;
+        }
+        
+        .card.bg-gradient-info p {
+            font-size: 0.875rem !important;
+        }
+    }
+    
+    /* Ensure proper stacking order */
+    .header.bg-primary {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .container-fluid.mt--6 {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Icon adjustments for mobile */
+    @media (max-width: 576px) {
+        .icon.icon-shape {
+            width: 40px !important;
+            height: 40px !important;
+        }
+        
+        .icon.icon-shape i {
+            font-size: 1rem !important;
+        }
+    }
+
   </style>
 </head>
 
 <body>
   <!-- ========================================
-       TAMBAHAN: HEADER SISTEM YANG FORMAL
+       HEADER SISTEM YANG FORMAL
        ======================================== -->
-  <div class="system-header">
-    <div class="container-fluid">
-      <div class="text-center">
-        <div class="d-flex justify-content-center align-items-center">
-          <i class="ni ni-hat-3 system-header-icon"></i>
-          <div>
-            <h1 class="system-title">SISTEM INFORMASI MANAJEMEN TUGAS AKHIR</h1>
-            <p class="system-subtitle">Sekolah Tinggi Katolik Santo Yakobus Merauke</p>
+    <div class="system-header">
+      <div class="container-fluid">
+        <div class="system-header-container">
+          <div class="system-info">
+            <i class="ni ni-hat-3 system-header-icon"></i>
+            <div>
+              <h1 class="system-title">SISTEM INFORMASI MANAJEMEN TUGAS AKHIR</h1>
+              <p class="system-subtitle">Sekolah Tinggi Katolik Santo Yakobus Merauke</p>
+            </div>
+          </div>
+          
+          <div class="dropdown">
+            <div class="mahasiswa-profile-header" id="mahasiswaProfileDropdown" style="cursor: pointer;">
+              <?php
+                // Ambil foto mahasiswa dari database atau session
+                $foto_mahasiswa = $this->session->userdata('foto');
+                if (empty($foto_mahasiswa) || $foto_mahasiswa == 'default.png') {
+                  $mahasiswa_id = $this->session->userdata('id');
+                  $mahasiswa = $this->db->get_where('mahasiswa', ['id' => $mahasiswa_id])->row();
+                  $foto_mahasiswa = ($mahasiswa && !empty($mahasiswa->foto)) ? $mahasiswa->foto : 'default.png';
+                } else {
+                  $foto_mahasiswa = !empty($foto_mahasiswa) ? $foto_mahasiswa : 'default.png';
+                }
+                $foto_path = base_url('cdn/img/mahasiswa/' . $foto_mahasiswa);
+              ?>
+              <img src="<?= $foto_path ?>" alt="Foto <?= $this->session->userdata('nama') ?>" class="mahasiswa-avatar-header">
+              <div class="mahasiswa-info-header">
+                <p class="mahasiswa-name-header"><?= $this->session->userdata('nama') ?></p>
+                <p class="mahasiswa-role-header">Mahasiswa</p>
+              </div>
+            </div>
+            <div class="dropdown-menu" id="mahasiswaDropdownMenu">
+              <div class="dropdown-header">
+                <h6 class="text-overflow m-0">Selamat Datang!</h6>
+              </div>
+              <a href="<?= base_url('mahasiswa/profil') ?>" class="dropdown-item">
+                <i class="ni ni-single-02"></i>
+                <span>Profil</span>
+              </a>
+              <a href="<?= base_url('mahasiswa/dashboard') ?>" class="dropdown-item">
+                <i class="ni ni-tv-2"></i>
+                <span>Dashboard</span>
+              </a>
+              <a href="<?= base_url('mahasiswa/kontak') ?>" class="dropdown-item">
+                <i class="ni ni-email-83"></i>
+                <span>Kontak Form</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="<?= base_url('auth/logout') ?>" class="dropdown-item">
+                <i class="ni ni-user-run"></i>
+                <span>Logout</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
   <nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white" id="sidenav-main">
     <div class="scrollbar-inner">
@@ -536,8 +961,6 @@ $verifikasi = $dataUser ? $dataUser->status : '';
                 </a>
               </li>
               
-              <!-- REMOVED: HK3 Menu - Dihapus karena tidak ada di workflow -->
-              
               <!-- Divider -->
               <li class="nav-item">
                 <hr class="my-3">
@@ -545,7 +968,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
               
             <?php } ?>
             
-            <!-- 8. Profil - Dipindahkan ke bawah -->
+            <!-- 8. Profil -->
             <li class="nav-item">
               <a class="nav-link <?= $this->uri->segment(2) == 'profil' ? 'active' : '' ?>" 
                  href="<?= base_url('mahasiswa/profil') ?>">
@@ -553,7 +976,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
               </a>
             </li>
             
-            <!-- 9. Kontak Form - Fitur Baru -->
+            <!-- 9. Kontak Form -->
             <li class="nav-item">
               <a class="nav-link <?= $this->uri->segment(2) == 'kontak' ? 'active' : '' ?>" 
                  href="<?= base_url('mahasiswa/kontak') ?>">
@@ -562,7 +985,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
             </li>
           </ul>
           
-          <!-- Profile Card - Seperti template dosen/kaprodi -->
+          <!-- Profile Card -->
           <?php if ($verifikasi == 1) { ?>
           <div class="sidebar-profile mt-4">
             <div class="row align-items-center">
@@ -608,11 +1031,11 @@ $verifikasi = $dataUser ? $dataUser->status : '';
     </div>
   </nav>
   
-  <div class="main-content" id="panel">
+  <div class="main-content sidebar-responsive" id="panel">
     <nav class="navbar navbar-top navbar-expand navbar-dark bg-primary border-bottom">
       <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <!-- TOMBOL HAMBURGER MENU UNTUK MOBILE - DITAMBAHKAN -->
+          <!-- TOMBOL HAMBURGER MENU UNTUK MOBILE -->
           <ul class="navbar-nav align-items-center ml-md-auto">
             <li class="nav-item d-xl-none">
               <div class="pr-3 sidenav-toggler sidenav-toggler-dark" data-action="sidenav-pin" data-target="#sidenav-main">
@@ -625,7 +1048,7 @@ $verifikasi = $dataUser ? $dataUser->status : '';
             </li>
           </ul>
           <ul class="navbar-nav align-items-center  ml-auto ml-md-0 ">
-            <!-- Notifications Dropdown (Enhanced) -->
+            <!-- Notifications Dropdown -->
             <li class="nav-item dropdown">
               <a class="nav-link" href="#" role="button" data-toggle="dropdown">
                 <i class="ni ni-bell-55"></i>
@@ -652,22 +1075,18 @@ $verifikasi = $dataUser ? $dataUser->status : '';
                 <div class="media align-items-center">
                     <span class="avatar avatar-sm rounded-circle">
                       <?php
-                        // PERBAIKAN: Multi-layer fallback untuk foto
                         $mahasiswa_id = $this->session->userdata('id');
                         $foto_session = $this->session->userdata('foto');
                         
                         $foto_name = 'default.png';
                         
-                        // Layer 1: Cek session
                         if (!empty($foto_session) && $foto_session !== 'default.png') {
                             $foto_name = $foto_session;
                         } else {
-                            // Layer 2: Query database
                             try {
                                 $mahasiswa = $this->db->get_where('mahasiswa', ['id' => $mahasiswa_id])->row();
                                 if ($mahasiswa && !empty($mahasiswa->foto)) {
                                     $foto_name = $mahasiswa->foto;
-                                    // Sync session dengan database
                                     $this->session->set_userdata('foto', $foto_name);
                                 }
                             } catch (Exception $e) {
@@ -676,7 +1095,6 @@ $verifikasi = $dataUser ? $dataUser->status : '';
                             }
                         }
                         
-                        // Cache busting dengan timestamp
                         $timestamp = time();
                         $foto_url = base_url('cdn/img/mahasiswa/' . $foto_name) . '?v=' . $timestamp;
                       ?>
@@ -714,12 +1132,11 @@ $verifikasi = $dataUser ? $dataUser->status : '';
       </div>
     </nav>
     
-    <!-- FIXED: Header dengan breadcrumb - MOBILE RESPONSIVE -->
+    <!-- Header dengan breadcrumb -->
     <div class="header bg-primary pb-6">
       <div class="container-fluid">
         <div class="header-body">
           <div class="row align-items-center py-4">
-            <!-- FIXED: Grid system responsive -->
             <div class="col-lg-6 col-md-7 col-sm-6 col-12 mb-2 mb-sm-0">
               <h6 class="h2 text-white d-inline-block mb-0 mobile-title"><?= isset($title) ? $title : 'Dashboard' ?></h6>
               <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
@@ -731,7 +1148,6 @@ $verifikasi = $dataUser ? $dataUser->status : '';
                 </ol>
               </nav>
             </div>
-            <!-- FIXED: Button container responsive -->
             <div class="col-lg-6 col-md-5 col-sm-6 col-12 text-right">
               <div class="header-button-group">
                 <a href="<?= base_url('mahasiswa/kontak') ?>" class="btn btn-sm btn-neutral header-btn">
@@ -778,7 +1194,9 @@ $verifikasi = $dataUser ? $dataUser->status : '';
   <?php include('_main/js.php') ?>
   <?= isset($script) ? $script : '' ?>
   
-  <!-- FIXED: Auto-load notifications dengan error handling -->
+  <!-- ========================================
+       🔧 FIXED JAVASCRIPT - SIDEBAR & NOTIFICATIONS
+       ======================================== -->
   <script>
   // Definisi base_url global
   var base_url = '<?= base_url() ?>';
@@ -794,84 +1212,277 @@ $verifikasi = $dataUser ? $dataUser->status : '';
   }
   
   $(document).ready(function() {
-    // Load notifikasi untuk dropdown
-    loadNotifikasiDropdown();
     
-    // Refresh notifikasi setiap 5 menit
-    setInterval(loadNotifikasiDropdown, 300000);
-  });
-  
-  function loadNotifikasiDropdown() {
-    call('mahasiswa/dashboard/get_notifikasi').done(function(response) {
-      if (response.status === 'success') {
-        const notifikasi = response.data;
-        const count = notifikasi.length;
-        
-        // Update badge count
-        if (count > 0) {
-          $('#notif-count').text(count).show();
-        } else {
-          $('#notif-count').hide();
-        }
-        
-        // Update dropdown content
-        let html = '';
-        if (count > 0) {
-          notifikasi.forEach(function(notif) {
-            html += `
-              <a href="#!" class="list-group-item list-group-item-action">
-                <div class="row align-items-center">
-                  <div class="col-auto">
-                    <i class="ni ni-bell-55 text-primary"></i>
-                  </div>
-                  <div class="col ml-n2">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h4 class="mb-0 text-sm">${notif.judul.substring(0, 30)}${notif.judul.length > 30 ? '...' : ''}</h4>
-                      </div>
-                      <div class="text-right text-muted">
-                        <small>${formatTimeAgo(notif.created_at)}</small>
-                      </div>
-                    </div>
-                    <p class="text-sm mb-0">${notif.pesan.substring(0, 50)}...</p>
-                  </div>
-                </div>
-              </a>
-            `;
-          });
-        } else {
-          html = `
-            <div class="text-center py-3">
-              <p class="text-muted mb-0">Tidak ada notifikasi</p>
-            </div>
-          `;
-        }
-        
-        $('#dropdown-notifications').html(html);
-      }
-    }).fail(function() {
-      console.log('Error loading notifications dropdown');
-    });
-  }
-  
-  function formatTimeAgo(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+    // ========================================
+    // 1. SIDEBAR RESPONSIVE FUNCTIONALITY
+    // ========================================
     
-    if (diffMins < 60) {
-      return diffMins + ' menit yang lalu';
-    } else if (diffHours < 24) {
-      return diffHours + ' jam yang lalu';
-    } else {
-      return diffDays + ' hari yang lalu';
+    // Initialize sidebar state
+    function initializeSidebar() {
+        const windowWidth = $(window).width();
+        
+        if (windowWidth >= 1200) {
+            // Desktop: Sidebar always visible
+            $('body').removeClass('g-sidenav-hidden').addClass('g-sidenav-show g-sidenav-pinned');
+            $('.sidenav-toggler').hide();
+        } else {
+            // Mobile/Tablet: Sidebar hidden by default
+            $('body').removeClass('g-sidenav-show g-sidenav-pinned').addClass('g-sidenav-hidden');
+            $('.sidenav-toggler').show();
+        }
     }
-  }
-      <!-- PERBAIKAN: JavaScript untuk update foto real-time -->
-    <script>
+    
+    // Sidebar toggle functionality
+    $(document).on('click', '.sidenav-toggler', function(e) {
+        e.preventDefault();
+        const windowWidth = $(window).width();
+        
+        if (windowWidth < 1200) {
+            // Mobile/Tablet toggle
+            if ($('body').hasClass('g-sidenav-show')) {
+                // Hide sidebar
+                $('body').removeClass('g-sidenav-show').addClass('g-sidenav-hidden');
+                $('.backdrop').remove();
+            } else {
+                // Show sidebar
+                $('body').removeClass('g-sidenav-hidden').addClass('g-sidenav-show');
+                
+                // Add backdrop
+                if (!$('.backdrop').length) {
+                    $('body').append('<div class="backdrop"></div>');
+                }
+            }
+        }
+    });
+    
+    // Backdrop click to close
+    $(document).on('click', '.backdrop', function() {
+        $('body').removeClass('g-sidenav-show').addClass('g-sidenav-hidden');
+        $(this).remove();
+    });
+    
+    // Escape key to close sidebar
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape' && $('body').hasClass('g-sidenav-show')) {
+            const windowWidth = $(window).width();
+            if (windowWidth < 1200) {
+                $('body').removeClass('g-sidenav-show').addClass('g-sidenav-hidden');
+                $('.backdrop').remove();
+            }
+        }
+    });
+    
+    // Window resize handler
+    let resizeTimer;
+    $(window).on('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            const windowWidth = $(window).width();
+            
+            if (windowWidth >= 1200) {
+                // Desktop: Show sidebar, remove backdrop
+                $('body').removeClass('g-sidenav-hidden').addClass('g-sidenav-show g-sidenav-pinned');
+                $('.backdrop').remove();
+                $('.sidenav-toggler').hide();
+            } else {
+                // Mobile/Tablet: Hide sidebar unless manually opened
+                if (!$('body').hasClass('g-sidenav-show')) {
+                    $('body').removeClass('g-sidenav-pinned').addClass('g-sidenav-hidden');
+                }
+                $('.sidenav-toggler').show();
+            }
+        }, 250);
+    });
+    
+    // Auto-close sidebar on mobile after clicking a link
+    $('.sidenav .nav-link').on('click', function() {
+        const windowWidth = $(window).width();
+        
+        if (windowWidth < 1200 && $('body').hasClass('g-sidenav-show')) {
+            setTimeout(function() {
+                $('body').removeClass('g-sidenav-show').addClass('g-sidenav-hidden');
+                $('.backdrop').remove();
+            }, 150);
+        }
+    });
+    
+    // Prevent sidebar close on internal clicks
+    $('.sidenav').on('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // Main content click to close sidebar (Mobile only)
+    $('.main-content').on('click', function() {
+        const windowWidth = $(window).width();
+        if (windowWidth < 1200 && $('body').hasClass('g-sidenav-show')) {
+            $('body').removeClass('g-sidenav-show').addClass('g-sidenav-hidden');
+            $('.backdrop').remove();
+        }
+    });
+    
+    // Active menu highlighting
+    function setActiveMenu() {
+        const currentPath = window.location.pathname;
+        const currentPage = currentPath.split('/').pop() || 'dashboard';
+        
+        // Remove all active classes
+        $('.sidenav .nav-link').removeClass('active');
+        
+        // Add active class to current page
+        $('.sidenav .nav-link').each(function() {
+            const href = $(this).attr('href');
+            if (href && (href.includes(currentPage) || 
+                (currentPage === 'dashboard' && href.includes('dashboard')))) {
+                $(this).addClass('active');
+            }
+        });
+    }
+    
+    // ========================================
+    // 2. MAHASISWA HEADER DROPDOWN
+    // ========================================
+    
+    function initializeMahasiswaHeaderDropdown() {
+      var dropdownToggle = document.getElementById('mahasiswaProfileDropdown');
+      var dropdownMenu = document.getElementById('mahasiswaDropdownMenu');
+      
+      if (dropdownToggle && dropdownMenu) {
+        // Handle click pada desktop
+        dropdownToggle.addEventListener('click', function(e) {
+          var windowWidth = window.innerWidth;
+          
+          // Hanya aktifkan dropdown di desktop/laptop
+          if (windowWidth > 768) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Toggle dropdown
+            var isShowing = dropdownMenu.classList.contains('show');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+              menu.classList.remove('show');
+            });
+            document.querySelectorAll('.mahasiswa-profile-header.dropdown-active').forEach(function(toggle) {
+              toggle.classList.remove('dropdown-active');
+            });
+            
+            // Toggle current dropdown
+            if (!isShowing) {
+              dropdownMenu.classList.add('show');
+              dropdownToggle.classList.add('dropdown-active');
+            } else {
+              dropdownToggle.classList.remove('dropdown-active');
+            }
+          }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.remove('show');
+            dropdownToggle.classList.remove('dropdown-active');
+          }
+        });
+        
+        // Close dropdown on window resize to mobile
+        window.addEventListener('resize', function() {
+          var windowWidth = window.innerWidth;
+          if (windowWidth <= 768) {
+            dropdownMenu.classList.remove('show');
+            dropdownToggle.classList.remove('dropdown-active');
+          }
+        });
+        
+        // Close dropdown when pressing ESC
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') {
+            dropdownMenu.classList.remove('show');
+            dropdownToggle.classList.remove('dropdown-active');
+          }
+        });
+      }
+    }
+    
+    // ========================================
+    // 3. NOTIFICATIONS
+    // ========================================
+    
+    // Load notifikasi untuk dropdown
+    function loadNotifikasiDropdown() {
+      call('mahasiswa/dashboard/get_notifikasi').done(function(response) {
+        if (response.status === 'success') {
+          const notifikasi = response.data;
+          const count = notifikasi.length;
+          
+          // Update badge count
+          if (count > 0) {
+            $('#notif-count').text(count).show();
+          } else {
+            $('#notif-count').hide();
+          }
+          
+          // Update dropdown content
+          let html = '';
+          if (count > 0) {
+            notifikasi.forEach(function(notif) {
+              html += `
+                <a href="#!" class="list-group-item list-group-item-action">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <i class="ni ni-bell-55 text-primary"></i>
+                    </div>
+                    <div class="col ml-n2">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h4 class="mb-0 text-sm">${notif.judul.substring(0, 30)}${notif.judul.length > 30 ? '...' : ''}</h4>
+                        </div>
+                        <div class="text-right text-muted">
+                          <small>${formatTimeAgo(notif.created_at)}</small>
+                        </div>
+                      </div>
+                      <p class="text-sm mb-0">${notif.pesan.substring(0, 50)}...</p>
+                    </div>
+                  </div>
+                </a>
+              `;
+            });
+          } else {
+            html = `
+              <div class="text-center py-3">
+                <p class="text-muted mb-0">Tidak ada notifikasi</p>
+              </div>
+            `;
+          }
+          
+          $('#dropdown-notifications').html(html);
+        }
+      }).fail(function() {
+        console.log('Error loading notifications dropdown');
+      });
+    }
+    
+    function formatTimeAgo(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      
+      if (diffMins < 60) {
+        return diffMins + ' menit yang lalu';
+      } else if (diffHours < 24) {
+        return diffHours + ' jam yang lalu';
+      } else {
+        return diffDays + ' hari yang lalu';
+      }
+    }
+    
+    // ========================================
+    // 4. PROFILE PHOTO UPDATE
+    // ========================================
+    
     // Global function untuk update foto di header dan sidebar
     window.updateHeaderProfilePhoto = function(newFotoName) {
         console.log('Global updateHeaderProfilePhoto called with:', newFotoName);
@@ -909,6 +1520,59 @@ $verifikasi = $dataUser ? $dataUser->status : '';
             window.updateHeaderProfilePhoto(fotoName);
         }
     });
-    </script>
+    
+    // ========================================
+    // 5. INITIALIZE ALL
+    // ========================================
+    
+    // Initialize pada load
+    initializeSidebar();
+    setActiveMenu();
+    initializeMahasiswaHeaderDropdown();
+    loadNotifikasiDropdown();
+    
+    // Refresh notifikasi setiap 5 menit
+    setInterval(loadNotifikasiDropdown, 300000);
+    
+    // Update active menu on navigation
+    $(window).on('popstate', function() {
+        setActiveMenu();
+    });
+    
+  });
+
+  // ========================================
+  // 6. UTILITY FUNCTIONS
+  // ========================================
+  
+  // Utility functions untuk sidebar
+  window.SidebarUtils = {
+    open: function() {
+        $('body').removeClass('g-sidenav-hidden').addClass('g-sidenav-show');
+        if ($(window).width() < 1200 && !$('.backdrop').length) {
+            $('body').append('<div class="backdrop"></div>');
+        }
+    },
+    
+    close: function() {
+        $('body').removeClass('g-sidenav-show').addClass('g-sidenav-hidden');
+        $('.backdrop').remove();
+    },
+    
+    toggle: function() {
+        if ($('body').hasClass('g-sidenav-show')) {
+            this.close();
+        } else {
+            this.open();
+        }
+    },
+    
+    isOpen: function() {
+        return $('body').hasClass('g-sidenav-show');
+    }
+  };
+  
+  </script>
+    
 </body>
 </html>

@@ -35,6 +35,9 @@ $route['dosen/(:any)'] = 'dosen/$1';
 // Dashboard
 $route['mahasiswa'] = 'mahasiswa/dashboard';
 
+// Mahasiswa Routes - Proposal
+$route['mahasiswa/proposal/ajukan_ulang'] = 'mahasiswa/proposal/ajukan_ulang';
+
 // =====================================================
 //      BIMBINGAN ROUTES - PRIORITAS TINGGI (SEBELUM GENERIC)
 // =====================================================

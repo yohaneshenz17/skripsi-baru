@@ -666,7 +666,26 @@ class Kaprodi extends CI_Controller {
             if (!$dosen_id) {
                 $this->session->set_flashdata('error', 'Dosen pembimbing harus dipilih!');
                 redirect('kaprodi/review_proposal/' . $proposal_id);
-            }
+        }
+        
+        if ($aksi == 'tolak') {
+            $data_update = [
+                'status_kaprodi' => '2',
+                'komentar_kaprodi' => $komentar,
+                'tanggal_review_kaprodi' => date('Y-m-d H:i:s'),
+                'workflow_status' => 'proposal_ditolak' // Status baru
+            ];
+            
+            // Tambahkan ke proposal_workflow untuk tracking
+            $this->db->insert('proposal_workflow', [
+                'proposal_id' => $proposal_id,
+                'tahap' => 'review_kaprodi',
+                'status' => 'rejected',
+                'komentar' => $komentar,
+                'diproses_oleh' => $this->session->userdata('id'),
+                'tanggal_proses' => date('Y-m-d H:i:s')
+            ]);
+        }
             
             // Update proposal - disetujui kaprodi dan tetapkan pembimbing
             $data_update = [

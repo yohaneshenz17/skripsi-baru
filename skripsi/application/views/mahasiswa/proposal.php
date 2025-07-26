@@ -34,6 +34,17 @@ ob_start();
         padding: 15px;
         margin: 15px 0;
     }
+
+    /* TAMBAHAN: Style untuk info file security */
+    .file-security-info {
+        background-color: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-left: 4px solid #007bff;
+        border-radius: 5px;
+        padding: 10px 15px;
+        margin: 10px 0;
+        font-size: 12px;
+    }
 </style>
 <?php
 $styles = ob_get_clean();
@@ -56,7 +67,7 @@ ob_start();
         <?php endif; ?>
 
         <?php if(!$proposal): ?>
-        <!-- FORM PENGAJUAN PROPOSAL BARU (EXISTING - TIDAK BERUBAH) -->
+        <!-- FORM PENGAJUAN PROPOSAL BARU -->
         <div class="card">
             <div class="card-header"><h3 class="mb-0">Form Pengajuan Usulan Proposal Skripsi</h3></div>
             <div class="card-body">
@@ -87,13 +98,24 @@ ob_start();
                     <div class="form-group">
                         <label class="form-control-label">5. Upload File Draft Proposal <span class="text-danger">*</span></label>
                         <div class="custom-file">
-                            <input type="file" class="custom-file-input" name="draft_proposal" id="draft_proposal" required>
+                            <input type="file" class="custom-file-input" name="draft_proposal" id="draft_proposal" required 
+                                   accept=".doc,.docx,.pdf">
                             <label class="custom-file-label" for="draft_proposal">Pilih file...</label>
                         </div>
-                        <small class="text-muted">File Word atau PDF, maksimal 500 KB.</small>
+                        <!-- PERBAIKAN: Konsistensi ukuran file 500KB -->
+                        <small class="text-muted">
+                            <strong>File Word (.doc, .docx) atau PDF, maksimal 500KB.</strong>
+                        </small>
+                        <!-- TAMBAHAN: Info keamanan file -->
+                        <div class="file-security-info">
+                            <i class="fa fa-shield-alt text-primary"></i>
+                            <strong>Keamanan File:</strong> File yang diupload akan otomatis diperiksa keamanannya untuk mencegah virus dan malware.
+                        </div>
                     </div>
                     <div class="text-right mt-4">
-                        <button type="submit" class="btn btn-primary"><i class="fa fa-paper-plane"></i> Ajukan Proposal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-paper-plane"></i> Ajukan Proposal
+                        </button>
                     </div>
                 </form>
             </div>
@@ -244,12 +266,19 @@ ob_start();
                     <div class="form-group">
                         <label class="form-control-label">5. Upload File Proposal Baru <span class="text-danger">*</span></label>
                         <div class="custom-file">
-                            <input type="file" class="custom-file-input" name="draft_proposal" id="draft_proposal_resubmission" required>
+                            <input type="file" class="custom-file-input" name="draft_proposal" id="draft_proposal_resubmission" required 
+                                   accept=".doc,.docx,.pdf">
                             <label class="custom-file-label" for="draft_proposal_resubmission">Pilih file proposal yang sudah diperbaiki...</label>
                         </div>
+                        <!-- PERBAIKAN: Konsistensi ukuran file 500KB untuk pengajuan ulang juga -->
                         <small class="text-muted">
-                            File Word atau PDF, maksimal 5MB. <strong>Wajib upload file baru yang sudah diperbaiki.</strong>
+                            <strong>File Word (.doc, .docx) atau PDF, maksimal 500KB. Wajib upload file baru yang sudah diperbaiki.</strong>
                         </small>
+                        <!-- TAMBAHAN: Info keamanan file untuk pengajuan ulang -->
+                        <div class="file-security-info">
+                            <i class="fa fa-shield-alt text-success"></i>
+                            <strong>Keamanan File:</strong> File akan diperiksa keamanannya dan menggantikan file proposal sebelumnya.
+                        </div>
                         <?php if($proposal->file_draft_proposal): ?>
                         <div class="mt-2">
                             <small class="text-info">
@@ -326,7 +355,9 @@ ob_start();
                 <h4 class="font-weight-bold">Uraian Masalah:</h4>
                 <div class="alert alert-secondary p-3" style="white-space: pre-wrap;"><?= $proposal->uraian_masalah ?: '-' ?></div>
                 <?php if($proposal->file_draft_proposal): ?>
-                    <a href="<?= base_url('cdn/proposals/' . $proposal->file_draft_proposal) ?>" target="_blank" class="btn btn-sm btn-info"><i class="fa fa-file-alt"></i> Lihat Draft Proposal</a>
+                    <a href="<?= base_url('cdn/proposals/' . $proposal->file_draft_proposal) ?>" target="_blank" class="btn btn-sm btn-info">
+                        <i class="fa fa-file-alt"></i> Lihat Draft Proposal
+                    </a>
                 <?php endif; ?>
                 <hr>
                 <?php if($proposal->dosen_id): ?>
@@ -384,12 +415,85 @@ $(document).ready(function() {
         $(this).next('.custom-file-label').addClass("selected").html(fileName);
     });
     
+    // PERBAIKAN: Validasi ukuran file di frontend juga
+    function validateFileSize(input, maxSizeKB) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const fileSizeKB = file.size / 1024;
+            
+            if (fileSizeKB > maxSizeKB) {
+                alert(`Ukuran file terlalu besar! Maksimal ${maxSizeKB}KB (${Math.round(maxSizeKB/1024*100)/100}MB). \nUkuran file Anda: ${Math.round(fileSizeKB)}KB (${Math.round(fileSizeKB/1024*100)/100}MB)`);
+                input.value = '';
+                $(input).next('.custom-file-label').removeClass("selected").html("Pilih file...");
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    function validateFileType(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            const allowedExtensions = ['.pdf', '.doc', '.docx'];
+            
+            const fileName = file.name.toLowerCase();
+            const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+            
+            if (!hasValidExtension) {
+                alert('Tipe file tidak diizinkan! Hanya file Word (.doc, .docx) dan PDF yang diperbolehkan.');
+                input.value = '';
+                $(input).next('.custom-file-label').removeClass("selected").html("Pilih file...");
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    // Validasi untuk form proposal baru
+    $('#draft_proposal').on('change', function() {
+        if (validateFileType(this)) {
+            validateFileSize(this, 512); // 500KB + buffer
+        }
+    });
+    
+    // Validasi untuk form pengajuan ulang
+    $('#draft_proposal_resubmission').on('change', function() {
+        if (validateFileType(this)) {
+            validateFileSize(this, 512); // 500KB + buffer
+        }
+    });
+    
+    // Form validation untuk pengajuan baru
+    $('form[action*="ajukan"]').on('submit', function(e) {
+        let fileInput = $('#draft_proposal')[0];
+        if (!fileInput.files || fileInput.files.length === 0) {
+            e.preventDefault();
+            alert('Harap upload file proposal!');
+            return false;
+        }
+        
+        // Double check ukuran file sebelum submit
+        if (!validateFileSize(fileInput, 512)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
     // Form validation untuk pengajuan ulang
     $('#form-resubmission').on('submit', function(e) {
         let fileInput = $('#draft_proposal_resubmission')[0];
         if (!fileInput.files || fileInput.files.length === 0) {
             e.preventDefault();
             alert('Harap upload file proposal yang sudah diperbaiki!');
+            return false;
+        }
+        
+        // Double check ukuran file sebelum submit
+        if (!validateFileSize(fileInput, 512)) {
+            e.preventDefault();
             return false;
         }
         

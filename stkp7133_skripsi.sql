@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 25, 2025 at 05:57 AM
+-- Generation Time: Jul 26, 2025 at 09:47 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -75,7 +75,7 @@ CREATE TABLE `dosen` (
 
 INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`, `foto`) VALUES
 (2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1', ''),
-(10, '2721128601', 10, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', '2ec0cb9edd6eeb951ce65dab0f0d4261.jpeg'),
+(10, '2721128601', 10, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', 'f5f78573e6f98ae0ec49bc71c07024b8.jpg'),
 (11, '2706058401', 11, 'Steven Ronald Ahlaro, S.Pd., M.Pd. (Kaprodi PGSD)', '082271403437', 'pgsd@stkyakobus.ac.id', '4', ''),
 (12, '2720067001', 10, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '2', ''),
 (14, '2709109301', 11, 'Lambertus Ayiriga, S.Pd., M.Pd.', '82197819425', 'lambertus@stkyakobus.ac.id', '2', ''),
@@ -89,11 +89,11 @@ INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, 
 (22, '2729086901', 11, 'Agustinus Kia Wolomasi, S.Ag., M.Pd.', '081386503387', 'aguswolomasi@stkyakobus.ac.id', '2', ''),
 (23, '2709077801', 10, 'Markus Meran, S.Ag., M.Th.', '82248526104', 'markusmeran@stkyakobus.ac.id', '2', ''),
 (24, '1423056901', 10, 'Francisco Noerjanto, S.Ag., M.Si.', '8114890505', 'francisco@stkyakobus.ac.id', '2', ''),
-(25, '2717069001', 10, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '081295111706', 'yohaneshenz@stkyakobus.ac.id', '2', '78af977767e79451ad0b98e6c5280799.jpg'),
+(25, '2717069001', 10, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '081295111706', 'yohaneshenz@stkyakobus.ac.id', '2', 'cb7f7e58e87bc27937e271490b9d767e.jpg'),
 (26, '2721128601', 10, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedydbeau@gmail.com', '2', ''),
 (27, '2706058401', 11, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '2', ''),
 (28, '2717069001', 10, 'Yohanes Hendro Pranyoto (Admin)', '081295111706', 'sipd@stkyakobus.ac.id', '1', ''),
-(29, 'STF001', 1, 'Maria Karolina Itu', '082124745593', 'mariadue@stkyakobus.ac.id', '5', ''),
+(29, 'STF001', 1, 'Maria Karolina Itu', '082124745593', 'mariadue@stkyakobus.ac.id', '5', 'c8b577cebc9eb3a9387528fe17e45fc6.png'),
 (30, 'STF002', 1, 'Elisabeth Yanu Dwi Astuti', '081240273873', 'elisabethyanu@stkyakobus.ac.id', '5', ''),
 (31, 'STF003', 1, 'Adris Paulina Kause', '085244636278', 'adriskause@stkyakobus.ac.id', '5', ''),
 (32, 'STF004', 1, 'Yuliana Mangera', '082399795210', 'yulimangera@stkyakobus.ac.id', '5', ''),
@@ -218,6 +218,21 @@ CREATE TABLE `hasil_kegiatan` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `hasil_kegiatan_backup_full_20250725_070204`
+--
+
+CREATE TABLE `hasil_kegiatan_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `mahasiswa_id` bigint(20) NOT NULL,
+  `file` varchar(50) NOT NULL,
+  `kegiatan` varchar(5000) DEFAULT NULL,
+  `file_kegiatan` varchar(50) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `hasil_kegiatan_v`
 -- (See below for the actual view)
 --
@@ -250,11 +265,39 @@ CREATE TABLE `hasil_penelitian` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `hasil_penelitian_backup_full_20250725_070204`
+--
+
+CREATE TABLE `hasil_penelitian_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `penelitian_id` bigint(20) NOT NULL,
+  `berita_acara` varchar(50) NOT NULL,
+  `masukan` varchar(50) NOT NULL,
+  `status` enum('1','2') NOT NULL COMMENT '1 = lulus, 2 = tidak lulus'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `hasil_seminar`
 --
 
 CREATE TABLE `hasil_seminar` (
   `id` bigint(20) NOT NULL,
+  `seminar_id` bigint(20) NOT NULL,
+  `berita_acara` text NOT NULL,
+  `masukan` text NOT NULL COMMENT 'komentar pdf (pembimbing, penguji, catatan)',
+  `status` enum('1','2','3') NOT NULL COMMENT '1 = lanjut, 2 = lanjut (perbaikan), 3 = ditolak'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hasil_seminar_backup_full_20250725_070204`
+--
+
+CREATE TABLE `hasil_seminar_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
   `seminar_id` bigint(20) NOT NULL,
   `berita_acara` text NOT NULL,
   `masukan` text NOT NULL COMMENT 'komentar pdf (pembimbing, penguji, catatan)',
@@ -335,7 +378,13 @@ CREATE TABLE `jurnal_bimbingan` (
 --
 
 INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `catatan_dosen`, `tindak_lanjut`, `durasi_bimbingan`, `catatan_mahasiswa`, `status_validasi`, `tanggal_validasi`, `validasi_oleh`, `created_by`, `created_at`, `updated_at`) VALUES
-(19, 41, 1, '2025-07-25', 'Test jurnal setelah perbaikan database lengkap', NULL, 'Lanjutkan ke BAB berikutnya', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-07-24 19:26:36', '2025-07-24 19:26:36');
+(20, 44, 1, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:30', 25, 'mahasiswa', '2025-07-25 10:57:44', '2025-07-25 11:00:30'),
+(21, 44, 2, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:38', 25, 'mahasiswa', '2025-07-25 10:57:56', '2025-07-25 11:00:38'),
+(22, 44, 3, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:44', 25, 'mahasiswa', '2025-07-25 10:58:07', '2025-07-25 11:00:44'),
+(23, 44, 4, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:51', 25, 'mahasiswa', '2025-07-25 10:58:16', '2025-07-25 11:00:51'),
+(24, 44, 5, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:23', 25, 'mahasiswa', '2025-07-25 10:58:26', '2025-07-25 11:00:23'),
+(25, 44, 6, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:12', 25, 'mahasiswa', '2025-07-25 10:58:35', '2025-07-25 11:00:12'),
+(26, 44, 7, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:06', 25, 'mahasiswa', '2025-07-25 10:58:46', '2025-07-25 11:00:06');
 
 -- --------------------------------------------------------
 
@@ -360,6 +409,37 @@ CREATE TABLE `jurnal_bimbingan_backup_20250724` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `jurnal_bimbingan_backup_full_20250725_070204`
+--
+
+CREATE TABLE `jurnal_bimbingan_backup_full_20250725_070204` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `proposal_id` bigint(20) NOT NULL,
+  `pertemuan_ke` int(11) NOT NULL COMMENT 'Urutan pertemuan (1, 2, 3, dst)',
+  `tanggal_bimbingan` date NOT NULL COMMENT 'Tanggal pelaksanaan bimbingan',
+  `materi_bimbingan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Materi yang dibahas dalam bimbingan',
+  `catatan_dosen` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Catatan dari dosen pembimbing (setelah validasi)',
+  `tindak_lanjut` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Tindak lanjut untuk mahasiswa',
+  `durasi_bimbingan` int(3) DEFAULT NULL COMMENT 'Durasi bimbingan dalam menit',
+  `catatan_mahasiswa` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Catatan atau pertanyaan dari mahasiswa',
+  `status_validasi` enum('0','1','2') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '0=pending, 1=valid, 2=revisi',
+  `tanggal_validasi` datetime DEFAULT NULL COMMENT 'Tanggal dosen memvalidasi',
+  `validasi_oleh` bigint(20) DEFAULT NULL,
+  `created_by` enum('mahasiswa','dosen') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'mahasiswa' COMMENT 'Dibuat oleh mahasiswa atau dosen',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `jurnal_bimbingan_backup_full_20250725_070204`
+--
+
+INSERT INTO `jurnal_bimbingan_backup_full_20250725_070204` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `catatan_dosen`, `tindak_lanjut`, `durasi_bimbingan`, `catatan_mahasiswa`, `status_validasi`, `tanggal_validasi`, `validasi_oleh`, `created_by`, `created_at`, `updated_at`) VALUES
+(19, 41, 1, '2025-07-25', 'Test jurnal setelah perbaikan database lengkap', NULL, 'Lanjutkan ke BAB berikutnya', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-07-24 19:26:36', '2025-07-24 19:26:36');
 
 -- --------------------------------------------------------
 
@@ -398,11 +478,31 @@ CREATE TABLE `konsultasi` (
   `komentar_kaprodi` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `konsultasi`
+-- Table structure for table `konsultasi_backup_full_20250725_070204`
 --
 
-INSERT INTO `konsultasi` (`id`, `proposal_mahasiswa_id`, `tanggal`, `jam`, `isi`, `bukti`, `sk_tim`, `persetujuan_pembimbing`, `persetujuan_kaprodi`, `komentar_pembimbing`, `komentar_kaprodi`) VALUES
+CREATE TABLE `konsultasi_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `proposal_mahasiswa_id` bigint(20) NOT NULL,
+  `tanggal` date NOT NULL,
+  `jam` time NOT NULL,
+  `isi` text NOT NULL,
+  `bukti` text NOT NULL,
+  `sk_tim` varchar(50) DEFAULT NULL,
+  `persetujuan_pembimbing` enum('1','0') NOT NULL DEFAULT '0' COMMENT '1 = true, 0 = false',
+  `persetujuan_kaprodi` enum('1','0') NOT NULL DEFAULT '0' COMMENT '1 = true, 0 = false',
+  `komentar_pembimbing` text DEFAULT NULL,
+  `komentar_kaprodi` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `konsultasi_backup_full_20250725_070204`
+--
+
+INSERT INTO `konsultasi_backup_full_20250725_070204` (`id`, `proposal_mahasiswa_id`, `tanggal`, `jam`, `isi`, `bukti`, `sk_tim`, `persetujuan_pembimbing`, `persetujuan_kaprodi`, `komentar_pembimbing`, `komentar_kaprodi`) VALUES
 (10, 33, '2022-04-26', '11:00:00', 'Bimbingan BAB 3 Metodologi Penelitian', '20220426060102.doc', NULL, '1', '1', NULL, NULL),
 (11, 33, '2022-04-26', '11:05:00', 'Bimbingan Abstrak dan Latar Belakang', '20220426060601.doc', NULL, '1', '1', NULL, NULL),
 (12, 32, '2022-04-26', '11:42:00', 'Bimbingan BAB 1 - BAB 2', '20220426064325.doc', NULL, '1', '1', NULL, NULL);
@@ -436,6 +536,38 @@ CREATE TABLE `mahasiswa` (
 --
 
 INSERT INTO `mahasiswa` (`id`, `nim`, `nama`, `prodi_id`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `email`, `alamat`, `nomor_telepon`, `nomor_telepon_orang_dekat`, `ipk`, `foto`, `password`, `status`) VALUES
+(44, '12345676', 'Mahasiswa Contoh', 10, 'laki-laki', 'NGGOLO', '2025-07-16', 'yohaneshenz@gmail.com', 'Missi 2, Mandala Merauke', '0812951117558', '081295111755', '3', '6882fb8ec3dd3.jpg', '$2y$10$5zc3rH6.SE5vjacDjUe9KOSzqxBzxO5mM4Xa5xln3JSiYahpHO1km', '1'),
+(45, '12345679', 'Mahasiswa Contoh 2', 10, 'laki-laki', 'KAKANIUK', '2025-07-01', 'videlis@stkyakobus.ac.id', 'Jl. Yogya-Wonosari Km. 23, Putat II, RT 034, RW 009, Desa Putat, Kecamatan Patuk', '081295111706', '081295111708', '4', '68841cfc62bf4.jpg', '$2y$10$s/udmiwNu0/zzSLIsJlEKerOWP8wKVmd./.4aGMWKsMAVvd70f/T2', '1');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mahasiswa_backup_full_20250725_070204`
+--
+
+CREATE TABLE `mahasiswa_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `nim` varchar(50) NOT NULL,
+  `nama` varchar(100) NOT NULL,
+  `prodi_id` bigint(20) NOT NULL,
+  `jenis_kelamin` enum('laki-laki','perempuan') NOT NULL,
+  `tempat_lahir` varchar(20) NOT NULL,
+  `tanggal_lahir` date NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `alamat` text NOT NULL,
+  `nomor_telepon` varchar(30) NOT NULL,
+  `nomor_telepon_orang_dekat` varchar(30) NOT NULL,
+  `ipk` text NOT NULL,
+  `foto` varchar(50) DEFAULT NULL,
+  `password` text NOT NULL,
+  `status` enum('1','0') NOT NULL DEFAULT '1' COMMENT '1 = aktif, 0 = nonaktif'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `mahasiswa_backup_full_20250725_070204`
+--
+
+INSERT INTO `mahasiswa_backup_full_20250725_070204` (`id`, `nim`, `nama`, `prodi_id`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `email`, `alamat`, `nomor_telepon`, `nomor_telepon_orang_dekat`, `ipk`, `foto`, `password`, `status`) VALUES
 (32, '25104540', 'Hendro Mahasiswa', 10, 'laki-laki', 'Merauke, Bade', '2025-07-22', 'yohaneshenz@gmail.com', 'Merauke', '081295111732', '081295111782', '3', '20250721021959_32.png', '$2y$10$Upai5wQDDl1XXxXAQjF5oOPElLJ6ztbHhpLHvpMTeI0z1ZrnAFFB6', '1'),
 (33, '2736373738', 'Herybertus Oktaviani', 10, 'laki-laki', 'Merauke', '1990-07-12', 'danielpuraka@student.stkyakobus.ac.id', 'Merauke', '081295111707', '081295111705', '3.20', '6877147cddd68.jpg', '$2y$10$Pq5WC53ySok2ae9Y4/hHZOCVLXavBZZKLRRnPYwi5RCfI78EbY4re', '1'),
 (42, '233423546', 'Videlis Nilo Leba', 10, 'laki-laki', 'Merauke', '2025-07-16', 'videlis@stkyakobus.ac.id', 'Merauke', '081223244545', '081223244544', '3', '6880d10d56199.jpg', '$2y$10$hkKE/2dEy2dX0g.T0Njo6eDxldhTZHbBREayDHGXn9r34tsKbOZdq', '1');
@@ -497,6 +629,24 @@ INSERT INTO `notifikasi` (`id`, `jenis`, `untuk_role`, `user_id`, `proposal_id`,
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `notifikasi_backup_full_20250725_070204`
+--
+
+CREATE TABLE `notifikasi_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `jenis` enum('proposal_masuk','proposal_disetujui','proposal_ditolak','pembimbing_ditunjuk','pembimbing_menyetujui','pembimbing_menolak') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `untuk_role` enum('mahasiswa','dosen','kaprodi','admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `proposal_id` bigint(20) DEFAULT NULL,
+  `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `pesan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `dibaca` tinyint(1) DEFAULT 0,
+  `tanggal_dibuat` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `penelitian`
 --
 
@@ -516,11 +666,33 @@ CREATE TABLE `penelitian` (
   `bukti_konsultasi` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `penelitian`
+-- Table structure for table `penelitian_backup_full_20250725_070204`
 --
 
-INSERT INTO `penelitian` (`id`, `judul_penelitian`, `proposal_mahasiswa_id`, `pembimbing_id`, `penguji_id`, `bukti`, `persetujuan_pembimbing`, `persetujuan_penguji`, `komentar_pembimbing`, `komentar_penguji`, `sk_tim`, `file_seminar`, `bukti_konsultasi`) VALUES
+CREATE TABLE `penelitian_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `judul_penelitian` varchar(100) DEFAULT NULL,
+  `proposal_mahasiswa_id` bigint(20) NOT NULL,
+  `pembimbing_id` bigint(20) NOT NULL,
+  `penguji_id` bigint(20) NOT NULL,
+  `bukti` text NOT NULL,
+  `persetujuan_pembimbing` enum('1','2') NOT NULL COMMENT '1 = true, 2 = false',
+  `persetujuan_penguji` enum('1','2') NOT NULL COMMENT '1 = true, 2 = false',
+  `komentar_pembimbing` text DEFAULT NULL,
+  `komentar_penguji` text DEFAULT NULL,
+  `sk_tim` varchar(50) DEFAULT NULL,
+  `file_seminar` varchar(50) DEFAULT NULL,
+  `bukti_konsultasi` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `penelitian_backup_full_20250725_070204`
+--
+
+INSERT INTO `penelitian_backup_full_20250725_070204` (`id`, `judul_penelitian`, `proposal_mahasiswa_id`, `pembimbing_id`, `penguji_id`, `bukti`, `persetujuan_pembimbing`, `persetujuan_penguji`, `komentar_pembimbing`, `komentar_penguji`, `sk_tim`, `file_seminar`, `bukti_konsultasi`) VALUES
 (20, 'Rancang Bangun CMS Berbasi IT Service Menggunakan ITIL V3', 33, 8, 1, '20220426034134.pdf', '2', '2', NULL, NULL, '20220426034134.pdf', '20220426034134.pdf', '20220426034134.pdf');
 
 -- --------------------------------------------------------
@@ -564,7 +736,7 @@ CREATE TABLE `pengumuman_tahapan` (
 --
 
 INSERT INTO `pengumuman_tahapan` (`id`, `no`, `tahapan`, `tanggal_deadline`, `keterangan`, `aktif`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Pengajuan Proposal', '2025-08-07', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-20 07:05:21'),
+(1, 1, 'Pengajuan Proposal Skripsi', '2025-08-06', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-26 06:36:56'),
 (3, 2, 'Seminar Proposal', '2025-10-31', 'Seminar Proposal Bab 1-3', '1', '2025-07-15 17:29:36', '2025-07-19 17:42:25'),
 (4, 3, 'Ujian Skripsi', '2026-05-25', 'Seminar Hasil Bab 1-5', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:31'),
 (5, 4, 'Revisi dan Publikasi', '2026-07-30', 'Perbaikan dan Publikasi Skripsi', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:52'),
@@ -658,9 +830,8 @@ CREATE TABLE `proposal_mahasiswa` (
 --
 
 INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
-(36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', '2025-07-18 10:21:14', 25, 1, NULL, NULL, '0', '1', 'Proposal sudah baik dan bisa langsung mulai bimbingan. Terimakasih', '2025-07-17 17:18:16', '1', 'Baik saya menerima', '2025-07-23 17:55:14', NULL, NULL, NULL, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '2025-07-23 17:45:02', 10, 'Dosen pembimbing sebelumnya () menolak penunjukan. Menetapkan dosen pembimbing baru untuk melanjutkan proses bimbingan mahasiswa.', 0, '0', NULL, NULL, NULL),
-(37, 33, 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'd2ff01bd1f6cb9b54d4059526a3fb112.docx', '2025-07-18 10:21:14', 26, 1, NULL, NULL, '0', '1', 'Lanjutkan', '2025-07-23 18:35:54', '1', 'Ya saya setuju membimbing ', '2025-07-23 19:25:53', NULL, '2025-07-23 18:35:54', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
-(41, 42, 'Pengaruh Tes Saja', 'Pengaruh Tes Saja', 'Kuantitatif', 'Merauke', 'Pengaruh Tes Saja', '68795a1fa5ea2fa268d3bfe05362db14.docx', '2025-07-23 19:10:29', 25, 1, NULL, NULL, '0', '1', 'Lanjutkan bimbingan', '2025-07-23 19:11:52', '1', 'Ok saya setuju\r\n', '2025-07-24 18:34:07', NULL, '2025-07-23 19:11:52', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
+(44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. ', '41e9fedea2555dd3808345d6831596ad.docx', '2025-07-26 07:12:16', NULL, 1, NULL, NULL, '0', '2', 'Judul Sudah Ada, ganti yang lain yang ada kebaruannya.', '2025-07-26 07:13:22', '0', NULL, NULL, NULL, NULL, NULL, '', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -833,6 +1004,76 @@ INSERT INTO `proposal_mahasiswa_backup_fix_20250723` (`id`, `mahasiswa_id`, `jud
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `proposal_mahasiswa_backup_full_20250725_070204`
+--
+
+CREATE TABLE `proposal_mahasiswa_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `mahasiswa_id` bigint(20) NOT NULL,
+  `judul` varchar(250) NOT NULL,
+  `ringkasan` varchar(5000) NOT NULL,
+  `jenis_penelitian` enum('Kuantitatif','Kualitatif','Mixed Method') DEFAULT NULL,
+  `lokasi_penelitian` varchar(255) DEFAULT NULL,
+  `uraian_masalah` text DEFAULT NULL,
+  `file_draft_proposal` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Tanggal pengajuan proposal oleh mahasiswa',
+  `dosen_id` bigint(20) DEFAULT NULL COMMENT 'pembimbing',
+  `dosen2_id` int(11) NOT NULL DEFAULT 1 COMMENT 'pembimbing 2',
+  `dosen_penguji_id` int(11) DEFAULT NULL,
+  `dosen_penguji2_id` bigint(20) DEFAULT NULL,
+  `status` enum('1','0') NOT NULL DEFAULT '0' COMMENT '1 = disetujui, 2 = tidak disetujui',
+  `status_kaprodi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_kaprodi` text DEFAULT NULL,
+  `tanggal_review_kaprodi` datetime DEFAULT NULL,
+  `status_pembimbing` enum('0','1','2') DEFAULT '0' COMMENT '0=belum diminta, 1=menyetujui, 2=menolak',
+  `komentar_pembimbing` text DEFAULT NULL,
+  `tanggal_respon_pembimbing` datetime DEFAULT NULL,
+  `deadline` datetime DEFAULT NULL,
+  `tanggal_penetapan` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi menetapkan pembimbing & penguji',
+  `penetapan_oleh` bigint(20) DEFAULT NULL COMMENT 'ID kaprodi yang menetapkan',
+  `workflow_status` enum('proposal','bimbingan','seminar_proposal','penelitian','seminar_skripsi','publikasi','selesai') DEFAULT 'proposal' COMMENT 'Status workflow saat ini: proposal->bimbingan->seminar_proposal->penelitian->seminar_skripsi->publikasi->selesai',
+  `status_seminar_proposal` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_seminar_proposal` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk seminar proposal',
+  `tanggal_review_seminar_proposal` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review seminar proposal',
+  `tanggal_seminar_proposal` date DEFAULT NULL COMMENT 'Tanggal pelaksanaan seminar proposal',
+  `tempat_seminar_proposal` varchar(255) DEFAULT NULL COMMENT 'Tempat pelaksanaan seminar proposal',
+  `status_seminar_skripsi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_seminar_skripsi` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk seminar skripsi',
+  `tanggal_review_seminar_skripsi` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review seminar skripsi',
+  `tanggal_seminar_skripsi` date DEFAULT NULL COMMENT 'Tanggal pelaksanaan seminar skripsi',
+  `tempat_seminar_skripsi` varchar(255) DEFAULT NULL COMMENT 'Tempat pelaksanaan seminar skripsi',
+  `status_publikasi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu review, 1=disetujui, 2=ditolak',
+  `komentar_publikasi` text DEFAULT NULL COMMENT 'Komentar kaprodi untuk publikasi',
+  `tanggal_review_publikasi` datetime DEFAULT NULL COMMENT 'Tanggal kaprodi review publikasi',
+  `link_repository` varchar(500) DEFAULT NULL COMMENT 'Link repository publikasi tugas akhir',
+  `tanggal_publikasi` date DEFAULT NULL COMMENT 'Tanggal publikasi ke repository',
+  `file_seminar_proposal` varchar(255) DEFAULT NULL COMMENT 'File dokumen seminar proposal (Bab 1-3)',
+  `file_seminar_skripsi` varchar(255) DEFAULT NULL COMMENT 'File dokumen seminar skripsi (Bab 1-5)',
+  `file_skripsi_final` varchar(255) DEFAULT NULL COMMENT 'File skripsi final untuk publikasi',
+  `surat_izin_penelitian` varchar(255) DEFAULT NULL COMMENT 'File surat izin penelitian',
+  `status_izin_penelitian` enum('0','1','2') DEFAULT '0' COMMENT '0=belum diminta, 1=disetujui, 2=ditolak',
+  `tanggal_penetapan_ulang` datetime DEFAULT NULL,
+  `penetapan_ulang_oleh` bigint(20) DEFAULT NULL,
+  `alasan_penetapan_ulang` text DEFAULT NULL,
+  `jumlah_penetapan_ulang` int(11) DEFAULT 0,
+  `validasi_staf_publikasi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu, 1=valid, 2=perlu perbaikan',
+  `staf_validator_id` bigint(20) DEFAULT NULL COMMENT 'ID staf yang memvalidasi',
+  `tanggal_validasi_staf` datetime DEFAULT NULL,
+  `catatan_staf` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `proposal_mahasiswa_backup_full_20250725_070204`
+--
+
+INSERT INTO `proposal_mahasiswa_backup_full_20250725_070204` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
+(36, 32, 'Pengaruh Gaya Berpacaran terhadap Partisipasi Orang Muda Katolik (OMK) dalam Hidup Menggereja di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke Tahun 2025', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Partisipasi Orang Muda Katolik (OMK) dalam hidup menggereja merupakan indikator penting keberlangsungan Gereja Katolik di masa depan. Namun, kenyataan di lapangan menunjukkan adanya penurunan keterlibatan OMK dalam kegiatan-kegiatan gerejawi, seperti perayaan Ekaristi, doa lingkungan, dan pelayanan sosial. Salah satu faktor yang diduga berkontribusi terhadap rendahnya partisipasi tersebut adalah gaya berpacaran yang dijalani oleh OMK. Di Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke, fenomena ini mulai tampak signifikan. Gaya pacaran yang tidak sehat—seperti hubungan yang posesif, terlalu mendominasi waktu, atau berorientasi pada kesenangan semata—berpotensi mengalihkan fokus dan komitmen OMK dari kegiatan rohani dan pelayanan gerejawi. Di sisi lain, gaya pacaran yang dewasa dan dilandasi nilai-nilai Kristiani justru dapat mendorong partisipasi aktif dalam kehidupan menggereja. Oleh karena itu, penting untuk menelaah lebih jauh bagaimana gaya berpacaran OMK memengaruhi tingkat keterlibatan mereka dalam hidup menggereja. Penelitian ini bertujuan untuk mengidentifikasi pola gaya pacaran yang dominan serta dampaknya terhadap semangat OMK dalam menjalani hidup menggereja di lingkungan Stasi Santo Mikael, demi merancang strategi pastoral yang lebih efektif.', '306cf686ff3f7323b18304b48f7c6e43.docx', '2025-07-18 10:21:14', 25, 1, NULL, NULL, '0', '1', 'Proposal sudah baik dan bisa langsung mulai bimbingan. Terimakasih', '2025-07-17 17:18:16', '1', 'Baik saya menerima', '2025-07-23 17:55:14', NULL, NULL, NULL, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '2025-07-23 17:45:02', 10, 'Dosen pembimbing sebelumnya () menolak penunjukan. Menetapkan dosen pembimbing baru untuk melanjutkan proses bimbingan mahasiswa.', 0, '0', NULL, NULL, NULL),
+(37, 33, 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Pengaruh Pendidikan Seksualitas terhadap Minat Berprestasi Mahasiswa Sekolah TInggi Katolik Santo Yakobus Merauke, ini latihan saja ya', 'd2ff01bd1f6cb9b54d4059526a3fb112.docx', '2025-07-18 10:21:14', 26, 1, NULL, NULL, '0', '1', 'Lanjutkan', '2025-07-23 18:35:54', '1', 'Ya saya setuju membimbing ', '2025-07-23 19:25:53', NULL, '2025-07-23 18:35:54', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(41, 42, 'Pengaruh Tes Saja', 'Pengaruh Tes Saja', 'Kuantitatif', 'Merauke', 'Pengaruh Tes Saja', '68795a1fa5ea2fa268d3bfe05362db14.docx', '2025-07-23 19:10:29', 25, 1, NULL, NULL, '0', '1', 'Lanjutkan bimbingan', '2025-07-23 19:11:52', '1', 'Ok saya setuju\r\n', '2025-07-24 18:34:07', NULL, '2025-07-23 19:11:52', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `proposal_mahasiswa_detail_v`
 -- (See below for the actual view)
 --
@@ -897,11 +1138,27 @@ CREATE TABLE `proposal_workflow` (
   `tanggal_proses` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `proposal_workflow`
+-- Table structure for table `proposal_workflow_backup_full_20250725_070204`
 --
 
-INSERT INTO `proposal_workflow` (`id`, `proposal_id`, `tahap`, `status`, `komentar`, `diproses_oleh`, `tanggal_proses`) VALUES
+CREATE TABLE `proposal_workflow_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `proposal_id` bigint(20) NOT NULL,
+  `tahap` enum('pengajuan','review_kaprodi','approval_pembimbing','penetapan_selesai') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `komentar` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `diproses_oleh` bigint(20) DEFAULT NULL,
+  `tanggal_proses` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `proposal_workflow_backup_full_20250725_070204`
+--
+
+INSERT INTO `proposal_workflow_backup_full_20250725_070204` (`id`, `proposal_id`, `tahap`, `status`, `komentar`, `diproses_oleh`, `tanggal_proses`) VALUES
 (3, 36, 'pengajuan', 'approved', NULL, 32, '2025-07-17 08:59:52'),
 (4, 37, 'pengajuan', 'approved', NULL, 33, '2025-07-17 08:59:52'),
 (5, 36, '', 'approved', 'Penetapan ulang pembimbing dari dosen ID  ke dosen ID 25. Alasan: Dosen pembimbing sebelumnya () menolak penunjukan. Menetapkan dosen pembimbing baru untuk melanjutkan proses bimbingan mahasiswa.', 10, '2025-07-23 17:45:02');
@@ -914,6 +1171,24 @@ INSERT INTO `proposal_workflow` (`id`, `proposal_id`, `tahap`, `status`, `koment
 
 CREATE TABLE `seminar` (
   `id` bigint(20) NOT NULL,
+  `proposal_mahasiswa_id` bigint(20) NOT NULL,
+  `tanggal` date NOT NULL,
+  `jam` time NOT NULL,
+  `tempat` text NOT NULL,
+  `file_proposal` varchar(50) NOT NULL,
+  `sk_tim` varchar(50) NOT NULL,
+  `bukti_konsultasi` varchar(50) DEFAULT NULL,
+  `persetujuan` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `seminar_backup_full_20250725_070204`
+--
+
+CREATE TABLE `seminar_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
   `proposal_mahasiswa_id` bigint(20) NOT NULL,
   `tanggal` date NOT NULL,
   `jam` time NOT NULL,
@@ -944,11 +1219,31 @@ CREATE TABLE `skripsi` (
   `bukti_konsultasi` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `skripsi`
+-- Table structure for table `skripsi_backup_full_20250725_070204`
 --
 
-INSERT INTO `skripsi` (`id`, `judul_skripsi`, `dosen_id`, `dosen_penguji_id`, `file_skripsi`, `sk_tim`, `mahasiswa_id`, `jadwal_skripsi`, `status`, `persetujuan`, `bukti_konsultasi`) VALUES
+CREATE TABLE `skripsi_backup_full_20250725_070204` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `judul_skripsi` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dosen_id` int(11) DEFAULT NULL,
+  `dosen_penguji_id` int(11) DEFAULT NULL,
+  `file_skripsi` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `sk_tim` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mahasiswa_id` int(11) DEFAULT NULL,
+  `jadwal_skripsi` datetime DEFAULT NULL,
+  `status` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `persetujuan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bukti_konsultasi` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `skripsi_backup_full_20250725_070204`
+--
+
+INSERT INTO `skripsi_backup_full_20250725_070204` (`id`, `judul_skripsi`, `dosen_id`, `dosen_penguji_id`, `file_skripsi`, `sk_tim`, `mahasiswa_id`, `jadwal_skripsi`, `status`, `persetujuan`, `bukti_konsultasi`) VALUES
 (19, 'Rancang Bangun CMS Berbasi IT Service Menggunakan ITIL V3', 8, 1, '20220426040137.pdf', '20220426040137.pdf', 3, '2022-12-26 12:00:00', '1', '20220426040137.pdf', '20220426040137.pdf');
 
 -- --------------------------------------------------------
@@ -1024,13 +1319,48 @@ CREATE TABLE `staf_aktivitas` (
 --
 
 INSERT INTO `staf_aktivitas` (`id`, `staf_id`, `aktivitas`, `mahasiswa_id`, `proposal_id`, `keterangan`, `file_output`, `tanggal_aktivitas`) VALUES
+(7, 29, '', NULL, NULL, 'Export semua data bimbingan format Excel XML (2 records)', NULL, '2025-07-24 18:04:41'),
+(8, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:47:19'),
+(9, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:47:41'),
+(10, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:56:43'),
+(11, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:56:48'),
+(12, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:56:52'),
+(13, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:56:56'),
+(14, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:57:00'),
+(15, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:57:03'),
+(16, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:58:52'),
+(17, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 15:39:03'),
+(18, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 16:16:57'),
+(19, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 17:35:43');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staf_aktivitas_backup_full_20250725_070204`
+--
+
+CREATE TABLE `staf_aktivitas_backup_full_20250725_070204` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `staf_id` bigint(20) NOT NULL,
+  `aktivitas` enum('export_jurnal','export_berita_acara','export_surat_izin','upload_repository','validasi_publikasi') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `mahasiswa_id` bigint(20) DEFAULT NULL,
+  `proposal_id` bigint(20) DEFAULT NULL,
+  `keterangan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `file_output` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `tanggal_aktivitas` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `staf_aktivitas_backup_full_20250725_070204`
+--
+
+INSERT INTO `staf_aktivitas_backup_full_20250725_070204` (`id`, `staf_id`, `aktivitas`, `mahasiswa_id`, `proposal_id`, `keterangan`, `file_output`, `tanggal_aktivitas`) VALUES
 (1, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 12:25:03'),
 (2, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:36:42'),
 (3, 29, 'export_jurnal', 32, 36, 'Export jurnal bimbingan mahasiswa Hendro Mahasiswa', NULL, '2025-07-24 17:37:38'),
 (4, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:47:18'),
 (5, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:48:27'),
-(6, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:49:50'),
-(7, 29, '', NULL, NULL, 'Export semua data bimbingan format Excel XML (2 records)', NULL, '2025-07-24 18:04:41');
+(6, 29, 'export_jurnal', 33, 37, 'Export jurnal bimbingan mahasiswa Herybertus Oktaviani', NULL, '2025-07-24 17:49:50');
 
 -- --------------------------------------------------------
 
@@ -1336,7 +1666,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`
@@ -1348,7 +1678,7 @@ ALTER TABLE `konsultasi`
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`
@@ -1378,7 +1708,7 @@ ALTER TABLE `prodi`
 -- AUTO_INCREMENT for table `proposal_mahasiswa`
 --
 ALTER TABLE `proposal_mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `proposal_workflow`
@@ -1402,7 +1732,7 @@ ALTER TABLE `skripsi`
 -- AUTO_INCREMENT for table `staf_aktivitas`
 --
 ALTER TABLE `staf_aktivitas`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Constraints for dumped tables

@@ -156,7 +156,6 @@ class Proposal extends CI_Controller
                 'status_kaprodi' => '0', // Reset ke menunggu review
                 'komentar_kaprodi' => NULL, // Reset komentar
                 'tanggal_review_kaprodi' => NULL, // Reset tanggal review
-                'updated_at' => date('Y-m-d H:i:s') // Timestamp update
             ];
             
             $this->db->where('id', $existing->id);

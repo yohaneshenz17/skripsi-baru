@@ -1,271 +1,94 @@
 <?php 
-defined('BASEPATH') OR exit('No direct script access allowed');
+/**
+ * Bimbingan Mahasiswa View - Template Sederhana
+ * File: application/views/mahasiswa/bimbingan.php
+ * Menggantikan template kompleks dengan approach sederhana
+ */
 
-// Prepare data untuk template
-$template_data = array(
-    'title' => 'Bimbingan Skripsi - Phase 2',
-    'content' => '',
-    'script' => ''
-);
-
-// Load content view sebagai string
+// Capture content untuk template
 ob_start();
 ?>
 
+<!-- Header Info & Actions -->
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center">
+            <div style="width: 60px; height: 60px; background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; margin-right: 1rem;">
+                👥
+            </div>
+            <div>
+                <h2 class="mb-1" style="color: #32325d; font-weight: 600;">Bimbingan Tugas Akhir</h2>
+                <p class="mb-0" style="color: #8898aa;">Kelola jurnal bimbingan dengan dosen pembimbing Anda</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 text-right">
+        <?php if (isset($proposal) && $proposal): ?>
+            <button type="button" class="btn btn-primary" onclick="tambahJurnalBimbingan()">
+                <i class="fas fa-plus"></i> Tambah Jurnal Bimbingan
+            </button>
+        <?php endif; ?>
+    </div>
+</div>
+
 <!-- Alert Messages -->
-<?php if($this->session->flashdata('success')): ?>
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <span class="alert-icon"><i class="fa fa-check"></i></span>
-    <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+<?php if ($this->session->flashdata('success')): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <strong>Berhasil!</strong> <?= $this->session->flashdata('success') ?>
+    </div>
 <?php endif; ?>
 
-<?php if($this->session->flashdata('error')): ?>
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <span class="alert-icon"><i class="fa fa-exclamation-triangle"></i></span>
-    <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+<?php if ($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Error!</strong> <?= $this->session->flashdata('error') ?>
+    </div>
 <?php endif; ?>
 
-<?php if($this->session->flashdata('info')): ?>
-<div class="alert alert-info alert-dismissible fade show" role="alert">
-    <span class="alert-icon"><i class="fa fa-info"></i></span>
-    <span class="alert-text"><?= $this->session->flashdata('info') ?></span>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+<?php if ($this->session->flashdata('warning')): ?>
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Perhatian!</strong> <?= $this->session->flashdata('warning') ?>
+    </div>
 <?php endif; ?>
 
-<?php if (isset($waiting_kaprodi)): ?>
-<!-- STATUS 1: PROPOSAL BELUM DIREVIEW KAPRODI -->
-<div class="row">
-    <div class="col-lg-12 mb-4">
-        <div class="card bg-gradient-info">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="text-white mb-0">📋 Menunggu Review Kaprodi</h3>
-                        <p class="text-white mt-2 mb-0">
-                            Proposal Anda sedang ditinjau oleh <strong>Kaprodi</strong>. 
-                            Setelah disetujui, kaprodi akan menetapkan dosen pembimbing untuk Anda.
+<?php if (!isset($proposal) || !$proposal): ?>
+<!-- Belum Ada Proposal -->
+<div class="card">
+    <div class="card-body text-center p-5">
+        <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.3;">📋</div>
+        <h4 class="mb-3" style="color: #32325d;">Belum Ada Proposal</h4>
+        <p class="text-muted mb-4">
+            Anda belum memiliki proposal yang disetujui. Silakan ajukan proposal terlebih dahulu 
+            sebelum memulai proses bimbingan.
+        </p>
+        <a href="<?= base_url() ?>mahasiswa/proposal" class="btn btn-primary">
+            <i class="fas fa-file-alt"></i> Kelola Proposal
+        </a>
+    </div>
+</div>
+
+<?php elseif ($proposal->status != '1'): ?>
+<!-- Proposal Belum Disetujui -->
+<div class="card">
+    <div class="card-body text-center p-5">
+        <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.3;">⏳</div>
+        <h4 class="mb-3" style="color: #32325d;">Proposal Belum Disetujui</h4>
+        <p class="text-muted mb-4">
+            Proposal Anda masih dalam tahap review. Bimbingan dapat dimulai setelah proposal disetujui 
+            dan dosen pembimbing ditunjuk.
+        </p>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card" style="border-left: 4px solid #fb6340;">
+                    <div class="card-body">
+                        <h6 class="mb-2">📄 Status Proposal</h6>
+                        <p class="mb-2"><strong>Judul:</strong> <?= $proposal->judul ?></p>
+                        <p class="mb-0">
+                            <span class="btn btn-warning btn-sm">⏳ Menunggu Persetujuan</span>
                         </p>
                     </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-white text-info rounded-circle shadow">
-                            <i class="fa fa-search"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fa fa-file-search fa-4x text-info mb-3"></i>
-                <h4>Proposal Sedang Ditinjau Kaprodi</h4>
-                <p class="text-muted">
-                    <strong>Judul:</strong> <?= $waiting_kaprodi->judul ?><br>
-                    <strong>Tanggal Pengajuan:</strong> <?= isset($waiting_kaprodi->created_at) && $waiting_kaprodi->created_at ? date('d F Y', strtotime($waiting_kaprodi->created_at)) : '-' ?>
-                </p>
-                <p class="text-muted">
-                    Kaprodi sedang melakukan review terhadap proposal Anda. 
-                    Silakan tunggu konfirmasi lebih lanjut atau hubungi kaprodi untuk info lebih detail.
-                </p>
-                <div class="mt-4">
-                    <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
-                        <i class="fa fa-eye"></i> Lihat Status Proposal
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php elseif (isset($rejected_kaprodi)): ?>
-<!-- STATUS 2: PROPOSAL DITOLAK KAPRODI -->
-<div class="row">
-    <div class="col-lg-12 mb-4">
-        <div class="card bg-gradient-danger">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="text-white mb-0">❌ Proposal Ditolak Kaprodi</h3>
-                        <p class="text-white mt-2 mb-0">
-                            Proposal Anda telah direview oleh <strong>Kaprodi</strong> dan memerlukan perbaikan. 
-                            Silakan lakukan revisi sesuai komentar yang diberikan.
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-white text-danger rounded-circle shadow">
-                            <i class="fa fa-times"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fa fa-exclamation-triangle fa-4x text-danger mb-3"></i>
-                <h4>Proposal Memerlukan Perbaikan</h4>
-                <p class="text-muted">
-                    <strong>Judul:</strong> <?= $rejected_kaprodi->judul ?><br>
-                    <strong>Tanggal Review:</strong> <?= isset($rejected_kaprodi->tanggal_review_kaprodi) && $rejected_kaprodi->tanggal_review_kaprodi ? date('d F Y', strtotime($rejected_kaprodi->tanggal_review_kaprodi)) : '-' ?>
-                </p>
-                <?php if(isset($rejected_kaprodi->komentar_kaprodi) && $rejected_kaprodi->komentar_kaprodi): ?>
-                <div class="alert alert-warning">
-                    <strong>Komentar Kaprodi:</strong><br>
-                    <?= $rejected_kaprodi->komentar_kaprodi ?>
-                </div>
-                <?php endif; ?>
-                <p class="text-muted">
-                    Silakan lakukan revisi proposal sesuai dengan komentar kaprodi dan ajukan kembali.
-                </p>
-                <div class="mt-4">
-                    <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
-                        <i class="fa fa-edit"></i> Revisi Proposal
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php elseif (isset($pending_proposal)): ?>
-<!-- STATUS 3: MENUNGGU PERSETUJUAN DOSEN PEMBIMBING -->
-<div class="row">
-    <div class="col-lg-12 mb-4">
-        <div class="card bg-gradient-warning">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="text-white mb-0">⏳ Menunggu Persetujuan Dosen Pembimbing</h3>
-                        <p class="text-white mt-2 mb-0">
-                            <strong>Kaprodi</strong> telah menetapkan <strong><?= isset($pending_proposal->nama_dosen) ? $pending_proposal->nama_dosen : 'Dosen' ?></strong> sebagai dosen pembimbing Anda. 
-                            Saat ini menunggu persetujuan dari dosen yang bersangkutan.
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-white text-warning rounded-circle shadow">
-                            <i class="fa fa-clock"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fa fa-hourglass-half fa-4x text-warning mb-3"></i>
-                <h4>Menunggu Konfirmasi Dosen Pembimbing</h4>
-                <p class="text-muted">
-                    <strong>Dosen Pembimbing:</strong> <?= isset($pending_proposal->nama_dosen) ? $pending_proposal->nama_dosen : 'Belum ditetapkan' ?><br>
-                    <strong>Tanggal Penetapan:</strong> <?= isset($pending_proposal->tanggal_penetapan) && $pending_proposal->tanggal_penetapan ? date('d F Y', strtotime($pending_proposal->tanggal_penetapan)) : '-' ?>
-                </p>
-                <p class="text-muted">
-                    Dosen pembimbing yang ditunjuk kaprodi sedang melakukan review proposal Anda. 
-                    Silakan tunggu konfirmasi lebih lanjut via email atau hubungi dosen yang bersangkutan.
-                </p>
-                <div class="mt-4">
-                    <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
-                        <i class="fa fa-eye"></i> Lihat Status Proposal
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php elseif (isset($rejected_dosen)): ?>
-<!-- STATUS 4: DOSEN PEMBIMBING MENOLAK -->
-<div class="row">
-    <div class="col-lg-12 mb-4">
-        <div class="card bg-gradient-danger">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="text-white mb-0">❌ Dosen Pembimbing Menolak</h3>
-                        <p class="text-white mt-2 mb-0">
-                            <strong><?= isset($rejected_dosen->nama_dosen) ? $rejected_dosen->nama_dosen : 'Dosen' ?></strong> menolak penunjukan sebagai pembimbing. 
-                            <strong>Kaprodi</strong> akan menetapkan dosen pembimbing yang baru untuk Anda.
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-white text-danger rounded-circle shadow">
-                            <i class="fa fa-user-times"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fa fa-user-slash fa-4x text-danger mb-3"></i>
-                <h4>Penunjukan Pembimbing Ditolak</h4>
-                <p class="text-muted">
-                    <strong>Dosen:</strong> <?= isset($rejected_dosen->nama_dosen) ? $rejected_dosen->nama_dosen : 'Tidak diketahui' ?><br>
-                    <strong>Tanggal Respon:</strong> <?= isset($rejected_dosen->tanggal_respon_pembimbing) && $rejected_dosen->tanggal_respon_pembimbing ? date('d F Y', strtotime($rejected_dosen->tanggal_respon_pembimbing)) : '-' ?>
-                </p>
-                <?php if(isset($rejected_dosen->komentar_pembimbing) && $rejected_dosen->komentar_pembimbing): ?>
-                <div class="alert alert-warning">
-                    <strong>Komentar Dosen:</strong><br>
-                    <?= $rejected_dosen->komentar_pembimbing ?>
-                </div>
-                <?php endif; ?>
-                <p class="text-muted">
-                    Kaprodi akan segera menetapkan dosen pembimbing yang baru. 
-                    Silakan tunggu konfirmasi lebih lanjut.
-                </p>
-                <div class="mt-4">
-                    <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
-                        <i class="fa fa-eye"></i> Lihat Status Proposal
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php elseif (!isset($proposal)): ?>
-<!-- STATUS 5: BELUM ADA PROPOSAL -->
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fa fa-file-alt fa-4x text-muted mb-3"></i>
-                <h4>Belum Ada Proposal</h4>
-                <p class="text-muted">
-                    Anda belum mengajukan proposal tugas akhir. 
-                    Silakan ajukan proposal terlebih dahulu untuk memulai proses bimbingan.
-                </p>
-                <div class="mt-4">
-                    <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-primary">
-                        <i class="fa fa-plus"></i> Ajukan Proposal
-                    </a>
                 </div>
             </div>
         </div>
@@ -273,542 +96,409 @@ ob_start();
 </div>
 
 <?php else: ?>
-<!-- STATUS 6: BIMBINGAN AKTIF -->
+<!-- Proposal Sudah Disetujui - Tampilkan Bimbingan -->
 
-<!-- Info Panel -->
-<div class="row">
-    <div class="col-lg-12 mb-4">
-        <div class="card bg-gradient-success">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="text-white mb-0">📚 Bimbingan Skripsi - Phase 2</h3>
-                        <p class="text-white mt-2 mb-0">
-                            <strong>Dosen Pembimbing:</strong> <?= isset($proposal->nama_dosen) ? $proposal->nama_dosen : 'Belum ditetapkan' ?> | 
-                            <strong>Judul:</strong> <?= substr($proposal->judul, 0, 50) ?><?= strlen($proposal->judul) > 50 ? '...' : '' ?>
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <button type="button" class="btn btn-sm btn-neutral" onclick="tambahJurnalBimbingan()">
-                            <i class="fa fa-plus"></i> Tambah Jurnal
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Statistics Cards -->
-<div class="row">
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Total Pertemuan</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= $total_bimbingan ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-info text-white rounded-circle shadow">
-                            <i class="fa fa-calendar"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-nowrap">Target: 16 pertemuan</span>
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Tervalidasi</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= $bimbingan_tervalidasi ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-success text-white rounded-circle shadow">
-                            <i class="fa fa-check"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 
-                    <?= $total_bimbingan > 0 ? round(($bimbingan_tervalidasi/$total_bimbingan)*100, 1) : 0 ?>%</span>
-                    <span class="text-nowrap">dari total</span>
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Pending</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= $bimbingan_pending ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
-                            <i class="fa fa-clock"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-nowrap">Menunggu validasi</span>
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Progress</h5>
-                        <span class="h2 font-weight-bold mb-0">
-                            <?= $total_bimbingan >= 16 ? '100' : round(($total_bimbingan/16)*100, 1) ?>%
-                        </span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-red text-white rounded-circle shadow">
-                            <i class="fa fa-chart-pie"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <?php if($siap_seminar): ?>
-                        <span class="text-success">Siap seminar proposal</span>
-                    <?php else: ?>
-                        <span class="text-nowrap">Minimal 8 untuk seminar</span>
-                    <?php endif; ?>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Progress Bar -->
-<div class="row mt-4">
-    <div class="col-lg-12">
+<!-- Info Proposal & Dosen Pembimbing -->
+<div class="row mb-4">
+    <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="mb-0">Progress Bimbingan</h3>
+                <h6 class="mb-0">📄 Informasi Proposal</h6>
             </div>
             <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <span class="h2 font-weight-bold mb-0"><?= $bimbingan_tervalidasi ?>/16</span>
-                    </div>
-                    <div class="col">
-                        <div class="progress progress-xs mb-0">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                 style="width: <?= min(($bimbingan_tervalidasi/16)*100, 100) ?>%"></div>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <span class="text-sm">
-                            <?php if($bimbingan_tervalidasi >= 16): ?>
-                                <span class="badge badge-success">Lengkap</span>
-                            <?php elseif($bimbingan_tervalidasi >= 8): ?>
-                                <span class="badge badge-info">Siap Seminar Proposal</span>
-                            <?php else: ?>
-                                <span class="badge badge-warning">Kurang <?= 8 - $bimbingan_tervalidasi ?> untuk seminar</span>
-                            <?php endif; ?>
-                        </span>
-                    </div>
-                </div>
-                <small class="text-muted">
-                    Minimal 8 pertemuan tervalidasi untuk mengajukan seminar proposal, 
-                    16 pertemuan untuk melengkapi seluruh fase bimbingan.
-                </small>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Info Dosen Pembimbing & Jurnal Bimbingan -->
-<div class="row mt-4">
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="mb-0">Dosen Pembimbing</h3>
-            </div>
-            <div class="card-body">
-                <div class="media align-items-center mb-3">
-                    <div class="avatar avatar-lg rounded-circle bg-primary">
-                        <i class="ni ni-single-02 text-white"></i>
-                    </div>
-                    <div class="media-body ml-3">
-                        <h4 class="mb-0"><?= isset($proposal->nama_dosen) ? $proposal->nama_dosen : 'Dosen Pembimbing' ?></h4>
-                        <p class="text-muted mb-0">Dosen Pembimbing</p>
-                    </div>
-                </div>
-                
-                <hr class="my-3">
-                
                 <div class="row">
-                    <div class="col-12">
-                        <?php if(isset($proposal->email_dosen) && $proposal->email_dosen): ?>
-                        <strong>Email:</strong>
-                        <p class="text-muted">
-                            <i class="fa fa-envelope text-primary"></i> 
-                            <a href="mailto:<?= $proposal->email_dosen ?>"><?= $proposal->email_dosen ?></a>
+                    <div class="col-md-8">
+                        <h6 class="mb-2" style="color: #32325d;"><?= $proposal->judul ?></h6>
+                        <p class="text-muted mb-1">
+                            <i class="fas fa-calendar"></i> 
+                            Disetujui: <?= date('d F Y', strtotime($proposal->tanggal_penetapan)) ?>
                         </p>
-                        <?php endif; ?>
-                        
-                        <?php if(isset($proposal->telepon_dosen) && $proposal->telepon_dosen): ?>
-                        <strong>No. Telepon:</strong>
-                        <p class="text-muted">
-                            <i class="fa fa-phone text-primary"></i> 
-                            <a href="tel:<?= $proposal->telepon_dosen ?>"><?= $proposal->telepon_dosen ?></a>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-graduation-cap"></i> 
+                            <?= $proposal->nama_prodi ?>
                         </p>
-                        <?php endif; ?>
-                        
-                        <strong>Proposal:</strong>
-                        <p class="text-muted"><?= isset($proposal->judul) ? $proposal->judul : 'Tidak ada judul' ?></p>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <span class="btn btn-success btn-sm">
+                            <i class="fas fa-check"></i> Disetujui
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Jurnal Bimbingan -->
-    <div class="col-lg-8">
+    <div class="col-lg-4">
         <div class="card">
-            <div class="card-header border-0">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="mb-0">Jurnal Bimbingan</h3>
-                        <p class="mb-0 text-sm">Riwayat pertemuan bimbingan dengan dosen pembimbing</p>
-                    </div>
-                    <div class="col text-right">
-                        <button type="button" class="btn btn-sm btn-primary" onclick="tambahJurnalBimbingan()">
-                            <i class="fa fa-plus"></i> Tambah Jurnal
-                        </button>
-                        <?php if(!empty($jurnal_bimbingan)): ?>
-                        <a href="<?= base_url('mahasiswa/bimbingan/export_jurnal') ?>" class="btn btn-sm btn-outline-primary">
-                            <i class="fa fa-download"></i> Export
-                        </a>
-                        <?php endif; ?>
-                    </div>
-                </div>
+            <div class="card-header">
+                <h6 class="mb-0">👨‍🏫 Dosen Pembimbing</h6>
             </div>
+            <div class="card-body text-center">
+                <?php if (isset($dosen_pembimbing) && $dosen_pembimbing): ?>
+                    <div style="width: 50px; height: 50px; background: #e9ecef; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        👨‍🏫
+                    </div>
+                    <h6 class="mb-1"><?= $dosen_pembimbing['nama'] ?></h6>
+                    <small class="text-muted"><?= $dosen_pembimbing['email'] ?></small>
+                <?php else: ?>
+                    <div class="text-muted">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👨‍🏫</div>
+                        <small>Dosen pembimbing belum ditunjuk</small>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Bimbingan -->
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">📊 Progress Bimbingan</h6>
+            <small class="text-muted">
+                <?= isset($total_bimbingan_valid) ? $total_bimbingan_valid : 0 ?> dari minimal 8 bimbingan tervalidasi
+            </small>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php 
+        $progress_percentage = isset($total_bimbingan_valid) ? min(($total_bimbingan_valid / 8) * 100, 100) : 0;
+        ?>
+        <div class="progress-wrapper">
+            <div class="progress-info">
+                <span class="progress-label">Progress Bimbingan</span>
+                <span class="progress-percentage"><?= round($progress_percentage) ?>%</span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" style="width: <?= $progress_percentage ?>%"></div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-3 text-center">
+                <div style="font-size: 1.5rem; color: #2dce89;">✅</div>
+                <h6 class="mb-0"><?= isset($total_bimbingan_valid) ? $total_bimbingan_valid : 0 ?></h6>
+                <small class="text-muted">Tervalidasi</small>
+            </div>
+            <div class="col-md-3 text-center">
+                <div style="font-size: 1.5rem; color: #fb6340;">⏳</div>
+                <h6 class="mb-0"><?= isset($total_bimbingan_pending) ? $total_bimbingan_pending : 0 ?></h6>
+                <small class="text-muted">Pending</small>
+            </div>
+            <div class="col-md-3 text-center">
+                <div style="font-size: 1.5rem; color: #f5365c;">❌</div>
+                <h6 class="mb-0"><?= isset($total_bimbingan_revisi) ? $total_bimbingan_revisi : 0 ?></h6>
+                <small class="text-muted">Perlu Revisi</small>
+            </div>
+            <div class="col-md-3 text-center">
+                <div style="font-size: 1.5rem; color: #525f7f;">📋</div>
+                <h6 class="mb-0"><?= isset($total_bimbingan) ? $total_bimbingan : 0 ?></h6>
+                <small class="text-muted">Total</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabel Jurnal Bimbingan -->
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">📚 Jurnal Bimbingan</h6>
+            <button type="button" class="btn btn-primary btn-sm" onclick="tambahJurnalBimbingan()">
+                <i class="fas fa-plus"></i> Tambah Jurnal
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php if (isset($jurnal_bimbingan) && !empty($jurnal_bimbingan)): ?>
             <div class="table-responsive">
-                <table class="table align-items-center table-flush">
-                    <thead class="thead-light">
+                <table class="table table-hover">
+                    <thead style="background: #f8f9fa;">
                         <tr>
-                            <th scope="col">Pertemuan</th>
-                            <th scope="col">Tanggal</th>
-                            <th scope="col">Materi</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Aksi</th>
+                            <th width="8%">No.</th>
+                            <th width="12%">Tanggal</th>
+                            <th width="35%">Materi Bimbingan</th>
+                            <th width="20%">Status</th>
+                            <th width="15%">Validasi</th>
+                            <th width="10%">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if(!empty($jurnal_bimbingan)): ?>
-                            <?php foreach($jurnal_bimbingan as $jurnal): ?>
+                        <?php foreach ($jurnal_bimbingan as $index => $jurnal): ?>
                             <tr>
+                                <td class="text-center">
+                                    <div style="width: 30px; height: 30px; background: #5e72e4; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; margin: 0 auto;">
+                                        <?= $jurnal->pertemuan_ke ?>
+                                    </div>
+                                </td>
                                 <td>
-                                    <span class="badge badge-pill badge-primary">
-                                        Ke-<?= $jurnal->pertemuan_ke ?>
+                                    <span style="font-size: 0.875rem; font-weight: 500;">
+                                        <?= date('d M Y', strtotime($jurnal->tanggal_bimbingan)) ?>
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="text-sm"><?= date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)) ?></span>
-                                    <br>
-                                    <small class="text-muted"><?= date('H:i', strtotime($jurnal->created_at)) ?> WIT</small>
+                                    <div style="max-width: 300px;">
+                                        <p class="mb-1" style="font-size: 0.875rem; font-weight: 500;">
+                                            <?= substr($jurnal->materi_bimbingan, 0, 80) ?>
+                                            <?= strlen($jurnal->materi_bimbingan) > 80 ? '...' : '' ?>
+                                        </p>
+                                        <?php if ($jurnal->tindak_lanjut): ?>
+                                            <small class="text-muted">
+                                                <i class="fas fa-arrow-right"></i> 
+                                                <?= substr($jurnal->tindak_lanjut, 0, 50) ?>
+                                                <?= strlen($jurnal->tindak_lanjut) > 50 ? '...' : '' ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td>
-                                    <span class="text-sm"><?= substr($jurnal->materi_bimbingan, 0, 40) ?><?= strlen($jurnal->materi_bimbingan) > 40 ? '...' : '' ?></span>
-                                    <?php if(isset($jurnal->tindak_lanjut) && $jurnal->tindak_lanjut): ?>
-                                    <br>
-                                    <small class="text-info"><strong>TL:</strong> <?= substr($jurnal->tindak_lanjut, 0, 30) ?>...</small>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if($jurnal->status_validasi == '1'): ?>
-                                        <span class="badge badge-success">
-                                            <i class="fa fa-check"></i> Tervalidasi
+                                    <?php if ($jurnal->status_validasi == '1'): ?>
+                                        <span class="btn btn-success btn-sm">
+                                            <i class="fas fa-check"></i> Tervalidasi
                                         </span>
-                                        <?php if(isset($jurnal->catatan_dosen) && $jurnal->catatan_dosen): ?>
-                                        <br>
-                                        <small class="text-muted" title="<?= $jurnal->catatan_dosen ?>">
-                                            <i class="fa fa-comment"></i> Ada catatan
-                                        </small>
-                                        <?php endif; ?>
-                                    <?php elseif($jurnal->status_validasi == '2'): ?>
-                                        <span class="badge badge-warning">
-                                            <i class="fa fa-edit"></i> Perlu Revisi
+                                    <?php elseif ($jurnal->status_validasi == '2'): ?>
+                                        <span class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times"></i> Perlu Revisi
                                         </span>
-                                        <?php if(isset($jurnal->catatan_dosen) && $jurnal->catatan_dosen): ?>
-                                        <br>
-                                        <small class="text-warning" title="<?= $jurnal->catatan_dosen ?>">
-                                            <i class="fa fa-exclamation-triangle"></i> Lihat catatan
-                                        </small>
-                                        <?php endif; ?>
                                     <?php else: ?>
-                                        <span class="badge badge-secondary">
-                                            <i class="fa fa-clock"></i> Pending
+                                        <span class="btn btn-warning btn-sm">
+                                            <i class="fas fa-clock"></i> Pending
                                         </span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <div class="dropdown">
-                                        <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown">
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                            <a class="dropdown-item" href="#" onclick="lihatDetailJurnal(<?= $jurnal->id ?>)">
-                                                <i class="fa fa-eye text-info"></i> Detail
-                                            </a>
-                                            <?php if($jurnal->status_validasi == '0'): ?>
-                                            <a class="dropdown-item" href="<?= base_url('mahasiswa/bimbingan/edit_jurnal/' . $jurnal->id) ?>">
-                                                <i class="fa fa-edit text-warning"></i> Edit
-                                            </a>
-                                            <a class="dropdown-item" href="#" onclick="hapusJurnal(<?= $jurnal->id ?>)">
-                                                <i class="fa fa-trash text-danger"></i> Hapus
-                                            </a>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
+                                    <?php if ($jurnal->status_validasi == '1' && $jurnal->tanggal_validasi): ?>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i>
+                                            <?= date('d/m/Y', strtotime($jurnal->tanggal_validasi)) ?>
+                                        </small>
+                                    <?php else: ?>
+                                        <small class="text-muted">-</small>
+                                    <?php endif; ?>
                                 </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="5" class="text-center py-4">
-                                    <div class="text-center">
-                                        <i class="fa fa-book fa-3x text-muted mb-3"></i>
-                                        <h5 class="text-muted">Belum ada jurnal bimbingan</h5>
-                                        <p class="text-muted">Mulai tambahkan jurnal bimbingan dengan dosen pembimbing Anda.</p>
-                                        <button type="button" class="btn btn-primary" onclick="tambahJurnalBimbingan()">
-                                            <i class="fa fa-plus"></i> Tambah Jurnal Pertama
+                                <td>
+                                    <div style="display: flex; gap: 0.25rem;">
+                                        <!-- Detail Button -->
+                                        <button type="button" class="btn btn-info btn-sm" 
+                                                onclick="lihatDetailJurnal(<?= $jurnal->id ?>)" 
+                                                title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
                                         </button>
+                                        
+                                        <!-- Edit Button - hanya untuk jurnal pending -->
+                                        <?php if ($jurnal->status_validasi == '0'): ?>
+                                            <a href="<?= base_url() ?>mahasiswa/bimbingan/edit_jurnal/<?= $jurnal->id ?>" 
+                                               class="btn btn-warning btn-sm" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        <?php endif; ?>
+                                        
+                                        <!-- Delete Button - hanya untuk jurnal pending -->
+                                        <?php if ($jurnal->status_validasi == '0'): ?>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="hapusJurnal(<?= $jurnal->id ?>)" 
+                                                    title="Hapus">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
-                        <?php endif; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Tambah Jurnal - TEMPLATE DIPERBAIKI -->
-<div class="modal fade" id="modalTambahJurnal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <form action="<?= base_url('mahasiswa/bimbingan/tambah_jurnal') ?>" method="POST">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah Jurnal Bimbingan</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Info Mahasiswa (Seragam dengan dosen) -->
-                    <div class="form-group">
-                        <label>Mahasiswa</label>
-                        <input type="text" class="form-control" value="<?= $this->session->userdata('nama') ?> (<?= $this->session->userdata('username') ?>)" readonly>
-                        <small class="form-text text-muted">Jurnal bimbingan akan tercatat atas nama Anda</small>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Pertemuan ke- *</label>
-                                <input type="number" class="form-control" name="pertemuan_ke" min="1" 
-                                       value="<?= isset($total_bimbingan) ? ($total_bimbingan + 1) : 1 ?>" required>
-                                <small class="form-text text-muted">Nomor urut pertemuan bimbingan</small>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Tanggal Bimbingan *</label>
-                                <input type="date" class="form-control" name="tanggal_bimbingan" value="<?= date('Y-m-d') ?>" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Durasi (menit)</label>
-                                <input type="number" class="form-control" name="durasi_bimbingan" min="15" max="180" placeholder="60">
-                                <small class="form-text text-muted">Estimasi durasi (opsional)</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Materi Bimbingan *</label>
-                        <textarea class="form-control" name="materi_bimbingan" rows="4" required 
-                                  placeholder="Jelaskan materi yang dibahas dalam bimbingan ini, misalnya: diskusi BAB 1, review metodologi, perbaikan rumusan masalah, dll."></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Catatan Mahasiswa</label>
-                        <textarea class="form-control" name="catatan_mahasiswa" rows="3" 
-                                  placeholder="Catatan atau pertanyaan dari Anda untuk dosen"></textarea>
-                        <small class="form-text text-muted">Field ini akan terlihat oleh dosen pembimbing</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Tindak Lanjut</label>
-                        <textarea class="form-control" name="tindak_lanjut" rows="3" 
-                                  placeholder="Tugas atau tindak lanjut yang diberikan dosen"></textarea>
-                    </div>
-
-                    <!-- Info untuk mahasiswa -->
-                    <div class="alert alert-success">
-                        <i class="fa fa-info-circle"></i> 
-                        <strong>PERBAIKAN BARU:</strong> Anda sekarang dapat membuat jurnal bimbingan baru meskipun ada jurnal sebelumnya yang masih pending validasi. 
-                        Jika ada pertemuan dengan nomor yang sama, sistem akan memperbarui jurnal yang sudah ada.
-                    </div>
-                    
-                    <div class="alert alert-info">
-                        <i class="fa fa-envelope"></i> 
-                        <strong>Notifikasi:</strong> Jurnal yang sudah diinput akan dikirim ke dosen pembimbing untuk divalidasi. 
-                        Pastikan informasi yang dimasukkan sudah benar.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fa fa-save"></i> Simpan Jurnal
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Detail Jurnal -->
-<div class="modal fade" id="modalDetailJurnal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detail Jurnal Bimbingan</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+        <?php else: ?>
+            <div class="text-center p-5">
+                <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.3;">📚</div>
+                <h5 class="mb-3" style="color: #32325d;">Belum Ada Jurnal Bimbingan</h5>
+                <p class="text-muted mb-4">
+                    Mulai tambahkan jurnal bimbingan dengan dosen pembimbing Anda.
+                </p>
+                <button type="button" class="btn btn-primary" onclick="tambahJurnalBimbingan()">
+                    <i class="fas fa-plus"></i> Tambah Jurnal Pertama
                 </button>
             </div>
-            <div class="modal-body" id="modalDetailContent">
-                <!-- Content akan diisi via JavaScript -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            </div>
-        </div>
+        <?php endif; ?>
     </div>
 </div>
 
 <?php endif; ?>
 
-<?php
-$template_data['content'] = ob_get_clean();
+<!-- Modal Tambah Jurnal Bimbingan -->
+<div id="modalTambahJurnal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 0.5rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <form action="<?= base_url() ?>mahasiswa/bimbingan/tambah_jurnal" method="POST" id="formTambahJurnal">
+            <!-- Modal Header -->
+            <div style="padding: 1.5rem; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+                <h5 style="margin: 0; color: #32325d; font-weight: 600;">
+                    <i class="fas fa-plus-circle"></i> Tambah Jurnal Bimbingan
+                </h5>
+                <button type="button" onclick="tutupModal()" style="background: none; border: none; font-size: 1.5rem; color: #8898aa; cursor: pointer;">
+                    ×
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div style="padding: 1.5rem;">
+                <!-- Info Mahasiswa -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-weight: 600; color: #32325d; margin-bottom: 0.5rem; display: block;">Mahasiswa</label>
+                    <input type="text" readonly 
+                           value="<?= $this->session->userdata('nama') ?> (<?= $this->session->userdata('username') ?>)"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.375rem; background: #f8f9fa;">
+                    <small style="color: #8898aa;">Jurnal bimbingan akan tercatat atas nama Anda</small>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <!-- Pertemuan ke -->
+                    <div style="flex: 1;">
+                        <label style="font-weight: 600; color: #32325d; margin-bottom: 0.5rem; display: block;">
+                            Pertemuan ke- <span style="color: #f5365c;">*</span>
+                        </label>
+                        <input type="number" name="pertemuan_ke" required min="1"
+                               value="<?= isset($total_bimbingan) ? ($total_bimbingan + 1) : 1 ?>"
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.375rem;">
+                        <small style="color: #8898aa;">Nomor urut pertemuan bimbingan</small>
+                    </div>
+                    
+                    <!-- Tanggal Bimbingan -->
+                    <div style="flex: 1;">
+                        <label style="font-weight: 600; color: #32325d; margin-bottom: 0.5rem; display: block;">
+                            Tanggal Bimbingan <span style="color: #f5365c;">*</span>
+                        </label>
+                        <input type="date" name="tanggal_bimbingan" required value="<?= date('Y-m-d') ?>"
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.375rem;">
+                    </div>
+                </div>
+                
+                <!-- Materi Bimbingan -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-weight: 600; color: #32325d; margin-bottom: 0.5rem; display: block;">
+                        Materi Bimbingan <span style="color: #f5365c;">*</span>
+                    </label>
+                    <textarea name="materi_bimbingan" required rows="4"
+                              placeholder="Jelaskan materi yang dibahas dalam bimbingan ini, misalnya: diskusi BAB 1, review metodologi, perbaikan rumusan masalah, dll."
+                              style="width: 100%; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.375rem; resize: vertical;"></textarea>
+                </div>
+                
+                <!-- Catatan Mahasiswa -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-weight: 600; color: #32325d; margin-bottom: 0.5rem; display: block;">Catatan Mahasiswa</label>
+                    <textarea name="catatan_mahasiswa" rows="3"
+                              placeholder="Catatan atau pertanyaan dari Anda untuk dosen"
+                              style="width: 100%; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.375rem; resize: vertical;"></textarea>
+                    <small style="color: #8898aa;">Field ini akan terlihat oleh dosen pembimbing</small>
+                </div>
+                
+                <!-- Tindak Lanjut -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-weight: 600; color: #32325d; margin-bottom: 0.5rem; display: block;">Tindak Lanjut</label>
+                    <textarea name="tindak_lanjut" rows="3"
+                              placeholder="Tugas atau tindak lanjut yang diberikan dosen"
+                              style="width: 100%; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.375rem; resize: vertical;"></textarea>
+                </div>
+                
+                <!-- Info untuk mahasiswa -->
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">
+                    <div style="color: #155724; font-size: 0.875rem;">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>PERBAIKAN BARU:</strong> Anda sekarang dapat membuat jurnal bimbingan baru meskipun ada jurnal sebelumnya yang masih pending validasi.
+                        Jika ada pertemuan dengan nomor yang sama, sistem akan memperbarui jurnal yang sudah ada.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div style="padding: 1rem 1.5rem; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" onclick="tutupModal()" 
+                        style="padding: 0.5rem 1rem; border: 1px solid #e9ecef; background: white; color: #525f7f; border-radius: 0.375rem; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="submit" 
+                        style="padding: 0.5rem 1rem; background: #5e72e4; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
+                    <i class="fas fa-save"></i> Simpan Jurnal
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
-// Add JavaScript untuk functionality
-$template_data['script'] = '
+<!-- Page-specific JavaScript -->
 <script>
-// Tambah Jurnal Bimbingan
+// Toggle Modal
 function tambahJurnalBimbingan() {
-    $("#modalTambahJurnal").modal("show");
+    document.getElementById('modalTambahJurnal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
 }
 
-// Lihat Detail Jurnal - PERBAIKAN FUNCTION
-function lihatDetailJurnal(jurnalId) {
-    ' . ((!empty($jurnal_bimbingan)) ? '
-    var jurnalData = ' . json_encode($jurnal_bimbingan ?? [], JSON_UNESCAPED_SLASHES | JSON_HEX_QUOT) . ';
-    var jurnal = null;
-    
-    // Find jurnal by ID
-    for (var i = 0; i < jurnalData.length; i++) {
-        if (jurnalData[i].id == jurnalId) {
-            jurnal = jurnalData[i];
-            break;
-        }
-    }
-    
-    if (jurnal) {
-        var statusBadge = "";
-        var catatanDosen = jurnal.catatan_dosen || "Belum ada catatan dari dosen";
-        
-        if (jurnal.status_validasi == "1") {
-            statusBadge = "<span class=\"badge badge-success\"><i class=\"fa fa-check\"></i> Tervalidasi</span>";
-        } else if (jurnal.status_validasi == "2") {
-            statusBadge = "<span class=\"badge badge-warning\"><i class=\"fa fa-edit\"></i> Perlu Revisi</span>";
-        } else {
-            statusBadge = "<span class=\"badge badge-secondary\"><i class=\"fa fa-clock\"></i> Pending Validasi</span>";
-        }
-        
-        var content = "<div class=\"row\">" +
-            "<div class=\"col-md-6\">" +
-                "<strong>Pertemuan ke:</strong> " + jurnal.pertemuan_ke + "<br>" +
-                "<strong>Tanggal:</strong> " + jurnal.tanggal_bimbingan + "<br>" +
-                "<strong>Status:</strong> " + statusBadge +
-            "</div>" +
-            "<div class=\"col-md-6\">" +
-                "<strong>Dibuat:</strong> " + jurnal.created_at + "<br>" +
-                (jurnal.tanggal_validasi ? "<strong>Divalidasi:</strong> " + jurnal.tanggal_validasi + "<br>" : "") +
-            "</div>" +
-        "</div>" +
-        "<hr>" +
-        "<div class=\"form-group\">" +
-            "<strong>Materi Bimbingan:</strong>" +
-            "<div class=\"bg-light p-3 rounded mt-2\">" +
-                (jurnal.materi_bimbingan || "Tidak ada materi") +
-            "</div>" +
-        "</div>" +
-        "<div class=\"form-group\">" +
-            "<strong>Tindak Lanjut:</strong>" +
-            "<div class=\"bg-light p-3 rounded mt-2\">" +
-                (jurnal.tindak_lanjut || "Tidak ada tindak lanjut khusus") +
-            "</div>" +
-        "</div>" +
-        "<div class=\"form-group\">" +
-            "<strong>Catatan Dosen:</strong>" +
-            "<div class=\"bg-light p-3 rounded mt-2\">" +
-                catatanDosen +
-            "</div>" +
-        "</div>";
-        
-        document.getElementById("modalDetailContent").innerHTML = content;
-        $("#modalDetailJurnal").modal("show");
-    } else {
-        alert("Data jurnal tidak ditemukan.");
-    }
-    ' : 'alert("Belum ada data jurnal bimbingan.");') . '
+function tutupModal() {
+    document.getElementById('modalTambahJurnal').style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
-// Hapus Jurnal - PERBAIKAN FUNCTION
-function hapusJurnal(jurnalId) {
-    if (confirm("Apakah Anda yakin ingin menghapus jurnal ini? Jurnal yang sudah divalidasi tidak dapat dihapus.")) {
-        // Redirect ke URL hapus
-        window.location.href = "' . base_url('mahasiswa/bimbingan/hapus_jurnal/') . '" + jurnalId;
+// Lihat Detail Jurnal
+function lihatDetailJurnal(id) {
+    // Implementasi detail jurnal - bisa redirect ke halaman detail
+    window.location.href = '<?= base_url() ?>mahasiswa/bimbingan/detail_jurnal/' + id;
+}
+
+// Hapus Jurnal dengan konfirmasi
+function hapusJurnal(id) {
+    if (confirm('Apakah Anda yakin ingin menghapus jurnal bimbingan ini?\n\nData yang sudah dihapus tidak dapat dikembalikan.')) {
+        window.location.href = '<?= base_url() ?>mahasiswa/bimbingan/hapus_jurnal/' + id;
     }
 }
 
-// Document ready function
-$(document).ready(function() {
-    console.log("JavaScript functions loaded successfully");
+// Close modal when clicking outside
+document.getElementById('modalTambahJurnal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        tutupModal();
+    }
+});
+
+// Form validation
+document.getElementById('formTambahJurnal').addEventListener('submit', function(e) {
+    const pertemuanKe = document.querySelector('input[name="pertemuan_ke"]').value;
+    const tanggalBimbingan = document.querySelector('input[name="tanggal_bimbingan"]').value;
+    const materiBimbingan = document.querySelector('textarea[name="materi_bimbingan"]').value;
     
-    // Test functions
-    if (typeof tambahJurnalBimbingan !== "function") {
-        console.error("tambahJurnalBimbingan function not defined");
+    if (!pertemuanKe || !tanggalBimbingan || !materiBimbingan.trim()) {
+        e.preventDefault();
+        alert('Mohon lengkapi semua field yang wajib diisi (*)');
+        return false;
     }
-    if (typeof lihatDetailJurnal !== "function") {
-        console.error("lihatDetailJurnal function not defined");
-    }
-    if (typeof hapusJurnal !== "function") {
-        console.error("hapusJurnal function not defined");
+    
+    // Disable submit button to prevent double submission
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+});
+
+// Initialize progress bar animation
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        const targetWidth = progressBar.style.width;
+        progressBar.style.width = '0%';
+        setTimeout(function() {
+            progressBar.style.width = targetWidth;
+        }, 500);
     }
 });
 </script>
-';
 
-// Load template
-$this->load->view('template/mahasiswa', $template_data);
+<?php
+// Capture content dan set untuk template
+$content = ob_get_clean();
+
+// Data untuk template
+$template_data = [
+    'title' => 'Bimbingan Tugas Akhir',
+    'content' => $content
+];
+
+// Load template sederhana
+$this->load->view('template/mahasiswa_simple', $template_data);
 ?>

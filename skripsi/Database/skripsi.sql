@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 27, 2025 at 10:47 AM
+-- Generation Time: Jul 27, 2025 at 07:06 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -20,157 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `stkp7133_skripsi`
 --
-
-DELIMITER $$
---
--- Procedures
---
-CREATE DEFINER=`stkp7133`@`localhost` PROCEDURE `ajukan_seminar_proposal_v2` (IN `p_proposal_id` BIGINT, IN `p_file_proposal` VARCHAR(255), OUT `p_result` VARCHAR(100), OUT `p_message` VARCHAR(500))   BEGIN
-    DECLARE v_layak BOOLEAN DEFAULT FALSE;
-    DECLARE v_workflow_status VARCHAR(30);
-    DECLARE v_pembimbing_status ENUM('0','1','2');
-    DECLARE v_sudah_ada INT DEFAULT 0;
-    
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SET p_result = 'ERROR';
-        SET p_message = 'Terjadi kesalahan sistem';
-    END;
-    
-    START TRANSACTION;
-    
-    -- Cek workflow status dan status pembimbing
-    SELECT workflow_status, status_pembimbing 
-    INTO v_workflow_status, v_pembimbing_status
-    FROM proposal_mahasiswa 
-    WHERE id = p_proposal_id;
-    
-    -- Validasi workflow harus sudah di tahap bimbingan
-    IF v_workflow_status != 'bimbingan' THEN
-        SET p_result = 'ERROR';
-        SET p_message = 'Proposal belum dalam tahap bimbingan';
-        ROLLBACK;
-    -- Validasi pembimbing harus sudah menyetujui
-    ELSEIF v_pembimbing_status != '1' THEN
-        SET p_result = 'ERROR'; 
-        SET p_message = 'Pembimbing belum menyetujui proposal';
-        ROLLBACK;
-    ELSE
-        -- Cek apakah sudah pernah mengajukan
-        SELECT COUNT(*) INTO v_sudah_ada 
-        FROM seminar_proposal 
-        WHERE proposal_id = p_proposal_id;
-        
-        IF v_sudah_ada > 0 THEN
-            SET p_result = 'ERROR';
-            SET p_message = 'Seminar proposal sudah pernah diajukan';
-            ROLLBACK;
-        ELSE
-            -- Cek kelayakan bimbingan
-            SELECT cek_kelayakan_seminar_proposal(p_proposal_id) INTO v_layak;
-            
-            IF v_layak = TRUE THEN
-                -- Insert seminar proposal
-                INSERT INTO seminar_proposal (
-                    proposal_id,
-                    file_proposal_mahasiswa,
-                    status_rekomendasi_pembimbing,
-                    status_review_kaprodi,
-                    status_final
-                ) VALUES (
-                    p_proposal_id,
-                    p_file_proposal,
-                    '0', -- Menunggu rekomendasi pembimbing
-                    '0', -- Menunggu review kaprodi  
-                    'pending'
-                );
-                
-                SET p_result = 'SUCCESS';
-                SET p_message = 'Seminar proposal berhasil diajukan. Menunggu rekomendasi pembimbing.';
-                COMMIT;
-            ELSE
-                SET p_result = 'ERROR';
-                SET p_message = 'Belum memenuhi syarat minimal 8 jurnal bimbingan yang divalidasi';
-                ROLLBACK;
-            END IF;
-        END IF;
-    END IF;
-END$$
-
---
--- Functions
---
-CREATE DEFINER=`stkp7133`@`localhost` FUNCTION `cek_kelayakan_seminar_proposal` (`proposal_id_param` BIGINT) RETURNS TINYINT(1) READS SQL DATA BEGIN
-    DECLARE jumlah_bimbingan INT DEFAULT 0;
-    DECLARE status_proposal VARCHAR(20);
-    
-    -- Cek status workflow proposal
-    SELECT workflow_status INTO status_proposal 
-    FROM proposal_mahasiswa 
-    WHERE id = proposal_id_param;
-    
-    -- Harus sudah dalam tahap bimbingan
-    IF status_proposal != 'bimbingan' THEN
-        RETURN FALSE;
-    END IF;
-    
-    -- Hitung jurnal bimbingan yang sudah divalidasi
-    SELECT COUNT(*) INTO jumlah_bimbingan
-    FROM jurnal_bimbingan 
-    WHERE proposal_id = proposal_id_param 
-    AND status_validasi = '1';
-    
-    -- Minimal 8 jurnal bimbingan yang divalidasi
-    IF jumlah_bimbingan >= 8 THEN
-        RETURN TRUE;
-    ELSE
-        RETURN FALSE;
-    END IF;
-END$$
-
-CREATE DEFINER=`stkp7133`@`localhost` FUNCTION `get_seminar_proposal_status` (`p_proposal_id` BIGINT) RETURNS VARCHAR(100) CHARSET latin1 COLLATE latin1_swedish_ci READS SQL DATA BEGIN
-    DECLARE v_status_rekomendasi ENUM('0','1','2');
-    DECLARE v_status_review ENUM('0','1','2');
-    DECLARE v_status_final ENUM('pending','approved','rejected','rescheduled');
-    DECLARE v_penguji1_id INT;
-    DECLARE v_penguji2_id INT;
-    
-    -- Ambil status dari seminar_proposal dan penguji dari proposal_mahasiswa
-    SELECT 
-        sp.status_rekomendasi_pembimbing,
-        sp.status_review_kaprodi, 
-        sp.status_final,
-        pm.dosen_penguji_id,
-        pm.dosen_penguji2_id
-    INTO v_status_rekomendasi, v_status_review, v_status_final, v_penguji1_id, v_penguji2_id
-    FROM seminar_proposal sp
-    JOIN proposal_mahasiswa pm ON sp.proposal_id = pm.id
-    WHERE sp.proposal_id = p_proposal_id;
-    
-    -- Logic status berdasarkan workflow
-    IF v_status_rekomendasi = '0' THEN
-        RETURN 'Menunggu rekomendasi pembimbing';
-    ELSEIF v_status_rekomendasi = '2' THEN
-        RETURN 'Ditolak oleh pembimbing';
-    ELSEIF v_status_review = '0' THEN
-        RETURN 'Menunggu review kaprodi';
-    ELSEIF v_status_review = '2' THEN
-        RETURN 'Ditolak oleh kaprodi';
-    ELSEIF (v_penguji1_id IS NULL OR v_penguji2_id IS NULL) THEN
-        RETURN 'Menunggu penetapan penguji oleh kaprodi';
-    ELSEIF v_status_final = 'approved' THEN
-        RETURN 'Seminar proposal disetujui';
-    ELSEIF v_status_final = 'rejected' THEN
-        RETURN 'Seminar proposal ditolak';
-    ELSEIF v_status_final = 'rescheduled' THEN
-        RETURN 'Perlu penjadwalan ulang';
-    ELSE
-        RETURN 'Menunggu persetujuan jadwal penguji';
-    END IF;
-END$$
-
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -524,6 +373,19 @@ CREATE TABLE `jurnal_bimbingan` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Jurnal bimbingan mahasiswa';
 
+--
+-- Dumping data for table `jurnal_bimbingan`
+--
+
+INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bimbingan`, `materi_bimbingan`, `catatan_dosen`, `tindak_lanjut`, `durasi_bimbingan`, `catatan_mahasiswa`, `status_validasi`, `tanggal_validasi`, `validasi_oleh`, `created_by`, `created_at`, `updated_at`) VALUES
+(20, 44, 1, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:30', 25, 'mahasiswa', '2025-07-25 10:57:44', '2025-07-25 11:00:30'),
+(21, 44, 2, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:38', 25, 'mahasiswa', '2025-07-25 10:57:56', '2025-07-25 11:00:38'),
+(22, 44, 3, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:44', 25, 'mahasiswa', '2025-07-25 10:58:07', '2025-07-25 11:00:44'),
+(23, 44, 4, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:51', 25, 'mahasiswa', '2025-07-25 10:58:16', '2025-07-25 11:00:51'),
+(24, 44, 5, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:23', 25, 'mahasiswa', '2025-07-25 10:58:26', '2025-07-25 11:00:23'),
+(25, 44, 6, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:12', 25, 'mahasiswa', '2025-07-25 10:58:35', '2025-07-25 11:00:12'),
+(26, 44, 7, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:06', 25, 'mahasiswa', '2025-07-25 10:58:46', '2025-07-25 11:00:06');
+
 -- --------------------------------------------------------
 
 --
@@ -674,7 +536,8 @@ CREATE TABLE `mahasiswa` (
 --
 
 INSERT INTO `mahasiswa` (`id`, `nim`, `nama`, `prodi_id`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `email`, `alamat`, `nomor_telepon`, `nomor_telepon_orang_dekat`, `ipk`, `foto`, `password`, `status`) VALUES
-(1, '12345678', 'Mahasiswa Contoh 1', 10, 'laki-laki', 'SUKAKIONG', '2025-07-02', 'yohaneshenz@gmail.com', 'Missi 2, Mandala\r\nMerauke', '0971333026455', '097133302655', '3', '68859ff00da45.jpg', '$2y$10$tKxZPCZr4VoMp2msbkghd.sJfC/1/9cvr1FiAjjE5aFJ4c.6lF3Bu', '1');
+(44, '12345676', 'Mahasiswa Contoh', 10, 'laki-laki', 'NGGOLO', '2025-07-16', 'yohaneshenz@gmail.com', 'Missi 2, Mandala Merauke', '0812951117558', '081295111755', '3', '6882fb8ec3dd3.jpg', '$2y$10$5zc3rH6.SE5vjacDjUe9KOSzqxBzxO5mM4Xa5xln3JSiYahpHO1km', '1'),
+(45, '12345679', 'Mahasiswa Contoh 2', 10, 'laki-laki', 'KAKANIUK', '2025-07-01', 'videlis@stkyakobus.ac.id', 'Jl. Yogya-Wonosari Km. 23, Putat II, RT 034, RW 009, Desa Putat, Kecamatan Patuk', '081295111706', '081295111708', '4', '68841cfc62bf4.jpg', '$2y$10$s/udmiwNu0/zzSLIsJlEKerOWP8wKVmd./.4aGMWKsMAVvd70f/T2', '1');
 
 -- --------------------------------------------------------
 
@@ -874,7 +737,7 @@ CREATE TABLE `pengumuman_tahapan` (
 
 INSERT INTO `pengumuman_tahapan` (`id`, `no`, `tahapan`, `tanggal_deadline`, `keterangan`, `aktif`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Pengajuan Proposal Skripsi', '2025-08-06', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-26 06:36:56'),
-(3, 2, 'Seminar Proposal', '2025-11-01', 'Seminar Proposal Bab 1-3', '1', '2025-07-15 17:29:36', '2025-07-27 10:43:33'),
+(3, 2, 'Seminar Proposal', '2025-10-31', 'Seminar Proposal Bab 1-3', '1', '2025-07-15 17:29:36', '2025-07-19 17:42:25'),
 (4, 3, 'Ujian Skripsi', '2026-05-25', 'Seminar Hasil Bab 1-5', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:31'),
 (5, 4, 'Revisi dan Publikasi', '2026-07-30', 'Perbaikan dan Publikasi Skripsi', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:52'),
 (6, 5, 'Yudisium', '2026-08-05', 'Pengukuhan dan Wisuda', '1', '2025-07-15 17:29:36', '2025-07-19 16:55:19');
@@ -967,7 +830,8 @@ CREATE TABLE `proposal_mahasiswa` (
 --
 
 INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
-(1, 1, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer) 3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Setiap kali kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer) 3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas.', '83033a361452c90a9ca4cacbc91c6d1f.docx', '2025-07-27 10:42:35', 25, 1, NULL, NULL, '0', '1', 'mohon dibimbing', '2025-07-27 10:44:27', '1', 'Terimakasih saya akan bimbing', '2025-07-27 10:45:43', NULL, '2025-07-27 10:44:27', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
+(44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '0', NULL, NULL, NULL, '2025-07-26 09:52:43', 10, '', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1455,7 +1319,19 @@ CREATE TABLE `staf_aktivitas` (
 --
 
 INSERT INTO `staf_aktivitas` (`id`, `staf_id`, `aktivitas`, `mahasiswa_id`, `proposal_id`, `keterangan`, `file_output`, `tanggal_aktivitas`) VALUES
-(7, 29, '', NULL, NULL, 'Export semua data bimbingan format Excel XML (2 records)', NULL, '2025-07-24 18:04:41');
+(7, 29, '', NULL, NULL, 'Export semua data bimbingan format Excel XML (2 records)', NULL, '2025-07-24 18:04:41'),
+(8, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:47:19'),
+(9, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:47:41'),
+(10, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:56:43'),
+(11, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:56:48'),
+(12, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:56:52'),
+(13, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:56:56'),
+(14, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:57:00'),
+(15, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:57:03'),
+(16, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:58:52'),
+(17, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 15:39:03'),
+(18, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 16:16:57'),
+(19, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 17:35:43');
 
 -- --------------------------------------------------------
 
@@ -1703,9 +1579,7 @@ ALTER TABLE `proposal_mahasiswa`
   ADD KEY `idx_status_seminar_proposal` (`status_seminar_proposal`),
   ADD KEY `idx_status_seminar_skripsi` (`status_seminar_skripsi`),
   ADD KEY `idx_status_publikasi` (`status_publikasi`),
-  ADD KEY `idx_mahasiswa_workflow` (`mahasiswa_id`,`workflow_status`),
-  ADD KEY `fk_penetapan` (`penetapan_oleh`),
-  ADD KEY `fk_penguji2` (`dosen_penguji2_id`);
+  ADD KEY `idx_mahasiswa_workflow` (`mahasiswa_id`,`workflow_status`);
 
 --
 -- Indexes for table `proposal_workflow`
@@ -1768,19 +1642,19 @@ ALTER TABLE `fakultas`
 -- AUTO_INCREMENT for table `hasil_kegiatan`
 --
 ALTER TABLE `hasil_kegiatan`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `hasil_penelitian`
 --
 ALTER TABLE `hasil_penelitian`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `hasil_seminar`
 --
 ALTER TABLE `hasil_seminar`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `home_template`
@@ -1792,19 +1666,19 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`
 --
 ALTER TABLE `konsultasi`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`
@@ -1816,7 +1690,7 @@ ALTER TABLE `notifikasi`
 -- AUTO_INCREMENT for table `penelitian`
 --
 ALTER TABLE `penelitian`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `pengumuman_tahapan`
@@ -1834,7 +1708,7 @@ ALTER TABLE `prodi`
 -- AUTO_INCREMENT for table `proposal_mahasiswa`
 --
 ALTER TABLE `proposal_mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `proposal_workflow`
@@ -1846,19 +1720,19 @@ ALTER TABLE `proposal_workflow`
 -- AUTO_INCREMENT for table `seminar`
 --
 ALTER TABLE `seminar`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `skripsi`
 --
 ALTER TABLE `skripsi`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `staf_aktivitas`
 --
 ALTER TABLE `staf_aktivitas`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Constraints for dumped tables

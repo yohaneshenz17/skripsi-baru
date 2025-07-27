@@ -22,6 +22,37 @@
 .dropdown-menu {
     z-index: 1050;
 }
+/* ✅ NEW: Style untuk export buttons */
+.export-btn-group {
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.export-btn {
+    border: none;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+.export-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px rgba(50, 50, 93, 0.15);
+    text-decoration: none;
+    color: white;
+}
+.export-btn-excel {
+    background: linear-gradient(135deg, #217346, #4CAF50);
+    color: white;
+}
+.export-btn-pdf {
+    background: linear-gradient(135deg, #dc3545, #ff4757);
+    color: white;
+}
 </style>
 
 <div class="content-spacing">
@@ -54,6 +85,64 @@
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
+</div>
+<?php endif; ?>
+
+<!-- ✅ NEW: Export Panel untuk Dosen -->
+<?php if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)): ?>
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card border-success shadow">
+            <div class="card-header bg-gradient-success text-white">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0 text-white">📊 Export Data Bimbingan</h3>
+                        <p class="mb-0 text-white opacity-8">
+                            Export semua data jurnal bimbingan mahasiswa Anda dalam format Excel atau PDF
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="export-btn-group">
+                            <a href="<?php echo base_url('dosen/bimbingan/export_all_excel'); ?>" 
+                               class="export-btn export-btn-excel" 
+                               title="Export ke Excel (.xlsx)">
+                                <i class="fas fa-file-excel"></i>
+                                Export Excel
+                            </a>
+                            <a href="#" 
+                               onclick="exportAllPDF()" 
+                               class="export-btn export-btn-pdf" 
+                               title="Export semua PDF dalam ZIP">
+                                <i class="fas fa-file-pdf"></i>
+                                Export PDF Semua
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="mb-2 text-sm">
+                            <strong>📈 Export Excel:</strong> Berisi data lengkap semua mahasiswa bimbingan Anda dengan statistik jurnal, progress, dan status workflow dalam format spreadsheet yang mudah dianalisis.
+                        </p>
+                        <p class="mb-0 text-sm">
+                            <strong>📄 Export PDF:</strong> Kumpulan jurnal bimbingan individual untuk setiap mahasiswa dalam format PDF yang rapi dan siap print.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="text-success">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <br>
+                            <strong><?php echo count($mahasiswa_bimbingan); ?></strong> mahasiswa
+                            <br>
+                            <small class="text-muted">siap untuk di-export</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <?php endif; ?>
 
@@ -419,8 +508,9 @@
                                                 <i class="fa fa-plus"></i> Tambah Jurnal
                                             </a>
                                             <?php if($total_bimbingan > 0): ?>
-                                            <a class="dropdown-item" href="<?php echo base_url('dosen/bimbingan/export_jurnal/' . $mahasiswa->proposal_id); ?>">
-                                                <i class="fa fa-download"></i> Export PDF
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="<?php echo base_url('dosen/bimbingan/export_jurnal/' . $mahasiswa->proposal_id); ?>" target="_blank">
+                                                <i class="fa fa-file-pdf text-danger"></i> Export PDF
                                             </a>
                                             <?php endif; ?>
                                             <?php endif; ?>
@@ -467,6 +557,7 @@
                             <strong>Validasi Berkala:</strong> Periksa jurnal bimbingan yang pending secara rutin untuk menjaga momentum mahasiswa. 
                             <strong>Feedback Konstruktif:</strong> Berikan catatan yang spesifik dan actionable dalam setiap validasi. 
                             <strong>Progress Monitoring:</strong> Pastikan minimal 8 pertemuan tervalidasi sebelum mahasiswa mengajukan seminar proposal.
+                            <strong>✅ Export Data:</strong> Gunakan fitur export Excel untuk monitoring dan laporan berkala.
                         </p>
                     </div>
                 </div>
@@ -623,6 +714,37 @@ function quickValidasi(jurnalId, action) {
     
     document.getElementById('quickCatatanDosen').value = '';
     $('#modalQuickValidasi').modal('show');
+}
+
+// ✅ NEW: Function untuk export all PDF
+function exportAllPDF() {
+    if (!confirm('Export semua jurnal bimbingan dalam format PDF?\n\nCatatan: Proses ini mungkin memerlukan waktu beberapa menit tergantung jumlah mahasiswa.')) {
+        return;
+    }
+    
+    // Implementasi sederhana: buka tab baru untuk setiap mahasiswa
+    const mahasiswaCount = <?php echo isset($mahasiswa_bimbingan) ? count($mahasiswa_bimbingan) : 0; ?>;
+    
+    if (mahasiswaCount === 0) {
+        alert('Tidak ada mahasiswa bimbingan untuk di-export!');
+        return;
+    }
+    
+    let confirmed = confirm(`Akan membuka ${mahasiswaCount} tab baru untuk export PDF setiap mahasiswa.\n\nLanjutkan?`);
+    
+    if (confirmed) {
+        <?php if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)): ?>
+        <?php foreach($mahasiswa_bimbingan as $mhs): ?>
+        <?php if(isset($mhs->proposal_id) && isset($mhs->total_bimbingan) && $mhs->total_bimbingan > 0): ?>
+        setTimeout(() => {
+            window.open('<?php echo base_url("dosen/bimbingan/export_jurnal/" . $mhs->proposal_id); ?>', '_blank');
+        }, <?php echo array_search($mhs, $mahasiswa_bimbingan) * 500; ?>); // Delay 500ms antara setiap tab
+        <?php endif; ?>
+        <?php endforeach; ?>
+        <?php endif; ?>
+        
+        alert('Export PDF dimulai! Silakan periksa tab baru yang terbuka.');
+    }
 }
 
 // Document ready

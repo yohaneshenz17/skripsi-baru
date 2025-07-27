@@ -359,71 +359,655 @@ class Bimbingan extends CI_Controller
         $this->load->view('mahasiswa/footer');
     }
     
-    public function export_jurnal()
-    {
+    /**
+     * ✅ FIXED: Export jurnal bimbingan mahasiswa dengan format konsisten dengan staf & dosen
+     */
+    public function export_jurnal() {
         $mahasiswa_id = $this->session->userdata('id');
         
-        // Ambil data proposal dan jurnal
-        $proposal = $this->db->select('pm.*, d.nama as nama_dosen, d.nip as nip_dosen, d.email as email_dosen')
-                            ->from('proposal_mahasiswa pm')
-                            ->join('dosen d', 'pm.dosen_id = d.id')
-                            ->where('pm.mahasiswa_id', $mahasiswa_id)
-                            ->where('pm.status_kaprodi', '1')
-                            ->where('pm.status_pembimbing', '1')
-                            ->get()->row();
+        try {
+            // ✅ FIXED: Ambil proposal mahasiswa dengan data lengkap
+            $proposal = $this->_get_proposal_data($mahasiswa_id);
+            if (!$proposal) {
+                $this->session->set_flashdata('error', 'Belum ada proposal yang disetujui atau belum ada pembimbing.');
+                redirect('mahasiswa/bimbingan');
+                return;
+            }
 
-        if (!$proposal) {
-            $this->session->set_flashdata('error', 'Data proposal tidak ditemukan.');
+            // ✅ FIXED: Ambil data mahasiswa lengkap dengan kaprodi
+            $mahasiswa = $this->_get_mahasiswa_data($mahasiswa_id);
+            if (!$mahasiswa) {
+                $this->session->set_flashdata('error', 'Data mahasiswa tidak ditemukan.');
+                redirect('mahasiswa/bimbingan');
+                return;
+            }
+
+            // ✅ FIXED: Jika kaprodi tidak ada dari JOIN, ambil manual
+            if (empty($proposal->nama_kaprodi) && !empty($mahasiswa->prodi_id)) {
+                $kaprodi_data = $this->_get_kaprodi_by_prodi($mahasiswa->prodi_id);
+                if ($kaprodi_data) {
+                    $proposal->nama_kaprodi = $kaprodi_data->nama_kaprodi;
+                    $proposal->nip_kaprodi = $kaprodi_data->nip_kaprodi;
+                    $proposal->email_kaprodi = $kaprodi_data->email_kaprodi;
+                }
+            }
+
+            // ✅ FIXED: Ambil jurnal bimbingan dengan validator
+            $jurnal_list = $this->db->select('jb.*, d.nama as nama_validator, d.nip as nip_validator')
+                                   ->from('jurnal_bimbingan jb')
+                                   ->join('dosen d', 'jb.validasi_oleh = d.id', 'left')
+                                   ->where('jb.proposal_id', $proposal->id)
+                                   ->order_by('jb.pertemuan_ke', 'ASC')
+                                   ->get()->result();
+
+            if (empty($jurnal_list)) {
+                $this->session->set_flashdata('error', 'Belum ada jurnal bimbingan untuk di-export.');
+                redirect('mahasiswa/bimbingan');
+                return;
+            }
+
+            // ✅ FIXED: Prepare data untuk template (konsisten dengan staf & dosen)
+            $data = [
+                'proposal' => $proposal,
+                'jurnal_bimbingan' => $jurnal_list,
+                'generated_by' => $this->session->userdata('nama'),
+                'generated_at' => date('d F Y H:i:s')
+            ];
+            
+            // ✅ FIXED: Generate HTML dari template CLEAN yang sama seperti dosen
+            $html = $this->load->view('mahasiswa/pdf/jurnal_bimbingan_clean', $data, true);
+            $filename = 'Jurnal_Bimbingan_' . str_replace([' ', ',', '.'], '_', $mahasiswa->nama) . '_' . date('Y-m-d') . '.html';
+            
+            // ✅ FIXED: Output HTML yang clean untuk browser print (SAMA SEPERTI DOSEN & STAF)
+            header('Content-Type: text/html; charset=utf-8');
+            header('Content-Disposition: inline; filename="' . str_replace('.html', '.pdf', $filename) . '"');
+            
+            echo '<!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>' . htmlspecialchars('Jurnal Bimbingan - ' . $mahasiswa->nama) . '</title>
+                <style>
+                    @media print { 
+                        @page { 
+                            size: A4 landscape; 
+                            margin: 12mm 8mm; 
+                        }
+                        body { margin: 0; }
+                        .no-print { display: none !important; }
+                    }
+                    body { 
+                        font-family: "Times New Roman", Times, serif; 
+                        margin: 0;
+                        padding: 10px;
+                    }
+                    .print-info {
+                        background: #e8f4fd;
+                        border: 1px solid #2c5aa0;
+                        padding: 10px;
+                        margin-bottom: 15px;
+                        text-align: center;
+                        font-size: 12px;
+                        color: #2c5aa0;
+                    }
+                    .print-btn {
+                        background: #2c5aa0;
+                        color: white;
+                        border: none;
+                        padding: 8px 15px;
+                        cursor: pointer;
+                        border-radius: 4px;
+                        margin: 0 5px;
+                        font-size: 11px;
+                    }
+                    .print-btn:hover {
+                        background: #1e3f73;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-info no-print">
+                    📄 <strong>Jurnal Bimbingan - ' . htmlspecialchars($mahasiswa->nama) . '</strong><br>
+                    Klik tombol di bawah untuk mencetak atau simpan sebagai PDF. Pastikan pilih orientasi <strong>Landscape</strong> di pengaturan print.
+                    <br><br>
+                    <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+                    <button class="print-btn" onclick="window.close()">❌ Tutup</button>
+                </div>
+                
+                ' . $html . '
+                
+                <script>
+                    // Auto-focus untuk print
+                    document.addEventListener("DOMContentLoaded", function() {
+                        // Keyboard shortcut Ctrl+P
+                        document.addEventListener("keydown", function(event) {
+                            if (event.ctrlKey && event.key === "p") {
+                                event.preventDefault();
+                                window.print();
+                            }
+                        });
+                    });
+                </script>
+            </body>
+            </html>';
+            exit;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in mahasiswa export_jurnal: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan saat export jurnal PDF: ' . $e->getMessage());
             redirect('mahasiswa/bimbingan');
-            return;
         }
-
-        // Ambil data mahasiswa lengkap
-        $mahasiswa = $this->db->select('m.*, p.nama as nama_prodi')
-                             ->from('mahasiswa m')
-                             ->join('prodi p', 'm.prodi_id = p.id')
-                             ->where('m.id', $mahasiswa_id)
-                             ->get()->row();
-
-        // Ambil jurnal bimbingan
-        $jurnal_list = $this->db->select('jb.*, d.nama as nama_validator, d.nip as nip_validator')
-                               ->from('jurnal_bimbingan jb')
-                               ->join('dosen d', 'jb.validasi_oleh = d.id', 'left')
-                               ->where('jb.proposal_id', $proposal->id)
-                               ->order_by('jb.pertemuan_ke', 'ASC')
-                               ->get()->result();
-
-        if (empty($jurnal_list)) {
-            $this->session->set_flashdata('error', 'Belum ada jurnal bimbingan untuk di-export.');
-            redirect('mahasiswa/bimbingan');
-            return;
-        }
-
-        // Load library PDF
-        $this->load->library('pdf');
-        
-        // Prepare data untuk template
-        $data = [
-            'mahasiswa' => $mahasiswa,
-            'proposal' => $proposal,
-            'jurnal_list' => $jurnal_list,
-            'tanggal_export' => date('d F Y'),
-            'total_bimbingan' => count($jurnal_list),
-            'bimbingan_tervalidasi' => count(array_filter($jurnal_list, function($j) { return $j->status_validasi == '1'; }))
-        ];
-        
-        // Generate HTML dari template
-        $html = $this->load->view('mahasiswa/pdf/jurnal_bimbingan', $data, true);
-        
-        // Set filename
-        $filename = 'Jurnal_Bimbingan_' . $mahasiswa->nim . '_' . date('Ymd_His') . '.pdf';
-        $this->pdf->filename = $filename;
-        
-        // Generate dan stream PDF
-        $this->pdf->load_html($html);
-        $this->pdf->stream($filename, array("Attachment" => true));
     }
 
+    /**
+     * ✅ NEW: Export jurnal bimbingan mahasiswa ke Excel (SAMA SEPERTI DOSEN & STAF)
+     */
+    public function export_excel() {
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        try {
+            // Ambil data jurnal bimbingan mahasiswa
+            $jurnal_data = $this->_get_jurnal_bimbingan_data($mahasiswa_id);
+            
+            if (empty($jurnal_data)) {
+                $this->session->set_flashdata('error', 'Belum ada jurnal bimbingan untuk di-export.');
+                redirect('mahasiswa/bimbingan');
+                return;
+            }
+            
+            // Coba export Excel format terbaik yang tersedia
+            if ($this->_export_xlsx_phpspreadsheet($jurnal_data)) {
+                return; // Berhasil dengan PhpSpreadsheet
+            } elseif ($this->_export_xlsx_simple($jurnal_data)) {
+                return; // Berhasil dengan Excel XML
+            } else {
+                // Fallback ke CSV jika semua gagal
+                $this->_export_to_csv($jurnal_data);
+                return;
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in mahasiswa export_excel: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan saat export data Excel: ' . $e->getMessage());
+            redirect('mahasiswa/bimbingan');
+        }
+    }
+
+    /**
+     * ✅ NEW: Export Excel XLSX menggunakan PhpSpreadsheet (ADAPTASI DARI DOSEN & STAF)
+     */
+    private function _export_xlsx_phpspreadsheet($jurnal_data) {
+        try {
+            // Cek apakah PhpSpreadsheet tersedia
+            if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+                // Coba load manual jika ada di vendor
+                if (file_exists(FCPATH . 'vendor/autoload.php')) {
+                    require_once FCPATH . 'vendor/autoload.php';
+                } else {
+                    return false; // Library tidak tersedia
+                }
+            }
+            
+            if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+                return false; // Library tetap tidak tersedia
+            }
+            
+            // Create new spreadsheet
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Jurnal Bimbingan');
+            
+            // Set header styling
+            $headerStyle = [
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF'],
+                    'size' => 12
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '4472C4']
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000']
+                    ]
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                ]
+            ];
+            
+            // Title
+            $sheet->setCellValue('A1', 'JURNAL BIMBINGAN - ' . strtoupper($this->session->userdata('nama')));
+            $sheet->mergeCells('A1:L1');
+            $sheet->getStyle('A1')->applyFromArray([
+                'font' => ['bold' => true, 'size' => 16],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]
+            ]);
+            
+            // Subtitle
+            $sheet->setCellValue('A2', 'STK Santo Yakobus Merauke');
+            $sheet->mergeCells('A2:L2');
+            $sheet->getStyle('A2')->applyFromArray([
+                'font' => ['bold' => true, 'size' => 12],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]
+            ]);
+            
+            // Generated info
+            $sheet->setCellValue('A3', 'Digenerate oleh: ' . $this->session->userdata('nama') . ' | Tanggal: ' . date('d F Y H:i:s'));
+            $sheet->mergeCells('A3:L3');
+            $sheet->getStyle('A3')->applyFromArray([
+                'font' => ['size' => 10],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]
+            ]);
+            
+            // Headers
+            $headers = [
+                'A5' => 'No',
+                'B5' => 'Pertemuan Ke',
+                'C5' => 'Tanggal Bimbingan',
+                'D5' => 'Materi Bimbingan',
+                'E5' => 'Tindak Lanjut',
+                'F5' => 'Catatan Mahasiswa',
+                'G5' => 'Catatan Dosen',
+                'H5' => 'Status Validasi',
+                'I5' => 'Tanggal Validasi',
+                'J5' => 'Validator',
+                'K5' => 'Dibuat Tanggal',
+                'L5' => 'Diupdate Tanggal'
+            ];
+            
+            foreach ($headers as $cell => $value) {
+                $sheet->setCellValue($cell, $value);
+            }
+            
+            // Apply header style
+            $sheet->getStyle('A5:L5')->applyFromArray($headerStyle);
+            
+            // Set column widths
+            $sheet->getColumnDimension('A')->setWidth(5);
+            $sheet->getColumnDimension('B')->setWidth(10);
+            $sheet->getColumnDimension('C')->setWidth(15);
+            $sheet->getColumnDimension('D')->setWidth(40);
+            $sheet->getColumnDimension('E')->setWidth(30);
+            $sheet->getColumnDimension('F')->setWidth(25);
+            $sheet->getColumnDimension('G')->setWidth(25);
+            $sheet->getColumnDimension('H')->setWidth(15);
+            $sheet->getColumnDimension('I')->setWidth(15);
+            $sheet->getColumnDimension('J')->setWidth(20);
+            $sheet->getColumnDimension('K')->setWidth(15);
+            $sheet->getColumnDimension('L')->setWidth(15);
+            
+            // Data rows
+            $row = 6;
+            foreach ($jurnal_data as $index => $jurnal) {
+                $status_text = '';
+                switch($jurnal->status_validasi) {
+                    case '1': $status_text = 'Tervalidasi'; break;
+                    case '2': $status_text = 'Perlu Revisi'; break;
+                    default: $status_text = 'Pending'; break;
+                }
+                
+                $sheet->setCellValue('A' . $row, $index + 1);
+                $sheet->setCellValue('B' . $row, $jurnal->pertemuan_ke);
+                $sheet->setCellValue('C' . $row, \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(strtotime($jurnal->tanggal_bimbingan)));
+                $sheet->setCellValue('D' . $row, $jurnal->materi_bimbingan);
+                $sheet->setCellValue('E' . $row, $jurnal->tindak_lanjut ?: '-');
+                $sheet->setCellValue('F' . $row, $jurnal->catatan_mahasiswa ?: '-');
+                $sheet->setCellValue('G' . $row, $jurnal->catatan_dosen ?: '-');
+                $sheet->setCellValue('H' . $row, $status_text);
+                $sheet->setCellValue('I' . $row, $jurnal->tanggal_validasi ? \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(strtotime($jurnal->tanggal_validasi)) : '-');
+                $sheet->setCellValue('J' . $row, $jurnal->nama_validator ?: '-');
+                $sheet->setCellValue('K' . $row, \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(strtotime($jurnal->created_at)));
+                $sheet->setCellValue('L' . $row, $jurnal->updated_at ? \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(strtotime($jurnal->updated_at)) : '-');
+                
+                // Format date columns
+                $sheet->getStyle('C' . $row)->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+                $sheet->getStyle('I' . $row)->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+                $sheet->getStyle('K' . $row)->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+                $sheet->getStyle('L' . $row)->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+                
+                $row++;
+            }
+            
+            // Apply borders to all data
+            $sheet->getStyle('A5:L' . ($row - 1))->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                    ]
+                ]
+            ]);
+            
+            // Summary section
+            $row += 2;
+            $sheet->setCellValue('A' . $row, 'RINGKASAN BIMBINGAN');
+            $sheet->mergeCells('A' . $row . ':L' . $row);
+            $sheet->getStyle('A' . $row)->applyFromArray($headerStyle);
+            
+            $row++;
+            $total_jurnal = count($jurnal_data);
+            $total_tervalidasi = count(array_filter($jurnal_data, function($j) { return $j->status_validasi == '1'; }));
+            $total_pending = count(array_filter($jurnal_data, function($j) { return $j->status_validasi == '0'; }));
+            $total_revisi = count(array_filter($jurnal_data, function($j) { return $j->status_validasi == '2'; }));
+            
+            $sheet->setCellValue('A' . $row, 'Total Jurnal:');
+            $sheet->setCellValue('B' . $row, $total_jurnal);
+            $row++;
+            $sheet->setCellValue('A' . $row, 'Tervalidasi:');
+            $sheet->setCellValue('B' . $row, $total_tervalidasi);
+            $row++;
+            $sheet->setCellValue('A' . $row, 'Pending:');
+            $sheet->setCellValue('B' . $row, $total_pending);
+            $row++;
+            $sheet->setCellValue('A' . $row, 'Perlu Revisi:');
+            $sheet->setCellValue('B' . $row, $total_revisi);
+            
+            // Set filename and download
+            $filename = 'Jurnal_Bimbingan_' . str_replace([' ', '.'], '_', $this->session->userdata('nama')) . '_' . date('Y-m-d_H-i-s') . '.xlsx';
+            
+            // Headers for download
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+            
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+            
+            exit;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in mahasiswa PhpSpreadsheet export: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * ✅ NEW: Export Excel menggunakan Excel XML format (fallback)
+     */
+    private function _export_xlsx_simple($jurnal_data) {
+        try {
+            $filename = 'Jurnal_Bimbingan_' . str_replace([' ', '.'], '_', $this->session->userdata('nama')) . '_' . date('Y-m-d_H-i-s') . '.xls';
+            
+            // Headers for Excel
+            header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+            
+            // Start output
+            echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+            echo '<?mso-application progid="Excel.Sheet"?>' . "\n";
+            echo '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
+            echo ' xmlns:o="urn:schemas-microsoft-com:office:office"' . "\n";
+            echo ' xmlns:x="urn:schemas-microsoft-com:office:excel"' . "\n";
+            echo ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
+            echo ' xmlns:html="http://www.w3.org/TR/REC-html40">' . "\n";
+            
+            // Styles
+            echo '<Styles>' . "\n";
+            echo '<Style ss:ID="HeaderStyle">' . "\n";
+            echo '<Font ss:Bold="1" ss:Color="#FFFFFF"/>' . "\n";
+            echo '<Interior ss:Color="#4472C4" ss:Pattern="Solid"/>' . "\n";
+            echo '<Borders>' . "\n";
+            echo '<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>' . "\n";
+            echo '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>' . "\n";
+            echo '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>' . "\n";
+            echo '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>' . "\n";
+            echo '</Borders>' . "\n";
+            echo '<Alignment ss:Horizontal="Center" ss:Vertical="Center"/>' . "\n";
+            echo '</Style>' . "\n";
+            
+            echo '<Style ss:ID="DataStyle">' . "\n";
+            echo '<Borders>' . "\n";
+            echo '<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>' . "\n";
+            echo '<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>' . "\n";
+            echo '<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>' . "\n";
+            echo '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>' . "\n";
+            echo '</Borders>' . "\n";
+            echo '</Style>' . "\n";
+            echo '</Styles>' . "\n";
+            
+            // Worksheet
+            echo '<Worksheet ss:Name="Jurnal Bimbingan">' . "\n";
+            echo '<Table>' . "\n";
+            
+            // Title row
+            echo '<Row>' . "\n";
+            echo '<Cell ss:MergeAcross="11" ss:StyleID="HeaderStyle">' . "\n";
+            echo '<Data ss:Type="String">JURNAL BIMBINGAN - ' . htmlspecialchars(strtoupper($this->session->userdata('nama'))) . '</Data>' . "\n";
+            echo '</Cell>' . "\n";
+            echo '</Row>' . "\n";
+            
+            // Empty row
+            echo '<Row></Row>' . "\n";
+            
+            // Headers
+            echo '<Row>' . "\n";
+            $headers = ['No', 'Pertemuan Ke', 'Tanggal', 'Materi', 'Tindak Lanjut', 
+                       'Catatan Mhs', 'Catatan Dosen', 'Status', 'Tgl Validasi', 
+                       'Validator', 'Dibuat', 'Diupdate'];
+            
+            foreach ($headers as $header) {
+                echo '<Cell ss:StyleID="HeaderStyle">' . "\n";
+                echo '<Data ss:Type="String">' . htmlspecialchars($header) . '</Data>' . "\n";
+                echo '</Cell>' . "\n";
+            }
+            echo '</Row>' . "\n";
+            
+            // Data rows
+            foreach ($jurnal_data as $index => $jurnal) {
+                $status_text = '';
+                switch($jurnal->status_validasi) {
+                    case '1': $status_text = 'Tervalidasi'; break;
+                    case '2': $status_text = 'Perlu Revisi'; break;
+                    default: $status_text = 'Pending'; break;
+                }
+                
+                echo '<Row>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="Number">' . ($index + 1) . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="Number">' . $jurnal->pertemuan_ke . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)) . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . htmlspecialchars($jurnal->materi_bimbingan) . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . htmlspecialchars($jurnal->tindak_lanjut ?: '-') . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . htmlspecialchars($jurnal->catatan_mahasiswa ?: '-') . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . htmlspecialchars($jurnal->catatan_dosen ?: '-') . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . htmlspecialchars($status_text) . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . ($jurnal->tanggal_validasi ? date('d/m/Y', strtotime($jurnal->tanggal_validasi)) : '-') . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . htmlspecialchars($jurnal->nama_validator ?: '-') . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . date('d/m/Y', strtotime($jurnal->created_at)) . '</Data></Cell>' . "\n";
+                echo '<Cell ss:StyleID="DataStyle"><Data ss:Type="String">' . ($jurnal->updated_at ? date('d/m/Y', strtotime($jurnal->updated_at)) : '-') . '</Data></Cell>' . "\n";
+                echo '</Row>' . "\n";
+            }
+            
+            echo '</Table>' . "\n";
+            echo '</Worksheet>' . "\n";
+            echo '</Workbook>' . "\n";
+            
+            exit;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in mahasiswa Excel XML export: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * ✅ NEW: Fallback export ke CSV
+     */
+    private function _export_to_csv($jurnal_data) {
+        $filename = 'Jurnal_Bimbingan_' . str_replace([' ', '.'], '_', $this->session->userdata('nama')) . '_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: 0');
+        
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        fputcsv($output, [
+            'No', 'Pertemuan Ke', 'Tanggal', 'Materi', 'Tindak Lanjut',
+            'Catatan Mahasiswa', 'Catatan Dosen', 'Status', 'Tanggal Validasi',
+            'Validator', 'Dibuat', 'Diupdate'
+        ]);
+        
+        foreach ($jurnal_data as $index => $jurnal) {
+            $status_text = '';
+            switch($jurnal->status_validasi) {
+                case '1': $status_text = 'Tervalidasi'; break;
+                case '2': $status_text = 'Perlu Revisi'; break;
+                default: $status_text = 'Pending'; break;
+            }
+            
+            fputcsv($output, [
+                $index + 1,
+                $jurnal->pertemuan_ke,
+                date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)),
+                $jurnal->materi_bimbingan,
+                $jurnal->tindak_lanjut ?: '-',
+                $jurnal->catatan_mahasiswa ?: '-',
+                $jurnal->catatan_dosen ?: '-',
+                $status_text,
+                $jurnal->tanggal_validasi ? date('d/m/Y', strtotime($jurnal->tanggal_validasi)) : '-',
+                $jurnal->nama_validator ?: '-',
+                date('d/m/Y', strtotime($jurnal->created_at)),
+                $jurnal->updated_at ? date('d/m/Y', strtotime($jurnal->updated_at)) : '-'
+            ]);
+        }
+        
+        fclose($output);
+        exit;
+    }
+
+    /**
+     * ✅ NEW: Get jurnal bimbingan data untuk export
+     */
+    private function _get_jurnal_bimbingan_data($mahasiswa_id) {
+        $this->db->select('
+            jb.*,
+            d.nama as nama_validator,
+            d.nip as nip_validator,
+            pm.judul as judul_proposal
+        ');
+        $this->db->from('jurnal_bimbingan jb');
+        $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+        $this->db->join('dosen d', 'jb.validasi_oleh = d.id', 'left');
+        $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+        $this->db->order_by('jb.pertemuan_ke', 'ASC');
+        
+        return $this->db->get()->result();
+    }
+
+    /**
+     * ✅ EXISTING: Get proposal data lengkap DENGAN DATA KAPRODI (SAMA SEPERTI DOSEN & STAF)
+     */
+    private function _get_proposal_data($mahasiswa_id) {
+        try {
+            $this->db->select('
+                pm.*,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                m.email as email_mahasiswa,
+                m.prodi_id,
+                p.nama as nama_prodi,
+                d.nama as nama_pembimbing,
+                d.nip as nip_pembimbing,
+                d.email as email_pembimbing,
+                kaprodi.nama as nama_kaprodi,
+                kaprodi.nip as nip_kaprodi,
+                kaprodi.email as email_kaprodi
+            ');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('prodi p', 'm.prodi_id = p.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('dosen kaprodi', 'p.dosen_id = kaprodi.id', 'left');
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+            $this->db->where('pm.status_pembimbing', '1');
+            $this->db->order_by('pm.created_at', 'DESC');
+            $this->db->limit(1);
+            
+            $query = $this->db->get();
+            
+            if ($query && $query->num_rows() > 0) {
+                return $query->row();
+            }
+            
+            return null;
+        } catch (Exception $e) {
+            log_message('error', 'Error getting proposal data: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * ✅ NEW: Get mahasiswa data lengkap
+     */
+    private function _get_mahasiswa_data($mahasiswa_id) {
+        try {
+            $this->db->select('m.*, p.nama as nama_prodi');
+            $this->db->from('mahasiswa m');
+            $this->db->join('prodi p', 'm.prodi_id = p.id');
+            $this->db->where('m.id', $mahasiswa_id);
+            
+            $query = $this->db->get();
+            
+            if ($query && $query->num_rows() > 0) {
+                return $query->row();
+            }
+            
+            return null;
+        } catch (Exception $e) {
+            log_message('error', 'Error getting mahasiswa data: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * ✅ EXISTING: Method untuk mendapatkan data kaprodi (SAMA SEPERTI DOSEN & STAF)
+     */
+    private function _get_kaprodi_by_prodi($prodi_id) {
+        try {
+            $this->db->select('
+                d.nama as nama_kaprodi,
+                d.nip as nip_kaprodi,
+                d.email as email_kaprodi
+            ');
+            $this->db->from('prodi p');
+            $this->db->join('dosen d', 'p.dosen_id = d.id');
+            $this->db->where('p.id', $prodi_id);
+            $this->db->where('d.level', '4'); // Level 4 = Kaprodi
+            
+            $query = $this->db->get();
+            
+            if ($query && $query->num_rows() > 0) {
+                return $query->row();
+            }
+            
+            // Fallback: cari kaprodi dari level di tabel dosen
+            $this->db->select('
+                d.nama as nama_kaprodi,
+                d.nip as nip_kaprodi,
+                d.email as email_kaprodi
+            ');
+            $this->db->from('dosen d');
+            $this->db->where('d.level', '4');
+            $this->db->limit(1);
+            
+            $query = $this->db->get();
+            return $query ? $query->row() : null;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting kaprodi data: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    // [EXISTING METHODS: _kirim_notifikasi_jurnal_baru, _kirim_notifikasi_revisi_jurnal - tetap sama]
+    
     private function _kirim_notifikasi_jurnal_baru($proposal, $pertemuan_ke, $tanggal_bimbingan, $materi_bimbingan)
     {
         $config = [

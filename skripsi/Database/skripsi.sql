@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 27, 2025 at 03:18 PM
+-- Generation Time: Jul 28, 2025 at 05:52 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -20,6 +20,20 @@ SET time_zone = "+00:00";
 --
 -- Database: `stkp7133_skripsi`
 --
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`stkp7133`@`localhost` PROCEDURE `CleanupExpiredValidation` ()   BEGIN
+    DELETE FROM validasi_dokumen 
+    WHERE expired_at < NOW() 
+    AND created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH);
+    
+    SELECT CONCAT('Cleaned up expired validation hashes: ', ROW_COUNT()) AS result;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -386,8 +400,10 @@ INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bi
 (25, 44, 6, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:12', 25, 'mahasiswa', '2025-07-25 10:58:35', '2025-07-25 11:00:12'),
 (26, 44, 7, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:06', 25, 'mahasiswa', '2025-07-25 10:58:46', '2025-07-25 11:00:06'),
 (27, 45, 1, '2025-07-27', 'Latihan Saja', 'Latihan Saja', 'Latihan Saja', NULL, NULL, '1', '2025-07-27 12:39:08', 25, 'dosen', '2025-07-27 12:39:08', '2025-07-27 12:39:08'),
-(28, 45, 2, '2025-07-27', 'Kajian Teori dan Metodologi', NULL, 'Tidak ada bos', NULL, NULL, '0', NULL, 25, 'mahasiswa', '2025-07-27 14:29:03', '2025-07-27 15:03:13'),
-(29, 45, 3, '2025-07-27', 'Metodologi penelitian', NULL, 'Tidak ada', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-07-27 14:55:13', '2025-07-27 14:55:13');
+(28, 45, 2, '2025-07-27', 'Kajian Teori dan Metodologi', '', 'Tidak ada bos', NULL, NULL, '1', '2025-07-27 15:30:16', 25, 'mahasiswa', '2025-07-27 14:29:03', '2025-07-27 15:30:16'),
+(29, 45, 3, '2025-07-27', 'Metodologi penelitian', NULL, 'Tidak ada', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-07-27 14:55:13', '2025-07-27 14:55:13'),
+(30, 45, 4, '2025-07-27', 'Kajian Teori', 'Update kajian teori', 'Tambah Referensi', NULL, NULL, '1', '2025-07-27 15:33:44', 25, 'dosen', '2025-07-27 15:33:44', '2025-07-27 15:33:44'),
+(31, 44, 8, '2025-07-27', 'Kajian Teori', NULL, 'siap laksanakan', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-07-27 19:04:08', '2025-07-27 19:04:08');
 
 -- --------------------------------------------------------
 
@@ -739,7 +755,7 @@ CREATE TABLE `pengumuman_tahapan` (
 --
 
 INSERT INTO `pengumuman_tahapan` (`id`, `no`, `tahapan`, `tanggal_deadline`, `keterangan`, `aktif`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Pengajuan Proposal Skripsi', '2025-08-06', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-26 06:36:56'),
+(1, 1, 'Pengajuan Proposal Skripsi', '2025-08-06', 'Periode 1 2025', '1', '2025-07-15 17:29:36', '2025-07-27 17:03:05'),
 (3, 2, 'Seminar Proposal', '2025-10-31', 'Seminar Proposal Bab 1-3', '1', '2025-07-15 17:29:36', '2025-07-19 17:42:25'),
 (4, 3, 'Ujian Skripsi', '2026-05-25', 'Seminar Hasil Bab 1-5', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:31'),
 (5, 4, 'Revisi dan Publikasi', '2026-07-30', 'Perbaikan dan Publikasi Skripsi', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:52'),
@@ -1309,7 +1325,7 @@ CREATE TABLE `skripsi_vl` (
 CREATE TABLE `staf_aktivitas` (
   `id` bigint(20) NOT NULL,
   `staf_id` bigint(20) NOT NULL,
-  `aktivitas` enum('export_jurnal','export_berita_acara','export_surat_izin','upload_repository','validasi_publikasi') NOT NULL,
+  `aktivitas` enum('export_jurnal','export_berita_acara','export_surat_izin','upload_repository','validasi_publikasi') DEFAULT NULL,
   `mahasiswa_id` bigint(20) DEFAULT NULL,
   `proposal_id` bigint(20) DEFAULT NULL,
   `keterangan` text DEFAULT NULL,
@@ -1334,7 +1350,12 @@ INSERT INTO `staf_aktivitas` (`id`, `staf_id`, `aktivitas`, `mahasiswa_id`, `pro
 (16, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 14:58:52'),
 (17, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 15:39:03'),
 (18, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 16:16:57'),
-(19, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 17:35:43');
+(19, 29, '', 44, 44, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-07-25 17:35:43'),
+(20, 29, '', 45, 45, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh 2', NULL, '2025-07-27 15:35:10'),
+(21, 29, '', NULL, NULL, 'Export semua data bimbingan format Excel XML (2 records)', NULL, '2025-07-27 15:39:49'),
+(22, 29, '', 45, 45, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh 2', NULL, '2025-07-27 15:40:49'),
+(23, 29, '', NULL, NULL, 'Export semua data bimbingan format Excel XML (2 records)', NULL, '2025-07-27 16:58:46'),
+(24, 29, '', 45, 45, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh 2', NULL, '2025-07-27 17:42:32');
 
 -- --------------------------------------------------------
 
@@ -1380,6 +1401,15 @@ CREATE TABLE `staf_v` (
 ,`prodi_id` bigint(20)
 ,`nama_prodi` varchar(50)
 ,`nama_fakultas` varchar(255)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `validasi_stats_v`
+-- (See below for the actual view)
+--
+CREATE TABLE `validasi_stats_v` (
 );
 
 -- --------------------------------------------------------
@@ -1471,6 +1501,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 DROP TABLE IF EXISTS `staf_v`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `staf_v`  AS SELECT `d`.`id` AS `id`, `d`.`nip` AS `nip`, `d`.`nama` AS `nama`, `d`.`email` AS `email`, `d`.`nomor_telepon` AS `nomor_telepon`, `p`.`id` AS `prodi_id`, `p`.`nama` AS `nama_prodi`, `f`.`nama` AS `nama_fakultas` FROM ((`dosen` `d` left join `prodi` `p` on(`d`.`prodi_id` = `p`.`id`)) left join `fakultas` `f` on(`p`.`fakultas_id` = `f`.`id`)) WHERE `d`.`level` = '5' ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `validasi_stats_v`
+--
+DROP TABLE IF EXISTS `validasi_stats_v`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `validasi_stats_v`  AS SELECT `validasi_dokumen`.`jenis_dokumen` AS `jenis_dokumen`, count(0) AS `total_dokumen`, sum(case when `validasi_dokumen`.`is_verified` = 1 then 1 else 0 end) AS `dokumen_terverifikasi`, sum(`validasi_dokumen`.`verify_count`) AS `total_verifikasi`, avg(`validasi_dokumen`.`verify_count`) AS `rata_rata_verifikasi`, count(case when `validasi_dokumen`.`expired_at` > current_timestamp() then 1 end) AS `masih_valid`, count(case when `validasi_dokumen`.`expired_at` <= current_timestamp() then 1 end) AS `sudah_expired` FROM `validasi_dokumen` GROUP BY `validasi_dokumen`.`jenis_dokumen` ;
 
 --
 -- Indexes for dumped tables
@@ -1671,7 +1710,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`
@@ -1737,7 +1776,7 @@ ALTER TABLE `skripsi`
 -- AUTO_INCREMENT for table `staf_aktivitas`
 --
 ALTER TABLE `staf_aktivitas`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- Constraints for dumped tables

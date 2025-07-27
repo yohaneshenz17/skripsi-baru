@@ -129,7 +129,7 @@
 <?php else: ?>
 <!-- STATUS 6: BIMBINGAN AKTIF -->
 
-<!-- Info Panel -->
+<!-- Info Panel - Container Hijau Utama -->
 <div class="card bg-success text-white mb-4">
     <div class="card-body">
         <div class="row align-items-center">
@@ -302,9 +302,14 @@
                         <i class="fas fa-plus"></i> Tambah Jurnal
                     </button>
                     <?php if(!empty($jurnal_bimbingan)): ?>
-                    <a href="<?= base_url('mahasiswa/bimbingan/export_jurnal') ?>" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-download"></i> Export
-                    </a>
+                    <div class="btn-group">
+                        <a href="<?= base_url('mahasiswa/bimbingan/export_excel') ?>" class="btn btn-success btn-sm" title="Export Excel">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </a>
+                        <a href="<?= base_url('mahasiswa/bimbingan/export_jurnal') ?>" class="btn btn-danger btn-sm" target="_blank" title="Export PDF">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </a>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>

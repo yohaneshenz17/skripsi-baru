@@ -77,3 +77,6 @@ ERROR - 2025-07-27 17:42:28 --> 404 Page Not Found: Assets/vendor
 ERROR - 2025-07-27 17:42:28 --> 404 Page Not Found: Assets/css
 ERROR - 2025-07-27 17:42:33 --> 404 Page Not Found: Assets/vendor
 ERROR - 2025-07-27 17:42:33 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 18:01:29 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/dosen/Bimbingan.php:459) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-27 18:01:29 --> Severity: Compile Error --> Cannot redeclare Bimbingan::_get_kaprodi_by_prodi() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Bimbingan.php 459
+ERROR - 2025-07-27 18:04:41 --> Severity: error --> Exception: Call to undefined method Pdf::generate() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Bimbingan.php 507

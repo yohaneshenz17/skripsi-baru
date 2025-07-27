@@ -1,0 +1,37 @@
+ERROR - 2025-07-26 05:56:35 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-26 06:03:43 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-26 06:07:45 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-26 06:38:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:38:08 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 06:41:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:41:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 06:42:28 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:42:28 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 06:43:09 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:43:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 06:43:13 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:43:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 06:48:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:48:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 06:48:15 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-26 06:53:15 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:53:15 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 06:54:25 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 06:54:25 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:54:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 06:54:42 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 07:02:55 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-26 07:12:20 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-26 07:53:40 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-26 07:53:43 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-07-26 08:19:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-26 08:19:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 08:19:17 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-26 08:42:16 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-26 09:44:11 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `proposal_mahasiswa` SET `judul` = 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', `ringkasan` = 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', `jenis_penelitian` = 'Kualitatif', `lokasi_penelitian` = 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', `uraian_masalah` = 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. ', `file_draft_proposal` = '17c6bc70f2ad389483e15a705e33e4a1.docx', `status_kaprodi` = '0', `komentar_kaprodi` = NULL, `tanggal_review_kaprodi` = NULL, `updated_at` = '2025-07-26 09:44:11'
+WHERE `id` = '45'
+ERROR - 2025-07-26 09:45:05 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `proposal_mahasiswa` SET `judul` = 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', `ringkasan` = 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', `jenis_penelitian` = 'Kualitatif', `lokasi_penelitian` = 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', `uraian_masalah` = 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. ', `file_draft_proposal` = '5c0cd42ad89ef918c5fab022536ae587.docx', `status_kaprodi` = '0', `komentar_kaprodi` = NULL, `tanggal_review_kaprodi` = NULL, `updated_at` = '2025-07-26 09:45:05'
+WHERE `id` = '45'
+ERROR - 2025-07-26 09:45:29 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-26 09:45:29 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-26 16:26:35 --> 404 Page Not Found: GetData/proposal_mahasiswa

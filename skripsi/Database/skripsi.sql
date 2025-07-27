@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 27, 2025 at 07:06 AM
+-- Generation Time: Jul 27, 2025 at 08:33 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -279,20 +279,6 @@ CREATE TABLE `hasil_penelitian_backup_full_20250725_070204` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `hasil_seminar`
---
-
-CREATE TABLE `hasil_seminar` (
-  `id` bigint(20) NOT NULL,
-  `seminar_id` bigint(20) NOT NULL,
-  `berita_acara` text NOT NULL,
-  `masukan` text NOT NULL COMMENT 'komentar pdf (pembimbing, penguji, catatan)',
-  `status` enum('1','2','3') NOT NULL COMMENT '1 = lanjut, 2 = lanjut (perbaikan), 3 = ditolak'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `hasil_seminar_backup_full_20250725_070204`
 --
 
@@ -303,6 +289,42 @@ CREATE TABLE `hasil_seminar_backup_full_20250725_070204` (
   `masukan` text NOT NULL COMMENT 'komentar pdf (pembimbing, penguji, catatan)',
   `status` enum('1','2','3') NOT NULL COMMENT '1 = lanjut, 2 = lanjut (perbaikan), 3 = ditolak'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hasil_seminar_proposal`
+--
+
+CREATE TABLE `hasil_seminar_proposal` (
+  `id` bigint(20) NOT NULL,
+  `seminar_proposal_id` bigint(20) NOT NULL,
+  `catatan_revisi_pembimbing` text DEFAULT NULL COMMENT 'Catatan revisi dari dosen pembimbing (ketua penguji)',
+  `catatan_revisi_penguji1` text DEFAULT NULL COMMENT 'Catatan revisi dari penguji 1',
+  `catatan_revisi_penguji2` text DEFAULT NULL COMMENT 'Catatan revisi dari penguji 2',
+  `nilai_substansi_pembimbing` decimal(5,2) DEFAULT NULL COMMENT 'Substansi dan Metode Penelitian (50%) - Pembimbing',
+  `nilai_presentasi_pembimbing` decimal(5,2) DEFAULT NULL COMMENT 'Presentasi dan Teknik Penyajian (20%) - Pembimbing',
+  `nilai_penguasaan_pembimbing` decimal(5,2) DEFAULT NULL COMMENT 'Penguasaan Materi dan Diskusi (30%) - Pembimbing',
+  `nilai_akhir_pembimbing` decimal(5,2) DEFAULT NULL COMMENT 'Nilai akhir pembimbing',
+  `nilai_substansi_penguji1` decimal(5,2) DEFAULT NULL COMMENT 'Substansi dan Metode Penelitian (50%) - Penguji 1',
+  `nilai_presentasi_penguji1` decimal(5,2) DEFAULT NULL COMMENT 'Presentasi dan Teknik Penyajian (20%) - Penguji 1',
+  `nilai_penguasaan_penguji1` decimal(5,2) DEFAULT NULL COMMENT 'Penguasaan Materi dan Diskusi (30%) - Penguji 1',
+  `nilai_akhir_penguji1` decimal(5,2) DEFAULT NULL COMMENT 'Nilai akhir penguji 1',
+  `nilai_substansi_penguji2` decimal(5,2) DEFAULT NULL COMMENT 'Substansi dan Metode Penelitian (50%) - Penguji 2',
+  `nilai_presentasi_penguji2` decimal(5,2) DEFAULT NULL COMMENT 'Presentasi dan Teknik Penyajian (20%) - Penguji 2',
+  `nilai_penguasaan_penguji2` decimal(5,2) DEFAULT NULL COMMENT 'Penguasaan Materi dan Diskusi (30%) - Penguji 2',
+  `nilai_akhir_penguji2` decimal(5,2) DEFAULT NULL COMMENT 'Nilai akhir penguji 2',
+  `nilai_rata_rata` decimal(5,2) DEFAULT NULL COMMENT 'Rata-rata dari 3 penguji',
+  `grade_huruf` varchar(2) DEFAULT NULL COMMENT 'A (>=80), B (70-79.9), C (60-69.9), D (50-59.9), E (<50)',
+  `rekomendasi_penguji` enum('diterima_tanpa_revisi','diterima_revisi_minor','diterima_revisi_mayor','ditolak_mengulang') DEFAULT NULL,
+  `status_input` enum('draft','published') DEFAULT 'draft' COMMENT 'Status input penilaian',
+  `diinput_oleh` bigint(20) DEFAULT NULL COMMENT 'ID dosen pembimbing atau staf yang input',
+  `role_input` enum('dosen','staf') DEFAULT NULL COMMENT 'Role yang menginput',
+  `tanggal_input` datetime DEFAULT NULL,
+  `tanggal_publikasi` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Hasil dan penilaian seminar proposal';
 
 -- --------------------------------------------------------
 
@@ -822,16 +844,22 @@ CREATE TABLE `proposal_mahasiswa` (
   `validasi_staf_publikasi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu, 1=valid, 2=perlu perbaikan',
   `staf_validator_id` bigint(20) DEFAULT NULL COMMENT 'ID staf yang memvalidasi',
   `tanggal_validasi_staf` datetime DEFAULT NULL,
-  `catatan_staf` text DEFAULT NULL
+  `catatan_staf` text DEFAULT NULL,
+  `jam_seminar_proposal` time DEFAULT NULL COMMENT 'Jam pelaksanaan seminar proposal',
+  `status_rekomendasi_pembimbing_seminar` enum('0','1','2') DEFAULT '0' COMMENT '0=belum, 1=direkomendasikan, 2=ditolak',
+  `komentar_rekomendasi_pembimbing_seminar` text DEFAULT NULL,
+  `tanggal_rekomendasi_pembimbing_seminar` datetime DEFAULT NULL,
+  `file_turnitin` varchar(255) DEFAULT NULL COMMENT 'File hasil turnitin dari kaprodi',
+  `persentase_turnitin` decimal(5,2) DEFAULT NULL COMMENT 'Persentase hasil turnitin'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `proposal_mahasiswa`
 --
 
-INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
-(44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
-(45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '0', NULL, NULL, NULL, '2025-07-26 09:52:43', 10, '', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
+INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`, `jam_seminar_proposal`, `status_rekomendasi_pembimbing_seminar`, `komentar_rekomendasi_pembimbing_seminar`, `tanggal_rekomendasi_pembimbing_seminar`, `file_turnitin`, `persentase_turnitin`) VALUES
+(44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL),
+(45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '0', NULL, NULL, NULL, '2025-07-26 09:52:43', 10, '', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1166,24 +1194,6 @@ INSERT INTO `proposal_workflow_backup_full_20250725_070204` (`id`, `proposal_id`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `seminar`
---
-
-CREATE TABLE `seminar` (
-  `id` bigint(20) NOT NULL,
-  `proposal_mahasiswa_id` bigint(20) NOT NULL,
-  `tanggal` date NOT NULL,
-  `jam` time NOT NULL,
-  `tempat` text NOT NULL,
-  `file_proposal` varchar(50) NOT NULL,
-  `sk_tim` varchar(50) NOT NULL,
-  `bukti_konsultasi` varchar(50) DEFAULT NULL,
-  `persetujuan` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `seminar_backup_full_20250725_070204`
 --
 
@@ -1198,6 +1208,57 @@ CREATE TABLE `seminar_backup_full_20250725_070204` (
   `bukti_konsultasi` varchar(50) DEFAULT NULL,
   `persetujuan` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `seminar_proposal`
+--
+
+CREATE TABLE `seminar_proposal` (
+  `id` bigint(20) NOT NULL,
+  `proposal_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa',
+  `file_proposal_mahasiswa` varchar(255) NOT NULL COMMENT 'File proposal yang diupload mahasiswa (Bab 1-3)',
+  `tanggal_pengajuan` datetime DEFAULT current_timestamp() COMMENT 'Tanggal mahasiswa mengajukan seminar proposal',
+  `status_rekomendasi_pembimbing` enum('0','1','2') DEFAULT '0' COMMENT '0=belum, 1=direkomendasikan, 2=ditolak',
+  `tanggal_rekomendasi_pembimbing` datetime DEFAULT NULL,
+  `komentar_rekomendasi_pembimbing` text DEFAULT NULL,
+  `status_review_kaprodi` enum('0','1','2') DEFAULT '0' COMMENT '0=menunggu, 1=disetujui, 2=ditolak',
+  `tanggal_review_kaprodi` datetime DEFAULT NULL,
+  `komentar_review_kaprodi` text DEFAULT NULL,
+  `file_turnitin` varchar(255) DEFAULT NULL COMMENT 'File hasil turnitin dari kaprodi',
+  `persentase_turnitin` decimal(5,2) DEFAULT NULL COMMENT 'Persentase plagiarisme (max 30%)',
+  `tanggal_upload_turnitin` datetime DEFAULT NULL,
+  `tanggal_seminar` date DEFAULT NULL,
+  `jam_seminar` time DEFAULT NULL,
+  `tempat_seminar` varchar(255) DEFAULT NULL,
+  `status_penguji1` enum('0','1','2') DEFAULT '0' COMMENT '0=belum merespon, 1=setuju, 2=tolak jadwal',
+  `status_penguji2` enum('0','1','2') DEFAULT '0' COMMENT '0=belum merespon, 1=setuju, 2=tolak jadwal',
+  `alasan_penolakan_penguji1` text DEFAULT NULL,
+  `alasan_penolakan_penguji2` text DEFAULT NULL,
+  `tanggal_respon_penguji1` datetime DEFAULT NULL,
+  `tanggal_respon_penguji2` datetime DEFAULT NULL,
+  `status_final` enum('pending','approved','rejected','rescheduled') DEFAULT 'pending',
+  `catatan_admin` text DEFAULT NULL COMMENT 'Catatan dari staf/admin',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Seminar proposal mahasiswa dengan workflow lengkap';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `seminar_proposal_dokumen`
+--
+
+CREATE TABLE `seminar_proposal_dokumen` (
+  `id` bigint(20) NOT NULL,
+  `seminar_proposal_id` bigint(20) NOT NULL,
+  `jenis_dokumen` enum('undangan','berita_acara','form_penilaian','surat_tugas') NOT NULL,
+  `nama_file` varchar(255) NOT NULL,
+  `path_file` varchar(500) NOT NULL,
+  `dibuat_oleh` bigint(20) DEFAULT NULL COMMENT 'ID staf yang generate',
+  `tanggal_dibuat` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Dokumen-dokumen seminar proposal';
 
 -- --------------------------------------------------------
 
@@ -1510,10 +1571,15 @@ ALTER TABLE `hasil_penelitian`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `hasil_seminar`
+-- Indexes for table `hasil_seminar_proposal`
 --
-ALTER TABLE `hasil_seminar`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `hasil_seminar_proposal`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_seminar_proposal_id` (`seminar_proposal_id`),
+  ADD KEY `idx_rekomendasi` (`rekomendasi_penguji`),
+  ADD KEY `idx_grade` (`grade_huruf`),
+  ADD KEY `idx_status` (`status_input`),
+  ADD KEY `fk_hasil_input_oleh` (`diinput_oleh`);
 
 --
 -- Indexes for table `home_template`
@@ -1590,10 +1656,21 @@ ALTER TABLE `proposal_workflow`
   ADD KEY `idx_tahap` (`tahap`);
 
 --
--- Indexes for table `seminar`
+-- Indexes for table `seminar_proposal`
 --
-ALTER TABLE `seminar`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `seminar_proposal`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_proposal_id` (`proposal_id`),
+  ADD KEY `idx_status_workflow` (`status_rekomendasi_pembimbing`,`status_review_kaprodi`),
+  ADD KEY `idx_tanggal_seminar` (`tanggal_seminar`),
+  ADD KEY `idx_status_final` (`status_final`);
+
+--
+-- Indexes for table `seminar_proposal_dokumen`
+--
+ALTER TABLE `seminar_proposal_dokumen`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_seminar_dokumen` (`seminar_proposal_id`,`jenis_dokumen`);
 
 --
 -- Indexes for table `skripsi`
@@ -1651,10 +1728,10 @@ ALTER TABLE `hasil_penelitian`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- AUTO_INCREMENT for table `hasil_seminar`
+-- AUTO_INCREMENT for table `hasil_seminar_proposal`
 --
-ALTER TABLE `hasil_seminar`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+ALTER TABLE `hasil_seminar_proposal`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `home_template`
@@ -1717,10 +1794,16 @@ ALTER TABLE `proposal_workflow`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `seminar`
+-- AUTO_INCREMENT for table `seminar_proposal`
 --
-ALTER TABLE `seminar`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+ALTER TABLE `seminar_proposal`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `seminar_proposal_dokumen`
+--
+ALTER TABLE `seminar_proposal_dokumen`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `skripsi`
@@ -1739,6 +1822,13 @@ ALTER TABLE `staf_aktivitas`
 --
 
 --
+-- Constraints for table `hasil_seminar_proposal`
+--
+ALTER TABLE `hasil_seminar_proposal`
+  ADD CONSTRAINT `fk_hasil_input_oleh` FOREIGN KEY (`diinput_oleh`) REFERENCES `dosen` (`id`),
+  ADD CONSTRAINT `fk_hasil_seminar_proposal` FOREIGN KEY (`seminar_proposal_id`) REFERENCES `seminar_proposal` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
@@ -1751,6 +1841,18 @@ ALTER TABLE `jurnal_bimbingan`
 ALTER TABLE `proposal_mahasiswa`
   ADD CONSTRAINT `fk_penetapan` FOREIGN KEY (`penetapan_oleh`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_penguji2` FOREIGN KEY (`dosen_penguji2_id`) REFERENCES `dosen` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `seminar_proposal`
+--
+ALTER TABLE `seminar_proposal`
+  ADD CONSTRAINT `fk_seminar_proposal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `seminar_proposal_dokumen`
+--
+ALTER TABLE `seminar_proposal_dokumen`
+  ADD CONSTRAINT `fk_dokumen_seminar_proposal` FOREIGN KEY (`seminar_proposal_id`) REFERENCES `seminar_proposal` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,10 +1,44 @@
 <?php 
 /**
  * Template Mahasiswa Sederhana - STK Santo Yakobus
- * Menggantikan template kompleks dengan wrapper yang simple dan self-contained
- * Tidak memerlukan Bootstrap, jQuery, atau dependencies eksternal
+ * Template yang terintegrasi dengan sistem SIM-TA yang sudah ada
+ * Updated untuk menggunakan data session yang sebenarnya
  */
-$app = json_decode(file_get_contents(base_url('cdn/db/app.json'))) 
+
+// Load app configuration
+$app_config_file = FCPATH . 'cdn/db/app.json';
+$app = null;
+
+if (file_exists($app_config_file)) {
+    $app_content = file_get_contents($app_config_file);
+    $app = json_decode($app_content);
+}
+
+// Fallback jika file tidak ada
+if (!$app) {
+    $app = (object) [
+        'icon' => 'default.png',
+        'name' => 'SIM-TA STK Yakobus'
+    ];
+}
+
+// Get mahasiswa data from session
+$mahasiswa_nama = $this->session->userdata('nama') ?: 'Mahasiswa';
+$mahasiswa_foto = $this->session->userdata('foto') ?: 'default.png';
+
+// Get additional mahasiswa info
+$mahasiswa_id = $this->session->userdata('id');
+$mahasiswa_info = null;
+if ($mahasiswa_id) {
+    $this->db->select('m.nim, p.nama as nama_prodi');
+    $this->db->from('mahasiswa m');
+    $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
+    $this->db->where('m.id', $mahasiswa_id);
+    $mahasiswa_info = $this->db->get()->row();
+}
+
+$nim = $mahasiswa_info->nim ?? '';
+$nama_prodi = $mahasiswa_info->nama_prodi ?? 'Program Studi';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -12,12 +46,13 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Sistem Informasi Manajemen Tugas Akhir STK Santo Yakobus">
+    <meta name="author" content="Unit SIPD STK Santo Yakobus">
     <title>SIM-TA STK Yakobus - <?= $title ?></title>
     
     <!-- Favicon -->
-    <link rel="shortcut icon" href="<?= base_url() ?>cdn/img/icons/<?= $app->icon ? $app->icon : 'default.png' ?>" type="image/png">
+    <link rel="shortcut icon" href="<?= base_url() ?>cdn/img/icons/<?= $app->icon ?>" type="image/png">
     
-    <!-- CSS Internal - Menggantikan Bootstrap & Dependencies -->
+    <!-- CSS Internal - Self-contained Template -->
     <style>
         /* ===== RESET & BASE STYLES ===== */
         * {
@@ -266,15 +301,44 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
             color: white;
         }
         
+        .btn-success:hover {
+            background: #24a872;
+            border-color: #24a872;
+            transform: translateY(-1px);
+        }
+        
         .btn-warning {
             background: #fb6340;
             border-color: #fb6340;
             color: white;
         }
         
+        .btn-warning:hover {
+            background: #fa441d;
+            border-color: #fa441d;
+            transform: translateY(-1px);
+        }
+        
         .btn-info {
             background: #11cdef;
             border-color: #11cdef;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #0da5c0;
+            border-color: #0da5c0;
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-primary {
+            background: transparent;
+            border-color: #5e72e4;
+            color: #5e72e4;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #5e72e4;
             color: white;
         }
         
@@ -351,6 +415,49 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
             color: #0c5460;
             background: #d1ecf1;
             border-color: #bee5eb;
+        }
+        
+        /* ===== BADGE SYSTEM ===== */
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.375rem;
+        }
+        
+        .badge-primary {
+            color: #fff;
+            background-color: #5e72e4;
+        }
+        
+        .badge-secondary {
+            color: #fff;
+            background-color: #8898aa;
+        }
+        
+        .badge-success {
+            color: #fff;
+            background-color: #2dce89;
+        }
+        
+        .badge-danger {
+            color: #fff;
+            background-color: #f5365c;
+        }
+        
+        .badge-warning {
+            color: #212529;
+            background-color: #fb6340;
+        }
+        
+        .badge-info {
+            color: #fff;
+            background-color: #11cdef;
         }
         
         /* ===== DROPDOWN SYSTEM ===== */
@@ -455,16 +562,20 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
         /* ===== UTILITY CLASSES ===== */
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .text-muted { color: #8898aa !important; }
         .mb-0 { margin-bottom: 0 !important; }
         .mb-1 { margin-bottom: 0.25rem !important; }
         .mb-2 { margin-bottom: 0.5rem !important; }
         .mb-3 { margin-bottom: 1rem !important; }
         .mt-2 { margin-top: 0.5rem !important; }
         .mt-3 { margin-top: 1rem !important; }
+        .p-2 { padding: 0.5rem !important; }
         .p-3 { padding: 1rem !important; }
         .d-flex { display: flex !important; }
         .align-items-center { align-items: center !important; }
+        .align-items-start { align-items: flex-start !important; }
         .justify-content-between { justify-content: space-between !important; }
+        .flex-grow-1 { flex-grow: 1 !important; }
         
         /* ===== GRID SYSTEM ===== */
         .row {
@@ -481,6 +592,7 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
         }
         
         .col { flex: 1; }
+        .col-6 { flex: 0 0 50%; max-width: 50%; }
         .col-md-6 { flex: 0 0 50%; max-width: 50%; }
         .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
         .col-xl-3 { flex: 0 0 25%; max-width: 25%; }
@@ -490,6 +602,56 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
                 flex: 0 0 100%;
                 max-width: 100%;
             }
+        }
+        
+        /* ===== CUSTOM STYLES FOR SIM-TA ===== */
+        .border-primary {
+            border-color: #5e72e4 !important;
+        }
+        
+        .text-primary {
+            color: #5e72e4 !important;
+        }
+        
+        .workflow-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .workflow-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+        
+        .workflow-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .workflow-item::before {
+            content: '';
+            position: absolute;
+            left: -0.8rem;
+            top: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #8898aa;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #e9ecef;
+        }
+        
+        .workflow-item.completed::before {
+            background: #2dce89;
+        }
+        
+        .workflow-item.active::before {
+            background: #5e72e4;
         }
     </style>
     
@@ -507,7 +669,7 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
         <!-- Sidebar Mahasiswa -->
         <nav class="mahasiswa-sidebar" id="sidebarMahasiswa">
             <div class="sidebar-brand">
-                <img src="<?= base_url() ?>cdn/img/icons/<?= $app->icon ? $app->icon : 'default.png' ?>" alt="Logo STK Yakobus">
+                <img src="<?= base_url() ?>cdn/img/icons/<?= $app->icon ?>" alt="Logo STK Yakobus">
                 <h5>SIM-TA<br>STK Yakobus</h5>
             </div>
             
@@ -575,18 +737,19 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
                                 <i class="fas fa-home"></i> Dashboard
                             </a>
                             <?php if ($this->uri->segment(2) != 'dashboard'): ?>
-                                <span> / <?= ucfirst($this->uri->segment(2)) ?></span>
+                                <span> / <?= ucfirst(str_replace('_', ' ', $this->uri->segment(2))) ?></span>
                             <?php endif; ?>
                         </nav>
                     </div>
                     
                     <div class="dropdown">
                         <div class="header-profile" onclick="toggleProfileDropdown()">
-                            <img src="<?= base_url() ?>cdn/img/avatar/<?= $this->session->userdata('foto') ?: 'default.png' ?>" 
-                                 alt="Avatar" class="profile-avatar">
+                            <img src="<?= base_url() ?>cdn/img/avatar/<?= $mahasiswa_foto ?>" 
+                                 alt="Avatar" class="profile-avatar"
+                                 onerror="this.src='<?= base_url() ?>cdn/img/avatar/default.png'">
                             <div class="profile-details">
-                                <h6><?= $this->session->userdata('nama') ?></h6>
-                                <small><?= $this->session->userdata('nim') ?></small>
+                                <h6><?= $mahasiswa_nama ?></h6>
+                                <small><?= $nim ?: 'Mahasiswa' ?> • <?= $nama_prodi ?></small>
                             </div>
                             <i class="fas fa-chevron-down" style="margin-left: 0.5rem; font-size: 0.75rem;"></i>
                         </div>
@@ -601,7 +764,7 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
                                 Bantuan
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a href="<?= base_url() ?>auth/logout" class="dropdown-item">
+                            <a href="<?= base_url() ?>auth/logout" class="dropdown-item" onclick="return confirm('Apakah Anda yakin ingin logout?')">
                                 <i class="fas fa-sign-out-alt"></i>
                                 Logout
                             </a>
@@ -795,11 +958,12 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
             
             if (submitBtn && !submitBtn.disabled) {
                 submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
                 
                 setTimeout(function() {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = submitBtn.getAttribute('data-original-text') || 'Submit';
+                    submitBtn.innerHTML = originalText;
                 }, 3000);
             }
         });
@@ -820,6 +984,29 @@ $app = json_decode(file_get_contents(base_url('cdn/db/app.json')))
                 };
                 reader.readAsDataURL(file);
             }
+        }
+        
+        // Utility: Format date to Indonesian
+        function formatDateIndonesian(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        // Utility: Format relative time
+        function formatRelativeTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) return 'Kemarin';
+            if (diffDays < 7) return `${diffDays} hari yang lalu`;
+            if (diffDays < 30) return `${Math.ceil(diffDays / 7)} minggu yang lalu`;
+            return formatDateIndonesian(dateString);
         }
     </script>
 </body>

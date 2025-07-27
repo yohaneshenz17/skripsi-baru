@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 27, 2025 at 07:06 AM
+-- Generation Time: Jul 27, 2025 at 03:18 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -384,7 +384,10 @@ INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bi
 (23, 44, 4, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:51', 25, 'mahasiswa', '2025-07-25 10:58:16', '2025-07-25 11:00:51'),
 (24, 44, 5, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:23', 25, 'mahasiswa', '2025-07-25 10:58:26', '2025-07-25 11:00:23'),
 (25, 44, 6, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:12', 25, 'mahasiswa', '2025-07-25 10:58:35', '2025-07-25 11:00:12'),
-(26, 44, 7, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:06', 25, 'mahasiswa', '2025-07-25 10:58:46', '2025-07-25 11:00:06');
+(26, 44, 7, '2025-07-25', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', 'Bagus lanjutkan yang baik sesuai catatan kita sebelumnya', 'Ini latihan saja ya, untuk jurnal bimbingan pada SIM Tugas Akhir Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke', NULL, NULL, '1', '2025-07-25 11:00:06', 25, 'mahasiswa', '2025-07-25 10:58:46', '2025-07-25 11:00:06'),
+(27, 45, 1, '2025-07-27', 'Latihan Saja', 'Latihan Saja', 'Latihan Saja', NULL, NULL, '1', '2025-07-27 12:39:08', 25, 'dosen', '2025-07-27 12:39:08', '2025-07-27 12:39:08'),
+(28, 45, 2, '2025-07-27', 'Kajian Teori dan Metodologi', NULL, 'Tidak ada bos', NULL, NULL, '0', NULL, 25, 'mahasiswa', '2025-07-27 14:29:03', '2025-07-27 15:03:13'),
+(29, 45, 3, '2025-07-27', 'Metodologi penelitian', NULL, 'Tidak ada', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-07-27 14:55:13', '2025-07-27 14:55:13');
 
 -- --------------------------------------------------------
 
@@ -831,7 +834,7 @@ CREATE TABLE `proposal_mahasiswa` (
 
 INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
 (44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
-(45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '0', NULL, NULL, NULL, '2025-07-26 09:52:43', 10, '', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
+(45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '1', '', '2025-07-27 12:38:21', NULL, '2025-07-26 09:52:43', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1579,7 +1582,9 @@ ALTER TABLE `proposal_mahasiswa`
   ADD KEY `idx_status_seminar_proposal` (`status_seminar_proposal`),
   ADD KEY `idx_status_seminar_skripsi` (`status_seminar_skripsi`),
   ADD KEY `idx_status_publikasi` (`status_publikasi`),
-  ADD KEY `idx_mahasiswa_workflow` (`mahasiswa_id`,`workflow_status`);
+  ADD KEY `idx_mahasiswa_workflow` (`mahasiswa_id`,`workflow_status`),
+  ADD KEY `fk_penetapan` (`penetapan_oleh`),
+  ADD KEY `fk_penguji2` (`dosen_penguji2_id`);
 
 --
 -- Indexes for table `proposal_workflow`
@@ -1666,7 +1671,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`

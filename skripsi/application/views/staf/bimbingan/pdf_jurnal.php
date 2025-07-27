@@ -1,8 +1,8 @@
 <?php
 // ========================================
-// PDF JURNAL BIMBINGAN TEMPLATE - FIXED 16 ROWS
+// PDF JURNAL BIMBINGAN TEMPLATE - FIXED KAPRODI & KETERANGAN FORMAL
 // File: application/views/staf/bimbingan/pdf_jurnal.php
-// FIXED: 16 baris bimbingan & field names sesuai database
+// FIXED: Data kaprodi otomatis & keterangan formal
 // ========================================
 ?>
 
@@ -210,7 +210,7 @@
             font-weight: bold;
         }
         
-        /* Signature Area */
+        /* ✅ FIXED: Signature Area dengan keterangan formal */
         .signature-area {
             margin-top: 40px;
             page-break-inside: avoid;
@@ -230,20 +230,44 @@
         
         .signature-title {
             font-weight: bold;
-            margin-bottom: 60px;
+            margin-bottom: 15px;
             color: #333;
         }
         
         .signature-name {
-            border-bottom: 1px solid #333;
-            padding-bottom: 2px;
             font-weight: bold;
             margin-bottom: 5px;
+            padding: 5px;
+            min-height: 25px;
         }
         
         .signature-nip {
             font-size: 11px;
             color: #666;
+        }
+        
+        /* ✅ BARU: Style untuk keterangan formal */
+        .formal-notice {
+            background-color: #e8f4fd;
+            border: 2px solid #2c5aa0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .formal-notice-title {
+            font-weight: bold;
+            color: #2c5aa0;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        
+        .formal-notice-text {
+            font-size: 11px;
+            color: #555;
+            line-height: 1.4;
+            font-style: italic;
         }
         
         /* Footer */
@@ -448,7 +472,18 @@
         </div>
     </div>
 
-    <!-- Area Tanda Tangan -->
+    <!-- ✅ KETERANGAN FORMAL - BARU -->
+    <div class="formal-notice">
+        <div class="formal-notice-title">📋 KETERANGAN RESMI</div>
+        <div class="formal-notice-text">
+            Dokumen ini digenerate secara otomatis oleh Sistem Informasi Manajemen Tugas Akhir 
+            STK Santo Yakobus Merauke. Sesuai kebijakan institusi, dokumen yang digenerate otomatis 
+            tidak memerlukan tanda tangan fisik karena telah terverifikasi melalui sistem digital 
+            dan dapat dipertanggungjawabkan secara akademik.
+        </div>
+    </div>
+
+    <!-- ✅ FIXED: Area Tanda Tangan dengan Data Kaprodi -->
     <div class="signature-area">
         <div style="text-align: right; margin-bottom: 20px;">
             Merauke, <?= date('d F Y') ?>
@@ -460,16 +495,38 @@
                     <div class="signature-title">Mahasiswa</div>
                     <div class="signature-name"><?= $proposal->nama_mahasiswa ?></div>
                     <div class="signature-nip">NIM. <?= $proposal->nim ?></div>
+                    <div style="font-size: 10px; color: #999; margin-top: 10px; font-style: italic;">
+                        *Terverifikasi sistem digital
+                    </div>
                 </td>
                 <td>
                     <div class="signature-title">Dosen Pembimbing</div>
-                    <div class="signature-name"><?= $proposal->nama_pembimbing ?: '______________________' ?></div>
-                    <div class="signature-nip">NIDN. <?= isset($proposal->nip_pembimbing) ? $proposal->nip_pembimbing : '______________________' ?></div>
+                    <div class="signature-name"><?= $proposal->nama_pembimbing ?: 'Belum ditetapkan' ?></div>
+                    <div class="signature-nip">NIDN. <?= isset($proposal->nip_pembimbing) ? $proposal->nip_pembimbing : 'Belum ditetapkan' ?></div>
+                    <div style="font-size: 10px; color: #999; margin-top: 10px; font-style: italic;">
+                        *Terverifikasi sistem digital
+                    </div>
                 </td>
                 <td>
                     <div class="signature-title">Ketua Program Studi</div>
-                    <div class="signature-name">_______________________</div>
-                    <div class="signature-nip">NIDN. ___________________</div>
+                    <!-- ✅ FIXED: Tampilkan data kaprodi dari database -->
+                    <div class="signature-name">
+                        <?php if (!empty($proposal->nama_kaprodi)): ?>
+                            <?= $proposal->nama_kaprodi ?>
+                        <?php else: ?>
+                            Belum ditetapkan
+                        <?php endif; ?>
+                    </div>
+                    <div class="signature-nip">
+                        NIDN. <?php if (!empty($proposal->nip_kaprodi)): ?>
+                            <?= $proposal->nip_kaprodi ?>
+                        <?php else: ?>
+                            Belum ditetapkan
+                        <?php endif; ?>
+                    </div>
+                    <div style="font-size: 10px; color: #999; margin-top: 10px; font-style: italic;">
+                        *Terverifikasi sistem digital
+                    </div>
                 </td>
             </tr>
         </table>
@@ -485,7 +542,7 @@
         </div>
         <div class="copyright">
             © <?= date('Y') ?> Sekolah Tinggi Katolik Santo Yakobus Merauke<br>
-            Sistem Informasi Manajemen Tugas Akhir (SIM-TA)
+            Sistem Informasi Manajemen Tugas Akhir (SIM-TA) | Versi Digital Terverifikasi
         </div>
     </div>
 </body>

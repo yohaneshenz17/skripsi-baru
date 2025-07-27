@@ -1,3 +1,79 @@
 ERROR - 2025-07-27 05:27:07 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-07-27 07:06:24 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-07-27 14:29:46 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-27 15:34:46 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-27 15:34:51 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:34:51 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:35:02 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:35:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:35:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:35:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:37:11 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:37:11 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:37:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:37:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:37:19 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:37:19 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:37:37 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:37:37 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:37:52 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:37:52 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:38:02 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:38:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:38:38 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:38:38 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:39:09 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:39:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:39:44 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:39:44 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 15:40:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 15:40:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 16:32:17 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php:496) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-27 16:32:17 --> Severity: Compile Error --> Cannot redeclare Bimbingan::export_jurnal() /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php 496
+ERROR - 2025-07-27 16:32:21 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php:496) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-27 16:32:21 --> Severity: Compile Error --> Cannot redeclare Bimbingan::export_jurnal() /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php 496
+ERROR - 2025-07-27 16:32:32 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-27 16:32:40 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php:496) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-27 16:32:40 --> Severity: Compile Error --> Cannot redeclare Bimbingan::export_jurnal() /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php 496
+ERROR - 2025-07-27 16:43:11 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 16:43:11 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 16:43:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 16:43:13 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 16:44:06 --> Severity: error --> Exception: Call to undefined method Pdf::render() /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php 388
+ERROR - 2025-07-27 16:49:40 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 16:49:40 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 16:49:44 --> Query error: Unknown column 'ip_address' in 'field list' - Invalid query: INSERT INTO `staf_aktivitas` (`staf_id`, `aktivitas`, `mahasiswa_id`, `proposal_id`, `keterangan`, `file_output`, `ip_address`, `user_agent`, `tanggal_aktivitas`) VALUES ('29', 'export_jurnal_pdf', '45', '45', 'Export PDF jurnal bimbingan dengan QR code - mahasiswa: Mahasiswa Contoh 2', 'jurnal_bimbingan_12345679_20250727_164944.pdf', '36.90.146.206', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-07-27 16:49:44')
+ERROR - 2025-07-27 16:49:44 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/third_party/tcpdf/include/tcpdf_static.php:345) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-27 16:50:21 --> Query error: Unknown column 'ip_address' in 'field list' - Invalid query: INSERT INTO `staf_aktivitas` (`staf_id`, `aktivitas`, `mahasiswa_id`, `proposal_id`, `keterangan`, `file_output`, `ip_address`, `user_agent`, `tanggal_aktivitas`) VALUES ('29', 'view_detail_mahasiswa', '45', '45', 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh 2', NULL, '36.90.146.206', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-07-27 16:50:21')
+ERROR - 2025-07-27 16:56:09 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 16:56:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 16:56:11 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 16:56:11 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 16:58:41 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 16:58:41 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 17:01:37 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-27 17:26:51 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 17:26:51 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 17:30:12 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-27 17:30:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 17:30:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 17:30:20 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 17:30:20 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 17:30:21 --> Query error: Unknown column 'validasi_kaprodi_publikasi' in 'where clause' - Invalid query: SELECT COUNT(*) AS `numrows`
+FROM `proposal_mahasiswa`
+WHERE `validasi_kaprodi_publikasi` = '1'
+AND `workflow_status` = 'selesai'
+ERROR - 2025-07-27 17:30:26 --> Query error: Unknown column 'validasi_kaprodi_publikasi' in 'where clause' - Invalid query: SELECT COUNT(*) AS `numrows`
+FROM `proposal_mahasiswa`
+WHERE `validasi_kaprodi_publikasi` = '1'
+AND `workflow_status` = 'selesai'
+ERROR - 2025-07-27 17:30:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 17:30:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 17:39:37 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 17:39:37 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 17:42:24 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 17:42:24 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 17:42:28 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 17:42:28 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-27 17:42:33 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-27 17:42:33 --> 404 Page Not Found: Assets/css

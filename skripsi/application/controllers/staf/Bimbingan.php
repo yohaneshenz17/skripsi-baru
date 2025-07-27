@@ -229,8 +229,8 @@ class Bimbingan extends CI_Controller {
     }
 
     /**
-     * Export jurnal bimbingan ke PDF
-     * FIXED: Query dan data yang benar
+     * ✅ UPDATE: Method export_jurnal untuk include data kaprodi
+     * Replace method export_jurnal yang ada dengan yang ini:
      */
     public function export_jurnal($proposal_id) {
         if (!is_numeric($proposal_id)) {
@@ -239,14 +239,24 @@ class Bimbingan extends CI_Controller {
         }
         
         try {
-            // Validasi proposal
+            // ✅ FIXED: Ambil data proposal dengan kaprodi
             $proposal = $this->_get_proposal_data($proposal_id);
             if (!$proposal) {
                 $this->session->set_flashdata('error', 'Data proposal tidak ditemukan!');
                 redirect('staf/bimbingan');
             }
             
-            // ✅ FIXED: Query jurnal dengan data lengkap untuk PDF
+            // ✅ FIXED: Jika kaprodi tidak ada dari JOIN, ambil manual
+            if (empty($proposal->nama_kaprodi) && !empty($proposal->prodi_id)) {
+                $kaprodi_data = $this->_get_kaprodi_by_prodi($proposal->prodi_id);
+                if ($kaprodi_data) {
+                    $proposal->nama_kaprodi = $kaprodi_data->nama_kaprodi;
+                    $proposal->nip_kaprodi = $kaprodi_data->nip_kaprodi;
+                    $proposal->email_kaprodi = $kaprodi_data->email_kaprodi;
+                }
+            }
+            
+            // Query jurnal dengan data lengkap untuk PDF
             $this->db->select('
                 jb.*,
                 d.nama as nama_dosen_validator,
@@ -258,7 +268,7 @@ class Bimbingan extends CI_Controller {
             $this->db->order_by('jb.pertemuan_ke', 'ASC');
             $jurnal_list = $this->db->get()->result();
             
-            // Generate PDF menggunakan view
+            // ✅ GENERATE PDF dengan data kaprodi
             $this->_generate_jurnal_pdf($proposal, $jurnal_list);
             
             // Log aktivitas staf
@@ -731,7 +741,7 @@ class Bimbingan extends CI_Controller {
     }
 
     /**
-     * Get proposal data lengkap
+     * ✅ FIXED: Get proposal data lengkap DENGAN DATA KAPRODI
      */
     private function _get_proposal_data($proposal_id) {
         try {
@@ -740,15 +750,20 @@ class Bimbingan extends CI_Controller {
                 m.nim,
                 m.nama as nama_mahasiswa,
                 m.email as email_mahasiswa,
+                m.prodi_id,
                 p.nama as nama_prodi,
                 d.nama as nama_pembimbing,
                 d.nip as nip_pembimbing,
-                d.email as email_pembimbing
+                d.email as email_pembimbing,
+                kaprodi.nama as nama_kaprodi,
+                kaprodi.nip as nip_kaprodi,
+                kaprodi.email as email_kaprodi
             ');
             $this->db->from('proposal_mahasiswa pm');
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
             $this->db->join('prodi p', 'm.prodi_id = p.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left'); // Dosen pembimbing
+            $this->db->join('dosen kaprodi', 'p.dosen_id = kaprodi.id', 'left'); // ✅ JOIN ke kaprodi
             $this->db->where('pm.id', $proposal_id);
             
             $query = $this->db->get();
@@ -760,6 +775,46 @@ class Bimbingan extends CI_Controller {
             return null;
         } catch (Exception $e) {
             log_message('error', 'Error getting proposal data: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * ✅ TAMBAHAN: Method khusus untuk mendapatkan data kaprodi jika method di atas tidak bekerja
+     */
+    private function _get_kaprodi_by_prodi($prodi_id) {
+        try {
+            $this->db->select('
+                d.nama as nama_kaprodi,
+                d.nip as nip_kaprodi,
+                d.email as email_kaprodi
+            ');
+            $this->db->from('prodi p');
+            $this->db->join('dosen d', 'p.dosen_id = d.id');
+            $this->db->where('p.id', $prodi_id);
+            $this->db->where('d.level', '4'); // Level 4 = Kaprodi
+            
+            $query = $this->db->get();
+            
+            if ($query && $query->num_rows() > 0) {
+                return $query->row();
+            }
+            
+            // Fallback: cari kaprodi dari level di tabel dosen
+            $this->db->select('
+                d.nama as nama_kaprodi,
+                d.nip as nip_kaprodi,
+                d.email as email_kaprodi
+            ');
+            $this->db->from('dosen d');
+            $this->db->where('d.level', '4');
+            $this->db->limit(1);
+            
+            $query = $this->db->get();
+            return $query ? $query->row() : null;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting kaprodi data: ' . $e->getMessage());
             return null;
         }
     }

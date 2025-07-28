@@ -1,9 +1,12 @@
 <?php
 /**
- * Detail Seminar Proposal View - Mahasiswa
+ * Detail Seminar Proposal View - Mahasiswa (FIXED VERSION)
  * File: application/views/mahasiswa/seminar_proposal/detail.php
  * 
- * Halaman detail lengkap untuk melihat informasi seminar proposal
+ * 🔧 PERBAIKAN:
+ * - Fixed property names sesuai database schema
+ * - Improved error handling untuk undefined properties
+ * - Enhanced display logic
  */
 ?>
 
@@ -48,6 +51,22 @@
         background: linear-gradient(87deg, #f5365c 0, #f56036 100%);
     }
     
+    .card-header.submitted {
+        background: linear-gradient(87deg, #11cdef 0, #1171ef 100%);
+    }
+    
+    .card-header.approved {
+        background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%);
+    }
+    
+    .card-header.rejected {
+        background: linear-gradient(87deg, #f5365c 0, #f56036 100%);
+    }
+    
+    .card-header.draft {
+        background: linear-gradient(87deg, #adb5bd 0, #8898aa 100%);
+    }
+    
     .card-body {
         padding: 1.5rem;
     }
@@ -83,6 +102,26 @@
     .status-badge.draft {
         background: rgba(173, 181, 189, 0.15);
         color: #adb5bd;
+    }
+    
+    .status-badge.review_pembimbing {
+        background: rgba(251, 99, 64, 0.15);
+        color: #fb6340;
+    }
+    
+    .status-badge.review_kaprodi {
+        background: rgba(94, 114, 228, 0.15);
+        color: #5e72e4;
+    }
+    
+    .status-badge.scheduled {
+        background: rgba(17, 205, 239, 0.15);
+        color: #11cdef;
+    }
+    
+    .status-badge.completed {
+        background: rgba(45, 206, 137, 0.15);
+        color: #2dce89;
     }
     
     /* Info Grid */
@@ -222,6 +261,18 @@
         text-decoration: none;
     }
     
+    .btn-outline-light {
+        background: transparent;
+        color: white;
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn-outline-light:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+    }
+    
     .btn-warning {
         background: linear-gradient(87deg, #fb6340 0, #fbb140 100%);
         color: white;
@@ -258,6 +309,12 @@
         color: #721c24;
         background-color: #f8d7da;
         border-color: #f5c6cb;
+    }
+    
+    .alert-warning {
+        color: #856404;
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
     }
     
     /* File Link */
@@ -324,6 +381,16 @@
         .timeline-item::before {
             left: -1.25rem;
         }
+        
+        .main-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    
+    .main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
     }
 </style>
 
@@ -371,7 +438,7 @@
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <div class="main-grid">
         
         <!-- Main Content -->
         <div>
@@ -390,9 +457,12 @@
                             $status_text = [
                                 'draft' => 'Draft',
                                 'submitted' => 'Menunggu Review',
+                                'review_pembimbing' => 'Sedang Direview Pembimbing',
+                                'review_kaprodi' => 'Sedang Direview Kaprodi',
                                 'approved' => 'Disetujui',
                                 'rejected' => 'Ditolak',
-                                'scheduled' => 'Terjadwal'
+                                'scheduled' => 'Terjadwal',
+                                'completed' => 'Selesai'
                             ];
                             echo $status_text[$seminar->status] ?? ucfirst($seminar->status);
                             ?>
@@ -413,19 +483,25 @@
                                 </div>
                             </div>
                             
-                            <?php if ($seminar->tanggal_seminar): ?>
+                            <?php if (!empty($seminar->tanggal_seminar)): ?>
                             <div class="info-item">
                                 <div class="info-label">Tanggal Seminar</div>
                                 <div class="info-value">
-                                    <?php echo date('d F Y H:i', strtotime($seminar->tanggal_seminar)); ?>
+                                    <?php 
+                                    $tanggal_display = date('d F Y', strtotime($seminar->tanggal_seminar));
+                                    if (!empty($seminar->jam_seminar)) {
+                                        $tanggal_display .= ' ' . date('H:i', strtotime($seminar->jam_seminar));
+                                    }
+                                    echo $tanggal_display;
+                                    ?>
                                 </div>
                             </div>
                             <?php endif; ?>
                             
-                            <?php if ($seminar->tempat): ?>
+                            <?php if (!empty($seminar->tempat_seminar)): ?>
                             <div class="info-item">
                                 <div class="info-label">Tempat Seminar</div>
-                                <div class="info-value"><?php echo htmlspecialchars($seminar->tempat); ?></div>
+                                <div class="info-value"><?php echo htmlspecialchars($seminar->tempat_seminar); ?></div>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -459,22 +535,24 @@
                         <div class="info-item">
                             <div class="info-label">Mahasiswa</div>
                             <div class="info-value">
-                                <?php echo $proposal->nama_mahasiswa; ?><br>
-                                <small style="color: #8898aa;">NIM: <?php echo $proposal->nim; ?></small>
+                                <?php echo htmlspecialchars($proposal->nama_mahasiswa); ?><br>
+                                <small style="color: #8898aa;">NIM: <?php echo htmlspecialchars($proposal->nim); ?></small>
                             </div>
                         </div>
                         
                         <div class="info-item">
                             <div class="info-label">Dosen Pembimbing</div>
-                            <div class="info-value"><?php echo $proposal->nama_pembimbing ?: 'Belum Ditentukan'; ?></div>
+                            <div class="info-value"><?php echo htmlspecialchars($proposal->nama_pembimbing ?: 'Belum Ditentukan'); ?></div>
                         </div>
                         
+                        <?php if (!empty($proposal->nama_prodi)): ?>
                         <div class="info-item">
                             <div class="info-label">Program Studi</div>
-                            <div class="info-value"><?php echo $proposal->nama_prodi ?: 'N/A'; ?></div>
+                            <div class="info-value"><?php echo htmlspecialchars($proposal->nama_prodi); ?></div>
                         </div>
+                        <?php endif; ?>
                         
-                        <?php if ($proposal->jenis_penelitian): ?>
+                        <?php if (!empty($proposal->jenis_penelitian)): ?>
                         <div class="info-item">
                             <div class="info-label">Jenis Penelitian</div>
                             <div class="info-value"><?php echo htmlspecialchars($proposal->jenis_penelitian); ?></div>
@@ -494,13 +572,13 @@
                         File dan Dokumen
                     </h6>
                     
-                    <?php if ($seminar->file_proposal): ?>
+                    <?php if (!empty($seminar->file_proposal)): ?>
                         <div style="margin-bottom: 1rem;">
                             <strong>File Proposal:</strong><br>
                             <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal); ?>" 
                                target="_blank" class="file-link" style="margin-top: 0.5rem;">
                                 <i class="fas fa-file-pdf" style="margin-right: 0.5rem;"></i>
-                                <?php echo $seminar->file_proposal; ?>
+                                <?php echo htmlspecialchars($seminar->file_proposal); ?>
                             </a>
                         </div>
                     <?php endif; ?>
@@ -516,7 +594,7 @@
             <?php endif; ?>
 
             <!-- Keterangan Mahasiswa -->
-            <?php if (isset($seminar) && $seminar->keterangan_mahasiswa): ?>
+            <?php if (isset($seminar) && !empty($seminar->keterangan_mahasiswa)): ?>
             <div class="card">
                 <div class="card-body">
                     <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
@@ -532,7 +610,7 @@
             <?php endif; ?>
 
             <!-- Feedback dari Pembimbing -->
-            <?php if (isset($seminar) && $seminar->komentar_pembimbing): ?>
+            <?php if (isset($seminar) && !empty($seminar->komentar_pembimbing)): ?>
             <div class="card">
                 <div class="card-body">
                     <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
@@ -541,13 +619,24 @@
                     </h6>
                     
                     <div class="comment-box pembimbing">
+                        <?php if (isset($seminar->status_pembimbing)): ?>
                         <strong>Status Rekomendasi:</strong> 
-                        <?php echo $seminar->rekomendasi_pembimbing == '1' ? 'Direkomendasikan' : 'Tidak Direkomendasikan'; ?>
+                        <?php 
+                        if ($seminar->status_pembimbing == 'approved') {
+                            echo '<span style="color: #2dce89;">Direkomendasikan</span>';
+                        } elseif ($seminar->status_pembimbing == 'rejected') {
+                            echo '<span style="color: #f5365c;">Tidak Direkomendasikan</span>';
+                        } else {
+                            echo '<span style="color: #fb6340;">Menunggu Review</span>';
+                        }
+                        ?>
                         <br><br>
+                        <?php endif; ?>
+                        
                         <strong>Komentar:</strong><br>
                         <?php echo nl2br(htmlspecialchars($seminar->komentar_pembimbing)); ?>
                         
-                        <?php if ($seminar->tanggal_review_pembimbing): ?>
+                        <?php if (!empty($seminar->tanggal_review_pembimbing)): ?>
                         <br><br>
                         <small style="color: #8898aa;">
                             <i class="fas fa-clock"></i>
@@ -560,7 +649,7 @@
             <?php endif; ?>
 
             <!-- Feedback dari Kaprodi -->
-            <?php if (isset($seminar) && $seminar->komentar_kaprodi): ?>
+            <?php if (isset($seminar) && !empty($seminar->komentar_kaprodi)): ?>
             <div class="card">
                 <div class="card-body">
                     <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
@@ -569,13 +658,24 @@
                     </h6>
                     
                     <div class="comment-box kaprodi">
+                        <?php if (isset($seminar->status_kaprodi)): ?>
                         <strong>Status Validasi:</strong> 
-                        <?php echo $seminar->status_kaprodi == '1' ? 'Disetujui' : 'Ditolak'; ?>
+                        <?php 
+                        if ($seminar->status_kaprodi == 'approved') {
+                            echo '<span style="color: #2dce89;">Disetujui</span>';
+                        } elseif ($seminar->status_kaprodi == 'rejected') {
+                            echo '<span style="color: #f5365c;">Ditolak</span>';
+                        } else {
+                            echo '<span style="color: #fb6340;">Menunggu Review</span>';
+                        }
+                        ?>
                         <br><br>
+                        <?php endif; ?>
+                        
                         <strong>Komentar:</strong><br>
                         <?php echo nl2br(htmlspecialchars($seminar->komentar_kaprodi)); ?>
                         
-                        <?php if ($seminar->tanggal_review_kaprodi): ?>
+                        <?php if (!empty($seminar->tanggal_review_kaprodi)): ?>
                         <br><br>
                         <small style="color: #8898aa;">
                             <i class="fas fa-clock"></i>
@@ -610,7 +710,7 @@
                             </a>
                         <?php endif; ?>
                         
-                        <?php if ($seminar->file_proposal): ?>
+                        <?php if (!empty($seminar->file_proposal)): ?>
                             <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal); ?>" 
                                target="_blank" class="btn btn-outline-primary" style="width: 100%; margin-bottom: 0.5rem;">
                                 <i class="fas fa-download"></i>
@@ -645,27 +745,36 @@
                             </small>
                         </div>
                         
-                        <div class="timeline-item <?php echo (isset($seminar) && $seminar->tanggal_review_pembimbing) ? 'completed' : 'pending'; ?>">
+                        <div class="timeline-item <?php echo (isset($seminar) && !empty($seminar->tanggal_review_pembimbing)) ? 'completed' : 'pending'; ?>">
                             <strong>Review Pembimbing</strong><br>
                             <small style="color: #8898aa;">
-                                <?php echo (isset($seminar) && $seminar->tanggal_review_pembimbing) ? 
+                                <?php echo (isset($seminar) && !empty($seminar->tanggal_review_pembimbing)) ? 
                                     date('d M Y H:i', strtotime($seminar->tanggal_review_pembimbing)) : 'Menunggu review'; ?>
                             </small>
                         </div>
                         
-                        <div class="timeline-item <?php echo (isset($seminar) && $seminar->tanggal_review_kaprodi) ? 'completed' : 'pending'; ?>">
+                        <div class="timeline-item <?php echo (isset($seminar) && !empty($seminar->tanggal_review_kaprodi)) ? 'completed' : 'pending'; ?>">
                             <strong>Validasi Kaprodi</strong><br>
                             <small style="color: #8898aa;">
-                                <?php echo (isset($seminar) && $seminar->tanggal_review_kaprodi) ? 
+                                <?php echo (isset($seminar) && !empty($seminar->tanggal_review_kaprodi)) ? 
                                     date('d M Y H:i', strtotime($seminar->tanggal_review_kaprodi)) : 'Menunggu validasi'; ?>
                             </small>
                         </div>
                         
-                        <div class="timeline-item <?php echo (isset($seminar) && $seminar->tanggal_seminar) ? 'completed' : 'pending'; ?>">
+                        <div class="timeline-item <?php echo (isset($seminar) && !empty($seminar->tanggal_seminar)) ? 'completed' : 'pending'; ?>">
                             <strong>Pelaksanaan Seminar</strong><br>
                             <small style="color: #8898aa;">
-                                <?php echo (isset($seminar) && $seminar->tanggal_seminar) ? 
-                                    date('d M Y H:i', strtotime($seminar->tanggal_seminar)) : 'Belum dijadwalkan'; ?>
+                                <?php 
+                                if (isset($seminar) && !empty($seminar->tanggal_seminar)) {
+                                    $tanggal_display = date('d M Y', strtotime($seminar->tanggal_seminar));
+                                    if (!empty($seminar->jam_seminar)) {
+                                        $tanggal_display .= ' ' . date('H:i', strtotime($seminar->jam_seminar));
+                                    }
+                                    echo $tanggal_display;
+                                } else {
+                                    echo 'Belum dijadwalkan';
+                                }
+                                ?>
                             </small>
                         </div>
                     </div>

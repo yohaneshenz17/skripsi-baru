@@ -2,19 +2,18 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Seminar Proposal Controller - Role Mahasiswa (ENHANCED FIXED VERSION)
+ * Seminar Proposal Controller - Role Mahasiswa (FIXED VERSION)
  * 
- * 🚀 PERBAIKAN UTAMA:
- * - Enhanced redirect dengan success feedback yang informatif
- * - Better status display dengan progress tracking
- * - Improved notification system
- * - Session management yang lebih baik untuk user experience
+ * 🔧 PERBAIKAN UTAMA:
+ * - Fixed _get_approved_proposal() untuk workflow_status = 'seminar_proposal'
+ * - Enhanced logic untuk menangani berbagai state proposal
+ * - Better error handling dan debugging
  * 
  * @package     SIM_TA
  * @subpackage  Controllers/Mahasiswa  
  * @category    Seminar Proposal
  * @author      Unit SIPD STK Santo Yakobus
- * @version     3.1 (Enhanced Final)
+ * @version     3.2 (Fixed Final)
  */
 
 class Seminar_proposal extends CI_Controller {
@@ -75,7 +74,7 @@ class Seminar_proposal extends CI_Controller {
     // =================================================================
 
     /**
-     * 🚀 ENHANCED: Dashboard Seminar Proposal dengan Status Informatif
+     * 🔧 FIXED: Dashboard Seminar Proposal dengan Logic yang Diperbaiki
      * URL: https://stkyakobus.ac.id/skripsi/mahasiswa/seminar_proposal
      */
     public function index()
@@ -91,11 +90,11 @@ class Seminar_proposal extends CI_Controller {
             $submission_success = $this->session->flashdata('submission_success');
             $is_from_submission = $this->input->get('submission') === 'success';
             
-            // PERBAIKAN: Cek proposal yang sudah disetujui dan siap untuk seminar proposal
-            $proposal = $this->_get_approved_proposal($mahasiswa_id);
+            // 🔧 PERBAIKAN UTAMA: Cek proposal dengan logic yang benar
+            $proposal = $this->_get_proposal_for_seminar($mahasiswa_id);
             
             if (!$proposal) {
-                // CASE 1: Belum ada proposal yang disetujui
+                // CASE 1: Belum ada proposal yang memenuhi syarat
                 $data = [
                     'title' => 'Seminar Proposal',
                     'content' => 'mahasiswa/seminar_proposal/no_proposal',
@@ -109,7 +108,7 @@ class Seminar_proposal extends CI_Controller {
                 return;
             }
 
-            // CASE 2: Ada proposal yang disetujui
+            // CASE 2: Ada proposal yang memenuhi syarat
             // ✅ ENHANCEMENT: Enhanced seminar data loading dengan join
             $seminar_data = $this->_get_seminar_with_details($proposal->id);
             
@@ -121,6 +120,18 @@ class Seminar_proposal extends CI_Controller {
             
             // ✅ NEW: Calculate comprehensive progress
             $workflow_progress = $this->_calculate_workflow_progress($proposal, $seminar_data);
+            
+            // 🔧 DEBUG: Log untuk troubleshooting
+            if (ENVIRONMENT === 'development') {
+                log_message('debug', 'Proposal found: ' . json_encode([
+                    'id' => $proposal->id,
+                    'workflow_status' => $proposal->workflow_status,
+                    'status_kaprodi' => $proposal->status_kaprodi,
+                    'status_pembimbing' => $proposal->status_pembimbing
+                ]));
+                log_message('debug', 'Seminar data: ' . ($seminar_data ? 'FOUND (ID: ' . $seminar_data->id . ')' : 'NOT FOUND'));
+                log_message('debug', 'Syarat jurnal: ' . json_encode($syarat_jurnal));
+            }
             
             $data = [
                 'title' => 'Seminar Proposal',
@@ -149,40 +160,508 @@ class Seminar_proposal extends CI_Controller {
         }
     }
 
+    // =================================================================
+    // 🔧 FIXED HELPER METHODS
+    // =================================================================
+
     /**
-     * Method untuk testing - bisa dihapus setelah sistem stabil
+     * 🔧 PERBAIKAN UTAMA: Get proposal yang dapat mengajukan seminar proposal
+     * - Tidak hanya workflow_status = 'bimbingan' 
+     * - Juga yang sudah di workflow_status = 'seminar_proposal'
      */
-    public function test()
+    private function _get_proposal_for_seminar($mahasiswa_id)
     {
-        if (ENVIRONMENT !== 'development') {
-            show_404();
-        }
-        
-        echo "<h2>Seminar Proposal Controller Test</h2>";
-        echo "<p><strong>Status:</strong> Enhanced Controller berjalan dengan baik! ✅</p>";
-        echo "<p><strong>Base URL:</strong> " . base_url() . "</p>";
-        echo "<p><strong>Current URL:</strong> " . current_url() . "</p>";
-        echo "<p><strong>Controller:</strong> " . $this->router->class . "</p>";
-        echo "<p><strong>Method:</strong> " . $this->router->method . "</p>";
-        
-        echo "<h3>Session Data:</h3>";
-        echo "<pre>" . print_r($this->session->userdata(), true) . "</pre>";
-        
-        echo "<h3>Database Test:</h3>";
         try {
-            $result = $this->db->query("SELECT COUNT(*) as total FROM mahasiswa")->row();
-            echo "<p>✅ Database connection OK - Total mahasiswa: " . $result->total . "</p>";
+            $this->db->select('
+                pm.*, 
+                m.nama as nama_mahasiswa,
+                m.nim,
+                m.email as email_mahasiswa,
+                d.nama as nama_pembimbing,
+                d.email as email_pembimbing,
+                p.nama as nama_prodi
+            ');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
             
-            // Test seminar proposal table
-            $seminar_count = $this->db->query("SELECT COUNT(*) as total FROM seminar_proposal_mahasiswa")->row();
-            echo "<p>✅ Seminar proposal table OK - Total records: " . $seminar_count->total . "</p>";
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+            $this->db->where('pm.status_kaprodi', '1');        // Disetujui Kaprodi
+            $this->db->where('pm.status_pembimbing', '1');     // Disetujui Pembimbing
+            
+            // 🔧 PERBAIKAN: Terima workflow_status bimbingan ATAU seminar_proposal
+            $this->db->where_in('pm.workflow_status', ['bimbingan', 'seminar_proposal']);
+            
+            $this->db->where('m.status', '1');                 // Mahasiswa aktif
+            $this->db->order_by('pm.id', 'DESC');
+            $this->db->limit(1);
+            
+            $proposal = $this->db->get()->row();
+            
+            if (ENVIRONMENT === 'development' && $proposal) {
+                log_message('debug', 'Found proposal for seminar: ' . $proposal->id . ' with workflow_status: ' . $proposal->workflow_status);
+            } else if (ENVIRONMENT === 'development') {
+                log_message('debug', 'No proposal found for mahasiswa: ' . $mahasiswa_id);
+                // Debug query
+                log_message('debug', 'Last query: ' . $this->db->last_query());
+            }
+            
+            return $proposal;
+            
         } catch (Exception $e) {
-            echo "<p>❌ Database error: " . $e->getMessage() . "</p>";
+            log_message('error', 'Error getting proposal for seminar: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * ✅ ENHANCED: Get approved proposal dengan join lengkap (Legacy method, kept for compatibility)
+     */
+    private function _get_approved_proposal($mahasiswa_id)
+    {
+        // Redirect ke method yang lebih baik
+        return $this->_get_proposal_for_seminar($mahasiswa_id);
+    }
+
+    /**
+     * Method untuk mendapatkan proposal berdasarkan ID dengan security check
+     */
+    private function _get_proposal_by_id($proposal_id, $mahasiswa_id)
+    {
+        try {
+            $this->db->select('
+                pm.*,
+                m.nama as nama_mahasiswa,
+                m.nim,
+                m.email as email_mahasiswa,
+                d.nama as nama_pembimbing,
+                d.email as email_pembimbing,
+                p.nama as nama_prodi
+            ');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
+            
+            $this->db->where('pm.id', $proposal_id);
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id); // Security check
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting proposal by ID: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * ✅ ENHANCED: Get seminar data dengan detail lengkap
+     */
+    private function _get_seminar_with_details($proposal_id)
+    {
+        try {
+            $this->db->select('
+                spm.*,
+                pm.judul as proposal_judul,
+                pm.dosen_id,
+                m.nama as nama_mahasiswa,
+                m.nim,
+                d.nama as nama_pembimbing,
+                d.email as email_pembimbing
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('spm.proposal_id', $proposal_id);
+            $this->db->order_by('spm.created_at', 'DESC');
+            $this->db->limit(1);
+            
+            $result = $this->db->get()->row();
+            
+            if (ENVIRONMENT === 'development') {
+                log_message('debug', 'Seminar query: ' . $this->db->last_query());
+                log_message('debug', 'Seminar result: ' . ($result ? 'FOUND' : 'NOT FOUND'));
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting seminar with details: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Method untuk mendapatkan seminar berdasarkan proposal_id
+     */
+    private function _get_seminar_by_proposal_id($proposal_id)
+    {
+        try {
+            $this->db->select('*');
+            $this->db->from('seminar_proposal_mahasiswa');
+            $this->db->where('proposal_id', $proposal_id);
+            $this->db->order_by('created_at', 'DESC');
+            $this->db->limit(1);
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting seminar by proposal ID: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Method untuk mendapatkan seminar berdasarkan ID dengan security check
+     */
+    private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
+    {
+        try {
+            $this->db->select('
+                sp.*,
+                pm.judul as proposal_judul,
+                pm.dosen_id,
+                m.nama as nama_mahasiswa,
+                m.nim,
+                d.nama as nama_pembimbing
+            ');
+            $this->db->from('seminar_proposal_mahasiswa sp');
+            $this->db->join('proposal_mahasiswa pm', 'sp.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            
+            $this->db->where('sp.id', $seminar_id);
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id); // Security check
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting seminar by ID: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Method untuk mengecek syarat jurnal bimbingan
+     */
+    private function _check_jurnal_requirement($proposal_id)
+    {
+        try {
+            // Minimum jurnal yang harus tervalidasi (bisa diatur di config)
+            $minimum_required = 8;
+            
+            if (!$this->db->table_exists('jurnal_bimbingan')) {
+                return [
+                    'eligible' => false,
+                    'minimum_required' => $minimum_required,
+                    'total_validated' => 0,
+                    'message' => 'Tabel jurnal bimbingan belum tersedia'
+                ];
+            }
+            
+            // Hitung jurnal yang sudah tervalidasi
+            $this->db->where('proposal_id', $proposal_id);
+            $this->db->where('status_validasi', '1');
+            $validated_count = $this->db->count_all_results('jurnal_bimbingan');
+            
+            $eligible = $validated_count >= $minimum_required;
+            
+            return [
+                'eligible' => $eligible,
+                'minimum_required' => $minimum_required,
+                'total_validated' => $validated_count,
+                'message' => $eligible ? 
+                    "Syarat jurnal bimbingan terpenuhi ({$validated_count}/{$minimum_required})" :
+                    "Jurnal bimbingan belum mencukupi ({$validated_count}/{$minimum_required})"
+            ];
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error checking jurnal requirement: ' . $e->getMessage());
+            return [
+                'eligible' => false,
+                'minimum_required' => 8,
+                'total_validated' => 0,
+                'message' => 'Error checking jurnal requirement'
+            ];
+        }
+    }
+
+    /**
+     * Get validated jurnal
+     */
+    private function _get_validated_jurnal($proposal_id)
+    {
+        try {
+            if (!$this->db->table_exists('jurnal_bimbingan')) {
+                return [];
+            }
+            
+            $this->db->select('jb.*, d.nama as nama_validator');
+            $this->db->from('jurnal_bimbingan jb');
+            $this->db->join('dosen d', 'jb.validasi_oleh = d.id', 'left');
+            $this->db->where('jb.proposal_id', $proposal_id);
+            $this->db->where('jb.status_validasi', '1');
+            $this->db->order_by('jb.pertemuan_ke', 'ASC');
+            
+            return $this->db->get()->result();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting validated jurnal: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * ✅ NEW: Enhanced workflow status determination
+     */
+    private function _determine_enhanced_workflow_status($proposal, $seminar_data, $syarat_jurnal)
+    {
+        if (!$syarat_jurnal['eligible']) {
+            return [
+                'current_step' => 'belum_eligible',
+                'next_action' => 'Lengkapi jurnal bimbingan',
+                'status_text' => 'Belum Memenuhi Syarat',
+                'status_class' => 'warning',
+                'description' => 'Jurnal bimbingan belum mencukupi untuk mengajukan seminar proposal',
+                'action_url' => base_url('mahasiswa/bimbingan'),
+                'action_text' => 'Tambah Jurnal Bimbingan'
+            ];
         }
         
-        echo "<hr>";
-        echo "<p><a href='" . base_url('mahasiswa/seminar_proposal') . "'>← Kembali ke Dashboard Seminar Proposal</a></p>";
+        if (!$seminar_data) {
+            return [
+                'current_step' => 'belum_mengajukan',
+                'next_action' => 'Ajukan Seminar Proposal',
+                'status_text' => 'Siap Mengajukan',
+                'status_class' => 'info',
+                'description' => 'Semua syarat telah terpenuhi, Anda dapat mengajukan seminar proposal',
+                'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
+                'action_text' => 'Ajukan Sekarang'
+            ];
+        }
+        
+        switch ($seminar_data->status) {
+            case 'draft':
+                return [
+                    'current_step' => 'draft',
+                    'next_action' => 'Lengkapi dan Submit',
+                    'status_text' => 'Draft',
+                    'status_class' => 'secondary',
+                    'description' => 'Draft pengajuan telah dibuat, lengkapi dan submit untuk review',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
+                    'action_text' => 'Lengkapi Draft'
+                ];
+                
+            case 'submitted':
+            case 'review_pembimbing':
+                return [
+                    'current_step' => 'review_pembimbing',
+                    'next_action' => 'Menunggu review pembimbing',
+                    'status_text' => 'Sedang Direview Pembimbing',
+                    'status_class' => 'warning',
+                    'description' => 'Pengajuan sedang direview oleh dosen pembimbing. Estimasi: 3-5 hari kerja',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
+                    'action_text' => 'Lihat Detail'
+                ];
+                
+            case 'review_kaprodi':
+                return [
+                    'current_step' => 'review_kaprodi',
+                    'next_action' => 'Menunggu review Kaprodi',
+                    'status_text' => 'Sedang Direview Kaprodi',
+                    'status_class' => 'primary',
+                    'description' => 'Dosen pembimbing telah menyetujui, menunggu persetujuan Kaprodi',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
+                    'action_text' => 'Lihat Detail'
+                ];
+                
+            case 'approved':
+                return [
+                    'current_step' => 'approved',
+                    'next_action' => 'Menunggu penjadwalan',
+                    'status_text' => 'Disetujui',
+                    'status_class' => 'success',
+                    'description' => 'Pengajuan telah disetujui, menunggu penjadwalan seminar',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
+                    'action_text' => 'Lihat Detail'
+                ];
+                
+            case 'scheduled':
+                return [
+                    'current_step' => 'scheduled',
+                    'next_action' => 'Persiapan seminar',
+                    'status_text' => 'Terjadwal',
+                    'status_class' => 'info',
+                    'description' => 'Seminar telah dijadwalkan, bersiaplah untuk presentasi',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
+                    'action_text' => 'Lihat Jadwal'
+                ];
+                
+            case 'completed':
+                return [
+                    'current_step' => 'completed',
+                    'next_action' => 'Lanjut ke penelitian',
+                    'status_text' => 'Selesai',
+                    'status_class' => 'success',
+                    'description' => 'Seminar proposal selesai, lanjut ke fase penelitian',
+                    'action_url' => base_url('mahasiswa/penelitian'),
+                    'action_text' => 'Lanjut Penelitian'
+                ];
+                
+            case 'rejected':
+                return [
+                    'current_step' => 'rejected',
+                    'next_action' => 'Perbaiki dan ajukan ulang',
+                    'status_text' => 'Perlu Perbaikan',
+                    'status_class' => 'danger',
+                    'description' => 'Pengajuan perlu diperbaiki sesuai catatan dari pembimbing',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
+                    'action_text' => 'Ajukan Ulang'
+                ];
+                
+            default:
+                return [
+                    'current_step' => 'unknown',
+                    'next_action' => 'Hubungi admin',
+                    'status_text' => 'Status Tidak Dikenali',
+                    'status_class' => 'secondary',
+                    'description' => 'Status tidak dikenali, hubungi admin sistem',
+                    'action_url' => base_url('mahasiswa/dashboard'),
+                    'action_text' => 'Dashboard'
+                ];
+        }
     }
+
+    /**
+     * ✅ NEW: Calculate comprehensive workflow progress
+     */
+    private function _calculate_workflow_progress($proposal, $seminar_data)
+    {
+        $progress = [
+            'percentage' => 0,
+            'current_phase' => 'preparation',
+            'completed_steps' => [],
+            'current_step' => '',
+            'next_step' => '',
+            'timeline_steps' => [
+                'preparation' => ['title' => 'Persiapan', 'desc' => 'Menyiapkan berkas', 'completed' => false],
+                'submission' => ['title' => 'Pengajuan', 'desc' => 'Berkas terkirim', 'completed' => false],
+                'pembimbing_review' => ['title' => 'Review Dosen', 'desc' => 'Evaluasi pembimbing', 'completed' => false],
+                'kaprodi_review' => ['title' => 'Review Kaprodi', 'desc' => 'Persetujuan akhir', 'completed' => false],
+                'scheduling' => ['title' => 'Penjadwalan', 'desc' => 'Penentuan jadwal', 'completed' => false],
+                'completion' => ['title' => 'Selesai', 'desc' => 'Seminar terlaksana', 'completed' => false]
+            ]
+        ];
+        
+        if (!$seminar_data) {
+            $progress['percentage'] = 20;
+            $progress['current_phase'] = 'preparation';
+            $progress['current_step'] = 'Persiapan pengajuan seminar proposal';
+            $progress['next_step'] = 'Ajukan seminar proposal';
+            $progress['timeline_steps']['preparation']['completed'] = true;
+            return $progress;
+        }
+        
+        switch ($seminar_data->status) {
+            case 'draft':
+                $progress['percentage'] = 30;
+                $progress['current_step'] = 'Draft pengajuan dibuat';
+                $progress['next_step'] = 'Kirim pengajuan ke dosen pembimbing';
+                $progress['completed_steps'] = ['preparation'];
+                break;
+                
+            case 'submitted':
+            case 'review_pembimbing':
+                $progress['percentage'] = 50;
+                $progress['current_step'] = 'Menunggu review dosen pembimbing';
+                $progress['next_step'] = 'Review oleh dosen pembimbing';
+                $progress['completed_steps'] = ['preparation', 'submission'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                break;
+                
+            case 'review_kaprodi':
+                $progress['percentage'] = 70;
+                $progress['current_step'] = 'Sedang direview Kaprodi';
+                $progress['next_step'] = 'Menunggu persetujuan akhir';
+                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
+                break;
+                
+            case 'approved':
+                $progress['percentage'] = 85;
+                $progress['current_step'] = 'Disetujui, menunggu penjadwalan';
+                $progress['next_step'] = 'Penentuan jadwal seminar';
+                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
+                $progress['timeline_steps']['kaprodi_review']['completed'] = true;
+                break;
+                
+            case 'scheduled':
+                $progress['percentage'] = 95;
+                $progress['current_step'] = 'Terjadwal, menunggu pelaksanaan';
+                $progress['next_step'] = 'Pelaksanaan seminar proposal';
+                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review', 'scheduling'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
+                $progress['timeline_steps']['kaprodi_review']['completed'] = true;
+                $progress['timeline_steps']['scheduling']['completed'] = true;
+                break;
+                
+            case 'completed':
+                $progress['percentage'] = 100;
+                $progress['current_step'] = 'Seminar proposal selesai';
+                $progress['next_step'] = 'Lanjut ke fase penelitian';
+                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review', 'scheduling', 'completion'];
+                foreach ($progress['timeline_steps'] as $key => $step) {
+                    $progress['timeline_steps'][$key]['completed'] = true;
+                }
+                break;
+                
+            case 'rejected':
+                $progress['percentage'] = 40;
+                $progress['current_phase'] = 'revision';
+                $progress['current_step'] = 'Ditolak, perlu revisi';
+                $progress['next_step'] = 'Lakukan perbaikan dan ajukan ulang';
+                $progress['completed_steps'] = ['preparation', 'submission'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                break;
+        }
+        
+        return $progress;
+    }
+
+    /**
+     * ✅ NEW: Determine if student can submit seminar proposal
+     */
+    private function _can_submit_seminar($proposal, $seminar_data, $syarat_jurnal)
+    {
+        // Check basic requirements
+        if (!$syarat_jurnal['eligible']) return false;
+        if (!$proposal) return false;
+        
+        // Check workflow status - harus dalam fase bimbingan atau seminar_proposal
+        if (!in_array($proposal->workflow_status, ['bimbingan', 'seminar_proposal'])) return false;
+        
+        // If no existing seminar, can submit
+        if (!$seminar_data) return true;
+        
+        // If existing seminar is rejected or draft, can resubmit
+        if (in_array($seminar_data->status, ['rejected', 'draft'])) return true;
+        
+        return false;
+    }
+
+    // =================================================================
+    // FORM HANDLING METHODS (Existing methods continue below...)
+    // =================================================================
 
     /**
      * Form Pengajuan Seminar Proposal
@@ -272,9 +751,9 @@ class Seminar_proposal extends CI_Controller {
             
             $data = [
                 'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
-                'status' => 'submitted', // ✅ Status yang jelas
-                'current_step' => 'review_pembimbing', // ✅ Step yang spesifik
-                'status_pembimbing' => 'pending', // ✅ Reset status pembimbing
+                'status' => 'submitted',
+                'current_step' => 'review_pembimbing',
+                'status_pembimbing' => 'pending',
                 'updated_at' => date('Y-m-d H:i:s')
             ];
             
@@ -770,7 +1249,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     // =================================================================
-    // 🚀 ENHANCED HELPER METHODS
+    // REMAINING HELPER METHODS
     // =================================================================
 
     /**
@@ -831,478 +1310,6 @@ class Seminar_proposal extends CI_Controller {
                 redirect('mahasiswa/dashboard');
             }
         }
-    }
-
-    /**
-     * ✅ ENHANCED: Get approved proposal dengan join lengkap
-     */
-    private function _get_approved_proposal($mahasiswa_id)
-    {
-        try {
-            $this->db->select('
-                pm.*, 
-                m.nama as nama_mahasiswa,
-                m.nim,
-                m.email as email_mahasiswa,
-                d.nama as nama_pembimbing,
-                d.email as email_pembimbing,
-                p.nama as nama_prodi
-            ');
-            $this->db->from('proposal_mahasiswa pm');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
-            
-            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-            $this->db->where('pm.status_kaprodi', '1');        // Disetujui Kaprodi
-            $this->db->where('pm.status_pembimbing', '1');     // Disetujui Pembimbing
-            
-            // Cek jika ada kolom workflow_status
-            if ($this->db->field_exists('workflow_status', 'proposal_mahasiswa')) {
-                $this->db->where('pm.workflow_status', 'bimbingan'); // Dalam fase bimbingan
-            }
-            
-            $this->db->where('m.status', '1');                 // Mahasiswa aktif
-            $this->db->order_by('pm.id', 'DESC');
-            $this->db->limit(1);
-            
-            $proposal = $this->db->get()->row();
-            
-            if (ENVIRONMENT === 'development' && $proposal) {
-                log_message('debug', 'Found approved proposal: ' . $proposal->id . ' for mahasiswa: ' . $mahasiswa_id);
-            }
-            
-            return $proposal;
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting approved proposal: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Method untuk mendapatkan proposal berdasarkan ID dengan security check
-     */
-    private function _get_proposal_by_id($proposal_id, $mahasiswa_id)
-    {
-        try {
-            $this->db->select('
-                pm.*,
-                m.nama as nama_mahasiswa,
-                m.nim,
-                m.email as email_mahasiswa,
-                d.nama as nama_pembimbing,
-                d.email as email_pembimbing,
-                p.nama as nama_prodi
-            ');
-            $this->db->from('proposal_mahasiswa pm');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
-            
-            $this->db->where('pm.id', $proposal_id);
-            $this->db->where('pm.mahasiswa_id', $mahasiswa_id); // Security check
-            
-            return $this->db->get()->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting proposal by ID: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * ✅ ENHANCED: Get seminar data dengan detail lengkap
-     */
-    private function _get_seminar_with_details($proposal_id)
-    {
-        try {
-            $this->db->select('
-                spm.*,
-                pm.judul as proposal_judul,
-                pm.dosen_id,
-                m.nama as nama_mahasiswa,
-                m.nim,
-                d.nama as nama_pembimbing,
-                d.email as email_pembimbing
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            $this->db->where('spm.proposal_id', $proposal_id);
-            $this->db->order_by('spm.created_at', 'DESC');
-            $this->db->limit(1);
-            
-            return $this->db->get()->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting seminar with details: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Method untuk mendapatkan seminar berdasarkan proposal_id
-     */
-    private function _get_seminar_by_proposal_id($proposal_id)
-    {
-        try {
-            $this->db->select('*');
-            $this->db->from('seminar_proposal_mahasiswa');
-            $this->db->where('proposal_id', $proposal_id);
-            $this->db->order_by('created_at', 'DESC');
-            $this->db->limit(1);
-            
-            return $this->db->get()->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting seminar by proposal ID: ' . $e->getMessage());
-            return null;
-        }
-    }
-    
-    /**
-     * Method untuk mendapatkan seminar berdasarkan ID dengan security check
-     */
-    private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
-    {
-        try {
-            $this->db->select('
-                sp.*,
-                pm.judul as proposal_judul,
-                pm.dosen_id,
-                m.nama as nama_mahasiswa,
-                m.nim,
-                d.nama as nama_pembimbing
-            ');
-            $this->db->from('seminar_proposal_mahasiswa sp');
-            $this->db->join('proposal_mahasiswa pm', 'sp.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            
-            $this->db->where('sp.id', $seminar_id);
-            $this->db->where('pm.mahasiswa_id', $mahasiswa_id); // Security check
-            
-            return $this->db->get()->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting seminar by ID: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Method untuk mengecek syarat jurnal bimbingan
-     */
-    private function _check_jurnal_requirement($proposal_id)
-    {
-        try {
-            // Minimum jurnal yang harus tervalidasi (bisa diatur di config)
-            $minimum_required = 8;
-            
-            if (!$this->db->table_exists('jurnal_bimbingan')) {
-                return [
-                    'eligible' => false,
-                    'minimum_required' => $minimum_required,
-                    'total_validated' => 0,
-                    'message' => 'Tabel jurnal bimbingan belum tersedia'
-                ];
-            }
-            
-            // Hitung jurnal yang sudah tervalidasi
-            $this->db->where('proposal_id', $proposal_id);
-            $this->db->where('status_validasi', '1');
-            $validated_count = $this->db->count_all_results('jurnal_bimbingan');
-            
-            $eligible = $validated_count >= $minimum_required;
-            
-            return [
-                'eligible' => $eligible,
-                'minimum_required' => $minimum_required,
-                'total_validated' => $validated_count,
-                'message' => $eligible ? 
-                    "Syarat jurnal bimbingan terpenuhi ({$validated_count}/{$minimum_required})" :
-                    "Jurnal bimbingan belum mencukupi ({$validated_count}/{$minimum_required})"
-            ];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error checking jurnal requirement: ' . $e->getMessage());
-            return [
-                'eligible' => false,
-                'minimum_required' => 8,
-                'total_validated' => 0,
-                'message' => 'Error checking jurnal requirement'
-            ];
-        }
-    }
-
-    /**
-     * Get validated jurnal
-     */
-    private function _get_validated_jurnal($proposal_id)
-    {
-        try {
-            if (!$this->db->table_exists('jurnal_bimbingan')) {
-                return [];
-            }
-            
-            $this->db->select('jb.*, d.nama as nama_validator');
-            $this->db->from('jurnal_bimbingan jb');
-            $this->db->join('dosen d', 'jb.validasi_oleh = d.id', 'left');
-            $this->db->where('jb.proposal_id', $proposal_id);
-            $this->db->where('jb.status_validasi', '1');
-            $this->db->order_by('jb.pertemuan_ke', 'ASC');
-            
-            return $this->db->get()->result();
-        } catch (Exception $e) {
-            log_message('error', 'Error getting validated jurnal: ' . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * ✅ NEW: Enhanced workflow status determination
-     */
-    private function _determine_enhanced_workflow_status($proposal, $seminar_data, $syarat_jurnal)
-    {
-        if (!$syarat_jurnal['eligible']) {
-            return [
-                'current_step' => 'belum_eligible',
-                'next_action' => 'Lengkapi jurnal bimbingan',
-                'status_text' => 'Belum Memenuhi Syarat',
-                'status_class' => 'warning',
-                'description' => 'Jurnal bimbingan belum mencukupi untuk mengajukan seminar proposal',
-                'action_url' => base_url('mahasiswa/bimbingan'),
-                'action_text' => 'Tambah Jurnal Bimbingan'
-            ];
-        }
-        
-        if (!$seminar_data) {
-            return [
-                'current_step' => 'belum_mengajukan',
-                'next_action' => 'Ajukan Seminar Proposal',
-                'status_text' => 'Siap Mengajukan',
-                'status_class' => 'info',
-                'description' => 'Semua syarat telah terpenuhi, Anda dapat mengajukan seminar proposal',
-                'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
-                'action_text' => 'Ajukan Sekarang'
-            ];
-        }
-        
-        switch ($seminar_data->status) {
-            case 'draft':
-                return [
-                    'current_step' => 'draft',
-                    'next_action' => 'Lengkapi dan Submit',
-                    'status_text' => 'Draft',
-                    'status_class' => 'secondary',
-                    'description' => 'Draft pengajuan telah dibuat, lengkapi dan submit untuk review',
-                    'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
-                    'action_text' => 'Lengkapi Draft'
-                ];
-                
-            case 'submitted':
-            case 'review_pembimbing':
-                return [
-                    'current_step' => 'review_pembimbing',
-                    'next_action' => 'Menunggu review pembimbing',
-                    'status_text' => 'Sedang Direview Pembimbing',
-                    'status_class' => 'warning',
-                    'description' => 'Pengajuan sedang direview oleh dosen pembimbing. Estimasi: 3-5 hari kerja',
-                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
-                    'action_text' => 'Lihat Detail'
-                ];
-                
-            case 'review_kaprodi':
-                return [
-                    'current_step' => 'review_kaprodi',
-                    'next_action' => 'Menunggu review Kaprodi',
-                    'status_text' => 'Sedang Direview Kaprodi',
-                    'status_class' => 'primary',
-                    'description' => 'Dosen pembimbing telah menyetujui, menunggu persetujuan Kaprodi',
-                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
-                    'action_text' => 'Lihat Detail'
-                ];
-                
-            case 'approved':
-                return [
-                    'current_step' => 'approved',
-                    'next_action' => 'Menunggu penjadwalan',
-                    'status_text' => 'Disetujui',
-                    'status_class' => 'success',
-                    'description' => 'Pengajuan telah disetujui, menunggu penjadwalan seminar',
-                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
-                    'action_text' => 'Lihat Detail'
-                ];
-                
-            case 'scheduled':
-                return [
-                    'current_step' => 'scheduled',
-                    'next_action' => 'Persiapan seminar',
-                    'status_text' => 'Terjadwal',
-                    'status_class' => 'info',
-                    'description' => 'Seminar telah dijadwalkan, bersiaplah untuk presentasi',
-                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
-                    'action_text' => 'Lihat Jadwal'
-                ];
-                
-            case 'completed':
-                return [
-                    'current_step' => 'completed',
-                    'next_action' => 'Lanjut ke penelitian',
-                    'status_text' => 'Selesai',
-                    'status_class' => 'success',
-                    'description' => 'Seminar proposal selesai, lanjut ke fase penelitian',
-                    'action_url' => base_url('mahasiswa/penelitian'),
-                    'action_text' => 'Lanjut Penelitian'
-                ];
-                
-            case 'rejected':
-                return [
-                    'current_step' => 'rejected',
-                    'next_action' => 'Perbaiki dan ajukan ulang',
-                    'status_text' => 'Perlu Perbaikan',
-                    'status_class' => 'danger',
-                    'description' => 'Pengajuan perlu diperbaiki sesuai catatan dari pembimbing',
-                    'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
-                    'action_text' => 'Ajukan Ulang'
-                ];
-                
-            default:
-                return [
-                    'current_step' => 'unknown',
-                    'next_action' => 'Hubungi admin',
-                    'status_text' => 'Status Tidak Dikenali',
-                    'status_class' => 'secondary',
-                    'description' => 'Status tidak dikenali, hubungi admin sistem',
-                    'action_url' => base_url('mahasiswa/dashboard'),
-                    'action_text' => 'Dashboard'
-                ];
-        }
-    }
-
-    /**
-     * ✅ NEW: Calculate comprehensive workflow progress
-     */
-    private function _calculate_workflow_progress($proposal, $seminar_data)
-    {
-        $progress = [
-            'percentage' => 0,
-            'current_phase' => 'preparation',
-            'completed_steps' => [],
-            'current_step' => '',
-            'next_step' => '',
-            'timeline_steps' => [
-                'preparation' => ['title' => 'Persiapan', 'desc' => 'Menyiapkan berkas', 'completed' => false],
-                'submission' => ['title' => 'Pengajuan', 'desc' => 'Berkas terkirim', 'completed' => false],
-                'pembimbing_review' => ['title' => 'Review Dosen', 'desc' => 'Evaluasi pembimbing', 'completed' => false],
-                'kaprodi_review' => ['title' => 'Review Kaprodi', 'desc' => 'Persetujuan akhir', 'completed' => false],
-                'scheduling' => ['title' => 'Penjadwalan', 'desc' => 'Penentuan jadwal', 'completed' => false],
-                'completion' => ['title' => 'Selesai', 'desc' => 'Seminar terlaksana', 'completed' => false]
-            ]
-        ];
-        
-        if (!$seminar_data) {
-            $progress['percentage'] = 20;
-            $progress['current_phase'] = 'preparation';
-            $progress['current_step'] = 'Persiapan pengajuan seminar proposal';
-            $progress['next_step'] = 'Ajukan seminar proposal';
-            $progress['timeline_steps']['preparation']['completed'] = true;
-            return $progress;
-        }
-        
-        switch ($seminar_data->status) {
-            case 'draft':
-                $progress['percentage'] = 30;
-                $progress['current_step'] = 'Draft pengajuan dibuat';
-                $progress['next_step'] = 'Kirim pengajuan ke dosen pembimbing';
-                $progress['completed_steps'] = ['preparation'];
-                break;
-                
-            case 'submitted':
-            case 'review_pembimbing':
-                $progress['percentage'] = 50;
-                $progress['current_step'] = 'Menunggu review dosen pembimbing';
-                $progress['next_step'] = 'Review oleh dosen pembimbing';
-                $progress['completed_steps'] = ['preparation', 'submission'];
-                $progress['timeline_steps']['preparation']['completed'] = true;
-                $progress['timeline_steps']['submission']['completed'] = true;
-                break;
-                
-            case 'review_kaprodi':
-                $progress['percentage'] = 70;
-                $progress['current_step'] = 'Sedang direview Kaprodi';
-                $progress['next_step'] = 'Menunggu persetujuan akhir';
-                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review'];
-                $progress['timeline_steps']['preparation']['completed'] = true;
-                $progress['timeline_steps']['submission']['completed'] = true;
-                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
-                break;
-                
-            case 'approved':
-                $progress['percentage'] = 85;
-                $progress['current_step'] = 'Disetujui, menunggu penjadwalan';
-                $progress['next_step'] = 'Penentuan jadwal seminar';
-                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review'];
-                $progress['timeline_steps']['preparation']['completed'] = true;
-                $progress['timeline_steps']['submission']['completed'] = true;
-                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
-                $progress['timeline_steps']['kaprodi_review']['completed'] = true;
-                break;
-                
-            case 'scheduled':
-                $progress['percentage'] = 95;
-                $progress['current_step'] = 'Terjadwal, menunggu pelaksanaan';
-                $progress['next_step'] = 'Pelaksanaan seminar proposal';
-                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review', 'scheduling'];
-                $progress['timeline_steps']['preparation']['completed'] = true;
-                $progress['timeline_steps']['submission']['completed'] = true;
-                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
-                $progress['timeline_steps']['kaprodi_review']['completed'] = true;
-                $progress['timeline_steps']['scheduling']['completed'] = true;
-                break;
-                
-            case 'completed':
-                $progress['percentage'] = 100;
-                $progress['current_step'] = 'Seminar proposal selesai';
-                $progress['next_step'] = 'Lanjut ke fase penelitian';
-                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review', 'scheduling', 'completion'];
-                foreach ($progress['timeline_steps'] as $key => $step) {
-                    $progress['timeline_steps'][$key]['completed'] = true;
-                }
-                break;
-                
-            case 'rejected':
-                $progress['percentage'] = 40;
-                $progress['current_phase'] = 'revision';
-                $progress['current_step'] = 'Ditolak, perlu revisi';
-                $progress['next_step'] = 'Lakukan perbaikan dan ajukan ulang';
-                $progress['completed_steps'] = ['preparation', 'submission'];
-                $progress['timeline_steps']['preparation']['completed'] = true;
-                $progress['timeline_steps']['submission']['completed'] = true;
-                break;
-        }
-        
-        return $progress;
-    }
-
-    /**
-     * ✅ NEW: Determine if student can submit seminar proposal
-     */
-    private function _can_submit_seminar($proposal, $seminar_data, $syarat_jurnal)
-    {
-        // Check basic requirements
-        if (!$syarat_jurnal['eligible']) return false;
-        if (!$proposal || $proposal->workflow_status !== 'bimbingan') return false;
-        
-        // If no existing seminar, can submit
-        if (!$seminar_data) return true;
-        
-        // If existing seminar is rejected or draft, can resubmit
-        if (in_array($seminar_data->status, ['rejected', 'draft'])) return true;
-        
-        return false;
     }
 
     /**
@@ -1399,7 +1406,7 @@ class Seminar_proposal extends CI_Controller {
             if ($this->db->table_exists('jurnal_bimbingan')) {
                 $this->db->select('
                     created_at as tanggal,
-                    CONCAT("Jurnal bimbingan pertemuan ke-", pertemuan_ke, " - ", judul_bimbingan) as aktivitas,
+                    CONCAT("Jurnal bimbingan pertemuan ke-", pertemuan_ke, " - ", materi_bimbingan) as aktivitas,
                     "bimbingan" as jenis,
                     status_validasi
                 ');
@@ -1446,5 +1453,55 @@ class Seminar_proposal extends CI_Controller {
     private function _create_fallback_model()
     {
         return new stdClass();
+    }
+
+    /**
+     * Method untuk testing - bisa dihapus setelah sistem stabil
+     */
+    public function test()
+    {
+        if (ENVIRONMENT !== 'development') {
+            show_404();
+        }
+        
+        echo "<h2>Seminar Proposal Controller Test - FIXED VERSION</h2>";
+        echo "<p><strong>Status:</strong> Fixed Controller berjalan dengan baik! ✅</p>";
+        echo "<p><strong>Base URL:</strong> " . base_url() . "</p>";
+        echo "<p><strong>Current URL:</strong> " . current_url() . "</p>";
+        echo "<p><strong>Controller:</strong> " . $this->router->class . "</p>";
+        echo "<p><strong>Method:</strong> " . $this->router->method . "</p>";
+        
+        echo "<h3>Session Data:</h3>";
+        echo "<pre>" . print_r($this->session->userdata(), true) . "</pre>";
+        
+        echo "<h3>Database Test:</h3>";
+        try {
+            $result = $this->db->query("SELECT COUNT(*) as total FROM mahasiswa")->row();
+            echo "<p>✅ Database connection OK - Total mahasiswa: " . $result->total . "</p>";
+            
+            // Test seminar proposal table
+            $seminar_count = $this->db->query("SELECT COUNT(*) as total FROM seminar_proposal_mahasiswa")->row();
+            echo "<p>✅ Seminar proposal table OK - Total records: " . $seminar_count->total . "</p>";
+            
+            // Test mahasiswa 44 data
+            $mahasiswa_44 = $this->db->query("
+                SELECT pm.*, m.nama, m.nim 
+                FROM proposal_mahasiswa pm 
+                JOIN mahasiswa m ON pm.mahasiswa_id = m.id 
+                WHERE pm.mahasiswa_id = 44
+            ")->result();
+            echo "<p>✅ Test mahasiswa 44 proposals: " . count($mahasiswa_44) . " found</p>";
+            if ($mahasiswa_44) {
+                foreach ($mahasiswa_44 as $prop) {
+                    echo "<p>   - Proposal ID {$prop->id}: workflow_status = '{$prop->workflow_status}', status_kaprodi = '{$prop->status_kaprodi}', status_pembimbing = '{$prop->status_pembimbing}'</p>";
+                }
+            }
+            
+        } catch (Exception $e) {
+            echo "<p>❌ Database error: " . $e->getMessage() . "</p>";
+        }
+        
+        echo "<hr>";
+        echo "<p><a href='" . base_url('mahasiswa/seminar_proposal') . "'>← Kembali ke Dashboard Seminar Proposal</a></p>";
     }
 }

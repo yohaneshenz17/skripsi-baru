@@ -393,22 +393,56 @@ class Seminar_proposal extends CI_Controller {
     private function _load_view($data)
     {
         try {
-            // PERBAIKAN UTAMA: Gunakan template mahasiswa.php sebagai prioritas
-            if (file_exists(VIEWPATH . 'template/mahasiswa.php')) {
-                $this->load->view('template/mahasiswa', $data);
+            // Extract view path dan data lainnya
+            $view_path = isset($data['content']) ? $data['content'] : '';
+            $title = isset($data['title']) ? $data['title'] : 'Seminar Proposal';
+            $styles = isset($data['styles']) ? $data['styles'] : '';
+            $script = isset($data['script']) ? $data['script'] : '';
+            
+            // Remove keys yang tidak perlu dikirim ke view
+            unset($data['content'], $data['styles'], $data['script']);
+            
+            // Render view content menjadi HTML string
+            if (!empty($view_path)) {
+                // Start output buffering
+                ob_start();
+                
+                // Load view dengan data (extract semua variables)
+                extract($data);
+                include(APPPATH . 'views/' . $view_path . '.php');
+                
+                // Get rendered content
+                $content = ob_get_clean();
             } else {
-                // Fallback ke template simple jika template utama tidak ada
-                if (file_exists(VIEWPATH . 'template/mahasiswa_simple.php')) {
-                    $this->load->view('template/mahasiswa_simple', $data);
-                } else {
-                    throw new Exception('Template mahasiswa tidak ditemukan');
-                }
+                $content = '<div class="alert alert-warning">No content specified.</div>';
             }
+            
+            // Prepare final data untuk template
+            $template_data = array(
+                'title' => $title,
+                'content' => $content,
+                'styles' => $styles,
+                'script' => $script
+            );
+            
+            // Load template mahasiswa
+            if (file_exists(VIEWPATH . 'template/mahasiswa.php')) {
+                $this->load->view('template/mahasiswa', $template_data);
+            } else if (file_exists(VIEWPATH . 'template/mahasiswa_simple.php')) {
+                $this->load->view('template/mahasiswa_simple', $template_data);
+            } else {
+                throw new Exception('Template mahasiswa tidak ditemukan');
+            }
+            
         } catch (Exception $e) {
             if (ENVIRONMENT === 'development') {
-                show_error('Template error: ' . $e->getMessage());
+                show_error('View Loading Error: ' . $e->getMessage() . '<br><br>' . 
+                          'View Path: ' . $view_path . '<br>' .
+                          'Available Data: ' . print_r(array_keys($data), true));
             } else {
-                echo "<h1>Error Loading Page</h1><p>Please contact administrator.</p>";
+                // Production error handling
+                $this->session->set_flashdata('error', 'Terjadi kesalahan sistem.');
+                redirect('mahasiswa/dashboard');
             }
         }
     }

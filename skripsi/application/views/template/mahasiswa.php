@@ -931,8 +931,8 @@ $verifikasi = $dataUser ? $dataUser->status : '';
               
               <!-- 4. Seminar Proposal -->
               <li class="nav-item">
-                <a class="nav-link <?= $this->uri->segment(2) == 'seminar' ? 'active' : '' ?>" 
-                   href="<?= base_url() ?>mahasiswa/seminar">
+                <a class="nav-link <?= (in_array($this->uri->segment(2), ['seminar', 'seminar_proposal'])) ? 'active' : '' ?>" 
+                   href="<?= base_url() ?>mahasiswa/seminar_proposal">
                   <i class="ni ni-calendar-grid-58 text-success"></i><span class="nav-link-text">Seminar Proposal</span>
                 </a>
               </li>

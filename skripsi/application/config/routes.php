@@ -51,6 +51,16 @@ $route['mahasiswa/bimbingan/detail_jurnal/(:num)'] = 'mahasiswa/bimbingan/detail
 $route['mahasiswa/bimbingan/export_jurnal'] = 'mahasiswa/bimbingan/export_jurnal';
 
 // =====================================================
+//      SEMINAR PROPOSAL MAHASISWA ROUTES (PHASE 3)
+// =====================================================
+$route['mahasiswa/seminar_proposal'] = 'mahasiswa/seminar_proposal/index';
+$route['mahasiswa/seminar_proposal/ajukan'] = 'mahasiswa/seminar_proposal/ajukan';
+$route['mahasiswa/seminar_proposal/detail/(:num)'] = 'mahasiswa/seminar_proposal/detail/$1';
+$route['mahasiswa/seminar_proposal/proses_pengajuan'] = 'mahasiswa/seminar_proposal/proses_pengajuan';
+$route['mahasiswa/seminar_proposal/get_workflow_status'] = 'mahasiswa/seminar_proposal/get_workflow_status';
+$route['mahasiswa/seminar_proposal/check_requirements'] = 'mahasiswa/seminar_proposal/check_requirements';
+
+// =====================================================
 //      GENERIC ROUTING (HARUS DI BAWAH ROUTING SPESIFIK)
 // =====================================================
 

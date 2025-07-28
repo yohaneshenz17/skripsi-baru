@@ -82,7 +82,6 @@ class Bimbingan extends CI_Controller {
             $data['total_jurnal_tervalidasi'] += (int)$mhs->jurnal_tervalidasi;
         }
         
-        // GUNAKAN STRUKTUR WRAPPER ASLI ANDA
         $this->load->view('dosen/bimbingan', $data);
     }
 
@@ -134,14 +133,484 @@ class Bimbingan extends CI_Controller {
         $data['bimbingan_pending'] = count(array_filter($jurnal_list, function($j) { return $j->status_validasi == '0'; }));
         $data['bimbingan_revisi'] = count(array_filter($jurnal_list, function($j) { return $j->status_validasi == '2'; }));
         
-        // GUNAKAN STRUKTUR WRAPPER ASLI ANDA
         $this->load->view('dosen/bimbingan_detail', $data);
     }
 
-    // [EXISTING METHODS: quick_validasi, validasi_jurnal, tambah_jurnal, edit_jurnal, get_jurnal, delete_jurnal - tetap sama]
+    /**
+     * ✅ FIXED: Quick Validasi Jurnal (AJAX) - WITH EMAIL NOTIFICATION
+     */
+    public function quick_validasi() {
+        // Set header JSON
+        header('Content-Type: application/json');
+        
+        // Validasi request method
+        if ($this->input->method() !== 'post') {
+            echo json_encode(['error' => true, 'message' => 'Method tidak diizinkan']);
+            return;
+        }
+        
+        $dosen_id = $this->session->userdata('id');
+        $jurnal_id = $this->input->post('jurnal_id');
+        $status = $this->input->post('status_validasi'); // 1=validasi, 2=revisi
+        $catatan = $this->input->post('catatan_dosen', true); // XSS filtering
+        
+        try {
+            // Validasi input
+            if (empty($jurnal_id) || !in_array($status, ['1', '2'])) {
+                echo json_encode(['error' => true, 'message' => 'Data tidak valid! Pastikan semua field terisi dengan benar.']);
+                return;
+            }
+            
+            // Cek jurnal milik dosen ini dengan query yang lebih aman
+            $this->db->select('jb.*, pm.dosen_id, m.nama as nama_mahasiswa, m.nim, m.email as email_mahasiswa, pm.judul');
+            $this->db->from('jurnal_bimbingan jb');
+            $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->where('jb.id', (int)$jurnal_id);
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('pm.status_pembimbing', '1'); // Pastikan dosen adalah pembimbing aktif
+            $jurnal = $this->db->get()->row();
+            
+            if (!$jurnal) {
+                echo json_encode(['error' => true, 'message' => 'Jurnal tidak ditemukan atau Anda tidak memiliki akses!']);
+                return;
+            }
+            
+            // Cek apakah jurnal sudah divalidasi sebelumnya
+            if ($jurnal->status_validasi == '1') {
+                echo json_encode(['error' => true, 'message' => 'Jurnal sudah divalidasi sebelumnya!']);
+                return;
+            }
+            
+            // Update status dengan transaction untuk keamanan
+            $this->db->trans_start();
+            
+            $update_data = [
+                'status_validasi' => $status,
+                'validasi_oleh' => $dosen_id,
+                'tanggal_validasi' => date('Y-m-d H:i:s'),
+                'catatan_dosen' => $catatan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->db->where('id', $jurnal_id);
+            $this->db->update('jurnal_bimbingan', $update_data);
+            
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                echo json_encode(['error' => true, 'message' => 'Gagal memperbarui status jurnal! Silakan coba lagi.']);
+                return;
+            }
+            
+            // ✅ NEW: Kirim email notifikasi ke mahasiswa
+            $this->_send_validation_notification($jurnal, $status, $catatan);
+            
+            // Response sukses dengan detail
+            $status_text = ($status == '1') ? 'divalidasi' : 'dikembalikan untuk revisi';
+            $message = "Jurnal bimbingan {$jurnal->nama_mahasiswa} ({$jurnal->nim}) berhasil {$status_text}! Email notifikasi telah dikirim.";
+            
+            echo json_encode([
+                'error' => false, 
+                'message' => $message,
+                'status' => $status,
+                'jurnal_id' => $jurnal_id
+            ]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in quick_validasi: ' . $e->getMessage());
+            echo json_encode(['error' => true, 'message' => 'Terjadi kesalahan sistem! Silakan hubungi administrator.']);
+        }
+    }
 
     /**
-     * ✅ NEW: Export Jurnal ke PDF - FIXED FORMAT SAMA SEPERTI STAF
+     * ✅ FIXED: Validasi Jurnal dengan Form - WITH EMAIL NOTIFICATION
+     */
+    public function validasi_jurnal() {
+        header('Content-Type: application/json');
+        
+        if ($this->input->method() !== 'post') {
+            echo json_encode(['error' => true, 'message' => 'Method tidak diizinkan']);
+            return;
+        }
+        
+        $dosen_id = $this->session->userdata('id');
+        $jurnal_id = $this->input->post('jurnal_id');
+        $status = $this->input->post('status');
+        $catatan = $this->input->post('catatan_dosen', true);
+        
+        try {
+            // Validasi input yang lebih ketat
+            if (empty($jurnal_id) || !is_numeric($jurnal_id) || !in_array($status, ['1', '2'])) {
+                echo json_encode(['error' => true, 'message' => 'Data tidak valid! Pastikan semua field terisi dengan benar.']);
+                return;
+            }
+            
+            // Jika status revisi, catatan harus ada
+            if ($status == '2' && empty(trim($catatan))) {
+                echo json_encode(['error' => true, 'message' => 'Catatan dosen wajib diisi untuk jurnal yang perlu revisi!']);
+                return;
+            }
+            
+            // Cek jurnal milik dosen ini
+            $this->db->select('jb.*, pm.dosen_id, m.nama as nama_mahasiswa, m.nim, m.email as email_mahasiswa, pm.judul');
+            $this->db->from('jurnal_bimbingan jb');
+            $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->where('jb.id', (int)$jurnal_id);
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('pm.status_pembimbing', '1');
+            $jurnal = $this->db->get()->row();
+            
+            if (!$jurnal) {
+                echo json_encode(['error' => true, 'message' => 'Jurnal tidak ditemukan atau Anda tidak memiliki akses!']);
+                return;
+            }
+            
+            // Cek apakah jurnal sudah divalidasi
+            if ($jurnal->status_validasi == '1') {
+                echo json_encode(['error' => true, 'message' => 'Jurnal sudah divalidasi sebelumnya dan tidak dapat diubah!']);
+                return;
+            }
+            
+            // Update dengan transaction
+            $this->db->trans_start();
+            
+            $update_data = [
+                'status_validasi' => $status,
+                'catatan_dosen' => $catatan,
+                'validasi_oleh' => $dosen_id,
+                'tanggal_validasi' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->db->where('id', $jurnal_id);
+            $this->db->update('jurnal_bimbingan', $update_data);
+            
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                echo json_encode(['error' => true, 'message' => 'Gagal memperbarui jurnal! Silakan coba lagi.']);
+                return;
+            }
+            
+            // ✅ NEW: Kirim email notifikasi ke mahasiswa
+            $this->_send_validation_notification($jurnal, $status, $catatan);
+            
+            $status_text = ($status == '1') ? 'divalidasi' : 'dikembalikan untuk revisi';
+            $message = "Jurnal bimbingan {$jurnal->nama_mahasiswa} ({$jurnal->nim}) berhasil {$status_text}! Email notifikasi telah dikirim.";
+            
+            echo json_encode([
+                'error' => false, 
+                'message' => $message,
+                'status' => $status,
+                'jurnal_id' => $jurnal_id
+            ]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in validasi_jurnal: ' . $e->getMessage());
+            echo json_encode(['error' => true, 'message' => 'Terjadi kesalahan sistem! Silakan hubungi administrator.']);
+        }
+    }
+
+    /**
+     * ✅ FIXED: Get Jurnal Data (AJAX)
+     */
+    public function get_jurnal() {
+        header('Content-Type: application/json');
+        
+        if (!$this->input->is_ajax_request()) {
+            echo json_encode(['error' => true, 'message' => 'Invalid request']);
+            return;
+        }
+        
+        $jurnal_id = $this->input->post('jurnal_id') ?: $this->uri->segment(4);
+        $dosen_id = $this->session->userdata('id');
+        
+        try {
+            if (empty($jurnal_id) || !is_numeric($jurnal_id)) {
+                echo json_encode(['error' => true, 'message' => 'ID jurnal tidak valid!']);
+                return;
+            }
+            
+            // Get jurnal data dengan validasi akses
+            $this->db->select('jb.*, pm.dosen_id, m.nama as nama_mahasiswa, m.nim');
+            $this->db->from('jurnal_bimbingan jb');
+            $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->where('jb.id', (int)$jurnal_id);
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('pm.status_pembimbing', '1');
+            $jurnal = $this->db->get()->row();
+            
+            if (!$jurnal) {
+                echo json_encode(['error' => true, 'message' => 'Jurnal tidak ditemukan atau Anda tidak memiliki akses!']);
+                return;
+            }
+            
+            echo json_encode([
+                'error' => false,
+                'data' => $jurnal
+            ]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in get_jurnal: ' . $e->getMessage());
+            echo json_encode(['error' => true, 'message' => 'Terjadi kesalahan saat mengambil data jurnal!']);
+        }
+    }
+
+    /**
+     * ✅ FIXED: Hapus Jurnal Bimbingan - DAPAT HAPUS SEMUA STATUS
+     */
+    public function delete_jurnal() {
+        header('Content-Type: application/json');
+        
+        if ($this->input->method() !== 'post') {
+            echo json_encode(['error' => true, 'message' => 'Method tidak diizinkan']);
+            return;
+        }
+        
+        $jurnal_id = $this->input->post('jurnal_id');
+        $dosen_id = $this->session->userdata('id');
+        
+        try {
+            if (empty($jurnal_id) || !is_numeric($jurnal_id)) {
+                echo json_encode(['error' => true, 'message' => 'ID jurnal tidak valid!']);
+                return;
+            }
+            
+            // Validasi jurnal dengan akses yang ketat
+            $this->db->select('jb.*, pm.dosen_id, m.nama as nama_mahasiswa, m.nim');
+            $this->db->from('jurnal_bimbingan jb');
+            $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->where('jb.id', (int)$jurnal_id);
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('pm.status_pembimbing', '1');
+            $jurnal = $this->db->get()->row();
+            
+            if (!$jurnal) {
+                echo json_encode(['error' => true, 'message' => 'Jurnal tidak ditemukan atau Anda tidak memiliki akses!']);
+                return;
+            }
+            
+            // ✅ PERUBAHAN: Hapus pengecekan status validasi - dosen bisa hapus semua jurnal
+            // Dosen pembimbing memiliki hak penuh untuk mengelola jurnal bimbingan
+            
+            // Hapus dengan transaction
+            $this->db->trans_start();
+            $this->db->where('id', $jurnal_id);
+            $this->db->delete('jurnal_bimbingan');
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                echo json_encode(['error' => true, 'message' => 'Gagal menghapus jurnal! Silakan coba lagi.']);
+                return;
+            }
+            
+            $status_desc = '';
+            if ($jurnal->status_validasi == '1') {
+                $status_desc = ' (sudah divalidasi)';
+            } elseif ($jurnal->status_validasi == '2') {
+                $status_desc = ' (perlu revisi)';
+            } else {
+                $status_desc = ' (pending)';
+            }
+            
+            echo json_encode([
+                'error' => false, 
+                'message' => "Jurnal bimbingan {$jurnal->nama_mahasiswa} ({$jurnal->nim}) pertemuan ke-{$jurnal->pertemuan_ke}{$status_desc} berhasil dihapus!"
+            ]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in delete_jurnal: ' . $e->getMessage());
+            echo json_encode(['error' => true, 'message' => 'Terjadi kesalahan sistem! Silakan hubungi administrator.']);
+        }
+    }
+
+    /**
+     * ✅ FIXED: Tambah Jurnal Bimbingan
+     */
+    public function tambah_jurnal() {
+        header('Content-Type: application/json');
+        
+        if ($this->input->method() !== 'post') {
+            echo json_encode(['error' => true, 'message' => 'Method tidak diizinkan']);
+            return;
+        }
+        
+        $dosen_id = $this->session->userdata('id');
+        $proposal_id = $this->input->post('proposal_id');
+        $pertemuan_ke = $this->input->post('pertemuan_ke');
+        $tanggal_bimbingan = $this->input->post('tanggal_bimbingan');
+        $materi_bimbingan = $this->input->post('materi_bimbingan', true);
+        $tindak_lanjut = $this->input->post('tindak_lanjut', true);
+        $catatan_dosen = $this->input->post('catatan_dosen', true);
+        
+        try {
+            // Validasi input wajib
+            if (empty($proposal_id) || empty($tanggal_bimbingan) || empty($materi_bimbingan)) {
+                echo json_encode(['error' => true, 'message' => 'Data wajib tidak lengkap! Pastikan proposal, tanggal, dan materi bimbingan terisi.']);
+                return;
+            }
+            
+            if (empty($pertemuan_ke) || !is_numeric($pertemuan_ke) || $pertemuan_ke < 1) {
+                echo json_encode(['error' => true, 'message' => 'Pertemuan ke- harus berupa angka positif!']);
+                return;
+            }
+            
+            // Validasi tanggal
+            if (!strtotime($tanggal_bimbingan)) {
+                echo json_encode(['error' => true, 'message' => 'Format tanggal tidak valid!']);
+                return;
+            }
+            
+            // Validasi proposal milik dosen ini
+            $this->db->select('pm.*, m.nama as nama_mahasiswa, m.nim');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->where('pm.id', (int)$proposal_id);
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('pm.status_pembimbing', '1');
+            $proposal = $this->db->get()->row();
+            
+            if (!$proposal) {
+                echo json_encode(['error' => true, 'message' => 'Proposal tidak ditemukan atau Anda tidak memiliki akses!']);
+                return;
+            }
+            
+            // Cek duplikasi pertemuan
+            $this->db->where('proposal_id', $proposal_id);
+            $this->db->where('pertemuan_ke', $pertemuan_ke);
+            $existing = $this->db->get('jurnal_bimbingan')->row();
+            
+            if ($existing) {
+                echo json_encode(['error' => true, 'message' => "Pertemuan ke-{$pertemuan_ke} sudah ada! Silakan gunakan nomor pertemuan yang lain."]);
+                return;
+            }
+            
+            // Insert jurnal dengan transaction
+            $this->db->trans_start();
+            
+            $data_jurnal = [
+                'proposal_id' => $proposal_id,
+                'pertemuan_ke' => $pertemuan_ke,
+                'tanggal_bimbingan' => $tanggal_bimbingan,
+                'materi_bimbingan' => $materi_bimbingan,
+                'tindak_lanjut' => $tindak_lanjut,
+                'catatan_dosen' => $catatan_dosen,
+                'status_validasi' => '1', // Langsung tervalidasi karena dibuat dosen
+                'validasi_oleh' => $dosen_id,
+                'tanggal_validasi' => date('Y-m-d H:i:s'),
+                'created_by' => 'dosen',
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->db->insert('jurnal_bimbingan', $data_jurnal);
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                echo json_encode(['error' => true, 'message' => 'Gagal menambahkan jurnal bimbingan! Silakan coba lagi.']);
+                return;
+            }
+            
+            echo json_encode([
+                'error' => false, 
+                'message' => "Jurnal bimbingan pertemuan ke-{$pertemuan_ke} untuk {$proposal->nama_mahasiswa} ({$proposal->nim}) berhasil ditambahkan dan langsung tervalidasi!"
+            ]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in tambah_jurnal: ' . $e->getMessage());
+            echo json_encode(['error' => true, 'message' => 'Terjadi kesalahan sistem! Silakan hubungi administrator.']);
+        }
+    }
+
+    /**
+     * ✅ FIXED: Edit Jurnal Bimbingan
+     */
+    public function edit_jurnal($jurnal_id = null) {
+        header('Content-Type: application/json');
+        
+        $jurnal_id = $jurnal_id ?: $this->input->post('jurnal_id');
+        $dosen_id = $this->session->userdata('id');
+        
+        try {
+            if (empty($jurnal_id) || !is_numeric($jurnal_id)) {
+                echo json_encode(['error' => true, 'message' => 'ID jurnal tidak valid!']);
+                return;
+            }
+            
+            // Get jurnal data dengan validasi akses
+            $this->db->select('jb.*, pm.dosen_id, m.nama as nama_mahasiswa, m.nim');
+            $this->db->from('jurnal_bimbingan jb');
+            $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->where('jb.id', (int)$jurnal_id);
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('pm.status_pembimbing', '1');
+            $jurnal = $this->db->get()->row();
+            
+            if (!$jurnal) {
+                echo json_encode(['error' => true, 'message' => 'Jurnal tidak ditemukan atau Anda tidak memiliki akses!']);
+                return;
+            }
+            
+            if ($this->input->method() === 'post') {
+                // Process update
+                $tanggal_bimbingan = $this->input->post('tanggal_bimbingan');
+                $materi_bimbingan = $this->input->post('materi_bimbingan', true);
+                $tindak_lanjut = $this->input->post('tindak_lanjut', true);
+                $catatan_dosen = $this->input->post('catatan_dosen', true);
+                
+                // Validasi input wajib
+                if (empty($tanggal_bimbingan) || empty($materi_bimbingan)) {
+                    echo json_encode(['error' => true, 'message' => 'Tanggal dan materi bimbingan wajib diisi!']);
+                    return;
+                }
+                
+                // Validasi tanggal
+                if (!strtotime($tanggal_bimbingan)) {
+                    echo json_encode(['error' => true, 'message' => 'Format tanggal tidak valid!']);
+                    return;
+                }
+                
+                $this->db->trans_start();
+                
+                $update_data = [
+                    'tanggal_bimbingan' => $tanggal_bimbingan,
+                    'materi_bimbingan' => $materi_bimbingan,
+                    'tindak_lanjut' => $tindak_lanjut,
+                    'catatan_dosen' => $catatan_dosen,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                
+                $this->db->where('id', $jurnal_id);
+                $this->db->update('jurnal_bimbingan', $update_data);
+                
+                $this->db->trans_complete();
+                
+                if ($this->db->trans_status() === FALSE) {
+                    echo json_encode(['error' => true, 'message' => 'Gagal memperbarui jurnal bimbingan! Silakan coba lagi.']);
+                    return;
+                }
+                
+                echo json_encode([
+                    'error' => false, 
+                    'message' => "Jurnal bimbingan {$jurnal->nama_mahasiswa} ({$jurnal->nim}) berhasil diperbarui!"
+                ]);
+            } else {
+                // Return jurnal data for editing (GET request)
+                echo json_encode(['error' => false, 'data' => $jurnal]);
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in edit_jurnal: ' . $e->getMessage());
+            echo json_encode(['error' => true, 'message' => 'Terjadi kesalahan sistem! Silakan hubungi administrator.']);
+        }
+    }
+
+    /**
+     * ✅ IMPROVED: Export Jurnal ke PDF
      */
     public function export_jurnal($proposal_id) {
         $dosen_id = $this->session->userdata('id');
@@ -153,7 +622,7 @@ class Bimbingan extends CI_Controller {
         }
         
         try {
-            // ✅ Query proposal dengan data kaprodi lengkap (SAMA SEPERTI STAF)
+            // Query proposal dengan data lengkap
             $proposal = $this->_get_proposal_data($proposal_id);
             if (!$proposal) {
                 $this->session->set_flashdata('error', 'Data proposal tidak ditemukan!');
@@ -168,7 +637,7 @@ class Bimbingan extends CI_Controller {
                 return;
             }
             
-            // ✅ Jika kaprodi tidak ada dari JOIN, ambil manual
+            // Jika kaprodi tidak ada dari JOIN, ambil manual
             if (empty($proposal->nama_kaprodi) && !empty($proposal->prodi_id)) {
                 $kaprodi_data = $this->_get_kaprodi_by_prodi($proposal->prodi_id);
                 if ($kaprodi_data) {
@@ -178,7 +647,7 @@ class Bimbingan extends CI_Controller {
                 }
             }
             
-            // ✅ Query jurnal dengan validator
+            // Query jurnal dengan validator
             $this->db->select('
                 jb.*,
                 d.nama as nama_dosen_validator,
@@ -190,7 +659,13 @@ class Bimbingan extends CI_Controller {
             $this->db->order_by('jb.pertemuan_ke', 'ASC');
             $jurnal_bimbingan = $this->db->get()->result();
             
-            // ✅ Prepare data untuk template
+            if (empty($jurnal_bimbingan)) {
+                $this->session->set_flashdata('error', 'Tidak ada data jurnal bimbingan untuk di-export!');
+                redirect('dosen/bimbingan/detail_mahasiswa/' . $proposal_id);
+                return;
+            }
+            
+            // Prepare data untuk template
             $data = [
                 'proposal' => $proposal,
                 'jurnal_bimbingan' => $jurnal_bimbingan,
@@ -198,82 +673,15 @@ class Bimbingan extends CI_Controller {
                 'generated_at' => date('d F Y H:i:s')
             ];
             
-            // ✅ GUNAKAN TEMPLATE CLEAN YANG SAMA SEPERTI STAF
+            // Generate HTML untuk PDF
             $html = $this->load->view('dosen/pdf/jurnal_bimbingan_clean', $data, true);
             $filename = 'Jurnal_Bimbingan_' . str_replace([' ', ',', '.'], '_', $proposal->nama_mahasiswa) . '_' . date('Y-m-d') . '.html';
             
-            // ✅ Output HTML yang clean untuk browser print (SAMA SEPERTI STAF)
+            // Output HTML yang clean untuk browser print
             header('Content-Type: text/html; charset=utf-8');
             header('Content-Disposition: inline; filename="' . str_replace('.html', '.pdf', $filename) . '"');
             
-            echo '<!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>' . htmlspecialchars('Jurnal Bimbingan - ' . $proposal->nama_mahasiswa) . '</title>
-                <style>
-                    @media print { 
-                        @page { 
-                            size: A4 landscape; 
-                            margin: 12mm 8mm; 
-                        }
-                        body { margin: 0; }
-                        .no-print { display: none !important; }
-                    }
-                    body { 
-                        font-family: "Times New Roman", Times, serif; 
-                        margin: 0;
-                        padding: 10px;
-                    }
-                    .print-info {
-                        background: #e8f4fd;
-                        border: 1px solid #2c5aa0;
-                        padding: 10px;
-                        margin-bottom: 15px;
-                        text-align: center;
-                        font-size: 12px;
-                        color: #2c5aa0;
-                    }
-                    .print-btn {
-                        background: #2c5aa0;
-                        color: white;
-                        border: none;
-                        padding: 8px 15px;
-                        cursor: pointer;
-                        border-radius: 4px;
-                        margin: 0 5px;
-                        font-size: 11px;
-                    }
-                    .print-btn:hover {
-                        background: #1e3f73;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="print-info no-print">
-                    📄 <strong>Jurnal Bimbingan - ' . htmlspecialchars($proposal->nama_mahasiswa) . '</strong><br>
-                    Klik tombol di bawah untuk mencetak atau simpan sebagai PDF. Pastikan pilih orientasi <strong>Landscape</strong> di pengaturan print.
-                    <br><br>
-                    <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
-                    <button class="print-btn" onclick="window.close()">❌ Tutup</button>
-                </div>
-                
-                ' . $html . '
-                
-                <script>
-                    // Auto-focus untuk print
-                    document.addEventListener("DOMContentLoaded", function() {
-                        // Keyboard shortcut Ctrl+P
-                        document.addEventListener("keydown", function(event) {
-                            if (event.ctrlKey && event.key === "p") {
-                                event.preventDefault();
-                                window.print();
-                            }
-                        });
-                    });
-                </script>
-            </body>
-            </html>';
+            echo $this->_generate_pdf_html($html, $proposal->nama_mahasiswa);
             exit;
             
         } catch (Exception $e) {
@@ -284,7 +692,7 @@ class Bimbingan extends CI_Controller {
     }
 
     /**
-     * ✅ NEW: Export All Jurnal Bimbingan ke Excel (SAMA SEPERTI STAF)
+     * ✅ IMPROVED: Export All Jurnal ke Excel - FORMAT EXCEL YANG RAPI
      */
     public function export_all_excel() {
         $dosen_id = $this->session->userdata('id');
@@ -317,8 +725,150 @@ class Bimbingan extends CI_Controller {
         }
     }
 
+    // ========================================
+    // PRIVATE HELPER METHODS
+    // ========================================
+
     /**
-     * ✅ NEW: Export Excel XLSX menggunakan PhpSpreadsheet (ADAPTASI DARI STAF)
+     * ✅ NEW: Send Email Notification untuk Validasi/Revisi Jurnal
+     */
+    private function _send_validation_notification($jurnal, $status, $catatan) {
+        try {
+            // Load email library
+            $this->load->library('email');
+            
+            // Konfigurasi email
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
+            
+            $this->email->initialize($config);
+            
+            $dosen_nama = $this->session->userdata('nama');
+            
+            if ($status == '1') {
+                // Jurnal divalidasi
+                $subject = "✅ Jurnal Bimbingan Divalidasi - Pertemuan ke-{$jurnal->pertemuan_ke}";
+                $status_badge = "background-color: #28a745; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px;";
+                $status_text = "DIVALIDASI";
+                $status_desc = "Jurnal bimbingan Anda telah divalidasi dan disetujui oleh dosen pembimbing.";
+                $action_text = "Lanjutkan ke pertemuan berikutnya";
+                $action_color = "#28a745";
+            } else {
+                // Jurnal perlu revisi
+                $subject = "⚠️ Jurnal Bimbingan Perlu Revisi - Pertemuan ke-{$jurnal->pertemuan_ke}";
+                $status_badge = "background-color: #ffc107; color: #212529; padding: 5px 10px; border-radius: 15px; font-size: 12px;";
+                $status_text = "PERLU REVISI";
+                $status_desc = "Dosen pembimbing meminta revisi pada jurnal bimbingan Anda.";
+                $action_text = "Revisi Jurnal Sekarang";
+                $action_color = "#ffc107";
+            }
+            
+            $message = "<!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='UTF-8'>
+                <title>{$subject}</title>
+            </head>
+            <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0;'>
+                <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;'>
+                    <!-- Header -->
+                    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px 20px; text-align: center;'>
+                        <h1 style='margin: 0; font-size: 24px; font-weight: bold;'>📚 Notifikasi Jurnal Bimbingan</h1>
+                        <p style='margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;'>STK Santo Yakobus Merauke</p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style='padding: 30px 20px;'>
+                        <div style='text-align: center; margin-bottom: 25px;'>
+                            <span style='{$status_badge}'>{$status_text}</span>
+                        </div>
+                        
+                        <div style='background-color: #f8f9fa; border-left: 4px solid {$action_color}; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0;'>
+                            <h3 style='margin: 0 0 10px 0; color: #2c3e50; font-size: 18px;'>Halo, {$jurnal->nama_mahasiswa}!</h3>
+                            <p style='margin: 0; font-size: 14px; color: #555;'>{$status_desc}</p>
+                        </div>
+                        
+                        <div style='background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 20px 0;'>
+                            <h4 style='margin: 0 0 15px 0; color: #495057; border-bottom: 2px solid #e9ecef; padding-bottom: 8px;'>📋 Detail Jurnal Bimbingan</h4>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: bold; width: 30%;'>Pertemuan ke-:</td>
+                                    <td style='padding: 8px 0;'>{$jurnal->pertemuan_ke}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: bold;'>Tanggal:</td>
+                                    <td style='padding: 8px 0;'>" . date('d F Y', strtotime($jurnal->tanggal_bimbingan)) . "</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: bold;'>Judul Proposal:</td>
+                                    <td style='padding: 8px 0;'>{$jurnal->judul}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: bold;'>Dosen Pembimbing:</td>
+                                    <td style='padding: 8px 0;'>{$dosen_nama}</td>
+                                </tr>";
+                                
+            if (!empty($catatan)) {
+                $message .= "<tr>
+                                    <td style='padding: 8px 0; font-weight: bold; vertical-align: top;'>Catatan Dosen:</td>
+                                    <td style='padding: 8px 0; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 10px;'>" . nl2br(htmlspecialchars($catatan)) . "</td>
+                                </tr>";
+            }
+            
+            $message .= "    </table>
+                        </div>
+                        
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <a href='" . base_url('mahasiswa/bimbingan') . "' 
+                               style='background-color: {$action_color}; color: white; padding: 12px 25px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold;'>
+                               📝 {$action_text}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6;'>
+                        <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                            Email ini dikirim secara otomatis oleh<br>
+                            <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                            STK Santo Yakobus Merauke
+                        </p>
+                        <p style='margin: 10px 0 0 0; font-size: 11px; color: #adb5bd;'>
+                            Diterima pada: " . date('d F Y H:i:s') . " WIT
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            
+            // Send email
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
+            $this->email->to($jurnal->email_mahasiswa);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', "Email notifikasi berhasil dikirim ke mahasiswa: {$jurnal->email_mahasiswa}");
+            } else {
+                log_message('error', "Gagal mengirim email notifikasi: " . $this->email->print_debugger());
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending validation notification: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ✅ NEW: Export Excel XLSX menggunakan PhpSpreadsheet
      */
     private function _export_xlsx_phpspreadsheet($mahasiswa_data) {
         try {
@@ -610,7 +1160,79 @@ class Bimbingan extends CI_Controller {
     }
 
     /**
-     * ✅ NEW: Fallback export ke CSV
+     * Generate HTML wrapper untuk PDF
+     */
+    private function _generate_pdf_html($content, $nama_mahasiswa) {
+        return '<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>' . htmlspecialchars('Jurnal Bimbingan - ' . $nama_mahasiswa) . '</title>
+            <style>
+                @media print { 
+                    @page { 
+                        size: A4 landscape; 
+                        margin: 12mm 8mm; 
+                    }
+                    body { margin: 0; }
+                    .no-print { display: none !important; }
+                }
+                body { 
+                    font-family: "Times New Roman", Times, serif; 
+                    margin: 0;
+                    padding: 10px;
+                }
+                .print-info {
+                    background: #e8f4fd;
+                    border: 1px solid #2c5aa0;
+                    padding: 10px;
+                    margin-bottom: 15px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #2c5aa0;
+                }
+                .print-btn {
+                    background: #2c5aa0;
+                    color: white;
+                    border: none;
+                    padding: 8px 15px;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    margin: 0 5px;
+                    font-size: 11px;
+                }
+                .print-btn:hover {
+                    background: #1e3f73;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="print-info no-print">
+                📄 <strong>Jurnal Bimbingan - ' . htmlspecialchars($nama_mahasiswa) . '</strong><br>
+                Klik tombol di bawah untuk mencetak atau simpan sebagai PDF. Pastikan pilih orientasi <strong>Landscape</strong> di pengaturan print.
+                <br><br>
+                <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+                <button class="print-btn" onclick="window.close()">❌ Tutup</button>
+            </div>
+            
+            ' . $content . '
+            
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    document.addEventListener("keydown", function(event) {
+                        if (event.ctrlKey && event.key === "p") {
+                            event.preventDefault();
+                            window.print();
+                        }
+                    });
+                });
+            </script>
+        </body>
+        </html>';
+    }
+
+    /**
+     * ✅ Fallback export ke CSV yang kompatibel dengan Excel
      */
     private function _export_to_csv($mahasiswa_data) {
         $filename = 'Jurnal_Bimbingan_' . str_replace([' ', '.'], '_', $this->session->userdata('nama')) . '_' . date('Y-m-d_H-i-s') . '.csv';
@@ -621,14 +1243,16 @@ class Bimbingan extends CI_Controller {
         header('Expires: 0');
         
         $output = fopen('php://output', 'w');
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM untuk Excel
         
+        // Header
         fputcsv($output, [
             'No', 'NIM', 'Nama Mahasiswa', 'Program Studi', 'Judul Proposal',
             'Total Bimbingan', 'Tervalidasi', 'Pending', 'Revisi', 'Progress %',
             'Status Workflow', 'Tanggal Pengajuan', 'Email Mahasiswa'
         ]);
         
+        // Data rows
         foreach ($mahasiswa_data as $index => $mhs) {
             $progress_persen = $mhs->total_bimbingan > 0 ? min(($mhs->total_bimbingan / 16) * 100, 100) : 0;
             
@@ -654,7 +1278,7 @@ class Bimbingan extends CI_Controller {
     }
 
     /**
-     * ✅ NEW: Get all bimbingan data untuk export (ADAPTASI DARI STAF)
+     * Get all bimbingan data untuk export
      */
     private function _get_all_bimbingan_data($dosen_id) {
         $this->db->select('
@@ -685,7 +1309,7 @@ class Bimbingan extends CI_Controller {
     }
 
     /**
-     * ✅ EXISTING: Get proposal data lengkap DENGAN DATA KAPRODI (SAMA SEPERTI STAF)
+     * Get proposal data lengkap dengan data kaprodi
      */
     private function _get_proposal_data($proposal_id) {
         try {
@@ -724,7 +1348,7 @@ class Bimbingan extends CI_Controller {
     }
 
     /**
-     * ✅ EXISTING: Method untuk mendapatkan data kaprodi
+     * Get kaprodi data by prodi ID
      */
     private function _get_kaprodi_by_prodi($prodi_id) {
         try {
@@ -762,6 +1386,4 @@ class Bimbingan extends CI_Controller {
             return null;
         }
     }
-
-    // [EXISTING METHODS LAINNYA TETAP SAMA...]
 }

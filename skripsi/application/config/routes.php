@@ -68,7 +68,6 @@ $route['mahasiswa/seminar_proposal/ajukan'] = 'mahasiswa/seminar_proposal/ajukan
 $route['mahasiswa/seminar_proposal/submit_ajukan'] = 'mahasiswa/seminar_proposal/submit_ajukan';
 $route['mahasiswa/seminar_proposal/detail/(:num)'] = 'mahasiswa/seminar_proposal/detail/$1';
 
-
 // =====================================================
 //      GENERIC ROUTING (HARUS DI BAWAH ROUTING SPESIFIK)
 // =====================================================
@@ -231,6 +230,19 @@ $route['dosen/seminar_proposal/detail/(:num)'] = 'dosen/seminar_proposal/detail/
 $route['dosen/seminar_proposal/rekomendasi'] = 'dosen/seminar_proposal/rekomendasi';
 $route['dosen/seminar_proposal/input_nilai'] = 'dosen/seminar_proposal/input_nilai';
 $route['dosen/seminar_proposal/berita_acara/(:num)'] = 'dosen/seminar_proposal/berita_acara/$1';
+
+// Routes dengan dash untuk konsistensi URL (TAMBAHAN BARU)
+$route['dosen/seminar-proposal'] = 'dosen/seminar_proposal';
+$route['dosen/seminar-proposal/detail/(:num)'] = 'dosen/seminar_proposal/detail/$1';
+$route['dosen/seminar-proposal/rekomendasi'] = 'dosen/seminar_proposal/rekomendasi';
+
+// Route untuk penilaian (future development) (TAMBAHAN BARU)
+$route['dosen/seminar_proposal/penilaian/(:num)'] = 'dosen/seminar_proposal/penilaian/$1';
+$route['dosen/seminar-proposal/penilaian/(:num)'] = 'dosen/seminar_proposal/penilaian/$1';
+
+// Route index eksplisit (TAMBAHAN BARU)
+$route['dosen/seminar_proposal/index'] = 'dosen/seminar_proposal/index';
+$route['dosen/seminar-proposal/index'] = 'dosen/seminar_proposal/index';
 
 // =====================================================
 //      PHASE 4: PENELITIAN

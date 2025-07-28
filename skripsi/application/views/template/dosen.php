@@ -504,6 +504,12 @@
               <a class="nav-link" href="<?= base_url() ?>dosen/seminar_proposal">
                 <i class="ni ni-books text-danger"></i>
                 <span class="nav-link-text">Seminar Proposal</span>
+                <?php
+                $count = get_seminar_proposal_badge_count();
+                if($count > 0) {
+                    echo '<span class="badge badge-warning badge-sm ml-2" style="font-size: 0.7rem;">' . $count . '</span>';
+                }
+                ?>
               </a>
             </li>
             

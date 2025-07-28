@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Seminar Proposal Controller - Role Mahasiswa (FIXED VERSION)
- * Updated untuk mengatasi konflik routing dan authentication
+ * Updated untuk menggunakan template mahasiswa.php yang konsisten
  * 
  * Controller untuk mengelola seminar proposal dari sisi mahasiswa
  * Sesuai dengan workflow yang telah ditetapkan
@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Mahasiswa
  * @category    Seminar Proposal
  * @author      Unit SIPD STK Santo Yakobus
- * @version     2.1 (Fixed)
+ * @version     2.2 (Fixed Final)
  */
 
 class Seminar_proposal extends CI_Controller {
@@ -75,6 +75,7 @@ class Seminar_proposal extends CI_Controller {
     /**
      * Dashboard Seminar Proposal Mahasiswa
      * URL: https://stkyakobus.ac.id/skripsi/mahasiswa/seminar_proposal
+     * URL: https://stkyakobus.ac.id/skripsi/mahasiswa/seminar (redirect)
      */
     public function index()
     {
@@ -185,8 +186,16 @@ class Seminar_proposal extends CI_Controller {
         }
         
         echo "<h3>Template Test:</h3>";
-        $template = VIEWPATH . 'template/mahasiswa_simple.php';
-        if (file_exists($template)) {
+        $template_normal = VIEWPATH . 'template/mahasiswa.php';
+        $template_simple = VIEWPATH . 'template/mahasiswa_simple.php';
+        
+        if (file_exists($template_normal)) {
+            echo "<p>✅ Template mahasiswa.php exists</p>";
+        } else {
+            echo "<p>❌ Template mahasiswa.php missing</p>";
+        }
+        
+        if (file_exists($template_simple)) {
             echo "<p>✅ Template mahasiswa_simple.php exists</p>";
         } else {
             echo "<p>❌ Template mahasiswa_simple.php missing</p>";
@@ -379,17 +388,21 @@ class Seminar_proposal extends CI_Controller {
     // =================================================================
 
     /**
-     * Load view dengan error handling
+     * FIXED: Load view dengan template mahasiswa.php (PRIORITAS UTAMA)
      */
     private function _load_view($data)
     {
         try {
-            // Cek template exists
-            if (file_exists(VIEWPATH . 'template/mahasiswa_simple.php')) {
-                $this->load->view('template/mahasiswa_simple', $data);
-            } else {
-                // Fallback ke template biasa
+            // PERBAIKAN UTAMA: Gunakan template mahasiswa.php sebagai prioritas
+            if (file_exists(VIEWPATH . 'template/mahasiswa.php')) {
                 $this->load->view('template/mahasiswa', $data);
+            } else {
+                // Fallback ke template simple jika template utama tidak ada
+                if (file_exists(VIEWPATH . 'template/mahasiswa_simple.php')) {
+                    $this->load->view('template/mahasiswa_simple', $data);
+                } else {
+                    throw new Exception('Template mahasiswa tidak ditemukan');
+                }
             }
         } catch (Exception $e) {
             if (ENVIRONMENT === 'development') {

@@ -1,5 +1,5 @@
 <!-- 
-Dashboard Seminar Proposal Dosen - Menggunakan Template Existing
+Dashboard Seminar Proposal Dosen - FIXED VERSION
 File: application/views/dosen/seminar_proposal/index.php
 -->
 
@@ -192,7 +192,7 @@ File: application/views/dosen/seminar_proposal/index.php
                                                     </td>
                                                     <td>
                                                         <div class="text-wrap" style="max-width: 300px;">
-                                                            <strong><?= character_limiter($pengajuan->judul, 60) ?></strong>
+                                                            <strong><?= truncate_text($pengajuan->judul, 60) ?></strong>
                                                             <br><small class="text-muted"><?= $pengajuan->nama_prodi ?></small>
                                                         </div>
                                                     </td>
@@ -272,7 +272,7 @@ File: application/views/dosen/seminar_proposal/index.php
                                                 </td>
                                                 <td>
                                                     <div class="text-wrap" style="max-width: 300px;">
-                                                        <strong><?= character_limiter($seminar->judul, 60) ?></strong>
+                                                        <strong><?= truncate_text($seminar->judul, 60) ?></strong>
                                                         <br><small class="text-muted"><?= $seminar->nama_prodi ?></small>
                                                     </div>
                                                 </td>
@@ -348,7 +348,7 @@ File: application/views/dosen/seminar_proposal/index.php
                                                     </td>
                                                     <td>
                                                         <div class="text-wrap" style="max-width: 250px;">
-                                                            <?= character_limiter($riwayat->judul, 50) ?>
+                                                            <?= truncate_text($riwayat->judul, 50) ?>
                                                             <br><small class="text-muted"><?= $riwayat->nama_prodi ?></small>
                                                         </div>
                                                     </td>
@@ -371,7 +371,7 @@ File: application/views/dosen/seminar_proposal/index.php
                                                     <td>
                                                         <?php if($riwayat->komentar_pembimbing): ?>
                                                             <div class="text-wrap" style="max-width: 200px;">
-                                                                <?= character_limiter($riwayat->komentar_pembimbing, 40) ?>
+                                                                <?= truncate_text($riwayat->komentar_pembimbing, 40) ?>
                                                             </div>
                                                         <?php else: ?>
                                                             <span class="text-muted">-</span>

@@ -505,9 +505,20 @@
                 <i class="ni ni-books text-danger"></i>
                 <span class="nav-link-text">Seminar Proposal</span>
                 <?php
-                $count = get_seminar_proposal_badge_count();
-                if($count > 0) {
-                    echo '<span class="badge badge-warning badge-sm ml-2" style="font-size: 0.7rem;">' . $count . '</span>';
+                // Simple badge counter
+                $CI =& get_instance();
+                $dosen_id = $CI->session->userdata('id');
+                if ($dosen_id && $CI->session->userdata('level') == '2') {
+                    $CI->db->select('COUNT(*) as count');
+                    $CI->db->from('seminar s');
+                    $CI->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
+                    $CI->db->where('pm.dosen_id', $dosen_id);
+                    $CI->db->where('(s.persetujuan IS NULL OR s.persetujuan = "")');
+                    $result = $CI->db->get()->row();
+                    $count = $result ? (int)$result->count : 0;
+                    if($count > 0) {
+                        echo '<span class="badge badge-warning badge-sm ml-2" style="font-size: 0.7rem;">' . $count . '</span>';
+                    }
                 }
                 ?>
               </a>

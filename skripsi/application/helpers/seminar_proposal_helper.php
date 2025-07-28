@@ -91,4 +91,34 @@ if (!function_exists('format_status_badge')) {
         
         return $badges[$status] ?? '<span class="badge badge-secondary">Unknown</span>';
     }
+
+// Tambahkan di bagian bawah file existing
+if (!function_exists('get_seminar_proposal_badge_count')) {
+    function get_seminar_proposal_badge_count($dosen_id = null) {
+        $CI =& get_instance();
+        if (!$dosen_id) $dosen_id = $CI->session->userdata('id');
+        if (!$dosen_id || $CI->session->userdata('level') != '2') return 0;
+        
+        try {
+            $CI->db->select('COUNT(*) as count');
+            $CI->db->from('seminar s');
+            $CI->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
+            $CI->db->where('pm.dosen_id', $dosen_id);
+            $CI->db->where('(s.persetujuan IS NULL OR s.persetujuan = "")');
+            $result = $CI->db->get()->row();
+            return $result ? (int)$result->count : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+}
+
+if (!function_exists('truncate_text')) {
+    function truncate_text($text, $limit = 50, $suffix = '...') {
+        if (function_exists('character_limiter')) {
+            return character_limiter($text, $limit);
+        }
+        return strlen($text) <= $limit ? $text : substr($text, 0, $limit) . $suffix;
+    }
+}
 }

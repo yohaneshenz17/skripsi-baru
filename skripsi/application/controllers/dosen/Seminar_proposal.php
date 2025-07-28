@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Seminar Proposal Controller untuk Dosen - CLEAN VERSION
+ * Seminar Proposal Controller untuk Dosen - FIXED VERSION
  * 
  * Controller untuk mengelola seminar proposal dari perspektif dosen pembimbing
  * Menggunakan template existing dan helper function approach untuk badge counter
@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Dosen
  * @category    Seminar Proposal
  * @author      Unit SIPD STK Santo Yakobus
- * @version     2.0 (Clean Template Integration)
+ * @version     2.1 (Fixed Version)
  */
 class Seminar_proposal extends CI_Controller {
 
@@ -28,8 +28,11 @@ class Seminar_proposal extends CI_Controller {
         $this->load->database();
         $this->load->library('session');
         $this->load->library('email');
-        $this->load->helper('url');
-        $this->load->helper('date');
+        
+        // ✅ FIX: Load semua helper yang diperlukan
+        $this->load->helper(['url', 'date', 'text', 'string']); // text helper untuk character_limiter()
+        
+        // Load model existing
         $this->load->model('Seminar_proposal_mahasiswa_model', 'seminar_model');
         
         // Cek login dan level dosen
@@ -45,7 +48,7 @@ class Seminar_proposal extends CI_Controller {
     public function index() {
         $dosen_id = $this->session->userdata('id');
         
-        // Prepare data untuk view
+        // Prepare data untuk view menggunakan tabel existing
         $view_data = [
             'pengajuan_review' => $this->_get_pengajuan_perlu_review($dosen_id),
             'riwayat_rekomendasi' => $this->_get_riwayat_rekomendasi($dosen_id),
@@ -57,7 +60,7 @@ class Seminar_proposal extends CI_Controller {
         $data = [
             'title' => 'Seminar Proposal',
             'content' => $this->load->view('dosen/seminar_proposal/index', $view_data, TRUE),
-            'script' => '' // JavaScript tambahan jika diperlukan
+            'script' => ''
         ];
         
         // Load template existing
@@ -233,21 +236,20 @@ class Seminar_proposal extends CI_Controller {
      */
     private function _get_pengajuan_perlu_review($dosen_id) {
         $this->db->select('
-            spm.*,
+            s.*,
             pm.judul,
             m.nim,
             m.nama as nama_mahasiswa,
             m.email as email_mahasiswa,
             p.nama as nama_prodi
         ');
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->from('seminar s'); // Tabel existing: seminar
+        $this->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
         $this->db->where('pm.dosen_id', $dosen_id);
-        $this->db->where_in('spm.status', ['submitted', 'review_pembimbing']);
-        $this->db->where('spm.status_pembimbing', 'pending');
-        $this->db->order_by('spm.created_at', 'ASC');
+        $this->db->where('(s.persetujuan IS NULL OR s.persetujuan = "")'); // Belum ada persetujuan
+        $this->db->order_by('s.id', 'ASC');
         
         return $this->db->get()->result();
     }
@@ -257,20 +259,20 @@ class Seminar_proposal extends CI_Controller {
      */
     private function _get_riwayat_rekomendasi($dosen_id) {
         $this->db->select('
-            spm.*,
+            s.*,
             pm.judul,
             m.nim,
             m.nama as nama_mahasiswa,
-            p.nama as nama_prodi
+            p.nama as nama_prodi,
+            s.persetujuan as status_pembimbing
         ');
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->from('seminar s'); // Tabel existing
+        $this->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
         $this->db->where('pm.dosen_id', $dosen_id);
-        $this->db->where('spm.status_pembimbing !=', 'pending');
-        $this->db->where('spm.tanggal_review_pembimbing IS NOT NULL');
-        $this->db->order_by('spm.tanggal_review_pembimbing', 'DESC');
+        $this->db->where('s.persetujuan IS NOT NULL AND s.persetujuan != ""'); // Sudah ada persetujuan
+        $this->db->order_by('s.id', 'DESC');
         $this->db->limit(10);
         
         return $this->db->get()->result();
@@ -281,20 +283,22 @@ class Seminar_proposal extends CI_Controller {
      */
     private function _get_seminar_perlu_penilaian($dosen_id) {
         $this->db->select('
-            spm.*,
+            s.*,
             pm.judul,
             m.nim,
             m.nama as nama_mahasiswa,
-            p.nama as nama_prodi
+            p.nama as nama_prodi,
+            hs.status as hasil_status
         ');
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->from('seminar s'); // ✅ FIX: Tidak ada typo 'smp'
+        $this->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
+        $this->db->join('hasil_seminar hs', 's.id = hs.seminar_id', 'left');
         $this->db->where('pm.dosen_id', $dosen_id);
-        $this->db->where('spm.status', 'scheduled');
-        $this->db->where('DATE(spm.tanggal_seminar) <=', date('Y-m-d')); // Seminar sudah lewat
-        $this->db->order_by('spm.tanggal_seminar', 'DESC');
+        $this->db->where('DATE(s.tanggal) <=', date('Y-m-d')); // Seminar sudah lewat
+        $this->db->where('(hs.status IS NULL OR hs.status = "")'); // Belum ada hasil
+        $this->db->order_by('s.tanggal', 'DESC');
         
         return $this->db->get()->result();
     }
@@ -304,28 +308,22 @@ class Seminar_proposal extends CI_Controller {
      */
     private function _get_seminar_detail($seminar_id, $dosen_id) {
         $this->db->select('
-            spm.*,
+            s.*,
             pm.judul,
             pm.ringkasan,
             pm.jenis_penelitian,
             pm.lokasi_penelitian,
-            pm.dosen_penguji_id,
-            pm.dosen_penguji2_id,
             m.nim,
             m.nama as nama_mahasiswa,
             m.email as email_mahasiswa,
             m.nomor_telepon,
-            p.nama as nama_prodi,
-            d1.nama as nama_penguji1,
-            d2.nama as nama_penguji2
+            p.nama as nama_prodi
         ');
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->from('seminar s'); // Tabel existing
+        $this->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
         $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
         $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('dosen d1', 'pm.dosen_penguji_id = d1.id', 'left');
-        $this->db->join('dosen d2', 'pm.dosen_penguji2_id = d2.id', 'left');
-        $this->db->where('spm.id', $seminar_id);
+        $this->db->where('s.id', $seminar_id);
         $this->db->where('pm.dosen_id', $dosen_id); // Validasi ownership
         
         return $this->db->get()->row();
@@ -336,7 +334,7 @@ class Seminar_proposal extends CI_Controller {
      */
     private function _get_jurnal_bimbingan($proposal_id) {
         $this->db->select('*');
-        $this->db->from('jurnal_bimbingan');
+        $this->db->from('jurnal_bimbingan'); // Tabel existing sudah benar
         $this->db->where('proposal_id', $proposal_id);
         $this->db->where('status_validasi', '1'); // Sudah divalidasi
         $this->db->order_by('tanggal_bimbingan', 'DESC');
@@ -352,28 +350,28 @@ class Seminar_proposal extends CI_Controller {
         $stats = new stdClass();
         
         // Total pengajuan yang perlu review
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->from('seminar s');
+        $this->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
         $this->db->where('pm.dosen_id', $dosen_id);
-        $this->db->where_in('spm.status', ['submitted', 'review_pembimbing']);
-        $this->db->where('spm.status_pembimbing', 'pending');
+        $this->db->where('(s.persetujuan IS NULL OR s.persetujuan = "")');
         $stats->perlu_review = $this->db->count_all_results();
         
         // Total yang sudah direkomendasi bulan ini
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->from('seminar s');
+        $this->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
         $this->db->where('pm.dosen_id', $dosen_id);
-        $this->db->where('spm.status_pembimbing !=', 'pending');
-        $this->db->where('MONTH(spm.tanggal_review_pembimbing)', date('n'));
-        $this->db->where('YEAR(spm.tanggal_review_pembimbing)', date('Y'));
+        $this->db->where('s.persetujuan IS NOT NULL AND s.persetujuan != ""');
+        $this->db->where('MONTH(s.tanggal)', date('n')); // Bulan ini
+        $this->db->where('YEAR(s.tanggal)', date('Y'));
         $stats->direkomendasi_bulan_ini = $this->db->count_all_results();
         
         // Total seminar terjadwal yang perlu penilaian
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->from('seminar s');
+        $this->db->join('proposal_mahasiswa pm', 's.proposal_mahasiswa_id = pm.id');
+        $this->db->join('hasil_seminar hs', 's.id = hs.seminar_id', 'left');
         $this->db->where('pm.dosen_id', $dosen_id);
-        $this->db->where('spm.status', 'scheduled');
-        $this->db->where('DATE(spm.tanggal_seminar) <=', date('Y-m-d'));
+        $this->db->where('DATE(s.tanggal) <=', date('Y-m-d'));
+        $this->db->where('(hs.status IS NULL OR hs.status = "")');
         $stats->perlu_penilaian = $this->db->count_all_results();
         
         return $stats;

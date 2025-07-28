@@ -34,3 +34,16 @@ ERROR - 2025-07-28 07:08:06 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-07-28 08:40:19 --> Unable to load the requested class: Seminar_proposal_validation
 ERROR - 2025-07-28 08:40:41 --> Unable to load the requested class: Seminar_proposal_validation
 ERROR - 2025-07-28 08:40:55 --> Unable to load the requested class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:11:18 --> Unable to load the requested class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:12:02 --> Unable to load the requested class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:12:40 --> Unable to load the requested class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:14:52 --> Non-existent class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:14:52 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/libraries/Seminar_proposal_validation.php:1) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-28 09:16:49 --> Non-existent class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:16:49 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/libraries/Seminar_proposal_validation.php:1) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-28 09:20:08 --> Non-existent class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:20:08 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/libraries/Seminar_proposal_validation.php:1) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-28 09:20:11 --> Non-existent class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:20:11 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/libraries/Seminar_proposal_validation.php:1) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-28 09:20:16 --> Non-existent class: Seminar_proposal_validation
+ERROR - 2025-07-28 09:20:16 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/libraries/Seminar_proposal_validation.php:1) /home/stkp7133/public_html/skripsi/system/core/Common.php 578

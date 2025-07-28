@@ -20,10 +20,13 @@ class Seminar_proposal extends CI_Controller {
     {
         parent::__construct();
         
-        // Load required models, libraries, helpers
+        // Load required models, libraries
         $this->load->model('Seminar_proposal_mahasiswa_model', 'seminar_model');
         $this->load->library(['form_validation', 'upload', 'email', 'session']);
-        $this->load->helper(['url', 'file', 'security', 'seminar_proposal']);
+        
+        // FIX: Hapus 'seminar_proposal' dari load helper karena sudah di autoload
+        // Hanya load helper yang belum di autoload
+        $this->load->helper(['file', 'security']);
         
         // Check authentication
         if (!$this->session->userdata('logged_in') || $this->session->userdata('level') !== 'mahasiswa') {

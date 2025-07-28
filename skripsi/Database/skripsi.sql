@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 29, 2025 at 06:11 AM
+-- Generation Time: Jul 29, 2025 at 06:57 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -794,6 +794,132 @@ INSERT INTO `pengumuman_tahapan` (`id`, `no`, `tahapan`, `tanggal_deadline`, `ke
 (4, 3, 'Ujian Skripsi', '2026-05-25', 'Seminar Hasil Bab 1-5', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:31'),
 (5, 4, 'Revisi dan Publikasi', '2026-07-30', 'Perbaikan dan Publikasi Skripsi', '1', '2025-07-15 17:29:36', '2025-07-19 16:54:52'),
 (6, 5, 'Yudisium', '2026-08-05', 'Pengukuhan dan Wisuda', '1', '2025-07-15 17:29:36', '2025-07-19 16:55:19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `penilaian_seminar_proposal`
+--
+
+CREATE TABLE `penilaian_seminar_proposal` (
+  `id` bigint(20) NOT NULL,
+  `seminar_proposal_id` bigint(20) NOT NULL COMMENT 'FK ke seminar_proposal_mahasiswa',
+  `mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke mahasiswa (redundant untuk performance)',
+  `proposal_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa (redundant untuk performance)',
+  `catatan_latar_belakang` text DEFAULT NULL COMMENT 'Catatan revisi untuk Latar Belakang & Rumusan Masalah',
+  `catatan_tinjauan_pustaka` text DEFAULT NULL COMMENT 'Catatan revisi untuk Tinjauan Pustaka & Kebaruan (Novelty)',
+  `catatan_landasan_teori` text DEFAULT NULL COMMENT 'Catatan revisi untuk Landasan Teori',
+  `catatan_metodologi` text DEFAULT NULL COMMENT 'Catatan revisi untuk Metodologi Penelitian',
+  `catatan_sistematika` text DEFAULT NULL COMMENT 'Catatan revisi untuk Sistematika & Tata Tulis',
+  `catatan_umum` text DEFAULT NULL COMMENT 'Catatan umum atau saran tambahan',
+  `nilai_substansi_metode` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Substansi & Metode Penelitian (bobot 50%)',
+  `nilai_presentasi_teknik` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Presentasi & Teknik Penyajian (bobot 20%)',
+  `nilai_penguasaan_diskusi` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Penguasaan Materi & Diskusi (bobot 30%)',
+  `nilai_akhir` decimal(5,2) DEFAULT NULL COMMENT 'Nilai akhir rata-rata (auto calculated)',
+  `nilai_huruf` enum('A','B','C','D','E') DEFAULT NULL COMMENT 'Konversi nilai: ≥80=A, 70-79.9=B, 60-69.9=C, 50-59.9=D, <50=E',
+  `rekomendasi` enum('diterima_tanpa_revisi','revisi_minor','revisi_mayor','ditolak') DEFAULT NULL COMMENT 'Rekomendasi hasil seminar',
+  `keterangan_rekomendasi` text DEFAULT NULL COMMENT 'Keterangan tambahan untuk rekomendasi',
+  `status_penilaian` enum('draft','published') DEFAULT 'draft' COMMENT 'Status form: draft (masih bisa diedit) atau published (final)',
+  `dinilai_oleh` bigint(20) NOT NULL COMMENT 'FK ke dosen/staf yang menginput penilaian',
+  `role_penilai` enum('dosen_pembimbing','staf') DEFAULT 'dosen_pembimbing' COMMENT 'Role yang menginput: dosen pembimbing atau staf',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Tanggal pembuatan penilaian',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Tanggal terakhir update',
+  `published_at` datetime DEFAULT NULL COMMENT 'Tanggal publikasi penilaian ke mahasiswa'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tabel penilaian seminar proposal yang detail untuk dosen & staf';
+
+--
+-- Triggers `penilaian_seminar_proposal`
+--
+DELIMITER $$
+CREATE TRIGGER `tr_penilaian_calculate_nilai` BEFORE UPDATE ON `penilaian_seminar_proposal` FOR EACH ROW BEGIN
+    -- Auto calculate nilai akhir jika semua komponen nilai sudah diisi
+    IF NEW.nilai_substansi_metode IS NOT NULL 
+       AND NEW.nilai_presentasi_teknik IS NOT NULL 
+       AND NEW.nilai_penguasaan_diskusi IS NOT NULL THEN
+       
+        -- Hitung nilai akhir dengan bobot: Substansi 50%, Presentasi 20%, Penguasaan 30%
+        SET NEW.nilai_akhir = ROUND(
+            (NEW.nilai_substansi_metode * 0.5) + 
+            (NEW.nilai_presentasi_teknik * 0.2) + 
+            (NEW.nilai_penguasaan_diskusi * 0.3), 
+            2
+        );
+        
+        -- Konversi ke nilai huruf
+        SET NEW.nilai_huruf = CASE 
+            WHEN NEW.nilai_akhir >= 80 THEN 'A'
+            WHEN NEW.nilai_akhir >= 70 THEN 'B'
+            WHEN NEW.nilai_akhir >= 60 THEN 'C'
+            WHEN NEW.nilai_akhir >= 50 THEN 'D'
+            ELSE 'E'
+        END;
+    END IF;
+    
+    -- Set published_at jika status berubah ke published
+    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
+        SET NEW.published_at = NOW();
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `tr_penilaian_update_workflow` AFTER UPDATE ON `penilaian_seminar_proposal` FOR EACH ROW BEGIN
+    -- Update status seminar proposal ke completed jika penilaian sudah dipublish
+    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
+        UPDATE seminar_proposal_mahasiswa 
+        SET status = 'completed',
+            current_step = 'mahasiswa'
+        WHERE id = NEW.seminar_proposal_id;
+        
+        -- Update workflow proposal_mahasiswa berdasarkan rekomendasi
+        IF NEW.rekomendasi = 'ditolak' THEN
+            -- Jika ditolak, kembali ke seminar_proposal untuk ajukan ulang
+            UPDATE proposal_mahasiswa 
+            SET workflow_status = 'seminar_proposal'
+            WHERE id = NEW.proposal_id;
+        ELSE
+            -- Jika diterima (dengan/tanpa revisi), lanjut ke penelitian
+            UPDATE proposal_mahasiswa 
+            SET workflow_status = 'penelitian'
+            WHERE id = NEW.proposal_id;
+        END IF;
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `penilaian_seminar_proposal_v`
+-- (See below for the actual view)
+--
+CREATE TABLE `penilaian_seminar_proposal_v` (
+`id` bigint(20)
+,`seminar_proposal_id` bigint(20)
+,`mahasiswa_id` bigint(20)
+,`proposal_id` bigint(20)
+,`nim` varchar(50)
+,`nama_mahasiswa` varchar(100)
+,`email_mahasiswa` varchar(100)
+,`judul` varchar(250)
+,`nama_pembimbing` varchar(100)
+,`tanggal_seminar` date
+,`jam_seminar` time
+,`tempat_seminar` varchar(255)
+,`nilai_substansi_metode` decimal(5,2)
+,`nilai_presentasi_teknik` decimal(5,2)
+,`nilai_penguasaan_diskusi` decimal(5,2)
+,`nilai_akhir` decimal(5,2)
+,`nilai_huruf` enum('A','B','C','D','E')
+,`rekomendasi` enum('diterima_tanpa_revisi','revisi_minor','revisi_mayor','ditolak')
+,`status_penilaian` enum('draft','published')
+,`role_penilai` enum('dosen_pembimbing','staf')
+,`nama_penilai` varchar(100)
+,`created_at` datetime
+,`updated_at` datetime
+,`published_at` datetime
+);
 
 -- --------------------------------------------------------
 
@@ -1664,6 +1790,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 -- --------------------------------------------------------
 
 --
+-- Structure for view `penilaian_seminar_proposal_v`
+--
+DROP TABLE IF EXISTS `penilaian_seminar_proposal_v`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `penilaian_seminar_proposal_v`  AS SELECT `psp`.`id` AS `id`, `psp`.`seminar_proposal_id` AS `seminar_proposal_id`, `psp`.`mahasiswa_id` AS `mahasiswa_id`, `psp`.`proposal_id` AS `proposal_id`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pm`.`judul` AS `judul`, `d`.`nama` AS `nama_pembimbing`, `spm`.`tanggal_seminar` AS `tanggal_seminar`, `spm`.`jam_seminar` AS `jam_seminar`, `spm`.`tempat_seminar` AS `tempat_seminar`, `psp`.`nilai_substansi_metode` AS `nilai_substansi_metode`, `psp`.`nilai_presentasi_teknik` AS `nilai_presentasi_teknik`, `psp`.`nilai_penguasaan_diskusi` AS `nilai_penguasaan_diskusi`, `psp`.`nilai_akhir` AS `nilai_akhir`, `psp`.`nilai_huruf` AS `nilai_huruf`, `psp`.`rekomendasi` AS `rekomendasi`, `psp`.`status_penilaian` AS `status_penilaian`, `psp`.`role_penilai` AS `role_penilai`, `dp`.`nama` AS `nama_penilai`, `psp`.`created_at` AS `created_at`, `psp`.`updated_at` AS `updated_at`, `psp`.`published_at` AS `published_at` FROM (((((`penilaian_seminar_proposal` `psp` join `seminar_proposal_mahasiswa` `spm` on(`psp`.`seminar_proposal_id` = `spm`.`id`)) join `mahasiswa` `m` on(`psp`.`mahasiswa_id` = `m`.`id`)) join `proposal_mahasiswa` `pm` on(`psp`.`proposal_id` = `pm`.`id`)) join `dosen` `d` on(`pm`.`dosen_id` = `d`.`id`)) join `dosen` `dp` on(`psp`.`dinilai_oleh` = `dp`.`id`)) ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `proposal_mahasiswa_detail_v`
 --
 DROP TABLE IF EXISTS `proposal_mahasiswa_detail_v`;
@@ -1821,6 +1956,20 @@ ALTER TABLE `pengumuman_tahapan`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `penilaian_seminar_proposal`
+--
+ALTER TABLE `penilaian_seminar_proposal`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_seminar_penilaian` (`seminar_proposal_id`),
+  ADD KEY `idx_mahasiswa` (`mahasiswa_id`),
+  ADD KEY `idx_proposal` (`proposal_id`),
+  ADD KEY `idx_penilai` (`dinilai_oleh`),
+  ADD KEY `idx_status` (`status_penilaian`),
+  ADD KEY `idx_rekomendasi` (`rekomendasi`),
+  ADD KEY `idx_nilai_huruf` (`nilai_huruf`),
+  ADD KEY `idx_published_at` (`published_at`);
+
+--
 -- Indexes for table `prodi`
 --
 ALTER TABLE `prodi`
@@ -1973,6 +2122,12 @@ ALTER TABLE `pengumuman_tahapan`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `penilaian_seminar_proposal`
+--
+ALTER TABLE `penilaian_seminar_proposal`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `prodi`
 --
 ALTER TABLE `prodi`
@@ -2024,6 +2179,15 @@ ALTER TABLE `staf_aktivitas`
 ALTER TABLE `jurnal_bimbingan`
   ADD CONSTRAINT `fk_jurnal_dosen` FOREIGN KEY (`validasi_oleh`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_jurnal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `penilaian_seminar_proposal`
+--
+ALTER TABLE `penilaian_seminar_proposal`
+  ADD CONSTRAINT `fk_penilaian_mahasiswa` FOREIGN KEY (`mahasiswa_id`) REFERENCES `mahasiswa` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_penilaian_penilai` FOREIGN KEY (`dinilai_oleh`) REFERENCES `dosen` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_penilaian_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_penilaian_seminar_proposal` FOREIGN KEY (`seminar_proposal_id`) REFERENCES `seminar_proposal_mahasiswa` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `proposal_mahasiswa`

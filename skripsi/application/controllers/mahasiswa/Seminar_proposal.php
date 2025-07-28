@@ -21,7 +21,7 @@ class Seminar_proposal extends CI_Controller {
         parent::__construct();
         
         // Load required models, libraries, helpers
-        $this->load->model('Seminar_proposal_model', 'seminar_model');
+        $this->load->model('Seminar_proposal_mahasiswa_model', 'seminar_model');
         $this->load->library(['form_validation', 'upload', 'email', 'session']);
         $this->load->helper(['url', 'file', 'security', 'seminar_proposal']);
         

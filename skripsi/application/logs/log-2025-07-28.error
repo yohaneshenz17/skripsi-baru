@@ -4429,3 +4429,61 @@ AND `spm`.`status` = 'scheduled'
 AND DATE(spm.tanggal_seminar) <= '2025-07-28'
 ORDER BY `spm`.`tanggal_seminar` DESC
 ERROR - 2025-07-28 17:22:51 --> Severity: error --> Exception: Call to undefined function get_seminar_proposal_badge_count() /home/stkp7133/public_html/skripsi/application/views/template/dosen.php 508
+ERROR - 2025-07-28 18:10:08 --> Query error: Unknown column 'spm.nilai_final' in 'where clause' - Invalid query: SELECT `spm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `spm`.`status` = 'scheduled'
+AND `spm`.`tanggal_seminar` <= '2025-07-28'
+AND (`spm`.`nilai_final` IS NULL OR `spm`.`nilai_final` = '')
+ORDER BY `spm`.`tanggal_seminar` ASC
+ERROR - 2025-07-28 18:10:44 --> Query error: Unknown column 'spm.nilai_final' in 'where clause' - Invalid query: SELECT `spm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `spm`.`status` = 'scheduled'
+AND `spm`.`tanggal_seminar` <= '2025-07-28'
+AND (`spm`.`nilai_final` IS NULL OR `spm`.`nilai_final` = '')
+ORDER BY `spm`.`tanggal_seminar` ASC
+ERROR - 2025-07-28 18:15:18 --> Query error: Unknown column 'spm.catatan_revisi' in 'where clause' - Invalid query: SELECT `spm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `spm`.`status` = 'scheduled'
+AND `spm`.`tanggal_seminar` <= '2025-07-28'
+AND (`spm`.`catatan_revisi` IS NULL OR `spm`.`catatan_revisi` = '')
+ORDER BY `spm`.`tanggal_seminar` ASC
+ERROR - 2025-07-28 18:16:42 --> Query error: Unknown column 'spm.catatan_revisi' in 'where clause' - Invalid query: SELECT `spm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `spm`.`status` = 'scheduled'
+AND `spm`.`tanggal_seminar` <= '2025-07-28'
+AND (`spm`.`catatan_revisi` IS NULL OR `spm`.`catatan_revisi` = '')
+ORDER BY `spm`.`tanggal_seminar` ASC
+ERROR - 2025-07-28 18:20:53 --> Query error: Unknown column 'smp.file_proposal' in 'field list' - Invalid query: SELECT `spm`.`id`, `spm`.`proposal_id`, `spm`.`status`, `spm`.`status_pembimbing`, `smp`.`file_proposal`, `spm`.`keterangan_mahasiswa`, DATE(spm.created_at) as tanggal_pengajuan, `pm`.`judul`, `pm`.`ringkasan`, `pm`.`jenis_penelitian`, `pm`.`lokasi_penelitian`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `p`.`nama` as `nama_prodi`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `spm`.`status` IN('submitted', 'review_pembimbing')
+AND (`spm`.`status_pembimbing` IS NULL OR `spm`.`status_pembimbing` = 'pending')
+ORDER BY `spm`.`created_at` ASC
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313
+ERROR - 2025-07-28 18:33:45 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_proposal/detail.php 313

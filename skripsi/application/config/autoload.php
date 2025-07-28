@@ -61,7 +61,6 @@ $autoload['packages'] = array();
 
 // UPDATED: Menambahkan library 'pdf' untuk menu staf
 $autoload['libraries'] = array('database', 'session', 'pdf', 'app_lib' => 'app');
-$autoload['libraries'] = array('seminar_proposal_validation');
 
 /*
 | -------------------------------------------------------------------

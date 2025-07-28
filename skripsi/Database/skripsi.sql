@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 28, 2025 at 05:32 PM
+-- Generation Time: Jul 29, 2025 at 06:11 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -435,8 +435,7 @@ INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bi
 (34, 45, 3, '2025-07-28', 'Tes Saja', '', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:24:43', 25, 'mahasiswa', '2025-07-28 12:21:58', '2025-07-28 12:24:43'),
 (35, 45, 5, '2025-07-28', 'Tes Saja', 'Bagus', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:25:32', 25, 'mahasiswa', '2025-07-28 12:22:20', '2025-07-28 12:25:32'),
 (36, 45, 6, '2025-07-28', 'Tidak ada catatan', 'Bagus', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:25:44', 25, 'mahasiswa', '2025-07-28 12:22:32', '2025-07-28 12:25:44'),
-(37, 45, 7, '2025-07-28', 'Tidak ada catatan', 'Tidak ada catatan', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:26:12', 25, 'mahasiswa', '2025-07-28 12:22:42', '2025-07-28 12:26:12'),
-(38, 45, 8, '2025-07-28', 'Tidak ada catatan', NULL, 'Tidak ada catatan', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-07-28 12:23:00', '2025-07-28 12:23:00');
+(37, 45, 7, '2025-07-28', 'Tidak ada catatan', 'Tidak ada catatan', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:26:12', 25, 'mahasiswa', '2025-07-28 12:22:42', '2025-07-28 12:26:12');
 
 -- --------------------------------------------------------
 
@@ -1341,6 +1340,53 @@ CREATE TRIGGER `tr_seminar_proposal_mhs_update` AFTER UPDATE ON `seminar_proposa
 END
 $$
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `seminar_proposal_mahasiswa_backup_$(date +%Y%m%d)`
+--
+
+CREATE TABLE `seminar_proposal_mahasiswa_backup_$(date +%Y%m%d)` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `proposal_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa (READ ONLY)',
+  `mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke mahasiswa (redundant untuk performance)',
+  `status` enum('draft','submitted','review_pembimbing','review_kaprodi','approved','rejected','scheduled','completed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
+  `current_step` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'mahasiswa' COMMENT 'mahasiswa|pembimbing|kaprodi|staf',
+  `file_proposal` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'File proposal untuk seminar (Word/PDF max 1MB)',
+  `keterangan_mahasiswa` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Keterangan tambahan dari mahasiswa',
+  `status_pembimbing` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `komentar_pembimbing` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tanggal_review_pembimbing` datetime DEFAULT NULL,
+  `reviewed_by_pembimbing` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen',
+  `status_kaprodi` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `komentar_kaprodi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tanggal_review_kaprodi` datetime DEFAULT NULL,
+  `reviewed_by_kaprodi` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen',
+  `file_turnitin` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'File hasil Turnitin dari Kaprodi',
+  `plagiarism_percentage` decimal(5,2) DEFAULT NULL COMMENT 'Persentase plagiarisme dari Turnitin',
+  `tanggal_seminar` date DEFAULT NULL,
+  `jam_seminar` time DEFAULT NULL,
+  `tempat_seminar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dosen_penguji1_id` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen',
+  `dosen_penguji2_id` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen',
+  `status_penguji1` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `komentar_penguji1` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tanggal_respon_penguji1` datetime DEFAULT NULL,
+  `status_penguji2` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `komentar_penguji2` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tanggal_respon_penguji2` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_by` bigint(20) DEFAULT NULL COMMENT 'FK ke mahasiswa yang membuat'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `seminar_proposal_mahasiswa_backup_$(date +%Y%m%d)`
+--
+
+INSERT INTO `seminar_proposal_mahasiswa_backup_$(date +%Y%m%d)` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_proposal`, `keterangan_mahasiswa`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
+(1, 44, 44, 'submitted', 'pembimbing', '65deab67fc9fb8be407309c6ff4caf63.docx', 'Proposal Fix ya', 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'pending', NULL, NULL, 'pending', NULL, NULL, '2025-07-28 12:49:03', '2025-07-28 12:49:03', NULL);
 
 -- --------------------------------------------------------
 

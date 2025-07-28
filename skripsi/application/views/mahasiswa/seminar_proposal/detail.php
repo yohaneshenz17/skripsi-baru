@@ -1,27 +1,51 @@
 <?php
 /**
- * Detail Seminar Proposal - Mahasiswa
+ * Detail Seminar Proposal View - Mahasiswa
  * File: application/views/mahasiswa/seminar_proposal/detail.php
  * 
- * Halaman detail untuk melihat informasi lengkap seminar proposal
- * Menggunakan template mahasiswa_simple.php dengan CSS inline
+ * Halaman detail lengkap untuk melihat informasi seminar proposal
  */
 ?>
 
 <style>
+    /* Page Styles */
+    .detail-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+    
     /* Card Styles */
     .card {
         background: white;
-        border-radius: 0.375rem;
+        border-radius: 0.5rem;
         box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15);
         border: none;
         margin-bottom: 1.5rem;
+        overflow: hidden;
     }
     
     .card-header {
-        background: transparent;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
+        background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%);
+        color: white;
+        border-bottom: none;
         padding: 1.5rem;
+    }
+    
+    .card-header.secondary {
+        background: linear-gradient(87deg, #6c757d 0, #8a909a 100%);
+    }
+    
+    .card-header.success {
+        background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%);
+    }
+    
+    .card-header.warning {
+        background: linear-gradient(87deg, #fb6340 0, #fbb140 100%);
+    }
+    
+    .card-header.danger {
+        background: linear-gradient(87deg, #f5365c 0, #f56036 100%);
     }
     
     .card-body {
@@ -38,6 +62,7 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.025em;
+        margin-bottom: 1rem;
     }
     
     .status-badge.submitted {
@@ -45,27 +70,7 @@
         color: #11cdef;
     }
     
-    .status-badge.review_pembimbing {
-        background: rgba(251, 99, 64, 0.15);
-        color: #fb6340;
-    }
-    
-    .status-badge.review_kaprodi {
-        background: rgba(255, 193, 7, 0.15);
-        color: #fd7e14;
-    }
-    
     .status-badge.approved {
-        background: rgba(45, 206, 137, 0.15);
-        color: #2dce89;
-    }
-    
-    .status-badge.scheduled {
-        background: rgba(45, 206, 137, 0.15);
-        color: #2dce89;
-    }
-    
-    .status-badge.completed {
         background: rgba(45, 206, 137, 0.15);
         color: #2dce89;
     }
@@ -83,8 +88,8 @@
     /* Info Grid */
     .info-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
         margin-bottom: 1.5rem;
     }
     
@@ -96,31 +101,100 @@
     }
     
     .info-label {
-        font-weight: 600;
-        color: #32325d;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
+        color: #8898aa;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
         margin-bottom: 0.25rem;
+        font-weight: 600;
     }
     
     .info-value {
-        color: #8898aa;
         font-size: 0.875rem;
+        color: #32325d;
+        font-weight: 600;
+    }
+    
+    /* Timeline */
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e3e6f0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 0.375rem;
+        border: 1px solid #e3e6f0;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.75rem;
+        top: 1rem;
+        width: 1rem;
+        height: 1rem;
+        background: #5e72e4;
+        border-radius: 50%;
+        border: 3px solid white;
+    }
+    
+    .timeline-item.completed::before {
+        background: #2dce89;
+    }
+    
+    .timeline-item.pending::before {
+        background: #fb6340;
+    }
+    
+    /* Comment Box */
+    .comment-box {
+        background: #f8f9fe;
+        border: 1px solid #e3e6f0;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .comment-box.pembimbing {
+        border-left: 4px solid #5e72e4;
+    }
+    
+    .comment-box.kaprodi {
+        border-left: 4px solid #2dce89;
+    }
+    
+    .comment-box.rejected {
+        border-left: 4px solid #f5365c;
+        background: #fff5f5;
     }
     
     /* Buttons */
     .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
         padding: 0.625rem 1.25rem;
         font-size: 0.875rem;
         font-weight: 600;
         border-radius: 0.375rem;
-        border: 1px solid transparent;
-        text-decoration: none;
-        cursor: pointer;
         transition: all 0.15s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
         gap: 0.5rem;
+        border: 1px solid transparent;
+        cursor: pointer;
     }
     
     .btn-primary {
@@ -132,8 +206,8 @@
     .btn-primary:hover {
         transform: translateY(-1px);
         box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
-        color: white;
         text-decoration: none;
+        color: white;
     }
     
     .btn-outline-primary {
@@ -148,16 +222,16 @@
         text-decoration: none;
     }
     
-    .btn-success {
-        background: #2dce89;
-        color: white;
-        border-color: #2dce89;
-    }
-    
     .btn-warning {
-        background: #fb6340;
+        background: linear-gradient(87deg, #fb6340 0, #fbb140 100%);
         color: white;
         border-color: #fb6340;
+    }
+    
+    .btn-success {
+        background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%);
+        color: white;
+        border-color: #2dce89;
     }
     
     .btn-secondary {
@@ -166,101 +240,77 @@
         border-color: #6c757d;
     }
     
-    /* Comment Box */
-    .comment-box {
-        background: #f1f3f4;
+    /* Alert */
+    .alert {
         padding: 1rem;
-        border-radius: 0.375rem;
-        margin-top: 0.5rem;
-        border-left: 4px solid #5e72e4;
-    }
-    
-    .comment-box.pembimbing {
-        border-left-color: #5e72e4;
-    }
-    
-    .comment-box.kaprodi {
-        border-left-color: #2dce89;
-    }
-    
-    .comment-box.rejected {
-        border-left-color: #f5365c;
-        background: rgba(245, 54, 92, 0.05);
-    }
-    
-    /* Timeline */
-    .timeline {
-        position: relative;
-        padding-left: 2rem;
-    }
-    
-    .timeline:before {
-        content: '';
-        position: absolute;
-        left: 0.5rem;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: #e9ecef;
-    }
-    
-    .timeline-item {
-        position: relative;
-        margin-bottom: 1.5rem;
-    }
-    
-    .timeline-item:before {
-        content: '';
-        position: absolute;
-        left: -1.5rem;
-        top: 0.375rem;
-        width: 0.75rem;
-        height: 0.75rem;
-        border-radius: 50%;
-        background: #adb5bd;
-        border: 2px solid white;
-    }
-    
-    .timeline-item.success:before {
-        background: #2dce89;
-    }
-    
-    .timeline-item.warning:before {
-        background: #fb6340;
-    }
-    
-    .timeline-item.info:before {
-        background: #5e72e4;
-    }
-    
-    /* File Display */
-    .file-item {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem;
-        background: rgba(94, 114, 228, 0.05);
-        border-radius: 0.375rem;
-        border: 1px solid rgba(94, 114, 228, 0.15);
         margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 0.375rem;
     }
     
-    .file-icon {
-        width: 2.5rem;
-        height: 2.5rem;
-        background: #5e72e4;
-        border-radius: 0.375rem;
-        display: flex;
+    .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+    
+    /* File Link */
+    .file-link {
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        color: white;
-        margin-right: 0.75rem;
+        padding: 0.5rem 1rem;
+        background: #f8f9fe;
+        border: 1px solid #e3e6f0;
+        border-radius: 0.375rem;
+        color: #5e72e4;
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: all 0.15s ease;
+    }
+    
+    .file-link:hover {
+        background: #e8ecff;
+        border-color: #5e72e4;
+        text-decoration: none;
+        color: #4c63d2;
+    }
+    
+    /* Table */
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        background-color: transparent;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+        background: #f8f9fe;
+        font-weight: 600;
+        color: #32325d;
     }
     
     /* Responsive */
     @media (max-width: 768px) {
+        .detail-page {
+            padding: 0 1rem;
+        }
+        
         .info-grid {
             grid-template-columns: 1fr;
-            gap: 1rem;
         }
         
         .card-body {
@@ -271,379 +321,403 @@
             padding-left: 1.5rem;
         }
         
-        .timeline-item:before {
+        .timeline-item::before {
             left: -1.25rem;
         }
     }
 </style>
 
-<div style="margin-top: -3rem; position: relative; z-index: 10;">
-    <div style="max-width: 1000px; margin: 0 auto; padding: 0 1.5rem;">
-        
-        <!-- Breadcrumb -->
-        <nav style="margin-bottom: 1.5rem;">
-            <a href="<?php echo base_url('mahasiswa/seminar_proposal'); ?>" 
-               style="color: #5e72e4; text-decoration: none; font-size: 0.875rem;">
-                <i class="fas fa-arrow-left"></i> Kembali ke Dashboard Seminar
-            </a>
-        </nav>
-        
-        <!-- Header -->
-        <div class="card">
-            <div class="card-body">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-                    <div>
-                        <h4 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #32325d;">
-                            Detail Seminar Proposal
-                        </h4>
-                        <p style="margin: 0.5rem 0 0 0; color: #8898aa; font-size: 0.875rem;">
-                            <?php echo $proposal->judul; ?>
-                        </p>
-                    </div>
-                    
-                    <div class="status-badge <?php echo $seminar->status; ?>">
-                        <?php echo ucfirst(str_replace('_', ' ', $seminar->status)); ?>
-                    </div>
+<!-- Flash Messages -->
+<?php if($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php endif; ?>
+
+<?php if($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php endif; ?>
+
+<div class="detail-page">
+
+    <!-- Header Card -->
+    <div class="card">
+        <div class="card-header <?php echo isset($seminar->status) ? strtolower($seminar->status) : 'secondary'; ?>">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <h4 style="margin: 0; color: white;">
+                        <i class="fas fa-file-alt" style="margin-right: 0.5rem;"></i>
+                        Detail Seminar Proposal
+                    </h4>
+                    <p style="margin: 0.5rem 0 0; color: rgba(255,255,255,0.8);">
+                        ID: <?php echo isset($seminar->id) ? '#SP-' . str_pad($seminar->id, 4, '0', STR_PAD_LEFT) : 'N/A'; ?>
+                    </p>
+                </div>
+                <div>
+                    <a href="<?php echo base_url('mahasiswa/seminar_proposal'); ?>" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left"></i>
+                        Kembali
+                    </a>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
         
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <!-- Main Content -->
+        <div>
             
-            <!-- Main Content -->
-            <div>
-                
-                <!-- Informasi Umum -->
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-info-circle" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            Informasi Pengajuan
-                        </h6>
-                    </div>
-                    <div class="card-body">
+            <!-- Status Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-info-circle" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                        Status Pengajuan
+                    </h6>
+                    
+                    <?php if (isset($seminar)): ?>
+                        <div class="status-badge <?php echo $seminar->status; ?>">
+                            <?php 
+                            $status_text = [
+                                'draft' => 'Draft',
+                                'submitted' => 'Menunggu Review',
+                                'approved' => 'Disetujui',
+                                'rejected' => 'Ditolak',
+                                'scheduled' => 'Terjadwal'
+                            ];
+                            echo $status_text[$seminar->status] ?? ucfirst($seminar->status);
+                            ?>
+                        </div>
+                        
                         <div class="info-grid">
                             <div class="info-item">
                                 <div class="info-label">Tanggal Pengajuan</div>
                                 <div class="info-value">
-                                    <?php echo date('d F Y, H:i', strtotime($seminar->created_at)); ?> WIB
+                                    <?php echo $seminar->created_at ? date('d F Y H:i', strtotime($seminar->created_at)) : '-'; ?>
                                 </div>
                             </div>
                             
                             <div class="info-item">
                                 <div class="info-label">Terakhir Update</div>
                                 <div class="info-value">
-                                    <?php echo date('d F Y, H:i', strtotime($seminar->updated_at)); ?> WIB
+                                    <?php echo $seminar->updated_at ? date('d F Y H:i', strtotime($seminar->updated_at)) : '-'; ?>
                                 </div>
                             </div>
                             
+                            <?php if ($seminar->tanggal_seminar): ?>
                             <div class="info-item">
-                                <div class="info-label">Status Pembimbing</div>
+                                <div class="info-label">Tanggal Seminar</div>
                                 <div class="info-value">
-                                    <?php 
-                                    switch($seminar->status_pembimbing) {
-                                        case 'pending':
-                                            echo '<span style="color: #fb6340;">⏳ Menunggu Review</span>';
-                                            break;
-                                        case 'approved':
-                                            echo '<span style="color: #2dce89;">✓ Direkomendasikan</span>';
-                                            break;
-                                        case 'rejected':
-                                            echo '<span style="color: #f5365c;">✗ Ditolak</span>';
-                                            break;
-                                        default:
-                                            echo '<span style="color: #8898aa;">-</span>';
-                                    }
-                                    ?>
+                                    <?php echo date('d F Y H:i', strtotime($seminar->tanggal_seminar)); ?>
                                 </div>
                             </div>
+                            <?php endif; ?>
                             
+                            <?php if ($seminar->tempat): ?>
                             <div class="info-item">
-                                <div class="info-label">Status Kaprodi</div>
-                                <div class="info-value">
-                                    <?php 
-                                    switch($seminar->status_kaprodi) {
-                                        case 'pending':
-                                            echo '<span style="color: #fb6340;">⏳ Menunggu Review</span>';
-                                            break;
-                                        case 'approved':
-                                            echo '<span style="color: #2dce89;">✓ Disetujui</span>';
-                                            break;
-                                        case 'rejected':
-                                            echo '<span style="color: #f5365c;">✗ Ditolak</span>';
-                                            break;
-                                        default:
-                                            echo '<span style="color: #8898aa;">Belum direview</span>';
-                                    }
-                                    ?>
-                                </div>
+                                <div class="info-label">Tempat Seminar</div>
+                                <div class="info-value"><?php echo htmlspecialchars($seminar->tempat); ?></div>
                             </div>
+                            <?php endif; ?>
                         </div>
                         
-                        <?php if ($seminar->tanggal_seminar): ?>
-                            <div style="background: rgba(45, 206, 137, 0.1); padding: 1rem; border-radius: 0.375rem; border-left: 4px solid #2dce89;">
-                                <h6 style="margin: 0 0 0.5rem 0; font-weight: 600; color: #2dce89;">
-                                    <i class="fas fa-calendar-check"></i> Jadwal Seminar
-                                </h6>
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-                                    <div>
-                                        <strong>Tanggal:</strong><br>
-                                        <?php echo date('d F Y', strtotime($seminar->tanggal_seminar)); ?>
-                                    </div>
-                                    <?php if ($seminar->jam_seminar): ?>
-                                    <div>
-                                        <strong>Waktu:</strong><br>
-                                        <?php echo date('H:i', strtotime($seminar->jam_seminar)); ?> WIB
-                                    </div>
-                                    <?php endif; ?>
-                                    <?php if ($seminar->tempat_seminar): ?>
-                                    <div>
-                                        <strong>Tempat:</strong><br>
-                                        <?php echo $seminar->tempat_seminar; ?>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                
-                <!-- File Proposal -->
-                <?php if ($seminar->file_proposal): ?>
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-file-alt" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            File Proposal
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="file-item">
-                            <div class="file-icon">
-                                <i class="fas fa-file-pdf"></i>
-                            </div>
-                            <div style="flex: 1;">
-                                <strong><?php echo $seminar->file_proposal; ?></strong><br>
-                                <small style="color: #8898aa;">
-                                    Upload: <?php echo date('d/m/Y H:i', strtotime($seminar->created_at)); ?>
-                                </small>
-                            </div>
-                            <div>
-                                <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal); ?>" 
-                                   target="_blank" class="btn btn-outline-primary">
-                                    <i class="fas fa-download"></i>
-                                    Download
-                                </a>
-                            </div>
+                    <?php else: ?>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Data seminar proposal tidak ditemukan.
                         </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Keterangan Mahasiswa -->
-                <?php if ($seminar->keterangan_mahasiswa): ?>
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-comment" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            Keterangan dari Anda
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div style="background: #f8f9fe; padding: 1rem; border-radius: 0.375rem;">
-                            <?php echo nl2br(htmlspecialchars($seminar->keterangan_mahasiswa)); ?>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Komentar Pembimbing -->
-                <?php if ($seminar->komentar_pembimbing): ?>
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-user-tie" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            Komentar Dosen Pembimbing
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="comment-box pembimbing">
-                            <?php echo nl2br(htmlspecialchars($seminar->komentar_pembimbing)); ?>
-                        </div>
-                        <?php if ($seminar->tanggal_review_pembimbing): ?>
-                            <small style="color: #8898aa; margin-top: 0.5rem; display: block;">
-                                <i class="fas fa-clock"></i>
-                                Review pada: <?php echo date('d F Y, H:i', strtotime($seminar->tanggal_review_pembimbing)); ?> WIB
-                            </small>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Komentar Kaprodi -->
-                <?php if ($seminar->komentar_kaprodi): ?>
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-user-graduate" style="margin-right: 0.5rem; color: #2dce89;"></i>
-                            Komentar Kaprodi
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="comment-box kaprodi">
-                            <?php echo nl2br(htmlspecialchars($seminar->komentar_kaprodi)); ?>
-                        </div>
-                        <?php if ($seminar->tanggal_review_kaprodi): ?>
-                            <small style="color: #8898aa; margin-top: 0.5rem; display: block;">
-                                <i class="fas fa-clock"></i>
-                                Review pada: <?php echo date('d F Y, H:i', strtotime($seminar->tanggal_review_kaprodi)); ?> WIB
-                            </small>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Actions -->
-                <div class="card">
-                    <div class="card-body">
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <?php if (in_array($seminar->status, ['draft', 'rejected'])): ?>
-                                <a href="<?php echo base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id); ?>" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                    Edit Pengajuan
-                                </a>
-                            <?php endif; ?>
-                            
-                            <?php if ($seminar->status === 'completed'): ?>
-                                <a href="<?php echo base_url('mahasiswa/penelitian'); ?>" class="btn btn-success">
-                                    <i class="fas fa-search"></i>
-                                    Lanjut ke Penelitian
-                                </a>
-                            <?php endif; ?>
-                            
-                            <a href="<?php echo base_url('mahasiswa/kontak'); ?>" class="btn btn-outline-primary">
-                                <i class="fas fa-comments"></i>
-                                Hubungi Pembimbing
-                            </a>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
-            
-            <!-- Sidebar -->
-            <div>
-                
-                <!-- Riwayat Aktivitas -->
-                <?php if (!empty($riwayat)): ?>
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-history" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            Riwayat Aktivitas
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="timeline">
-                            <?php foreach (array_slice($riwayat, 0, 10) as $log): ?>
-                                <div class="timeline-item <?php echo $log->action === 'approved' ? 'success' : ($log->action === 'rejected' ? 'warning' : 'info'); ?>">
-                                    <strong><?php echo ucfirst($log->action); ?></strong><br>
-                                    <small style="color: #8898aa;">
-                                        <?php echo $log->description; ?><br>
-                                        <?php echo date('d/m/Y H:i', strtotime($log->created_at)); ?>
-                                        <?php if ($log->user_nama): ?>
-                                            - <?php echo $log->user_nama; ?>
-                                        <?php endif; ?>
-                                    </small>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Info Kontak -->
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-address-card" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            Informasi Kontak
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <?php if ($proposal->nama_pembimbing): ?>
-                            <div style="margin-bottom: 1rem;">
-                                <strong>Dosen Pembimbing:</strong><br>
-                                <span style="color: #8898aa;"><?php echo $proposal->nama_pembimbing; ?></span>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <a href="<?php echo base_url('mahasiswa/kontak'); ?>" style="color: #5e72e4; text-decoration: none; font-size: 0.875rem;">
-                                <i class="fas fa-envelope"></i> Kirim Pesan
-                            </a>
-                            <a href="<?php echo base_url('mahasiswa/jurnal_bimbingan'); ?>" style="color: #5e72e4; text-decoration: none; font-size: 0.875rem;">
-                                <i class="fas fa-book"></i> Jurnal Bimbingan
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quick Actions -->
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-bolt" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            Aksi Cepat
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            <a href="<?php echo base_url('mahasiswa/seminar_proposal'); ?>" class="btn btn-outline-primary">
-                                <i class="fas fa-arrow-left"></i>
-                                Kembali ke Dashboard
-                            </a>
-                            
-                            <?php if ($seminar->file_proposal): ?>
-                                <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal); ?>" 
-                                   target="_blank" class="btn btn-outline-primary">
-                                    <i class="fas fa-download"></i>
-                                    Download File
-                                </a>
-                            <?php endif; ?>
-                            
-                            <a href="<?php echo base_url('mahasiswa/bantuan'); ?>" class="btn btn-outline-primary">
-                                <i class="fas fa-question-circle"></i>
-                                Bantuan
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto refresh untuk update status real-time (optional)
-    // Uncomment jika diperlukan auto refresh
-    /*
-    setInterval(function() {
-        // Check for status updates
-        // location.reload();
-    }, 60000); // 1 minute
-    */
-    
-    // Print functionality (if needed)
-    function printDetail() {
-        window.print();
-    }
-    
-    // Copy link functionality
-    function copyLink() {
-        navigator.clipboard.writeText(window.location.href).then(function() {
-            alert('Link detail telah disalin ke clipboard');
-        });
-    }
-});
-</script>
+            <!-- Proposal Info -->
+            <?php if (isset($proposal)): ?>
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-file-text" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                        Informasi Proposal
+                    </h6>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <strong>Judul Proposal:</strong><br>
+                        <p style="margin-top: 0.5rem; line-height: 1.6; color: #525f7f;">
+                            <?php echo htmlspecialchars($proposal->judul); ?>
+                        </p>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Mahasiswa</div>
+                            <div class="info-value">
+                                <?php echo $proposal->nama_mahasiswa; ?><br>
+                                <small style="color: #8898aa;">NIM: <?php echo $proposal->nim; ?></small>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Dosen Pembimbing</div>
+                            <div class="info-value"><?php echo $proposal->nama_pembimbing ?: 'Belum Ditentukan'; ?></div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Program Studi</div>
+                            <div class="info-value"><?php echo $proposal->nama_prodi ?: 'N/A'; ?></div>
+                        </div>
+                        
+                        <?php if ($proposal->jenis_penelitian): ?>
+                        <div class="info-item">
+                            <div class="info-label">Jenis Penelitian</div>
+                            <div class="info-value"><?php echo htmlspecialchars($proposal->jenis_penelitian); ?></div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- File dan Dokumen -->
+            <?php if (isset($seminar)): ?>
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-file-download" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                        File dan Dokumen
+                    </h6>
+                    
+                    <?php if ($seminar->file_proposal): ?>
+                        <div style="margin-bottom: 1rem;">
+                            <strong>File Proposal:</strong><br>
+                            <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal); ?>" 
+                               target="_blank" class="file-link" style="margin-top: 0.5rem;">
+                                <i class="fas fa-file-pdf" style="margin-right: 0.5rem;"></i>
+                                <?php echo $seminar->file_proposal; ?>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if (empty($seminar->file_proposal)): ?>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Belum ada file yang diupload.
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Keterangan Mahasiswa -->
+            <?php if (isset($seminar) && $seminar->keterangan_mahasiswa): ?>
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-comment" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                        Keterangan Mahasiswa
+                    </h6>
+                    
+                    <div class="comment-box">
+                        <?php echo nl2br(htmlspecialchars($seminar->keterangan_mahasiswa)); ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Feedback dari Pembimbing -->
+            <?php if (isset($seminar) && $seminar->komentar_pembimbing): ?>
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-user-graduate" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                        Feedback Dosen Pembimbing
+                    </h6>
+                    
+                    <div class="comment-box pembimbing">
+                        <strong>Status Rekomendasi:</strong> 
+                        <?php echo $seminar->rekomendasi_pembimbing == '1' ? 'Direkomendasikan' : 'Tidak Direkomendasikan'; ?>
+                        <br><br>
+                        <strong>Komentar:</strong><br>
+                        <?php echo nl2br(htmlspecialchars($seminar->komentar_pembimbing)); ?>
+                        
+                        <?php if ($seminar->tanggal_review_pembimbing): ?>
+                        <br><br>
+                        <small style="color: #8898aa;">
+                            <i class="fas fa-clock"></i>
+                            Direview pada: <?php echo date('d F Y H:i', strtotime($seminar->tanggal_review_pembimbing)); ?>
+                        </small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Feedback dari Kaprodi -->
+            <?php if (isset($seminar) && $seminar->komentar_kaprodi): ?>
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-user-tie" style="margin-right: 0.5rem; color: #2dce89;"></i>
+                        Feedback Ketua Program Studi
+                    </h6>
+                    
+                    <div class="comment-box kaprodi">
+                        <strong>Status Validasi:</strong> 
+                        <?php echo $seminar->status_kaprodi == '1' ? 'Disetujui' : 'Ditolak'; ?>
+                        <br><br>
+                        <strong>Komentar:</strong><br>
+                        <?php echo nl2br(htmlspecialchars($seminar->komentar_kaprodi)); ?>
+                        
+                        <?php if ($seminar->tanggal_review_kaprodi): ?>
+                        <br><br>
+                        <small style="color: #8898aa;">
+                            <i class="fas fa-clock"></i>
+                            Direview pada: <?php echo date('d F Y H:i', strtotime($seminar->tanggal_review_kaprodi)); ?>
+                        </small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            
+            <!-- Action Buttons -->
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-cogs" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                        Tindakan
+                    </h6>
+                    
+                    <?php if (isset($seminar)): ?>
+                        
+                        <?php if (in_array($seminar->status, ['draft', 'rejected'])): ?>
+                            <a href="<?php echo base_url('mahasiswa/seminar_proposal/ajukan/' . $seminar->proposal_id); ?>" 
+                               class="btn btn-warning" style="width: 100%; margin-bottom: 0.5rem;">
+                                <i class="fas fa-edit"></i>
+                                Edit Pengajuan
+                            </a>
+                        <?php endif; ?>
+                        
+                        <?php if ($seminar->file_proposal): ?>
+                            <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal); ?>" 
+                               target="_blank" class="btn btn-outline-primary" style="width: 100%; margin-bottom: 0.5rem;">
+                                <i class="fas fa-download"></i>
+                                Download File
+                            </a>
+                        <?php endif; ?>
+                        
+                    <?php endif; ?>
+                    
+                    <a href="<?php echo base_url('mahasiswa/seminar_proposal'); ?>" 
+                       class="btn btn-secondary" style="width: 100%;">
+                        <i class="fas fa-list"></i>
+                        Lihat Semua
+                    </a>
+                </div>
+            </div>
+
+            <!-- Timeline Workflow -->
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-route" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                        Timeline Workflow
+                    </h6>
+                    
+                    <div class="timeline">
+                        <div class="timeline-item completed">
+                            <strong>Pengajuan Mahasiswa</strong><br>
+                            <small style="color: #8898aa;">
+                                <?php echo isset($seminar) && $seminar->created_at ? 
+                                    date('d M Y H:i', strtotime($seminar->created_at)) : 'Belum diajukan'; ?>
+                            </small>
+                        </div>
+                        
+                        <div class="timeline-item <?php echo (isset($seminar) && $seminar->tanggal_review_pembimbing) ? 'completed' : 'pending'; ?>">
+                            <strong>Review Pembimbing</strong><br>
+                            <small style="color: #8898aa;">
+                                <?php echo (isset($seminar) && $seminar->tanggal_review_pembimbing) ? 
+                                    date('d M Y H:i', strtotime($seminar->tanggal_review_pembimbing)) : 'Menunggu review'; ?>
+                            </small>
+                        </div>
+                        
+                        <div class="timeline-item <?php echo (isset($seminar) && $seminar->tanggal_review_kaprodi) ? 'completed' : 'pending'; ?>">
+                            <strong>Validasi Kaprodi</strong><br>
+                            <small style="color: #8898aa;">
+                                <?php echo (isset($seminar) && $seminar->tanggal_review_kaprodi) ? 
+                                    date('d M Y H:i', strtotime($seminar->tanggal_review_kaprodi)) : 'Menunggu validasi'; ?>
+                            </small>
+                        </div>
+                        
+                        <div class="timeline-item <?php echo (isset($seminar) && $seminar->tanggal_seminar) ? 'completed' : 'pending'; ?>">
+                            <strong>Pelaksanaan Seminar</strong><br>
+                            <small style="color: #8898aa;">
+                                <?php echo (isset($seminar) && $seminar->tanggal_seminar) ? 
+                                    date('d M Y H:i', strtotime($seminar->tanggal_seminar)) : 'Belum dijadwalkan'; ?>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jurnal Bimbingan -->
+            <?php if (isset($jurnal_validasi) && !empty($jurnal_validasi)): ?>
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
+                        <i class="fas fa-book" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                        Jurnal Bimbingan Tervalidasi
+                    </h6>
+                    
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Pertemuan</th>
+                                    <th>Tanggal</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($jurnal_validasi as $jurnal): ?>
+                                <tr>
+                                    <td><?php echo $jurnal->pertemuan_ke; ?></td>
+                                    <td><?php echo date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)); ?></td>
+                                    <td>
+                                        <span style="color: #2dce89; font-size: 0.75rem;">
+                                            <i class="fas fa-check-circle"></i> Tervalidasi
+                                        </span>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <a href="<?php echo base_url('mahasiswa/bimbingan'); ?>" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt"></i>
+                            Lihat Semua Jurnal
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+        </div>
+
+    </div>
+
+</div>

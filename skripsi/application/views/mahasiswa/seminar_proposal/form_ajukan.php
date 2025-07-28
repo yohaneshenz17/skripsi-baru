@@ -1,10 +1,10 @@
 <?php
 /**
- * Form Pengajuan Seminar Proposal - Mahasiswa
+ * Form Pengajuan Seminar Proposal - Mahasiswa (FIXED VERSION)
  * File: application/views/mahasiswa/seminar_proposal/form_ajukan.php
  * 
  * Form untuk mengajukan atau mengedit pengajuan seminar proposal
- * Menggunakan template mahasiswa_simple.php dengan CSS inline
+ * PERBAIKAN: Menambahkan form tag yang hilang dengan action yang benar
  */
 ?>
 
@@ -84,82 +84,78 @@
     
     .file-upload-label:hover {
         border-color: #5e72e4;
-        background: rgba(94, 114, 228, 0.05);
+        background: #f0f3ff;
     }
     
     .file-upload.has-file .file-upload-label {
-        border-color: #2dce89;
-        background: rgba(45, 206, 137, 0.05);
+        border-color: #28a745;
+        background: #f8fff9;
     }
     
     .file-info {
         margin-top: 0.5rem;
         padding: 0.5rem;
-        background: rgba(94, 114, 228, 0.05);
+        background: #f8f9fa;
         border-radius: 0.25rem;
         font-size: 0.875rem;
-        color: #5e72e4;
     }
     
-    /* Card Styles (reused from dashboard) */
-    .card {
-        background: white;
-        border-radius: 0.375rem;
-        box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15);
-        border: none;
+    /* Progress Bar */
+    .progress-container {
+        background: #f8f9fe;
+        border-radius: 0.5rem;
+        padding: 1rem;
         margin-bottom: 1.5rem;
     }
     
+    .progress-title {
+        font-weight: 600;
+        color: #32325d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        background: linear-gradient(90deg, #11cdef 0%, #5e72e4 100%);
+        transition: width 0.6s ease;
+    }
+    
+    /* Cards */
+    .card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+    
     .card-header {
-        background: transparent;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        padding: 1.5rem;
+        background: #f8f9fe;
+        border-bottom: 1px solid #e3e6f0;
+        padding: 1rem 1.25rem;
     }
     
     .card-body {
-        padding: 1.5rem;
-    }
-    
-    /* Alert */
-    .alert {
-        padding: 1rem 1.25rem;
-        border-radius: 0.375rem;
-        border: 1px solid transparent;
-        margin-bottom: 1rem;
-    }
-    
-    .alert-success {
-        background: rgba(45, 206, 137, 0.1);
-        color: #155724;
-        border-color: rgba(45, 206, 137, 0.2);
-    }
-    
-    .alert-warning {
-        background: rgba(251, 99, 64, 0.1);
-        color: #8a2b06;
-        border-color: rgba(251, 99, 64, 0.2);
-    }
-    
-    .alert-info {
-        background: rgba(17, 205, 239, 0.1);
-        color: #0c5460;
-        border-color: rgba(17, 205, 239, 0.2);
+        padding: 1.25rem;
     }
     
     /* Buttons */
     .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
         padding: 0.625rem 1.25rem;
         font-size: 0.875rem;
         font-weight: 600;
         border-radius: 0.375rem;
-        border: 1px solid transparent;
-        text-decoration: none;
-        cursor: pointer;
         transition: all 0.15s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
         gap: 0.5rem;
+        border: 1px solid transparent;
+        cursor: pointer;
     }
     
     .btn-primary {
@@ -169,10 +165,9 @@
     }
     
     .btn-primary:hover {
+        background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%);
         transform: translateY(-1px);
         box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
-        color: white;
-        text-decoration: none;
     }
     
     .btn-secondary {
@@ -181,275 +176,228 @@
         border-color: #6c757d;
     }
     
-    .btn-outline-primary {
-        background: transparent;
-        color: #5e72e4;
-        border-color: #5e72e4;
+    .btn-secondary:hover {
+        background: #5a6268;
+        border-color: #545b62;
+        transform: translateY(-1px);
     }
     
-    .btn-outline-primary:hover {
-        background: #5e72e4;
-        color: white;
-        text-decoration: none;
-    }
-    
-    /* Jurnal List */
-    .jurnal-item {
+    /* Alert Styles */
+    .alert {
         padding: 1rem;
-        border: 1px solid #e3e6f0;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
         border-radius: 0.375rem;
-        margin-bottom: 0.75rem;
-        background: white;
     }
     
-    .jurnal-item.validated {
-        border-color: #2dce89;
-        background: rgba(45, 206, 137, 0.05);
+    .alert-info {
+        color: #0c5460;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
     }
     
-    /* Responsive */
-    @media (max-width: 768px) {
-        .card-body {
-            padding: 1rem;
-        }
-        
-        .form-control {
-            padding: 0.625rem 0.875rem;
-        }
-        
-        .file-upload-label {
-            padding: 1.5rem 1rem;
-        }
+    .alert-warning {
+        color: #856404;
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
     }
 </style>
 
-<div style="margin-top: -3rem; position: relative; z-index: 10;">
-    <div style="max-width: 900px; margin: 0 auto; padding: 0 1.5rem;">
-        
-        <!-- Form Header -->
-        <div class="card">
-            <div class="card-header">
-                <h4 style="margin: 0; font-weight: 600; color: #32325d;">
-                    <i class="fas fa-paper-plane" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                    <?php echo $is_edit ? 'Edit Pengajuan' : 'Ajukan'; ?> Seminar Proposal
-                </h4>
-                <p style="margin: 0.5rem 0 0 0; color: #8898aa; font-size: 0.875rem;">
-                    <?php echo $proposal->judul; ?>
-                </p>
+<!-- Progress Workflow -->
+<div class="progress-container">
+    <div class="progress-title">
+        <i class="fas fa-tasks" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+        Progress Pengajuan Seminar Proposal
+    </div>
+    <div class="progress">
+        <div class="progress-bar" style="width: 60%"></div>
+    </div>
+    <small style="color: #8898aa; margin-top: 0.5rem; display: block;">
+        Phase 3: Mengajukan Seminar Proposal (60% dari keseluruhan workflow)
+    </small>
+</div>
+
+<!-- ============================================== -->
+<!-- FORM TAG YANG BENAR - INI YANG HILANG SEBELUMNYA -->
+<!-- ============================================== -->
+<form action="<?php echo base_url('mahasiswa/seminar_proposal/submit_ajukan'); ?>" 
+      method="post" 
+      enctype="multipart/form-data" 
+      id="form-seminar"
+      novalidate>
+
+    <!-- Hidden Fields -->
+    <input type="hidden" name="proposal_id" value="<?php echo isset($proposal) ? $proposal->id : ''; ?>">
+    <input type="hidden" name="is_edit" value="<?php echo isset($is_edit) && $is_edit ? '1' : '0'; ?>">
+
+    <!-- Flash Messages -->
+    <?php if($this->session->flashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <?php if($this->session->flashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Informasi Proposal -->
+    <div class="card">
+        <div class="card-header">
+            <h6 style="margin: 0; font-weight: 600; color: #32325d;">
+                <i class="fas fa-info-circle" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                Informasi Proposal
+            </h6>
+        </div>
+        <div class="card-body">
+            <?php if (isset($proposal)): ?>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>ID Proposal:</strong> #<?php echo $proposal->id; ?></p>
+                        <p><strong>Judul:</strong> <?php echo htmlspecialchars($proposal->judul); ?></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Dosen Pembimbing:</strong> <?php echo isset($proposal->nama_pembimbing) ? $proposal->nama_pembimbing : 'Belum ditetapkan'; ?></p>
+                        <p><strong>Status Proposal:</strong> 
+                            <span class="badge badge-success">Disetujui untuk Seminar</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Syarat Jurnal Bimbingan -->
+                <?php if (isset($syarat_jurnal)): ?>
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-check-circle"></i> Syarat Jurnal Bimbingan</h6>
+                        <p style="margin: 0;">
+                            ✅ Jurnal bimbingan telah memenuhi syarat: 
+                            <strong><?php echo $syarat_jurnal['total_validated']; ?> dari <?php echo $syarat_jurnal['minimum_required']; ?> pertemuan minimum</strong>
+                        </p>
+                    </div>
+                <?php endif; ?>
+            <?php else: ?>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Informasi proposal tidak tersedia.
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Upload File Proposal -->
+    <div class="card">
+        <div class="card-header">
+            <h6 style="margin: 0; font-weight: 600; color: #32325d;">
+                <i class="fas fa-file-upload" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                Upload File Proposal
+            </h6>
+        </div>
+        <div class="card-body">
+            
+            <?php if (isset($is_edit) && $is_edit && isset($existing_seminar) && $existing_seminar->file_proposal): ?>
+                <div class="alert alert-info">
+                    <strong>File saat ini:</strong> 
+                    <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $existing_seminar->file_proposal); ?>" 
+                       target="_blank" style="color: #0c5460;">
+                        <?php echo $existing_seminar->file_proposal; ?>
+                    </a>
+                    <br><small>Kosongkan jika tidak ingin mengubah file.</small>
+                </div>
+            <?php endif; ?>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    File Proposal Seminar 
+                    <?php if (!isset($is_edit) || !$is_edit): ?>
+                        <span style="color: #f5365c;">*</span>
+                    <?php endif; ?>
+                </label>
+                
+                <div class="file-upload" id="fileUpload">
+                    <input type="file" name="file_proposal" id="fileProposal" accept=".pdf,.doc,.docx">
+                    <div class="file-upload-label">
+                        <div>
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #8898aa; margin-bottom: 0.5rem;"></i>
+                            <p style="margin: 0; color: #8898aa; font-weight: 600;">
+                                Klik untuk upload file atau drag & drop
+                            </p>
+                            <small style="color: #8898aa;">
+                                Format: PDF, DOC, DOCX | Maksimal: 1MB
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="fileInfo" class="file-info" style="display: none;"></div>
+                
+                <div class="form-text">
+                    Upload file proposal yang akan dipresentasikan dalam seminar.
+                    File harus berisi proposal yang sudah diperbaiki sesuai saran pembimbing.
+                </div>
             </div>
         </div>
-        
-        <!-- Breadcrumb -->
-        <nav style="margin-bottom: 1.5rem;">
-            <a href="<?php echo base_url('mahasiswa/seminar_proposal'); ?>" 
-               style="color: #5e72e4; text-decoration: none; font-size: 0.875rem;">
-                <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
-            </a>
-        </nav>
-        
-        <?php if (!$can_edit): ?>
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>
-                <strong>Pengajuan sedang diproses.</strong> Anda tidak dapat mengedit pengajuan yang sedang dalam tahap review.
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($can_edit): ?>
-            
-            <!-- Syarat Jurnal Bimbingan -->
-            <div class="card">
-                <div class="card-header">
-                    <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                        <i class="fas fa-check-circle" style="margin-right: 0.5rem; color: #2dce89;"></i>
-                        Syarat Jurnal Bimbingan Terpenuhi
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-success">
-                        <strong>✓ Syarat Terpenuhi!</strong><br>
-                        Anda memiliki <?php echo $syarat_jurnal['jurnal_validated_count']; ?> jurnal bimbingan yang telah divalidasi dosen pembimbing.
-                    </div>
-                    
-                    <?php if (!empty($jurnal_validasi)): ?>
-                        <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">Daftar Jurnal Tervalidasi:</h6>
-                        <?php foreach ($jurnal_validasi as $jurnal): ?>
-                            <div class="jurnal-item validated">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong>Pertemuan ke-<?php echo $jurnal->pertemuan_ke; ?></strong><br>
-                                        <small style="color: #8898aa;">
-                                            <?php echo date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)); ?>
-                                            - Validasi: <?php echo $jurnal->nama_validator ?: 'Dosen Pembimbing'; ?>
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <span style="background: #2dce89; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">
-                                            ✓ Tervalidasi
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
-            
-            <!-- Form Pengajuan -->
-            <?php echo form_open_multipart('mahasiswa/seminar_proposal/submit_ajukan', ['id' => 'form-seminar', 'novalidate' => 'novalidate']); ?>
-                
-                <input type="hidden" name="proposal_id" value="<?php echo $proposal->id; ?>">
-                <input type="hidden" name="is_edit" value="<?php echo $is_edit ? '1' : '0'; ?>">
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-file-upload" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            Upload File Proposal
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        
-                        <?php if ($is_edit && $existing_seminar->file_proposal): ?>
-                            <div class="alert alert-info">
-                                <strong>File saat ini:</strong> 
-                                <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $existing_seminar->file_proposal); ?>" 
-                                   target="_blank" style="color: #0c5460;">
-                                    <?php echo $existing_seminar->file_proposal; ?>
-                                </a>
-                                <br><small>Kosongkan jika tidak ingin mengubah file.</small>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                File Proposal Seminar 
-                                <?php if (!$is_edit): ?>
-                                    <span style="color: #f5365c;">*</span>
-                                <?php endif; ?>
-                            </label>
-                            
-                            <div class="file-upload" id="fileUpload">
-                                <input type="file" name="file_proposal" id="fileProposal" accept=".pdf,.doc,.docx">
-                                <div class="file-upload-label">
-                                    <div>
-                                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #8898aa; margin-bottom: 0.5rem;"></i>
-                                        <p style="margin: 0; color: #8898aa; font-weight: 600;">
-                                            Klik untuk upload file atau drag & drop
-                                        </p>
-                                        <small style="color: #8898aa;">
-                                            Format: PDF, DOC, DOCX | Maksimal: 1MB
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="fileInfo" class="file-info" style="display: none;"></div>
-                            
-                            <div class="form-text">
-                                Upload file proposal yang akan dipresentasikan dalam seminar. 
-                                File harus berisi proposal yang sudah diperbaiki sesuai saran pembimbing.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                            <i class="fas fa-edit" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                            Keterangan Pengajuan
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label for="keterangan" class="form-label">
-                                Keterangan Tambahan <span style="color: #f5365c;">*</span>
-                            </label>
-                            
-                            <textarea name="keterangan_mahasiswa" id="keterangan" class="form-control" 
-                                      rows="6" placeholder="Jelaskan kesiapan Anda untuk seminar proposal..."><?php echo $existing_seminar ? $existing_seminar->keterangan_mahasiswa : ''; ?></textarea>
-                            
-                            <div class="form-text">
-                                Minimal 10 karakter. Jelaskan kesiapan Anda mengikuti seminar proposal, 
-                                poin-poin penting yang akan dipresentasikan, atau hal lain yang perlu disampaikan.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Submit Actions -->
-                <div class="card">
-                    <div class="card-body">
-                        <div style="display: flex; gap: 1rem; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                            <div>
-                                <small style="color: #8898aa;">
-                                    <i class="fas fa-info-circle"></i>
-                                    Pastikan semua data sudah benar sebelum mengajukan.
-                                </small>
-                            </div>
-                            
-                            <div style="display: flex; gap: 1rem;">
-                                <a href="<?php echo base_url('mahasiswa/seminar_proposal'); ?>" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i>
-                                    Batal
-                                </a>
-                                
-                                <button type="submit" class="btn btn-primary" id="btnSubmit">
-                                    <i class="fas fa-paper-plane"></i>
-                                    <?php echo $is_edit ? 'Update Pengajuan' : 'Kirim Pengajuan'; ?>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            <?php echo form_close(); ?>
-            
-        <?php else: ?>
-            
-            <!-- Read Only Display -->
-            <div class="card">
-                <div class="card-header">
-                    <h6 style="margin: 0; font-weight: 600; color: #32325d;">
-                        <i class="fas fa-eye" style="margin-right: 0.5rem; color: #5e72e4;"></i>
-                        Detail Pengajuan (Read Only)
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <?php if ($existing_seminar): ?>
-                        <div style="margin-bottom: 1.5rem;">
-                            <strong>File Proposal:</strong><br>
-                            <?php if ($existing_seminar->file_proposal): ?>
-                                <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $existing_seminar->file_proposal); ?>" 
-                                   target="_blank" class="btn btn-outline-primary">
-                                    <i class="fas fa-download"></i>
-                                    Download File
-                                </a>
-                            <?php else: ?>
-                                <span style="color: #8898aa;">Tidak ada file</span>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <div style="margin-bottom: 1.5rem;">
-                            <strong>Keterangan:</strong><br>
-                            <div style="background: #f8f9fe; padding: 1rem; border-radius: 0.375rem; margin-top: 0.5rem;">
-                                <?php echo nl2br(htmlspecialchars($existing_seminar->keterangan_mahasiswa)); ?>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <strong>Status:</strong> 
-                            <span style="background: #5e72e4; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">
-                                <?php echo ucfirst(str_replace('_', ' ', $existing_seminar->status)); ?>
-                            </span>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            
-        <?php endif; ?>
     </div>
-</div>
+    
+    <!-- Keterangan Pengajuan -->
+    <div class="card">
+        <div class="card-header">
+            <h6 style="margin: 0; font-weight: 600; color: #32325d;">
+                <i class="fas fa-edit" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+                Keterangan Pengajuan
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="keterangan" class="form-label">
+                    Keterangan Tambahan <span style="color: #f5365c;">*</span>
+                </label>
+                
+                <textarea name="keterangan_mahasiswa" id="keterangan" class="form-control" 
+                          rows="6" placeholder="Jelaskan kesiapan Anda untuk seminar proposal..."><?php echo (isset($existing_seminar) && $existing_seminar) ? $existing_seminar->keterangan_mahasiswa : ''; ?></textarea>
+                
+                <div class="form-text">
+                    Minimal 10 karakter. Jelaskan kesiapan Anda mengikuti seminar proposal, 
+                    poin-poin penting yang akan dipresentasikan, atau hal lain yang perlu disampaikan.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Submit Actions -->
+    <div class="card">
+        <div class="card-body">
+            <div style="display: flex; gap: 1rem; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <small style="color: #8898aa;">
+                        <i class="fas fa-info-circle"></i>
+                        Pastikan semua data sudah benar sebelum mengajukan.
+                    </small>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <a href="<?php echo base_url('mahasiswa/seminar_proposal'); ?>" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Batal
+                    </a>
+                    
+                    <button type="submit" class="btn btn-primary" id="btnSubmit">
+                        <i class="fas fa-paper-plane"></i>
+                        <?php echo (isset($is_edit) && $is_edit) ? 'Update Pengajuan' : 'Ajukan Seminar Proposal'; ?>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+<!-- END FORM -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -459,8 +407,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileInfo = document.getElementById('fileInfo');
     
     if (fileInput) {
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
             
             if (file) {
                 // Validate file size (1MB = 1048576 bytes)

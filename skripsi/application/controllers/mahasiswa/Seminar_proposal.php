@@ -2,17 +2,19 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Seminar Proposal Controller - Role Mahasiswa (COMPLETE FIXED VERSION)
- * Updated untuk menggunakan template mahasiswa.php yang konsisten
+ * Seminar Proposal Controller - Role Mahasiswa (ENHANCED FIXED VERSION)
  * 
- * Controller untuk mengelola seminar proposal dari sisi mahasiswa
- * Sesuai dengan workflow yang telah ditetapkan
+ * 🚀 PERBAIKAN UTAMA:
+ * - Enhanced redirect dengan success feedback yang informatif
+ * - Better status display dengan progress tracking
+ * - Improved notification system
+ * - Session management yang lebih baik untuk user experience
  * 
  * @package     SIM_TA
- * @subpackage  Controllers/Mahasiswa
+ * @subpackage  Controllers/Mahasiswa  
  * @category    Seminar Proposal
  * @author      Unit SIPD STK Santo Yakobus
- * @version     3.0 (Complete Final)
+ * @version     3.1 (Enhanced Final)
  */
 
 class Seminar_proposal extends CI_Controller {
@@ -53,7 +55,7 @@ class Seminar_proposal extends CI_Controller {
         }
         
         // Load additional libraries after auth check
-        $this->load->library(['form_validation', 'upload']);
+        $this->load->library(['form_validation', 'upload', 'email']);
         $this->load->helper(['file', 'security']);
         
         // Try to load model, with fallback
@@ -73,9 +75,8 @@ class Seminar_proposal extends CI_Controller {
     // =================================================================
 
     /**
-     * Dashboard Seminar Proposal Mahasiswa
+     * 🚀 ENHANCED: Dashboard Seminar Proposal dengan Status Informatif
      * URL: https://stkyakobus.ac.id/skripsi/mahasiswa/seminar_proposal
-     * URL: https://stkyakobus.ac.id/skripsi/mahasiswa/seminar (redirect)
      */
     public function index()
     {
@@ -86,18 +87,22 @@ class Seminar_proposal extends CI_Controller {
                 log_message('debug', 'Seminar_proposal index - Mahasiswa ID: ' . $mahasiswa_id);
             }
             
+            // ✅ ENHANCEMENT: Cek submission success state dari redirect
+            $submission_success = $this->session->flashdata('submission_success');
+            $is_from_submission = $this->input->get('submission') === 'success';
+            
             // PERBAIKAN: Cek proposal yang sudah disetujui dan siap untuk seminar proposal
             $proposal = $this->_get_approved_proposal($mahasiswa_id);
             
             if (!$proposal) {
                 // CASE 1: Belum ada proposal yang disetujui
-                // Tampilkan no_proposal.php yang mengarahkan ke pengajuan proposal
                 $data = [
                     'title' => 'Seminar Proposal',
                     'content' => 'mahasiswa/seminar_proposal/no_proposal',
                     'proposal' => null,
                     'seminar_data' => null,
-                    'current_step' => 'no_approved_proposal'
+                    'current_step' => 'no_approved_proposal',
+                    'submission_success' => null
                 ];
                 
                 $this->_load_view($data);
@@ -105,14 +110,17 @@ class Seminar_proposal extends CI_Controller {
             }
 
             // CASE 2: Ada proposal yang disetujui
-            // Cek data seminar proposal yang sudah ada
-            $seminar_data = $this->_get_seminar_by_proposal_id($proposal->id);
+            // ✅ ENHANCEMENT: Enhanced seminar data loading dengan join
+            $seminar_data = $this->_get_seminar_with_details($proposal->id);
             
             // Cek syarat jurnal bimbingan
             $syarat_jurnal = $this->_check_jurnal_requirement($proposal->id);
             
-            // Tentukan status dan langkah berikutnya
-            $workflow_status = $this->_determine_workflow_status($proposal, $seminar_data, $syarat_jurnal);
+            // ✅ NEW: Enhanced workflow status determination
+            $workflow_status = $this->_determine_enhanced_workflow_status($proposal, $seminar_data, $syarat_jurnal);
+            
+            // ✅ NEW: Calculate comprehensive progress
+            $workflow_progress = $this->_calculate_workflow_progress($proposal, $seminar_data);
             
             $data = [
                 'title' => 'Seminar Proposal',
@@ -121,7 +129,11 @@ class Seminar_proposal extends CI_Controller {
                 'seminar_data' => $seminar_data,
                 'syarat_jurnal' => $syarat_jurnal,
                 'workflow_status' => $workflow_status,
-                'progress_percentage' => $this->_calculate_progress($workflow_status['current_step'])
+                'workflow_progress' => $workflow_progress,
+                'progress_percentage' => $workflow_progress['percentage'],
+                'submission_success' => $submission_success,
+                'is_from_submission' => $is_from_submission,
+                'can_submit' => $this->_can_submit_seminar($proposal, $seminar_data, $syarat_jurnal)
             ];
             
             $this->_load_view($data);
@@ -147,7 +159,7 @@ class Seminar_proposal extends CI_Controller {
         }
         
         echo "<h2>Seminar Proposal Controller Test</h2>";
-        echo "<p><strong>Status:</strong> Controller berjalan dengan baik! ✅</p>";
+        echo "<p><strong>Status:</strong> Enhanced Controller berjalan dengan baik! ✅</p>";
         echo "<p><strong>Base URL:</strong> " . base_url() . "</p>";
         echo "<p><strong>Current URL:</strong> " . current_url() . "</p>";
         echo "<p><strong>Controller:</strong> " . $this->router->class . "</p>";
@@ -160,48 +172,12 @@ class Seminar_proposal extends CI_Controller {
         try {
             $result = $this->db->query("SELECT COUNT(*) as total FROM mahasiswa")->row();
             echo "<p>✅ Database connection OK - Total mahasiswa: " . $result->total . "</p>";
+            
+            // Test seminar proposal table
+            $seminar_count = $this->db->query("SELECT COUNT(*) as total FROM seminar_proposal_mahasiswa")->row();
+            echo "<p>✅ Seminar proposal table OK - Total records: " . $seminar_count->total . "</p>";
         } catch (Exception $e) {
             echo "<p>❌ Database error: " . $e->getMessage() . "</p>";
-        }
-        
-        echo "<h3>Model Test:</h3>";
-        if (isset($this->seminar_model)) {
-            echo "<p>✅ Seminar model loaded successfully</p>";
-        } else {
-            echo "<p>❌ Seminar model not loaded</p>";
-        }
-        
-        echo "<h3>View Test:</h3>";
-        $view_files = [
-            'mahasiswa/seminar_proposal/dashboard.php',
-            'mahasiswa/seminar_proposal/form_ajukan.php',
-            'mahasiswa/seminar_proposal/detail.php',
-            'mahasiswa/seminar_proposal/no_proposal.php'
-        ];
-        
-        foreach ($view_files as $view) {
-            $path = VIEWPATH . $view;
-            if (file_exists($path)) {
-                echo "<p>✅ {$view} exists</p>";
-            } else {
-                echo "<p>❌ {$view} missing</p>";
-            }
-        }
-        
-        echo "<h3>Template Test:</h3>";
-        $template_normal = VIEWPATH . 'template/mahasiswa.php';
-        $template_simple = VIEWPATH . 'template/mahasiswa_simple.php';
-        
-        if (file_exists($template_normal)) {
-            echo "<p>✅ Template mahasiswa.php exists</p>";
-        } else {
-            echo "<p>❌ Template mahasiswa.php missing</p>";
-        }
-        
-        if (file_exists($template_simple)) {
-            echo "<p>✅ Template mahasiswa_simple.php exists</p>";
-        } else {
-            echo "<p>❌ Template mahasiswa_simple.php missing</p>";
         }
         
         echo "<hr>";
@@ -261,7 +237,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * Process Form Pengajuan Seminar Proposal (DIPERBAIKI - NAMA TABEL YANG BENAR)
+     * 🚀 ENHANCED: Process Form Pengajuan dengan Better Redirect & Feedback
      */
     public function submit_ajukan()
     {
@@ -296,8 +272,9 @@ class Seminar_proposal extends CI_Controller {
             
             $data = [
                 'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
-                'status' => 'submitted',
-                'current_step' => 'pembimbing',
+                'status' => 'submitted', // ✅ Status yang jelas
+                'current_step' => 'review_pembimbing', // ✅ Step yang spesifik
+                'status_pembimbing' => 'pending', // ✅ Reset status pembimbing
                 'updated_at' => date('Y-m-d H:i:s')
             ];
             
@@ -306,21 +283,32 @@ class Seminar_proposal extends CI_Controller {
                 $file_result = $this->_handle_file_upload('file_proposal', 'proposal_files');
                 if ($file_result['status']) {
                     $data['file_proposal'] = $file_result['filename'];
+                    
+                    // Delete old file if editing
+                    if ($is_edit) {
+                        $existing = $this->_get_seminar_by_proposal_id($proposal_id);
+                        if ($existing && $existing->file_proposal) {
+                            $old_file_path = FCPATH . 'uploads/seminar_proposal/proposal_files/' . $existing->file_proposal;
+                            if (file_exists($old_file_path)) {
+                                unlink($old_file_path);
+                            }
+                        }
+                    }
                 } else {
                     throw new Exception($file_result['message']);
                 }
             }
+            
+            $seminar_id = null;
             
             if ($is_edit) {
                 // Update existing record
                 $existing = $this->_get_seminar_by_proposal_id($proposal_id);
                 if ($existing) {
                     $this->db->where('id', $existing->id);
-                    // 🚀 PERBAIKAN: Gunakan nama tabel yang benar
                     $this->db->update('seminar_proposal_mahasiswa', $data);
-                    
+                    $seminar_id = $existing->id;
                     $action_type = 'updated';
-                    $this->session->set_flashdata('success', 'Pengajuan seminar proposal berhasil diperbarui.');
                 } else {
                     throw new Exception('Data seminar tidak ditemukan untuk diupdate.');
                 }
@@ -329,12 +317,11 @@ class Seminar_proposal extends CI_Controller {
                 $data['proposal_id'] = $proposal_id;
                 $data['mahasiswa_id'] = $mahasiswa_id;
                 $data['created_at'] = date('Y-m-d H:i:s');
+                $data['created_by'] = $mahasiswa_id;
                 
-                // 🚀 PERBAIKAN: Gunakan nama tabel yang benar
                 $this->db->insert('seminar_proposal_mahasiswa', $data);
-                
+                $seminar_id = $this->db->insert_id();
                 $action_type = 'created';
-                $this->session->set_flashdata('success', 'Pengajuan seminar proposal berhasil dikirim. Menunggu review dari dosen pembimbing.');
             }
             
             $this->db->trans_complete();
@@ -343,40 +330,55 @@ class Seminar_proposal extends CI_Controller {
                 throw new Exception('Database transaction failed');
             }
             
-            // KIRIM NOTIFIKASI EMAIL setelah berhasil submit
-            if ($action_type === 'created') {
-                $this->_kirim_notifikasi_seminar_proposal($proposal, $data);
-            }
+            // ✅ ENHANCEMENT: Enhanced notification system
+            $this->_kirim_notifikasi_seminar_proposal($proposal, $data, $seminar_id);
+            
+            // ✅ PERBAIKAN UTAMA: Set comprehensive success data untuk UI feedback
+            $success_message = $is_edit 
+                ? 'Pengajuan seminar proposal berhasil diperbarui dan sedang menunggu review ulang dari dosen pembimbing.'
+                : 'Pengajuan seminar proposal berhasil dikirim dan sedang menunggu review dari dosen pembimbing.';
+            
+            $this->session->set_flashdata('submission_success', [
+                'seminar_id' => $seminar_id,
+                'proposal_id' => $proposal_id,
+                'action' => $action_type,
+                'status' => 'submitted',
+                'current_step' => 'review_pembimbing',
+                'message' => $success_message,
+                'next_step_description' => 'Dosen pembimbing akan mereview pengajuan Anda dalam 3-5 hari kerja.',
+                'estimated_time' => '3-5 hari kerja',
+                'timestamp' => date('Y-m-d H:i:s'),
+                'can_track' => true
+            ]);
+            
+            // ✅ SOLUSI UTAMA: Enhanced redirect dengan parameter untuk feedback
+            redirect('mahasiswa/seminar_proposal?submission=success&seminar_id=' . $seminar_id . '&action=' . $action_type);
             
         } catch (Exception $e) {
             $this->db->trans_rollback();
-            log_message('error', 'Seminar proposal submission error: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            log_message('error', 'Submit Seminar Proposal Error: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan saat mengirim pengajuan: ' . $e->getMessage());
+            redirect('mahasiswa/seminar_proposal/ajukan/' . $proposal_id);
         }
-        
-        redirect('mahasiswa/seminar_proposal');
     }
     
     // ========================================
-    // METHOD UNTUK NOTIFIKASI EMAIL
+    // 🚀 ENHANCED NOTIFICATION SYSTEM
     // ========================================
     
     /**
-     * 🚀 METHOD BARU: Kirim notifikasi email setelah pengajuan seminar proposal
+     * ✅ ENHANCED: Kirim notifikasi dengan parameter tambahan
      */
-    private function _kirim_notifikasi_seminar_proposal($proposal, $seminar_data)
+    private function _kirim_notifikasi_seminar_proposal($proposal, $seminar_data, $seminar_id)
     {
         try {
-            // Load email library
-            $this->load->library('email');
-            
             // Setup email configuration
             $config = [
                 'protocol' => 'smtp',
                 'smtp_host' => 'smtp.gmail.com',
                 'smtp_port' => 587,
                 'smtp_user' => 'stkyakobus@gmail.com',
-                'smtp_pass' => 'yonroxhraathnaug', // Gunakan app password
+                'smtp_pass' => 'yonroxhraathnaug',
                 'charset' => 'utf-8',
                 'newline' => "\r\n",
                 'mailtype' => 'html',
@@ -386,89 +388,167 @@ class Seminar_proposal extends CI_Controller {
             
             $this->email->initialize($config);
             
-            // 1. KIRIM EMAIL KE MAHASISWA (KONFIRMASI)
-            $this->_kirim_email_mahasiswa_seminar_proposal($proposal, $seminar_data);
+            // 1. EMAIL KE MAHASISWA (KONFIRMASI) - Enhanced
+            $this->_kirim_email_mahasiswa_konfirmasi($proposal, $seminar_data, $seminar_id);
             
-            // 2. KIRIM EMAIL KE DOSEN PEMBIMBING (NOTIFIKASI REVIEW)
-            $this->_kirim_email_dosen_seminar_proposal($proposal, $seminar_data);
+            // 2. EMAIL KE DOSEN PEMBIMBING (NOTIFIKASI REVIEW) - Enhanced  
+            $this->_kirim_email_dosen_review_request($proposal, $seminar_data, $seminar_id);
             
-            // 3. SIMPAN KE TABEL NOTIFIKASI (INTERNAL SYSTEM)
-            $this->_simpan_notifikasi_internal($proposal, $seminar_data);
+            // 3. SIMPAN KE TABEL NOTIFIKASI (INTERNAL SYSTEM) - Enhanced
+            $this->_simpan_notifikasi_database($proposal, $seminar_data, $seminar_id);
             
-            log_message('info', 'Notifikasi seminar proposal berhasil dikirim untuk proposal ID: ' . $proposal->id);
+            log_message('info', "Enhanced notification sent successfully - Seminar ID: {$seminar_id}, Proposal ID: {$proposal->id}");
             
         } catch (Exception $e) {
-            log_message('error', 'Error sending seminar proposal notification: ' . $e->getMessage());
-            // Jangan throw exception, biarkan proses utama tetap berjalan
+            log_message('error', 'Error sending enhanced seminar proposal notification: ' . $e->getMessage());
+            // Don't throw exception, let main process continue
         }
     }
     
     /**
-     * 📧 EMAIL KE MAHASISWA - Konfirmasi pengajuan
+     * ✅ ENHANCED: Email konfirmasi ke mahasiswa dengan design yang lebih baik
      */
-    private function _kirim_email_mahasiswa_seminar_proposal($proposal, $seminar_data)
+    private function _kirim_email_mahasiswa_konfirmasi($proposal, $seminar_data, $seminar_id)
     {
+        if (empty($proposal->email_mahasiswa)) {
+            log_message('warning', 'Student email not found for proposal ID: ' . $proposal->id);
+            return;
+        }
+        
         $this->email->clear();
         $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
         $this->email->to($proposal->email_mahasiswa);
-        $this->email->subject('[SIM-TA] Pengajuan Seminar Proposal Berhasil - Menunggu Review Pembimbing');
+        $this->email->subject('[SIM-TA] ✅ Pengajuan Seminar Proposal Berhasil Dikirim');
+        
+        $tracking_url = base_url('mahasiswa/seminar_proposal?track=' . $seminar_id);
         
         $message = "
-        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-            <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;'>
-                <h1 style='color: white; margin: 0; font-size: 24px;'>📋 Pengajuan Seminar Proposal</h1>
-            </div>
-            
-            <div style='padding: 30px; background-color: #f8f9fa;'>
-                <h2 style='color: #28a745; margin: 0 0 20px 0;'>✅ Pengajuan Berhasil Dikirim</h2>
-                
-                <p><strong>Halo {$proposal->nama_mahasiswa},</strong></p>
-                
-                <p>Pengajuan seminar proposal Anda telah <strong>berhasil dikirim</strong> dan sedang menunggu review dari dosen pembimbing.</p>
-                
-                <div style='background-color: white; padding: 20px; border-left: 4px solid #007bff; margin: 20px 0;'>
-                    <h4 style='margin-top: 0; color: #007bff;'>📊 Detail Pengajuan:</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr><td style='padding: 8px 0; border-bottom: 1px solid #eee;'><strong>NIM:</strong></td><td style='padding: 8px 0; border-bottom: 1px solid #eee;'>{$proposal->nim}</td></tr>
-                        <tr><td style='padding: 8px 0; border-bottom: 1px solid #eee;'><strong>Judul:</strong></td><td style='padding: 8px 0; border-bottom: 1px solid #eee;'>{$proposal->judul}</td></tr>
-                        <tr><td style='padding: 8px 0; border-bottom: 1px solid #eee;'><strong>Pembimbing:</strong></td><td style='padding: 8px 0; border-bottom: 1px solid #eee;'>{$proposal->nama_pembimbing}</td></tr>
-                        <tr><td style='padding: 8px 0; border-bottom: 1px solid #eee;'><strong>Status:</strong></td><td style='padding: 8px 0; border-bottom: 1px solid #eee;'><span style='background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px;'>⏳ Menunggu Review Pembimbing</span></td></tr>
-                        <tr><td style='padding: 8px 0;'><strong>Tanggal Pengajuan:</strong></td><td style='padding: 8px 0;'>" . date('d F Y, H:i') . " WIT</td></tr>
-                    </table>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Konfirmasi Pengajuan Seminar Proposal</title>
+        </head>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0;'>
+            <div style='max-width: 600px; margin: 0 auto; background: #ffffff;'>
+                <!-- Header with gradient -->
+                <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;'>
+                    <h1 style='color: white; margin: 0; font-size: 24px; font-weight: 600;'>
+                        ✅ Pengajuan Berhasil Dikirim
+                    </h1>
+                    <p style='color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;'>
+                        Seminar Proposal #{$seminar_id}
+                    </p>
                 </div>
                 
-                <div style='background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 20px 0;'>
-                    <h4 style='color: #0c5460; margin: 0 0 10px 0;'>📋 Langkah Selanjutnya:</h4>
-                    <ul style='color: #0c5460; margin: 0; padding-left: 20px;'>
-                        <li>Dosen pembimbing akan mereview pengajuan Anda</li>
-                        <li>Anda akan mendapat notifikasi hasil review via email</li>
-                        <li>Pantau status melalui dashboard SIM-TA</li>
-                        <li>Jika disetujui, akan dilanjutkan ke proses penjadwalan seminar</li>
-                    </ul>
+                <!-- Main content -->
+                <div style='padding: 30px;'>
+                    <div style='background: #f8f9fe; padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #28a745;'>
+                        <h2 style='color: #28a745; margin: 0 0 15px 0; font-size: 18px;'>
+                            📋 Halo {$proposal->nama_mahasiswa}!
+                        </h2>
+                        <p style='margin: 0; font-size: 16px; line-height: 1.5;'>
+                            Pengajuan seminar proposal Anda telah <strong>berhasil dikirim</strong> dan sedang menunggu review dari dosen pembimbing.
+                        </p>
+                    </div>
+                    
+                    <!-- Details table -->
+                    <div style='background: white; border: 1px solid #e1e8ed; border-radius: 8px; overflow: hidden; margin-bottom: 25px;'>
+                        <div style='background: #f7f9fc; padding: 15px; border-bottom: 1px solid #e1e8ed;'>
+                            <h3 style='margin: 0; color: #1a202c; font-size: 16px;'>📊 Detail Pengajuan</h3>
+                        </div>
+                        <div style='padding: 20px;'>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568; width: 30%;'>ID Pengajuan:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>#SP-" . str_pad($seminar_id, 4, '0', STR_PAD_LEFT) . "</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>NIM:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>{$proposal->nim}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>Judul:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>" . substr($proposal->judul, 0, 100) . (strlen($proposal->judul) > 100 ? '...' : '') . "</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>Pembimbing:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>{$proposal->nama_pembimbing}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>Status:</td>
+                                    <td style='padding: 8px 0;'>
+                                        <span style='background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 14px; font-weight: 600;'>
+                                            ⏳ Menunggu Review Pembimbing
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>Tanggal Pengajuan:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>" . date('d F Y, H:i') . " WIT</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Next steps -->
+                    <div style='background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin-bottom: 25px;'>
+                        <h4 style='color: #0c5460; margin: 0 0 15px 0; font-size: 16px;'>
+                            📋 Langkah Selanjutnya:
+                        </h4>
+                        <ul style='color: #0c5460; margin: 0; padding-left: 20px; line-height: 1.8;'>
+                            <li>Dosen pembimbing akan mereview pengajuan Anda</li>
+                            <li>Estimasi waktu review: <strong>3-5 hari kerja</strong></li>
+                            <li>Anda akan mendapat notifikasi email hasil review</li>
+                            <li>Pantau status terbaru melalui dashboard SIM-TA</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- CTA buttons -->
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='{$tracking_url}' 
+                           style='background: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; margin-right: 10px;'>
+                            📊 Cek Status Pengajuan
+                        </a>
+                        <a href='" . base_url('mahasiswa/bimbingan') . "' 
+                           style='background: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;'>
+                            📚 Lihat Jurnal Bimbingan
+                        </a>
+                    </div>
+                    
+                    <!-- Tips -->
+                    <div style='background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin: 20px 0;'>
+                        <p style='margin: 0; color: #856404; font-size: 14px;'>
+                            <strong>💡 Tips:</strong> Pastikan email Anda selalu aktif untuk menerima notifikasi perkembangan review. 
+                            Jika ada pertanyaan, hubungi dosen pembimbing atau bagian akademik.
+                        </p>
+                    </div>
                 </div>
                 
-                <div style='text-align: center; margin: 30px 0;'>
-                    <a href='" . base_url('mahasiswa/seminar_proposal') . "' 
-                       style='background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;'>
-                       📊 Cek Status Pengajuan
-                    </a>
+                <!-- Footer -->
+                <div style='background: #6c757d; color: white; padding: 20px; text-align: center; font-size: 12px;'>
+                    <p style='margin: 0 0 5px 0; font-weight: 600;'>STK Santo Yakobus Merauke</p>
+                    <p style='margin: 0; opacity: 0.8;'>Sistem Informasi Manajemen Tugas Akhir</p>
+                    <p style='margin: 10px 0 0 0; opacity: 0.7;'>
+                        Email otomatis - mohon tidak membalas langsung ke email ini
+                    </p>
                 </div>
             </div>
-            
-            <div style='background-color: #6c757d; color: white; padding: 20px; text-align: center; font-size: 12px;'>
-                <p style='margin: 0;'>STK Santo Yakobus Merauke | SIM Tugas Akhir</p>
-                <p style='margin: 5px 0 0 0;'>Email otomatis - mohon tidak membalas</p>
-            </div>
-        </div>";
+        </body>
+        </html>";
         
         $this->email->message($message);
-        $this->email->send();
+        
+        if (!$this->email->send()) {
+            log_message('error', 'Failed to send confirmation email to student: ' . $this->email->print_debugger());
+        }
     }
     
     /**
-     * 📧 EMAIL KE DOSEN PEMBIMBING - Notifikasi review
+     * ✅ ENHANCED: Email ke dosen pembimbing dengan design yang lebih baik
      */
-    private function _kirim_email_dosen_seminar_proposal($proposal, $seminar_data)
+    private function _kirim_email_dosen_review_request($proposal, $seminar_data, $seminar_id)
     {
         // Get email dosen dari database
         $this->db->select('email, nama');
@@ -477,111 +557,175 @@ class Seminar_proposal extends CI_Controller {
         $dosen = $this->db->get()->row();
         
         if (!$dosen || empty($dosen->email)) {
-            log_message('warning', 'Email dosen tidak ditemukan untuk proposal ID: ' . $proposal->id);
+            log_message('warning', 'Supervisor email not found for proposal ID: ' . $proposal->id);
             return;
         }
         
         $this->email->clear();
         $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
         $this->email->to($dosen->email);
-        $this->email->subject('[SIM-TA] Review Pengajuan Seminar Proposal - ' . $proposal->nama_mahasiswa);
+        $this->email->subject('[SIM-TA] 🔍 Review Pengajuan Seminar Proposal - ' . $proposal->nama_mahasiswa);
+        
+        $review_url = base_url('dosen/seminar_proposal');
+        $bimbingan_url = base_url('dosen/bimbingan');
         
         $message = "
-        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-            <div style='background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); padding: 30px; text-align: center;'>
-                <h1 style='color: white; margin: 0; font-size: 24px;'>🔍 Review Seminar Proposal</h1>
-            </div>
-            
-            <div style='padding: 30px; background-color: #f8f9fa;'>
-                <h2 style='color: #dc3545; margin: 0 0 20px 0;'>⚡ Action Required</h2>
-                
-                <p><strong>Yth. {$dosen->nama},</strong></p>
-                
-                <p>Mahasiswa bimbingan Anda telah mengajukan <strong>Seminar Proposal</strong> dan membutuhkan review dari Anda.</p>
-                
-                <div style='background-color: white; padding: 20px; border-left: 4px solid #dc3545; margin: 20px 0;'>
-                    <h4 style='margin-top: 0; color: #dc3545;'>👨‍🎓 Detail Mahasiswa:</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr><td style='padding: 8px 0; border-bottom: 1px solid #eee;'><strong>Nama:</strong></td><td style='padding: 8px 0; border-bottom: 1px solid #eee;'>{$proposal->nama_mahasiswa}</td></tr>
-                        <tr><td style='padding: 8px 0; border-bottom: 1px solid #eee;'><strong>NIM:</strong></td><td style='padding: 8px 0; border-bottom: 1px solid #eee;'>{$proposal->nim}</td></tr>
-                        <tr><td style='padding: 8px 0; border-bottom: 1px solid #eee;'><strong>Judul:</strong></td><td style='padding: 8px 0; border-bottom: 1px solid #eee;'>{$proposal->judul}</td></tr>
-                        <tr><td style='padding: 8px 0;'><strong>Tanggal Pengajuan:</strong></td><td style='padding: 8px 0;'>" . date('d F Y, H:i') . " WIT</td></tr>
-                    </table>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Review Pengajuan Seminar Proposal</title>
+        </head>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0;'>
+            <div style='max-width: 600px; margin: 0 auto; background: #ffffff;'>
+                <!-- Header -->
+                <div style='background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); padding: 30px; text-align: center;'>
+                    <h1 style='color: white; margin: 0; font-size: 24px; font-weight: 600;'>
+                        🔍 Review Diperlukan
+                    </h1>
+                    <p style='color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;'>
+                        Pengajuan Seminar Proposal
+                    </p>
                 </div>
                 
-                <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;'>
-                    <h4 style='color: #856404; margin: 0 0 10px 0;'>📋 Yang Perlu Direview:</h4>
-                    <ul style='color: #856404; margin: 0; padding-left: 20px;'>
-                        <li>Kelengkapan jurnal bimbingan (minimal 8 tervalidasi)</li>
-                        <li>Kesiapan mahasiswa untuk seminar proposal</li>
-                        <li>File proposal yang diupload mahasiswa</li>
-                        <li>Keterangan tambahan dari mahasiswa</li>
-                    </ul>
+                <!-- Content -->
+                <div style='padding: 30px;'>
+                    <div style='background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #dc3545;'>
+                        <h2 style='color: #dc3545; margin: 0 0 15px 0; font-size: 18px;'>
+                            ⚡ Action Required
+                        </h2>
+                        <p style='margin: 0; font-size: 16px; line-height: 1.5;'>
+                            <strong>Yth. {$dosen->nama},</strong><br>
+                            Mahasiswa bimbingan Anda telah mengajukan seminar proposal dan membutuhkan review dari Anda.
+                        </p>
+                    </div>
+                    
+                    <!-- Student details -->
+                    <div style='background: white; border: 1px solid #e1e8ed; border-radius: 8px; overflow: hidden; margin-bottom: 25px;'>
+                        <div style='background: #f7f9fc; padding: 15px; border-bottom: 1px solid #e1e8ed;'>
+                            <h3 style='margin: 0; color: #1a202c; font-size: 16px;'>👨‍🎓 Detail Mahasiswa</h3>
+                        </div>
+                        <div style='padding: 20px;'>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568; width: 25%;'>Nama:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>{$proposal->nama_mahasiswa}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>NIM:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>{$proposal->nim}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>Judul:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>" . substr($proposal->judul, 0, 150) . (strlen($proposal->judul) > 150 ? '...' : '') . "</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>ID Pengajuan:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>#SP-" . str_pad($seminar_id, 4, '0', STR_PAD_LEFT) . "</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding: 8px 0; font-weight: 600; color: #4a5568;'>Tanggal Pengajuan:</td>
+                                    <td style='padding: 8px 0; color: #2d3748;'>" . date('d F Y, H:i') . " WIT</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Review checklist -->
+                    <div style='background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin-bottom: 25px;'>
+                        <h4 style='color: #0c5460; margin: 0 0 15px 0; font-size: 16px;'>
+                            📋 Yang Perlu Direview:
+                        </h4>
+                        <ul style='color: #0c5460; margin: 0; padding-left: 20px; line-height: 1.8;'>
+                            <li>Kelengkapan jurnal bimbingan (minimal 8 tervalidasi)</li>
+                            <li>Kesiapan mahasiswa untuk seminar proposal</li>
+                            <li>File proposal yang diupload mahasiswa</li>
+                            <li>Keterangan tambahan dari mahasiswa</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action buttons -->
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='{$review_url}' 
+                           style='background: #dc3545; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; margin-right: 10px;'>
+                            🔍 Review Sekarang
+                        </a>
+                        <a href='{$bimbingan_url}' 
+                           style='background: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;'>
+                            📋 Lihat Jurnal Bimbingan
+                        </a>
+                    </div>
+                    
+                    <!-- Urgency note -->
+                    <div style='background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin: 20px 0;'>
+                        <p style='margin: 0; color: #856404; font-size: 14px; text-align: center;'>
+                            <strong>⏰ Reminder:</strong> Harap segera direview untuk kelancaran proses akademik mahasiswa.
+                            Target waktu review: 3-5 hari kerja.
+                        </p>
+                    </div>
                 </div>
                 
-                <div style='text-align: center; margin: 30px 0;'>
-                    <a href='" . base_url('dosen/seminar_proposal') . "' 
-                       style='background-color: #dc3545; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin-right: 10px;'>
-                       🔍 Review Sekarang
-                    </a>
-                    <a href='" . base_url('dosen/bimbingan') . "' 
-                       style='background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;'>
-                       📋 Lihat Jurnal Bimbingan
-                    </a>
+                <!-- Footer -->
+                <div style='background: #6c757d; color: white; padding: 20px; text-align: center; font-size: 12px;'>
+                    <p style='margin: 0 0 5px 0; font-weight: 600;'>STK Santo Yakobus Merauke</p>
+                    <p style='margin: 0; opacity: 0.8;'>Sistem Informasi Manajemen Tugas Akhir</p>
+                    <p style='margin: 10px 0 0 0; opacity: 0.7;'>
+                        Email otomatis - mohon tidak membalas langsung ke email ini
+                    </p>
                 </div>
-                
-                <p style='font-size: 14px; color: #6c757d; text-align: center;'>
-                    <em>Harap segera direview untuk kelancaran proses akademik mahasiswa.</em>
-                </p>
             </div>
-            
-            <div style='background-color: #6c757d; color: white; padding: 20px; text-align: center; font-size: 12px;'>
-                <p style='margin: 0;'>STK Santo Yakobus Merauke | SIM Tugas Akhir</p>
-                <p style='margin: 5px 0 0 0;'>Email otomatis - mohon tidak membalas</p>
-            </div>
-        </div>";
+        </body>
+        </html>";
         
         $this->email->message($message);
-        $this->email->send();
+        
+        if (!$this->email->send()) {
+            log_message('error', 'Failed to send review request email to supervisor: ' . $this->email->print_debugger());
+        }
     }
     
     /**
-     * 💾 SIMPAN NOTIFIKASI INTERNAL KE DATABASE
+     * ✅ ENHANCED: Save notification to database dengan informasi lengkap
      */
-    private function _simpan_notifikasi_internal($proposal, $seminar_data)
+    private function _simpan_notifikasi_database($proposal, $seminar_data, $seminar_id)
     {
         try {
             if (!$this->db->table_exists('notifikasi')) {
-                return; // Skip jika tabel belum ada
+                log_message('info', 'Notifikasi table not exists, skipping database notification');
+                return;
             }
             
             $notifications = [
-                // Notifikasi untuk mahasiswa
+                // Enhanced notification for student
                 [
                     'user_id' => $proposal->mahasiswa_id,
                     'untuk_role' => 'mahasiswa',
-                    'judul' => 'Pengajuan Seminar Proposal Berhasil',
-                    'pesan' => 'Pengajuan seminar proposal Anda telah berhasil dikirim dan sedang menunggu review dari dosen pembimbing.',
-                    'jenis' => 'proposal_masuk', // Sesuaikan dengan enum yang ada
+                    'jenis' => 'proposal_masuk',
+                    'proposal_id' => $proposal->id,
+                    'judul' => '✅ Pengajuan Seminar Proposal Berhasil',
+                    'pesan' => "Pengajuan seminar proposal Anda (ID: #SP-" . str_pad($seminar_id, 4, '0', STR_PAD_LEFT) . ") telah berhasil dikirim dan sedang menunggu review dari dosen pembimbing. Estimasi waktu review: 3-5 hari kerja.",
                     'dibaca' => 0,
                     'tanggal_dibuat' => date('Y-m-d H:i:s')
                 ],
-                // Notifikasi untuk dosen pembimbing
+                // Enhanced notification for supervisor
                 [
                     'user_id' => $proposal->dosen_id,
                     'untuk_role' => 'dosen',
-                    'judul' => 'Review Pengajuan Seminar Proposal',
-                    'pesan' => "Mahasiswa {$proposal->nama_mahasiswa} ({$proposal->nim}) telah mengajukan seminar proposal dan membutuhkan review Anda.",
-                    'jenis' => 'proposal_masuk', // Sesuaikan dengan enum yang ada
+                    'jenis' => 'proposal_masuk',
+                    'proposal_id' => $proposal->id,
+                    'judul' => '🔍 Review Pengajuan Seminar Proposal Diperlukan',
+                    'pesan' => "Mahasiswa {$proposal->nama_mahasiswa} ({$proposal->nim}) telah mengajukan seminar proposal dengan ID #SP-" . str_pad($seminar_id, 4, '0', STR_PAD_LEFT) . " dan membutuhkan review Anda. Harap segera lakukan review melalui sistem.",
                     'dibaca' => 0,
                     'tanggal_dibuat' => date('Y-m-d H:i:s')
                 ]
             ];
             
             $this->db->insert_batch('notifikasi', $notifications);
+            log_message('info', 'Enhanced database notifications saved successfully for seminar ID: ' . $seminar_id);
             
         } catch (Exception $e) {
-            log_message('error', 'Error saving internal notification: ' . $e->getMessage());
+            log_message('error', 'Error saving enhanced database notification: ' . $e->getMessage());
         }
     }
 
@@ -610,8 +754,8 @@ class Seminar_proposal extends CI_Controller {
         // Get jurnal bimbingan yang sudah divalidasi
         $jurnal_validasi = $this->_get_validated_jurnal($seminar->proposal_id);
         
-        // Get riwayat aktivitas (jika tabel ada)
-        $riwayat = $this->_get_activity_log($seminar->proposal_id);
+        // ✅ ENHANCEMENT: Get activity timeline
+        $activity_timeline = $this->_get_activity_timeline($seminar->proposal_id, $seminar->id);
         
         $data = [
             'title' => 'Detail Seminar Proposal',
@@ -619,18 +763,18 @@ class Seminar_proposal extends CI_Controller {
             'seminar' => $seminar,
             'proposal' => $proposal,
             'jurnal_validasi' => $jurnal_validasi,
-            'riwayat' => $riwayat
+            'activity_timeline' => $activity_timeline
         ];
         
         $this->_load_view($data);
     }
 
     // =================================================================
-    // HELPER METHODS
+    // 🚀 ENHANCED HELPER METHODS
     // =================================================================
 
     /**
-     * FIXED: Load view dengan template mahasiswa.php (PRIORITAS UTAMA)
+     * FIXED: Load view dengan template mahasiswa.php
      */
     private function _load_view($data)
     {
@@ -690,8 +834,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * PERBAIKAN: Method untuk mendapatkan proposal yang sudah disetujui
-     * Sesuaikan dengan kolom yang ada di tabel proposal_mahasiswa
+     * ✅ ENHANCED: Get approved proposal dengan join lengkap
      */
     private function _get_approved_proposal($mahasiswa_id)
     {
@@ -702,6 +845,7 @@ class Seminar_proposal extends CI_Controller {
                 m.nim,
                 m.email as email_mahasiswa,
                 d.nama as nama_pembimbing,
+                d.email as email_pembimbing,
                 p.nama as nama_prodi
             ');
             $this->db->from('proposal_mahasiswa pm');
@@ -737,7 +881,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * PERBAIKAN: Method untuk mendapatkan proposal berdasarkan ID dengan security check
+     * Method untuk mendapatkan proposal berdasarkan ID dengan security check
      */
     private function _get_proposal_by_id($proposal_id, $mahasiswa_id)
     {
@@ -748,6 +892,7 @@ class Seminar_proposal extends CI_Controller {
                 m.nim,
                 m.email as email_mahasiswa,
                 d.nama as nama_pembimbing,
+                d.email as email_pembimbing,
                 p.nama as nama_prodi
             ');
             $this->db->from('proposal_mahasiswa pm');
@@ -767,14 +912,44 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * PERBAIKAN: Method untuk mendapatkan seminar berdasarkan proposal_id
-     * Gunakan nama tabel yang benar: seminar_proposal_mahasiswa
+     * ✅ ENHANCED: Get seminar data dengan detail lengkap
+     */
+    private function _get_seminar_with_details($proposal_id)
+    {
+        try {
+            $this->db->select('
+                spm.*,
+                pm.judul as proposal_judul,
+                pm.dosen_id,
+                m.nama as nama_mahasiswa,
+                m.nim,
+                d.nama as nama_pembimbing,
+                d.email as email_pembimbing
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('spm.proposal_id', $proposal_id);
+            $this->db->order_by('spm.created_at', 'DESC');
+            $this->db->limit(1);
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting seminar with details: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Method untuk mendapatkan seminar berdasarkan proposal_id
      */
     private function _get_seminar_by_proposal_id($proposal_id)
     {
         try {
             $this->db->select('*');
-            $this->db->from('seminar_proposal_mahasiswa'); // ✅ Nama tabel yang benar
+            $this->db->from('seminar_proposal_mahasiswa');
             $this->db->where('proposal_id', $proposal_id);
             $this->db->order_by('created_at', 'DESC');
             $this->db->limit(1);
@@ -788,8 +963,7 @@ class Seminar_proposal extends CI_Controller {
     }
     
     /**
-     * PERBAIKAN: Method untuk mendapatkan seminar berdasarkan ID dengan security check
-     * Gunakan nama tabel yang benar: seminar_proposal_mahasiswa
+     * Method untuk mendapatkan seminar berdasarkan ID dengan security check
      */
     private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
     {
@@ -802,7 +976,7 @@ class Seminar_proposal extends CI_Controller {
                 m.nim,
                 d.nama as nama_pembimbing
             ');
-            $this->db->from('seminar_proposal_mahasiswa sp'); // ✅ Nama tabel yang benar
+            $this->db->from('seminar_proposal_mahasiswa sp');
             $this->db->join('proposal_mahasiswa pm', 'sp.proposal_id = pm.id');
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
             $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
@@ -819,7 +993,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * PERBAIKAN: Method untuk mengecek syarat jurnal bimbingan
+     * Method untuk mengecek syarat jurnal bimbingan
      */
     private function _check_jurnal_requirement($proposal_id)
     {
@@ -888,16 +1062,19 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * Determine workflow status berdasarkan kondisi saat ini
+     * ✅ NEW: Enhanced workflow status determination
      */
-    private function _determine_workflow_status($proposal, $seminar_data, $syarat_jurnal)
+    private function _determine_enhanced_workflow_status($proposal, $seminar_data, $syarat_jurnal)
     {
         if (!$syarat_jurnal['eligible']) {
             return [
                 'current_step' => 'belum_eligible',
                 'next_action' => 'Lengkapi jurnal bimbingan',
                 'status_text' => 'Belum Memenuhi Syarat',
-                'status_class' => 'warning'
+                'status_class' => 'warning',
+                'description' => 'Jurnal bimbingan belum mencukupi untuk mengajukan seminar proposal',
+                'action_url' => base_url('mahasiswa/bimbingan'),
+                'action_text' => 'Tambah Jurnal Bimbingan'
             ];
         }
         
@@ -906,7 +1083,10 @@ class Seminar_proposal extends CI_Controller {
                 'current_step' => 'belum_mengajukan',
                 'next_action' => 'Ajukan Seminar Proposal',
                 'status_text' => 'Siap Mengajukan',
-                'status_class' => 'info'
+                'status_class' => 'info',
+                'description' => 'Semua syarat telah terpenuhi, Anda dapat mengajukan seminar proposal',
+                'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
+                'action_text' => 'Ajukan Sekarang'
             ];
         }
         
@@ -916,15 +1096,33 @@ class Seminar_proposal extends CI_Controller {
                     'current_step' => 'draft',
                     'next_action' => 'Lengkapi dan Submit',
                     'status_text' => 'Draft',
-                    'status_class' => 'secondary'
+                    'status_class' => 'secondary',
+                    'description' => 'Draft pengajuan telah dibuat, lengkapi dan submit untuk review',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
+                    'action_text' => 'Lengkapi Draft'
                 ];
                 
             case 'submitted':
+            case 'review_pembimbing':
                 return [
                     'current_step' => 'review_pembimbing',
                     'next_action' => 'Menunggu review pembimbing',
                     'status_text' => 'Sedang Direview Pembimbing',
-                    'status_class' => 'warning'
+                    'status_class' => 'warning',
+                    'description' => 'Pengajuan sedang direview oleh dosen pembimbing. Estimasi: 3-5 hari kerja',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
+                    'action_text' => 'Lihat Detail'
+                ];
+                
+            case 'review_kaprodi':
+                return [
+                    'current_step' => 'review_kaprodi',
+                    'next_action' => 'Menunggu review Kaprodi',
+                    'status_text' => 'Sedang Direview Kaprodi',
+                    'status_class' => 'primary',
+                    'description' => 'Dosen pembimbing telah menyetujui, menunggu persetujuan Kaprodi',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
+                    'action_text' => 'Lihat Detail'
                 ];
                 
             case 'approved':
@@ -932,15 +1130,43 @@ class Seminar_proposal extends CI_Controller {
                     'current_step' => 'approved',
                     'next_action' => 'Menunggu penjadwalan',
                     'status_text' => 'Disetujui',
-                    'status_class' => 'success'
+                    'status_class' => 'success',
+                    'description' => 'Pengajuan telah disetujui, menunggu penjadwalan seminar',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
+                    'action_text' => 'Lihat Detail'
+                ];
+                
+            case 'scheduled':
+                return [
+                    'current_step' => 'scheduled',
+                    'next_action' => 'Persiapan seminar',
+                    'status_text' => 'Terjadwal',
+                    'status_class' => 'info',
+                    'description' => 'Seminar telah dijadwalkan, bersiaplah untuk presentasi',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/detail/' . $seminar_data->id),
+                    'action_text' => 'Lihat Jadwal'
+                ];
+                
+            case 'completed':
+                return [
+                    'current_step' => 'completed',
+                    'next_action' => 'Lanjut ke penelitian',
+                    'status_text' => 'Selesai',
+                    'status_class' => 'success',
+                    'description' => 'Seminar proposal selesai, lanjut ke fase penelitian',
+                    'action_url' => base_url('mahasiswa/penelitian'),
+                    'action_text' => 'Lanjut Penelitian'
                 ];
                 
             case 'rejected':
                 return [
                     'current_step' => 'rejected',
                     'next_action' => 'Perbaiki dan ajukan ulang',
-                    'status_text' => 'Ditolak',
-                    'status_class' => 'danger'
+                    'status_text' => 'Perlu Perbaikan',
+                    'status_class' => 'danger',
+                    'description' => 'Pengajuan perlu diperbaiki sesuai catatan dari pembimbing',
+                    'action_url' => base_url('mahasiswa/seminar_proposal/ajukan/' . $proposal->id),
+                    'action_text' => 'Ajukan Ulang'
                 ];
                 
             default:
@@ -948,34 +1174,139 @@ class Seminar_proposal extends CI_Controller {
                     'current_step' => 'unknown',
                     'next_action' => 'Hubungi admin',
                     'status_text' => 'Status Tidak Dikenali',
-                    'status_class' => 'secondary'
+                    'status_class' => 'secondary',
+                    'description' => 'Status tidak dikenali, hubungi admin sistem',
+                    'action_url' => base_url('mahasiswa/dashboard'),
+                    'action_text' => 'Dashboard'
                 ];
         }
     }
 
     /**
-     * Calculate progress percentage
+     * ✅ NEW: Calculate comprehensive workflow progress
      */
-    private function _calculate_progress($current_step)
+    private function _calculate_workflow_progress($proposal, $seminar_data)
     {
-        $steps = [
-            'belum_eligible' => 10,
-            'belum_mengajukan' => 20,
-            'draft' => 25,
-            'submitted' => 30,
-            'review_pembimbing' => 50,
-            'review_kaprodi' => 70,
-            'approved' => 80,
-            'scheduled' => 90,
-            'completed' => 100,
-            'rejected' => 30
+        $progress = [
+            'percentage' => 0,
+            'current_phase' => 'preparation',
+            'completed_steps' => [],
+            'current_step' => '',
+            'next_step' => '',
+            'timeline_steps' => [
+                'preparation' => ['title' => 'Persiapan', 'desc' => 'Menyiapkan berkas', 'completed' => false],
+                'submission' => ['title' => 'Pengajuan', 'desc' => 'Berkas terkirim', 'completed' => false],
+                'pembimbing_review' => ['title' => 'Review Dosen', 'desc' => 'Evaluasi pembimbing', 'completed' => false],
+                'kaprodi_review' => ['title' => 'Review Kaprodi', 'desc' => 'Persetujuan akhir', 'completed' => false],
+                'scheduling' => ['title' => 'Penjadwalan', 'desc' => 'Penentuan jadwal', 'completed' => false],
+                'completion' => ['title' => 'Selesai', 'desc' => 'Seminar terlaksana', 'completed' => false]
+            ]
         ];
         
-        return $steps[$current_step] ?? 0;
+        if (!$seminar_data) {
+            $progress['percentage'] = 20;
+            $progress['current_phase'] = 'preparation';
+            $progress['current_step'] = 'Persiapan pengajuan seminar proposal';
+            $progress['next_step'] = 'Ajukan seminar proposal';
+            $progress['timeline_steps']['preparation']['completed'] = true;
+            return $progress;
+        }
+        
+        switch ($seminar_data->status) {
+            case 'draft':
+                $progress['percentage'] = 30;
+                $progress['current_step'] = 'Draft pengajuan dibuat';
+                $progress['next_step'] = 'Kirim pengajuan ke dosen pembimbing';
+                $progress['completed_steps'] = ['preparation'];
+                break;
+                
+            case 'submitted':
+            case 'review_pembimbing':
+                $progress['percentage'] = 50;
+                $progress['current_step'] = 'Menunggu review dosen pembimbing';
+                $progress['next_step'] = 'Review oleh dosen pembimbing';
+                $progress['completed_steps'] = ['preparation', 'submission'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                break;
+                
+            case 'review_kaprodi':
+                $progress['percentage'] = 70;
+                $progress['current_step'] = 'Sedang direview Kaprodi';
+                $progress['next_step'] = 'Menunggu persetujuan akhir';
+                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
+                break;
+                
+            case 'approved':
+                $progress['percentage'] = 85;
+                $progress['current_step'] = 'Disetujui, menunggu penjadwalan';
+                $progress['next_step'] = 'Penentuan jadwal seminar';
+                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
+                $progress['timeline_steps']['kaprodi_review']['completed'] = true;
+                break;
+                
+            case 'scheduled':
+                $progress['percentage'] = 95;
+                $progress['current_step'] = 'Terjadwal, menunggu pelaksanaan';
+                $progress['next_step'] = 'Pelaksanaan seminar proposal';
+                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review', 'scheduling'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                $progress['timeline_steps']['pembimbing_review']['completed'] = true;
+                $progress['timeline_steps']['kaprodi_review']['completed'] = true;
+                $progress['timeline_steps']['scheduling']['completed'] = true;
+                break;
+                
+            case 'completed':
+                $progress['percentage'] = 100;
+                $progress['current_step'] = 'Seminar proposal selesai';
+                $progress['next_step'] = 'Lanjut ke fase penelitian';
+                $progress['completed_steps'] = ['preparation', 'submission', 'pembimbing_review', 'kaprodi_review', 'scheduling', 'completion'];
+                foreach ($progress['timeline_steps'] as $key => $step) {
+                    $progress['timeline_steps'][$key]['completed'] = true;
+                }
+                break;
+                
+            case 'rejected':
+                $progress['percentage'] = 40;
+                $progress['current_phase'] = 'revision';
+                $progress['current_step'] = 'Ditolak, perlu revisi';
+                $progress['next_step'] = 'Lakukan perbaikan dan ajukan ulang';
+                $progress['completed_steps'] = ['preparation', 'submission'];
+                $progress['timeline_steps']['preparation']['completed'] = true;
+                $progress['timeline_steps']['submission']['completed'] = true;
+                break;
+        }
+        
+        return $progress;
     }
 
     /**
-     * PERBAIKAN: Method untuk file upload dengan validation
+     * ✅ NEW: Determine if student can submit seminar proposal
+     */
+    private function _can_submit_seminar($proposal, $seminar_data, $syarat_jurnal)
+    {
+        // Check basic requirements
+        if (!$syarat_jurnal['eligible']) return false;
+        if (!$proposal || $proposal->workflow_status !== 'bimbingan') return false;
+        
+        // If no existing seminar, can submit
+        if (!$seminar_data) return true;
+        
+        // If existing seminar is rejected or draft, can resubmit
+        if (in_array($seminar_data->status, ['rejected', 'draft'])) return true;
+        
+        return false;
+    }
+
+    /**
+     * ✅ ENHANCED: Method untuk file upload dengan validation yang lebih ketat
      */
     private function _handle_file_upload($field_name, $subfolder = 'proposal_files')
     {
@@ -987,11 +1318,16 @@ class Seminar_proposal extends CI_Controller {
                 mkdir($upload_path, 0755, true);
             }
             
+            // Generate unique filename
+            $file_ext = pathinfo($_FILES[$field_name]['name'], PATHINFO_EXTENSION);
+            $unique_name = 'SP_' . date('YmdHis') . '_' . uniqid() . '.' . $file_ext;
+            
             $config = [
                 'upload_path' => $upload_path,
                 'allowed_types' => 'pdf|doc|docx',
-                'max_size' => 1024, // 1MB
-                'encrypt_name' => true,
+                'max_size' => 5120, // 5MB - increased from 1MB
+                'file_name' => $unique_name,
+                'encrypt_name' => false, // Using custom name
                 'remove_spaces' => true
             ];
             
@@ -1004,7 +1340,8 @@ class Seminar_proposal extends CI_Controller {
                     'status' => true,
                     'filename' => $upload_data['file_name'],
                     'original_name' => $upload_data['orig_name'],
-                    'file_size' => $upload_data['file_size']
+                    'file_size' => $upload_data['file_size'],
+                    'file_type' => $upload_data['file_type']
                 ];
             } else {
                 return [
@@ -1015,7 +1352,7 @@ class Seminar_proposal extends CI_Controller {
             }
             
         } catch (Exception $e) {
-            log_message('error', 'File upload error: ' . $e->getMessage());
+            log_message('error', 'Enhanced file upload error: ' . $e->getMessage());
             return [
                 'status' => false,
                 'message' => 'Upload failed: ' . $e->getMessage(),
@@ -1025,7 +1362,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * PERBAIKAN: Custom validation callback untuk file upload
+     * ✅ ENHANCED: Custom validation callback untuk file upload
      */
     public function _check_file_proposal($str)
     {
@@ -1042,8 +1379,8 @@ class Seminar_proposal extends CI_Controller {
             return false;
         }
         
-        if ($_FILES['file_proposal']['size'] > 1048576) { // 1MB
-            $this->form_validation->set_message('_check_file_proposal', 'Ukuran file terlalu besar. Maksimal 1MB.');
+        if ($_FILES['file_proposal']['size'] > 5242880) { // 5MB - increased
+            $this->form_validation->set_message('_check_file_proposal', 'Ukuran file terlalu besar. Maksimal 5MB.');
             return false;
         }
         
@@ -1051,42 +1388,54 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * PERBAIKAN: Method untuk mendapatkan log aktivitas
+     * ✅ NEW: Get activity timeline for detail page
      */
-    private function _get_activity_log($proposal_id)
+    private function _get_activity_timeline($proposal_id, $seminar_id = null)
     {
         try {
-            // Jika tabel activity_log ada
-            if ($this->db->table_exists('activity_log')) {
-                $this->db->select('*');
-                $this->db->from('activity_log');
-                $this->db->where('proposal_id', $proposal_id);
-                $this->db->where('module', 'seminar_proposal');
-                $this->db->order_by('created_at', 'DESC');
-                $this->db->limit(10);
-                
-                return $this->db->get()->result();
-            }
+            $timeline = [];
             
-            // Fallback: Buat log sederhana dari data yang ada
-            $log = [];
-            
-            // Log dari jurnal bimbingan
+            // Get from jurnal bimbingan
             if ($this->db->table_exists('jurnal_bimbingan')) {
-                $this->db->select('created_at, "Jurnal bimbingan dibuat" as activity');
+                $this->db->select('
+                    created_at as tanggal,
+                    CONCAT("Jurnal bimbingan pertemuan ke-", pertemuan_ke, " - ", judul_bimbingan) as aktivitas,
+                    "bimbingan" as jenis,
+                    status_validasi
+                ');
                 $this->db->from('jurnal_bimbingan');
                 $this->db->where('proposal_id', $proposal_id);
                 $this->db->order_by('created_at', 'DESC');
                 $this->db->limit(5);
                 
-                $jurnal_log = $this->db->get()->result();
-                $log = array_merge($log, $jurnal_log);
+                $jurnal_timeline = $this->db->get()->result();
+                $timeline = array_merge($timeline, $jurnal_timeline);
             }
             
-            return $log;
+            // Get from seminar proposal events
+            if ($seminar_id && $this->db->table_exists('seminar_proposal_mahasiswa')) {
+                $this->db->select('
+                    created_at as tanggal,
+                    "Pengajuan seminar proposal dibuat" as aktivitas,
+                    "seminar_proposal" as jenis,
+                    status
+                ');
+                $this->db->from('seminar_proposal_mahasiswa');
+                $this->db->where('id', $seminar_id);
+                
+                $seminar_timeline = $this->db->get()->result();
+                $timeline = array_merge($timeline, $seminar_timeline);
+            }
+            
+            // Sort by date descending
+            usort($timeline, function($a, $b) {
+                return strtotime($b->tanggal) - strtotime($a->tanggal);
+            });
+            
+            return array_slice($timeline, 0, 10); // Limit to 10 most recent
             
         } catch (Exception $e) {
-            log_message('error', 'Error getting activity log: ' . $e->getMessage());
+            log_message('error', 'Error getting activity timeline: ' . $e->getMessage());
             return [];
         }
     }

@@ -268,7 +268,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     </div>
 </div>
 
-<!-- Seminar Perlu Penilaian -->
+<!-- Seminar Perlu Penilaian - SECTION BARU UNTUK TOMBOL PENILAIAN -->
 <?php if (!empty($perlu_penilaian)): ?>
 <div class="card shadow mb-4">
     <div class="card-header py-3 bg-info text-white">
@@ -294,7 +294,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <th>Judul Proposal</th>
                         <th width="120">Tanggal Seminar</th>
                         <th width="100">File</th>
-                        <th width="100">Aksi</th>
+                        <th width="180">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -305,6 +305,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <td>
                             <strong><?= $seminar->nama_mahasiswa ?></strong>
                             <br><small class="text-muted"><?= $seminar->nama_prodi ?></small>
+                            
+                            <!-- Status Penilaian Badge -->
+                            <?php if(isset($seminar->penilaian_id) && !empty($seminar->penilaian_id)): ?>
+                                <?php if($seminar->status_penilaian == 'draft'): ?>
+                                    <br><span class="badge badge-warning badge-sm mt-1">Draft Tersimpan</span>
+                                <?php elseif($seminar->status_penilaian == 'published'): ?>
+                                    <br><span class="badge badge-success badge-sm mt-1">Sudah Dinilai</span>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <br><span class="badge badge-secondary badge-sm mt-1">Belum Dinilai</span>
+                            <?php endif; ?>
                         </td>
                         <td class="text-justify">
                             <?php 
@@ -315,8 +326,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </td>
                         <td>
                             <?= isset($seminar->tanggal_seminar) ? date('d/m/Y', strtotime($seminar->tanggal_seminar)) : '-' ?>
-                            <?php if(isset($seminar->jam_seminar)): ?>
-                            <br><small class="text-muted"><?= date('H:i', strtotime($seminar->jam_seminar)) ?> WIB</small>
+                            <?php if(isset($seminar->jam_seminar) && !empty($seminar->jam_seminar)): ?>
+                            <br><small class="text-muted"><?= date('H:i', strtotime($seminar->jam_seminar)) ?> WIT</small>
                             <?php endif; ?>
                         </td>
                         <td class="text-center">
@@ -332,12 +343,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <td>
                             <div class="btn-group-vertical btn-group-sm">
                                 <a href="<?= base_url('dosen/seminar_proposal/detail/' . $seminar->id) ?>" 
-                                   class="btn btn-info btn-sm" title="Lihat Detail">
+                                   class="btn btn-info btn-sm mb-1" title="Lihat Detail">
                                     <i class="fas fa-eye"></i> Detail
                                 </a>
+                                
+                                <!-- TOMBOL PENILAIAN UTAMA -->
                                 <a href="<?= base_url('dosen/seminar_proposal/penilaian/' . $seminar->id) ?>" 
-                                   class="btn btn-primary btn-sm" title="Input Penilaian">
-                                    <i class="fas fa-star"></i> Nilai
+                                   class="btn btn-warning btn-sm" title="Input/Edit Penilaian">
+                                    <i class="fas fa-edit"></i> 
+                                    <?php if(isset($seminar->penilaian_id) && !empty($seminar->penilaian_id)): ?>
+                                        <?php if($seminar->status_penilaian == 'draft'): ?>
+                                            Edit Draft
+                                        <?php else: ?>
+                                            Lihat Nilai
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        Penilaian
+                                    <?php endif; ?>
                                 </a>
                             </div>
                         </td>
@@ -345,6 +367,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <?php endforeach; ?>
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+<?php else: ?>
+<!-- Jika tidak ada seminar yang perlu penilaian -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-light">
+        <h6 class="m-0 font-weight-bold text-muted">
+            <i class="fas fa-clipboard-check mr-2"></i>
+            Seminar yang Perlu Penilaian
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="text-center py-4">
+            <div class="mb-3">
+                <i class="fas fa-clipboard-check fa-3x text-muted"></i>
+            </div>
+            <h5 class="text-muted">Tidak Ada Seminar yang Perlu Penilaian</h5>
+            <p class="text-muted mb-0">
+                Seminar proposal yang perlu penilaian akan muncul di sini setelah seminar selesai dilaksanakan.
+            </p>
         </div>
     </div>
 </div>
@@ -419,4 +462,60 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 .btn-group-vertical .btn:last-child {
     margin-bottom: 0;
 }
+
+/* Style untuk badge status penilaian */
+.badge-sm {
+    font-size: 0.75em;
+    padding: 0.25em 0.5em;
+}
+
+/* Ensure proper spacing for badges */
+.mt-1 {
+    margin-top: 0.25rem !important;
+}
 </style>
+
+<script>
+function rekomendasi(seminarId, action, namaMahasiswa) {
+    document.getElementById("modalSeminarId").value = seminarId;
+    document.getElementById("modalRekomendasi").value = action;
+    document.getElementById("modalMahasiswa").textContent = namaMahasiswa;
+    
+    const alertDiv = document.getElementById("modalAlert");
+    const submitBtn = document.getElementById("modalSubmitBtn");
+    
+    if (action === "approved") {
+        alertDiv.className = "alert alert-success";
+        alertDiv.innerHTML = "<i class=\"fas fa-check-circle mr-2\"></i><strong>Menyetujui pengajuan seminar proposal</strong>";
+        submitBtn.className = "btn btn-success";
+        submitBtn.innerHTML = "<i class=\"fas fa-check mr-2\"></i>Setujui";
+    } else {
+        alertDiv.className = "alert alert-warning";
+        alertDiv.innerHTML = "<i class=\"fas fa-exclamation-triangle mr-2\"></i><strong>Menolak pengajuan seminar proposal</strong>";
+        submitBtn.className = "btn btn-danger";
+        submitBtn.innerHTML = "<i class=\"fas fa-times mr-2\"></i>Tolak";
+    }
+    
+    // Clear previous comment
+    document.getElementById("modalKomentar").value = "";
+    
+    $("#rekomendasiModal").modal("show");
+}
+
+// Form validation
+$(document).ready(function() {
+    $("#rekomendasiModal form").on("submit", function(e) {
+        const rekomendasi = document.getElementById("modalRekomendasi").value;
+        const komentar = document.getElementById("modalKomentar").value.trim();
+        
+        if (rekomendasi === "rejected" && komentar === "") {
+            e.preventDefault();
+            alert("Komentar wajib diisi untuk penolakan!");
+            return false;
+        }
+        
+        const action = rekomendasi === "approved" ? "menyetujui" : "menolak";
+        return confirm("Yakin ingin " + action + " pengajuan seminar proposal ini?");
+    });
+});
+</script>

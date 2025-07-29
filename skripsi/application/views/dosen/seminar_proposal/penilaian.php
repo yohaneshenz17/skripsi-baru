@@ -1,5 +1,9 @@
-<!-- File: application/views/dosen/seminar_proposal/penilaian.php -->
-<!-- Form Penilaian Seminar Proposal - COMPLETE VERSION sesuai requirement -->
+<?php
+/**
+ * File: application/views/dosen/seminar_proposal/penilaian.php
+ * Form Penilaian Seminar Proposal - COMPLETE VERSION dengan semua fix
+ */
+?>
 
 <div class="container-fluid">
     
@@ -58,17 +62,17 @@
                         <tr>
                             <td><strong>Pembimbing</strong></td>
                             <td>:</td>
-                            <td><?= $seminar->nama_pembimbing ?></td>
+                            <td><?= isset($seminar->nama_pembimbing) ? $seminar->nama_pembimbing : '-' ?></td>
                         </tr>
                         <tr>
                             <td><strong>Penguji 1</strong></td>
                             <td>:</td>
-                            <td><?= isset($dosen_penguji1) ? $dosen_penguji1->nama : '-' ?></td>
+                            <td><?= isset($dosen_penguji1) && $dosen_penguji1 ? $dosen_penguji1->nama : '-' ?></td>
                         </tr>
                         <tr>
                             <td><strong>Penguji 2</strong></td>
                             <td>:</td>
-                            <td><?= isset($dosen_penguji2) ? $dosen_penguji2->nama : '-' ?></td>
+                            <td><?= isset($dosen_penguji2) && $dosen_penguji2 ? $dosen_penguji2->nama : '-' ?></td>
                         </tr>
                         <tr>
                             <td><strong>Tanggal</strong></td>
@@ -95,7 +99,7 @@
                             <td><strong>Status Penilaian</strong></td>
                             <td>:</td>
                             <td>
-                                <?php if ($penilaian): ?>
+                                <?php if (isset($penilaian) && $penilaian): ?>
                                     <?php if ($penilaian->status_penilaian == 'published'): ?>
                                         <span class="badge badge-success">Sudah Dipublikasi</span>
                                         <small class="text-muted">
@@ -103,6 +107,9 @@
                                         </small>
                                     <?php else: ?>
                                         <span class="badge badge-warning">Draft</span>
+                                        <small class="text-muted">
+                                            (<?= date('d M Y H:i', strtotime($penilaian->updated_at)) ?>)
+                                        </small>
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <span class="badge badge-secondary">Belum Dinilai</span>
@@ -121,7 +128,9 @@
     </div>
 
     <!-- Form Penilaian -->
+    <?php if (!isset($penilaian) || $penilaian->status_penilaian != 'published'): ?>
     <form method="post" action="<?= base_url('dosen/seminar_proposal/penilaian/' . $seminar->id) ?>" id="penilaianForm">
+    <?php endif; ?>
         
         <!-- Komponen 1: Catatan Revisi Seminar Proposal -->
         <div class="card shadow mb-4">
@@ -142,38 +151,44 @@
                         <div class="form-group">
                             <label class="font-weight-bold">Latar Belakang & Rumusan Masalah:</label>
                             <textarea name="catatan_latar_belakang" class="form-control" rows="3" 
-                                      placeholder="Masukkan catatan perbaikan untuk latar belakang dan rumusan masalah..."><?= isset($penilaian) ? $penilaian->catatan_latar_belakang : set_value('catatan_latar_belakang') ?></textarea>
+                                      placeholder="Masukkan catatan perbaikan untuk latar belakang dan rumusan masalah..."
+                                      <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>><?= isset($penilaian) ? $penilaian->catatan_latar_belakang : set_value('catatan_latar_belakang') ?></textarea>
                         </div>
                         
                         <div class="form-group">
                             <label class="font-weight-bold">Tinjauan Pustaka & Kebaruan (Novelty):</label>
                             <textarea name="catatan_tinjauan_pustaka" class="form-control" rows="3" 
-                                      placeholder="Masukkan catatan perbaikan untuk tinjauan pustaka dan novelty..."><?= isset($penilaian) ? $penilaian->catatan_tinjauan_pustaka : set_value('catatan_tinjauan_pustaka') ?></textarea>
+                                      placeholder="Masukkan catatan perbaikan untuk tinjauan pustaka dan novelty..."
+                                      <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>><?= isset($penilaian) ? $penilaian->catatan_tinjauan_pustaka : set_value('catatan_tinjauan_pustaka') ?></textarea>
                         </div>
                         
                         <div class="form-group">
                             <label class="font-weight-bold">Landasan Teori:</label>
                             <textarea name="catatan_landasan_teori" class="form-control" rows="3" 
-                                      placeholder="Masukkan catatan perbaikan untuk landasan teori..."><?= isset($penilaian) ? $penilaian->catatan_landasan_teori : set_value('catatan_landasan_teori') ?></textarea>
+                                      placeholder="Masukkan catatan perbaikan untuk landasan teori..."
+                                      <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>><?= isset($penilaian) ? $penilaian->catatan_landasan_teori : set_value('catatan_landasan_teori') ?></textarea>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="font-weight-bold">Metodologi Penelitian:</label>
                             <textarea name="catatan_metodologi" class="form-control" rows="3" 
-                                      placeholder="Masukkan catatan perbaikan untuk metodologi penelitian..."><?= isset($penilaian) ? $penilaian->catatan_metodologi : set_value('catatan_metodologi') ?></textarea>
+                                      placeholder="Masukkan catatan perbaikan untuk metodologi penelitian..."
+                                      <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>><?= isset($penilaian) ? $penilaian->catatan_metodologi : set_value('catatan_metodologi') ?></textarea>
                         </div>
                         
                         <div class="form-group">
                             <label class="font-weight-bold">Sistematika & Tata Tulis:</label>
                             <textarea name="catatan_sistematika" class="form-control" rows="3" 
-                                      placeholder="Masukkan catatan perbaikan untuk sistematika dan tata tulis..."><?= isset($penilaian) ? $penilaian->catatan_sistematika : set_value('catatan_sistematika') ?></textarea>
+                                      placeholder="Masukkan catatan perbaikan untuk sistematika dan tata tulis..."
+                                      <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>><?= isset($penilaian) ? $penilaian->catatan_sistematika : set_value('catatan_sistematika') ?></textarea>
                         </div>
                         
                         <div class="form-group">
                             <label class="font-weight-bold">Catatan Umum:</label>
                             <textarea name="catatan_umum" class="form-control" rows="3" 
-                                      placeholder="Masukkan catatan umum atau saran tambahan..."><?= isset($penilaian) ? $penilaian->catatan_umum : set_value('catatan_umum') ?></textarea>
+                                      placeholder="Masukkan catatan umum atau saran tambahan..."
+                                      <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>><?= isset($penilaian) ? $penilaian->catatan_umum : set_value('catatan_umum') ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -202,7 +217,8 @@
                                 <input type="number" name="nilai_substansi_metode" class="form-control" 
                                        min="0" max="100" step="0.01" required
                                        value="<?= isset($penilaian) ? $penilaian->nilai_substansi_metode : set_value('nilai_substansi_metode') ?>"
-                                       placeholder="0-100" onchange="calculateNilaiAkhir()">
+                                       placeholder="0-100" onchange="calculateNilaiAkhir()"
+                                       <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>>
                                 <div class="input-group-append">
                                     <span class="input-group-text">/ 100</span>
                                 </div>
@@ -217,7 +233,8 @@
                                 <input type="number" name="nilai_presentasi_teknik" class="form-control" 
                                        min="0" max="100" step="0.01" required
                                        value="<?= isset($penilaian) ? $penilaian->nilai_presentasi_teknik : set_value('nilai_presentasi_teknik') ?>"
-                                       placeholder="0-100" onchange="calculateNilaiAkhir()">
+                                       placeholder="0-100" onchange="calculateNilaiAkhir()"
+                                       <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>>
                                 <div class="input-group-append">
                                     <span class="input-group-text">/ 100</span>
                                 </div>
@@ -232,7 +249,8 @@
                                 <input type="number" name="nilai_penguasaan_diskusi" class="form-control" 
                                        min="0" max="100" step="0.01" required
                                        value="<?= isset($penilaian) ? $penilaian->nilai_penguasaan_diskusi : set_value('nilai_penguasaan_diskusi') ?>"
-                                       placeholder="0-100" onchange="calculateNilaiAkhir()">
+                                       placeholder="0-100" onchange="calculateNilaiAkhir()"
+                                       <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>>
                                 <div class="input-group-append">
                                     <span class="input-group-text">/ 100</span>
                                 </div>
@@ -297,7 +315,8 @@
                         <div class="col-md-6">
                             <div class="custom-control custom-radio mb-2">
                                 <input type="radio" name="rekomendasi" value="diterima_tanpa_revisi" id="rekomen1" class="custom-control-input" 
-                                       <?= (isset($penilaian) && $penilaian->rekomendasi == 'diterima_tanpa_revisi') ? 'checked' : '' ?> required>
+                                       <?= (isset($penilaian) && $penilaian->rekomendasi == 'diterima_tanpa_revisi') ? 'checked' : '' ?>
+                                       <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'disabled' : '' ?> required>
                                 <label class="custom-control-label" for="rekomen1">
                                     <i class="fas fa-check-circle text-success mr-1"></i>
                                     <strong>Diterima Tanpa Revisi</strong><br>
@@ -307,7 +326,8 @@
                             
                             <div class="custom-control custom-radio mb-2">
                                 <input type="radio" name="rekomendasi" value="revisi_minor" id="rekomen2" class="custom-control-input"
-                                       <?= (isset($penilaian) && $penilaian->rekomendasi == 'revisi_minor') ? 'checked' : '' ?> required>
+                                       <?= (isset($penilaian) && $penilaian->rekomendasi == 'revisi_minor') ? 'checked' : '' ?>
+                                       <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'disabled' : '' ?> required>
                                 <label class="custom-control-label" for="rekomen2">
                                     <i class="fas fa-edit text-info mr-1"></i>
                                     <strong>Revisi Minor</strong><br>
@@ -318,7 +338,8 @@
                         <div class="col-md-6">
                             <div class="custom-control custom-radio mb-2">
                                 <input type="radio" name="rekomendasi" value="revisi_mayor" id="rekomen3" class="custom-control-input"
-                                       <?= (isset($penilaian) && $penilaian->rekomendasi == 'revisi_mayor') ? 'checked' : '' ?> required>
+                                       <?= (isset($penilaian) && $penilaian->rekomendasi == 'revisi_mayor') ? 'checked' : '' ?>
+                                       <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'disabled' : '' ?> required>
                                 <label class="custom-control-label" for="rekomen3">
                                     <i class="fas fa-exclamation-triangle text-warning mr-1"></i>
                                     <strong>Revisi Mayor</strong><br>
@@ -328,7 +349,8 @@
                             
                             <div class="custom-control custom-radio mb-2">
                                 <input type="radio" name="rekomendasi" value="ditolak" id="rekomen4" class="custom-control-input"
-                                       <?= (isset($penilaian) && $penilaian->rekomendasi == 'ditolak') ? 'checked' : '' ?> required>
+                                       <?= (isset($penilaian) && $penilaian->rekomendasi == 'ditolak') ? 'checked' : '' ?>
+                                       <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'disabled' : '' ?> required>
                                 <label class="custom-control-label" for="rekomen4">
                                     <i class="fas fa-times-circle text-danger mr-1"></i>
                                     <strong>Ditolak</strong><br>
@@ -342,7 +364,8 @@
                 <div class="form-group">
                     <label class="font-weight-bold">Keterangan Rekomendasi</label>
                     <textarea name="keterangan_rekomendasi" class="form-control" rows="3" 
-                              placeholder="Masukkan keterangan tambahan untuk rekomendasi (opsional)..."><?= isset($penilaian) ? $penilaian->keterangan_rekomendasi : set_value('keterangan_rekomendasi') ?></textarea>
+                              placeholder="Masukkan keterangan tambahan untuk rekomendasi (opsional)..."
+                              <?= (isset($penilaian) && $penilaian->status_penilaian == 'published') ? 'readonly' : '' ?>><?= isset($penilaian) ? $penilaian->keterangan_rekomendasi : set_value('keterangan_rekomendasi') ?></textarea>
                 </div>
             </div>
         </div>
@@ -352,6 +375,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-8">
+                        <?php if (!isset($penilaian) || $penilaian->status_penilaian != 'published'): ?>
                         <h6 class="font-weight-bold text-primary mb-3">
                             <i class="fas fa-save mr-2"></i>
                             Opsi Penyimpanan
@@ -360,8 +384,17 @@
                             <strong>Draft:</strong> Penilaian disimpan tapi belum dikirim ke mahasiswa (masih bisa diedit)<br>
                             <strong>Simpan dan Publikasi:</strong> Penilaian final dikirim ke mahasiswa via email & sistem (tidak bisa diedit lagi)
                         </p>
+                        <?php else: ?>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <strong>Penilaian Sudah Dipublikasi</strong><br>
+                            Penilaian ini telah dipublikasi pada <?= date('d F Y, H:i', strtotime($penilaian->published_at)) ?> WIB
+                            dan tidak dapat diubah lagi.
+                        </div>
+                        <?php endif; ?>
                     </div>
                     <div class="col-md-4 text-right">
+                        <?php if (!isset($penilaian) || $penilaian->status_penilaian != 'published'): ?>
                         <button type="submit" name="action_type" value="draft" class="btn btn-outline-primary btn-lg mb-2">
                             <i class="fas fa-save mr-2"></i>
                             Simpan Draft
@@ -372,12 +405,20 @@
                             <i class="fas fa-paper-plane mr-2"></i>
                             Simpan & Publikasi
                         </button>
+                        <?php else: ?>
+                        <a href="<?= base_url('dosen/seminar_proposal') ?>" class="btn btn-primary btn-lg">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Kembali ke Dashboard
+                        </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
 
+    <?php if (!isset($penilaian) || $penilaian->status_penilaian != 'published'): ?>
     </form>
+    <?php endif; ?>
 
 </div>
 

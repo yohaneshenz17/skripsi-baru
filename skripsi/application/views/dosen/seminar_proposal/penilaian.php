@@ -153,7 +153,7 @@ if (!function_exists('get_form_value')) {
             <div class="card-body">
                 <p class="text-muted mb-3">
                     <i class="fas fa-info-circle mr-1"></i>
-                    Masukkan catatan perbaikan dari dosen pembimbing untuk berbagai aspek proposal
+                    Masukkan catatan perbaikan dari para dosen penguji untuk berbagai aspek proposal
                 </p>
                 
                 <div class="row">
@@ -205,102 +205,162 @@ if (!function_exists('get_form_value')) {
             </div>
         </div>
 
-        <!-- Komponen 2: Nilai Final Seminar Proposal -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-calculator mr-2"></i>
-                    2. Nilai Final Seminar Proposal
-                </h6>
-            </div>
-            <div class="card-body">
-                <p class="text-muted mb-3">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Nilai rata-rata dengan bobot: Substansi & Metode (50%), Presentasi & Teknik (20%), Penguasaan & Diskusi (30%)
-                </p>
-                
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="font-weight-bold">Substansi & Metode Penelitian <span class="text-primary">(50%)</span></label>
-                            <div class="input-group">
-                                <input type="number" name="nilai_substansi_metode" class="form-control nilai-input" 
-                                       min="0" max="100" step="0.01"
-                                       value="<?= get_form_value('nilai_substansi_metode', $penilaian ?? null) ?>"
-                                       placeholder="0-100" <?= $readonly ?>>
-                                <div class="input-group-append">
-                                    <span class="input-group-text">/ 100</span>
-                                </div>
+    <!-- Komponen 2: Nilai Final Seminar Proposal - UPDATED UNTUK SISTEM 3 DOSEN -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-calculator mr-2"></i>
+                2. Nilai Final Seminar Proposal
+            </h6>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">
+                <i class="fas fa-info-circle mr-1"></i>
+                <strong>Sistem Penilaian Baru:</strong> Nilai dari 3 dosen (tanpa pembobotan). Preview Nilai Akhir adalah rata-rata ketiganya: (Nilai Penguji 1 + Nilai Penguji 2 + Nilai Pembimbing) ÷ 3
+            </p>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="font-weight-bold">
+                            <i class="fas fa-user-graduate mr-1"></i>
+                            Nilai Dosen Penguji 1
+                            <?php if (isset($dosen_penguji1) && $dosen_penguji1): ?>
+                                <br><small class="text-info"><?= $dosen_penguji1->nama ?></small>
+                            <?php endif; ?>
+                        </label>
+                        <div class="input-group">
+                            <input type="number" name="nilai_penguji1" class="form-control nilai-input" 
+                                   id="nilai_penguji1"
+                                   min="0" max="100" step="0.01"
+                                   value="<?= get_form_value('nilai_penguji1', $penilaian ?? null) ?>"
+                                   placeholder="0-100" <?= $readonly ?>>
+                            <div class="input-group-append">
+                                <span class="input-group-text">/ 100</span>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="font-weight-bold">Presentasi & Teknik Penyajian <span class="text-primary">(20%)</span></label>
-                            <div class="input-group">
-                                <input type="number" name="nilai_presentasi_teknik" class="form-control nilai-input" 
-                                       min="0" max="100" step="0.01"
-                                       value="<?= get_form_value('nilai_presentasi_teknik', $penilaian ?? null) ?>"
-                                       placeholder="0-100" <?= $readonly ?>>
-                                <div class="input-group-append">
-                                    <span class="input-group-text">/ 100</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="font-weight-bold">Penguasaan Materi & Diskusi <span class="text-primary">(30%)</span></label>
-                            <div class="input-group">
-                                <input type="number" name="nilai_penguasaan_diskusi" class="form-control nilai-input" 
-                                       min="0" max="100" step="0.01"
-                                       value="<?= get_form_value('nilai_penguasaan_diskusi', $penilaian ?? null) ?>"
-                                       placeholder="0-100" <?= $readonly ?>>
-                                <div class="input-group-append">
-                                    <span class="input-group-text">/ 100</span>
-                                </div>
-                            </div>
-                        </div>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i> Nilai mentah dari Dosen Penguji 1 (tanpa pembobotan)
+                        </small>
                     </div>
                 </div>
                 
-                <!-- Preview Nilai Akhir -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="alert alert-light border">
-                            <h6 class="font-weight-bold mb-2">
-                                <i class="fas fa-chart-line mr-2"></i>
-                                Preview Nilai Akhir:
-                            </h6>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>Nilai Angka:</span>
-                                <span class="font-weight-bold" id="previewNilaiAngka">
-                                    <?= (isset($penilaian) && isset($penilaian->nilai_akhir) && $penilaian->nilai_akhir) ? number_format($penilaian->nilai_akhir, 2) : '-' ?>
-                                </span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>Nilai Huruf:</span>
-                                <span class="font-weight-bold" id="previewNilaiHuruf">
-                                    <?= (isset($penilaian) && isset($penilaian->nilai_huruf) && $penilaian->nilai_huruf) ? $penilaian->nilai_huruf : '-' ?>
-                                </span>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="font-weight-bold">
+                            <i class="fas fa-user-graduate mr-1"></i>
+                            Nilai Dosen Penguji 2
+                            <?php if (isset($dosen_penguji2) && $dosen_penguji2): ?>
+                                <br><small class="text-info"><?= $dosen_penguji2->nama ?></small>
+                            <?php endif; ?>
+                        </label>
+                        <div class="input-group">
+                            <input type="number" name="nilai_penguji2" class="form-control nilai-input" 
+                                   id="nilai_penguji2"
+                                   min="0" max="100" step="0.01"
+                                   value="<?= get_form_value('nilai_penguji2', $penilaian ?? null) ?>"
+                                   placeholder="0-100" <?= $readonly ?>>
+                            <div class="input-group-append">
+                                <span class="input-group-text">/ 100</span>
                             </div>
                         </div>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i> Nilai mentah dari Dosen Penguji 2 (tanpa pembobotan)
+                        </small>
                     </div>
-                    <div class="col-md-6">
-                        <div class="small text-muted">
-                            <strong>Konversi Nilai:</strong><br>
-                            • ≥80: A<br>
-                            • 70-79.9: B<br>
-                            • 60-69.9: C<br>
-                            • 50-59.9: D<br>
-                            • <50: E
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="font-weight-bold">
+                            <i class="fas fa-chalkboard-teacher mr-1"></i>
+                            Nilai Dosen Pembimbing
+                            <?php if (isset($seminar->nama_pembimbing)): ?>
+                                <br><small class="text-success"><?= $seminar->nama_pembimbing ?></small>
+                            <?php endif; ?>
+                        </label>
+                        <div class="input-group">
+                            <input type="number" name="nilai_pembimbing" class="form-control nilai-input" 
+                                   id="nilai_pembimbing"
+                                   min="0" max="100" step="0.01"
+                                   value="<?= get_form_value('nilai_pembimbing', $penilaian ?? null) ?>"
+                                   placeholder="0-100" <?= $readonly ?>>
+                            <div class="input-group-append">
+                                <span class="input-group-text">/ 100</span>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i> Nilai mentah dari Dosen Pembimbing (tanpa pembobotan)
+                        </small>
+                    </div>
+                </div>
+            </div>
+                
+        <!-- Preview Nilai Akhir - UPDATED -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="alert alert-light border">
+                    <h6 class="font-weight-bold mb-2">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Preview Nilai Akhir:
+                    </h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Nilai Angka:</span>
+                        <span class="font-weight-bold" id="previewNilaiAngka">
+                            <?= (isset($penilaian) && isset($penilaian->nilai_akhir) && $penilaian->nilai_akhir) ? number_format($penilaian->nilai_akhir, 2) : '-' ?>
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Nilai Huruf:</span>
+                        <span class="font-weight-bold" id="previewNilaiHuruf">
+                            <?= (isset($penilaian) && isset($penilaian->nilai_huruf) && $penilaian->nilai_huruf) ? $penilaian->nilai_huruf : '-' ?>
+                        </span>
+                    </div>
+                    <hr class="my-2">
+                    <small class="text-muted">
+                        <i class="fas fa-calculator mr-1"></i>
+                        <strong>Rumus:</strong> (Penguji 1 + Penguji 2 + Pembimbing) ÷ 3
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert alert-info">
+                    <h6 class="font-weight-bold mb-2">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        Konversi Nilai:
+                    </h6>
+                    <div class="small">
+                        <div><span class="badge badge-success">A</span> ≥80: Sangat Baik</div>
+                        <div><span class="badge badge-primary">B</span> 70-79.9: Baik</div>
+                        <div><span class="badge badge-warning">C</span> 60-69.9: Cukup</div>
+                        <div><span class="badge badge-secondary">D</span> 50-59.9: Kurang</div>
+                        <div><span class="badge badge-danger">E</span> <50: Sangat Kurang</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Info Tambahan untuk Sistem Baru -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-warning">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle mr-2 mt-1"></i>
+                        <div>
+                            <strong>Perhatian - Sistem Penilaian Baru:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Sistem lama menggunakan <strong>pembobotan</strong>: Substansi (50%) + Presentasi (20%) + Penguasaan (30%)</li>
+                                <li>Sistem baru menggunakan <strong>rata-rata sederhana</strong>: (Nilai Penguji 1 + Nilai Penguji 2 + Nilai Pembimbing) ÷ 3</li>
+                                <li>Setiap dosen memberikan nilai <strong>0-100</strong> tanpa pembobotan</li>
+                                <li>Nilai akhir adalah <strong>rata-rata dari 3 dosen</strong></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>        
 
         <!-- Komponen 3: Rekomendasi Hasil Seminar -->
         <div class="card shadow mb-4">
@@ -432,14 +492,15 @@ if (!function_exists('get_form_value')) {
 </div>
 
 <script>
-// Auto calculate nilai akhir
+// Auto calculate nilai akhir dengan rata-rata sederhana
 function calculateNilaiAkhir() {
-    const substansi = parseFloat(document.querySelector('input[name="nilai_substansi_metode"]').value) || 0;
-    const presentasi = parseFloat(document.querySelector('input[name="nilai_presentasi_teknik"]').value) || 0;
-    const penguasaan = parseFloat(document.querySelector('input[name="nilai_penguasaan_diskusi"]').value) || 0;
+    const penguji1 = parseFloat(document.querySelector('input[name="nilai_penguji1"]').value) || 0;
+    const penguji2 = parseFloat(document.querySelector('input[name="nilai_penguji2"]').value) || 0;
+    const pembimbing = parseFloat(document.querySelector('input[name="nilai_pembimbing"]').value) || 0;
     
-    if (substansi > 0 && presentasi > 0 && penguasaan > 0) {
-        const nilaiAkhir = (substansi * 0.5) + (presentasi * 0.2) + (penguasaan * 0.3);
+    if (penguji1 > 0 && penguji2 > 0 && pembimbing > 0) {
+        // Rata-rata sederhana (tanpa bobot)
+        const nilaiAkhir = (penguji1 + penguji2 + pembimbing) / 3;
         
         let nilaiHuruf = '';
         if (nilaiAkhir >= 80) nilaiHuruf = 'A';
@@ -475,12 +536,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const actionType = actionButton.value;
             
             if (actionType === 'publish') {
-                const substansi = parseFloat(document.querySelector('input[name="nilai_substansi_metode"]').value) || 0;
-                const presentasi = parseFloat(document.querySelector('input[name="nilai_presentasi_teknik"]').value) || 0;
-                const penguasaan = parseFloat(document.querySelector('input[name="nilai_penguasaan_diskusi"]').value) || 0;
+                const penguji1 = parseFloat(document.querySelector('input[name="nilai_penguji1"]').value) || 0;
+                const penguji2 = parseFloat(document.querySelector('input[name="nilai_penguji2"]').value) || 0;
+                const pembimbing = parseFloat(document.querySelector('input[name="nilai_pembimbing"]').value) || 0;
                 const rekomendasi = document.querySelector('input[name="rekomendasi"]:checked');
                 
-                if (substansi <= 0 || presentasi <= 0 || penguasaan <= 0) {
+                if (penguji1 <= 0 || penguji2 <= 0 || pembimbing <= 0) {
                     e.preventDefault();
                     alert('Semua komponen nilai harus diisi dengan nilai > 0 untuk publikasi!');
                     return false;
@@ -498,3 +559,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<?php
+// Helper function untuk mendapatkan nilai form
+if (!function_exists('get_form_value')) {
+    function get_form_value($field_name, $object = null) {
+        if ($object && isset($object->$field_name)) {
+            return $object->$field_name;
+        }
+        return '';
+    }
+}
+?>

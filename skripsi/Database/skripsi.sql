@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 29, 2025 at 08:35 AM
+-- Generation Time: Jul 29, 2025 at 03:25 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -680,7 +680,9 @@ INSERT INTO `notifikasi` (`id`, `jenis`, `untuk_role`, `user_id`, `proposal_id`,
 (4, '', 'dosen', 10, NULL, 'Pengaturan Jadwal Bimbingan', 'Yth. Bapak/Ibu,\n\nSaya ingin mengatur jadwal bimbingan. Apakah Bapak/Ibu berkenan untuk:\n\nWaktu yang saya usulkan:\n- Hari: [Hari]\n- Tanggal: [Tanggal]\n- Jam: [Jam]\n- Tempat: [Tempat/Online]\n\nTerima kasih.\n\nHormat saya,\nYohanes Kandam', 0, '2025-07-21 17:04:37'),
 (5, '', 'dosen', 2, NULL, 'Pengaturan Jadwal Bimbingan', 'Yth. Bapak/Ibu,\n\nSaya ingin mengatur jadwal bimbingan. Apakah Bapak/Ibu berkenan untuk:\n\nWaktu yang saya usulkan:\n- Hari: [Hari]\n- Tanggal: [Tanggal]\n- Jam: [Jam]\n- Tempat: [Tempat/Online]\n\nTerima kasih.\n\nHormat saya,\nYohanes Kandam', 0, '2025-07-21 17:05:48'),
 (6, 'proposal_masuk', 'mahasiswa', 44, NULL, 'Pengajuan Seminar Proposal Berhasil', 'Pengajuan seminar proposal Anda telah berhasil dikirim dan sedang menunggu review dari dosen pembimbing.', 0, '2025-07-28 12:49:09'),
-(7, 'proposal_masuk', 'dosen', 25, NULL, 'Review Pengajuan Seminar Proposal', 'Mahasiswa Mahasiswa Contoh (12345676) telah mengajukan seminar proposal dan membutuhkan review Anda.', 0, '2025-07-28 12:49:09');
+(7, 'proposal_masuk', 'dosen', 25, NULL, 'Review Pengajuan Seminar Proposal', 'Mahasiswa Mahasiswa Contoh (12345676) telah mengajukan seminar proposal dan membutuhkan review Anda.', 0, '2025-07-28 12:49:09'),
+(8, 'proposal_masuk', 'mahasiswa', 45, 45, '✅ Pengajuan Seminar Proposal Berhasil', 'Pengajuan seminar proposal Anda (ID: #SP-0002) telah berhasil dikirim dan sedang menunggu review dari dosen pembimbing. Estimasi waktu review: 3-5 hari kerja.', 0, '2025-07-29 11:42:09'),
+(9, 'proposal_masuk', 'dosen', 25, 45, '???? Review Pengajuan Seminar Proposal Diperlukan', 'Mahasiswa Mahasiswa Contoh 2 (12345679) telah mengajukan seminar proposal dengan ID #SP-0002 dan membutuhkan review Anda. Harap segera lakukan review melalui sistem.', 0, '2025-07-29 11:42:09');
 
 -- --------------------------------------------------------
 
@@ -815,6 +817,110 @@ CREATE TABLE `penilaian_seminar_proposal` (
   `catatan_metodologi` text DEFAULT NULL COMMENT 'Catatan revisi untuk Metodologi Penelitian',
   `catatan_sistematika` text DEFAULT NULL COMMENT 'Catatan revisi untuk Sistematika & Tata Tulis',
   `catatan_umum` text DEFAULT NULL COMMENT 'Catatan umum atau saran tambahan',
+  `nilai_penguji1` decimal(5,2) DEFAULT NULL COMMENT 'Nilai dari Dosen Penguji 1 (0-100, tanpa pembobotan)',
+  `nilai_penguji2` decimal(5,2) DEFAULT NULL COMMENT 'Nilai dari Dosen Penguji 2 (0-100, tanpa pembobotan)',
+  `nilai_pembimbing` decimal(5,2) DEFAULT NULL COMMENT 'Nilai dari Dosen Pembimbing (0-100, tanpa pembobotan)',
+  `nilai_substansi_metode` decimal(5,2) DEFAULT NULL COMMENT '[DEPRECATED] Gunakan nilai_penguji1',
+  `nilai_presentasi_teknik` decimal(5,2) DEFAULT NULL COMMENT '[DEPRECATED] Gunakan nilai_penguji2',
+  `nilai_penguasaan_diskusi` decimal(5,2) DEFAULT NULL COMMENT '[DEPRECATED] Gunakan nilai_pembimbing',
+  `nilai_akhir` decimal(5,2) DEFAULT NULL COMMENT 'Nilai akhir: (nilai_penguji1 + nilai_penguji2 + nilai_pembimbing) / 3',
+  `nilai_huruf` enum('A','B','C','D','E') DEFAULT NULL COMMENT 'Konversi nilai: ≥80=A, 70-79.9=B, 60-69.9=C, 50-59.9=D, <50=E',
+  `rekomendasi` enum('diterima_tanpa_revisi','revisi_minor','revisi_mayor','ditolak') DEFAULT NULL COMMENT 'Rekomendasi hasil seminar',
+  `keterangan_rekomendasi` text DEFAULT NULL COMMENT 'Keterangan tambahan untuk rekomendasi',
+  `status_penilaian` enum('draft','published') DEFAULT 'draft' COMMENT 'Status form: draft (masih bisa diedit) atau published (final)',
+  `dinilai_oleh` bigint(20) NOT NULL COMMENT 'FK ke dosen/staf yang menginput penilaian',
+  `role_penilai` enum('dosen_pembimbing','staf') DEFAULT 'dosen_pembimbing' COMMENT 'Role yang menginput: dosen pembimbing atau staf',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Tanggal pembuatan penilaian',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Tanggal terakhir update',
+  `published_at` datetime DEFAULT NULL COMMENT 'Tanggal publikasi penilaian ke mahasiswa'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tabel penilaian seminar proposal yang detail untuk dosen & staf';
+
+--
+-- Dumping data for table `penilaian_seminar_proposal`
+--
+
+INSERT INTO `penilaian_seminar_proposal` (`id`, `seminar_proposal_id`, `mahasiswa_id`, `proposal_id`, `catatan_latar_belakang`, `catatan_tinjauan_pustaka`, `catatan_landasan_teori`, `catatan_metodologi`, `catatan_sistematika`, `catatan_umum`, `nilai_penguji1`, `nilai_penguji2`, `nilai_pembimbing`, `nilai_substansi_metode`, `nilai_presentasi_teknik`, `nilai_penguasaan_diskusi`, `nilai_akhir`, `nilai_huruf`, `rekomendasi`, `keterangan_rekomendasi`, `status_penilaian`, `dinilai_oleh`, `role_penilai`, `created_at`, `updated_at`, `published_at`) VALUES
+(1, 1, 44, 44, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'draft', 25, 'dosen_pembimbing', '2025-07-29 11:37:29', '2025-07-29 11:37:29', NULL);
+
+--
+-- Triggers `penilaian_seminar_proposal`
+--
+DELIMITER $$
+CREATE TRIGGER `tr_penilaian_calculate_nilai_v2` BEFORE INSERT ON `penilaian_seminar_proposal` FOR EACH ROW BEGIN
+    IF NEW.nilai_penguji1 IS NOT NULL AND NEW.nilai_penguji2 IS NOT NULL AND NEW.nilai_pembimbing IS NOT NULL THEN
+        SET NEW.nilai_akhir = ROUND((NEW.nilai_penguji1 + NEW.nilai_penguji2 + NEW.nilai_pembimbing) / 3, 2);
+        SET NEW.nilai_huruf = CASE 
+            WHEN NEW.nilai_akhir >= 80 THEN 'A'
+            WHEN NEW.nilai_akhir >= 70 THEN 'B'
+            WHEN NEW.nilai_akhir >= 60 THEN 'C'
+            WHEN NEW.nilai_akhir >= 50 THEN 'D'
+            ELSE 'E'
+        END;
+    END IF;
+    
+    IF NEW.status_penilaian = 'published' THEN
+        SET NEW.published_at = NOW();
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `tr_penilaian_calculate_nilai_v2_update` BEFORE UPDATE ON `penilaian_seminar_proposal` FOR EACH ROW BEGIN
+    IF NEW.nilai_penguji1 IS NOT NULL AND NEW.nilai_penguji2 IS NOT NULL AND NEW.nilai_pembimbing IS NOT NULL THEN
+        SET NEW.nilai_akhir = ROUND((NEW.nilai_penguji1 + NEW.nilai_penguji2 + NEW.nilai_pembimbing) / 3, 2);
+        SET NEW.nilai_huruf = CASE 
+            WHEN NEW.nilai_akhir >= 80 THEN 'A'
+            WHEN NEW.nilai_akhir >= 70 THEN 'B'
+            WHEN NEW.nilai_akhir >= 60 THEN 'C'
+            WHEN NEW.nilai_akhir >= 50 THEN 'D'
+            ELSE 'E'
+        END;
+    END IF;
+    
+    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
+        SET NEW.published_at = NOW();
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `tr_penilaian_workflow_v2` AFTER UPDATE ON `penilaian_seminar_proposal` FOR EACH ROW BEGIN
+    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
+        UPDATE seminar_proposal_mahasiswa 
+        SET status = 'completed', current_step = 'mahasiswa'
+        WHERE id = NEW.seminar_proposal_id;
+        
+        IF NEW.rekomendasi = 'ditolak' THEN
+            UPDATE proposal_mahasiswa 
+            SET workflow_status = 'seminar_proposal'
+            WHERE id = NEW.proposal_id;
+        ELSE
+            UPDATE proposal_mahasiswa 
+            SET workflow_status = 'penelitian'
+            WHERE id = NEW.proposal_id;
+        END IF;
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `penilaian_seminar_proposal_backup_20250729`
+--
+
+CREATE TABLE `penilaian_seminar_proposal_backup_20250729` (
+  `id` bigint(20) NOT NULL,
+  `seminar_proposal_id` bigint(20) NOT NULL COMMENT 'FK ke seminar_proposal_mahasiswa',
+  `mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke mahasiswa (redundant untuk performance)',
+  `proposal_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa (redundant untuk performance)',
+  `catatan_latar_belakang` text DEFAULT NULL COMMENT 'Catatan revisi untuk Latar Belakang & Rumusan Masalah',
+  `catatan_tinjauan_pustaka` text DEFAULT NULL COMMENT 'Catatan revisi untuk Tinjauan Pustaka & Kebaruan (Novelty)',
+  `catatan_landasan_teori` text DEFAULT NULL COMMENT 'Catatan revisi untuk Landasan Teori',
+  `catatan_metodologi` text DEFAULT NULL COMMENT 'Catatan revisi untuk Metodologi Penelitian',
+  `catatan_sistematika` text DEFAULT NULL COMMENT 'Catatan revisi untuk Sistematika & Tata Tulis',
+  `catatan_umum` text DEFAULT NULL COMMENT 'Catatan umum atau saran tambahan',
   `nilai_substansi_metode` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Substansi & Metode Penelitian (bobot 50%)',
   `nilai_presentasi_teknik` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Presentasi & Teknik Penyajian (bobot 20%)',
   `nilai_penguasaan_diskusi` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Penguasaan Materi & Diskusi (bobot 30%)',
@@ -831,65 +937,11 @@ CREATE TABLE `penilaian_seminar_proposal` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tabel penilaian seminar proposal yang detail untuk dosen & staf';
 
 --
--- Triggers `penilaian_seminar_proposal`
+-- Dumping data for table `penilaian_seminar_proposal_backup_20250729`
 --
-DELIMITER $$
-CREATE TRIGGER `tr_penilaian_calculate_nilai` BEFORE UPDATE ON `penilaian_seminar_proposal` FOR EACH ROW BEGIN
-    -- Auto calculate nilai akhir jika semua komponen nilai sudah diisi
-    IF NEW.nilai_substansi_metode IS NOT NULL 
-       AND NEW.nilai_presentasi_teknik IS NOT NULL 
-       AND NEW.nilai_penguasaan_diskusi IS NOT NULL THEN
-       
-        -- Hitung nilai akhir dengan bobot: Substansi 50%, Presentasi 20%, Penguasaan 30%
-        SET NEW.nilai_akhir = ROUND(
-            (NEW.nilai_substansi_metode * 0.5) + 
-            (NEW.nilai_presentasi_teknik * 0.2) + 
-            (NEW.nilai_penguasaan_diskusi * 0.3), 
-            2
-        );
-        
-        -- Konversi ke nilai huruf
-        SET NEW.nilai_huruf = CASE 
-            WHEN NEW.nilai_akhir >= 80 THEN 'A'
-            WHEN NEW.nilai_akhir >= 70 THEN 'B'
-            WHEN NEW.nilai_akhir >= 60 THEN 'C'
-            WHEN NEW.nilai_akhir >= 50 THEN 'D'
-            ELSE 'E'
-        END;
-    END IF;
-    
-    -- Set published_at jika status berubah ke published
-    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
-        SET NEW.published_at = NOW();
-    END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `tr_penilaian_update_workflow` AFTER UPDATE ON `penilaian_seminar_proposal` FOR EACH ROW BEGIN
-    -- Update status seminar proposal ke completed jika penilaian sudah dipublish
-    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
-        UPDATE seminar_proposal_mahasiswa 
-        SET status = 'completed',
-            current_step = 'mahasiswa'
-        WHERE id = NEW.seminar_proposal_id;
-        
-        -- Update workflow proposal_mahasiswa berdasarkan rekomendasi
-        IF NEW.rekomendasi = 'ditolak' THEN
-            -- Jika ditolak, kembali ke seminar_proposal untuk ajukan ulang
-            UPDATE proposal_mahasiswa 
-            SET workflow_status = 'seminar_proposal'
-            WHERE id = NEW.proposal_id;
-        ELSE
-            -- Jika diterima (dengan/tanpa revisi), lanjut ke penelitian
-            UPDATE proposal_mahasiswa 
-            SET workflow_status = 'penelitian'
-            WHERE id = NEW.proposal_id;
-        END IF;
-    END IF;
-END
-$$
-DELIMITER ;
+
+INSERT INTO `penilaian_seminar_proposal_backup_20250729` (`id`, `seminar_proposal_id`, `mahasiswa_id`, `proposal_id`, `catatan_latar_belakang`, `catatan_tinjauan_pustaka`, `catatan_landasan_teori`, `catatan_metodologi`, `catatan_sistematika`, `catatan_umum`, `nilai_substansi_metode`, `nilai_presentasi_teknik`, `nilai_penguasaan_diskusi`, `nilai_akhir`, `nilai_huruf`, `rekomendasi`, `keterangan_rekomendasi`, `status_penilaian`, `dinilai_oleh`, `role_penilai`, `created_at`, `updated_at`, `published_at`) VALUES
+(1, 1, 44, 44, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'draft', 25, 'dosen_pembimbing', '2025-07-29 11:37:29', '2025-07-29 11:37:29', NULL);
 
 -- --------------------------------------------------------
 
@@ -910,9 +962,12 @@ CREATE TABLE `penilaian_seminar_proposal_v` (
 ,`tanggal_seminar` date
 ,`jam_seminar` time
 ,`tempat_seminar` varchar(255)
-,`nilai_substansi_metode` decimal(5,2)
-,`nilai_presentasi_teknik` decimal(5,2)
-,`nilai_penguasaan_diskusi` decimal(5,2)
+,`nilai_penguji1` decimal(5,2)
+,`nilai_penguji2` decimal(5,2)
+,`nilai_pembimbing` decimal(5,2)
+,`nilai_substansi_metode_old` decimal(5,2)
+,`nilai_presentasi_teknik_old` decimal(5,2)
+,`nilai_penguasaan_diskusi_old` decimal(5,2)
 ,`nilai_akhir` decimal(5,2)
 ,`nilai_huruf` enum('A','B','C','D','E')
 ,`rekomendasi` enum('diterima_tanpa_revisi','revisi_minor','revisi_mayor','ditolak')
@@ -1013,7 +1068,7 @@ CREATE TABLE `proposal_mahasiswa` (
 
 INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
 (44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'seminar_proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
-(45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '1', '', '2025-07-27 12:38:21', NULL, '2025-07-26 09:52:43', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
+(45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '1', '', '2025-07-27 12:38:21', NULL, '2025-07-26 09:52:43', 10, 'seminar_proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1444,7 +1499,8 @@ CREATE TABLE `seminar_proposal_mahasiswa` (
 --
 
 INSERT INTO `seminar_proposal_mahasiswa` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_proposal`, `keterangan_mahasiswa`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
-(1, 44, 44, 'submitted', 'pembimbing', '65deab67fc9fb8be407309c6ff4caf63.docx', 'Proposal Fix ya', 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'pending', NULL, NULL, 'pending', NULL, NULL, '2025-07-28 12:49:03', '2025-07-28 12:49:03', NULL);
+(1, 44, 44, 'review_kaprodi', 'kaprodi', '65deab67fc9fb8be407309c6ff4caf63.docx', 'Proposal Fix ya', 'approved', 'bisa dilanjutkan seminar', '2025-07-29 12:15:06', 25, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'pending', NULL, NULL, 'pending', NULL, NULL, '2025-07-28 12:49:03', '2025-07-29 12:15:06', NULL),
+(2, 45, 45, 'submitted', 'review_pembimbing', 'SP_20250729114202_6888511ab23cc.docx', 'Tidak ada ya, tolong diterima dengan baik', 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'pending', NULL, NULL, 'pending', NULL, NULL, '2025-07-29 11:42:02', '2025-07-29 11:42:02', 45);
 
 --
 -- Triggers `seminar_proposal_mahasiswa`
@@ -1797,7 +1853,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 --
 DROP TABLE IF EXISTS `penilaian_seminar_proposal_v`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `penilaian_seminar_proposal_v`  AS SELECT `psp`.`id` AS `id`, `psp`.`seminar_proposal_id` AS `seminar_proposal_id`, `psp`.`mahasiswa_id` AS `mahasiswa_id`, `psp`.`proposal_id` AS `proposal_id`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pm`.`judul` AS `judul`, `d`.`nama` AS `nama_pembimbing`, `spm`.`tanggal_seminar` AS `tanggal_seminar`, `spm`.`jam_seminar` AS `jam_seminar`, `spm`.`tempat_seminar` AS `tempat_seminar`, `psp`.`nilai_substansi_metode` AS `nilai_substansi_metode`, `psp`.`nilai_presentasi_teknik` AS `nilai_presentasi_teknik`, `psp`.`nilai_penguasaan_diskusi` AS `nilai_penguasaan_diskusi`, `psp`.`nilai_akhir` AS `nilai_akhir`, `psp`.`nilai_huruf` AS `nilai_huruf`, `psp`.`rekomendasi` AS `rekomendasi`, `psp`.`status_penilaian` AS `status_penilaian`, `psp`.`role_penilai` AS `role_penilai`, `dp`.`nama` AS `nama_penilai`, `psp`.`created_at` AS `created_at`, `psp`.`updated_at` AS `updated_at`, `psp`.`published_at` AS `published_at` FROM (((((`penilaian_seminar_proposal` `psp` join `seminar_proposal_mahasiswa` `spm` on(`psp`.`seminar_proposal_id` = `spm`.`id`)) join `mahasiswa` `m` on(`psp`.`mahasiswa_id` = `m`.`id`)) join `proposal_mahasiswa` `pm` on(`psp`.`proposal_id` = `pm`.`id`)) join `dosen` `d` on(`pm`.`dosen_id` = `d`.`id`)) join `dosen` `dp` on(`psp`.`dinilai_oleh` = `dp`.`id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `penilaian_seminar_proposal_v`  AS SELECT `psp`.`id` AS `id`, `psp`.`seminar_proposal_id` AS `seminar_proposal_id`, `psp`.`mahasiswa_id` AS `mahasiswa_id`, `psp`.`proposal_id` AS `proposal_id`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pm`.`judul` AS `judul`, `d`.`nama` AS `nama_pembimbing`, `spm`.`tanggal_seminar` AS `tanggal_seminar`, `spm`.`jam_seminar` AS `jam_seminar`, `spm`.`tempat_seminar` AS `tempat_seminar`, `psp`.`nilai_penguji1` AS `nilai_penguji1`, `psp`.`nilai_penguji2` AS `nilai_penguji2`, `psp`.`nilai_pembimbing` AS `nilai_pembimbing`, `psp`.`nilai_substansi_metode` AS `nilai_substansi_metode_old`, `psp`.`nilai_presentasi_teknik` AS `nilai_presentasi_teknik_old`, `psp`.`nilai_penguasaan_diskusi` AS `nilai_penguasaan_diskusi_old`, `psp`.`nilai_akhir` AS `nilai_akhir`, `psp`.`nilai_huruf` AS `nilai_huruf`, `psp`.`rekomendasi` AS `rekomendasi`, `psp`.`status_penilaian` AS `status_penilaian`, `psp`.`role_penilai` AS `role_penilai`, `dp`.`nama` AS `nama_penilai`, `psp`.`created_at` AS `created_at`, `psp`.`updated_at` AS `updated_at`, `psp`.`published_at` AS `published_at` FROM (((((`penilaian_seminar_proposal` `psp` join `seminar_proposal_mahasiswa` `spm` on(`psp`.`seminar_proposal_id` = `spm`.`id`)) join `mahasiswa` `m` on(`psp`.`mahasiswa_id` = `m`.`id`)) join `proposal_mahasiswa` `pm` on(`psp`.`proposal_id` = `pm`.`id`)) join `dosen` `d` on(`pm`.`dosen_id` = `d`.`id`)) join `dosen` `dp` on(`psp`.`dinilai_oleh` = `dp`.`id`)) ;
 
 -- --------------------------------------------------------
 
@@ -1970,6 +2026,23 @@ ALTER TABLE `penilaian_seminar_proposal`
   ADD KEY `idx_status` (`status_penilaian`),
   ADD KEY `idx_rekomendasi` (`rekomendasi`),
   ADD KEY `idx_nilai_huruf` (`nilai_huruf`),
+  ADD KEY `idx_published_at` (`published_at`),
+  ADD KEY `idx_nilai_penguji1` (`nilai_penguji1`),
+  ADD KEY `idx_nilai_penguji2` (`nilai_penguji2`),
+  ADD KEY `idx_nilai_pembimbing` (`nilai_pembimbing`);
+
+--
+-- Indexes for table `penilaian_seminar_proposal_backup_20250729`
+--
+ALTER TABLE `penilaian_seminar_proposal_backup_20250729`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_seminar_penilaian` (`seminar_proposal_id`),
+  ADD KEY `idx_mahasiswa` (`mahasiswa_id`),
+  ADD KEY `idx_proposal` (`proposal_id`),
+  ADD KEY `idx_penilai` (`dinilai_oleh`),
+  ADD KEY `idx_status` (`status_penilaian`),
+  ADD KEY `idx_rekomendasi` (`rekomendasi`),
+  ADD KEY `idx_nilai_huruf` (`nilai_huruf`),
   ADD KEY `idx_published_at` (`published_at`);
 
 --
@@ -2110,7 +2183,7 @@ ALTER TABLE `mahasiswa`
 -- AUTO_INCREMENT for table `notifikasi`
 --
 ALTER TABLE `notifikasi`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `penelitian`
@@ -2128,7 +2201,13 @@ ALTER TABLE `pengumuman_tahapan`
 -- AUTO_INCREMENT for table `penilaian_seminar_proposal`
 --
 ALTER TABLE `penilaian_seminar_proposal`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `penilaian_seminar_proposal_backup_20250729`
+--
+ALTER TABLE `penilaian_seminar_proposal_backup_20250729`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `prodi`
@@ -2158,7 +2237,7 @@ ALTER TABLE `seminar`
 -- AUTO_INCREMENT for table `seminar_proposal_mahasiswa`
 --
 ALTER TABLE `seminar_proposal_mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `skripsi`

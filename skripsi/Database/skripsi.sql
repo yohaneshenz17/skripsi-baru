@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 29, 2025 at 06:57 AM
+-- Generation Time: Jul 29, 2025 at 08:35 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -435,7 +435,10 @@ INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bi
 (34, 45, 3, '2025-07-28', 'Tes Saja', '', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:24:43', 25, 'mahasiswa', '2025-07-28 12:21:58', '2025-07-28 12:24:43'),
 (35, 45, 5, '2025-07-28', 'Tes Saja', 'Bagus', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:25:32', 25, 'mahasiswa', '2025-07-28 12:22:20', '2025-07-28 12:25:32'),
 (36, 45, 6, '2025-07-28', 'Tidak ada catatan', 'Bagus', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:25:44', 25, 'mahasiswa', '2025-07-28 12:22:32', '2025-07-28 12:25:44'),
-(37, 45, 7, '2025-07-28', 'Tidak ada catatan', 'Tidak ada catatan', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:26:12', 25, 'mahasiswa', '2025-07-28 12:22:42', '2025-07-28 12:26:12');
+(37, 45, 7, '2025-07-28', 'Tidak ada catatan', 'Tidak ada catatan', 'Tidak ada catatan', NULL, NULL, '1', '2025-07-28 12:26:12', 25, 'mahasiswa', '2025-07-28 12:22:42', '2025-07-28 12:26:12'),
+(39, 45, 8, '2025-07-28', 'Tes saja', 'Tes saja', 'Tes saja', NULL, NULL, '1', '2025-07-29 07:04:30', 25, 'dosen', '2025-07-29 07:04:30', '2025-07-29 07:04:30'),
+(41, 44, 10, '2025-07-29', 'Tes saja', 'Tes saja', 'Tes saja', NULL, NULL, '1', '2025-07-29 07:07:35', 25, 'mahasiswa', '2025-07-29 07:07:04', '2025-07-29 07:07:35'),
+(42, 45, 9, '2025-07-29', 'Tes ya', 'Tes ya', 'Tes ya', NULL, NULL, '1', '2025-07-29 07:32:00', 25, 'dosen', '2025-07-29 07:32:00', '2025-07-29 07:32:00');
 
 -- --------------------------------------------------------
 
@@ -2089,7 +2092,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`

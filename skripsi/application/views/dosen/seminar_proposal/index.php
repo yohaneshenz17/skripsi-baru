@@ -169,7 +169,7 @@
                                     </td>
                                     <td>
                                         <?php if (!empty($pengajuan->file_proposal)): ?>
-                                            <a href="<?= base_url('uploads/seminar_proposal/' . $pengajuan->file_proposal) ?>" 
+                                            <a href="<?= base_url('dosen/seminar_proposal/view_file/' . $pengajuan->id) ?>" 
                                                target="_blank" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-file-pdf mr-1"></i> Lihat
                                             </a>

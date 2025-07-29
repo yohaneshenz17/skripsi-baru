@@ -87,7 +87,7 @@ class Seminar_proposal extends CI_Controller {
             return;
         }
         
-        // Prepare data untuk view (gunakan pattern yang sama dengan dosen)
+        // ✅ FIXED: Hanya prepare data, JANGAN panggil template di controller
         $data = [
             'title' => 'Review Seminar Proposal - ' . $seminar->nama_mahasiswa,
             'seminar' => $seminar,
@@ -96,11 +96,9 @@ class Seminar_proposal extends CI_Controller {
             'is_jurnal_sufficient' => $this->_check_jurnal_sufficient($seminar->proposal_id)
         ];
         
-        // Load view dengan template kaprodi
-        $this->load->view('template/kaprodi', [
-            'title' => $data['title'],
-            'content' => $this->load->view('kaprodi/seminar_proposal/detail', $data, TRUE)
-        ]);
+        // ✅ FIXED: Langsung load view, biarkan VIEW yang handle template
+        // Seperti pattern index.php yang sudah bekerja baik
+        $this->load->view('kaprodi/seminar_proposal/detail', $data);
     }
     
     /**
@@ -306,16 +304,16 @@ class Seminar_proposal extends CI_Controller {
      */
     private function _get_jurnal_count($proposal_id) {
         return $this->db->where('proposal_id', $proposal_id)
-                        ->where('status_validasi', 'valid')
+                        ->where('status_validasi', '1')  // ✅ BENAR! Database pakai '1' untuk valid
                         ->count_all_results('jurnal_bimbingan');
     }
     
     /**
-     * Check jurnal sufficient (minimal 10)
+     * Check jurnal sufficient (minimal 8)
      */
     private function _check_jurnal_sufficient($proposal_id) {
         $count = $this->_get_jurnal_count($proposal_id);
-        return $count >= 10;
+        return $count >= 8;  // ✅ BENAR! Seminar proposal minimal 8 jurnal tervalidasi
     }
     
     /**

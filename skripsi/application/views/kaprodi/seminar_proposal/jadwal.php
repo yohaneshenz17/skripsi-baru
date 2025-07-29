@@ -1,11 +1,14 @@
 <?php
 /**
- * Form Penjadwalan Seminar Proposal & Penunjukan Penguji (FIXED - Template Integration)
- * File: application/views/kaprodi/seminar_proposal/jadwal.php
+ * FIXED - Form Penjadwalan Seminar Proposal & Penunjukan Penguji (LAYOUT CORRECTED)
  * 
- * Halaman untuk menjadwalkan seminar proposal dan menunjuk dosen penguji
- * setelah validasi plagiarisme passed (<30%)
- * Menggunakan template kaprodi.php yang sudah ada (konsisten dengan sistem existing)
+ * PERBAIKAN UTAMA:
+ * 1. REMOVE dobel header - biarkan template yang handle
+ * 2. Fix spacing dan container alignment dengan sidebar
+ * 3. Fix layout responsive untuk desktop
+ * 4. Clean structure tanpa konflik dengan template
+ * 
+ * File: application/views/kaprodi/seminar_proposal/jadwal.php
  */
 
 // Start output buffering untuk content
@@ -83,16 +86,80 @@ ob_start();
         background-color: #fb6340;
         box-shadow: 0 0 0 3px rgba(251, 99, 64, 0.3);
     }
+    
+    /* Breadcrumb styling */
+    .breadcrumb {
+        padding: 0.5rem 0;
+        margin-bottom: 1rem;
+        background: transparent;
+        border-radius: 0;
+    }
+    
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: #6c757d;
+    }
+    
+    .breadcrumb-item a {
+        color: #5e72e4;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item a:hover {
+        color: #324cdd;
+        text-decoration: underline;
+    }
+    
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+    
+    /* Fix container alignment */
+    .row {
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+    
+    .row > .col,
+    .row > [class*="col-"] {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Card styling */
+    .card {
+        border: 1px solid #e3e6f0;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 767.98px) {
+        .schedule-form {
+            padding: 1rem;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+        }
+    }
 </style>
 
-<!-- Breadcrumb -->
+<!-- Breadcrumb Navigation -->
 <div class="row">
     <div class="col-md-12">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="<?= base_url('kaprodi') ?>">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="<?= base_url('kaprodi/seminar_proposal') ?>">Seminar Proposal</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Penjadwalan</li>
+                <li class="breadcrumb-item">
+                    <a href="<?= base_url('kaprodi') ?>">
+                        <i class="fas fa-home mr-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="<?= base_url('kaprodi/seminar_proposal') ?>">Seminar Proposal</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Penjadwalan
+                </li>
             </ol>
         </nav>
     </div>
@@ -617,7 +684,7 @@ $(document).ready(function() {
 // Tangkap script
 $script = ob_get_clean();
 
-// Load template kaprodi yang sudah ada (FIXED - Format yang benar)
+// Load template kaprodi
 $this->load->view('template/kaprodi', [
     'title' => 'Penjadwalan Seminar Proposal - ' . htmlspecialchars($seminar->nama_mahasiswa),
     'content' => $content,

@@ -1,12 +1,12 @@
 <?php
 /**
- * MINIMAL FIX - Kaprodi Seminar Proposal Detail View
+ * FINAL FIXED - Kaprodi Seminar Proposal Detail View (NO HEADER CONFLICT)
  * 
- * PERBAIKAN SEDERHANA:
- * 1. Gunakan form_open_multipart() dengan benar (form helper sudah di-load)
- * 2. Tampilan yang lebih menarik tapi tidak terlalu kompleks
- * 3. Menggunakan pattern yang mirip dengan view dosen
- * 4. Fokus pada functionality, bukan eye-candy berlebihan
+ * PERBAIKAN FINAL:
+ * 1. REMOVE SEMUA header dan breadcrumb - template sudah handle
+ * 2. Langsung start dengan content utama
+ * 3. No wrapper tambahan yang konflik dengan template
+ * 4. Clean structure yang align dengan container template
  * 
  * File: application/views/kaprodi/seminar_proposal/detail.php
  */
@@ -36,16 +36,20 @@ ob_start();
 </div>
 <?php endif; ?>
 
-<!-- Header Card -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
+<!-- ======================================
+     MAIN CONTENT - NO HEADER CONFLICT
+     ====================================== -->
+<div class="row">
+    <!-- Left Column: Detail Proposal -->
+    <div class="col-xl-8 col-lg-7">
+        <!-- Proposal Details Card -->
+        <div class="card shadow">
             <div class="card-header bg-gradient-primary">
                 <div class="row align-items-center">
                     <div class="col">
                         <h3 class="text-white mb-0">
                             <i class="fas fa-clipboard-check mr-2"></i>
-                            Review Seminar Proposal
+                            Detail Proposal Seminar
                         </h3>
                         <p class="text-white-50 mt-1 mb-0">
                             <?= htmlspecialchars($seminar->nama_mahasiswa) ?> (<?= htmlspecialchars($seminar->nim) ?>)
@@ -69,33 +73,19 @@ ob_start();
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Left Column: Detail Proposal -->
-    <div class="col-lg-8">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-file-alt mr-2"></i>
-                    Detail Proposal
-                </h5>
-            </div>
             <div class="card-body">
                 <!-- Mahasiswa Info -->
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="text-sm font-weight-bold text-muted">MAHASISWA</label>
+                            <label class="text-sm font-weight-bold text-muted mb-1">MAHASISWA</label>
                             <p class="mb-1 font-weight-600"><?= htmlspecialchars($seminar->nama_mahasiswa) ?></p>
                             <small class="text-muted"><?= htmlspecialchars($seminar->nim) ?></small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="text-sm font-weight-bold text-muted">DOSEN PEMBIMBING</label>
+                            <label class="text-sm font-weight-bold text-muted mb-1">DOSEN PEMBIMBING</label>
                             <p class="mb-1 font-weight-600">
                                 <?= isset($seminar->nama_pembimbing) ? htmlspecialchars($seminar->nama_pembimbing) : 'Belum ditetapkan' ?>
                             </p>
@@ -105,7 +95,7 @@ ob_start();
                 
                 <!-- Judul Proposal -->
                 <div class="form-group mb-4">
-                    <label class="text-sm font-weight-bold text-muted">JUDUL PROPOSAL</label>
+                    <label class="text-sm font-weight-bold text-muted mb-2">JUDUL PROPOSAL</label>
                     <div class="border rounded p-3 bg-light">
                         <h6 class="mb-0 text-dark"><?= htmlspecialchars($seminar->judul) ?></h6>
                     </div>
@@ -115,13 +105,13 @@ ob_start();
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="text-sm font-weight-bold text-muted">TANGGAL PENGAJUAN</label>
+                            <label class="text-sm font-weight-bold text-muted mb-1">TANGGAL PENGAJUAN</label>
                             <p class="mb-0"><?= date('d F Y, H:i', strtotime($seminar->created_at)) ?> WIT</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="text-sm font-weight-bold text-muted">STATUS PEMBIMBING</label>
+                            <label class="text-sm font-weight-bold text-muted mb-1">STATUS PEMBIMBING</label>
                             <p class="mb-0">
                                 <?php if($seminar->status_pembimbing === 'approved'): ?>
                                     <span class="badge badge-success">
@@ -143,7 +133,7 @@ ob_start();
                 
                 <!-- File Proposal -->
                 <div class="form-group mb-4">
-                    <label class="text-sm font-weight-bold text-muted">FILE PROPOSAL</label>
+                    <label class="text-sm font-weight-bold text-muted mb-2">FILE PROPOSAL</label>
                     <?php if(!empty($seminar->file_proposal)): ?>
                         <div class="d-flex align-items-center p-3 border rounded bg-light">
                             <div class="mr-3">
@@ -154,11 +144,11 @@ ob_start();
                                 <small class="text-muted">File proposal untuk seminar</small>
                             </div>
                             <div>
-                                <a href="<?= base_url('uploads/proposals/' . $seminar->file_proposal) ?>" 
+                                <a href="<?= base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal) ?>" 
                                    class="btn btn-outline-primary btn-sm mr-2" target="_blank">
                                     <i class="fas fa-eye mr-1"></i>Lihat
                                 </a>
-                                <a href="<?= base_url('uploads/proposals/' . $seminar->file_proposal) ?>" 
+                                <a href="<?= base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal) ?>" 
                                    class="btn btn-outline-success btn-sm" download>
                                     <i class="fas fa-download mr-1"></i>Download
                                 </a>
@@ -175,7 +165,7 @@ ob_start();
                 <!-- Keterangan Mahasiswa -->
                 <?php if(!empty($seminar->keterangan_mahasiswa)): ?>
                 <div class="form-group mb-4">
-                    <label class="text-sm font-weight-bold text-muted">KETERANGAN MAHASISWA</label>
+                    <label class="text-sm font-weight-bold text-muted mb-2">KETERANGAN MAHASISWA</label>
                     <div class="alert alert-info mb-0">
                         <i class="fas fa-info-circle mr-2"></i>
                         <?= nl2br(htmlspecialchars($seminar->keterangan_mahasiswa)) ?>
@@ -186,7 +176,7 @@ ob_start();
                 <!-- Komentar Pembimbing -->
                 <?php if(!empty($seminar->komentar_pembimbing)): ?>
                 <div class="form-group mb-0">
-                    <label class="text-sm font-weight-bold text-muted">KOMENTAR PEMBIMBING</label>
+                    <label class="text-sm font-weight-bold text-muted mb-2">KOMENTAR PEMBIMBING</label>
                     <div class="alert alert-primary mb-0">
                         <i class="fas fa-comment-dots mr-2"></i>
                         <?= nl2br(htmlspecialchars($seminar->komentar_pembimbing)) ?>
@@ -197,7 +187,7 @@ ob_start();
         </div>
         
         <!-- Jurnal Bimbingan Summary -->
-        <div class="card">
+        <div class="card shadow mt-4">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-book mr-2"></i>
@@ -234,12 +224,12 @@ ob_start();
                 <?php if($is_jurnal_sufficient): ?>
                     <div class="alert alert-success text-center mb-0">
                         <i class="fas fa-thumbs-up mr-2"></i>
-                        Mahasiswa telah memenuhi syarat minimal 10 jurnal bimbingan
+                        Mahasiswa telah memenuhi syarat minimal 8 jurnal bimbingan
                     </div>
                 <?php else: ?>
                     <div class="alert alert-warning text-center mb-0">
                         <i class="fas fa-info-circle mr-2"></i>
-                        Mahasiswa belum memenuhi syarat minimal 10 jurnal bimbingan
+                        Mahasiswa belum memenuhi syarat minimal 8 jurnal bimbingan
                     </div>
                 <?php endif; ?>
             </div>
@@ -247,10 +237,10 @@ ob_start();
     </div>
     
     <!-- Right Column: Form Validasi -->
-    <div class="col-lg-4">
+    <div class="col-xl-4 col-lg-5">
         <?php if($seminar->status === 'review_kaprodi' && $seminar->status_pembimbing === 'approved'): ?>
         <!-- FORM VALIDASI PLAGIARISME -->
-        <div class="card">
+        <div class="card shadow">
             <div class="card-header bg-gradient-warning">
                 <h5 class="text-white mb-0">
                     <i class="fas fa-search mr-2"></i>
@@ -258,7 +248,6 @@ ob_start();
                 </h5>
             </div>
             <div class="card-body">
-                <!-- PERBAIKAN: Menggunakan form_open_multipart() dengan benar -->
                 <?= form_open_multipart('kaprodi/seminar_proposal/validasi_plagiarisme', [
                     'id' => 'form-validasi'
                 ]) ?>
@@ -313,7 +302,7 @@ ob_start();
                             <i class="fas fa-gavel mr-1"></i>
                             Keputusan <span class="text-danger">*</span>
                         </label>
-                        <div class="custom-control custom-radio">
+                        <div class="custom-control custom-radio mb-2">
                             <input type="radio" id="approve" name="keputusan" value="approve" 
                                    class="custom-control-input" required>
                             <label class="custom-control-label" for="approve">
@@ -358,7 +347,7 @@ ob_start();
         
         <?php else: ?>
         <!-- Status Information -->
-        <div class="card">
+        <div class="card shadow">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-info-circle mr-2"></i>
@@ -422,7 +411,7 @@ ob_start();
         <?php endif; ?>
         
         <!-- Guidelines -->
-        <div class="card mt-3">
+        <div class="card shadow mt-4">
             <div class="card-header">
                 <h6 class="mb-0">
                     <i class="fas fa-lightbulb mr-2"></i>
@@ -462,6 +451,7 @@ ob_start();
     </div>
 </div>
 
+<!-- Custom CSS untuk layout yang clean dan align dengan template -->
 <style>
 .badge-lg {
     font-size: 0.9rem;
@@ -494,10 +484,24 @@ ob_start();
     content: "Browse";
 }
 
-@media (max-width: 768px) {
-    .col-lg-4 {
-        margin-top: 2rem;
+/* Responsive adjustments yang align dengan template */
+@media (max-width: 991.98px) {
+    .col-lg-5 {
+        margin-top: 1.5rem;
     }
+}
+
+@media (max-width: 767.98px) {
+    .card-body {
+        padding: 1.25rem;
+    }
+}
+
+/* Ensure proper spacing dengan template container */
+.card {
+    margin-bottom: 1.5rem;
+    border: 1px solid #e3e6f0;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
 }
 </style>
 
@@ -588,7 +592,7 @@ $(document).ready(function() {
     
     // Auto-hide alerts
     setTimeout(function() {
-        $('.alert').fadeOut();
+        $('.alert-dismissible').fadeOut();
     }, 5000);
 });
 </script>
@@ -597,7 +601,7 @@ $(document).ready(function() {
 // Tangkap script
 $script = ob_get_clean();
 
-// Load template kaprodi
+// Load template kaprodi - TITLE AKAN MENJADI HEADER
 $this->load->view('template/kaprodi', [
     'title' => 'Review Seminar Proposal - ' . htmlspecialchars($seminar->nama_mahasiswa),
     'content' => $content,

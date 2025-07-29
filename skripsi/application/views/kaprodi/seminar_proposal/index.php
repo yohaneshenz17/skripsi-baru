@@ -233,78 +233,6 @@ ob_start();
             </div>
         </div>
         
-        <!-- Quick Actions -->
-        <div class="card">
-            <div class="card-header border-0">
-                <h3 class="mb-0">Quick Actions</h3>
-            </div>
-            <div class="card-body">
-                <div class="list-group list-group-flush">
-                    <a href="<?= base_url('kaprodi/proposal') ?>" class="list-group-item list-group-item-action">
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <i class="fas fa-file-alt text-primary"></i>
-                            </div>
-                            <div class="col ml--2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h4 class="mb-0 text-sm">Usulan Proposal</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                    
-                    <a href="<?= base_url('kaprodi/mahasiswa') ?>" class="list-group-item list-group-item-action">
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <i class="fas fa-users text-info"></i>
-                            </div>
-                            <div class="col ml--2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h4 class="mb-0 text-sm">Daftar Mahasiswa</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                    
-                    <a href="<?= base_url('kaprodi/dosen') ?>" class="list-group-item list-group-item-action">
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <i class="fas fa-chalkboard-teacher text-success"></i>
-                            </div>
-                            <div class="col ml--2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h4 class="mb-0 text-sm">Daftar Dosen</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                    
-                    <a href="<?= base_url('kaprodi/laporan') ?>" class="list-group-item list-group-item-action">
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <i class="fas fa-chart-bar text-warning"></i>
-                            </div>
-                            <div class="col ml--2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h4 class="mb-0 text-sm">Laporan</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?php
 // Tangkap content
 $content = ob_get_clean();
@@ -351,4 +279,3 @@ $this->load->view('template/kaprodi', [
     'content' => $content,
     'script' => $script
 ]);
-?>

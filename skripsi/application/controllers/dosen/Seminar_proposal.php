@@ -2,10 +2,16 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * FIXED PRODUCTION VERSION - Seminar Proposal Controller untuk Dosen
+ * Seminar Proposal Controller untuk Dosen - FIXED VERSION
  * 
- * Controller lengkap yang sudah disesuaikan dengan database structure yang ada
- * FIXED: Database errors dan file upload path issues
+ * Controller untuk mengelola seminar proposal dari perspektif dosen pembimbing
+ * Menggunakan template existing dan helper function approach untuk badge counter
+ * 
+ * Features:
+ * 1. Dashboard dengan statistics dan overview
+ * 2. Detail pengajuan dengan validasi syarat jurnal bimbingan - FIXED
+ * 3. Rekomendasi (setujui/tolak) dengan email notification
+ * 4. Helper functions untuk badge counter dan utilities
  * 
  * File: application/controllers/dosen/Seminar_proposal.php
  * 
@@ -13,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Dosen
  * @category    Seminar Proposal
  * @author      Unit SIPD STK Santo Yakobus
- * @version     3.1 (FIXED Production)
+ * @version     2.1 (Error Fixed)
  */
 class Seminar_proposal extends CI_Controller {
 
@@ -24,10 +30,13 @@ class Seminar_proposal extends CI_Controller {
         $this->load->library('email');
         $this->load->helper('url');
         $this->load->helper('date');
+        $this->load->helper('text'); // TAMBAHAN: Load text helper untuk character_limiter
         
-        // Load model jika ada
-        if (file_exists(APPPATH . 'models/Seminar_proposal_mahasiswa_model.php')) {
+        // Load model dengan error handling
+        try {
             $this->load->model('Seminar_proposal_mahasiswa_model', 'seminar_model');
+        } catch (Exception $e) {
+            log_message('error', 'Error loading seminar model: ' . $e->getMessage());
         }
         
         // Cek login dan level dosen
@@ -38,31 +47,36 @@ class Seminar_proposal extends CI_Controller {
 
     /**
      * Index - Dashboard seminar proposal untuk dosen
+     * Menggunakan template existing dosen.php
      */
     public function index() {
         $dosen_id = $this->session->userdata('id');
         
-        // Prepare data untuk view
-        $view_data = [
+        // Prepare data untuk view dengan error handling
+        $data = [
             'pengajuan_review' => $this->_get_pengajuan_perlu_review($dosen_id),
-            'perlu_penilaian' => $this->_get_seminar_perlu_penilaian($dosen_id),
             'riwayat_rekomendasi' => $this->_get_riwayat_rekomendasi($dosen_id),
-            'riwayat_penilaian' => $this->_get_riwayat_penilaian($dosen_id),
+            'perlu_penilaian' => $this->_get_seminar_perlu_penilaian($dosen_id),
             'stats' => $this->_get_statistics($dosen_id)
         ];
         
-        // Data untuk template dosen.php
-        $data = [
-            'title' => 'Seminar Proposal',
-            'content' => $this->load->view('dosen/seminar_proposal/index', $view_data, TRUE),
-            'script' => '' 
-        ];
+        // Pastikan semua data tidak null
+        $data['pengajuan_review'] = $data['pengajuan_review'] ?: [];
+        $data['riwayat_rekomendasi'] = $data['riwayat_rekomendasi'] ?: [];
+        $data['perlu_penilaian'] = $data['perlu_penilaian'] ?: [];
+        $data['stats'] = $data['stats'] ?: ['total' => 0, 'perlu_review' => 0, 'disetujui' => 0, 'ditolak' => 0];
         
-        $this->load->view('template/dosen', $data);
+        // Load view langsung dengan data
+        $this->load->view('template/dosen', [
+            'title' => 'Seminar Proposal',
+            'content' => $this->load->view('dosen/seminar_proposal/index', $data, TRUE),
+            'script' => $this->_get_index_script() // JavaScript untuk halaman index
+        ]);
     }
 
     /**
      * Detail pengajuan seminar proposal - FIXED VERSION
+     * Menggunakan template existing dosen.php
      */
     public function detail($seminar_id) {
         $dosen_id = $this->session->userdata('id');
@@ -76,26 +90,62 @@ class Seminar_proposal extends CI_Controller {
             return;
         }
         
+        // FIXED: Safe jurnal requirement check
+        $jurnal_requirement = $this->_safe_check_jurnal_requirement($seminar->proposal_id);
+        
+        // FIXED: Safe jurnal bimbingan retrieval
+        $jurnal_bimbingan = $this->_safe_get_jurnal_bimbingan($seminar->proposal_id);
+        
         // Prepare data untuk view
-        $view_data = [
-            'seminar' => $seminar,
-            'jurnal_requirement' => $this->_check_jurnal_requirement($seminar->proposal_id),
-            'jurnal_bimbingan' => $this->_get_jurnal_bimbingan_fixed($seminar->proposal_id), // FIXED METHOD
-            'penilaian' => $this->_get_penilaian_seminar($seminar_id)
-        ];
-        
-        // Data untuk template dosen.php
         $data = [
-            'title' => 'Detail Seminar Proposal - ' . $seminar->nama_mahasiswa,
-            'content' => $this->load->view('dosen/seminar_proposal/detail', $view_data, TRUE),
-            'script' => '' 
+            'seminar' => $seminar,
+            'jurnal_requirement' => $jurnal_requirement,
+            'jurnal_bimbingan' => $jurnal_bimbingan
         ];
         
-        $this->load->view('template/dosen', $data);
+        // Load view langsung dengan data
+        $this->load->view('template/dosen', [
+            'title' => 'Detail Seminar Proposal - ' . $seminar->nama_mahasiswa,
+            'content' => $this->load->view('dosen/seminar_proposal/detail', $data, TRUE),
+            'script' => $this->_get_detail_script() // JavaScript untuk halaman detail
+        ]);
     }
 
     /**
-     * Proses rekomendasi seminar proposal
+     * View file proposal - FIXED PATH
+     */
+    public function view_file($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Get detail seminar dengan validasi ownership
+        $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
+        
+        if (!$seminar || empty($seminar->file_proposal)) {
+            $this->session->set_flashdata('error', 'File tidak ditemukan!');
+            redirect('dosen/seminar_proposal');
+            return;
+        }
+        
+        // FIXED: Path yang benar sesuai directory
+        $file_path = FCPATH . 'uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal;
+        
+        if (!file_exists($file_path)) {
+            $this->session->set_flashdata('error', 'File tidak ditemukan di server!');
+            redirect('dosen/seminar_proposal');
+            return;
+        }
+        
+        // Set headers untuk download/view
+        $mime_type = mime_content_type($file_path);
+        header('Content-Type: ' . $mime_type);
+        header('Content-Disposition: inline; filename="' . $seminar->file_proposal . '"');
+        header('Content-Length: ' . filesize($file_path));
+        readfile($file_path);
+        exit;
+    }
+
+    /**
+     * Proses rekomendasi seminar proposal - ENHANCED dengan EMAIL NOTIFICATION
      */
     public function rekomendasi() {
         if ($this->input->method() !== 'post') {
@@ -130,476 +180,381 @@ class Seminar_proposal extends CI_Controller {
             return;
         }
         
-        // Update rekomendasi
-        $update_data = [
-            'status_pembimbing' => $rekomendasi,
-            'komentar_pembimbing' => $komentar,
-            'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
-            'reviewed_by_pembimbing' => $dosen_id,
-            'current_step' => $rekomendasi == 'approved' ? 'kaprodi' : 'mahasiswa',
-            'status' => $rekomendasi == 'approved' ? 'review_kaprodi' : 'rejected'
-        ];
+        // Process rekomendasi
+        $this->db->trans_start();
         
-        $this->db->where('id', $seminar_id);
-        $result = $this->db->update('seminar_proposal_mahasiswa', $update_data);
-        
-        if ($result) {
-            // Kirim email notifikasi
-            $this->_kirim_email_rekomendasi($seminar, $rekomendasi, $komentar);
+        try {
+            $update_data = [
+                'status_pembimbing' => $rekomendasi == 'approved' ? 'approved' : 'rejected',
+                'komentar_pembimbing' => $komentar,
+                'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
+                'reviewed_by_pembimbing' => $dosen_id,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
             
+            // Update status berdasarkan rekomendasi
+            if ($rekomendasi == 'approved') {
+                // DISETUJUI: Lanjut ke Kaprodi
+                $update_data['status'] = 'review_kaprodi';
+                $update_data['current_step'] = 'kaprodi';
+            } else {
+                // DITOLAK: Kembali ke mahasiswa
+                $update_data['status'] = 'rejected';
+                $update_data['current_step'] = 'mahasiswa';
+            }
+            
+            $this->db->where('id', $seminar_id);
+            $this->db->update('seminar_proposal_mahasiswa', $update_data);
+            
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Database transaction failed');
+            }
+            
+            // Kirim email notification sesuai logika workflow
+            $this->_kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar, $dosen_id);
+            
+            // Success message
             $message = $rekomendasi == 'approved' ? 
-                'Seminar proposal berhasil direkomendasikan! Email notifikasi telah dikirim ke mahasiswa dan Kaprodi.' : 
-                'Seminar proposal dikembalikan ke mahasiswa untuk perbaikan. Email notifikasi telah dikirim.';
+                'Pengajuan seminar proposal berhasil disetujui! Email notifikasi telah dikirim ke Kaprodi.' : 
+                'Pengajuan seminar proposal berhasil ditolak! Email notifikasi telah dikirim ke mahasiswa.';
+            
             $this->session->set_flashdata('success', $message);
-        } else {
-            $this->session->set_flashdata('error', 'Gagal menyimpan rekomendasi!');
+            
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'Error processing rekomendasi: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan saat memproses rekomendasi!');
         }
         
         redirect('dosen/seminar_proposal');
     }
 
+    // =================================================================
+    // PRIVATE HELPER METHODS - FIXED VERSION
+    // =================================================================
+
     /**
-     * Form penilaian seminar proposal
+     * Get JavaScript untuk halaman index
      */
-    public function penilaian($seminar_id) {
-        $dosen_id = $this->session->userdata('id');
+    private function _get_index_script() {
+        return '
+<script>
+function rekomendasi(seminarId, action, namaMahasiswa) {
+    document.getElementById("modalSeminarId").value = seminarId;
+    document.getElementById("modalRekomendasi").value = action;
+    document.getElementById("modalMahasiswa").textContent = namaMahasiswa;
+    
+    const alertDiv = document.getElementById("modalAlert");
+    const submitBtn = document.getElementById("modalSubmitBtn");
+    
+    if (action === "approved") {
+        alertDiv.className = "alert alert-success";
+        alertDiv.innerHTML = "<i class=\"fas fa-check-circle mr-2\"></i><strong>Menyetujui pengajuan seminar proposal</strong>";
+        submitBtn.className = "btn btn-success";
+        submitBtn.innerHTML = "<i class=\"fas fa-check mr-2\"></i>Setujui";
+    } else {
+        alertDiv.className = "alert alert-warning";
+        alertDiv.innerHTML = "<i class=\"fas fa-exclamation-triangle mr-2\"></i><strong>Menolak pengajuan seminar proposal</strong>";
+        submitBtn.className = "btn btn-danger";
+        submitBtn.innerHTML = "<i class=\"fas fa-times mr-2\"></i>Tolak";
+    }
+    
+    // Clear previous comment
+    document.getElementById("modalKomentar").value = "";
+    
+    $("#rekomendasiModal").modal("show");
+}
+
+// Form validation
+$(document).ready(function() {
+    $("#rekomendasiModal form").on("submit", function(e) {
+        const rekomendasi = document.getElementById("modalRekomendasi").value;
+        const komentar = document.getElementById("modalKomentar").value.trim();
         
-        // Get detail seminar dengan validasi ownership  
-        $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
-        
-        if (!$seminar) {
-            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan bimbingan Anda!');
-            redirect('dosen/seminar_proposal');
-            return;
+        if (rekomendasi === "rejected" && komentar === "") {
+            e.preventDefault();
+            alert("Komentar wajib diisi untuk penolakan!");
+            return false;
         }
         
-        // Validasi bahwa seminar sudah dijadwalkan oleh Kaprodi
-        if (!in_array($seminar->status, ['scheduled', 'completed'])) {
-            $this->session->set_flashdata('error', 'Seminar belum dijadwalkan atau belum dapat dinilai!');
-            redirect('dosen/seminar_proposal/detail/' . $seminar_id);
-            return;
-        }
-        
-        // Validasi bahwa jadwal sudah ditetapkan
-        if (empty($seminar->tanggal_seminar)) {
-            $this->session->set_flashdata('error', 'Jadwal seminar belum ditetapkan oleh Kaprodi!');
-            redirect('dosen/seminar_proposal/detail/' . $seminar_id);
-            return;
-        }
-        
-        // Cek apakah sudah ada penilaian
-        $existing_penilaian = $this->_get_penilaian_seminar($seminar_id);
-        
-        if ($this->input->method() === 'post') {
-            $this->_proses_penilaian($seminar_id, $seminar, $existing_penilaian);
-            return;
-        }
-        
-        // Prepare data untuk view
-        $view_data = [
-            'seminar' => $seminar,
-            'penilaian' => $existing_penilaian,
-            'dosen_penguji1' => $this->_get_dosen_by_id($seminar->dosen_penguji1_id),
-            'dosen_penguji2' => $this->_get_dosen_by_id($seminar->dosen_penguji2_id)
-        ];
-        
-        // Data untuk template dosen.php
-        $data = [
-            'title' => 'Penilaian Seminar Proposal - ' . $seminar->nama_mahasiswa,
-            'content' => $this->load->view('dosen/seminar_proposal/penilaian', $view_data, TRUE),
-            'script' => ''
-        ];
-        
-        $this->load->view('template/dosen', $data);
+        const action = rekomendasi === "approved" ? "menyetujui" : "menolak";
+        return confirm("Yakin ingin " + action + " pengajuan seminar proposal ini?");
+    });
+});
+</script>';
     }
 
     /**
-     * Proses penyimpanan penilaian
+     * Get JavaScript untuk halaman detail
      */
-    private function _proses_penilaian($seminar_id, $seminar, $existing_penilaian) {
-        $this->load->library('form_validation');
-        
-        // Validation rules
-        $this->form_validation->set_rules('nilai_substansi_metode', 'Nilai Substansi & Metode', 'required|decimal|greater_than_equal_to[0]|less_than_equal_to[100]');
-        $this->form_validation->set_rules('nilai_presentasi_teknik', 'Nilai Presentasi & Teknik', 'required|decimal|greater_than_equal_to[0]|less_than_equal_to[100]');
-        $this->form_validation->set_rules('nilai_penguasaan_diskusi', 'Nilai Penguasaan & Diskusi', 'required|decimal|greater_than_equal_to[0]|less_than_equal_to[100]');
-        $this->form_validation->set_rules('rekomendasi', 'Rekomendasi', 'required|in_list[diterima_tanpa_revisi,revisi_minor,revisi_mayor,ditolak]');
-        $this->form_validation->set_rules('action_type', 'Action Type', 'required|in_list[draft,publish]');
-        
-        if (!$this->form_validation->run()) {
-            $this->session->set_flashdata('error', validation_errors());
-            redirect('dosen/seminar_proposal/penilaian/' . $seminar_id);
-            return;
-        }
-        
-        $action_type = $this->input->post('action_type'); // 'draft' atau 'publish'
-        
-        // Prepare data penilaian
-        $penilaian_data = [
-            'seminar_proposal_id' => $seminar_id,
-            'mahasiswa_id' => $seminar->mahasiswa_id,
-            'proposal_id' => $seminar->proposal_id,
-            
-            // Catatan revisi
-            'catatan_latar_belakang' => trim($this->input->post('catatan_latar_belakang')),
-            'catatan_tinjauan_pustaka' => trim($this->input->post('catatan_tinjauan_pustaka')),
-            'catatan_landasan_teori' => trim($this->input->post('catatan_landasan_teori')),
-            'catatan_metodologi' => trim($this->input->post('catatan_metodologi')),
-            'catatan_sistematika' => trim($this->input->post('catatan_sistematika')),
-            'catatan_umum' => trim($this->input->post('catatan_umum')),
-            
-            // Nilai komponen
-            'nilai_substansi_metode' => (float)$this->input->post('nilai_substansi_metode'),
-            'nilai_presentasi_teknik' => (float)$this->input->post('nilai_presentasi_teknik'),
-            'nilai_penguasaan_diskusi' => (float)$this->input->post('nilai_penguasaan_diskusi'),
-            
-            // Rekomendasi
-            'rekomendasi' => $this->input->post('rekomendasi'),
-            'keterangan_rekomendasi' => trim($this->input->post('keterangan_rekomendasi')),
-            
-            // Status & metadata
-            'status_penilaian' => $action_type,
-            'dinilai_oleh' => $this->session->userdata('id'),
-            'role_penilai' => 'dosen_pembimbing'
-        ];
-        
-        try {
-            if ($existing_penilaian) {
-                // Update existing
-                $this->db->where('id', $existing_penilaian->id);
-                $result = $this->db->update('penilaian_seminar_proposal', $penilaian_data);
-            } else {
-                // Insert new
-                $result = $this->db->insert('penilaian_seminar_proposal', $penilaian_data);
-            }
-            
-            if ($result) {
-                if ($action_type == 'publish') {
-                    // Kirim notifikasi ke mahasiswa
-                    $this->_kirim_email_penilaian_dipublikasi($seminar, $penilaian_data);
-                    $this->session->set_flashdata('success', 'Penilaian berhasil dipublikasi! Mahasiswa akan menerima notifikasi email.');
-                } else {
-                    $this->session->set_flashdata('success', 'Penilaian berhasil disimpan sebagai draft.');
-                }
-            } else {
-                $this->session->set_flashdata('error', 'Gagal menyimpan penilaian!');
-            }
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error saving penilaian: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan sistem!');
-        }
-        
-        redirect('dosen/seminar_proposal');
-    }
-
-    // ========================================
-    // HELPER FUNCTIONS - FIXED VERSION
-    // ========================================
-
-    /**
-     * Get pengajuan yang perlu review (submitted) - FIXED WITH FILE PATH
-     */
-    private function _get_pengajuan_perlu_review($dosen_id) {
-        try {
-            $this->db->select('
-                spm.id, spm.proposal_id, spm.status, spm.current_step, spm.file_proposal,
-                spm.keterangan_mahasiswa, spm.created_at,
-                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                pm.judul, p.nama as nama_prodi
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
-            $this->db->join('prodi p', 'm.prodi_id = p.id');
-            $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where('spm.status', 'submitted');
-            $this->db->where('spm.current_step', 'pembimbing');
-            $this->db->where('spm.status_pembimbing', 'pending');
-            $this->db->order_by('spm.created_at', 'ASC');
-            
-            $results = $this->db->get()->result();
-            
-            // FIXED: Add proper file URL for each result
-            foreach ($results as $result) {
-                if (!empty($result->file_proposal)) {
-                    $result->file_url = $this->_get_file_url($result->file_proposal);
-                    $result->file_exists = $this->_check_file_exists($result->file_proposal);
-                } else {
-                    $result->file_url = null;
-                    $result->file_exists = false;
-                }
-            }
-            
-            return $results;
-        } catch (Exception $e) {
-            log_message('error', 'Error getting pengajuan review: ' . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * FIXED: Get jurnal bimbingan dengan JOIN yang benar
-     * Original error: kolom mahasiswa_id tidak ada di tabel jurnal_bimbingan
-     * Fixed: JOIN melalui proposal_id → proposal_mahasiswa → mahasiswa
-     */
-    private function _get_jurnal_bimbingan_fixed($proposal_id) {
-        try {
-            if (!$this->db->table_exists('jurnal_bimbingan')) {
-                return []; 
-            }
-            
-            // FIXED JOIN: jurnal_bimbingan → proposal_mahasiswa → mahasiswa
-            $this->db->select('
-                jb.*, 
-                m.nama as nama_mahasiswa,
-                pm.judul as judul_proposal
-            ');
-            $this->db->from('jurnal_bimbingan jb');
-            $this->db->join('proposal_mahasiswa pm', 'jb.proposal_id = pm.id'); // FIXED: Correct JOIN
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id'); // FIXED: Through proposal_mahasiswa
-            $this->db->where('jb.proposal_id', $proposal_id);
-            $this->db->where('jb.status_validasi', '1'); // Only validated journals
-            $this->db->order_by('jb.tanggal_bimbingan', 'DESC');
-            $this->db->limit(10);
-            
-            return $this->db->get()->result();
-        } catch (Exception $e) {
-            log_message('error', 'Error getting jurnal bimbingan: ' . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * FIXED: Helper untuk get file URL dengan multi-path check
-     */
-    private function _get_file_url($filename) {
-        if (empty($filename)) return null;
-        
-        // Possible file paths to check
-        $possible_paths = [
-            'uploads/seminar_proposal/',
-            'uploads/proposal/',
-            'uploads/files/',
-            'assets/uploads/seminar_proposal/',
-            'assets/uploads/'
-        ];
-        
-        foreach ($possible_paths as $path) {
-            $full_path = FCPATH . $path . $filename;
-            if (file_exists($full_path)) {
-                return base_url($path . $filename);
-            }
-        }
-        
-        // Default fallback
-        return base_url('uploads/seminar_proposal/' . $filename);
-    }
-
-    /**
-     * FIXED: Helper untuk check file exists dengan multi-path
-     */
-    private function _check_file_exists($filename) {
-        if (empty($filename)) return false;
-        
-        // Possible file paths to check
-        $possible_paths = [
-            'uploads/seminar_proposal/',
-            'uploads/proposal/',
-            'uploads/files/',
-            'assets/uploads/seminar_proposal/',
-            'assets/uploads/'
-        ];
-        
-        foreach ($possible_paths as $path) {
-            $full_path = FCPATH . $path . $filename;
-            if (file_exists($full_path)) {
-                return true;
-            }
-        }
-        
+    private function _get_detail_script() {
+        return '
+<script>
+function validateReject() {
+    const komentar = document.querySelector("textarea[name=\"komentar_pembimbing\"]").value.trim();
+    if (komentar === "") {
+        alert("Komentar wajib diisi untuk penolakan!");
         return false;
     }
+    return confirm("Yakin ingin menolak pengajuan seminar proposal ini?");
+}
+</script>';
+    }
 
     /**
-     * Get seminar yang perlu penilaian (scheduled/completed tapi belum ada penilaian)
+     * Kirim notifikasi email berdasarkan rekomendasi dosen
      */
-    private function _get_seminar_perlu_penilaian($dosen_id) {
+    private function _kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar, $dosen_id) {
         try {
-            $this->db->select('
-                spm.id, spm.proposal_id, spm.status, spm.tanggal_seminar, spm.jam_seminar, spm.tempat_seminar,
-                m.nim, m.nama as nama_mahasiswa,
-                pm.judul,
-                psp.id as penilaian_id, psp.status_penilaian
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
-            $this->db->join('penilaian_seminar_proposal psp', 'spm.id = psp.seminar_proposal_id', 'left');
-            $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where_in('spm.status', ['scheduled', 'completed']);
-            $this->db->where('spm.tanggal_seminar IS NOT NULL');
-            $this->db->group_start();
-                $this->db->where('psp.id IS NULL'); // Belum ada penilaian
-                $this->db->or_where('psp.status_penilaian', 'draft'); // Atau masih draft
-            $this->db->group_end();
-            $this->db->order_by('spm.tanggal_seminar', 'ASC');
+            // Get dosen info
+            $dosen = $this->_get_dosen_by_id($dosen_id);
+            $dosen_nama = $dosen ? $dosen->nama : 'Dosen Pembimbing';
             
-            return $this->db->get()->result();
-        } catch (Exception $e) {
-            log_message('error', 'Error getting perlu penilaian: ' . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Get riwayat rekomendasi
-     */
-    private function _get_riwayat_rekomendasi($dosen_id) {
-        try {
-            $this->db->select('
-                spm.id, spm.status_pembimbing, spm.komentar_pembimbing, spm.tanggal_review_pembimbing,
-                m.nim, m.nama as nama_mahasiswa,
-                pm.judul
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
-            $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where('spm.status_pembimbing !=', 'pending');
-            $this->db->order_by('spm.tanggal_review_pembimbing', 'DESC');
-            $this->db->limit(10);
+            if ($rekomendasi == 'approved') {
+                // DISETUJUI: Kirim email ke Kaprodi
+                $this->_kirim_email_ke_kaprodi($seminar, $dosen_nama);
+            } else {
+                // DITOLAK: Kirim email ke Mahasiswa
+                $this->_kirim_email_ke_mahasiswa($seminar, $dosen_nama, $komentar);
+            }
             
-            return $this->db->get()->result();
         } catch (Exception $e) {
-            log_message('error', 'Error getting riwayat rekomendasi: ' . $e->getMessage());
-            return [];
+            log_message('error', 'Error sending notification: ' . $e->getMessage());
         }
     }
 
     /**
-     * Get riwayat penilaian yang sudah published
+     * Kirim email ke mahasiswa jika pengajuan DITOLAK
      */
-    private function _get_riwayat_penilaian($dosen_id) {
-        try {
-            $this->db->select('
-                spm.id, spm.tanggal_seminar,
-                m.nim, m.nama as nama_mahasiswa,
-                pm.judul,
-                psp.nilai_akhir, psp.nilai_huruf, psp.rekomendasi, psp.published_at
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
-            $this->db->join('penilaian_seminar_proposal psp', 'spm.id = psp.seminar_proposal_id');
-            $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where('psp.status_penilaian', 'published');
-            $this->db->order_by('psp.published_at', 'DESC');
-            $this->db->limit(10);
-            
-            return $this->db->get()->result();
-        } catch (Exception $e) {
-            log_message('error', 'Error getting riwayat penilaian: ' . $e->getMessage());
-            return [];
+    private function _kirim_email_ke_mahasiswa($seminar, $dosen_nama, $komentar) {
+        // Konfigurasi email
+        $config = $this->_get_email_config();
+        $this->email->initialize($config);
+        
+        $subject = 'Pengajuan Seminar Proposal Perlu Diperbaiki - STK Santo Yakobus';
+        
+        $message = $this->_get_template_email_mahasiswa_ditolak($seminar, $dosen_nama, $komentar);
+        
+        $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+        $this->email->to($seminar->email_mahasiswa);
+        $this->email->subject($subject);
+        $this->email->message($message);
+        
+        if (!$this->email->send()) {
+            log_message('error', 'Failed to send rejection email to student: ' . $this->email->print_debugger());
+        } else {
+            log_message('info', 'Rejection email sent to student: ' . $seminar->email_mahasiswa);
         }
     }
 
     /**
-     * Get statistics
+     * Kirim email ke kaprodi jika pengajuan DISETUJUI
      */
-    private function _get_statistics($dosen_id) {
-        try {
-            return [
-                'perlu_review' => count($this->_get_pengajuan_perlu_review($dosen_id)),
-                'perlu_penilaian' => count($this->_get_seminar_perlu_penilaian($dosen_id)),
-                'total_direkomendasikan' => $this->_count_by_status($dosen_id, 'approved'),
-                'total_ditolak' => $this->_count_by_status($dosen_id, 'rejected'),
-                'total_penilaian_published' => $this->_count_penilaian_published($dosen_id)
-            ];
-        } catch (Exception $e) {
-            log_message('error', 'Error getting statistics: ' . $e->getMessage());
-            return [
-                'perlu_review' => 0,
-                'perlu_penilaian' => 0,
-                'total_direkomendasikan' => 0,
-                'total_ditolak' => 0,
-                'total_penilaian_published' => 0
-            ];
+    private function _kirim_email_ke_kaprodi($seminar, $dosen_nama) {
+        // Get info kaprodi
+        $kaprodi = $this->_get_kaprodi_info();
+        if (!$kaprodi) {
+            log_message('error', 'Kaprodi info not found');
+            return;
+        }
+        
+        // Konfigurasi email
+        $config = $this->_get_email_config();
+        $this->email->initialize($config);
+        
+        $subject = 'Pengajuan Seminar Proposal Perlu Review - STK Santo Yakobus';
+        
+        $message = $this->_get_template_email_kaprodi_review($seminar, $dosen_nama, $kaprodi);
+        
+        $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+        $this->email->to($kaprodi->email);
+        $this->email->subject($subject);
+        $this->email->message($message);
+        
+        if (!$this->email->send()) {
+            log_message('error', 'Failed to send review email to kaprodi: ' . $this->email->print_debugger());
+        } else {
+            log_message('info', 'Review email sent to kaprodi: ' . $kaprodi->email);
         }
     }
 
     /**
-     * Count seminar by status pembimbing
+     * Email configuration
      */
-    private function _count_by_status($dosen_id, $status) {
-        try {
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where('spm.status_pembimbing', $status);
-            return $this->db->count_all_results();
-        } catch (Exception $e) {
-            log_message('error', 'Error counting by status: ' . $e->getMessage());
-            return 0;
-        }
+    private function _get_email_config() {
+        return [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug',
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls'
+        ];
     }
 
     /**
-     * Count penilaian published
+     * Template email untuk mahasiswa ketika pengajuan DITOLAK
      */
-    private function _count_penilaian_published($dosen_id) {
-        try {
-            $this->db->from('penilaian_seminar_proposal psp');
-            $this->db->join('proposal_mahasiswa pm', 'psp.proposal_id = pm.id');
-            $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where('psp.status_penilaian', 'published');
-            return $this->db->count_all_results();
-        } catch (Exception $e) {
-            log_message('error', 'Error counting penilaian published: ' . $e->getMessage());
-            return 0;
-        }
+    private function _get_template_email_mahasiswa_ditolak($seminar, $dosen_nama, $komentar) {
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Pengajuan Seminar Proposal Perlu Diperbaiki</title>
+        </head>
+        <body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;'>
+            <div style='max-width: 600px; margin: 0 auto; background-color: white;'>
+                <!-- Header -->
+                <div style='background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; text-align: center;'>
+                    <h1 style='margin: 0; font-size: 24px;'>📝 Pengajuan Perlu Diperbaiki</h1>
+                    <p style='margin: 5px 0 0 0; opacity: 0.9;'>STK Santo Yakobus Merauke</p>
+                </div>
+                
+                <!-- Content -->
+                <div style='padding: 30px;'>
+                    <p>Kepada Yth.<br>
+                    <strong>{$seminar->nama_mahasiswa}</strong><br>
+                    NIM: {$seminar->nim}</p>
+                    
+                    <p>Pengajuan seminar proposal Anda telah direview oleh dosen pembimbing, namun <strong>perlu diperbaiki</strong> sebelum dapat dilanjutkan ke tahap berikutnya.</p>
+                    
+                    <div style='background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #721c24; margin: 0 0 10px 0;'>📋 Detail Pengajuan:</h4>
+                        <ul style='color: #721c24; margin: 0;'>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Dosen Pembimbing:</strong> {$dosen_nama}</li>
+                            <li><strong>Tanggal Review:</strong> " . date('d F Y, H:i') . " WIB</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>💬 Catatan dari Dosen Pembimbing:</h4>
+                        <p style='color: #856404; margin: 0; font-style: italic; line-height: 1.6;'>
+                            \"{$komentar}\"
+                        </p>
+                    </div>
+                    
+                    <div style='background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #0c5460; margin: 0 0 10px 0;'>📋 Langkah Selanjutnya:</h4>
+                        <ol style='color: #0c5460; margin: 0; padding-left: 20px;'>
+                            <li>Perbaiki proposal sesuai catatan dari dosen pembimbing</li>
+                            <li>Ajukan kembali seminar proposal melalui sistem SIM-TA</li>
+                            <li>Pastikan semua perbaikan telah dilakukan sebelum mengajukan ulang</li>
+                            <li>Konsultasikan dengan dosen pembimbing jika ada hal yang kurang jelas</li>
+                        </ol>
+                    </div>
+                    
+                    <p style='margin-top: 20px; text-align: center;'>
+                        <a href='" . base_url('mahasiswa/seminar_proposal') . "' 
+                           style='background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                           🔄 Ajukan Ulang Seminar Proposal
+                        </a>
+                    </p>
+                    
+                    <p style='margin-top: 20px; color: #6c757d; font-size: 14px;'>
+                        Terima kasih atas upaya perbaikan yang akan Anda lakukan. Jangan ragu untuk berkonsultasi dengan dosen pembimbing Anda.
+                    </p>
+                </div>
+                
+                <!-- Footer -->
+                <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6;'>
+                    <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                        <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                        STK Santo Yakobus Merauke<br>
+                        Email ini dikirim secara otomatis, mohon tidak membalas langsung.
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>";
     }
 
     /**
-     * Get seminar detail
+     * Template email untuk kaprodi ketika pengajuan DISETUJUI
      */
-    private function _get_seminar_detail($seminar_id, $dosen_id) {
-        try {
-            $this->db->select('
-                spm.*, 
-                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                pm.judul, pm.workflow_status,
-                d.nama as nama_pembimbing,
-                dp1.nama as nama_penguji1,
-                dp2.nama as nama_penguji2
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id');
-            $this->db->join('dosen dp1', 'spm.dosen_penguji1_id = dp1.id', 'left');
-            $this->db->join('dosen dp2', 'spm.dosen_penguji2_id = dp2.id', 'left');
-            $this->db->where('spm.id', $seminar_id);
-            $this->db->where('pm.dosen_id', $dosen_id);
-            
-            return $this->db->get()->row();
-        } catch (Exception $e) {
-            log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Get penilaian seminar
-     */
-    private function _get_penilaian_seminar($seminar_id) {
-        try {
-            $this->db->where('seminar_proposal_id', $seminar_id);
-            return $this->db->get('penilaian_seminar_proposal')->row();
-        } catch (Exception $e) {
-            log_message('error', 'Error getting penilaian seminar: ' . $e->getMessage());
-            return null;
-        }
+    private function _get_template_email_kaprodi_review($seminar, $dosen_nama, $kaprodi) {
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Pengajuan Seminar Proposal Perlu Review</title>
+        </head>
+        <body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;'>
+            <div style='max-width: 600px; margin: 0 auto; background-color: white;'>
+                <!-- Header -->
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h1 style='margin: 0; font-size: 24px;'>📋 Pengajuan Seminar Proposal Perlu Review</h1>
+                    <p style='margin: 5px 0 0 0; opacity: 0.9;'>STK Santo Yakobus Merauke</p>
+                </div>
+                
+                <!-- Content -->
+                <div style='padding: 30px;'>
+                    <p>Kepada Yth.<br>
+                    <strong>{$kaprodi->nama}</strong><br>
+                    Ketua Program Studi</p>
+                    
+                    <p>Terdapat pengajuan seminar proposal yang telah <strong>disetujui oleh dosen pembimbing</strong> dan memerlukan review dari Anda:</p>
+                    
+                    <div style='background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>📋 Detail Mahasiswa:</h4>
+                        <ul style='color: #155724; margin: 0;'>
+                            <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
+                            <li><strong>NIM:</strong> {$seminar->nim}</li>
+                            <li><strong>Program Studi:</strong> {$seminar->nama_prodi}</li>
+                            <li><strong>Dosen Pembimbing:</strong> {$dosen_nama}</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #e2e3e5; border: 1px solid #d6d8db; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #383d41; margin: 0 0 10px 0;'>📄 Judul Proposal:</h4>
+                        <p style='color: #383d41; margin: 0; font-weight: 600; line-height: 1.6;'>
+                            {$seminar->judul}
+                        </p>
+                    </div>
+                    
+                    <div style='background-color: #cce5ff; border: 1px solid #b3d9ff; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>📋 Tugas Review Kaprodi:</h4>
+                        <ol style='color: #004085; margin: 0; padding-left: 20px;'>
+                            <li>Review kelengkapan dokumen proposal</li>
+                            <li>Verifikasi plagiarisme menggunakan sistem yang tersedia</li>
+                            <li>Evaluasi kelayakan topik penelitian</li>
+                            <li>Menentukan dosen penguji jika disetujui</li>
+                            <li>Penjadwalan seminar proposal</li>
+                        </ol>
+                    </div>
+                    
+                    <p style='margin-top: 20px; text-align: center;'>
+                        <a href='" . base_url('kaprodi/seminar_proposal') . "' 
+                           style='background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                           📊 Review Pengajuan Sekarang
+                        </a>
+                    </p>
+                    
+                    <p style='margin-top: 20px; color: #6c757d; font-size: 14px;'>
+                        Target waktu review: <strong>3-5 hari kerja</strong> dari tanggal pengajuan.
+                    </p>
+                </div>
+                
+                <!-- Footer -->
+                <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6;'>
+                    <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                        <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                        STK Santo Yakobus Merauke<br>
+                        Email ini dikirim secara otomatis, mohon tidak membalas langsung.
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>";
     }
 
     /**
@@ -612,260 +567,294 @@ class Seminar_proposal extends CI_Controller {
             $this->db->where('id', $dosen_id);
             return $this->db->get('dosen')->row();
         } catch (Exception $e) {
+            log_message('error', 'Error getting dosen: ' . $e->getMessage());
             return null;
         }
     }
 
     /**
-     * Simple jurnal requirement check
+     * Get kaprodi information
      */
-    private function _check_jurnal_requirement($proposal_id) {
-        // Check if model is available
-        if (isset($this->seminar_model)) {
-            return $this->seminar_model->check_jurnal_requirement($proposal_id);
-        }
-        
-        // Fallback check menggunakan database
+    private function _get_kaprodi_info() {
         try {
-            $this->db->from('jurnal_bimbingan');
+            $this->db->select('d.*, p.nama as nama_prodi');
+            $this->db->from('dosen d');
+            $this->db->join('prodi p', 'd.prodi_id = p.id', 'left');
+            $this->db->where('d.level', '4'); // Level kaprodi
+            $this->db->limit(1);
+            
+            return $this->db->get()->row();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting kaprodi info: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * FIXED: Safe jurnal requirement check
+     */
+    private function _safe_check_jurnal_requirement($proposal_id) {
+        try {
+            // Cek apakah model tersedia dan method exists
+            if (isset($this->seminar_model) && method_exists($this->seminar_model, 'check_jurnal_requirement')) {
+                return $this->seminar_model->check_jurnal_requirement($proposal_id);
+            }
+            
+            // Fallback manual check
+            return $this->_manual_check_jurnal_requirement($proposal_id);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error checking jurnal requirement: ' . $e->getMessage());
+            
+            // Return safe default
+            return [
+                'eligible' => false,
+                'jurnal_validated_count' => 0,
+                'minimum_required' => 8,
+                'missing' => 8,
+                'message' => 'Error checking jurnal requirement'
+            ];
+        }
+    }
+
+    /**
+     * Manual jurnal requirement check sebagai fallback
+     */
+    private function _manual_check_jurnal_requirement($proposal_id) {
+        try {
+            $minimum_required = 8;
+            
+            // Check if table exists
+            if (!$this->db->table_exists('jurnal_bimbingan')) {
+                return [
+                    'eligible' => false,
+                    'jurnal_validated_count' => 0,
+                    'minimum_required' => $minimum_required,
+                    'missing' => $minimum_required,
+                    'message' => 'Tabel jurnal bimbingan belum tersedia'
+                ];
+            }
+            
+            // Count validated jurnal
             $this->db->where('proposal_id', $proposal_id);
             $this->db->where('status_validasi', '1');
-            $count = $this->db->count_all_results();
+            $count = $this->db->count_all_results('jurnal_bimbingan');
             
-            $min_required = 5;
+            $eligible = $count >= $minimum_required;
+            $missing = max(0, $minimum_required - $count);
             
             return [
-                'eligible' => $count >= $min_required,
+                'eligible' => $eligible,
                 'jurnal_validated_count' => $count,
-                'minimum_required' => $min_required,
-                'missing' => max(0, $min_required - $count),
-                'message' => $count >= $min_required ? 
+                'minimum_required' => $minimum_required,
+                'missing' => $missing,
+                'message' => $eligible ? 
                     'Memenuhi syarat untuk mengajukan seminar proposal' : 
-                    "Perlu " . ($min_required - $count) . " jurnal bimbingan lagi yang divalidasi dosen"
+                    "Perlu {$missing} jurnal bimbingan lagi yang divalidasi dosen"
             ];
+            
         } catch (Exception $e) {
-            // Fallback simplified check
+            log_message('error', 'Error in manual jurnal check: ' . $e->getMessage());
             return [
-                'eligible' => true,
-                'jurnal_validated_count' => 5,
-                'minimum_required' => 5,
-                'missing' => 0,
-                'message' => 'Memenuhi syarat untuk mengajukan seminar proposal'
+                'eligible' => false,
+                'jurnal_validated_count' => 0,
+                'minimum_required' => 8,
+                'missing' => 8,
+                'message' => 'Error checking jurnal requirement'
             ];
         }
     }
 
-    // EMAIL NOTIFICATION FUNCTIONS - SAME AS BEFORE
-    private function _kirim_email_rekomendasi($seminar, $rekomendasi, $komentar) {
+    /**
+     * FIXED: Safe get jurnal bimbingan
+     */
+    private function _safe_get_jurnal_bimbingan($proposal_id) {
         try {
-            // Email ke mahasiswa
-            $this->email->clear();
-            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($seminar->email_mahasiswa);
-            
-            if ($rekomendasi == 'approved') {
-                $this->email->subject('✅ Seminar Proposal Direkomendasikan - STK Santo Yakobus');
-                $message = $this->_email_template_approved($seminar, $komentar);
-            } else {
-                $this->email->subject('⚠️ Seminar Proposal Perlu Perbaikan - STK Santo Yakobus');
-                $message = $this->_email_template_rejected($seminar, $komentar);
+            // Check if table exists
+            if (!$this->db->table_exists('jurnal_bimbingan')) {
+                return [];
             }
             
-            $this->email->message($message);
-            $this->email->send();
+            $this->db->select('jb.*, d.nama as nama_validator');
+            $this->db->from('jurnal_bimbingan jb');
+            $this->db->join('dosen d', 'jb.validasi_oleh = d.id', 'left');
+            $this->db->where('jb.proposal_id', $proposal_id);
+            $this->db->where('jb.status_validasi', '1'); // Sudah divalidasi
+            $this->db->order_by('jb.pertemuan_ke', 'ASC');
             
-            // Email ke Kaprodi jika approved
-            if ($rekomendasi == 'approved') {
-                $this->_kirim_email_kaprodi($seminar);
-            }
+            return $this->db->get()->result();
             
         } catch (Exception $e) {
-            log_message('error', 'Email error: ' . $e->getMessage());
-        }
-    }
-
-    private function _email_template_approved($seminar, $komentar) {
-        return "
-        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-            <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
-                <h2>✅ Seminar Proposal Direkomendasikan</h2>
-            </div>
-            <div style='padding: 20px;'>
-                <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
-                <p>Seminar proposal Anda telah <strong>direkomendasikan</strong> oleh dosen pembimbing.</p>
-                <div style='background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;'>
-                    <h4>📋 Detail:</h4>
-                    <ul>
-                        <li><strong>Judul:</strong> {$seminar->judul}</li>
-                        <li><strong>Status:</strong> Menunggu Review Kaprodi</li>
-                    </ul>
-                </div>
-                " . (!empty($komentar) ? "<p><strong>Catatan:</strong> {$komentar}</p>" : "") . "
-                <p>Pengajuan akan direview oleh Kaprodi untuk proses selanjutnya.</p>
-            </div>
-        </div>";
-    }
-
-    private function _email_template_rejected($seminar, $komentar) {
-        return "
-        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-            <div style='background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); color: white; padding: 20px; text-align: center;'>
-                <h2>⚠️ Seminar Proposal Perlu Perbaikan</h2>
-            </div>
-            <div style='padding: 20px;'>
-                <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
-                <p>Pengajuan seminar proposal perlu diperbaiki sesuai catatan pembimbing.</p>
-                <div style='background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;'>
-                    <h4>📝 Catatan Perbaikan:</h4>
-                    <p>{$komentar}</p>
-                </div>
-                <p>Silakan lakukan perbaikan dan ajukan kembali seminar proposal.</p>
-            </div>
-        </div>";
-    }
-
-    private function _kirim_email_kaprodi($seminar) {
-        try {
-            // Get kaprodi email
-            $this->db->select('email, nama');
-            $this->db->from('dosen');
-            $this->db->where('level', '3'); // Assuming kaprodi level = 3
-            $this->db->limit(1);
-            $kaprodi = $this->db->get()->row();
-            
-            if ($kaprodi && !empty($kaprodi->email)) {
-                $this->email->clear();
-                $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-                $this->email->to($kaprodi->email);
-                $this->email->subject('📋 Pengajuan Seminar Proposal Perlu Review - STK Santo Yakobus');
-                
-                $message = "
-                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-                    <div style='background: linear-gradient(135deg, #007bff 0%, #17a2b8 100%); color: white; padding: 20px; text-align: center;'>
-                        <h2>📋 Pengajuan Seminar Proposal Perlu Review</h2>
-                    </div>
-                    <div style='padding: 20px;'>
-                        <p>Kepada Yth. <strong>{$kaprodi->nama}</strong>,</p>
-                        <p>Pengajuan seminar proposal telah direkomendasikan dosen pembimbing dan perlu review Anda.</p>
-                        <div style='background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;'>
-                            <h4>📋 Detail:</h4>
-                            <ul>
-                                <li><strong>Mahasiswa:</strong> {$seminar->nama_mahasiswa}</li>
-                                <li><strong>Judul:</strong> {$seminar->judul}</li>
-                            </ul>
-                        </div>
-                        <p>Silakan login ke sistem untuk melakukan review.</p>
-                    </div>
-                </div>";
-                
-                $this->email->message($message);
-                $this->email->send();
-            }
-        } catch (Exception $e) {
-            log_message('error', 'Email kaprodi error: ' . $e->getMessage());
+            log_message('error', 'Error getting jurnal bimbingan: ' . $e->getMessage());
+            return [];
         }
     }
 
     /**
-     * Email penilaian dipublikasi ke mahasiswa
+     * Get pengajuan yang perlu direview
      */
-    private function _kirim_email_penilaian_dipublikasi($seminar, $penilaian_data) {
+    private function _get_pengajuan_perlu_review($dosen_id) {
         try {
-            $this->email->clear();
-            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($seminar->email_mahasiswa);
-            $this->email->subject('📊 Hasil Penilaian Seminar Proposal - STK Santo Yakobus');
+            $this->db->select('
+                spm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                p.nama as nama_prodi
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('prodi p', 'm.prodi_id = p.id');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where_in('spm.status', ['submitted', 'review_pembimbing']);
+            $this->db->order_by('spm.created_at', 'ASC');
             
-            $rekomendasi_text = [
-                'diterima_tanpa_revisi' => 'Diterima Tanpa Revisi',
-                'revisi_minor' => 'Diterima dengan Revisi Minor',
-                'revisi_mayor' => 'Diterima dengan Revisi Mayor', 
-                'ditolak' => 'Ditolak'
+            return $this->db->get()->result();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting pengajuan review: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get riwayat rekomendasi
+     */
+    private function _get_riwayat_rekomendasi($dosen_id) {
+        try {
+            $this->db->select('
+                spm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                p.nama as nama_prodi
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('prodi p', 'm.prodi_id = p.id');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where_in('spm.status', ['approved', 'rejected', 'scheduled', 'completed']);
+            $this->db->order_by('spm.updated_at', 'DESC');
+            $this->db->limit(10);
+            
+            return $this->db->get()->result();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting riwayat rekomendasi: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get seminar yang perlu penilaian
+     */
+    private function _get_seminar_perlu_penilaian($dosen_id) {
+        try {
+            $this->db->select('
+                spm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                p.nama as nama_prodi
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('prodi p', 'm.prodi_id = p.id');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('spm.status', 'scheduled');
+            $this->db->where('DATE(spm.tanggal_seminar) <=', date('Y-m-d')); // Seminar sudah lewat
+            $this->db->order_by('spm.tanggal_seminar', 'DESC');
+            
+            return $this->db->get()->result();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting seminar penilaian: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get statistics untuk dashboard
+     */
+    private function _get_statistics($dosen_id) {
+        try {
+            $stats = [];
+            
+            // Total pengajuan
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $stats['total'] = $this->db->count_all_results();
+            
+            // Perlu review
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where_in('spm.status', ['submitted', 'review_pembimbing']);
+            $stats['perlu_review'] = $this->db->count_all_results();
+            
+            // Disetujui
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where_in('spm.status', ['approved', 'scheduled', 'completed']);
+            $stats['disetujui'] = $this->db->count_all_results();
+            
+            // Ditolak
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('spm.status', 'rejected');
+            $stats['ditolak'] = $this->db->count_all_results();
+            
+            return $stats;
+        } catch (Exception $e) {
+            log_message('error', 'Error getting statistics: ' . $e->getMessage());
+            return [
+                'total' => 0,
+                'perlu_review' => 0,
+                'disetujui' => 0,
+                'ditolak' => 0
             ];
-            
-            $message = "
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
-                    <h2>📊 Hasil Penilaian Seminar Proposal</h2>
-                </div>
-                
-                <div style='padding: 20px;'>
-                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
-                    <p>Hasil penilaian seminar proposal Anda telah tersedia:</p>
-                    
-                    <div style='background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;'>
-                        <h4>📋 Detail Penilaian:</h4>
-                        <ul>
-                            <li><strong>Rekomendasi:</strong> {$rekomendasi_text[$penilaian_data['rekomendasi']]}</li>
-                        </ul>
-                    </div>
-                    
-                    <p>Silakan login ke sistem untuk melihat detail lengkap penilaian dan catatan revisi.</p>
-                </div>
-            </div>";
-            
-            $this->email->message($message);
-            $this->email->send();
-        } catch (Exception $e) {
-            log_message('error', 'Email penilaian error: ' . $e->getMessage());
         }
     }
 
     /**
-     * Badge count untuk template
+     * Get detail seminar dengan validasi ownership
      */
-    public function get_seminar_proposal_badge_count($dosen_id = null) {
-        if (!$dosen_id) {
-            $dosen_id = $this->session->userdata('id');
-        }
-        
-        if (!$dosen_id) return 0;
-        
+    private function _get_seminar_detail($seminar_id, $dosen_id) {
         try {
-            $perlu_review = count($this->_get_pengajuan_perlu_review($dosen_id));
-            $perlu_penilaian = count($this->_get_seminar_perlu_penilaian($dosen_id));
-            return $perlu_review + $perlu_penilaian;
+            $this->db->select('
+                spm.*,
+                pm.judul,
+                pm.ringkasan,
+                pm.jenis_penelitian,
+                pm.lokasi_penelitian,
+                pm.uraian_masalah,
+                pm.file_draft_proposal,
+                pm.dosen_penguji_id,
+                pm.dosen_penguji2_id,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                m.email as email_mahasiswa,
+                m.nomor_telepon,
+                p.nama as nama_prodi,
+                d1.nama as nama_penguji1,
+                d2.nama as nama_penguji2
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('prodi p', 'm.prodi_id = p.id');
+            $this->db->join('dosen d1', 'pm.dosen_penguji_id = d1.id', 'left');
+            $this->db->join('dosen d2', 'pm.dosen_penguji2_id = d2.id', 'left');
+            $this->db->where('spm.id', $seminar_id);
+            $this->db->where('pm.dosen_id', $dosen_id); // Validasi ownership
+            
+            return $this->db->get()->row();
         } catch (Exception $e) {
-            return 0;
+            log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
+            return null;
         }
-    }
-
-    /**
-     * Debug function untuk development
-     */
-    public function debug_data() {
-        if (ENVIRONMENT !== 'development') {
-            show_404();
-        }
-        
-        $dosen_id = $this->session->userdata('id');
-        echo "<h3>🔍 Debug Data untuk Dosen ID: $dosen_id</h3><hr>";
-        
-        echo "<h4>📊 Database Structure Check:</h4>";
-        $fields = $this->db->list_fields('seminar_proposal_mahasiswa');
-        echo "<strong>Kolom yang tersedia (" . count($fields) . "):</strong><br>";
-        foreach ($fields as $field) {
-            echo "- $field<br>";
-        }
-        
-        // Check jurnal_bimbingan structure
-        echo "<hr><h4>📋 Jurnal Bimbingan Structure:</h4>";
-        if ($this->db->table_exists('jurnal_bimbingan')) {
-            $jb_fields = $this->db->list_fields('jurnal_bimbingan');
-            echo "<strong>Jurnal Bimbingan Fields:</strong><br>";
-            foreach ($jb_fields as $field) {
-                echo "- $field<br>";
-            }
-        }
-        
-        echo "<hr><h4>📈 Statistics:</h4>";
-        $stats = $this->_get_statistics($dosen_id);
-        echo "<pre>" . print_r($stats, true) . "</pre>";
-        
-        echo "<hr><h4>🔍 Test Jurnal Query:</h4>";
-        $test_jurnal = $this->_get_jurnal_bimbingan_fixed(44); // Test dengan proposal_id 44
-        echo "<strong>Test Query Result:</strong><br>";
-        echo "<pre>" . print_r($test_jurnal, true) . "</pre>";
-        echo "<strong>Last Query:</strong><br><pre>" . $this->db->last_query() . "</pre>";
     }
 }

@@ -242,33 +242,48 @@ class Seminar_proposal extends CI_Controller {
     }
     
     /**
-     * Get statistics sederhana
-     */
-    private function _get_statistics() {
-        // Total pengajuan
-        $total = $this->db->join('mahasiswa m', 'seminar_proposal_mahasiswa.mahasiswa_id = m.id')
-                          ->where('m.prodi_id', $this->prodi_id)
-                          ->count_all_results('seminar_proposal_mahasiswa');
-        
-        // Pending review
-        $pending = $this->db->join('mahasiswa m', 'seminar_proposal_mahasiswa.mahasiswa_id = m.id')
-                            ->where('m.prodi_id', $this->prodi_id)
-                            ->where('seminar_proposal_mahasiswa.status', 'review_kaprodi')
-                            ->count_all_results('seminar_proposal_mahasiswa');
-        
-        // Approved this month
-        $approved = $this->db->join('mahasiswa m', 'seminar_proposal_mahasiswa.mahasiswa_id = m.id')
-                             ->where('m.prodi_id', $this->prodi_id)
-                             ->where('seminar_proposal_mahasiswa.status_kaprodi', 'approved')
-                             ->where('MONTH(seminar_proposal_mahasiswa.tanggal_review_kaprodi)', date('n'))
-                             ->count_all_results('seminar_proposal_mahasiswa');
-        
-        return [
-            'total' => $total,
-            'pending' => $pending,
-            'approved_this_month' => $approved
-        ];
-    }
+         * Get statistik untuk dashboard
+         */
+        private function _get_statistics() {
+            $stats = [];
+            
+            // Count pending reviews
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('spm.status', 'review_kaprodi');
+            $this->db->where('spm.status_pembimbing', 'approved');
+            $stats['pending_review'] = $this->db->count_all_results();
+            
+            // Count approved this month
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('spm.status_kaprodi', 'approved');
+            $this->db->where('MONTH(spm.tanggal_review_kaprodi)', date('m'));
+            $this->db->where('YEAR(spm.tanggal_review_kaprodi)', date('Y'));
+            $stats['approved_month'] = $this->db->count_all_results();
+            
+            // Count rejected this month
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('spm.status_kaprodi', 'rejected');
+            $this->db->where('MONTH(spm.tanggal_review_kaprodi)', date('m'));
+            $this->db->where('YEAR(spm.tanggal_review_kaprodi)', date('Y'));
+            $stats['rejected_month'] = $this->db->count_all_results();
+            
+            // Count scheduled this month
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('spm.status', 'scheduled');
+            $this->db->where('MONTH(spm.tanggal_seminar)', date('m'));
+            $this->db->where('YEAR(spm.tanggal_seminar)', date('Y'));
+            $stats['scheduled_month'] = $this->db->count_all_results();
+            
+            return $stats;
+        }
     
     /**
      * Get recent approved (untuk dashboard)

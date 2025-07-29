@@ -1,0 +1,1 @@
+ERROR - 2025-07-30 04:48:33 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 224

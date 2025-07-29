@@ -1,0 +1,54 @@
+# =============================================================================
+# File: uploads/turnitin/.htaccess
+# Security configuration untuk upload directory file Turnitin
+# =============================================================================
+
+# Deny access to PHP files
+<Files "*.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Only allow PDF files
+<Files ~ "\.(pdf)$">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Deny access to all other file types
+<Files ~ "\..*$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Prevent directory browsing
+Options -Indexes
+
+# Disable script execution
+AddHandler cgi-script .php .php3 .php4 .php5 .phtml .pl .py .jsp .asp .sh .cgi
+Options -ExecCGI
+
+# Set proper MIME type for PDFs
+<IfModule mod_mime.c>
+    AddType application/pdf .pdf
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# File size limit (5MB)
+LimitRequestBody 5242880
+
+# Cache control for PDF files
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType application/pdf "access plus 1 month"
+</IfModule>
+
+# Error pages
+ErrorDocument 403 "Access Forbidden - File type not allowed"
+ErrorDocument 404 "File Not Found"

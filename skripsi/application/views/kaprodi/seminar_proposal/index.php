@@ -155,7 +155,7 @@ ob_start();
                                 </td>
                                 <td>
                                     <span class="text-sm">
-                                        <?= date('d/m/Y H:i', strtotime($review->tanggal_pengajuan)) ?>
+                                        <?= date('d/m/Y H:i', strtotime($review->created_at)) ?>
                                     </span>
                                 </td>
                                 <td>

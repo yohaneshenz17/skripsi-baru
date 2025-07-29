@@ -558,16 +558,14 @@ function validateReject() {
     }
 
     /**
-     * Get dosen by ID
+     * Get dosen by ID - HELPER METHOD
      */
     private function _get_dosen_by_id($dosen_id) {
-        if (empty($dosen_id)) return null;
-        
         try {
             $this->db->where('id', $dosen_id);
             return $this->db->get('dosen')->row();
         } catch (Exception $e) {
-            log_message('error', 'Error getting dosen: ' . $e->getMessage());
+            log_message('error', 'Error getting dosen by ID: ' . $e->getMessage());
             return null;
         }
     }
@@ -765,15 +763,14 @@ function validateReject() {
             $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
             $this->db->join('prodi p', 'm.prodi_id = p.id');
-            $this->db->join('penilaian_seminar_proposal psp', 'spm.id = psp.seminar_proposal_id', 'left');
+            $this->db->join('penilaian_seminar_proposal psp', 'spm.id = psp.seminar_proposal_id AND psp.dinilai_oleh = ' . $dosen_id, 'left');
             $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where('spm.status', 'scheduled');
-            $this->db->where('DATE(spm.tanggal_seminar) <=', date('Y-m-d')); // Seminar sudah lewat
-            $this->db->group_start();
-                $this->db->where('psp.id IS NULL'); // Belum ada penilaian
-                $this->db->or_where('psp.status_penilaian', 'draft'); // Atau masih draft
-            $this->db->group_end();
-            $this->db->order_by('spm.tanggal_seminar', 'DESC');
+            
+            // PERUBAHAN UTAMA: Tampilkan sejak status 'submitted'
+            // Hapus pembatasan tanggal seminar dan status 'scheduled'
+            $this->db->where_in('spm.status', ['submitted', 'review_pembimbing', 'review_kaprodi', 'approved', 'scheduled', 'completed']);
+            
+            $this->db->order_by('spm.created_at', 'DESC');
             
             return $this->db->get()->result();
         } catch (Exception $e) {
@@ -874,53 +871,65 @@ function validateReject() {
     LETAKKAN METHODS INI SEBELUM BARIS TERAKHIR } DI FILE CONTROLLER
     */
     
-        /**
-         * Form input penilaian seminar proposal
-         */
-        public function penilaian($seminar_id) {
-            $dosen_id = $this->session->userdata('id');
-            
-            // Validasi seminar dan ownership
-            $seminar = $this->_get_seminar_detail_for_penilaian($seminar_id, $dosen_id);
-            
-            if (!$seminar) {
-                $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau belum saatnya dinilai!');
-                redirect('dosen/seminar_proposal');
-                return;
-            }
-            
-            // Cek apakah sudah ada penilaian
-            $existing_penilaian = $this->_get_existing_penilaian($seminar_id, $dosen_id);
-            
-            // Get info dosen penguji untuk ditampilkan
-            $dosen_penguji1 = null;
-            $dosen_penguji2 = null;
-            if ($seminar->dosen_penguji_id) {
-                $dosen_penguji1 = $this->_get_dosen_by_id($seminar->dosen_penguji_id);
-            }
-            if ($seminar->dosen_penguji2_id) {
-                $dosen_penguji2 = $this->_get_dosen_by_id($seminar->dosen_penguji2_id);
-            }
-            
-            $data = [
-                'seminar' => $seminar,
-                'penilaian' => $existing_penilaian,
-                'dosen_penguji1' => $dosen_penguji1,
-                'dosen_penguji2' => $dosen_penguji2
-            ];
-            
-            // Handle form submission
-            if ($this->input->method() === 'post') {
-                $this->_proses_simpan_penilaian($seminar_id, $seminar, $dosen_id);
-                return;
-            }
-            
-            $this->load->view('template/dosen', [
-                'title' => 'Input Penilaian Seminar Proposal - ' . $seminar->nama_mahasiswa,
-                'content' => $this->load->view('dosen/seminar_proposal/penilaian', $data, TRUE),
-                'script' => $this->_get_penilaian_script()
-            ]);
+    /**
+     * Halaman input penilaian seminar proposal - FIXED VERSION
+     */
+    public function penilaian($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Debug log untuk troubleshooting
+        log_message('debug', 'Accessing penilaian page for seminar_id: ' . $seminar_id . ', dosen_id: ' . $dosen_id);
+        
+        // Get detail seminar dengan validasi ownership
+        $seminar = $this->_get_seminar_detail_for_penilaian($seminar_id, $dosen_id);
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan bimbingan Anda!');
+            redirect('dosen/seminar_proposal');
+            return;
         }
+        
+        // Handle form submission
+        if ($this->input->method() === 'post') {
+            $this->_process_penilaian($seminar_id, $dosen_id, $seminar);
+            return;
+        }
+        
+        // Get existing penilaian jika ada
+        $existing_penilaian = $this->_get_existing_penilaian($seminar_id, $dosen_id);
+        
+        // Get info dosen penguji untuk ditampilkan (optional)
+        $dosen_penguji1 = null;
+        $dosen_penguji2 = null;
+        if (isset($seminar->dosen_penguji_id) && $seminar->dosen_penguji_id) {
+            $dosen_penguji1 = $this->_get_dosen_by_id($seminar->dosen_penguji_id);
+        }
+        if (isset($seminar->dosen_penguji2_id) && $seminar->dosen_penguji2_id) {
+            $dosen_penguji2 = $this->_get_dosen_by_id($seminar->dosen_penguji2_id);
+        }
+        
+        // Prepare data untuk view
+        $view_data = [
+            'seminar' => $seminar,
+            'penilaian' => $existing_penilaian,
+            'dosen_penguji1' => $dosen_penguji1,
+            'dosen_penguji2' => $dosen_penguji2,
+            'is_edit' => !empty($existing_penilaian)
+        ];
+        
+        // Debug log
+        log_message('debug', 'Penilaian view data: ' . print_r($view_data, true));
+        
+        // Template data untuk dosen.php
+        $template_data = [
+            'title' => 'Penilaian Seminar Proposal - ' . $seminar->nama_mahasiswa,
+            'content' => $this->load->view('dosen/seminar_proposal/penilaian', $view_data, TRUE),
+            'script' => $this->_get_penilaian_script()
+        ];
+        
+        // Load template dosen
+        $this->load->view('template/dosen', $template_data);
+    }
     
         /**
          * Proses simpan penilaian
@@ -1020,14 +1029,17 @@ function validateReject() {
         }
     
         /**
-         * Get detail seminar untuk penilaian
+         * Get detail seminar untuk penilaian - FIXED VERSION
          */
         private function _get_seminar_detail_for_penilaian($seminar_id, $dosen_id) {
             try {
                 $this->db->select('
-                    spm.*, pm.judul, pm.mahasiswa_id, pm.dosen_id, pm.dosen_penguji_id, pm.dosen_penguji2_id,
+                    spm.*, 
+                    pm.judul, pm.mahasiswa_id, pm.dosen_id, 
+                    pm.dosen_penguji_id, pm.dosen_penguji2_id,
                     m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                    p.nama as nama_prodi, d.nama as nama_pembimbing
+                    p.nama as nama_prodi, 
+                    d.nama as nama_pembimbing
                 ');
                 $this->db->from('seminar_proposal_mahasiswa spm');
                 $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
@@ -1036,18 +1048,137 @@ function validateReject() {
                 $this->db->join('dosen d', 'pm.dosen_id = d.id');
                 $this->db->where('spm.id', $seminar_id);
                 $this->db->where('pm.dosen_id', $dosen_id);
-                $this->db->where('spm.status', 'scheduled'); // Hanya yang sudah terjadwal
-                $this->db->where('DATE(spm.tanggal_seminar) <=', date('Y-m-d')); // Seminar sudah lewat
                 
-                return $this->db->get()->row();
+                // Bisa diakses sejak status 'submitted'
+                $this->db->where_in('spm.status', ['submitted', 'review_pembimbing', 'review_kaprodi', 'approved', 'scheduled', 'completed']);
+                
+                $result = $this->db->get()->row();
+                
+                // Debug log
+                if (!$result) {
+                    log_message('debug', 'No seminar found for seminar_id: ' . $seminar_id . ', dosen_id: ' . $dosen_id);
+                    log_message('debug', 'Last query: ' . $this->db->last_query());
+                }
+                
+                return $result;
             } catch (Exception $e) {
                 log_message('error', 'Error getting seminar detail for penilaian: ' . $e->getMessage());
                 return null;
             }
         }
+        
+        /**
+         * Process penyimpanan penilaian - FIXED VERSION
+         */
+        private function _process_penilaian($seminar_id, $dosen_id, $seminar) {
+            // Validasi input basic
+            $action_type = $this->input->post('action_type'); // 'draft' atau 'publish'
+            
+            if (!in_array($action_type, ['draft', 'publish'])) {
+                $this->session->set_flashdata('error', 'Action type tidak valid!');
+                redirect('dosen/seminar_proposal/penilaian/' . $seminar_id);
+                return;
+            }
+            
+            // Jika publish, validasi field required
+            if ($action_type == 'publish') {
+                $required_fields = ['nilai_substansi_metode', 'nilai_presentasi_teknik', 'nilai_penguasaan_diskusi', 'rekomendasi'];
+                foreach ($required_fields as $field) {
+                    if (empty($this->input->post($field))) {
+                        $this->session->set_flashdata('error', 'Field ' . str_replace('_', ' ', $field) . ' wajib diisi untuk publikasi!');
+                        redirect('dosen/seminar_proposal/penilaian/' . $seminar_id);
+                        return;
+                    }
+                }
+            }
+            
+            $this->db->trans_start();
+            
+            try {
+                // Hitung nilai akhir dengan bobot sesuai form
+                $substansi = floatval($this->input->post('nilai_substansi_metode'));
+                $presentasi = floatval($this->input->post('nilai_presentasi_teknik')); 
+                $penguasaan = floatval($this->input->post('nilai_penguasaan_diskusi'));
+                
+                // Bobot: Substansi 50%, Presentasi 20%, Penguasaan 30%
+                $nilai_akhir = null;
+                if ($substansi > 0 && $presentasi > 0 && $penguasaan > 0) {
+                    $nilai_akhir = ($substansi * 0.5) + ($presentasi * 0.2) + ($penguasaan * 0.3);
+                }
+                
+                // Konversi ke nilai huruf
+                $nilai_huruf = null;
+                if ($nilai_akhir !== null) {
+                    $nilai_huruf = $this->_convert_to_grade($nilai_akhir);
+                }
+                
+                // Data penilaian
+                $penilaian_data = [
+                    'seminar_proposal_id' => $seminar_id,
+                    'mahasiswa_id' => $seminar->mahasiswa_id,
+                    'proposal_id' => $seminar->proposal_id,
+                    'dinilai_oleh' => $dosen_id,
+                    'role_penilai' => 'dosen_pembimbing',
+                    'catatan_latar_belakang' => $this->input->post('catatan_latar_belakang'),
+                    'catatan_tinjauan_pustaka' => $this->input->post('catatan_tinjauan_pustaka'),
+                    'catatan_landasan_teori' => $this->input->post('catatan_landasan_teori'),
+                    'catatan_metodologi' => $this->input->post('catatan_metodologi'),
+                    'catatan_sistematika' => $this->input->post('catatan_sistematika'),
+                    'catatan_umum' => $this->input->post('catatan_umum'),
+                    'nilai_substansi_metode' => $substansi > 0 ? $substansi : null,
+                    'nilai_presentasi_teknik' => $presentasi > 0 ? $presentasi : null,
+                    'nilai_penguasaan_diskusi' => $penguasaan > 0 ? $penguasaan : null,
+                    'nilai_akhir' => $nilai_akhir,
+                    'nilai_huruf' => $nilai_huruf,
+                    'rekomendasi' => $this->input->post('rekomendasi'),
+                    'keterangan_rekomendasi' => $this->input->post('keterangan_rekomendasi'),
+                    'status_penilaian' => $action_type == 'publish' ? 'published' : 'draft',
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                
+                if ($action_type == 'publish') {
+                    $penilaian_data['published_at'] = date('Y-m-d H:i:s');
+                }
+                
+                // Cek apakah sudah ada penilaian
+                $existing = $this->_get_existing_penilaian($seminar_id, $dosen_id);
+                
+                if ($existing) {
+                    // Update existing
+                    $this->db->where('id', $existing->id);
+                    $this->db->update('penilaian_seminar_proposal', $penilaian_data);
+                    log_message('debug', 'Updated penilaian ID: ' . $existing->id);
+                } else {
+                    // Insert new
+                    $penilaian_data['created_at'] = date('Y-m-d H:i:s');
+                    $this->db->insert('penilaian_seminar_proposal', $penilaian_data);
+                    $insert_id = $this->db->insert_id();
+                    log_message('debug', 'Inserted new penilaian ID: ' . $insert_id);
+                }
+                
+                $this->db->trans_complete();
+                
+                if ($this->db->trans_status() === FALSE) {
+                    throw new Exception('Gagal menyimpan penilaian - transaction failed');
+                }
+                
+                $message = ($action_type == 'publish') ? 
+                    'Penilaian berhasil disimpan dan dipublikasi!' : 
+                    'Draft penilaian berhasil disimpan.';
+                    
+                $this->session->set_flashdata('success', $message);
+                
+            } catch (Exception $e) {
+                $this->db->trans_rollback();
+                log_message('error', 'Error simpan penilaian: ' . $e->getMessage());
+                $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            }
+            
+            redirect('dosen/seminar_proposal');
+        }
     
         /**
-         * Get existing penilaian
+         * Get existing penilaian - HELPER METHOD
          */
         private function _get_existing_penilaian($seminar_id, $dosen_id) {
             try {
@@ -1069,9 +1200,9 @@ function validateReject() {
         }
     
         /**
-         * Konversi nilai ke huruf
+         * Konversi nilai angka ke huruf - HELPER METHOD
          */
-        private function _konversi_nilai_huruf($nilai) {
+        private function _convert_to_grade($nilai) {
             if ($nilai >= 80) return 'A';
             if ($nilai >= 70) return 'B';
             if ($nilai >= 60) return 'C';
@@ -1164,48 +1295,80 @@ function validateReject() {
             }
         }
     
-        /**
-         * JavaScript untuk halaman penilaian
-         */
-        private function _get_penilaian_script() {
-            return '
-    <script>
-    $(document).ready(function() {
-        // Auto calculate nilai akhir
-        function hitungNilaiAkhir() {
-            var substansi = parseFloat($(\'input[name="nilai_substansi_metode"]\').val()) || 0;
-            var presentasi = parseFloat($(\'input[name="nilai_presentasi_teknik"]\').val()) || 0;
-            var penguasaan = parseFloat($(\'input[name="nilai_penguasaan_diskusi"]\').val()) || 0;
+    /**
+     * Script untuk halaman penilaian - HELPER METHOD
+     */
+    private function _get_penilaian_script() {
+        return '
+        <script>
+        // Auto calculate nilai akhir saat input berubah
+        function calculateNilaiAkhir() {
+            const substansi = parseFloat(document.querySelector(\'input[name="nilai_substansi_metode"]\').value) || 0;
+            const presentasi = parseFloat(document.querySelector(\'input[name="nilai_presentasi_teknik"]\').value) || 0;
+            const penguasaan = parseFloat(document.querySelector(\'input[name="nilai_penguasaan_diskusi"]\').value) || 0;
             
             if (substansi > 0 && presentasi > 0 && penguasaan > 0) {
-                var nilaiAkhir = (substansi * 0.5) + (presentasi * 0.2) + (penguasaan * 0.3);
+                const nilaiAkhir = (substansi * 0.5) + (presentasi * 0.2) + (penguasaan * 0.3);
                 
-                var huruf = "";
-                if (nilaiAkhir >= 80) huruf = "A";
-                else if (nilaiAkhir >= 70) huruf = "B";
-                else if (nilaiAkhir >= 60) huruf = "C";
-                else if (nilaiAkhir >= 50) huruf = "D";
-                else huruf = "E";
+                let nilaiHuruf = "";
+                if (nilaiAkhir >= 80) nilaiHuruf = "A";
+                else if (nilaiAkhir >= 70) nilaiHuruf = "B";
+                else if (nilaiAkhir >= 60) nilaiHuruf = "C";
+                else if (nilaiAkhir >= 50) nilaiHuruf = "D";
+                else nilaiHuruf = "E";
                 
-                $("#previewNilaiAngka").text(nilaiAkhir.toFixed(2));
-                $("#previewNilaiHuruf").text(huruf);
+                document.getElementById("previewNilaiAngka").textContent = nilaiAkhir.toFixed(2);
+                document.getElementById("previewNilaiHuruf").textContent = nilaiHuruf;
             } else {
-                $("#previewNilaiAngka").text("-");
-                $("#previewNilaiHuruf").text("-");
+                document.getElementById("previewNilaiAngka").textContent = "-";
+                document.getElementById("previewNilaiHuruf").textContent = "-";
             }
         }
         
-        // Event listener untuk input nilai
-        $(\'input[name="nilai_substansi_metode"], input[name="nilai_presentasi_teknik"], input[name="nilai_penguasaan_diskusi"]\').on("input", hitungNilaiAkhir);
-        
-        // Initial calculation
-        hitungNilaiAkhir();
-    });
-    </script>';
-        }
-    
-    // ====================================================================
-    // SELESAI - LETAKKAN SEBELUM CLOSING CLASS BRACE }
-    // ====================================================================
-
+        // Event listeners
+        document.addEventListener("DOMContentLoaded", function() {
+            // Add event listeners untuk semua input nilai
+            const nilaiInputs = document.querySelectorAll("input[name^=\"nilai_\"]");
+            nilaiInputs.forEach(function(input) {
+                input.addEventListener("input", calculateNilaiAkhir);
+            });
+            
+            // Calculate on page load
+            calculateNilaiAkhir();
+            
+            // Form validation
+            if (document.getElementById("penilaianForm")) {
+                document.getElementById("penilaianForm").addEventListener("submit", function(e) {
+                    const actionType = document.activeElement.value;
+                    
+                    if (actionType === "publish") {
+                        const substansi = parseFloat(document.querySelector(\'input[name="nilai_substansi_metode"]\').value) || 0;
+                        const presentasi = parseFloat(document.querySelector(\'input[name="nilai_presentasi_teknik"]\').value) || 0;
+                        const penguasaan = parseFloat(document.querySelector(\'input[name="nilai_penguasaan_diskusi"]\').value) || 0;
+                        const rekomendasi = document.querySelector(\'input[name="rekomendasi"]:checked\');
+                        
+                        if (substansi <= 0 || presentasi <= 0 || penguasaan <= 0) {
+                            e.preventDefault();
+                            alert("Semua komponen nilai harus diisi dengan nilai > 0 untuk publikasi!");
+                            return false;
+                        }
+                        
+                        if (!rekomendasi) {
+                            e.preventDefault();
+                            alert("Rekomendasi hasil seminar harus dipilih untuk publikasi!");
+                            return false;
+                        }
+                        
+                        if (!confirm("Apakah Anda yakin ingin mempublikasi penilaian ini? Penilaian yang sudah dipublikasi tidak dapat diubah lagi.")) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+            }
+        });
+        </script>';
+    }
 }

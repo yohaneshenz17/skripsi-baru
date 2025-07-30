@@ -225,6 +225,26 @@ class Seminar_proposal extends CI_Controller {
     }
     
     /**
+     * ✅ NEW: Daftar Jadwal - untuk menampilkan semua penjadwalan
+     * URL: kaprodi/seminar_proposal/daftar_jadwal
+     */
+    public function daftar_jadwal() {
+        $data = [
+            'title' => 'Kelola Penjadwalan Seminar Proposal',
+            'seminar_perlu_dijadwalkan' => $this->_get_seminar_perlu_dijadwalkan(),
+            'jadwal_mendatang' => $this->_get_jadwal_seminar_mendatang()
+        ];
+        
+        $this->load->view('kaprodi/seminar_proposal/daftar_jadwal', $data);
+    }
+    
+    /**
+     * ✅ UPDATED: Method jadwal() yang sudah ada - TIDAK PERLU DIUBAH
+     * Tetap seperti sekarang untuk form penjadwalan individual
+     * URL: kaprodi/seminar_proposal/jadwal/1 (dengan ID)
+     */
+    
+    /**
      * ✅ NEW: Form penjadwalan seminar proposal
      */
     public function jadwal($seminar_id) {

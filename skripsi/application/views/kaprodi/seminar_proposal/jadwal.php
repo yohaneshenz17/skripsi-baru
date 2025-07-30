@@ -252,7 +252,7 @@ ob_start();
                 </div>
 
                 <div class="text-right">
-                    <a href="<?= base_url('kaprodi/seminar_proposal/jadwal') ?>" 
+                    <a href="<?= base_url('kaprodi/seminar_proposal/daftar_jadwal') ?>" 
                        class="btn btn-secondary">
                         <i class="fas fa-arrow-left mr-2"></i>Kembali ke Daftar
                     </a>

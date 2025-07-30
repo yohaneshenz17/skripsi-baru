@@ -723,7 +723,7 @@
                 <div class="card-body">
                     <!-- Tombol Download File (existing) -->
                     <?php if (!empty($seminar->file_proposal)): ?>
-                    <a href="<?= base_url('uploads/seminar_proposal/' . $seminar->file_proposal) ?>" 
+                    <a href="<?= base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal) ?>" 
                        class="btn btn-outline-primary btn-block mb-2" 
                        target="_blank"
                        title="Download file proposal">

@@ -742,7 +742,7 @@ class Seminar_proposal extends CI_Controller {
         
         // Prepare data untuk view
         $data = [
-            'title' => 'Penilaian Seminar Proposal - ' . $seminar->judul,
+            'title' => 'Hasil Penilaian Seminar Proposal',  // <-- TITLE RINGKAS
             'content' => 'mahasiswa/seminar_proposal/lihat_penilaian',
             'seminar' => $seminar,
             'penilaian' => $penilaian
@@ -1231,8 +1231,9 @@ class Seminar_proposal extends CI_Controller {
             return false;
         }
         
-        if ($_FILES['file_proposal']['size'] > 5242880) { // 5MB
-            $this->form_validation->set_message('_check_file_proposal', 'Ukuran file terlalu besar. Maksimal 5MB.');
+        // 🔧 FIXED: Max size 1MB (bukan 5MB)
+        if ($_FILES['file_proposal']['size'] > 1048576) { // 1MB
+            $this->form_validation->set_message('_check_file_proposal', 'Ukuran file terlalu besar. Maksimal 1MB.');
             return false;
         }
         

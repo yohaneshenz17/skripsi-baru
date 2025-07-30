@@ -1,1 +1,100 @@
 ERROR - 2025-07-30 04:48:33 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 224
+ERROR - 2025-07-30 06:39:19 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-30 06:39:49 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-30 06:39:49 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-30 07:16:18 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_get_riwayat_review_kaprodi() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 61
+ERROR - 2025-07-30 07:18:20 --> Severity: error --> Exception: Call to undefined function character_limiter() /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal/index.php 272
+ERROR - 2025-07-30 07:18:25 --> Severity: error --> Exception: Call to undefined function character_limiter() /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal/index.php 272
+ERROR - 2025-07-30 07:18:54 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_get_riwayat_review_kaprodi() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 61
+ERROR - 2025-07-30 07:27:28 --> Severity: error --> Exception: Call to undefined function character_limiter() /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal/index.php 272
+ERROR - 2025-07-30 07:31:23 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:31:32 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:39:47 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:40:24 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:42:05 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:42:15 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:42:27 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:43:19 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:47:56 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:50:16 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 230
+ERROR - 2025-07-30 07:53:59 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::jadwal(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 250
+ERROR - 2025-07-30 07:56:31 --> 404 Page Not Found: kaprodi/Seminar_proposal/daftar_jadwal1
+ERROR - 2025-07-30 07:57:37 --> 404 Page Not Found: kaprodi/Seminar_proposal/jadwal1
+ERROR - 2025-07-30 07:57:41 --> 404 Page Not Found: kaprodi/Seminar_proposal/jadwal2
+ERROR - 2025-07-30 08:01:10 --> 404 Page Not Found: kaprodi/Seminar_proposal/jadwal1
+ERROR - 2025-07-30 08:01:12 --> Severity: error --> Exception: syntax error, unexpected token "endforeach", expecting end of file /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_proposal/index.php 572
+ERROR - 2025-07-30 08:43:43 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_get_jurnal_requirement_safe() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 94
+ERROR - 2025-07-30 08:44:03 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_get_jurnal_requirement_safe() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 94
+ERROR - 2025-07-30 08:46:55 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_get_jurnal_requirement_safe() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 94
+ERROR - 2025-07-30 08:57:15 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_safe_get_jurnal_bimbingan() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 97
+ERROR - 2025-07-30 09:56:02 --> Severity: Warning --> Undefined variable $penilaian_status /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_proposal/detail.php 735
+ERROR - 2025-07-30 09:57:20 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-30 09:58:13 --> Severity: error --> Exception: Call to undefined function character_limiter() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_proposal/lihat_penilaian.php 48
+ERROR - 2025-07-30 09:59:09 --> Severity: error --> Exception: Call to undefined function character_limiter() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_proposal/lihat_penilaian.php 48
+ERROR - 2025-07-30 10:02:04 --> Severity: error --> Exception: Call to undefined function character_limiter() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_proposal/lihat_penilaian.php 48
+ERROR - 2025-07-30 10:12:32 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::lihat_penilaian(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_proposal.php 437
+ERROR - 2025-07-30 10:34:57 --> Query error: Unknown column 'd1.nama' in 'field list' - Invalid query: SELECT `spm`.*, `pm`.`judul` as `proposal_judul`, `pm`.`dosen_id`, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `m`.`email` as `email_mahasiswa`, `m`.`nomor_telepon`, `pr`.`nama` as `nama_prodi`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_pembimbing`.`email` as `email_pembimbing`, `d1`.`nama` as `nama_penguji1`, `d2`.`nama` as `nama_penguji2`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `penilaian_seminar_proposal` `psp` ON `spm`.`id` = `psp`.`seminar_proposal_id` AND `psp`.`status_penilaian` = "published"
+WHERE `spm`.`proposal_id` = '44'
+ORDER BY `spm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-07-30 10:35:06 --> Query error: Unknown column 'd1.nama' in 'field list' - Invalid query: SELECT `spm`.*, `pm`.`judul` as `proposal_judul`, `pm`.`dosen_id`, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `m`.`email` as `email_mahasiswa`, `m`.`nomor_telepon`, `pr`.`nama` as `nama_prodi`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_pembimbing`.`email` as `email_pembimbing`, `d1`.`nama` as `nama_penguji1`, `d2`.`nama` as `nama_penguji2`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `penilaian_seminar_proposal` `psp` ON `spm`.`id` = `psp`.`seminar_proposal_id` AND `psp`.`status_penilaian` = "published"
+WHERE `spm`.`proposal_id` = '44'
+ORDER BY `spm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-07-30 10:35:10 --> Query error: Unknown column 'd1.nama' in 'field list' - Invalid query: SELECT `spm`.*, `pm`.`judul` as `proposal_judul`, `pm`.`dosen_id`, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `m`.`email` as `email_mahasiswa`, `m`.`nomor_telepon`, `pr`.`nama` as `nama_prodi`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_pembimbing`.`email` as `email_pembimbing`, `d1`.`nama` as `nama_penguji1`, `d2`.`nama` as `nama_penguji2`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `penilaian_seminar_proposal` `psp` ON `spm`.`id` = `psp`.`seminar_proposal_id` AND `psp`.`status_penilaian` = "published"
+WHERE `spm`.`proposal_id` = '44'
+ORDER BY `spm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-07-30 10:35:29 --> Query error: Unknown column 'd1.nama' in 'field list' - Invalid query: SELECT `spm`.*, `pm`.`judul` as `proposal_judul`, `pm`.`dosen_id`, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `m`.`email` as `email_mahasiswa`, `m`.`nomor_telepon`, `pr`.`nama` as `nama_prodi`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_pembimbing`.`email` as `email_pembimbing`, `d1`.`nama` as `nama_penguji1`, `d2`.`nama` as `nama_penguji2`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `penilaian_seminar_proposal` `psp` ON `spm`.`id` = `psp`.`seminar_proposal_id` AND `psp`.`status_penilaian` = "published"
+WHERE `spm`.`proposal_id` = '44'
+ORDER BY `spm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-07-30 10:35:32 --> Query error: Unknown column 'd1.nama' in 'field list' - Invalid query: SELECT `spm`.*, `pm`.`judul` as `proposal_judul`, `pm`.`dosen_id`, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `m`.`email` as `email_mahasiswa`, `m`.`nomor_telepon`, `pr`.`nama` as `nama_prodi`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_pembimbing`.`email` as `email_pembimbing`, `d1`.`nama` as `nama_penguji1`, `d2`.`nama` as `nama_penguji2`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `penilaian_seminar_proposal` `psp` ON `spm`.`id` = `psp`.`seminar_proposal_id` AND `psp`.`status_penilaian` = "published"
+WHERE `spm`.`proposal_id` = '44'
+ORDER BY `spm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-07-30 10:35:37 --> Query error: Unknown column 'd1.nama' in 'field list' - Invalid query: SELECT `spm`.*, `pm`.`judul` as `proposal_judul`, `pm`.`dosen_id`, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `m`.`email` as `email_mahasiswa`, `m`.`nomor_telepon`, `pr`.`nama` as `nama_prodi`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_pembimbing`.`email` as `email_pembimbing`, `d1`.`nama` as `nama_penguji1`, `d2`.`nama` as `nama_penguji2`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `penilaian_seminar_proposal` `psp` ON `spm`.`id` = `psp`.`seminar_proposal_id` AND `psp`.`status_penilaian` = "published"
+WHERE `spm`.`proposal_id` = '44'
+ORDER BY `spm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-07-30 10:39:43 --> Severity: Warning --> Undefined variable $seminar_data /home/stkp7133/public_html/skripsi/application/views/mahasiswa/dashboard.php 129
+ERROR - 2025-07-30 10:39:43 --> Severity: Warning --> Attempt to read property "status" on null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/dashboard.php 129
+ERROR - 2025-07-30 10:39:43 --> Severity: Warning --> Undefined variable $seminar_data /home/stkp7133/public_html/skripsi/application/views/mahasiswa/dashboard.php 133
+ERROR - 2025-07-30 10:39:43 --> Severity: Warning --> Attempt to read property "status" on null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/dashboard.php 133
+ERROR - 2025-07-30 13:35:52 --> 404 Page Not Found: Uploads/seminar_proposal

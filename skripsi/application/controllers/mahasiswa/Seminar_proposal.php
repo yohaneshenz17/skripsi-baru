@@ -432,6 +432,80 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
+     * Lihat Penilaian Seminar Proposal yang sudah dipublikasikan
+     * Method untuk menampilkan penilaian seminar proposal kepada mahasiswa
+     * 
+     * @param int $seminar_id ID seminar proposal
+     */
+    public function lihat_penilaian($seminar_id) {
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        // Validasi akses - pastikan seminar milik mahasiswa yang login
+        $this->db->select('spm.*, pm.judul, pm.mahasiswa_id');
+        $this->db->from('seminar_proposal_mahasiswa spm');
+        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->where('spm.id', $seminar_id);
+        $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+        $seminar = $this->db->get()->row();
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau Anda tidak memiliki akses!');
+            redirect('mahasiswa/seminar_proposal');
+            return;
+        }
+        
+        // Ambil data penilaian yang sudah dipublikasikan
+        $this->db->select('
+            psp.*,
+            d1.nama as nama_penguji1, d1.nip as nip_penguji1,
+            d2.nama as nama_penguji2, d2.nip as nip_penguji2,
+            dp.nama as nama_pembimbing, dp.nip as nip_pembimbing
+        ');
+        $this->db->from('penilaian_seminar_proposal psp');
+        $this->db->join('seminar_proposal_mahasiswa spm', 'psp.seminar_proposal_id = spm.id');
+        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->join('dosen dp', 'pm.dosen_id = dp.id', 'left'); // Dosen pembimbing
+        $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left'); // Dosen penguji 1
+        $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left'); // Dosen penguji 2
+        $this->db->where('psp.seminar_proposal_id', $seminar_id);
+        $this->db->where('psp.status_penilaian', 'published'); // Hanya yang sudah dipublikasikan
+        $penilaian = $this->db->get()->row();
+        
+        if (!$penilaian) {
+            $this->session->set_flashdata('info', 'Penilaian seminar proposal belum tersedia atau belum dipublikasikan.');
+            redirect('mahasiswa/seminar_proposal/detail/' . $seminar_id);
+            return;
+        }
+        
+        // Prepare data untuk view
+        $data['title'] = 'Penilaian Seminar Proposal - ' . $seminar->judul;
+        $data['seminar'] = $seminar;
+        $data['penilaian'] = $penilaian;
+        
+        // Load view dengan template mahasiswa
+        $data['content'] = $this->load->view('mahasiswa/seminar_proposal/lihat_penilaian', $data, TRUE);
+        $this->load->view('template/mahasiswa', $data);
+    }
+    
+    /**
+     * Helper method untuk cek apakah penilaian sudah dipublikasikan
+     * Digunakan untuk validasi di view sidebar
+     * 
+     * @param int $seminar_id
+     * @return boolean
+     */
+    public function is_penilaian_published($seminar_id) {
+        $this->db->select('id');
+        $this->db->from('penilaian_seminar_proposal');
+        $this->db->where('seminar_proposal_id', $seminar_id);
+        $this->db->where('status_penilaian', 'published');
+        $this->db->where('published_at IS NOT NULL');
+        
+        $result = $this->db->get()->row();
+        return !empty($result);
+    }
+
+    /**
      * ✅ NEW: Enhanced workflow status determination
      */
     private function _determine_enhanced_workflow_status($proposal, $seminar_data, $syarat_jurnal)

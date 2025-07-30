@@ -712,37 +712,67 @@
         <!-- Sidebar -->
         <div>
             
-            <!-- Action Buttons -->
-            <div class="card">
-                <div class="card-body">
-                    <h6 style="margin-bottom: 1rem; font-weight: 600; color: #32325d;">
-                        <i class="fas fa-cogs" style="margin-right: 0.5rem; color: #5e72e4;"></i>
+            <!-- Container Tindakan - Update untuk menambahkan tombol Lihat Penilaian -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 font-weight-bold text-white">
+                        <i class="fas fa-cogs mr-2"></i>
                         Tindakan
                     </h6>
-                    
-                    <?php if (isset($seminar)): ?>
-                        
-                        <?php if (in_array($seminar->status, ['draft', 'rejected'])): ?>
-                            <a href="<?php echo base_url('mahasiswa/seminar_proposal/ajukan/' . $seminar->proposal_id); ?>" 
-                               class="btn btn-warning" style="width: 100%; margin-bottom: 0.5rem;">
-                                <i class="fas fa-edit"></i>
-                                Edit Pengajuan
-                            </a>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($seminar->file_proposal)): ?>
-                            <a href="<?php echo base_url('uploads/seminar_proposal/proposal_files/' . $seminar->file_proposal); ?>" 
-                               target="_blank" class="btn btn-outline-primary" style="width: 100%; margin-bottom: 0.5rem;">
-                                <i class="fas fa-download"></i>
-                                Download File
-                            </a>
-                        <?php endif; ?>
-                        
+                </div>
+                <div class="card-body">
+                    <!-- Tombol Download File (existing) -->
+                    <?php if (!empty($seminar->file_proposal)): ?>
+                    <a href="<?= base_url('uploads/seminar_proposal/' . $seminar->file_proposal) ?>" 
+                       class="btn btn-outline-primary btn-block mb-2" 
+                       target="_blank"
+                       title="Download file proposal">
+                        <i class="fas fa-download mr-2"></i>
+                        Download File
+                    </a>
                     <?php endif; ?>
                     
-                    <a href="<?php echo base_url('mahasiswa/seminar_proposal'); ?>" 
-                       class="btn btn-secondary" style="width: 100%;">
-                        <i class="fas fa-list"></i>
+                    <!-- TOMBOL BARU: Lihat Penilaian -->
+                    <?php 
+                    // Cek apakah penilaian sudah dipublikasikan
+                    $this->db->select('id, published_at');
+                    $this->db->from('penilaian_seminar_proposal');
+                    $this->db->where('seminar_proposal_id', $seminar->id);
+                    $this->db->where('status_penilaian', 'published');
+                    $this->db->where('published_at IS NOT NULL');
+                    $penilaian_published = $this->db->get()->row();
+                    ?>
+                    
+                    <?php if ($penilaian_published): ?>
+                    <a href="<?= base_url('mahasiswa/seminar_proposal/lihat_penilaian/' . $seminar->id) ?>" 
+                       class="btn btn-success btn-block mb-2"
+                       title="Lihat hasil penilaian seminar proposal">
+                        <i class="fas fa-star mr-2"></i>
+                        Lihat Penilaian
+                    </a>
+                    <small class="text-muted d-block mb-3">
+                        <i class="fas fa-check-circle text-success mr-1"></i>
+                        Penilaian dipublikasikan: <?= date('d/m/Y H:i', strtotime($penilaian_published->published_at)) ?>
+                    </small>
+                    <?php else: ?>
+                    <!-- Tombol disabled jika penilaian belum tersedia -->
+                    <button class="btn btn-outline-secondary btn-block mb-2" 
+                            disabled
+                            title="Penilaian belum tersedia atau belum dipublikasikan">
+                        <i class="fas fa-clock mr-2"></i>
+                        Penilaian Belum Tersedia
+                    </button>
+                    <small class="text-muted d-block mb-3">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Penilaian akan muncul setelah seminar selesai dan dosen menginput nilai
+                    </small>
+                    <?php endif; ?>
+                    
+                    <!-- Tombol Lihat Semua (existing) -->
+                    <a href="<?= base_url('mahasiswa/seminar_proposal') ?>" 
+                       class="btn btn-outline-secondary btn-block"
+                       title="Kembali ke daftar seminar proposal">
+                        <i class="fas fa-list mr-2"></i>
                         Lihat Semua
                     </a>
                 </div>

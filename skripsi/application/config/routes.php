@@ -39,6 +39,31 @@ $route['mahasiswa'] = 'mahasiswa/dashboard';
 $route['mahasiswa/proposal/ajukan_ulang'] = 'mahasiswa/proposal/ajukan_ulang';
 
 // =====================================================
+//      MAHASISWA ROUTES - PHASE 4: PENELITIAN (BARU - TAMBAHAN)
+// =====================================================
+
+// Dashboard Penelitian
+$route['mahasiswa/penelitian'] = 'mahasiswa/penelitian/index';
+$route['mahasiswa/penelitian/index'] = 'mahasiswa/penelitian/index';
+
+// Form Pengajuan Izin Penelitian
+$route['mahasiswa/penelitian/ajukan'] = 'mahasiswa/penelitian/ajukan';
+$route['mahasiswa/penelitian/ajukan/(:num)'] = 'mahasiswa/penelitian/ajukan/$1';
+
+// Detail dan Tracking Permohonan
+$route['mahasiswa/penelitian/detail/(:num)'] = 'mahasiswa/penelitian/detail/$1';
+
+// Download Surat Izin Penelitian
+$route['mahasiswa/penelitian/download_surat/(:num)'] = 'mahasiswa/penelitian/download_surat/$1';
+
+// AJAX Endpoints untuk Validasi Real-time
+$route['mahasiswa/penelitian/check_syarat/(:num)'] = 'mahasiswa/penelitian/check_syarat/$1';
+
+// Alias untuk konsistensi URL (dengan dash)
+$route['mahasiswa/penelitian-izin'] = 'mahasiswa/penelitian/index';
+$route['mahasiswa/penelitian-izin/ajukan/(:num)'] = 'mahasiswa/penelitian/ajukan/$1';
+
+// =====================================================
 //      BIMBINGAN ROUTES - PRIORITAS TINGGI (SEBELUM GENERIC)
 // =====================================================
 
@@ -248,10 +273,22 @@ $route['dosen/seminar-proposal/index'] = 'dosen/seminar_proposal/index';
 //      PHASE 4: PENELITIAN
 // =====================================================
 
-// Penelitian - Surat Ijin Penelitian
-$route['dosen/penelitian'] = 'dosen/penelitian';
-$route['dosen/penelitian/detail/(:num)'] = 'dosen/penelitian/detail/$1';
-$route['dosen/penelitian/rekomendasi'] = 'dosen/penelitian/rekomendasi';
+// Dashboard penelitian dosen
+$route['dosen/penelitian'] = 'dosen/penelitian/index';
+
+// List permohonan yang perlu direview
+$route['dosen/penelitian/review'] = 'dosen/penelitian/review';
+
+// Detail review permohonan
+$route['dosen/penelitian/review/(:num)'] = 'dosen/penelitian/review/$1';
+
+// Action approve/reject
+$route['dosen/penelitian/approve/(:num)'] = 'dosen/penelitian/approve/$1';
+$route['dosen/penelitian/reject/(:num)'] = 'dosen/penelitian/reject/$1';
+
+// Dashboard dan laporan dosen
+$route['dosen/penelitian/dashboard'] = 'dosen/penelitian/dashboard';
+$route['dosen/penelitian/laporan'] = 'dosen/penelitian/laporan';
 
 // =====================================================
 //      PHASE 5: SEMINAR SKRIPSI
@@ -342,13 +379,24 @@ $route['staf/seminar_proposal/export_berita_acara/(:num)'] = 'staf/seminar_propo
 $route['staf/seminar_proposal/cetak_berita_acara/(:num)'] = 'staf/seminar_proposal/cetak_berita_acara/$1';
 
 // 4. Penelitian - Surat Izin Penelitian
-$route['staf/penelitian'] = 'staf/penelitian';
-$route['staf/penelitian/index'] = 'staf/penelitian/index';
+// Dashboard penelitian staf
+$route['staf/penelitian'] = 'staf/penelitian/index';
+
+// List permohonan yang disetujui pembimbing
+$route['staf/penelitian/approved'] = 'staf/penelitian/approved';
+
+// Detail permohonan untuk staf
 $route['staf/penelitian/detail/(:num)'] = 'staf/penelitian/detail/$1';
-$route['staf/penelitian/proses_surat'] = 'staf/penelitian/proses_surat';
+
+// Upload surat izin penelitian
+$route['staf/penelitian/upload_surat/(:num)'] = 'staf/penelitian/upload_surat/$1';
+
+// Generate/cetak surat izin
 $route['staf/penelitian/cetak_surat/(:num)'] = 'staf/penelitian/cetak_surat/$1';
-$route['staf/penelitian/upload_surat'] = 'staf/penelitian/upload_surat';
-$route['staf/penelitian/download_surat/(:num)'] = 'staf/penelitian/download_surat/$1';
+
+// Laporan dan monitoring staf
+$route['staf/penelitian/laporan'] = 'staf/penelitian/laporan';
+$route['staf/penelitian/monitoring'] = 'staf/penelitian/monitoring';
 
 // 5. Seminar Skripsi - Penjadwalan dan Berita Acara
 $route['staf/seminar-skripsi'] = 'staf/seminar_skripsi';

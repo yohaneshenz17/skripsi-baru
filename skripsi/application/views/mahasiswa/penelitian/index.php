@@ -1,444 +1,433 @@
 <?php
 /**
- * Dashboard Penelitian - Tahap 4 Workflow
- * View untuk mahasiswa mengelola permohonan izin penelitian
- * 
+ * View Dashboard Penelitian - Mahasiswa
  * File: application/views/mahasiswa/penelitian/index.php
+ * 
+ * Menampilkan dashboard penelitian dengan progress tracking dan status permohonan
+ * Mengikuti design pattern existing dengan Bootstrap 4 dan card-based layout
  */
 ?>
 
-<style>
-.card-stats {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-}
-
-.card-stats-2 {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
-}
-
-.card-stats-3 {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    color: white;
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
-}
-
-.workflow-card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-}
-
-.workflow-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-}
-
-.status-badge {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 50px;
-    font-weight: 600;
-}
-
-.status-submitted { background: #fff3cd; color: #856404; }
-.status-review_pembimbing { background: #cce5ff; color: #004085; }
-.status-approved { background: #d1ecf1; color: #0c5460; }
-.status-completed { background: #d4edda; color: #155724; }
-.status-rejected { background: #f8d7da; color: #721c24; }
-
-.progress-bar-custom {
-    height: 8px;
-    border-radius: 10px;
-    background: #e9ecef;
-}
-
-.progress-fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.3s ease;
-}
-
-.btn-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    color: white;
-    border-radius: 25px;
-    padding: 10px 25px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.btn-gradient:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    color: white;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 3rem;
-    color: #6c757d;
-}
-
-.empty-state i {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-</style>
-
-<!-- Flash Messages -->
-<?php if ($this->session->flashdata('success')): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle mr-2"></i>
-        <?= $this->session->flashdata('success') ?>
-        <button type="button" class="close" data-dismiss="alert">
-            <span>&times;</span>
-        </button>
-    </div>
-<?php endif; ?>
-
-<?php if ($this->session->flashdata('error')): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle mr-2"></i>
-        <?= $this->session->flashdata('error') ?>
-        <button type="button" class="close" data-dismiss="alert">
-            <span>&times;</span>
-        </button>
-    </div>
-<?php endif; ?>
-
-<?php if ($this->session->flashdata('warning')): ?>
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-circle mr-2"></i>
-        <?= $this->session->flashdata('warning') ?>
-        <button type="button" class="close" data-dismiss="alert">
-            <span>&times;</span>
-        </button>
-    </div>
-<?php endif; ?>
-
-<!-- Page Header -->
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-flask mr-2 text-primary"></i>
-            Penelitian - Tahap 4
-        </h1>
-        <p class="text-muted mb-0">Kelola permohonan izin penelitian untuk pengumpulan data skripsi</p>
-    </div>
-    <div class="d-none d-lg-inline-block">
-        <button class="btn btn-sm btn-outline-primary btn-refresh" data-toggle="tooltip" title="Refresh Data">
-            <i class="fas fa-sync-alt"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card card-stats h-100">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-uppercase mb-1">
-                            Total Permohonan
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold">
-                            <?= $statistics['total_permohonan'] ?>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-file-alt fa-2x opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card card-stats-2 h-100">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-uppercase mb-1">
-                            Sedang Diproses
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold">
-                            <?= $statistics['pending_permohonan'] ?>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-clock fa-2x opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card card-stats-3 h-100">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-uppercase mb-1">
-                            Selesai
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold">
-                            <?= $statistics['completed_permohonan'] ?>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Quick Actions -->
+<!-- Header Section -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card workflow-card">
-            <div class="card-header bg-gradient-primary text-white">
-                <h6 class="m-0 font-weight-bold">
-                    <i class="fas fa-plus-circle mr-2"></i>
-                    Ajukan Izin Penelitian Baru
+        <div class="card border-left-primary shadow">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Tahap 4 - Penelitian
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            Permohonan Izin Penelitian
+                        </div>
+                        <div class="text-sm text-gray-600 mt-1">
+                            <?= $proposal->judul ?>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-search fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Tracking -->
+<?php if ($permohonan): ?>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chart-line mr-2"></i>Progress Permohonan
                 </h6>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-3">
-                    Pilih proposal yang sudah lulus seminar proposal untuk mengajukan izin penelitian
-                </p>
-                
-                <?php if (!empty($proposal_list)): ?>
-                    <div class="row">
-                        <?php foreach ($proposal_list as $proposal): ?>
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-left-primary">
-                                    <div class="card-body py-3">
-                                        <h6 class="card-title mb-2">
-                                            <strong><?= htmlspecialchars($proposal->judul) ?></strong>
-                                        </h6>
-                                        <p class="card-text small text-muted mb-2">
-                                            Status: 
-                                            <span class="badge badge-info">
-                                                <?= ucfirst(str_replace('_', ' ', $proposal->workflow_status)) ?>
-                                            </span>
-                                        </p>
-                                        <div class="mt-3">
-                                            <a href="<?= base_url('mahasiswa/penelitian/ajukan/' . $proposal->id) ?>" 
-                                               class="btn btn-gradient btn-sm">
-                                                <i class="fas fa-plus mr-1"></i>
-                                                Ajukan Izin Penelitian
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                <div class="progress-steps">
+                    <?php foreach ($progress_steps as $index => $step): ?>
+                    <div class="step-item <?= $step['status'] ?>">
+                        <div class="step-icon">
+                            <i class="fas fa-<?= $step['icon'] ?>"></i>
+                        </div>
+                        <div class="step-content">
+                            <h6><?= $step['title'] ?></h6>
+                            <small class="text-muted">
+                                <?php
+                                switch ($step['status']) {
+                                    case 'completed':
+                                        echo '<i class="fas fa-check text-success"></i> Selesai';
+                                        break;
+                                    case 'active':
+                                        echo '<i class="fas fa-clock text-warning"></i> Sedang Proses';
+                                        break;
+                                    case 'error':
+                                        echo '<i class="fas fa-times text-danger"></i> Ditolak';
+                                        break;
+                                    default:
+                                        echo '<i class="fas fa-circle text-muted"></i> Menunggu';
+                                }
+                                ?>
+                            </small>
+                        </div>
+                        <?php if ($index < count($progress_steps) - 1): ?>
+                        <div class="step-connector"></div>
+                        <?php endif; ?>
                     </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="fas fa-file-alt"></i>
-                        <h5>Belum Ada Proposal</h5>
-                        <p>Anda belum memiliki proposal. Silakan ajukan proposal terlebih dahulu.</p>
-                        <a href="<?= base_url('mahasiswa/proposal') ?>" class="btn btn-gradient">
-                            <i class="fas fa-plus mr-2"></i>
-                            Ajukan Proposal
-                        </a>
-                    </div>
-                <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
     </div>
 </div>
+<?php endif; ?>
 
-<!-- Daftar Permohonan Izin Penelitian -->
+<!-- Status Permohonan atau Syarat -->
 <div class="row">
-    <div class="col-12">
-        <div class="card workflow-card">
-            <div class="card-header bg-white">
-                <div class="d-flex justify-content-between align-items-center">
+    <div class="col-md-8">
+        <?php if ($permohonan): ?>
+            <!-- Card Status Permohonan Existing -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-list mr-2"></i>
-                        Riwayat Permohonan Izin Penelitian
+                        <i class="fas fa-file-alt mr-2"></i>Status Permohonan
                     </h6>
-                    <?php if (!empty($permohonan_list)): ?>
-                        <small class="text-muted">
-                            Total: <?= count($permohonan_list) ?> permohonan
-                        </small>
+                    <?php
+                    $status_class = '';
+                    $status_text = '';
+                    switch ($permohonan->status) {
+                        case 'submitted':
+                        case 'review_pembimbing':
+                            $status_class = 'warning';
+                            $status_text = 'Menunggu Review';
+                            break;
+                        case 'approved':
+                            $status_class = 'info';
+                            $status_text = 'Disetujui - Proses Staf';
+                            break;
+                        case 'rejected':
+                            $status_class = 'danger';
+                            $status_text = 'Ditolak';
+                            break;
+                        case 'surat_ready':
+                            $status_class = 'success';
+                            $status_text = 'Surat Siap';
+                            break;
+                        case 'completed':
+                            $status_class = 'success';
+                            $status_text = 'Selesai';
+                            break;
+                        default:
+                            $status_class = 'secondary';
+                            $status_text = 'Draft';
+                    }
+                    ?>
+                    <span class="badge badge-<?= $status_class ?> badge-pill px-3 py-2">
+                        <?= $status_text ?>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td width="40%"><strong>Tanggal Pengajuan</strong></td>
+                                    <td>: <?= date('d F Y', strtotime($permohonan->created_at)) ?></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tempat Penelitian</strong></td>
+                                    <td>: <?= $permohonan->tempat_penelitian ?></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Periode Penelitian</strong></td>
+                                    <td>: <?= date('d M', strtotime($permohonan->tanggal_mulai_penelitian)) ?> - <?= date('d M Y', strtotime($permohonan->tanggal_selesai_penelitian)) ?></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td width="40%"><strong>Pembimbing</strong></td>
+                                    <td>: <?= $permohonan->nama_pembimbing ?></td>
+                                </tr>
+                                <?php if ($permohonan->tanggal_review_pembimbing): ?>
+                                <tr>
+                                    <td><strong>Review Pembimbing</strong></td>
+                                    <td>: <?= date('d F Y', strtotime($permohonan->tanggal_review_pembimbing)) ?></td>
+                                </tr>
+                                <?php endif; ?>
+                                <?php if ($permohonan->tanggal_upload_surat_staf): ?>
+                                <tr>
+                                    <td><strong>Surat Diterbitkan</strong></td>
+                                    <td>: <?= date('d F Y', strtotime($permohonan->tanggal_upload_surat_staf)) ?></td>
+                                </tr>
+                                <?php endif; ?>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Komentar Pembimbing -->
+                    <?php if ($permohonan->komentar_pembimbing): ?>
+                    <div class="alert alert-<?= $permohonan->status_pembimbing == 'approved' ? 'success' : 'danger' ?> mt-3">
+                        <h6><i class="fas fa-comment mr-2"></i>Komentar Pembimbing:</h6>
+                        <p class="mb-0"><?= nl2br(htmlspecialchars($permohonan->komentar_pembimbing)) ?></p>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-3">
+                        <a href="<?= base_url('mahasiswa/penelitian/detail/' . $permohonan->id) ?>" 
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye mr-1"></i>Detail Permohonan
+                        </a>
+                        
+                        <?php if (in_array($permohonan->status, ['surat_ready', 'completed']) && $permohonan->file_surat_izin_staf): ?>
+                        <a href="<?= base_url('mahasiswa/penelitian/download_surat/' . $permohonan->id) ?>" 
+                           class="btn btn-success btn-sm">
+                            <i class="fas fa-download mr-1"></i>Download Surat
+                        </a>
+                        <?php endif; ?>
+                        
+                        <?php if ($permohonan->status == 'rejected'): ?>
+                        <a href="<?= base_url('mahasiswa/penelitian/ajukan') ?>" 
+                           class="btn btn-warning btn-sm">
+                            <i class="fas fa-redo mr-1"></i>Ajukan Ulang
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php else: ?>
+            <!-- Card Cek Syarat -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-list-check mr-2"></i>Syarat Pengajuan Izin Penelitian
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <?php if ($eligibility['error']): ?>
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <?= $eligibility['message'] ?>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($eligibility['requirements'] as $req_key => $requirement): ?>
+                        <div class="d-flex align-items-center mb-3 p-3 border rounded">
+                            <div class="mr-3">
+                                <?php if ($requirement['status'] == 'OK'): ?>
+                                    <i class="fas fa-check-circle text-success fa-lg"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-times-circle text-danger fa-lg"></i>
+                                <?php endif; ?>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1"><?= ucwords(str_replace('_', ' ', $req_key)) ?></h6>
+                                <small class="text-muted"><?= $requirement['detail'] ?></small>
+                            </div>
+                            <div>
+                                <span class="badge badge-<?= $requirement['status'] == 'OK' ? 'success' : 'danger' ?>">
+                                    <?= $requirement['count'] ?>/<?= $requirement['required'] ?>
+                                </span>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                        
+                        <div class="mt-4">
+                            <?php if ($eligibility['eligible']): ?>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check mr-2"></i>
+                                    <strong>Selamat!</strong> Anda memenuhi syarat untuk mengajukan izin penelitian.
+                                </div>
+                            <?php else: ?>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <strong>Belum Memenuhi Syarat</strong><br>
+                                    Pastikan semua syarat terpenuhi sebelum mengajukan permohonan.
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
+        <?php endif; ?>
+    </div>
+    
+    <!-- Sidebar Info -->
+    <div class="col-md-4">
+        <!-- Info Proposal -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-info-circle mr-2"></i>Info Proposal
+                </h6>
+            </div>
             <div class="card-body">
-                <?php if (!empty($permohonan_list)): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover datatable">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th width="5%">No</th>
-                                    <th width="25%">Judul Proposal</th>
-                                    <th width="20%">Tempat Penelitian</th>
-                                    <th width="15%">Tanggal Pengajuan</th>
-                                    <th width="15%">Status</th>
-                                    <th width="10%">Progress</th>
-                                    <th width="10%">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($permohonan_list as $index => $permohonan): ?>
-                                    <tr>
-                                        <td><?= $index + 1 ?></td>
-                                        <td>
-                                            <div class="font-weight-bold text-dark">
-                                                <?= htmlspecialchars(substr($permohonan->judul_skripsi_terbaru, 0, 50)) ?>
-                                                <?= strlen($permohonan->judul_skripsi_terbaru) > 50 ? '...' : '' ?>
-                                            </div>
-                                            <small class="text-muted">
-                                                <?= htmlspecialchars($permohonan->program_studi) ?>
-                                            </small>
-                                        </td>
-                                        <td>
-                                            <i class="fas fa-map-marker-alt text-muted mr-1"></i>
-                                            <?= htmlspecialchars($permohonan->tempat_penelitian) ?>
-                                        </td>
-                                        <td>
-                                            <i class="fas fa-calendar text-muted mr-1"></i>
-                                            <?= date('d/m/Y', strtotime($permohonan->created_at)) ?>
-                                            <br>
-                                            <small class="text-muted">
-                                                <?= date('H:i', strtotime($permohonan->created_at)) ?> WIT
-                                            </small>
-                                        </td>
-                                        <td>
-                                            <?php
-                                            $status_class = 'status-' . $permohonan->status;
-                                            $status_text = '';
-                                            switch ($permohonan->status) {
-                                                case 'submitted':
-                                                    $status_text = 'Diajukan';
-                                                    break;
-                                                case 'review_pembimbing':
-                                                    $status_text = 'Review Pembimbing';
-                                                    break;
-                                                case 'approved':
-                                                    $status_text = 'Menunggu Staf';
-                                                    break;
-                                                case 'completed':
-                                                    $status_text = 'Selesai';
-                                                    break;
-                                                case 'rejected':
-                                                    $status_text = 'Ditolak';
-                                                    break;
-                                                default:
-                                                    $status_text = ucfirst($permohonan->status);
-                                            }
-                                            ?>
-                                            <span class="status-badge <?= $status_class ?>">
-                                                <?= $status_text ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <?php
-                                            $progress = 0;
-                                            switch ($permohonan->status) {
-                                                case 'submitted': $progress = 25; break;
-                                                case 'review_pembimbing': $progress = 40; break;
-                                                case 'approved': $progress = 60; break;
-                                                case 'surat_ready': $progress = 80; break;
-                                                case 'completed': $progress = 100; break;
-                                                case 'rejected': $progress = 0; break;
-                                                default: $progress = 10;
-                                            }
-                                            ?>
-                                            <div class="progress-bar-custom">
-                                                <div class="progress-fill bg-primary" style="width: <?= $progress ?>%"></div>
-                                            </div>
-                                            <small class="text-muted"><?= $progress ?>%</small>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <a href="<?= base_url('mahasiswa/penelitian/detail/' . $permohonan->id) ?>" 
-                                                   class="btn btn-outline-primary btn-sm" 
-                                                   data-toggle="tooltip" title="Lihat Detail">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                
-                                                <?php if ($permohonan->status == 'completed' && !empty($permohonan->file_surat_izin_staf)): ?>
-                                                    <a href="<?= base_url('mahasiswa/penelitian/download_surat/' . $permohonan->id) ?>" 
-                                                       class="btn btn-outline-success btn-sm" 
-                                                       data-toggle="tooltip" title="Download Surat">
-                                                        <i class="fas fa-download"></i>
-                                                    </a>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="fas fa-clipboard-list"></i>
-                        <h5>Belum Ada Permohonan</h5>
-                        <p>Anda belum pernah mengajukan izin penelitian. Mulai dengan mengajukan permohonan pertama Anda.</p>
-                        <?php if (!empty($proposal_list)): ?>
-                            <a href="<?= base_url('mahasiswa/penelitian/ajukan/' . $proposal_list[0]->id) ?>" 
-                               class="btn btn-gradient">
-                                <i class="fas fa-plus mr-2"></i>
-                                Ajukan Izin Penelitian
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
+                <table class="table table-borderless table-sm">
+                    <tr>
+                        <td><strong>Mahasiswa</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted"><?= $proposal->nama ?> (<?= $proposal->nim ?>)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Program Studi</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted"><?= $proposal->nama_prodi ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pembimbing</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted"><?= $proposal->nama_pembimbing ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Card -->
+        <?php if ($can_submit): ?>
+        <div class="card shadow mb-4 border-left-success">
+            <div class="card-body text-center">
+                <i class="fas fa-paper-plane fa-3x text-success mb-3"></i>
+                <h5 class="text-success">Siap Mengajukan?</h5>
+                <p class="text-muted mb-3">Semua syarat sudah terpenuhi. Anda dapat mengajukan permohonan izin penelitian sekarang.</p>
+                <a href="<?= base_url('mahasiswa/penelitian/ajukan') ?>" 
+                   class="btn btn-success btn-block">
+                    <i class="fas fa-plus mr-2"></i>Ajukan Permohonan
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Help Card -->
+        <div class="card shadow border-left-info">
+            <div class="card-body">
+                <h6 class="text-info"><i class="fas fa-question-circle mr-2"></i>Butuh Bantuan?</h6>
+                <small class="text-muted">
+                    Jika ada kendala dalam proses pengajuan, silakan hubungi:
+                    <br><br>
+                    <strong>Unit SIPD</strong><br>
+                    Email: sipd@stkstjak.ac.id<br>
+                    Telp: (021) 123-4567
+                </small>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Help Section -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card border-left-info">
-            <div class="card-body">
-                <h6 class="font-weight-bold text-info mb-3">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    Informasi Tahap Penelitian
-                </h6>
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="font-weight-bold">Syarat Mengajukan Izin Penelitian:</h6>
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check text-success mr-2"></i>Seminar proposal sudah selesai</li>
-                            <li><i class="fas fa-check text-success mr-2"></i>Penilaian seminar sudah dipublikasi</li>
-                            <li><i class="fas fa-check text-success mr-2"></i>Minimal 9 jurnal bimbingan tervalidasi</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="font-weight-bold">Alur Proses:</h6>
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-arrow-right text-primary mr-2"></i>Mahasiswa ajukan permohonan</li>
-                            <li><i class="fas fa-arrow-right text-primary mr-2"></i>Dosen pembimbing review</li>
-                            <li><i class="fas fa-arrow-right text-primary mr-2"></i>Staf proses surat izin</li>
-                            <li><i class="fas fa-arrow-right text-primary mr-2"></i>Download surat izin</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- CSS untuk Progress Steps -->
+<style>
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 20px 0;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    text-align: center;
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 18px;
+    z-index: 2;
+    position: relative;
+}
+
+.step-content h6 {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.step-content small {
+    font-size: 12px;
+}
+
+.step-connector {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    z-index: 1;
+}
+
+/* Status Colors */
+.step-item.pending .step-icon {
+    background-color: #f8f9fa;
+    border: 2px solid #dee2e6;
+    color: #6c757d;
+}
+
+.step-item.active .step-icon {
+    background-color: #ffc107;
+    border: 2px solid #ffc107;
+    color: white;
+}
+
+.step-item.completed .step-icon {
+    background-color: #28a745;
+    border: 2px solid #28a745;
+    color: white;
+}
+
+.step-item.error .step-icon {
+    background-color: #dc3545;
+    border: 2px solid #dc3545;
+    color: white;
+}
+
+.step-item.pending .step-connector {
+    background-color: #dee2e6;
+}
+
+.step-item.completed .step-connector {
+    background-color: #28a745;
+}
+
+.step-item.active .step-connector {
+    background-color: #ffc107;
+}
+
+.step-item.error .step-connector {
+    background-color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .progress-steps {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .step-item {
+        flex-direction: row;
+        text-align: left;
+        margin-bottom: 20px;
+    }
+    
+    .step-icon {
+        margin-right: 15px;
+        margin-bottom: 0;
+    }
+    
+    .step-connector {
+        display: none;
+    }
+}
+</style>

@@ -102,6 +102,42 @@ ob_start();
     </div>
 </div>
 
+<!-- ✅ TAMBAHAN BARU: Quick Actions Menu -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-gradient-primary">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="text-white mb-0">⚡ Menu Aksi Cepat</h3>
+                        <p class="text-white mb-0">Akses langsung ke fungsi penting Kaprodi</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4 mb-2">
+                        <a href="<?= base_url('kaprodi/seminar_proposal/jadwal') ?>" class="btn btn-white btn-block">
+                            <i class="fas fa-calendar-plus mr-2"></i>
+                            Kelola Penjadwalan
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button class="btn btn-outline-white btn-block" onclick="showRiwayatModal()">
+                            <i class="fas fa-history mr-2"></i>
+                            Riwayat Review
+                        </button>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button class="btn btn-outline-white btn-block" onclick="showJadwalModal()">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            Jadwal Mendatang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-xl-8">
         <!-- Pengajuan Perlu Review -->
@@ -179,7 +215,90 @@ ob_start();
             </div>
         </div>
     </div>
-    
+
+        <!-- ✅ TAMBAHAN BARU: Seminar Perlu Dijadwalkan -->
+        <div class="card mt-4">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">⏰ Perlu Dijadwalkan</h3>
+                    </div>
+                    <div class="col text-right">
+                        <span class="badge badge-info badge-pill">
+                            <?= count($seminar_perlu_dijadwalkan) ?> seminar
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <?php if(!empty($seminar_perlu_dijadwalkan)): ?>
+                <div class="table-responsive">
+                    <table class="table table-flush">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Mahasiswa</th>
+                                <th>Judul</th>
+                                <th>Disetujui</th>
+                                <th>Lama Menunggu</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($seminar_perlu_dijadwalkan as $seminar): ?>
+                            <?php 
+                            $days_waiting = (strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($seminar->tanggal_review_kaprodi)))) / (60*60*24);
+                            $badge_class = $days_waiting > 7 ? 'danger' : ($days_waiting > 3 ? 'warning' : 'info');
+                            ?>
+                            <tr>
+                                <td>
+                                    <div class="media align-items-center">
+                                        <div class="media-body">
+                                            <span class="name mb-0 text-sm font-weight-bold">
+                                                <?= htmlspecialchars($seminar->nama_mahasiswa) ?>
+                                            </span>
+                                            <br><small class="text-muted"><?= htmlspecialchars($seminar->nim) ?></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-sm" data-toggle="tooltip" title="<?= htmlspecialchars($seminar->judul) ?>">
+                                        <?= substr(htmlspecialchars($seminar->judul), 0, 40) ?>...
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-sm text-success">
+                                        <i class="fas fa-check mr-1"></i>
+                                        <?= date('d/m/Y', strtotime($seminar->tanggal_review_kaprodi)) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-<?= $badge_class ?>">
+                                        <?= $days_waiting ?> hari
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="<?= base_url('kaprodi/seminar_proposal/jadwal/' . $seminar->id) ?>" 
+                                       class="btn btn-sm btn-info" data-toggle="tooltip" title="Jadwalkan Seminar">
+                                        <i class="fas fa-calendar-plus"></i> Jadwalkan
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php else: ?>
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-check fa-2x text-muted mb-2"></i>
+                    <h5>Semua Sudah Terjadwal</h5>
+                    <p class="text-sm text-muted">Tidak ada seminar proposal yang perlu dijadwalkan saat ini.</p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
     <div class="col-xl-4">
         <!-- Recent Approved -->
         <div class="card">
@@ -232,7 +351,132 @@ ob_start();
                 <?php endif; ?>
             </div>
         </div>
-        
+
+<!-- ✅ TAMBAHAN BARU: Modal Riwayat Review -->
+<div class="modal fade" id="riwayatModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-history mr-2"></i>
+                    Riwayat Review Kaprodi
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <?php if (!empty($riwayat_review)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Mahasiswa</th>
+                                    <th>Keputusan</th>
+                                    <th>Plagiarisme</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($riwayat_review as $riwayat): ?>
+                                <tr>
+                                    <td><?= date('d/m/Y H:i', strtotime($riwayat->tanggal_review_kaprodi)) ?></td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($riwayat->nama_mahasiswa) ?></strong><br>
+                                        <small class="text-muted"><?= htmlspecialchars($riwayat->nim) ?></small>
+                                    </td>
+                                    <td>
+                                        <?php if ($riwayat->status_kaprodi == 'approved'): ?>
+                                            <span class="badge badge-success">DISETUJUI</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-danger">DITOLAK</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($riwayat->plagiarism_percentage): ?>
+                                            <span class="badge badge-<?= $riwayat->plagiarism_percentage <= 30 ? 'success' : 'danger' ?>">
+                                                <?= $riwayat->plagiarism_percentage ?>%
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <p class="text-muted">Belum ada riwayat review.</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ TAMBAHAN BARU: Modal Jadwal Mendatang -->
+<div class="modal fade" id="jadwalModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    Jadwal Seminar Mendatang
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <?php if (!empty($jadwal_mendatang)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Tanggal & Waktu</th>
+                                    <th>Mahasiswa</th>
+                                    <th>Tempat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($jadwal_mendatang as $jadwal): ?>
+                                <tr>
+                                    <td>
+                                        <strong><?= date('d/m/Y', strtotime($jadwal->tanggal_seminar)) ?></strong><br>
+                                        <small class="text-info"><?= date('H:i', strtotime($jadwal->jam_seminar)) ?> WIT</small>
+                                    </td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($jadwal->nama_mahasiswa) ?></strong><br>
+                                        <small class="text-muted"><?= htmlspecialchars($jadwal->nim) ?></small>
+                                    </td>
+                                    <td><?= htmlspecialchars($jadwal->tempat_seminar) ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <p class="text-muted">Tidak ada jadwal seminar mendatang.</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                <a href="<?= base_url('kaprodi/seminar_proposal/jadwal') ?>" class="btn btn-primary">
+                    <i class="fas fa-calendar-plus mr-1"></i> Kelola Jadwal
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <?php
 // Tangkap content
 $content = ob_get_clean();
@@ -268,6 +512,15 @@ $(document).ready(function() {
         }
     }, 300000);
 });
+
+// ✅ TAMBAHAN BARU: Functions untuk modal
+function showRiwayatModal() {
+    $('#riwayatModal').modal('show');
+}
+
+function showJadwalModal() {
+    $('#jadwalModal').modal('show');
+}
 </script>
 <?php
 // Tangkap script

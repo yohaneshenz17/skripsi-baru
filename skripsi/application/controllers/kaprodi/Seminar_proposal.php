@@ -47,14 +47,20 @@ class Seminar_proposal extends CI_Controller {
     }
     
     /**
-     * Dashboard Seminar Proposal Kaprodi
+     * Dashboard Seminar Proposal Kaprodi - ENHANCED
+     * UBAH method index() existing dengan ini
      */
     public function index() {
         $data = [
             'title' => 'Kelola Seminar Proposal',
             'pending_reviews' => $this->_get_pengajuan_perlu_review(),
             'statistics' => $this->_get_statistics(),
-            'recent_approved' => $this->_get_recent_approved()
+            'recent_approved' => $this->_get_recent_approved(),
+            
+            // ✅ TAMBAHAN BARU - Riwayat review dan penjadwalan
+            'riwayat_review' => $this->_get_riwayat_review_kaprodi(),
+            'seminar_perlu_dijadwalkan' => $this->_get_seminar_perlu_dijadwalkan(),
+            'jadwal_mendatang' => $this->_get_jadwal_seminar_mendatang()
         ];
         
         $this->load->view('kaprodi/seminar_proposal/index', $data);
@@ -848,6 +854,95 @@ class Seminar_proposal extends CI_Controller {
         
         $this->email->message($message);
         $this->email->send();
+    }
+    
+        /**
+     * ✅ NEW: Get riwayat review/validasi yang dilakukan Kaprodi
+     * TAMBAH method ini di akhir controller
+     */
+    private function _get_riwayat_review_kaprodi() {
+        $this->db->select('
+            spm.*,
+            pm.judul,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            d.nama as nama_pembimbing,
+            spm.tanggal_review_kaprodi,
+            spm.status_kaprodi,
+            spm.komentar_kaprodi,
+            spm.plagiarism_percentage
+        ');
+        $this->db->from('seminar_proposal_mahasiswa spm');
+        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->where('m.prodi_id', $this->prodi_id);
+        $this->db->where('spm.reviewed_by_kaprodi', $this->session->userdata('id'));
+        $this->db->where_in('spm.status_kaprodi', ['approved', 'rejected']);
+        $this->db->where('spm.tanggal_review_kaprodi IS NOT NULL');
+        $this->db->order_by('spm.tanggal_review_kaprodi', 'DESC');
+        $this->db->limit(10); // Tampilkan 10 riwayat terakhir
+        
+        return $this->db->get()->result();
+    }
+    
+    /**
+     * ✅ NEW: Get seminar yang sudah disetujui tapi belum dijadwalkan
+     * TAMBAH method ini di akhir controller
+     */
+    private function _get_seminar_perlu_dijadwalkan() {
+        $this->db->select('
+            spm.*,
+            pm.judul,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            d.nama as nama_pembimbing,
+            spm.tanggal_review_kaprodi
+        ');
+        $this->db->from('seminar_proposal_mahasiswa spm');
+        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->where('m.prodi_id', $this->prodi_id);
+        $this->db->where('spm.status_kaprodi', 'approved');
+        $this->db->where('spm.status', 'approved'); // Status seminar = approved tapi belum scheduled
+        $this->db->where('spm.tanggal_seminar IS NULL'); // Belum ada jadwal
+        $this->db->order_by('spm.tanggal_review_kaprodi', 'ASC'); // Yang paling lama menunggu
+        
+        return $this->db->get()->result();
+    }
+    
+    /**
+     * ✅ NEW: Get jadwal seminar yang akan datang (sudah dijadwalkan)
+     * TAMBAH method ini di akhir controller
+     */
+    private function _get_jadwal_seminar_mendatang() {
+        $this->db->select('
+            spm.*,
+            pm.judul,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            d.nama as nama_pembimbing,
+            spm.tanggal_seminar,
+            spm.jam_seminar,
+            spm.tempat_seminar,
+            d1.nama as nama_penguji1,
+            d2.nama as nama_penguji2
+        ');
+        $this->db->from('seminar_proposal_mahasiswa spm');
+        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left');
+        $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left');
+        $this->db->where('m.prodi_id', $this->prodi_id);
+        $this->db->where('spm.status', 'scheduled');
+        $this->db->where('spm.tanggal_seminar >=', date('Y-m-d')); // Mulai dari hari ini
+        $this->db->order_by('spm.tanggal_seminar', 'ASC');
+        $this->db->order_by('spm.jam_seminar', 'ASC');
+        $this->db->limit(5); // Tampilkan 5 jadwal terdekat
+        
+        return $this->db->get()->result();
     }
 }
 ?>

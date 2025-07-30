@@ -1,189 +1,82 @@
 <?php
 /**
- * FIXED - Form Penjadwalan Seminar Proposal & Penunjukan Penguji (LAYOUT CORRECTED)
- * 
- * PERBAIKAN UTAMA:
- * 1. REMOVE dobel header - biarkan template yang handle
- * 2. Fix spacing dan container alignment dengan sidebar
- * 3. Fix layout responsive untuk desktop
- * 4. Clean structure tanpa konflik dengan template
- * 
+ * Enhanced Form Penjadwalan Seminar Proposal - Individual
  * File: application/views/kaprodi/seminar_proposal/jadwal.php
+ * 
+ * Form untuk penjadwalan seminar proposal individual
+ * Support navigasi dari daftar jadwal dan direct link
  */
 
 // Start output buffering untuk content
 ob_start();
 ?>
 
-<style>
-    .validation-success {
-        background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%);
-        color: white;
-        border-radius: 0.375rem;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    .schedule-form {
-        background: #f8f9fe;
-        border-radius: 0.375rem;
-        padding: 1.5rem;
-    }
-    .penguji-selection {
-        border: 2px solid #e9ecef;
-        border-radius: 0.375rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        transition: border-color 0.3s;
-    }
-    .penguji-selection.selected {
-        border-color: #5e72e4;
-        background-color: #f8f9ff;
-    }
-    .datetime-input {
-        background: white;
-        border: 2px solid #e9ecef;
-        border-radius: 0.375rem;
-        padding: 0.75rem;
-    }
-    .datetime-input:focus {
-        border-color: #5e72e4;
-        box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
-    }
-    .conflict-warning {
-        background-color: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-        padding: 0.75rem;
-        border-radius: 0.375rem;
-        margin-top: 0.5rem;
-    }
-    .info-card {
-        background: linear-gradient(87deg, #11cdef 0, #1171ef 100%);
-        color: white;
-        border-radius: 0.375rem;
-        padding: 1rem;
-    }
-    .timeline-item {
-        border-left: 2px solid #dee2e6;
-        padding-left: 1rem;
-        margin-bottom: 1rem;
-        position: relative;
-    }
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: -6px;
-        top: 0;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background-color: #5e72e4;
-    }
-    .timeline-item.completed::before {
-        background-color: #2dce89;
-    }
-    .timeline-item.current::before {
-        background-color: #fb6340;
-        box-shadow: 0 0 0 3px rgba(251, 99, 64, 0.3);
-    }
-    
-    /* Breadcrumb styling */
-    .breadcrumb {
-        padding: 0.5rem 0;
-        margin-bottom: 1rem;
-        background: transparent;
-        border-radius: 0;
-    }
-    
-    .breadcrumb-item + .breadcrumb-item::before {
-        content: ">";
-        color: #6c757d;
-    }
-    
-    .breadcrumb-item a {
-        color: #5e72e4;
-        text-decoration: none;
-    }
-    
-    .breadcrumb-item a:hover {
-        color: #324cdd;
-        text-decoration: underline;
-    }
-    
-    .breadcrumb-item.active {
-        color: #6c757d;
-    }
-    
-    /* Fix container alignment */
-    .row {
-        margin-left: -15px;
-        margin-right: -15px;
-    }
-    
-    .row > .col,
-    .row > [class*="col-"] {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-    
-    /* Card styling */
-    .card {
-        border: 1px solid #e3e6f0;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 767.98px) {
-        .schedule-form {
-            padding: 1rem;
-        }
-        
-        .card-body {
-            padding: 1.25rem;
-        }
-    }
-</style>
-
 <!-- Breadcrumb Navigation -->
 <div class="row">
     <div class="col-md-12">
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+            <ol class="breadcrumb bg-transparent mb-3 pb-0">
                 <li class="breadcrumb-item">
-                    <a href="<?= base_url('kaprodi') ?>">
+                    <a href="<?= base_url('kaprodi/dashboard') ?>">
                         <i class="fas fa-home mr-1"></i>Dashboard
                     </a>
                 </li>
                 <li class="breadcrumb-item">
                     <a href="<?= base_url('kaprodi/seminar_proposal') ?>">Seminar Proposal</a>
                 </li>
+                <li class="breadcrumb-item">
+                    <a href="<?= base_url('kaprodi/seminar_proposal/jadwal') ?>">Kelola Penjadwalan</a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">
-                    Penjadwalan
+                    Penjadwalan Individual
                 </li>
             </ol>
         </nav>
     </div>
 </div>
 
+<!-- Flash Messages -->
+<?php if($this->session->flashdata('success')): ?>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <span class="alert-icon"><i class="fas fa-check-circle"></i></span>
+    <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
+    <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<?php endif; ?>
+
+<?php if($this->session->flashdata('error')): ?>
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span class="alert-icon"><i class="fas fa-exclamation-triangle"></i></span>
+    <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
+    <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<?php endif; ?>
+
 <div class="row">
     <!-- Form Penjadwalan -->
     <div class="col-lg-8">
         <!-- Status Validasi -->
-        <div class="validation-success">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h5 class="text-white mb-0">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        Validasi Plagiarisme Passed
-                    </h5>
-                    <p class="text-white-50 mb-0 mt-1">
-                        Plagiarisme: <strong><?= number_format($seminar->plagiarism_percentage, 1) ?>%</strong> 
-                        (Di bawah batas maksimal 30%)
-                    </p>
-                </div>
-                <div class="col-auto">
-                    <div class="icon icon-shape bg-white text-success rounded-circle shadow">
-                        <i class="fas fa-thumbs-up"></i>
+        <div class="card" style="background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%);">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="text-white mb-0">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Validasi Plagiarisme Passed
+                        </h5>
+                        <p class="text-white-50 mb-0 mt-1">
+                            Plagiarisme: <strong><?= number_format($seminar->plagiarism_percentage ?? 0, 1) ?>%</strong> 
+                            (Di bawah batas maksimal 30%)
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-white text-success rounded-circle shadow">
+                            <i class="fas fa-thumbs-up"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,12 +91,12 @@ ob_start();
                 </h3>
             </div>
             <div class="card-body">
-                <div class="schedule-form">
-                    <?= form_open('kaprodi/seminar_proposal/simpan_jadwal', ['id' => 'jadwal-form']) ?>
-                    <input type="hidden" name="seminar_id" value="<?= $seminar->id ?>">
-                    
-                    <!-- Informasi Mahasiswa -->
-                    <div class="info-card mb-4">
+                <?= form_open('kaprodi/seminar_proposal/simpan_jadwal', ['id' => 'jadwal-form']) ?>
+                <input type="hidden" name="seminar_id" value="<?= $seminar->id ?>">
+                
+                <!-- Informasi Mahasiswa -->
+                <div class="card mb-4" style="background: linear-gradient(87deg, #11cdef 0, #1171ef 100%);">
+                    <div class="card-body">
                         <h6 class="text-white mb-2">
                             <i class="fas fa-user-graduate mr-2"></i>
                             Informasi Mahasiswa
@@ -219,152 +112,156 @@ ob_start();
                             </div>
                         </div>
                         <div class="mt-2">
+                            <small>Pembimbing:</small><br>
+                            <strong class="text-white"><?= htmlspecialchars($seminar->nama_pembimbing) ?></strong>
+                        </div>
+                        <div class="mt-2">
                             <small>Judul:</small><br>
                             <strong class="text-white"><?= htmlspecialchars($seminar->judul) ?></strong>
                         </div>
                     </div>
-                    
-                    <!-- Jadwal Seminar -->
-                    <h6 class="heading-small text-muted mb-4">Jadwal Seminar</h6>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-control-label">
-                                    Tanggal Seminar <span class="text-danger">*</span>
-                                </label>
-                                <input type="date" 
-                                       class="form-control datetime-input" 
-                                       name="tanggal_seminar" 
-                                       id="tanggal_seminar"
-                                       min="<?= date('Y-m-d', strtotime('+1 day')) ?>" 
-                                       required>
-                                <small class="form-text text-muted">
-                                    <i class="fas fa-info-circle"></i>
-                                    Minimal H+1 dari hari ini
-                                </small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-control-label">
-                                    Waktu Seminar <span class="text-danger">*</span>
-                                </label>
-                                <input type="time" 
-                                       class="form-control datetime-input" 
-                                       name="jam_seminar" 
-                                       id="jam_seminar"
-                                       required>
-                                <small class="form-text text-muted">
-                                    <i class="fas fa-clock"></i>
-                                    Waktu Indonesia Timur (WIT)
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-control-label">
-                            Tempat Seminar <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" 
-                               class="form-control" 
-                               name="tempat_seminar" 
-                               id="tempat_seminar"
-                               placeholder="Contoh: Ruang Kuliah 1, STK Santo Yakobus Merauke" 
-                               required>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Sebutkan nama ruang dan lokasi yang spesifik
-                        </small>
-                    </div>
-                    
-                    <!-- Penunjukan Penguji -->
-                    <hr class="my-4">
-                    <h6 class="heading-small text-muted mb-4">Penunjukan Tim Penguji</h6>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-control-label">
-                                    Dosen Penguji 1 <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-control" name="penguji1_id" id="penguji1_id" required>
-                                    <option value="">Pilih Dosen Penguji 1</option>
-                                    <?php foreach($dosen_list as $dosen): ?>
-                                    <option value="<?= $dosen->id ?>" data-nama="<?= htmlspecialchars($dosen->nama) ?>">
-                                        <?= htmlspecialchars($dosen->nama) ?> 
-                                        <?php if(!empty($dosen->nip)): ?>
-                                        (<?= htmlspecialchars($dosen->nip) ?>)
-                                        <?php endif; ?>
-                                    </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-control-label">
-                                    Dosen Penguji 2 <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-control" name="penguji2_id" id="penguji2_id" required>
-                                    <option value="">Pilih Dosen Penguji 2</option>
-                                    <?php foreach($dosen_list as $dosen): ?>
-                                    <option value="<?= $dosen->id ?>" data-nama="<?= htmlspecialchars($dosen->nama) ?>">
-                                        <?= htmlspecialchars($dosen->nama) ?> 
-                                        <?php if(!empty($dosen->nip)): ?>
-                                        (<?= htmlspecialchars($dosen->nip) ?>)
-                                        <?php endif; ?>
-                                    </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Preview Tim Penguji -->
-                    <div id="tim-penguji-preview" class="alert alert-light" style="display: none;">
-                        <h6 class="alert-heading">
-                            <i class="fas fa-users mr-2"></i>
-                            Preview Tim Penguji
-                        </h6>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <small class="text-muted">Pembimbing:</small><br>
-                                <strong><?= htmlspecialchars($seminar->nama_pembimbing) ?></strong>
-                            </div>
-                            <div class="col-md-4">
-                                <small class="text-muted">Penguji 1:</small><br>
-                                <strong id="preview-penguji1">-</strong>
-                            </div>
-                            <div class="col-md-4">
-                                <small class="text-muted">Penguji 2:</small><br>
-                                <strong id="preview-penguji2">-</strong>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Catatan Tambahan -->
-                    <div class="form-group">
-                        <label class="form-control-label">Catatan Tambahan</label>
-                        <textarea class="form-control" 
-                                  name="catatan_kaprodi" 
-                                  rows="3" 
-                                  placeholder="Catatan atau instruksi khusus untuk seminar (opsional)"></textarea>
-                    </div>
-
-                    <div class="text-right">
-                        <a href="<?= base_url('kaprodi/seminar_proposal/detail/' . $seminar->id) ?>" 
-                           class="btn btn-secondary">
-                            <i class="fas fa-times mr-2"></i>Batal
-                        </a>
-                        <button type="submit" class="btn btn-success" id="submit-btn">
-                            <i class="fas fa-calendar-check mr-2"></i>
-                            Jadwalkan Seminar
-                        </button>
-                    </div>
-                    <?= form_close() ?>
                 </div>
+                
+                <!-- Jadwal Seminar -->
+                <h6 class="heading-small text-muted mb-4">Jadwal Seminar</h6>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label">
+                                Tanggal Seminar <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   name="tanggal_seminar" 
+                                   id="tanggal_seminar"
+                                   min="<?= date('Y-m-d', strtotime('+1 day')) ?>" 
+                                   required>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Minimal H+1 dari hari ini
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label">
+                                Waktu Seminar <span class="text-danger">*</span>
+                            </label>
+                            <input type="time" 
+                                   class="form-control" 
+                                   name="jam_seminar" 
+                                   id="jam_seminar"
+                                   required>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-clock"></i>
+                                Waktu Indonesia Timur (WIT)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-control-label">
+                        Tempat Seminar <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           name="tempat_seminar" 
+                           id="tempat_seminar"
+                           placeholder="Contoh: Ruang Kuliah 1, STK Santo Yakobus Merauke" 
+                           required>
+                    <small class="form-text text-muted">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Sebutkan nama ruang dan lokasi yang spesifik
+                    </small>
+                </div>
+                
+                <!-- Penunjukan Penguji -->
+                <hr class="my-4">
+                <h6 class="heading-small text-muted mb-4">Penunjukan Tim Penguji</h6>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label">
+                                Dosen Penguji 1 <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" name="penguji1_id" id="penguji1_id" required>
+                                <option value="">Pilih Dosen Penguji 1</option>
+                                <?php foreach($dosen_list as $dosen): ?>
+                                <option value="<?= $dosen->id ?>" data-nama="<?= htmlspecialchars($dosen->nama) ?>">
+                                    <?= htmlspecialchars($dosen->nama) ?> 
+                                    <?php if(!empty($dosen->nip)): ?>
+                                    (<?= htmlspecialchars($dosen->nip) ?>)
+                                    <?php endif; ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label">
+                                Dosen Penguji 2 <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" name="penguji2_id" id="penguji2_id" required>
+                                <option value="">Pilih Dosen Penguji 2</option>
+                                <?php foreach($dosen_list as $dosen): ?>
+                                <option value="<?= $dosen->id ?>" data-nama="<?= htmlspecialchars($dosen->nama) ?>">
+                                    <?= htmlspecialchars($dosen->nama) ?> 
+                                    <?php if(!empty($dosen->nip)): ?>
+                                    (<?= htmlspecialchars($dosen->nip) ?>)
+                                    <?php endif; ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preview Tim Penguji -->
+                <div id="tim-penguji-preview" class="alert alert-light" style="display: none;">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-users mr-2"></i>
+                        Preview Tim Penguji
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <small class="text-muted">Pembimbing:</small><br>
+                            <strong><?= htmlspecialchars($seminar->nama_pembimbing) ?></strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">Penguji 1:</small><br>
+                            <strong id="preview-penguji1">-</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">Penguji 2:</strong><br>
+                            <strong id="preview-penguji2">-</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Catatan Tambahan -->
+                <div class="form-group">
+                    <label class="form-control-label">Catatan Tambahan</label>
+                    <textarea class="form-control" 
+                              name="catatan_kaprodi" 
+                              rows="3" 
+                              placeholder="Catatan atau instruksi khusus untuk seminar (opsional)"></textarea>
+                </div>
+
+                <div class="text-right">
+                    <a href="<?= base_url('kaprodi/seminar_proposal/jadwal') ?>" 
+                       class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali ke Daftar
+                    </a>
+                    <button type="submit" class="btn btn-success" id="submit-btn">
+                        <i class="fas fa-calendar-check mr-2"></i>
+                        Jadwalkan Seminar
+                    </button>
+                </div>
+                <?= form_close() ?>
             </div>
         </div>
     </div>
@@ -380,42 +277,64 @@ ob_start();
                 </h3>
             </div>
             <div class="card-body">
-                <div class="timeline-item completed">
-                    <h6 class="mb-1">Pengajuan Mahasiswa</h6>
-                    <small class="text-muted">
-                        <?= date('d/m/Y H:i', strtotime($seminar->created_at)) ?>
-                    </small>
-                </div>
-                
-                <div class="timeline-item completed">
-                    <h6 class="mb-1">Review Pembimbing</h6>
-                    <small class="text-muted">
-                        Disetujui - <?= date('d/m/Y H:i', strtotime($seminar->tanggal_review_pembimbing)) ?>
-                    </small>
-                </div>
-                
-                <div class="timeline-item completed">
-                    <h6 class="mb-1">Validasi Plagiarisme</h6>
-                    <small class="text-muted">
-                        <?= number_format($seminar->plagiarism_percentage, 1) ?>% - Passed
-                    </small>
-                </div>
-                
-                <div class="timeline-item current">
-                    <h6 class="mb-1">Penjadwalan Seminar</h6>
-                    <small class="text-warning">
-                        <i class="fas fa-spinner fa-pulse"></i> Sedang diproses
-                    </small>
-                </div>
-                
-                <div class="timeline-item">
-                    <h6 class="mb-1">Pelaksanaan Seminar</h6>
-                    <small class="text-muted">Menunggu penjadwalan</small>
-                </div>
-                
-                <div class="timeline-item">
-                    <h6 class="mb-1">Penelitian</h6>
-                    <small class="text-muted">Tahap selanjutnya</small>
+                <div class="timeline timeline-one-side" data-timeline-content="axis" data-timeline-axis-style="dashed">
+                    <div class="timeline-block">
+                        <span class="timeline-step badge-success">
+                            <i class="fas fa-check"></i>
+                        </span>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Pengajuan Mahasiswa</h6>
+                            <small class="text-muted">
+                                <?= date('d/m/Y H:i', strtotime($seminar->created_at)) ?>
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-block">
+                        <span class="timeline-step badge-success">
+                            <i class="fas fa-check"></i>
+                        </span>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Review Pembimbing</h6>
+                            <small class="text-muted">
+                                Disetujui - <?= isset($seminar->tanggal_review_pembimbing) ? date('d/m/Y', strtotime($seminar->tanggal_review_pembimbing)) : 'Completed' ?>
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-block">
+                        <span class="timeline-step badge-success">
+                            <i class="fas fa-check"></i>
+                        </span>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Validasi Plagiarisme</h6>
+                            <small class="text-muted">
+                                <?= number_format($seminar->plagiarism_percentage ?? 0, 1) ?>% - Passed
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-block">
+                        <span class="timeline-step badge-warning">
+                            <i class="fas fa-spinner fa-pulse"></i>
+                        </span>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Penjadwalan Seminar</h6>
+                            <small class="text-warning">
+                                Sedang diproses
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-block">
+                        <span class="timeline-step badge-secondary">
+                            <i class="fas fa-clock"></i>
+                        </span>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Pelaksanaan Seminar</h6>
+                            <small class="text-muted">Menunggu penjadwalan</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -485,11 +404,11 @@ ob_start();
             <div class="card-body">
                 <div class="row">
                     <div class="col-6 text-center">
-                        <span class="h2 font-weight-bold mb-0" id="total-dosen"><?= count($dosen_list) ?></span>
+                        <span class="h2 font-weight-bold mb-0"><?= count($dosen_list) ?></span>
                         <span class="text-sm text-muted d-block">Dosen Tersedia</span>
                     </div>
                     <div class="col-6 text-center">
-                        <span class="h2 font-weight-bold mb-0 text-success"><?= number_format($seminar->plagiarism_percentage, 1) ?>%</span>
+                        <span class="h2 font-weight-bold mb-0 text-success"><?= number_format($seminar->plagiarism_percentage ?? 0, 1) ?>%</span>
                         <span class="text-sm text-muted d-block">Plagiarisme</span>
                     </div>
                 </div>
@@ -561,10 +480,6 @@ $(document).ready(function() {
         if (selected2) {
             penguji1Select.find(`option[value="${selected2}"]`).prop('disabled', true);
         }
-        
-        // Visual feedback for disabled options
-        penguji1Select.find('option:disabled').addClass('text-muted');
-        penguji2Select.find('option:disabled').addClass('text-muted');
     }
     
     function updateTimPreview() {
@@ -590,7 +505,7 @@ $(document).ready(function() {
         const selectedDay = selectedDate.getDay(); // 0 = Sunday, 6 = Saturday
         
         // Remove existing warnings
-        $('.conflict-warning').remove();
+        $('.date-warning').remove();
         
         if (selectedDate < tomorrow) {
             showDateWarning('Tanggal seminar harus minimal H+1 dari hari ini.', 'danger');
@@ -613,7 +528,7 @@ $(document).ready(function() {
         const icon = type === 'danger' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle';
         
         const warningHtml = `
-            <div class="alert ${alertClass} conflict-warning mt-2">
+            <div class="alert ${alertClass} date-warning mt-2">
                 <i class="fas ${icon} mr-2"></i>
                 ${message}
             </div>
@@ -678,6 +593,11 @@ $(document).ready(function() {
     } else {
         $('#jam_seminar').val('14:00');
     }
+    
+    // Auto-hide alerts
+    setTimeout(function() {
+        $('.alert-dismissible').fadeOut();
+    }, 5000);
 });
 </script>
 <?php
@@ -690,4 +610,3 @@ $this->load->view('template/kaprodi', [
     'content' => $content,
     'script' => $script
 ]);
-?>

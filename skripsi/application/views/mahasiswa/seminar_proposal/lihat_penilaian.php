@@ -178,33 +178,112 @@
         </div>
     </div>
 
-    <!-- Catatan dan Revisi -->
-    <?php if (!empty($penilaian->catatan_umum) || !empty($penilaian->keterangan_rekomendasi)): ?>
+    <!-- Catatan dan Revisi - VERSI LENGKAP -->
+    <?php 
+    // Cek apakah ada catatan yang terisi
+    $ada_catatan = !empty($penilaian->catatan_latar_belakang) || 
+                   !empty($penilaian->catatan_tinjauan_pustaka) || 
+                   !empty($penilaian->catatan_landasan_teori) || 
+                   !empty($penilaian->catatan_metodologi) || 
+                   !empty($penilaian->catatan_sistematika) || 
+                   !empty($penilaian->catatan_umum) || 
+                   !empty($penilaian->keterangan_rekomendasi);
+    ?>
+    
+    <?php if ($ada_catatan): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-warning">
             <h6 class="m-0 font-weight-bold text-white">
                 <i class="fas fa-sticky-note mr-2"></i>
-                Catatan dan Saran Revisi
+                Catatan dan Saran Revisi dari Dewan Penguji
             </h6>
         </div>
         <div class="card-body">
+            <!-- 1. Latar Belakang & Rumusan Masalah -->
+            <?php if (!empty($penilaian->catatan_latar_belakang)): ?>
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading">
+                    <i class="fas fa-lightbulb mr-2"></i>
+                    <strong>1. Latar Belakang & Rumusan Masalah</strong>
+                </h6>
+                <p class="mb-0"><?= nl2br(htmlspecialchars($penilaian->catatan_latar_belakang)) ?></p>
+            </div>
+            <?php endif; ?>
+
+            <!-- 2. Tinjauan Pustaka & Kebaruan (Novelty) -->
+            <?php if (!empty($penilaian->catatan_tinjauan_pustaka)): ?>
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading">
+                    <i class="fas fa-book mr-2"></i>
+                    <strong>2. Tinjauan Pustaka & Kebaruan (Novelty)</strong>
+                </h6>
+                <p class="mb-0"><?= nl2br(htmlspecialchars($penilaian->catatan_tinjauan_pustaka)) ?></p>
+            </div>
+            <?php endif; ?>
+
+            <!-- 3. Landasan Teori -->
+            <?php if (!empty($penilaian->catatan_landasan_teori)): ?>
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading">
+                    <i class="fas fa-graduation-cap mr-2"></i>
+                    <strong>3. Landasan Teori</strong>
+                </h6>
+                <p class="mb-0"><?= nl2br(htmlspecialchars($penilaian->catatan_landasan_teori)) ?></p>
+            </div>
+            <?php endif; ?>
+
+            <!-- 4. Metodologi Penelitian -->
+            <?php if (!empty($penilaian->catatan_metodologi)): ?>
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading">
+                    <i class="fas fa-microscope mr-2"></i>
+                    <strong>4. Metodologi Penelitian</strong>
+                </h6>
+                <p class="mb-0"><?= nl2br(htmlspecialchars($penilaian->catatan_metodologi)) ?></p>
+            </div>
+            <?php endif; ?>
+
+            <!-- 5. Sistematika & Tata Tulis -->
+            <?php if (!empty($penilaian->catatan_sistematika)): ?>
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading">
+                    <i class="fas fa-list-ol mr-2"></i>
+                    <strong>5. Sistematika & Tata Tulis</strong>
+                </h6>
+                <p class="mb-0"><?= nl2br(htmlspecialchars($penilaian->catatan_sistematika)) ?></p>
+            </div>
+            <?php endif; ?>
+
+            <!-- 6. Catatan Umum -->
             <?php if (!empty($penilaian->catatan_umum)): ?>
-            <div class="alert alert-info">
+            <div class="alert alert-primary mb-3">
                 <h6 class="alert-heading">
                     <i class="fas fa-comments mr-2"></i>
-                    Catatan Umum dari Dewan Penguji:
+                    <strong>6. Catatan Umum dari Dewan Penguji</strong>
                 </h6>
                 <p class="mb-0"><?= nl2br(htmlspecialchars($penilaian->catatan_umum)) ?></p>
             </div>
             <?php endif; ?>
             
+            <!-- 7. Keterangan Rekomendasi -->
             <?php if (!empty($penilaian->keterangan_rekomendasi)): ?>
-            <div class="alert alert-warning">
+            <div class="alert alert-warning mb-0">
                 <h6 class="alert-heading">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
-                    Keterangan Rekomendasi:
+                    <strong>7. Keterangan Rekomendasi</strong>
                 </h6>
                 <p class="mb-0"><?= nl2br(htmlspecialchars($penilaian->keterangan_rekomendasi)) ?></p>
+            </div>
+            <?php endif; ?>
+
+            <!-- Jika tidak ada catatan sama sekali -->
+            <?php if (!$ada_catatan): ?>
+            <div class="alert alert-secondary">
+                <h6 class="alert-heading">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Tidak Ada Catatan Revisi
+                </h6>
+                <p class="mb-0">Dewan penguji tidak memberikan catatan khusus untuk proposal Anda.</p>
             </div>
             <?php endif; ?>
         </div>

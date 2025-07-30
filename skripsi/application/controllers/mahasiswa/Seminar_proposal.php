@@ -267,13 +267,22 @@ class Seminar_proposal extends CI_Controller {
                 pm.dosen_id,
                 m.nama as nama_mahasiswa,
                 m.nim,
-                d.nama as nama_pembimbing,
-                d.email as email_pembimbing
+                m.email as email_mahasiswa,
+                m.nomor_telepon,
+                pr.nama as nama_prodi,
+                d_pembimbing.nama as nama_pembimbing,
+                d_pembimbing.email as email_pembimbing,
+                d1.nama as nama_penguji1,
+                d2.nama as nama_penguji2
             ');
             $this->db->from('seminar_proposal_mahasiswa spm');
             $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'left');
+            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+            // CORRECTED: Join dari seminar_proposal_mahasiswa
+            $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left');
+            $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left');
             $this->db->where('spm.proposal_id', $proposal_id);
             $this->db->order_by('spm.created_at', 'DESC');
             $this->db->limit(1);
@@ -325,12 +334,22 @@ class Seminar_proposal extends CI_Controller {
                 pm.dosen_id,
                 m.nama as nama_mahasiswa,
                 m.nim,
-                d.nama as nama_pembimbing
+                m.email as email_mahasiswa,
+                m.nomor_telepon,
+                pr.nama as nama_prodi,
+                d_pembimbing.nama as nama_pembimbing,
+                d_pembimbing.email as email_pembimbing,
+                d1.nama as nama_penguji1,
+                d2.nama as nama_penguji2
             ');
             $this->db->from('seminar_proposal_mahasiswa sp');
             $this->db->join('proposal_mahasiswa pm', 'sp.proposal_id = pm.id');
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'left');
+            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+            // CORRECTED: Join dari seminar_proposal_mahasiswa, bukan proposal_mahasiswa
+            $this->db->join('dosen d1', 'sp.dosen_penguji1_id = d1.id', 'left');
+            $this->db->join('dosen d2', 'sp.dosen_penguji2_id = d2.id', 'left');
             
             $this->db->where('sp.id', $seminar_id);
             $this->db->where('pm.mahasiswa_id', $mahasiswa_id); // Security check

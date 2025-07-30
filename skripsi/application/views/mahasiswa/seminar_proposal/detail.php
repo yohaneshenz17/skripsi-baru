@@ -1,12 +1,13 @@
 <?php
 /**
- * Detail Seminar Proposal View - Mahasiswa (FIXED VERSION)
+ * Detail Seminar Proposal View - Mahasiswa (UPDATED VERSION)
  * File: application/views/mahasiswa/seminar_proposal/detail.php
  * 
  * 🔧 PERBAIKAN:
  * - Fixed property names sesuai database schema
  * - Improved error handling untuk undefined properties
  * - Enhanced display logic
+ * - ADDED: Informasi Dosen Penguji 1 dan Penguji 2 di Status Pengajuan
  */
 ?>
 
@@ -480,6 +481,25 @@
                                 <div class="info-label">Terakhir Update</div>
                                 <div class="info-value">
                                     <?php echo $seminar->updated_at ? date('d F Y H:i', strtotime($seminar->updated_at)) : '-'; ?>
+                                </div>
+                            </div>
+                            
+                            <!-- ADDED: Informasi Dosen Penguji -->
+                            <div class="info-item">
+                                <div class="info-label">Dosen Penguji 1</div>
+                                <div class="info-value">
+                                    <?php echo isset($seminar->nama_penguji1) && !empty($seminar->nama_penguji1) ? 
+                                        htmlspecialchars($seminar->nama_penguji1) : 
+                                        '<span style="color: #8898aa; font-style: italic;">Belum Ditentukan</span>'; ?>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-label">Dosen Penguji 2</div>
+                                <div class="info-value">
+                                    <?php echo isset($seminar->nama_penguji2) && !empty($seminar->nama_penguji2) ? 
+                                        htmlspecialchars($seminar->nama_penguji2) : 
+                                        '<span style="color: #8898aa; font-style: italic;">Belum Ditentukan</span>'; ?>
                                 </div>
                             </div>
                             

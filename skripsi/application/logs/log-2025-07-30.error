@@ -98,3 +98,15 @@ ERROR - 2025-07-30 10:39:43 --> Severity: Warning --> Attempt to read property "
 ERROR - 2025-07-30 10:39:43 --> Severity: Warning --> Undefined variable $seminar_data /home/stkp7133/public_html/skripsi/application/views/mahasiswa/dashboard.php 133
 ERROR - 2025-07-30 10:39:43 --> Severity: Warning --> Attempt to read property "status" on null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/dashboard.php 133
 ERROR - 2025-07-30 13:35:52 --> 404 Page Not Found: Uploads/seminar_proposal
+ERROR - 2025-07-30 16:40:22 --> Query error: Unknown column 'pip.mahasiswa_id' in 'where clause' - Invalid query: SELECT `pip`.*, `pm`.`judul` as `judul_proposal`, `pm`.`workflow_status`, `d`.`nama` as `nama_pembimbing`, `d`.`email` as `email_pembimbing`
+FROM `permohonan_izin_penelitian` `pip`
+JOIN `proposal_mahasiswa` `pm` ON `pip`.`proposal_mahasiswa_id` = `pm`.`id`
+LEFT JOIN `dosen` `d` ON `pip`.`dosen_pembimbing_id` = `d`.`id`
+WHERE `pip`.`mahasiswa_id` = '44'
+ORDER BY `pip`.`created_at` DESC
+ERROR - 2025-07-30 16:40:38 --> Query error: Unknown column 'pip.mahasiswa_id' in 'where clause' - Invalid query: SELECT `pip`.*, `pm`.`judul` as `judul_proposal`, `pm`.`workflow_status`, `d`.`nama` as `nama_pembimbing`, `d`.`email` as `email_pembimbing`
+FROM `permohonan_izin_penelitian` `pip`
+JOIN `proposal_mahasiswa` `pm` ON `pip`.`proposal_mahasiswa_id` = `pm`.`id`
+LEFT JOIN `dosen` `d` ON `pip`.`dosen_pembimbing_id` = `d`.`id`
+WHERE `pip`.`mahasiswa_id` = '44'
+ORDER BY `pip`.`created_at` DESC

@@ -853,8 +853,14 @@ function validateReject() {
             $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
             $this->db->join('prodi p', 'm.prodi_id = p.id');
-            $this->db->join('dosen d1', 'pm.dosen_penguji_id = d1.id', 'left');
-            $this->db->join('dosen d2', 'pm.dosen_penguji2_id = d2.id', 'left');
+            
+            // ✅ PERBAIKAN: Pastikan join pembimbing benar
+            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id');
+            
+            // ✅ PERBAIKAN: Join dosen penguji dari seminar_proposal_mahasiswa
+            $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left');
+            $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left');
+            
             $this->db->where('spm.id', $seminar_id);
             $this->db->where('pm.dosen_id', $dosen_id); // Validasi ownership
             
@@ -1035,33 +1041,39 @@ function validateReject() {
         private function _get_seminar_detail_for_penilaian($seminar_id, $dosen_id) {
             try {
                 $this->db->select('
-                    spm.*, 
-                    pm.judul, pm.mahasiswa_id, pm.dosen_id, 
-                    pm.dosen_penguji_id, pm.dosen_penguji2_id,
-                    m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                    p.nama as nama_prodi, 
-                    d.nama as nama_pembimbing
+                    spm.*,
+                    pm.judul,
+                    pm.ringkasan,
+                    m.nim,
+                    m.nama as nama_mahasiswa,
+                    m.email as email_mahasiswa,
+                    p.nama as nama_prodi,
+                    d_pembimbing.nama as nama_pembimbing,
+                    d1.nama as nama_penguji1,
+                    d1.email as email_penguji1,
+                    d2.nama as nama_penguji2,
+                    d2.email as email_penguji2
                 ');
                 $this->db->from('seminar_proposal_mahasiswa spm');
                 $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
                 $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
                 $this->db->join('prodi p', 'm.prodi_id = p.id');
-                $this->db->join('dosen d', 'pm.dosen_id = d.id');
+                $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+                
+                // ✅ PERBAIKAN: Dosen penguji dari seminar_proposal_mahasiswa
+                $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left');
+                $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left');
+                
                 $this->db->where('spm.id', $seminar_id);
-                $this->db->where('pm.dosen_id', $dosen_id);
                 
-                // Bisa diakses sejak status 'submitted'
-                $this->db->where_in('spm.status', ['submitted', 'review_pembimbing', 'review_kaprodi', 'approved', 'scheduled', 'completed']);
+                // Validasi: dosen bisa akses jika dia pembimbing ATAU penguji
+                $this->db->group_start();
+                $this->db->where('pm.dosen_id', $dosen_id); // Pembimbing
+                $this->db->or_where('spm.dosen_penguji1_id', $dosen_id); // Penguji 1
+                $this->db->or_where('spm.dosen_penguji2_id', $dosen_id); // Penguji 2
+                $this->db->group_end();
                 
-                $result = $this->db->get()->row();
-                
-                // Debug log
-                if (!$result) {
-                    log_message('debug', 'No seminar found for seminar_id: ' . $seminar_id . ', dosen_id: ' . $dosen_id);
-                    log_message('debug', 'Last query: ' . $this->db->last_query());
-                }
-                
-                return $result;
+                return $this->db->get()->row();
             } catch (Exception $e) {
                 log_message('error', 'Error getting seminar detail for penilaian: ' . $e->getMessage());
                 return null;

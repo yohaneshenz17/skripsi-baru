@@ -1,10 +1,10 @@
 <?php
 /**
- * View Dashboard Penelitian - Mahasiswa
+ * View Dashboard Penelitian - Mahasiswa - FIXED VERSION
  * File: application/views/mahasiswa/penelitian/index.php
  * 
- * Menampilkan dashboard penelitian dengan progress tracking dan status permohonan
- * Mengikuti design pattern existing dengan Bootstrap 4 dan card-based layout
+ * FIXED: PHP Warning "Undefined array key 'count'" 
+ * Menangani struktur data requirements dengan proper checking
  */
 ?>
 
@@ -21,9 +21,11 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             Permohonan Izin Penelitian
                         </div>
+                        <?php if (isset($proposal) && $proposal): ?>
                         <div class="text-sm text-gray-600 mt-1">
                             <?= $proposal->judul ?>
                         </div>
+                        <?php endif; ?>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-search fa-2x text-gray-300"></i>
@@ -35,7 +37,7 @@
 </div>
 
 <!-- Progress Tracking -->
-<?php if ($permohonan): ?>
+<?php if (isset($permohonan) && $permohonan): ?>
 <div class="row mb-4">
     <div class="col-12">
         <div class="card shadow">
@@ -46,36 +48,39 @@
             </div>
             <div class="card-body">
                 <div class="progress-steps">
-                    <?php foreach ($progress_steps as $index => $step): ?>
-                    <div class="step-item <?= $step['status'] ?>">
-                        <div class="step-icon">
-                            <i class="fas fa-<?= $step['icon'] ?>"></i>
+                    <?php if (isset($progress_steps) && is_array($progress_steps)): ?>
+                        <?php foreach ($progress_steps as $index => $step): ?>
+                        <div class="step-item <?= isset($step['status']) ? $step['status'] : 'pending' ?>">
+                            <div class="step-icon">
+                                <i class="fas fa-<?= isset($step['icon']) ? $step['icon'] : 'circle' ?>"></i>
+                            </div>
+                            <div class="step-content">
+                                <h6><?= isset($step['title']) ? $step['title'] : 'Step ' . ($index + 1) ?></h6>
+                                <small class="text-muted">
+                                    <?php
+                                    $status = isset($step['status']) ? $step['status'] : 'pending';
+                                    switch ($status) {
+                                        case 'completed':
+                                            echo '<i class="fas fa-check text-success"></i> Selesai';
+                                            break;
+                                        case 'active':
+                                            echo '<i class="fas fa-clock text-warning"></i> Sedang Proses';
+                                            break;
+                                        case 'error':
+                                            echo '<i class="fas fa-times text-danger"></i> Ditolak';
+                                            break;
+                                        default:
+                                            echo '<i class="fas fa-circle text-muted"></i> Menunggu';
+                                    }
+                                    ?>
+                                </small>
+                            </div>
+                            <?php if ($index < count($progress_steps) - 1): ?>
+                            <div class="step-connector"></div>
+                            <?php endif; ?>
                         </div>
-                        <div class="step-content">
-                            <h6><?= $step['title'] ?></h6>
-                            <small class="text-muted">
-                                <?php
-                                switch ($step['status']) {
-                                    case 'completed':
-                                        echo '<i class="fas fa-check text-success"></i> Selesai';
-                                        break;
-                                    case 'active':
-                                        echo '<i class="fas fa-clock text-warning"></i> Sedang Proses';
-                                        break;
-                                    case 'error':
-                                        echo '<i class="fas fa-times text-danger"></i> Ditolak';
-                                        break;
-                                    default:
-                                        echo '<i class="fas fa-circle text-muted"></i> Menunggu';
-                                }
-                                ?>
-                            </small>
-                        </div>
-                        <?php if ($index < count($progress_steps) - 1): ?>
-                        <div class="step-connector"></div>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -86,7 +91,7 @@
 <!-- Status Permohonan atau Syarat -->
 <div class="row">
     <div class="col-md-8">
-        <?php if ($permohonan): ?>
+        <?php if (isset($permohonan) && $permohonan): ?>
             <!-- Card Status Permohonan Existing -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -96,7 +101,9 @@
                     <?php
                     $status_class = '';
                     $status_text = '';
-                    switch ($permohonan->status) {
+                    $current_status = isset($permohonan->status) ? $permohonan->status : 'draft';
+                    
+                    switch ($current_status) {
                         case 'submitted':
                         case 'review_pembimbing':
                             $status_class = 'warning';
@@ -133,15 +140,23 @@
                             <table class="table table-borderless table-sm">
                                 <tr>
                                     <td width="40%"><strong>Tanggal Pengajuan</strong></td>
-                                    <td>: <?= date('d F Y', strtotime($permohonan->created_at)) ?></td>
+                                    <td>: <?= isset($permohonan->created_at) ? date('d F Y', strtotime($permohonan->created_at)) : '-' ?></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Tempat Penelitian</strong></td>
-                                    <td>: <?= $permohonan->tempat_penelitian ?></td>
+                                    <td>: <?= isset($permohonan->tempat_penelitian) ? $permohonan->tempat_penelitian : '-' ?></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Periode Penelitian</strong></td>
-                                    <td>: <?= date('d M', strtotime($permohonan->tanggal_mulai_penelitian)) ?> - <?= date('d M Y', strtotime($permohonan->tanggal_selesai_penelitian)) ?></td>
+                                    <td>: 
+                                        <?php 
+                                        if (isset($permohonan->tanggal_mulai_penelitian) && isset($permohonan->tanggal_selesai_penelitian)) {
+                                            echo date('d M', strtotime($permohonan->tanggal_mulai_penelitian)) . ' - ' . date('d M Y', strtotime($permohonan->tanggal_selesai_penelitian));
+                                        } else {
+                                            echo '-';
+                                        }
+                                        ?>
+                                    </td>
                                 </tr>
                             </table>
                         </div>
@@ -149,15 +164,15 @@
                             <table class="table table-borderless table-sm">
                                 <tr>
                                     <td width="40%"><strong>Pembimbing</strong></td>
-                                    <td>: <?= $permohonan->nama_pembimbing ?></td>
+                                    <td>: <?= isset($permohonan->nama_pembimbing) ? $permohonan->nama_pembimbing : '-' ?></td>
                                 </tr>
-                                <?php if ($permohonan->tanggal_review_pembimbing): ?>
+                                <?php if (isset($permohonan->tanggal_review_pembimbing) && $permohonan->tanggal_review_pembimbing): ?>
                                 <tr>
                                     <td><strong>Review Pembimbing</strong></td>
                                     <td>: <?= date('d F Y', strtotime($permohonan->tanggal_review_pembimbing)) ?></td>
                                 </tr>
                                 <?php endif; ?>
-                                <?php if ($permohonan->tanggal_upload_surat_staf): ?>
+                                <?php if (isset($permohonan->tanggal_upload_surat_staf) && $permohonan->tanggal_upload_surat_staf): ?>
                                 <tr>
                                     <td><strong>Surat Diterbitkan</strong></td>
                                     <td>: <?= date('d F Y', strtotime($permohonan->tanggal_upload_surat_staf)) ?></td>
@@ -168,8 +183,8 @@
                     </div>
                     
                     <!-- Komentar Pembimbing -->
-                    <?php if ($permohonan->komentar_pembimbing): ?>
-                    <div class="alert alert-<?= $permohonan->status_pembimbing == 'approved' ? 'success' : 'danger' ?> mt-3">
+                    <?php if (isset($permohonan->komentar_pembimbing) && !empty($permohonan->komentar_pembimbing)): ?>
+                    <div class="alert alert-<?= isset($permohonan->status_pembimbing) && $permohonan->status_pembimbing == 'approved' ? 'success' : 'danger' ?> mt-3">
                         <h6><i class="fas fa-comment mr-2"></i>Komentar Pembimbing:</h6>
                         <p class="mb-0"><?= nl2br(htmlspecialchars($permohonan->komentar_pembimbing)) ?></p>
                     </div>
@@ -177,19 +192,19 @@
 
                     <!-- Action Buttons -->
                     <div class="mt-3">
-                        <a href="<?= base_url('mahasiswa/penelitian/detail/' . $permohonan->id) ?>" 
+                        <a href="<?= base_url('mahasiswa/penelitian/detail/' . (isset($permohonan->id) ? $permohonan->id : '0')) ?>" 
                            class="btn btn-primary btn-sm">
                             <i class="fas fa-eye mr-1"></i>Detail Permohonan
                         </a>
                         
-                        <?php if (in_array($permohonan->status, ['surat_ready', 'completed']) && $permohonan->file_surat_izin_staf): ?>
+                        <?php if (isset($permohonan->status) && in_array($permohonan->status, ['surat_ready', 'completed']) && isset($permohonan->file_surat_izin_staf) && $permohonan->file_surat_izin_staf): ?>
                         <a href="<?= base_url('mahasiswa/penelitian/download_surat/' . $permohonan->id) ?>" 
                            class="btn btn-success btn-sm">
                             <i class="fas fa-download mr-1"></i>Download Surat
                         </a>
                         <?php endif; ?>
                         
-                        <?php if ($permohonan->status == 'rejected'): ?>
+                        <?php if (isset($permohonan->status) && $permohonan->status == 'rejected'): ?>
                         <a href="<?= base_url('mahasiswa/penelitian/ajukan') ?>" 
                            class="btn btn-warning btn-sm">
                             <i class="fas fa-redo mr-1"></i>Ajukan Ulang
@@ -207,35 +222,56 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <?php if ($eligibility['error']): ?>
+                    <?php if (isset($eligibility['error']) && $eligibility['error']): ?>
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle mr-2"></i>
-                            <?= $eligibility['message'] ?>
+                            <?= isset($eligibility['message']) ? $eligibility['message'] : 'Terjadi kesalahan sistem' ?>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($eligibility['requirements'] as $req_key => $requirement): ?>
-                        <div class="d-flex align-items-center mb-3 p-3 border rounded">
-                            <div class="mr-3">
-                                <?php if ($requirement['status'] == 'OK'): ?>
-                                    <i class="fas fa-check-circle text-success fa-lg"></i>
-                                <?php else: ?>
-                                    <i class="fas fa-times-circle text-danger fa-lg"></i>
-                                <?php endif; ?>
+                        <?php if (isset($eligibility['requirements']) && is_array($eligibility['requirements'])): ?>
+                            <?php foreach ($eligibility['requirements'] as $req_key => $requirement): ?>
+                            <div class="d-flex align-items-center mb-3 p-3 border rounded">
+                                <div class="mr-3">
+                                    <?php 
+                                    $req_status = isset($requirement['status']) ? $requirement['status'] : 'BELUM';
+                                    if ($req_status == 'OK'): 
+                                    ?>
+                                        <i class="fas fa-check-circle text-success fa-lg"></i>
+                                    <?php else: ?>
+                                        <i class="fas fa-times-circle text-danger fa-lg"></i>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1"><?= ucwords(str_replace('_', ' ', $req_key)) ?></h6>
+                                    <small class="text-muted">
+                                        <?= isset($requirement['detail']) ? $requirement['detail'] : 'Tidak ada detail' ?>
+                                    </small>
+                                </div>
+                                <div>
+                                    <?php 
+                                    // FIXED: Check if 'count' and 'required' keys exist before using them
+                                    if (isset($requirement['count']) && isset($requirement['required'])):
+                                    ?>
+                                        <span class="badge badge-<?= $req_status == 'OK' ? 'success' : 'danger' ?>">
+                                            <?= $requirement['count'] ?>/<?= $requirement['required'] ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge badge-<?= $req_status == 'OK' ? 'success' : 'danger' ?>">
+                                            <?= $req_status ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1"><?= ucwords(str_replace('_', ' ', $req_key)) ?></h6>
-                                <small class="text-muted"><?= $requirement['detail'] ?></small>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Data syarat belum tersedia. Silakan hubungi administrator.
                             </div>
-                            <div>
-                                <span class="badge badge-<?= $requirement['status'] == 'OK' ? 'success' : 'danger' ?>">
-                                    <?= $requirement['count'] ?>/<?= $requirement['required'] ?>
-                                </span>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
+                        <?php endif; ?>
                         
                         <div class="mt-4">
-                            <?php if ($eligibility['eligible']): ?>
+                            <?php if (isset($eligibility['eligible']) && $eligibility['eligible']): ?>
                                 <div class="alert alert-success">
                                     <i class="fas fa-check mr-2"></i>
                                     <strong>Selamat!</strong> Anda memenuhi syarat untuk mengajukan izin penelitian.
@@ -244,7 +280,13 @@
                                 <div class="alert alert-warning">
                                     <i class="fas fa-exclamation-triangle mr-2"></i>
                                     <strong>Belum Memenuhi Syarat</strong><br>
-                                    Pastikan semua syarat terpenuhi sebelum mengajukan permohonan.
+                                    <?php 
+                                    $message = 'Pastikan semua syarat terpenuhi sebelum mengajukan permohonan.';
+                                    if (isset($eligibility['message'])) {
+                                        $message = $eligibility['message'];
+                                    }
+                                    echo $message;
+                                    ?>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -264,31 +306,39 @@
                 </h6>
             </div>
             <div class="card-body">
+                <?php if (isset($proposal) && $proposal): ?>
                 <table class="table table-borderless table-sm">
                     <tr>
                         <td><strong>Mahasiswa</strong></td>
                     </tr>
                     <tr>
-                        <td class="text-muted"><?= $proposal->nama ?> (<?= $proposal->nim ?>)</td>
+                        <td class="text-muted"><?= isset($proposal->nama) ? $proposal->nama : 'Tidak tersedia' ?> 
+                            (<?= isset($proposal->nim) ? $proposal->nim : '-' ?>)</td>
                     </tr>
                     <tr>
                         <td><strong>Program Studi</strong></td>
                     </tr>
                     <tr>
-                        <td class="text-muted"><?= $proposal->nama_prodi ?></td>
+                        <td class="text-muted"><?= isset($proposal->nama_prodi) ? $proposal->nama_prodi : 'Tidak tersedia' ?></td>
                     </tr>
                     <tr>
                         <td><strong>Pembimbing</strong></td>
                     </tr>
                     <tr>
-                        <td class="text-muted"><?= $proposal->nama_pembimbing ?></td>
+                        <td class="text-muted"><?= isset($proposal->nama_pembimbing) ? $proposal->nama_pembimbing : 'Belum ditetapkan' ?></td>
                     </tr>
                 </table>
+                <?php else: ?>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <small>Belum memiliki proposal yang aktif. Silakan ajukan proposal terlebih dahulu.</small>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
 
         <!-- Action Card -->
-        <?php if ($can_submit): ?>
+        <?php if (isset($can_submit) && $can_submit): ?>
         <div class="card shadow mb-4 border-left-success">
             <div class="card-body text-center">
                 <i class="fas fa-paper-plane fa-3x text-success mb-3"></i>

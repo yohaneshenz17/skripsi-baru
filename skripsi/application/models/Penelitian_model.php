@@ -2,17 +2,10 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
- * Penelitian Model - Tahap 4 Workflow
+ * Penelitian Model - FIXED FOR EXISTING DATABASE STRUCTURE
  * 
- * Model untuk mengelola permohonan izin penelitian mahasiswa
- * sesuai dengan workflow tahap 4 yang telah didefinisikan.
- * 
- * Features:
- * - Validasi syarat pengajuan (seminar proposal + jurnal bimbingan)
- * - Manajemen permohonan izin penelitian
- * - Upload dan tracking file proposal revisi
- * - Workflow pembimbing review dan staf upload surat
- * - Integration dengan tabel existing proposal_mahasiswa
+ * Model yang diperbaiki sesuai dengan struktur database yang sudah ada
+ * Menggunakan FK proposal_mahasiswa_id, bukan mahasiswa_id langsung
  * 
  * File: application/models/Penelitian_model.php
  * 
@@ -20,34 +13,25 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @subpackage  Models
  * @category    Penelitian
  * @author      Unit SIPD STK Santo Yakobus
- * @version     2.0 (Workflow Tahap 4)
+ * @version     1.1 (Fixed for Existing DB)
  */
 class Penelitian_model extends CI_Model
 {
-    // Tabel utama untuk permohonan izin penelitian (tabel baru)
     protected $table = "permohonan_izin_penelitian";
-    
-    // Tabel existing untuk integrasi
-    protected $proposal_table = "proposal_mahasiswa";
-    protected $jurnal_table = "jurnal_bimbingan";
-    protected $seminar_table = "seminar_proposal_mahasiswa";
-    protected $penilaian_table = "penilaian_seminar_proposal";
 
     public function __construct()
     {
         parent::__construct();
         $this->load->database();
-        $this->load->library('upload');
-        $this->load->helper(['file', 'security']);
     }
 
     // =================================================================
-    // VALIDASI SYARAT PENGAJUAN IZIN PENELITIAN
+    // METHODS FIXED FOR EXISTING DATABASE STRUCTURE
     // =================================================================
 
     /**
-     * Cek apakah mahasiswa memenuhi syarat untuk mengajukan izin penelitian
-     * Syarat: 1) Seminar proposal selesai + penilaian published, 2) Minimal 9 jurnal tervalidasi
+     * Cek syarat eligibility mahasiswa untuk mengajukan izin penelitian
+     * FIXED: Menggunakan struktur database yang benar
      * 
      * @param int $proposal_id
      * @param int $mahasiswa_id
@@ -56,90 +40,74 @@ class Penelitian_model extends CI_Model
     public function check_eligibility($proposal_id, $mahasiswa_id)
     {
         try {
-            // 1. Cek syarat seminar proposal
+            // 1. Cek seminar proposal completed dengan struktur yang benar
             $this->db->select('
-                pm.id as proposal_id,
-                pm.mahasiswa_id,
-                pm.judul,
-                pm.workflow_status,
+                pm.id, pm.judul, pm.workflow_status, pm.mahasiswa_id,
                 spm.status as status_seminar,
-                psp.status_penilaian,
-                psp.rekomendasi,
-                psp.published_at
+                psp.status_penilaian, psp.published_at
             ');
-            $this->db->from($this->proposal_table . ' pm');
-            $this->db->join($this->seminar_table . ' spm', 'pm.id = spm.proposal_id', 'left');
-            $this->db->join($this->penilaian_table . ' psp', 'spm.id = psp.seminar_proposal_id AND psp.status_penilaian = "published"', 'left');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->join('seminar_proposal_mahasiswa spm', 'pm.id = spm.proposal_id', 'left');
+            $this->db->join('penilaian_seminar_proposal psp', 'spm.id = psp.seminar_proposal_id AND psp.status_penilaian = "published"', 'left');
             $this->db->where('pm.id', $proposal_id);
             $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
             
-            $proposal_data = $this->db->get()->row();
+            $proposal = $this->db->get()->row();
             
-            if (!$proposal_data) {
+            if (!$proposal) {
                 return [
                     'error' => true,
-                    'message' => 'Proposal tidak ditemukan atau bukan milik Anda',
+                    'message' => 'Proposal tidak ditemukan',
                     'eligible' => false
                 ];
             }
 
-            // Cek syarat seminar proposal
-            $seminar_ok = ($proposal_data->status_seminar == 'completed' && 
-                          $proposal_data->status_penilaian == 'published');
+            // Check seminar proposal completed (status completed + penilaian published)
+            $seminar_ok = ($proposal->status_seminar == 'completed' && 
+                          $proposal->status_penilaian == 'published');
 
-            // 2. Cek syarat jurnal bimbingan (minimal 9 tervalidasi)
-            $this->db->select('COUNT(*) as total_tervalidasi');
-            $this->db->from($this->jurnal_table);
+            // 2. Cek jurnal bimbingan minimal 9
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('jurnal_bimbingan');
             $this->db->where('proposal_id', $proposal_id);
-            $this->db->where('status_validasi', '1'); // 1 = tervalidasi
+            $this->db->where('status_validasi', '1');
             
-            $jurnal_result = $this->db->get()->row();
-            $jurnal_count = $jurnal_result ? (int)$jurnal_result->total_tervalidasi : 0;
+            $jurnal_count = $this->db->get()->row()->total;
             $jurnal_ok = ($jurnal_count >= 9);
 
-            // 3. Hasil eligibility
             $eligible = $seminar_ok && $jurnal_ok;
             
-            $result = [
+            return [
                 'error' => false,
                 'eligible' => $eligible,
-                'proposal_data' => $proposal_data,
                 'requirements' => [
                     'seminar_proposal' => [
                         'status' => $seminar_ok ? 'OK' : 'BELUM',
-                        'detail' => $seminar_ok ? 'Seminar proposal selesai dan penilaian sudah dipublikasi' : 
-                                   'Seminar proposal belum selesai atau penilaian belum dipublikasi'
+                        'detail' => $seminar_ok ? 'Seminar proposal selesai dan penilaian dipublikasi' : 'Seminar proposal belum selesai atau penilaian belum dipublikasi'
                     ],
                     'jurnal_bimbingan' => [
                         'status' => $jurnal_ok ? 'OK' : 'KURANG',
                         'count' => $jurnal_count,
                         'required' => 9,
-                        'detail' => $jurnal_ok ? "Memiliki {$jurnal_count} jurnal tervalidasi" : 
-                                   "Hanya {$jurnal_count} dari 9 jurnal yang diperlukan"
+                        'detail' => $jurnal_ok ? "Memiliki {$jurnal_count} jurnal tervalidasi" : "Hanya {$jurnal_count} dari 9 jurnal yang diperlukan"
                     ]
                 ],
-                'message' => $eligible ? 'Memenuhi syarat untuk mengajukan izin penelitian' : 
-                            'Belum memenuhi syarat untuk mengajukan izin penelitian'
+                'message' => $eligible ? 'Memenuhi syarat mengajukan izin penelitian' : 'Belum memenuhi syarat'
             ];
 
-            return $result;
-
         } catch (Exception $e) {
-            log_message('error', 'Error checking eligibility: ' . $e->getMessage());
+            log_message('error', 'Error check eligibility: ' . $e->getMessage());
             return [
                 'error' => true,
-                'message' => 'Terjadi kesalahan saat memvalidasi syarat',
+                'message' => 'Terjadi kesalahan sistem',
                 'eligible' => false
             ];
         }
     }
 
-    // =================================================================
-    // MANAJEMEN PERMOHONAN IZIN PENELITIAN
-    // =================================================================
-
     /**
-     * Ambil daftar permohonan izin penelitian mahasiswa
+     * Get permohonan izin penelitian by mahasiswa
+     * FIXED: Menggunakan JOIN dengan proposal_mahasiswa
      * 
      * @param int $mahasiswa_id
      * @return array
@@ -155,33 +123,35 @@ class Penelitian_model extends CI_Model
                 d.email as email_pembimbing
             ');
             $this->db->from($this->table . ' pip');
-            $this->db->join($this->proposal_table . ' pm', 'pip.proposal_mahasiswa_id = pm.id');
+            $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
             $this->db->join('dosen d', 'pip.dosen_pembimbing_id = d.id', 'left');
-            $this->db->where('pip.mahasiswa_id', $mahasiswa_id);
+            // FIXED: Gunakan pm.mahasiswa_id, bukan pip.mahasiswa_id
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
             $this->db->order_by('pip.created_at', 'DESC');
             
-            $permohonan_list = $this->db->get()->result();
+            $result = $this->db->get()->result();
             
             return [
                 'error' => false,
-                'message' => 'Data berhasil diambil',
-                'data' => $permohonan_list
+                'data' => $result
             ];
 
         } catch (Exception $e) {
-            log_message('error', 'Error getting permohonan: ' . $e->getMessage());
+            log_message('error', 'Error get permohonan: ' . $e->getMessage());
             return [
                 'error' => true,
-                'message' => 'Terjadi kesalahan saat mengambil data permohonan'
+                'message' => 'Gagal mengambil data permohonan',
+                'data' => []
             ];
         }
     }
 
     /**
-     * Ambil detail permohonan berdasarkan ID
+     * Get detail permohonan
+     * FIXED: Menggunakan struktur JOIN yang benar
      * 
      * @param int $permohonan_id
-     * @param int $mahasiswa_id (untuk validasi ownership)
+     * @param int $mahasiswa_id (optional untuk validasi)
      * @return array
      */
     public function get_permohonan_detail($permohonan_id, $mahasiswa_id = null)
@@ -191,145 +161,141 @@ class Penelitian_model extends CI_Model
                 pip.*,
                 pm.judul as judul_proposal,
                 pm.workflow_status,
-                pm.status_izin_penelitian,
+                pm.mahasiswa_id,
                 d.nama as nama_pembimbing,
                 d.email as email_pembimbing,
-                d.nip as nip_pembimbing
+                d.nip as nip_pembimbing,
+                m.nama as nama_mahasiswa_db,
+                m.nim as nim_mahasiswa_db
             ');
             $this->db->from($this->table . ' pip');
-            $this->db->join($this->proposal_table . ' pm', 'pip.proposal_mahasiswa_id = pm.id');
+            $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
             $this->db->join('dosen d', 'pip.dosen_pembimbing_id = d.id', 'left');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id', 'left');
             $this->db->where('pip.id', $permohonan_id);
             
+            // FIXED: Validasi menggunakan pm.mahasiswa_id
             if ($mahasiswa_id) {
-                $this->db->where('pip.mahasiswa_id', $mahasiswa_id);
+                $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
             }
             
-            $permohonan = $this->db->get()->row();
+            $result = $this->db->get()->row();
             
-            if (!$permohonan) {
+            if (!$result) {
                 return [
                     'error' => true,
-                    'message' => 'Permohonan tidak ditemukan atau bukan milik Anda'
+                    'message' => 'Permohonan tidak ditemukan'
                 ];
             }
 
             return [
                 'error' => false,
-                'message' => 'Data berhasil ditemukan',
-                'data' => $permohonan
+                'data' => $result
             ];
 
         } catch (Exception $e) {
-            log_message('error', 'Error getting permohonan detail: ' . $e->getMessage());
+            log_message('error', 'Error get detail: ' . $e->getMessage());
             return [
                 'error' => true,
-                'message' => 'Terjadi kesalahan saat mengambil detail permohonan'
+                'message' => 'Gagal mengambil detail permohonan'
             ];
         }
     }
 
     /**
-     * Buat permohonan izin penelitian baru
+     * Create permohonan baru
+     * FIXED: Sesuai struktur database existing (tanpa field mahasiswa_id)
      * 
-     * @param array $input_data
+     * @param array $data
      * @return array
      */
-    public function create_permohonan($input_data)
+    public function create_permohonan($data)
     {
         $this->db->trans_start();
         
         try {
-            // 1. Validasi input required
-            $required_fields = [
-                'proposal_mahasiswa_id', 'mahasiswa_id', 'nama_mahasiswa', 
-                'nim', 'semester', 'program_studi', 'judul_skripsi_terbaru',
-                'tempat_penelitian', 'tanggal_mulai_penelitian', 
-                'tanggal_selesai_penelitian', 'dosen_pembimbing_id'
-            ];
-
-            foreach ($required_fields as $field) {
-                if (!isset($input_data[$field]) || empty($input_data[$field])) {
-                    throw new Exception("Field {$field} wajib diisi");
-                }
+            // Basic validation
+            if (empty($data['proposal_mahasiswa_id'])) {
+                throw new Exception('proposal_mahasiswa_id tidak boleh kosong');
             }
 
-            // 2. Validasi eligibility terlebih dahulu
-            $eligibility = $this->check_eligibility($input_data['proposal_mahasiswa_id'], $input_data['mahasiswa_id']);
+            // Validasi proposal exists dan milik mahasiswa yang benar
+            $this->db->select('pm.id, pm.mahasiswa_id, pm.judul, pm.dosen_id');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->where('pm.id', $data['proposal_mahasiswa_id']);
+            if (isset($data['mahasiswa_id'])) {
+                $this->db->where('pm.mahasiswa_id', $data['mahasiswa_id']);
+            }
+            
+            $proposal_check = $this->db->get()->row();
+            if (!$proposal_check) {
+                throw new Exception('Proposal tidak ditemukan atau bukan milik Anda');
+            }
+
+            // Check eligibility
+            $eligibility = $this->check_eligibility($data['proposal_mahasiswa_id'], $proposal_check->mahasiswa_id);
             if (!$eligibility['eligible']) {
                 throw new Exception($eligibility['message']);
             }
 
-            // 3. Cek apakah sudah ada permohonan active untuk proposal ini
+            // Check existing permohonan (menggunakan unique key yang sudah ada)
             $existing = $this->db->get_where($this->table, [
-                'proposal_mahasiswa_id' => $input_data['proposal_mahasiswa_id'],
-                'status !=' => 'rejected'
+                'proposal_mahasiswa_id' => $data['proposal_mahasiswa_id']
             ])->row();
 
-            if ($existing) {
+            if ($existing && $existing->status != 'rejected') {
                 throw new Exception('Sudah ada permohonan yang sedang diproses untuk proposal ini');
             }
 
-            // 4. Handle file upload proposal revisi
-            $file_proposal_revisi = null;
-            if (isset($input_data['file_proposal_revisi']) && !empty($input_data['file_proposal_revisi'])) {
-                $upload_result = $this->_handle_file_upload($input_data['file_proposal_revisi'], 'proposal_revisi');
-                if ($upload_result['error']) {
-                    throw new Exception($upload_result['message']);
-                }
-                $file_proposal_revisi = $upload_result['file_name'];
-            }
-
-            // 5. Prepare data untuk insert
+            // FIXED: Insert data sesuai struktur tabel yang ada (tanpa mahasiswa_id)
             $insert_data = [
-                'proposal_mahasiswa_id' => $input_data['proposal_mahasiswa_id'],
-                'mahasiswa_id' => $input_data['mahasiswa_id'],
-                'nama_mahasiswa' => strtoupper($input_data['nama_mahasiswa']),
-                'nim' => $input_data['nim'],
-                'semester' => $input_data['semester'],
-                'program_studi' => $input_data['program_studi'],
-                'judul_skripsi_terbaru' => $input_data['judul_skripsi_terbaru'],
-                'tempat_penelitian' => $input_data['tempat_penelitian'],
-                'tanggal_mulai_penelitian' => $input_data['tanggal_mulai_penelitian'],
-                'tanggal_selesai_penelitian' => $input_data['tanggal_selesai_penelitian'],
-                'dosen_pembimbing_id' => $input_data['dosen_pembimbing_id'],
-                'file_proposal_revisi' => $file_proposal_revisi,
+                'proposal_mahasiswa_id' => $data['proposal_mahasiswa_id'],
+                'nama_mahasiswa' => strtoupper($data['nama_mahasiswa']),
+                'nim' => $data['nim'],
+                'semester' => $data['semester'],
+                'program_studi' => $data['program_studi'],
+                'judul_skripsi_terbaru' => $data['judul_skripsi_terbaru'],
+                'tempat_penelitian' => $data['tempat_penelitian'],
+                'tanggal_mulai_penelitian' => $data['tanggal_mulai_penelitian'],
+                'tanggal_selesai_penelitian' => $data['tanggal_selesai_penelitian'],
+                'dosen_pembimbing_id' => $data['dosen_pembimbing_id'],
                 'status' => 'submitted',
                 'status_pembimbing' => 'pending',
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            // 6. Insert ke database
+            // Handle file upload jika ada
+            if (isset($data['file_proposal_revisi']) && !empty($data['file_proposal_revisi'])) {
+                $insert_data['file_proposal_revisi'] = $data['file_proposal_revisi'];
+            }
+
+            // Insert ke database
             $this->db->insert($this->table, $insert_data);
             $permohonan_id = $this->db->insert_id();
 
-            // 7. Update workflow_status di proposal_mahasiswa
-            $this->db->where('id', $input_data['proposal_mahasiswa_id']);
-            $this->db->update($this->proposal_table, [
+            // Update proposal workflow status (trigger akan handle yang lain)
+            $this->db->where('id', $data['proposal_mahasiswa_id']);
+            $this->db->update('proposal_mahasiswa', [
                 'workflow_status' => 'penelitian',
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
 
-            // 8. Log aktivitas
-            $this->_log_activity($permohonan_id, $input_data['mahasiswa_id'], 'mahasiswa', 
-                               'create_permohonan', 'Mahasiswa mengajukan permohonan izin penelitian');
-
             $this->db->trans_complete();
 
             if ($this->db->trans_status() === FALSE) {
-                throw new Exception('Gagal menyimpan permohonan izin penelitian');
+                throw new Exception('Gagal menyimpan permohonan');
             }
 
             return [
                 'error' => false,
-                'message' => 'Permohonan izin penelitian berhasil diajukan',
+                'message' => 'Permohonan berhasil diajukan',
                 'data' => ['permohonan_id' => $permohonan_id]
             ];
 
         } catch (Exception $e) {
             $this->db->trans_rollback();
-            log_message('error', 'Error creating permohonan: ' . $e->getMessage());
+            log_message('error', 'Error create permohonan: ' . $e->getMessage());
             return [
                 'error' => true,
                 'message' => $e->getMessage()
@@ -337,221 +303,98 @@ class Penelitian_model extends CI_Model
         }
     }
 
-    // =================================================================
-    // DROPDOWN DATA HELPERS
-    // =================================================================
-
     /**
-     * Ambil daftar dosen untuk dropdown pembimbing
+     * Update status permohonan
      * 
+     * @param int $permohonan_id
+     * @param string $status
+     * @param array $additional_data
      * @return array
      */
-    public function get_dosen_list()
+    public function update_status($permohonan_id, $status, $additional_data = [])
     {
         try {
-            $this->db->select('id, nama, nip, email');
-            $this->db->from('dosen');
-            $this->db->where('level', '2'); // Level 2 = dosen
-            $this->db->order_by('nama', 'ASC');
-            
-            $dosen_list = $this->db->get()->result();
-            
-            return [
-                'error' => false,
-                'data' => $dosen_list
-            ];
+            $update_data = array_merge([
+                'status' => $status,
+                'updated_at' => date('Y-m-d H:i:s')
+            ], $additional_data);
+
+            $this->db->where('id', $permohonan_id);
+            $this->db->update($this->table, $update_data);
+
+            if ($this->db->affected_rows() > 0) {
+                return [
+                    'error' => false,
+                    'message' => 'Status berhasil diupdate'
+                ];
+            } else {
+                return [
+                    'error' => true,
+                    'message' => 'Gagal update status'
+                ];
+            }
 
         } catch (Exception $e) {
-            log_message('error', 'Error getting dosen list: ' . $e->getMessage());
+            log_message('error', 'Error update status: ' . $e->getMessage());
             return [
                 'error' => true,
-                'message' => 'Gagal mengambil daftar dosen'
+                'message' => 'Terjadi kesalahan sistem'
             ];
         }
     }
 
     /**
-     * Ambil proposal mahasiswa untuk form (pre-fill data)
+     * Menggunakan view yang sudah tersedia untuk dashboard
+     * BONUS: Manfaatkan v_penelitian_dashboard yang sudah ada
      * 
-     * @param int $proposal_id
      * @param int $mahasiswa_id
      * @return array
      */
-    public function get_proposal_data($proposal_id, $mahasiswa_id)
+    public function get_dashboard_data($mahasiswa_id)
     {
         try {
-            $this->db->select('
-                pm.*,
-                m.nim, m.nama as nama_mahasiswa,
-                p.nama as nama_prodi,
-                d.nama as nama_pembimbing, d.id as dosen_pembimbing_id
-            ');
-            $this->db->from($this->proposal_table . ' pm');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            $this->db->where('pm.id', $proposal_id);
+            // Gunakan view yang sudah tersedia
+            $this->db->select('*');
+            $this->db->from('v_penelitian_dashboard');
+            $this->db->join('proposal_mahasiswa pm', 'v_penelitian_dashboard.proposal_mahasiswa_id = pm.id');
             $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+            $this->db->order_by('v_penelitian_dashboard.tanggal_pengajuan', 'DESC');
             
-            $proposal = $this->db->get()->row();
+            $result = $this->db->get()->result();
             
-            if (!$proposal) {
-                return [
-                    'error' => true,
-                    'message' => 'Data proposal tidak ditemukan'
-                ];
-            }
-
             return [
                 'error' => false,
-                'data' => $proposal
+                'data' => $result
             ];
 
         } catch (Exception $e) {
-            log_message('error', 'Error getting proposal data: ' . $e->getMessage());
+            log_message('error', 'Error get dashboard data: ' . $e->getMessage());
             return [
                 'error' => true,
-                'message' => 'Gagal mengambil data proposal'
+                'message' => 'Gagal mengambil data dashboard',
+                'data' => []
             ];
         }
     }
 
     // =================================================================
-    // FILE HANDLING
+    // LEGACY COMPATIBILITY - MINIMAL
     // =================================================================
 
     /**
-     * Handle file upload dengan validasi keamanan
-     * 
-     * @param string $file_data (base64 atau file upload)
-     * @param string $subfolder
-     * @return array
-     */
-    private function _handle_file_upload($file_data, $subfolder = 'proposal_revisi')
-    {
-        try {
-            // Direktori upload
-            $upload_path = FCPATH . 'uploads/penelitian/' . $subfolder . '/';
-            
-            // Buat direktori jika belum ada
-            if (!is_dir($upload_path)) {
-                mkdir($upload_path, 0755, true);
-            }
-
-            // Handle base64 upload (dari form)
-            if (strpos($file_data, 'data:') === 0) {
-                // Parse base64 data
-                $file_parts = explode(';base64,', $file_data);
-                if (count($file_parts) !== 2) {
-                    throw new Exception('Format file tidak valid');
-                }
-
-                $file_type = str_replace('data:', '', $file_parts[0]);
-                $file_content = base64_decode($file_parts[1]);
-                
-                // Validasi tipe file
-                $allowed_types = ['application/pdf', 'application/msword', 
-                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-                if (!in_array($file_type, $allowed_types)) {
-                    throw new Exception('Tipe file tidak diizinkan. Hanya PDF dan Word yang diperbolehkan');
-                }
-
-                // Generate nama file unik
-                $extension = ($file_type === 'application/pdf') ? '.pdf' : 
-                           (($file_type === 'application/msword') ? '.doc' : '.docx');
-                $file_name = 'proposal_' . date('YmdHis') . '_' . uniqid() . $extension;
-                
-                // Simpan file
-                $file_path = $upload_path . $file_name;
-                if (!file_put_contents($file_path, $file_content)) {
-                    throw new Exception('Gagal menyimpan file');
-                }
-
-                // Validasi ukuran file (max 2MB)
-                if (filesize($file_path) > 2 * 1024 * 1024) {
-                    unlink($file_path);
-                    throw new Exception('Ukuran file terlalu besar. Maksimal 2MB');
-                }
-
-                return [
-                    'error' => false,
-                    'file_name' => $file_name,
-                    'file_path' => $file_path
-                ];
-            }
-
-            throw new Exception('Format upload tidak didukung');
-
-        } catch (Exception $e) {
-            return [
-                'error' => true,
-                'message' => $e->getMessage()
-            ];
-        }
-    }
-
-    // =================================================================
-    // ACTIVITY LOGGING
-    // =================================================================
-
-    /**
-     * Log aktivitas untuk audit trail
-     * 
-     * @param int $permohonan_id
-     * @param int $user_id
-     * @param string $user_role
-     * @param string $aktivitas
-     * @param string $deskripsi
-     */
-    private function _log_activity($permohonan_id, $user_id, $user_role, $aktivitas, $deskripsi)
-    {
-        try {
-            // Cek apakah tabel log ada
-            if (!$this->db->table_exists('log_penelitian')) {
-                return; // Skip jika tabel belum dibuat
-            }
-
-            $log_data = [
-                'permohonan_id' => $permohonan_id,
-                'user_id' => $user_id,
-                'user_role' => $user_role,
-                'aktivitas' => $aktivitas,
-                'deskripsi' => $deskripsi,
-                'created_at' => date('Y-m-d H:i:s')
-            ];
-
-            $this->db->insert('log_penelitian', $log_data);
-
-        } catch (Exception $e) {
-            log_message('debug', 'Log activity error: ' . $e->getMessage());
-            // Tidak perlu throw exception, karena ini hanya logging
-        }
-    }
-
-    // =================================================================
-    // LEGACY COMPATIBILITY (untuk backward compatibility)
-    // =================================================================
-
-    /**
-     * Method untuk kompatibilitas dengan sistem lama
-     * DEPRECATED: Gunakan method baru di atas
+     * Legacy method untuk compatibility dengan API controller existing
      */
     public function index($input)
     {
-        // Redirect ke method baru
         if (isset($input['mahasiswa_id'])) {
             return $this->get_permohonan_by_mahasiswa($input['mahasiswa_id']);
         }
         
-        return [
-            'error' => true,
-            'message' => 'Parameter tidak valid'
-        ];
+        return ['error' => true, 'message' => 'Parameter tidak valid'];
     }
 
     /**
-     * Method untuk kompatibilitas dengan sistem lama  
-     * DEPRECATED: Gunakan create_permohonan()
+     * Legacy method untuk compatibility
      */
     public function create($input)
     {
@@ -559,12 +402,19 @@ class Penelitian_model extends CI_Model
     }
 
     /**
-     * Method untuk kompatibilitas dengan sistem lama
-     * DEPRECATED: Gunakan get_permohonan_detail()
+     * Legacy method untuk compatibility
      */
     public function details($id)
     {
         return $this->get_permohonan_detail($id);
+    }
+
+    /**
+     * Legacy method - not used but kept for compatibility
+     */
+    public function destroy($id)
+    {
+        return ['error' => true, 'message' => 'Method not implemented'];
     }
 }
 

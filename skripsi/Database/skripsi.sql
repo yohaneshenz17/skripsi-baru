@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 30, 2025 at 02:53 PM
+-- Generation Time: Jul 30, 2025 at 04:06 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -564,6 +564,22 @@ INSERT INTO `konsultasi_backup_full_20250725_070204` (`id`, `proposal_mahasiswa_
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `log_penelitian`
+--
+
+CREATE TABLE `log_penelitian` (
+  `id` bigint(20) NOT NULL,
+  `permohonan_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `user_role` enum('mahasiswa','dosen','staf','kaprodi','admin') NOT NULL,
+  `aktivitas` varchar(100) NOT NULL,
+  `deskripsi` text NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `mahasiswa`
 --
 
@@ -978,6 +994,72 @@ CREATE TABLE `penilaian_seminar_proposal_v` (
 ,`updated_at` datetime
 ,`published_at` datetime
 );
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `permohonan_izin_penelitian`
+--
+
+CREATE TABLE `permohonan_izin_penelitian` (
+  `id` bigint(20) NOT NULL,
+  `proposal_mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa (readonly)',
+  `nama_mahasiswa` varchar(100) NOT NULL COMMENT 'Nama mahasiswa (input manual, huruf kapital)',
+  `nim` varchar(20) NOT NULL COMMENT 'NIM mahasiswa (input manual)',
+  `semester` varchar(10) NOT NULL COMMENT 'Semester (VII, VIII, IX)',
+  `program_studi` enum('Pendidikan Keagamaan Katolik','Pendidikan Guru Sekolah Dasar') NOT NULL COMMENT 'Program studi',
+  `judul_skripsi_terbaru` text NOT NULL COMMENT 'Judul skripsi terbaru setelah seminar proposal',
+  `tempat_penelitian` varchar(255) NOT NULL COMMENT 'Lokasi penelitian (wilayah gerejawi, instansi, dll)',
+  `tanggal_mulai_penelitian` date NOT NULL COMMENT 'Tanggal mulai penelitian',
+  `tanggal_selesai_penelitian` date NOT NULL COMMENT 'Tanggal selesai penelitian',
+  `dosen_pembimbing_id` bigint(20) NOT NULL COMMENT 'FK ke dosen pembimbing (dari dropdown)',
+  `file_proposal_revisi` varchar(255) NOT NULL COMMENT 'File proposal yang sudah direvisi (PDF/Word, max 2MB)',
+  `status` enum('draft','submitted','review_pembimbing','approved','rejected','surat_ready','completed') DEFAULT 'draft' COMMENT 'Status workflow permohonan',
+  `status_pembimbing` enum('pending','approved','rejected') DEFAULT 'pending' COMMENT 'Status review dosen pembimbing',
+  `komentar_pembimbing` text DEFAULT NULL COMMENT 'Komentar dosen pembimbing',
+  `tanggal_review_pembimbing` datetime DEFAULT NULL COMMENT 'Tanggal review pembimbing',
+  `file_surat_izin_staf` varchar(255) DEFAULT NULL COMMENT 'File surat izin yang diupload staf (PDF, max 1MB)',
+  `tanggal_upload_surat_staf` datetime DEFAULT NULL COMMENT 'Tanggal staf upload surat',
+  `uploaded_by_staf` bigint(20) DEFAULT NULL COMMENT 'ID staf yang upload surat',
+  `keterangan_staf` text DEFAULT NULL COMMENT 'Keterangan dari staf',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Tanggal pengajuan',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Permohonan izin penelitian - tidak mengubah tabel existing';
+
+--
+-- Triggers `permohonan_izin_penelitian`
+--
+DELIMITER $$
+CREATE TRIGGER `tr_permohonan_completed` AFTER UPDATE ON `permohonan_izin_penelitian` FOR EACH ROW BEGIN
+    -- Jika status berubah ke completed, update field existing di proposal_mahasiswa
+    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+        UPDATE proposal_mahasiswa 
+        SET 
+            status_izin_penelitian = '1',
+            surat_izin_penelitian = NEW.file_surat_izin_staf
+        WHERE id = NEW.proposal_mahasiswa_id;
+    END IF;
+    
+    -- Jika ditolak pembimbing
+    IF NEW.status_pembimbing = 'rejected' AND OLD.status_pembimbing != 'rejected' THEN
+        UPDATE proposal_mahasiswa 
+        SET status_izin_penelitian = '2'
+        WHERE id = NEW.proposal_mahasiswa_id;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `tr_workflow_to_seminar_skripsi` AFTER UPDATE ON `permohonan_izin_penelitian` FOR EACH ROW BEGIN
+    -- Jika surat sudah didownload mahasiswa, siap ke tahap seminar skripsi
+    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+        UPDATE proposal_mahasiswa 
+        SET workflow_status = 'seminar_skripsi'
+        WHERE id = NEW.proposal_mahasiswa_id;
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -1804,6 +1886,38 @@ CREATE TABLE `validasi_stats_v` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `v_penelitian_dashboard`
+-- (See below for the actual view)
+--
+CREATE TABLE `v_penelitian_dashboard` (
+`permohonan_id` bigint(20)
+,`proposal_mahasiswa_id` bigint(20)
+,`nim` varchar(20)
+,`nama_mahasiswa` varchar(100)
+,`semester` varchar(10)
+,`program_studi` enum('Pendidikan Keagamaan Katolik','Pendidikan Guru Sekolah Dasar')
+,`judul_skripsi_terbaru` text
+,`tempat_penelitian` varchar(255)
+,`tanggal_mulai_penelitian` date
+,`tanggal_selesai_penelitian` date
+,`status` enum('draft','submitted','review_pembimbing','approved','rejected','surat_ready','completed')
+,`status_pembimbing` enum('pending','approved','rejected')
+,`tanggal_pengajuan` datetime
+,`tanggal_review_pembimbing` datetime
+,`tanggal_upload_surat_staf` datetime
+,`nama_pembimbing` varchar(100)
+,`nip_pembimbing` varchar(30)
+,`email_pembimbing` varchar(100)
+,`workflow_status` enum('proposal','bimbingan','seminar_proposal','penelitian','seminar_skripsi','publikasi','selesai')
+,`status_izin_penelitian` enum('0','1','2')
+,`surat_izin_penelitian` varchar(255)
+,`status_description` varchar(36)
+,`progress_percentage` int(3)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `bimbingan_dosen_v`
 --
 DROP TABLE IF EXISTS `bimbingan_dosen_v`;
@@ -1918,6 +2032,15 @@ DROP TABLE IF EXISTS `validasi_stats_v`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `validasi_stats_v`  AS SELECT `validasi_dokumen`.`jenis_dokumen` AS `jenis_dokumen`, count(0) AS `total_dokumen`, sum(case when `validasi_dokumen`.`is_verified` = 1 then 1 else 0 end) AS `dokumen_terverifikasi`, sum(`validasi_dokumen`.`verify_count`) AS `total_verifikasi`, avg(`validasi_dokumen`.`verify_count`) AS `rata_rata_verifikasi`, count(case when `validasi_dokumen`.`expired_at` > current_timestamp() then 1 end) AS `masih_valid`, count(case when `validasi_dokumen`.`expired_at` <= current_timestamp() then 1 end) AS `sudah_expired` FROM `validasi_dokumen` GROUP BY `validasi_dokumen`.`jenis_dokumen` ;
 
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_penelitian_dashboard`
+--
+DROP TABLE IF EXISTS `v_penelitian_dashboard`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `v_penelitian_dashboard`  AS SELECT `pip`.`id` AS `permohonan_id`, `pip`.`proposal_mahasiswa_id` AS `proposal_mahasiswa_id`, `pip`.`nim` AS `nim`, `pip`.`nama_mahasiswa` AS `nama_mahasiswa`, `pip`.`semester` AS `semester`, `pip`.`program_studi` AS `program_studi`, `pip`.`judul_skripsi_terbaru` AS `judul_skripsi_terbaru`, `pip`.`tempat_penelitian` AS `tempat_penelitian`, `pip`.`tanggal_mulai_penelitian` AS `tanggal_mulai_penelitian`, `pip`.`tanggal_selesai_penelitian` AS `tanggal_selesai_penelitian`, `pip`.`status` AS `status`, `pip`.`status_pembimbing` AS `status_pembimbing`, `pip`.`created_at` AS `tanggal_pengajuan`, `pip`.`tanggal_review_pembimbing` AS `tanggal_review_pembimbing`, `pip`.`tanggal_upload_surat_staf` AS `tanggal_upload_surat_staf`, `d`.`nama` AS `nama_pembimbing`, `d`.`nip` AS `nip_pembimbing`, `d`.`email` AS `email_pembimbing`, `pm`.`workflow_status` AS `workflow_status`, `pm`.`status_izin_penelitian` AS `status_izin_penelitian`, `pm`.`surat_izin_penelitian` AS `surat_izin_penelitian`, CASE `pip`.`status` WHEN 'draft' THEN 'Draft Permohonan' WHEN 'submitted' THEN 'Menunggu Review Pembimbing' WHEN 'review_pembimbing' THEN 'Sedang Direview Pembimbing' WHEN 'approved' THEN 'Disetujui Pembimbing - Menunggu Staf' WHEN 'rejected' THEN 'Ditolak Pembimbing' WHEN 'surat_ready' THEN 'Surat Siap - Menunggu Download' WHEN 'completed' THEN 'Selesai' ELSE 'Status Tidak Dikenal' END AS `status_description`, CASE `pip`.`status` WHEN 'draft' THEN 10 WHEN 'submitted' THEN 25 WHEN 'review_pembimbing' THEN 40 WHEN 'approved' THEN 60 WHEN 'rejected' THEN 0 WHEN 'surat_ready' THEN 80 WHEN 'completed' THEN 100 ELSE 0 END AS `progress_percentage` FROM ((`permohonan_izin_penelitian` `pip` left join `dosen` `d` on(`pip`.`dosen_pembimbing_id` = `d`.`id`)) left join `proposal_mahasiswa` `pm` on(`pip`.`proposal_mahasiswa_id` = `pm`.`id`)) ;
+
 --
 -- Indexes for dumped tables
 --
@@ -1989,6 +2112,15 @@ ALTER TABLE `konsultasi`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `log_penelitian`
+--
+ALTER TABLE `log_penelitian`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_permohonan` (`permohonan_id`),
+  ADD KEY `idx_user` (`user_id`),
+  ADD KEY `idx_aktivitas` (`aktivitas`);
+
+--
 -- Indexes for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
@@ -2044,6 +2176,19 @@ ALTER TABLE `penilaian_seminar_proposal_backup_20250729`
   ADD KEY `idx_rekomendasi` (`rekomendasi`),
   ADD KEY `idx_nilai_huruf` (`nilai_huruf`),
   ADD KEY `idx_published_at` (`published_at`);
+
+--
+-- Indexes for table `permohonan_izin_penelitian`
+--
+ALTER TABLE `permohonan_izin_penelitian`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_proposal_permohonan` (`proposal_mahasiswa_id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_pembimbing` (`dosen_pembimbing_id`),
+  ADD KEY `idx_status_pembimbing` (`status_pembimbing`),
+  ADD KEY `idx_created_at` (`created_at`),
+  ADD KEY `idx_penelitian_workflow_safe` (`status`,`created_at`),
+  ADD KEY `idx_penelitian_pembimbing_safe` (`dosen_pembimbing_id`,`status_pembimbing`);
 
 --
 -- Indexes for table `prodi`
@@ -2174,6 +2319,12 @@ ALTER TABLE `konsultasi`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
+-- AUTO_INCREMENT for table `log_penelitian`
+--
+ALTER TABLE `log_penelitian`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
@@ -2208,6 +2359,12 @@ ALTER TABLE `penilaian_seminar_proposal`
 --
 ALTER TABLE `penilaian_seminar_proposal_backup_20250729`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `permohonan_izin_penelitian`
+--
+ALTER TABLE `permohonan_izin_penelitian`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `prodi`
@@ -2263,6 +2420,12 @@ ALTER TABLE `jurnal_bimbingan`
   ADD CONSTRAINT `fk_jurnal_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `log_penelitian`
+--
+ALTER TABLE `log_penelitian`
+  ADD CONSTRAINT `fk_log_permohonan` FOREIGN KEY (`permohonan_id`) REFERENCES `permohonan_izin_penelitian` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `penilaian_seminar_proposal`
 --
 ALTER TABLE `penilaian_seminar_proposal`
@@ -2270,6 +2433,13 @@ ALTER TABLE `penilaian_seminar_proposal`
   ADD CONSTRAINT `fk_penilaian_penilai` FOREIGN KEY (`dinilai_oleh`) REFERENCES `dosen` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_penilaian_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_penilaian_seminar_proposal` FOREIGN KEY (`seminar_proposal_id`) REFERENCES `seminar_proposal_mahasiswa` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `permohonan_izin_penelitian`
+--
+ALTER TABLE `permohonan_izin_penelitian`
+  ADD CONSTRAINT `fk_permohonan_pembimbing_readonly` FOREIGN KEY (`dosen_pembimbing_id`) REFERENCES `dosen` (`id`),
+  ADD CONSTRAINT `fk_permohonan_proposal_readonly` FOREIGN KEY (`proposal_mahasiswa_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `proposal_mahasiswa`

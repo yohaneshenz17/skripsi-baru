@@ -22,11 +22,11 @@ class Seminar_proposal extends CI_Controller {
     {
         parent::__construct();
         
-        // Load core libraries first
+        // Load core libraries
         $this->load->database();
         $this->load->library('session');
-        $this->load->helper(['url', 'form']);
-        
+        $this->load->helper(['url', 'form', 'text']); // ← TAMBAHKAN 'text' di sini
+
         // Debug mode untuk development
         if (ENVIRONMENT === 'development') {
             error_reporting(E_ALL);
@@ -34,11 +34,8 @@ class Seminar_proposal extends CI_Controller {
             log_message('debug', 'Seminar_proposal constructor called - Session: ' . json_encode($this->session->userdata()));
         }
         
-        // Check authentication dengan debugging
-        if (!$this->session->userdata('logged_in')) {
-            if (ENVIRONMENT === 'development') {
-                log_message('debug', 'Seminar_proposal: User not logged in');
-            }
+        // Check authentication
+        if (!$this->session->userdata('logged_in') || $this->session->userdata('level') !== '3') {
             redirect('auth/login');
             return;
         }
@@ -438,6 +435,8 @@ class Seminar_proposal extends CI_Controller {
      * @param int $seminar_id ID seminar proposal
      */
     public function lihat_penilaian($seminar_id) {
+        // Load text helper
+        $this->load->helper('text');
         $mahasiswa_id = $this->session->userdata('id');
         
         // Validasi akses - pastikan seminar milik mahasiswa yang login

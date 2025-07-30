@@ -5,6 +5,7 @@
  * 
  * Form untuk mengajukan permohonan izin penelitian dengan validasi syarat
  * Mengikuti design pattern existing dengan Bootstrap 4
+ * FIXED: File upload validation dan error handling
  */
 ?>
 
@@ -65,7 +66,7 @@
                             <div class="form-group">
                                 <label for="nama_mahasiswa">Nama Lengkap <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="nama_mahasiswa" name="nama_mahasiswa" 
-                                       value="<?= strtoupper($mahasiswa->nama) ?>" required>
+                                       value="<?= isset($mahasiswa->nama) ? strtoupper($mahasiswa->nama) : '' ?>" required>
                                 <small class="text-muted">Nama akan otomatis dalam huruf kapital</small>
                             </div>
                         </div>
@@ -73,7 +74,7 @@
                             <div class="form-group">
                                 <label for="nim">NIM <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="nim" name="nim" 
-                                       value="<?= $mahasiswa->nim ?>" readonly>
+                                       value="<?= isset($mahasiswa->nim) ? $mahasiswa->nim : '' ?>" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -81,10 +82,17 @@
                                 <label for="semester">Semester <span class="text-danger">*</span></label>
                                 <select class="form-control" id="semester" name="semester" required>
                                     <option value="">Pilih Semester</option>
+                                    <option value="II">II (Dua)</option>
+                                    <option value="III">III (Tiga)</option>
+                                    <option value="IV">IV (Empat)</option>
+                                    <option value="V">V (Lima)</option>
+                                    <option value="VI">VI (Enam)</option>
                                     <option value="VII">VII (Tujuh)</option>
                                     <option value="VIII">VIII (Delapan)</option>
                                     <option value="IX">IX (Sembilan)</option>
                                     <option value="X">X (Sepuluh)</option>
+                                    <option value="XI">XI (Sebelas)</option>
+                                    <option value="XII">XII (Dua Belas)</option>
                                 </select>
                             </div>
                         </div>
@@ -94,11 +102,11 @@
                                 <select class="form-control" id="program_studi" name="program_studi" required>
                                     <option value="">Pilih Program Studi</option>
                                     <option value="Pendidikan Keagamaan Katolik" 
-                                            <?= $mahasiswa->nama_prodi == 'Pendidikan Keagamaan Katolik' ? 'selected' : '' ?>>
+                                            <?= isset($mahasiswa->nama_prodi) && $mahasiswa->nama_prodi == 'Pendidikan Keagamaan Katolik' ? 'selected' : '' ?>>
                                         Pendidikan Keagamaan Katolik
                                     </option>
                                     <option value="Pendidikan Guru Sekolah Dasar"
-                                            <?= $mahasiswa->nama_prodi == 'Pendidikan Guru Sekolah Dasar' ? 'selected' : '' ?>>
+                                            <?= isset($mahasiswa->nama_prodi) && $mahasiswa->nama_prodi == 'Pendidikan Guru Sekolah Dasar' ? 'selected' : '' ?>>
                                         Pendidikan Guru Sekolah Dasar
                                     </option>
                                 </select>
@@ -115,14 +123,14 @@
                     <div class="form-group">
                         <label for="judul_skripsi_terbaru">Judul Skripsi Terbaru <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="judul_skripsi_terbaru" name="judul_skripsi_terbaru" 
-                                  rows="3" required><?= $proposal->judul ?></textarea>
+                                  rows="3" required><?= isset($proposal->judul) ? $proposal->judul : '' ?></textarea>
                         <small class="text-muted">Judul setelah revisi seminar proposal (jika ada perubahan)</small>
                     </div>
                     
                     <div class="form-group">
                         <label for="tempat_penelitian">Tempat/Lokasi Penelitian <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="tempat_penelitian" name="tempat_penelitian" 
-                               placeholder="Contoh: Keuskupan Agung Jakarta, SD Katolik St. Yakobus, dll" required>
+                               placeholder="Contoh: Lingkungan St. Mikael, SD Katolik St. Yakobus, Kampung Yawimu Distrik Okaba, dll" required>
                         <small class="text-muted">Sebutkan nama instansi/wilayah yang akan menjadi lokasi penelitian</small>
                     </div>
 
@@ -150,15 +158,16 @@
                         <i class="fas fa-upload mr-2"></i>Dokumen Pendukung
                     </h6>
                     <div class="form-group">
-                        <label for="file_proposal_revisi">Proposal Revisi (Opsional)</label>
+                        <label for="file_proposal_revisi">Proposal Revisi <span class="text-danger">*</span></label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="file_proposal_revisi" 
-                                   name="file_proposal_revisi" accept=".pdf,.doc,.docx">
+                                   name="file_proposal_revisi" accept=".pdf,.doc,.docx" required>
                             <label class="custom-file-label" for="file_proposal_revisi">Pilih file...</label>
                         </div>
                         <small class="text-muted">
                             Upload proposal yang sudah direvisi (jika ada). Format: PDF, DOC, DOCX. Maksimal 2MB.
                         </small>
+                        <div class="invalid-feedback" id="file-error-msg"></div>
                     </div>
                 </div>
 
@@ -169,7 +178,7 @@
                     </h6>
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle mr-2"></i>
-                        <strong><?= $proposal->nama_pembimbing ?></strong><br>
+                        <strong><?= isset($proposal->nama_pembimbing) ? $proposal->nama_pembimbing : 'Pembimbing belum ditentukan' ?></strong><br>
                         Permohonan akan dikirim ke dosen pembimbing untuk review dan persetujuan.
                     </div>
                 </div>
@@ -199,12 +208,19 @@
                 </h6>
             </div>
             <div class="card-body">
-                <?php foreach ($eligibility['requirements'] as $req_key => $requirement): ?>
-                <div class="d-flex align-items-center mb-2">
-                    <i class="fas fa-check text-success mr-2"></i>
-                    <small><?= ucwords(str_replace('_', ' ', $req_key)) ?></small>
-                </div>
-                <?php endforeach; ?>
+                <?php if (isset($eligibility['requirements']) && is_array($eligibility['requirements'])): ?>
+                    <?php foreach ($eligibility['requirements'] as $req_key => $requirement): ?>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-check text-success mr-2"></i>
+                        <small><?= ucwords(str_replace('_', ' ', $req_key)) ?></small>
+                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-info-circle text-info mr-2"></i>
+                        <small>Informasi syarat sedang dimuat...</small>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -247,6 +263,10 @@ $(document).ready(function() {
     $('.custom-file-input').on('change', function() {
         let fileName = $(this).val().split('\\').pop();
         $(this).siblings('.custom-file-label').addClass('selected').html(fileName || 'Pilih file...');
+        
+        // Clear any previous error styling
+        $(this).removeClass('is-invalid');
+        $('#file-error-msg').text('');
     });
 
     // Validasi tanggal
@@ -276,6 +296,39 @@ $(document).ready(function() {
         let valid = true;
         let errors = [];
 
+        // Reset all error states
+        $('.is-invalid').removeClass('is-invalid');
+        $('.invalid-feedback').text('');
+
+        // Validasi file upload
+        let fileInput = $('#file_proposal_revisi')[0];
+        if (!fileInput.files.length) {
+            valid = false;
+            errors.push('File Proposal Revisi wajib diupload');
+            $('#file_proposal_revisi').addClass('is-invalid');
+            $('#file-error-msg').text('File Proposal Revisi wajib diupload');
+        } else {
+            // Validasi tipe file
+            let fileName = fileInput.files[0].name;
+            let fileExtension = fileName.split('.').pop().toLowerCase();
+            let allowedExtensions = ['pdf', 'doc', 'docx'];
+            
+            if (!allowedExtensions.includes(fileExtension)) {
+                valid = false;
+                errors.push('Format file harus PDF, DOC, atau DOCX');
+                $('#file_proposal_revisi').addClass('is-invalid');
+                $('#file-error-msg').text('Format file harus PDF, DOC, atau DOCX');
+            }
+
+            // Validasi ukuran file (2MB = 2097152 bytes)
+            if (fileInput.files[0].size > 2097152) {
+                valid = false;
+                errors.push('Ukuran file tidak boleh lebih dari 2MB');
+                $('#file_proposal_revisi').addClass('is-invalid');
+                $('#file-error-msg').text('Ukuran file tidak boleh lebih dari 2MB');
+            }
+        }
+
         // Validasi tanggal
         let startDate = new Date($('#tanggal_mulai_penelitian').val());
         let endDate = new Date($('#tanggal_selesai_penelitian').val());
@@ -283,21 +336,46 @@ $(document).ready(function() {
         if (endDate <= startDate) {
             valid = false;
             errors.push('Tanggal selesai harus lebih dari tanggal mulai penelitian');
+            $('#tanggal_selesai_penelitian').addClass('is-invalid');
         }
 
-        // Validasi file size jika ada upload
-        let fileInput = $('#file_proposal_revisi')[0];
-        if (fileInput.files.length > 0) {
-            let fileSize = fileInput.files[0].size / 1024 / 1024; // Convert to MB
-            if (fileSize > 2) {
+        // Validasi required fields
+        $('[required]').each(function() {
+            if (!$(this).val().trim()) {
                 valid = false;
-                errors.push('Ukuran file tidak boleh lebih dari 2MB');
+                $(this).addClass('is-invalid');
+                let fieldName = $(this).closest('.form-group').find('label').text().replace(' *', '');
+                errors.push(fieldName + ' wajib diisi');
             }
-        }
+        });
 
         if (!valid) {
             e.preventDefault();
-            alert('Error:\n' + errors.join('\n'));
+            
+            // Show error message
+            let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                           '<i class="fas fa-exclamation-triangle mr-2"></i>' +
+                           '<strong>Terjadi kesalahan:</strong><br>' +
+                           '<ul class="mb-0">';
+            
+            errors.forEach(function(error) {
+                errorHtml += '<li>' + error + '</li>';
+            });
+            
+            errorHtml += '</ul>' +
+                        '<button type="button" class="close" data-dismiss="alert">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>';
+            
+            // Insert error message at top of form
+            $('.card-body').prepend(errorHtml);
+            
+            // Scroll to top
+            $('html, body').animate({
+                scrollTop: $('.card').offset().top - 20
+            }, 500);
+            
             return false;
         }
 
@@ -305,11 +383,20 @@ $(document).ready(function() {
         $('#btnSubmit').prop('disabled', true).html(
             '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...'
         );
+        
+        return true;
     });
 
     // Auto uppercase nama
     $('#nama_mahasiswa').on('input', function() {
         $(this).val($(this).val().toUpperCase());
+    });
+
+    // Remove invalid class on input change
+    $('.form-control').on('change input', function() {
+        if ($(this).val().trim()) {
+            $(this).removeClass('is-invalid');
+        }
     });
 });
 </script>
@@ -342,6 +429,18 @@ $(document).ready(function() {
 
 .text-danger {
     color: #e74a3b !important;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
 }
 
 /* Responsive adjustments */

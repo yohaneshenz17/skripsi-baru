@@ -1,0 +1,1013 @@
+ERROR - 2025-07-21 02:45:43 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 02:52:14 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:52:14 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:14 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:28 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, `d`.`nama` as `nama_penerima`
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:28 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:32 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:52:32 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:52:32 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:48 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:52:49 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:49 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:51 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:52:51 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:51 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:52:54 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:52:54 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:52:54 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:53:18 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:53:18 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:53:18 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:58:34 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, `d`.`nama` as `nama_penerima`
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:58:34 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:59:14 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:59:14 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:59:14 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 02:59:19 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:59:19 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 02:59:19 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:28:49 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 08:28:57 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:28:57 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 08:28:57 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:28:59 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:29:03 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 08:29:03 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:29:03 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:32:59 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 08:33:02 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 08:33:02 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:33:02 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:34:05 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:34:48 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 08:34:48 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:34:48 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:39:04 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:44:04 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:49:05 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:50:40 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 08:50:40 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:50:40 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:50:45 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 08:50:45 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:50:45 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:52:21 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 08:52:21 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 08:52:21 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:13:47 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:13:47 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:13:47 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:18:49 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:18:55 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:18:57 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:18:57 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:18:57 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:19:03 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:19:15 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:19:20 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:19:20 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:19:20 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:19:54 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:19:54 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:19:54 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:19:57 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:19:57 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:19:57 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:20:11 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:20:11 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '40'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:20:11 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '40'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:20:16 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:20:16 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '40'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:20:16 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '40'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:20:17 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:20:17 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:20:17 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '40'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:24:58 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:27:58 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:27:58 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:27:58 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:28:00 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:28:00 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:28:00 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:28:03 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:28:03 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:28:03 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:28:16 --> 404 Page Not Found: mahasiswa/Debug/index
+ERROR - 2025-07-21 09:28:55 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:28:55 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:29:04 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:29:04 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:29:04 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Prodi does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:29:04 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:29:04 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:29:28 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:29:28 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:32:29 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:32:29 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:33:50 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Mahasiswa does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 09:34:05 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:39:04 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:40:50 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:45:36 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:45:41 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:45:41 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:45:44 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:45:56 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:46:35 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '40'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:47:59 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:47:59 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:48:01 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:48:01 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:48:04 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:48:04 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:48:08 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:48:09 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:48:20 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:48:51 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:48:55 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Merauke', `nomor_telepon_orang_tua` = '083224324567', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1, `foto` = '20250721094851.png'
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:48:55 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:48:55 --> Severity: Warning --> unlink(/home/stkp7133/public_html/skripsi/cdn/img/mahasiswa/687caab46af31.jpg): No such file or directory /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 249
+ERROR - 2025-07-21 09:48:55 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:48:58 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Merauke', `nomor_telepon_orang_tua` = '083224324567', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1, `foto` = '20250721094855.png'
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:48:58 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:49:00 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:49:15 --> Severity: Warning --> unlink(/home/stkp7133/public_html/skripsi/cdn/img/mahasiswa/687caab46af31.jpg): No such file or directory /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 249
+ERROR - 2025-07-21 09:49:15 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:49:18 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1, `foto` = '20250721094915.png'
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:49:18 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:49:18 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:49:27 --> Severity: Warning --> unlink(/home/stkp7133/public_html/skripsi/cdn/img/mahasiswa/687caab46af31.jpg): No such file or directory /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 249
+ERROR - 2025-07-21 09:49:27 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:49:30 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1, `foto` = '20250721094927.png'
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:49:30 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:49:30 --> Severity: Warning --> unlink(/home/stkp7133/public_html/skripsi/cdn/img/mahasiswa/687caab46af31.jpg): No such file or directory /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 249
+ERROR - 2025-07-21 09:49:30 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:49:33 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1, `foto` = '20250721094930.png'
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:49:33 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:50:47 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:54:37 --> Severity: Warning --> unlink(/home/stkp7133/public_html/skripsi/cdn/img/mahasiswa/687caab46af31.jpg): No such file or directory /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 249
+ERROR - 2025-07-21 09:54:37 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:54:40 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1, `foto` = '20250721095437.png'
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:54:40 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:54:41 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:55:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:55:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:55:09 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:55:12 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:55:12 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:55:23 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:55:23 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 09:55:23 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 09:55:31 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:55:34 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:55:34 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:55:34 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:55:36 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:55:36 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:55:36 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:55:39 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:55:39 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:55:39 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:55:42 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:55:42 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:55:42 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:55:45 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:55:45 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 09:55:45 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 253
+ERROR - 2025-07-21 09:55:48 --> Query error: Unknown column 'alamat_orang_tua' in 'field list' - Invalid query: UPDATE `mahasiswa` SET `nim` = '2342345456', `nama` = 'Yohanes Kandam', `prodi_id` = '10', `jenis_kelamin` = 'laki-laki', `tempat_lahir` = 'Merauke', `tanggal_lahir` = '2025-07-02', `email` = 'fransiskus.nam27@guru.sma.belajar.id', `alamat_orang_tua` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon_orang_tua` = '09713330264', `alamat` = 'Missi 2, Mandala\r\nMerauke', `nomor_telepon` = '0812324546556', `nomor_telepon_orang_dekat` = '0812324546553', `ipk` = '2.5', `status` = 1
+WHERE `mahasiswa`.`id` = '39'
+ERROR - 2025-07-21 09:55:48 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:00:23 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:00:25 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:02:04 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:06:46 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 10:07:06 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:08:02 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:08:33 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:08:33 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:08:33 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:08:34 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:08:35 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:08:35 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:08:35 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:08:35 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:08:35 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:08:35 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:08:38 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:08:38 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:08:38 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:08:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 10:08:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 10:13:02 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:18:02 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:23:03 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:28:03 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:33:02 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:38:39 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:42:50 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:42:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 10:42:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 10:42:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 10:42:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 10:42:58 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:47:59 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, COALESCE(d.nama, "Sistem") as nama_pengirim
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+AND `n`.`dibaca` =0
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 10:50:03 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:50:03 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:50:03 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:50:15 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:50:15 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:50:15 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:50:25 --> Severity: Warning --> Undefined array key "alamat_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 211
+ERROR - 2025-07-21 10:50:25 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_tua" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 212
+ERROR - 2025-07-21 10:50:25 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:55:12 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 251
+ERROR - 2025-07-21 10:55:15 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:55:27 --> Severity: Warning --> unlink(/home/stkp7133/public_html/skripsi/cdn/img/mahasiswa/687caab46af31.jpg): No such file or directory /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 247
+ERROR - 2025-07-21 10:55:27 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 251
+ERROR - 2025-07-21 10:55:30 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 10:55:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 10:55:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 13:12:21 --> Severity: Warning --> Undefined array key "status" /home/stkp7133/public_html/skripsi/application/models/Mahasiswa_model.php 251
+ERROR - 2025-07-21 13:12:25 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 13:12:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 13:12:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 13:39:08 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:39:13 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:39:17 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:39:18 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:39:22 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:39:22 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:39:51 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:39:51 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:47:02 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:47:04 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:47:08 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:52:01 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:52:05 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:52:18 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:52:54 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:53:30 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 13:54:55 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 13:54:55 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 14:20:00 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 14:42:34 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 16:24:47 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 16:26:30 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, `d`.`nama` as `nama_penerima`
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 16:26:34 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, `d`.`nama` as `nama_penerima`
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 16:26:40 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, `d`.`nama` as `nama_penerima`
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 16:27:46 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:27:46 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:27:47 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:27:47 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:27:48 --> Query error: Unknown column 'pm.id' in 'on clause' - Invalid query: SELECT `n`.*, `d`.`nama` as `nama_penerima`
+FROM `notifikasi` `n`
+LEFT JOIN `dosen` `d` ON `n`.`proposal_id` IS NOT NULL AND `pm`.`id` = `n`.`proposal_id` AND `pm`.`dosen_id` = `d`.`id`
+WHERE `n`.`user_id` = '39'
+AND `n`.`untuk_role` = 'mahasiswa'
+ORDER BY `n`.`tanggal_dibuat` DESC
+ LIMIT 5
+ERROR - 2025-07-21 16:32:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:32:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:33:14 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:33:14 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:33:17 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:33:17 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 16:49:12 --> 404 Page Not Found: mahasiswa/Debug_kontak/check_all
+ERROR - 2025-07-21 16:49:14 --> 404 Page Not Found: mahasiswa/Debug_kontak/index
+ERROR - 2025-07-21 16:49:32 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1 - Invalid query: SELECT 1 as test, NOW() as current_time
+ERROR - 2025-07-21 16:49:32 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Debug_kontak.php:49) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 16:51:28 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1 - Invalid query: SELECT 1 as test, NOW() as current_time
+ERROR - 2025-07-21 16:51:28 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Debug_kontak.php:49) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 17:00:39 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1 - Invalid query: SELECT 1 as test, NOW() as current_time
+ERROR - 2025-07-21 17:00:39 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Debug_kontak.php:49) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-21 17:01:08 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Debug_kontak.php:49) /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Debug_kontak.php 410
+ERROR - 2025-07-21 17:03:30 --> 404 Page Not Found: mahasiswa/Debug_kontak/check_all
+ERROR - 2025-07-21 17:03:46 --> 404 Page Not Found: mahasiswa/Debug_kontak/ajax_test
+ERROR - 2025-07-21 17:25:45 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 17:25:45 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 17:28:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 17:28:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 17:43:16 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 17:43:16 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 17:43:30 --> 404 Page Not Found: GetData/proposal_mahasiswa
+ERROR - 2025-07-21 17:43:34 --> Severity: error --> Exception: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Dosen does not have a method "index_get" /home/stkp7133/public_html/skripsi/application/libraries/REST_Controller.php 742
+ERROR - 2025-07-21 17:54:03 --> Severity: Warning --> include(_main/css.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 15
+ERROR - 2025-07-21 17:54:03 --> Severity: Warning --> include(): Failed opening '_main/css.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 15
+ERROR - 2025-07-21 17:54:03 --> Severity: Warning --> include(_main/js.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 1130
+ERROR - 2025-07-21 17:54:03 --> Severity: Warning --> include(): Failed opening '_main/js.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 1130
+ERROR - 2025-07-21 17:55:13 --> Severity: Warning --> include(_main/css.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 15
+ERROR - 2025-07-21 17:55:13 --> Severity: Warning --> include(): Failed opening '_main/css.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 15
+ERROR - 2025-07-21 17:55:13 --> Severity: Warning --> include(_main/js.php): Failed to open stream: No such file or directory /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 1130
+ERROR - 2025-07-21 17:55:13 --> Severity: Warning --> include(): Failed opening '_main/js.php' for inclusion (include_path='.:/opt/cpanel/ea-php80/root/usr/share/pear') /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 1130
+ERROR - 2025-07-21 18:01:58 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 18:11:04 --> Severity: Warning --> Undefined property: stdClass::$created_at /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 79
+ERROR - 2025-07-21 18:12:02 --> Severity: Warning --> Undefined property: stdClass::$created_at /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 79
+ERROR - 2025-07-21 18:12:44 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 18:12:44 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 18:12:45 --> Severity: Warning --> Undefined property: stdClass::$created_at /home/stkp7133/public_html/skripsi/application/views/mahasiswa/bimbingan.php 79
+ERROR - 2025-07-21 18:12:46 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 18:12:46 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-21 18:28:53 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-21 18:29:56 --> 404 Page Not Found: Cdn/img

@@ -2,13 +2,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Penelitian Controller untuk Mahasiswa - FIXED FOR EXISTING DB
+ * Penelitian Controller untuk Mahasiswa - FIXED VERSION
  * 
  * Fixed Issues:
- * - Accept mahasiswa level '3' (as shown in debug)
- * - Use correct database structure (no direct mahasiswa_id field)
+ * - Fixed undefined $upload_result variable
+ * - Fixed database update query (removed updated_at field)
+ * - Fixed file upload handling
  * - Better error handling
- * - Fallback for missing data
  * 
  * File: application/controllers/mahasiswa/Penelitian.php
  * 
@@ -16,7 +16,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Mahasiswa  
  * @category    Penelitian
  * @author      Unit SIPD STK Santo Yakobus
- * @version     2.2 (Fixed for Existing DB)
+ * @version     2.3 (Error Fixed)
  */
 class Penelitian extends CI_Controller {
 
@@ -148,7 +148,7 @@ class Penelitian extends CI_Controller {
                 $permohonan_data = null;
             }
             
-                       // SIMPLE & FIXED: Direct logic untuk can_submit
+            // SIMPLE & FIXED: Direct logic untuk can_submit
             $can_submit = false;
             $debug_steps = [];
             
@@ -391,7 +391,8 @@ class Penelitian extends CI_Controller {
     }
 
     /**
-     * Handle form submission - SIMPLIFIED
+     * Handle form submission - FIXED VERSION
+     * Memperbaiki masalah undefined $upload_result dan error database
      */
     private function _handle_form_submission($proposal, $mahasiswa_id) {
         try {
@@ -405,15 +406,29 @@ class Penelitian extends CI_Controller {
             $this->form_validation->set_rules('tanggal_mulai_penelitian', 'Tanggal Mulai', 'required');
             $this->form_validation->set_rules('tanggal_selesai_penelitian', 'Tanggal Selesai', 'required');
 
+            // TAMBAHKAN INI: Validasi file proposal revisi
+            if (empty($_FILES['file_proposal_revisi']['name'])) {
+                $this->form_validation->set_rules('file_proposal_revisi_dummy', 'File Proposal Revisi', 'required');
+                $this->form_validation->set_message('required', 'File Proposal Revisi wajib diupload');
+            }
+            
             if ($this->form_validation->run() == FALSE) {
                 $this->session->set_flashdata('error', validation_errors());
                 return;
             }
 
-            // Prepare data - FIXED: Sesuai struktur database
+            // FIXED: Handle file upload SEBELUM prepare data
+            $upload_result = $this->_handle_file_upload('file_proposal_revisi');
+            
+            if (!$upload_result['status']) {
+                $this->session->set_flashdata('error', $upload_result['message']);
+                return;
+            }
+
+            // FIXED: Prepare data dengan file yang sudah diupload
             $input_data = [
                 'proposal_mahasiswa_id' => $proposal->id,
-                'mahasiswa_id' => $mahasiswa_id, // Untuk validasi saja
+                'mahasiswa_id' => $mahasiswa_id,
                 'nama_mahasiswa' => $this->input->post('nama_mahasiswa'),
                 'nim' => $this->input->post('nim'),
                 'semester' => $this->input->post('semester'),
@@ -422,7 +437,8 @@ class Penelitian extends CI_Controller {
                 'tempat_penelitian' => $this->input->post('tempat_penelitian'),
                 'tanggal_mulai_penelitian' => $this->input->post('tanggal_mulai_penelitian'),
                 'tanggal_selesai_penelitian' => $this->input->post('tanggal_selesai_penelitian'),
-                'dosen_pembimbing_id' => $proposal->dosen_id
+                'dosen_pembimbing_id' => $proposal->dosen_id,
+                'file_proposal_revisi' => $upload_result['filename'] // FIXED: Sekarang sudah ada
             ];
 
             // Submit permohonan
@@ -432,6 +448,14 @@ class Penelitian extends CI_Controller {
                 $this->session->set_flashdata('error', $result['message']);
             } else {
                 $this->session->set_flashdata('success', 'Permohonan izin penelitian berhasil diajukan');
+                
+                // OPTIONAL: Kirim notifikasi ke dosen pembimbing
+                try {
+                    $this->_kirim_notifikasi_penelitian($proposal, $input_data);
+                } catch (Exception $e) {
+                    // Jangan gagalkan proses utama jika notifikasi gagal
+                    log_message('error', 'Failed to send email notification: ' . $e->getMessage());
+                }
             }
 
             redirect('mahasiswa/penelitian');
@@ -442,6 +466,191 @@ class Penelitian extends CI_Controller {
             }
             $this->session->set_flashdata('error', 'Terjadi kesalahan saat menyimpan data');
             redirect('mahasiswa/penelitian');
+        }
+    }
+    
+    /**
+     * Handle file upload untuk proposal revisi
+     * 
+     * @param string $field_name Nama field file input
+     * @return array Status upload dan informasi file
+     */
+    private function _handle_file_upload($field_name) {
+        $upload_path = FCPATH . 'uploads/penelitian/proposal_revisi/';
+        
+        // Buat direktori jika belum ada
+        if (!is_dir($upload_path)) {
+            mkdir($upload_path, 0755, true);
+        }
+        
+        // Konfigurasi upload
+        $config = [
+            'upload_path' => $upload_path,
+            'allowed_types' => 'pdf|doc|docx',
+            'max_size' => 2048, // 2MB
+            'file_name' => 'PENELITIAN_' . date('YmdHis') . '_' . $this->session->userdata('id') . '_' . uniqid(),
+            'remove_spaces' => true,
+            'encrypt_name' => false // Karena sudah custom naming
+        ];
+        
+        $this->upload->initialize($config);
+        
+        if ($this->upload->do_upload($field_name)) {
+            $upload_data = $this->upload->data();
+            return [
+                'status' => true,
+                'filename' => $upload_data['file_name'],
+                'message' => 'File berhasil diupload'
+            ];
+        } else {
+            return [
+                'status' => false,
+                'message' => 'Upload gagal: ' . $this->upload->display_errors('', ''),
+                'filename' => null
+            ];
+        }
+    }
+
+    /**
+     * Kirim notifikasi email ke dosen pembimbing
+     * 
+     * @param object $proposal Data proposal mahasiswa
+     * @param array $data_penelitian Data permohonan penelitian
+     * @return boolean Status pengiriman email
+     */
+    private function _kirim_notifikasi_penelitian($proposal, $data_penelitian) {
+        try {
+            // Ambil data dosen pembimbing
+            $dosen = $this->db->get_where('dosen', ['id' => $proposal->dosen_id])->row();
+            
+            if (!$dosen || !$dosen->email) {
+                log_message('error', 'Dosen pembimbing tidak ditemukan atau email kosong untuk proposal ID: ' . $proposal->id);
+                return false;
+            }
+            
+            // Load email library
+            $this->load->library('email');
+            
+            // Konfigurasi email
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com', 
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
+            
+            $this->email->initialize($config);
+            
+            $subject = 'Permohonan Izin Penelitian - ' . $data_penelitian['nama_mahasiswa'];
+            
+            // Template email yang professional
+            $message = "
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='UTF-8'>
+                <title>Permohonan Izin Penelitian</title>
+            </head>
+            <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+                <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                    
+                    <!-- Header -->
+                    <div style='text-align: center; background-color: #17a2b8; color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;'>
+                        <h2 style='margin: 0;'>📋 Permohonan Izin Penelitian</h2>
+                    </div>
+                    
+                    <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                        Yth. <strong>{$dosen->nama}</strong>,<br>
+                        S.Pd., M.Pd.
+                    </p>
+                    
+                    <p style='margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;'>
+                        Dengan hormat, melalui email ini kami sampaikan bahwa mahasiswa bimbingan Anda telah mengajukan 
+                        <strong>permohonan izin penelitian</strong> melalui Sistem Informasi Manajemen Tugas Akhir (SIM-TA).
+                    </p>
+                    
+                    <!-- Detail Mahasiswa -->
+                    <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #17a2b8;'>
+                        <h4 style='margin: 0 0 10px 0; color: #17a2b8;'>📚 Detail Mahasiswa:</h4>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td style='padding: 2px 0; width: 30%;'><strong>Nama</strong></td><td>: {$data_penelitian['nama_mahasiswa']}</td></tr>
+                            <tr><td style='padding: 2px 0;'><strong>NIM</strong></td><td>: {$data_penelitian['nim']}</td></tr>
+                            <tr><td style='padding: 2px 0;'><strong>Semester</strong></td><td>: {$data_penelitian['semester']}</td></tr>
+                            <tr><td style='padding: 2px 0;'><strong>Program Studi</strong></td><td>: {$data_penelitian['program_studi']}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Detail Penelitian -->
+                    <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='margin: 0 0 10px 0; color: #28a745;'>🔍 Detail Penelitian:</h4>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td style='padding: 2px 0; width: 30%; vertical-align: top;'><strong>Judul Skripsi</strong></td><td>: {$data_penelitian['judul_skripsi_terbaru']}</td></tr>
+                            <tr><td style='padding: 2px 0; vertical-align: top;'><strong>Lokasi Penelitian</strong></td><td>: {$data_penelitian['tempat_penelitian']}</td></tr>
+                            <tr><td style='padding: 2px 0;'><strong>Periode Penelitian</strong></td><td>: {$data_penelitian['tanggal_mulai_penelitian']} s/d {$data_penelitian['tanggal_selesai_penelitian']}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Call to Action -->
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='margin: 0 0 10px 0; color: #856404;'>⚡ Tindakan Diperlukan:</h4>
+                        <p style='margin: 0; font-size: 14px; color: #856404;'>
+                            Silakan login ke sistem untuk memberikan <strong>persetujuan atau penolakan</strong> 
+                            terhadap permohonan izin penelitian ini.
+                        </p>
+                    </div>
+                    
+                    <!-- Button Login -->
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='https://stkyakobus.ac.id/skripsi/dosen' 
+                           style='background-color: #17a2b8; color: white; padding: 12px 25px; text-decoration: none; 
+                                  border-radius: 5px; display: inline-block; font-weight: bold;'>
+                            🔐 Login ke Sistem SIM-TA
+                        </a>
+                    </div>
+                    
+                    <!-- Info Tambahan -->
+                    <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                        <p style='margin: 0; font-size: 13px; color: #0c5460;'>
+                            <strong>📌 Catatan:</strong> Permohonan ini memerlukan persetujuan Anda sebelum 
+                            dapat diproses lebih lanjut oleh bagian administrasi akademik.
+                        </p>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <hr style='margin: 30px 0; border: none; border-top: 1px solid #eee;'>
+                    <p style='text-align: center; color: #6c757d; font-size: 14px; margin: 0;'>
+                        Email ini dikirim otomatis oleh SIM Tugas Akhir STK Santo Yakobus Merauke<br>
+                        <small style='font-size: 12px;'>© 2025 Sekolah Tinggi Kateketik dan Pastoral Santo Yakobus Merauke</small>
+                    </p>
+                </div>
+            </body>
+            </html>";
+            
+            // Setup email
+            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($dosen->email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            // Kirim email
+            $result = $this->email->send();
+            
+            if ($result) {
+                log_message('info', 'Email permohonan penelitian berhasil dikirim ke: ' . $dosen->email . ' untuk mahasiswa: ' . $data_penelitian['nama_mahasiswa']);
+            } else {
+                log_message('error', 'Email permohonan penelitian gagal dikirim ke: ' . $dosen->email . ' - Error: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Exception saat kirim email permohonan penelitian: ' . $e->getMessage());
+            return false;
         }
     }
 

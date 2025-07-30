@@ -6,6 +6,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * 
  * Model yang diperbaiki sesuai dengan struktur database yang sudah ada
  * Menggunakan FK proposal_mahasiswa_id, bukan mahasiswa_id langsung
+ * FIXED: Menghapus field updated_at yang tidak ada di database
  * 
  * File: application/models/Penelitian_model.php
  * 
@@ -13,7 +14,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @subpackage  Models
  * @category    Penelitian
  * @author      Unit SIPD STK Santo Yakobus
- * @version     1.1 (Fixed for Existing DB)
+ * @version     1.2 (Fixed Database Fields)
  */
 class Penelitian_model extends CI_Model
 {
@@ -204,7 +205,7 @@ class Penelitian_model extends CI_Model
 
     /**
      * Create permohonan baru
-     * FIXED: Sesuai struktur database existing (tanpa field mahasiswa_id)
+     * FIXED: Sesuai struktur database existing + HAPUS field updated_at
      * 
      * @param array $data
      * @return array
@@ -261,8 +262,8 @@ class Penelitian_model extends CI_Model
                 'dosen_pembimbing_id' => $data['dosen_pembimbing_id'],
                 'status' => 'submitted',
                 'status_pembimbing' => 'pending',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s')
+                // REMOVED: 'updated_at' karena field ini tidak ada di database
             ];
 
             // Handle file upload jika ada
@@ -274,11 +275,11 @@ class Penelitian_model extends CI_Model
             $this->db->insert($this->table, $insert_data);
             $permohonan_id = $this->db->insert_id();
 
-            // Update proposal workflow status (trigger akan handle yang lain)
+            // FIXED: Update proposal workflow status (TANPA updated_at)
             $this->db->where('id', $data['proposal_mahasiswa_id']);
             $this->db->update('proposal_mahasiswa', [
-                'workflow_status' => 'penelitian',
-                'updated_at' => date('Y-m-d H:i:s')
+                'workflow_status' => 'penelitian'
+                // REMOVED: 'updated_at' karena field ini tidak ada di tabel proposal_mahasiswa
             ]);
 
             $this->db->trans_complete();
@@ -305,6 +306,7 @@ class Penelitian_model extends CI_Model
 
     /**
      * Update status permohonan
+     * FIXED: HAPUS updated_at field
      * 
      * @param int $permohonan_id
      * @param string $status
@@ -315,8 +317,8 @@ class Penelitian_model extends CI_Model
     {
         try {
             $update_data = array_merge([
-                'status' => $status,
-                'updated_at' => date('Y-m-d H:i:s')
+                'status' => $status
+                // REMOVED: 'updated_at' karena field ini tidak ada di database
             ], $additional_data);
 
             $this->db->where('id', $permohonan_id);

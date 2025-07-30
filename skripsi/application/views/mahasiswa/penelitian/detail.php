@@ -236,7 +236,7 @@
                 <?php if ($permohonan->file_proposal_revisi): ?>
                 <div class="mt-3">
                     <h6><strong>Proposal Revisi:</strong></h6>
-                    <a href="<?= base_url('uploads/proposal_revisi/' . $permohonan->file_proposal_revisi) ?>" 
+                    <a href="<?= base_url('uploads/penelitian/proposal_revisi/' . $permohonan->file_proposal_revisi) ?>" 
                        target="_blank" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-file-pdf mr-1"></i>Lihat File
                     </a>

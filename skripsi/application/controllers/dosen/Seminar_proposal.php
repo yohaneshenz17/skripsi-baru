@@ -846,6 +846,8 @@ function validateReject() {
                 m.email as email_mahasiswa,
                 m.nomor_telepon,
                 p.nama as nama_prodi,
+                d_pembimbing.nama as nama_pembimbing,
+                d_pembimbing.email as email_pembimbing,
                 d1.nama as nama_penguji1,
                 d2.nama as nama_penguji2
             ');
@@ -854,10 +856,10 @@ function validateReject() {
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
             $this->db->join('prodi p', 'm.prodi_id = p.id');
             
-            // ✅ PERBAIKAN: Pastikan join pembimbing benar
-            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id');
+            // ✅ PERBAIKAN 1: Join pembimbing dengan alias yang jelas
+            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
             
-            // ✅ PERBAIKAN: Join dosen penguji dari seminar_proposal_mahasiswa
+            // ✅ PERBAIKAN: Join dosen penguji dari seminar_proposal_mahasiswa  
             $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left');
             $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left');
             

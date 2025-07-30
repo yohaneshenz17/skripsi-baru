@@ -243,57 +243,84 @@ ob_start();
             </div>
         </div>
         
-        <!-- ✅ FIXED: Jurnal Bimbingan Summary -->
-        <div class="card shadow mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-book mr-2"></i>
-                    Status Jurnal Bimbingan
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="text-center p-3">
-                            <div class="display-4 font-weight-bold text-primary">
-                                <!-- ✅ PERBAIKAN: Akses data jurnal yang benar -->
-                                <?= $jurnal_requirement['total_approved'] ?? 0 ?>
-                            </div>
-                            <p class="text-muted mb-0">Total Pertemuan</p>
+    <!-- ✅ FIXED: Jurnal Bimbingan Summary -->
+    <div class="card shadow mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-book mr-2"></i>
+                Status Jurnal Bimbingan
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="text-center p-3">
+                        <div class="display-4 font-weight-bold text-primary">
+                            <!-- ✅ PERBAIKAN: Handle berbagai format data yang mungkin dikembalikan -->
+                            <?php
+                            $count = 0;
+                            if (isset($jurnal_requirement['jurnal_validated_count'])) {
+                                $count = $jurnal_requirement['jurnal_validated_count'];
+                            } elseif (isset($jurnal_requirement['total_approved'])) {
+                                $count = $jurnal_requirement['total_approved'];
+                            } elseif (isset($jurnal_requirement['total_validated'])) {
+                                $count = $jurnal_requirement['total_validated'];
+                            }
+                            echo $count;
+                            ?>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="text-center p-3">
-                            <!-- ✅ PERBAIKAN: Check sufficient dengan format data yang benar -->
-                            <?php if($jurnal_requirement['is_sufficient'] ?? false): ?>
-                                <div class="display-4 text-success">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <p class="text-success mb-0 font-weight-600">Syarat Terpenuhi</p>
-                            <?php else: ?>
-                                <div class="display-4 text-warning">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                </div>
-                                <p class="text-warning mb-0 font-weight-600">
-                                    Butuh <?= $jurnal_requirement['missing'] ?? 8 ?> lagi
-                                </p>
-                            <?php endif; ?>
-                        </div>
+                        <p class="text-muted mb-0">Total Pertemuan</p>
                     </div>
                 </div>
-                
-                <!-- ✅ PERBAIKAN: Alert message -->
-                <?php if($jurnal_requirement['is_sufficient'] ?? false): ?>
-                    <div class="alert alert-success text-center mb-0">
-                        <i class="fas fa-thumbs-up mr-2"></i>
-                        Mahasiswa telah memenuhi syarat minimal <?= $jurnal_requirement['minimum_required'] ?? 8 ?> jurnal bimbingan
+                <div class="col-md-6">
+                    <div class="text-center p-3">
+                        <!-- ✅ PERBAIKAN: Handle berbagai format status yang mungkin dikembalikan -->
+                        <?php 
+                        $is_sufficient = false;
+                        if (isset($jurnal_requirement['eligible'])) {
+                            $is_sufficient = $jurnal_requirement['eligible'];
+                        } elseif (isset($jurnal_requirement['is_sufficient'])) {
+                            $is_sufficient = $jurnal_requirement['is_sufficient'];
+                        } elseif (isset($jurnal_requirement['sufficient'])) {
+                            $is_sufficient = $jurnal_requirement['sufficient'];
+                        }
+                        
+                        if ($is_sufficient): 
+                        ?>
+                            <div class="display-4 text-success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <p class="text-success mb-0 font-weight-600">Syarat Terpenuhi</p>
+                        <?php else: ?>
+                            <div class="display-4 text-warning">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <p class="text-warning mb-0 font-weight-600">
+                                Butuh <?= max(0, 8 - $count) ?> lagi
+                            </p>
+                        <?php endif; ?>
                     </div>
-                <?php else: ?>
-                    <div class="alert alert-warning text-center mb-0">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <?= $jurnal_requirement['message'] ?? 'Mahasiswa belum memenuhi syarat minimal 8 jurnal bimbingan' ?>
-                    </div>
-                <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- ✅ PERBAIKAN: Alert message yang robust -->
+            <?php if ($is_sufficient): ?>
+                <div class="alert alert-success text-center mb-0">
+                    <i class="fas fa-thumbs-up mr-2"></i>
+                    Mahasiswa telah memenuhi syarat minimal 8 jurnal bimbingan
+                </div>
+            <?php else: ?>
+                <div class="alert alert-warning text-center mb-0">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <?php 
+                    $message = 'Mahasiswa belum memenuhi syarat minimal 8 jurnal bimbingan';
+                    if (isset($jurnal_requirement['message'])) {
+                        $message = $jurnal_requirement['message'];
+                    }
+                    echo $message;
+                    ?>
+                </div>
+            <?php endif; ?>
                 
                 <!-- ✅ TAMBAHAN: Detail jurnal jika tersedia -->
                 <?php if (!empty($jurnal_bimbingan)): ?>

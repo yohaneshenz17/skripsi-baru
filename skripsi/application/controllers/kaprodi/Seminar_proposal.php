@@ -835,45 +835,100 @@ class Seminar_proposal extends CI_Controller {
     }
     
     /**
-     * Email jadwal ke staf
+     * ✅ FIXED: Email jadwal ke staf - mengambil dari database level = '5'
      */
     private function _kirim_email_jadwal_staf($seminar, $jadwal, $penguji1, $penguji2) {
-        // Get email staf dari database atau config
-        $email_staf = 'admin@stkyakobus.ac.id'; // Sesuaikan dengan email staf
-        
-        $this->email->clear();
-        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
-        $this->email->to($email_staf);
-        $this->email->subject('📅 Jadwal Seminar Proposal - Persiapan Administrasi');
-        
-        $tanggal_indo = date('d F Y', strtotime($jadwal['tanggal_seminar']));
-        $jam = date('H:i', strtotime($jadwal['jam_seminar']));
-        
-        $message = "
-        <h2 style='color: #007bff;'>📅 Jadwal Seminar Proposal</h2>
-        <p>Kepada Yth. Tim Administrasi,</p>
-        <p>Terdapat jadwal seminar proposal yang perlu dipersiapkan:</p>
-        <ul>
-        <li><strong>Mahasiswa:</strong> {$seminar->nama_mahasiswa} ({$seminar->nim})</li>
-        <li><strong>Judul:</strong> {$seminar->judul}</li>
-        <li><strong>Tanggal:</strong> {$tanggal_indo}</li>
-        <li><strong>Waktu:</strong> {$jam} WIT</li>
-        <li><strong>Tempat:</strong> {$jadwal['tempat_seminar']}</li>
-        <li><strong>Pembimbing:</strong> {$seminar->nama_pembimbing}</li>
-        <li><strong>Penguji 1:</strong> {$penguji1->nama}</li>
-        <li><strong>Penguji 2:</strong> {$penguji2->nama}</li>
-        </ul>
-        <p>Mohon dipersiapkan:</p>
-        <ul>
-        <li>Ruang dan fasilitas seminar</li>
-        <li>Berita acara seminar proposal</li>
-        <li>Form penilaian</li>
-        </ul>
-        <p>Terima kasih.</p>
-        ";
-        
-        $this->email->message($message);
-        $this->email->send();
+        try {
+            // ✅ FIXED: Get email semua staf dari database dengan level = '5'
+            $this->db->select('nama, email');
+            $this->db->from('dosen');
+            $this->db->where('level', '5'); // Level 5 = Staf
+            $this->db->where('email IS NOT NULL');
+            $this->db->where('email !=', '');
+            $staf_list = $this->db->get()->result();
+            
+            if (empty($staf_list)) {
+                log_message('warning', 'No active staff found for seminar schedule notification');
+                return false;
+            }
+            
+            $tanggal_indo = date('d F Y', strtotime($jadwal['tanggal_seminar']));
+            $jam = date('H:i', strtotime($jadwal['jam_seminar']));
+            
+            $success_count = 0;
+            
+            // ✅ KIRIM KE SEMUA STAF dengan level = '5'
+            foreach ($staf_list as $staf) {
+                $this->email->clear();
+                $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+                $this->email->to($staf->email);
+                $this->email->subject('📅 Jadwal Seminar Proposal - Persiapan Administrasi');
+                
+                $message = "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <div style='background-color: #007bff; color: white; padding: 20px; text-align: center;'>
+                        <h2 style='margin: 0;'>📅 Jadwal Seminar Proposal</h2>
+                    </div>
+                    
+                    <div style='padding: 20px; background-color: #f8f9fa;'>
+                        <p>Kepada Yth. <strong>{$staf->nama}</strong>,</p>
+                        <p>Terdapat jadwal seminar proposal yang perlu dipersiapkan administrasinya:</p>
+                        
+                        <div style='background: #ffffff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                            <h3 style='color: #007bff; margin: 0 0 10px 0;'>📋 Detail Seminar:</h3>
+                            <ul style='margin: 0; color: #495057;'>
+                                <li><strong>Mahasiswa:</strong> {$seminar->nama_mahasiswa} ({$seminar->nim})</li>
+                                <li><strong>Judul:</strong> {$seminar->judul}</li>
+                                <li><strong>Tanggal:</strong> {$tanggal_indo}</li>
+                                <li><strong>Waktu:</strong> {$jam} WIT</li>
+                                <li><strong>Tempat:</strong> {$jadwal['tempat_seminar']}</li>
+                                <li><strong>Pembimbing:</strong> {$seminar->nama_pembimbing}</li>
+                                <li><strong>Penguji 1:</strong> {$penguji1->nama}</li>
+                                <li><strong>Penguji 2:</strong> {$penguji2->nama}</li>
+                            </ul>
+                        </div>
+                        
+                        <div style='background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                            <h4 style='color: #856404; margin: 0 0 10px 0;'>📝 Persiapan yang Diperlukan:</h4>
+                            <ul style='margin: 0; color: #856404;'>
+                                <li>✅ Koordinasi ruang dan fasilitas seminar</li>
+                                <li>✅ Menyiapkan berita acara seminar proposal</li>
+                                <li>✅ Menyiapkan form penilaian untuk dosen penguji</li>
+                                <li>✅ Memastikan kelengkapan administrasi mahasiswa</li>
+                                <li>✅ Koordinasi konsumsi (jika diperlukan)</li>
+                                <li>✅ Backup teknis (proyektor, laptop, dll)</li>
+                            </ul>
+                        </div>
+                        
+                        <p><strong>Mohon dipersiapkan dengan baik sebelum tanggal pelaksanaan.</strong></p>
+                        <p>Jika ada pertanyaan, silakan koordinasi dengan Kaprodi.</p>
+                        <p>Terima kasih atas kerjasamanya.</p>
+                    </div>
+                    
+                    <div style='background-color: #6c757d; color: white; padding: 10px; text-align: center; font-size: 12px;'>
+                        STK Santo Yakobus Merauke - Sistem Informasi Manajemen Tugas Akhir
+                    </div>
+                </div>
+                ";
+                
+                $this->email->message($message);
+                $sent = $this->email->send();
+                
+                if ($sent) {
+                    $success_count++;
+                    log_message('info', 'Schedule notification sent to staff: ' . $staf->nama . ' (' . $staf->email . ')');
+                } else {
+                    log_message('error', 'Failed to send schedule notification to staff: ' . $staf->nama . ' - ' . $this->email->print_debugger());
+                }
+            }
+            
+            log_message('info', 'Schedule notification sent to ' . $success_count . ' out of ' . count($staf_list) . ' staff members');
+            return $success_count > 0;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending staff schedule notification: ' . $e->getMessage());
+            return false;
+        }
     }
     
         /**

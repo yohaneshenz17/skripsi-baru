@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Controller Penelitian untuk Dosen - Updated untuk workflow penelitian
+ * Controller Penelitian untuk Dosen - FIXED DATABASE ERRORS
  * 
  * Controller untuk mengelola permohonan izin penelitian dari perspektif dosen pembimbing
  * Sesuai dengan workflow: Mahasiswa Ajukan -> Dosen Review -> Staf Proses
@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Dosen
  * @category    Penelitian
  * @author      Unit SIPD STK Santo Yakobus
- * @version     2.0 (Updated Workflow)
+ * @version     2.2 (Database Error Fixed)
  */
 class Penelitian extends CI_Controller {
 
@@ -78,7 +78,7 @@ class Penelitian extends CI_Controller {
     }
 
     /**
-     * Proses review permohonan (approve/reject)
+     * Proses review permohonan (approve/reject) - FIXED NOTIFICATIONS
      */
     public function review() {
         if ($this->input->method() !== 'post') {
@@ -123,13 +123,26 @@ class Penelitian extends CI_Controller {
             $this->_log_aktivitas($permohonan_id, $dosen_id, 'review_pembimbing', 
                 'Dosen memberikan review: ' . ($status_review == 'approved' ? 'Disetujui' : 'Ditolak'));
             
-            // Kirim email notifikasi
+            // WORKFLOW NOTIFIKASI SESUAI REQUIREMENT - FIXED
             if ($status_review == 'approved') {
-                $this->_send_notification_to_staf($permohonan);
-                $this->session->set_flashdata('success', 'Permohonan berhasil disetujui! Notifikasi telah dikirim ke staf.');
+                // APPROVE: kirim ke MAHASISWA DAN STAF
+                $notif_mahasiswa = $this->_send_notification_to_mahasiswa_approved($permohonan, $komentar);
+                $notif_staf = $this->_send_notification_to_staf($permohonan);
+                
+                if ($notif_mahasiswa && $notif_staf) {
+                    $this->session->set_flashdata('success', 'Permohonan berhasil disetujui! Notifikasi telah dikirim ke mahasiswa dan staf.');
+                } else {
+                    $this->session->set_flashdata('success', 'Permohonan berhasil disetujui! (Beberapa notifikasi email mungkin gagal dikirim)');
+                }
             } else {
-                $this->_send_notification_to_mahasiswa($permohonan, $komentar);
-                $this->session->set_flashdata('success', 'Permohonan ditolak. Notifikasi telah dikirim ke mahasiswa.');
+                // REJECT: kirim ke MAHASISWA saja (untuk ajukan ulang)
+                $notif_mahasiswa = $this->_send_notification_to_mahasiswa_rejected($permohonan, $komentar);
+                
+                if ($notif_mahasiswa) {
+                    $this->session->set_flashdata('success', 'Permohonan ditolak. Notifikasi telah dikirim ke mahasiswa untuk perbaikan.');
+                } else {
+                    $this->session->set_flashdata('success', 'Permohonan ditolak. (Notifikasi email mungkin gagal dikirim)');
+                }
             }
         } else {
             $this->session->set_flashdata('error', 'Gagal menyimpan review!');
@@ -218,7 +231,8 @@ class Penelitian extends CI_Controller {
     }
 
     /**
-     * Get detail permohonan dengan validasi ownership
+     * FIXED: Get detail permohonan dengan validasi ownership
+     * Memastikan field email_mahasiswa tersedia untuk notifikasi
      */
     private function _get_permohonan_detail($permohonan_id, $dosen_id) {
         $this->db->select('
@@ -226,7 +240,7 @@ class Penelitian extends CI_Controller {
             pm.judul as judul_proposal,
             pm.workflow_status,
             m.nama as nama_mahasiswa_db,
-            m.email as email_mahasiswa
+            m.email as email_mahasiswa  -- PASTIKAN field ini ada untuk notifikasi
         ');
         $this->db->from('permohonan_izin_penelitian pip');
         $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
@@ -270,111 +284,267 @@ class Penelitian extends CI_Controller {
      * Log aktivitas ke tabel log_penelitian
      */
     private function _log_aktivitas($permohonan_id, $user_id, $aktivitas, $deskripsi) {
-        $log_data = [
-            'permohonan_id' => $permohonan_id,
-            'user_id' => $user_id,
-            'user_role' => 'dosen',
-            'aktivitas' => $aktivitas,
-            'deskripsi' => $deskripsi,
-            'created_at' => date('Y-m-d H:i:s')
-        ];
-        
-        $this->db->insert('log_penelitian', $log_data);
+        try {
+            $log_data = [
+                'permohonan_id' => $permohonan_id,
+                'user_id' => $user_id,
+                'user_role' => 'dosen',
+                'aktivitas' => $aktivitas,
+                'deskripsi' => $deskripsi,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->db->insert('log_penelitian', $log_data);
+        } catch (Exception $e) {
+            log_message('error', 'Error logging penelitian activity: ' . $e->getMessage());
+        }
     }
 
+    // ====================================================================
+    // EMAIL NOTIFICATION METHODS - FIXED DATABASE ISSUES
+    // ====================================================================
+
     /**
-     * Kirim notifikasi email ke staf setelah dosen approve
+     * FIXED: Kirim notifikasi ke mahasiswa ketika APPROVED
      */
-    private function _send_notification_to_staf($permohonan) {
-        // Get email staf (level 5)
-        $this->db->select('email, nama');
-        $this->db->where('level', '5');
-        $this->db->where('status', '1');
-        $staf_list = $this->db->get('staf')->result();
-        
-        if (empty($staf_list)) {
-            return false;
-        }
-        
-        // Setup email
-        $config['protocol'] = 'smtp';
-        $config['smtp_host'] = 'ssl://smtp.gmail.com';
-        $config['smtp_port'] = 465;
-        $config['smtp_user'] = 'noreply.stkyakobus@gmail.com';
-        $config['smtp_pass'] = 'your_email_password'; // Ganti dengan password yang benar
-        $config['charset'] = 'utf-8';
-        $config['newline'] = "\r\n";
-        $config['mailtype'] = 'html';
-        
-        $this->email->initialize($config);
-        
-        $subject = 'Permohonan Izin Penelitian Disetujui Dosen - ' . $permohonan->nama_mahasiswa;
-        
-        $message = "
-        <h3>Permohonan Izin Penelitian Disetujui</h3>
-        <p>Dosen pembimbing telah menyetujui permohonan izin penelitian mahasiswa:</p>
-        
-        <strong>Detail Mahasiswa:</strong><br>
-        - Nama: {$permohonan->nama_mahasiswa}<br>
-        - NIM: {$permohonan->nim}<br>
-        - Program Studi: {$permohonan->program_studi}<br>
-        
-        <strong>Detail Penelitian:</strong><br>
-        - Judul: {$permohonan->judul_skripsi_terbaru}<br>
-        - Tempat: {$permohonan->tempat_penelitian}<br>
-        - Periode: {$permohonan->tanggal_mulai_penelitian} s/d {$permohonan->tanggal_selesai_penelitian}<br>
-        
-        <p>Silakan proses surat izin penelitian melalui sistem.</p>
-        ";
-        
-        // Kirim ke semua staf
-        foreach ($staf_list as $staf) {
+    private function _send_notification_to_mahasiswa_approved($permohonan, $komentar = '') {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $subject = 'Permohonan Izin Penelitian Disetujui - ' . $permohonan->nama_mahasiswa;
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #28a745; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Permohonan Izin Penelitian Disetujui</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. <strong>{$permohonan->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Selamat! Dosen pembimbing telah menyetujui permohonan izin penelitian Anda.</p>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #28a745; margin-top: 0;'>Detail Penelitian:</h4>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td><strong>Judul:</strong></td><td>{$permohonan->judul_skripsi_terbaru}</td></tr>
+                            <tr><td><strong>Tempat:</strong></td><td>{$permohonan->tempat_penelitian}</td></tr>
+                            <tr><td><strong>Periode:</strong></td><td>{$permohonan->tanggal_mulai_penelitian} s/d {$permohonan->tanggal_selesai_penelitian}</td></tr>
+                        </table>
+                    </div>";
+            
+            if (!empty($komentar)) {
+                $message .= "
+                    <div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 15px 0;'>
+                        <h4 style='color: #1976d2; margin-top: 0;'>Catatan Dosen:</h4>
+                        <p style='margin: 0;'>" . nl2br(htmlspecialchars($komentar)) . "</p>
+                    </div>";
+            }
+            
+            $message .= "
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;'>
+                        <p style='margin: 0; color: #856404;'><strong>Langkah Selanjutnya:</strong></p>
+                        <p style='margin: 5px 0 0 0; color: #856404;'>Staf akademik akan segera memproses surat izin penelitian Anda. Anda akan mendapat notifikasi lanjutan ketika surat sudah siap.</p>
+                    </div>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                    <p style='margin: 0;'>SIM Tugas Akhir STK Santo Yakobus</p>
+                </div>
+            </div>";
+            
             $this->email->from('noreply.stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($staf->email);
+            $this->email->to($permohonan->email_mahasiswa);  // Field sudah dipastikan ada
             $this->email->subject($subject);
             $this->email->message($message);
-            $this->email->send();
+            
+            $result = $this->email->send();
+            
+            if ($result) {
+                log_message('info', 'Email approval sent to mahasiswa: ' . $permohonan->email_mahasiswa);
+            } else {
+                log_message('error', 'Failed to send approval email to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Exception sending approval email to mahasiswa: ' . $e->getMessage());
+            return false;
         }
-        
-        return true;
     }
 
     /**
-     * Kirim notifikasi email ke mahasiswa jika ditolak
+     * FIXED: Kirim notifikasi ke mahasiswa ketika REJECTED
      */
-    private function _send_notification_to_mahasiswa($permohonan, $komentar) {
-        // Setup email
-        $config['protocol'] = 'smtp';
-        $config['smtp_host'] = 'ssl://smtp.gmail.com';
-        $config['smtp_port'] = 465;
-        $config['smtp_user'] = 'noreply.stkyakobus@gmail.com';
-        $config['smtp_pass'] = 'your_email_password'; // Ganti dengan password yang benar
-        $config['charset'] = 'utf-8';
-        $config['newline'] = "\r\n";
-        $config['mailtype'] = 'html';
-        
-        $this->email->initialize($config);
-        
-        $subject = 'Permohonan Izin Penelitian Perlu Perbaikan - ' . $permohonan->nama_mahasiswa;
-        
-        $message = "
-        <h3>Permohonan Izin Penelitian Perlu Perbaikan</h3>
-        <p>Dosen pembimbing telah memberikan catatan untuk perbaikan permohonan izin penelitian Anda:</p>
-        
-        <strong>Catatan Dosen:</strong><br>
-        <div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #dc3545;'>
-            {$komentar}
-        </div>
-        
-        <p>Silakan perbaiki permohonan Anda sesuai catatan dan ajukan kembali melalui sistem.</p>
-        ";
-        
-        $this->email->from('noreply.stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-        $this->email->to($permohonan->email_mahasiswa);
-        $this->email->subject($subject);
-        $this->email->message($message);
-        
-        return $this->email->send();
+    private function _send_notification_to_mahasiswa_rejected($permohonan, $komentar) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $subject = 'Permohonan Izin Penelitian Perlu Perbaikan - ' . $permohonan->nama_mahasiswa;
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #dc3545; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📝 Permohonan Izin Penelitian Perlu Perbaikan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. <strong>{$permohonan->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Dosen pembimbing telah memberikan catatan untuk perbaikan permohonan izin penelitian Anda.</p>
+                    
+                    <div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0;'>
+                        <h4 style='color: #721c24; margin-top: 0;'>Catatan Dosen Pembimbing:</h4>
+                        <p style='margin: 0; color: #721c24;'>" . nl2br(htmlspecialchars($komentar)) . "</p>
+                    </div>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #dc3545; margin-top: 0;'>Detail Permohonan:</h4>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td><strong>Judul:</strong></td><td>{$permohonan->judul_skripsi_terbaru}</td></tr>
+                            <tr><td><strong>Tempat:</strong></td><td>{$permohonan->tempat_penelitian}</td></tr>
+                            <tr><td><strong>Periode:</strong></td><td>{$permohonan->tanggal_mulai_penelitian} s/d {$permohonan->tanggal_selesai_penelitian}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; border-left: 4px solid #17a2b8;'>
+                        <p style='margin: 0; color: #0c5460;'><strong>Langkah Selanjutnya:</strong></p>
+                        <p style='margin: 5px 0 0 0; color: #0c5460;'>Silakan perbaiki permohonan Anda sesuai catatan dosen pembimbing dan ajukan kembali melalui sistem SIM-TA.</p>
+                    </div>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                    <p style='margin: 0;'>SIM Tugas Akhir STK Santo Yakobus</p>
+                </div>
+            </div>";
+            
+            $this->email->from('noreply.stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($permohonan->email_mahasiswa);  // Field sudah dipastikan ada
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            $result = $this->email->send();
+            
+            if ($result) {
+                log_message('info', 'Email rejection sent to mahasiswa: ' . $permohonan->email_mahasiswa);
+            } else {
+                log_message('error', 'Failed to send rejection email to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Exception sending rejection email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * FIXED: Kirim notifikasi email ke staf setelah dosen approve
+     * Menggunakan tabel dosen dengan level = '5' (bukan tabel staf yang tidak ada)
+     */
+    private function _send_notification_to_staf($permohonan) {
+        try {
+            // PERBAIKAN: Get email staf dari tabel dosen dengan level = '5'
+            $this->db->select('email, nama');
+            $this->db->where('level', '5');  // Staf tersimpan di tabel dosen dengan level 5
+            $staf_list = $this->db->get('dosen')->result();  // Query ke tabel dosen, bukan staf
+            
+            if (empty($staf_list)) {
+                log_message('warning', 'No active staff found for penelitian notification');
+                return false;
+            }
+            
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $subject = 'Permohonan Izin Penelitian Disetujui Dosen - ' . $permohonan->nama_mahasiswa;
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #007bff; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>🔬 Permohonan Izin Penelitian Disetujui</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. Tim Staf Akademik,</p>
+                    
+                    <p>Dosen pembimbing telah menyetujui permohonan izin penelitian mahasiswa berikut:</p>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #007bff; margin-top: 0;'>Detail Mahasiswa:</h4>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td width='30%'><strong>Nama:</strong></td><td>{$permohonan->nama_mahasiswa}</td></tr>
+                            <tr><td><strong>NIM:</strong></td><td>{$permohonan->nim}</td></tr>
+                            <tr><td><strong>Program Studi:</strong></td><td>{$permohonan->program_studi}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #28a745; margin-top: 0;'>Detail Penelitian:</h4>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td width='30%'><strong>Judul:</strong></td><td>{$permohonan->judul_skripsi_terbaru}</td></tr>
+                            <tr><td><strong>Tempat:</strong></td><td>{$permohonan->tempat_penelitian}</td></tr>
+                            <tr><td><strong>Periode:</strong></td><td>{$permohonan->tanggal_mulai_penelitian} s/d {$permohonan->tanggal_selesai_penelitian}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;'>
+                        <p style='margin: 0; color: #856404;'><strong>Tindakan Diperlukan:</strong></p>
+                        <p style='margin: 5px 0 0 0; color: #856404;'>Silakan proses surat izin penelitian melalui sistem SIM-TA dan upload surat yang sudah ditandatangani.</p>
+                    </div>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                    <p style='margin: 0;'>SIM Tugas Akhir STK Santo Yakobus</p>
+                </div>
+            </div>";
+            
+            $success_count = 0;
+            
+            // Kirim ke semua staf
+            foreach ($staf_list as $staf) {
+                $this->email->clear();
+                $this->email->from('noreply.stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+                $this->email->to($staf->email);
+                $this->email->subject($subject);
+                $this->email->message($message);
+                
+                if ($this->email->send()) {
+                    $success_count++;
+                    log_message('info', 'Email sent to staff: ' . $staf->email);
+                } else {
+                    log_message('error', 'Failed to send email to staff: ' . $staf->email);
+                }
+            }
+            
+            return $success_count > 0;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Exception sending email to staff: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get email configuration
+     */
+    private function _get_email_config() {
+        return [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug', // Ganti dengan password yang benar
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls',
+            'smtp_timeout' => 30
+        ];
     }
 
     /**

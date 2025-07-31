@@ -3,7 +3,7 @@
  * Detail Seminar Proposal View - Mahasiswa (UPDATED VERSION)
  * File: application/views/mahasiswa/seminar_proposal/detail.php
  * 
- * 🔧 PERBAIKAN:
+ * ðŸ”§ PERBAIKAN:
  * - Fixed property names sesuai database schema
  * - Improved error handling untuk undefined properties
  * - Enhanced display logic
@@ -576,6 +576,45 @@
                         <div class="info-item">
                             <div class="info-label">Jenis Penelitian</div>
                             <div class="info-value"><?php echo htmlspecialchars($proposal->jenis_penelitian); ?></div>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <!-- 🆕 TAMBAHKAN BAGIAN INI TEPAT DI SINI -->
+                        <div class="info-item" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e3e6f0;">
+                            <div class="info-label" style="font-weight: 600; color: #525f7f; margin-bottom: 0.5rem;">
+                                <i class="fas fa-bookmark"></i> Judul untuk Seminar Proposal
+                            </div>
+                            <div class="info-value" style="padding: 1rem; background-color: #f8f9fe; border: 1px solid #e3e6f0; border-radius: 0.375rem; border-left: 4px solid #5e72e4;">
+                                <?php 
+                                // Prioritas: judul_seminar dari tabel seminar_proposal_mahasiswa, fallback ke judul original
+                                $judul_seminar = '';
+                                if (isset($seminar->judul_seminar) && !empty($seminar->judul_seminar)) {
+                                    $judul_seminar = $seminar->judul_seminar;
+                                } else {
+                                    $judul_seminar = $proposal->judul;
+                                }
+                                echo htmlspecialchars($judul_seminar); 
+                                ?>
+                            </div>
+                            <small class="text-muted" style="margin-top: 0.5rem; display: block;">
+                                <i class="fas fa-info-circle"></i>
+                                Judul ini yang digunakan untuk undangan seminar, berita acara, dan dokumen resmi.
+                            </small>
+                        </div>
+                        
+                        <!-- Tampilkan judul original jika berbeda -->
+                        <?php if (isset($seminar->judul_seminar) && !empty($seminar->judul_seminar) && $seminar->judul_seminar != $proposal->judul): ?>
+                        <div class="info-item" style="margin-top: 1rem;">
+                            <div class="info-label" style="font-weight: 500; color: #8898aa; margin-bottom: 0.5rem;">
+                                <i class="fas fa-history"></i> Judul Proposal Original
+                            </div>
+                            <div class="info-value" style="padding: 0.75rem; background-color: #f8f9fa; border: 1px dashed #dee2e6; border-radius: 0.375rem; color: #6c757d; font-style: italic;">
+                                <?php echo htmlspecialchars($proposal->judul); ?>
+                            </div>
+                            <small class="text-info" style="margin-top: 0.5rem; display: block;">
+                                <i class="fas fa-edit"></i>
+                                <strong>Perubahan terdeteksi:</strong> Judul seminar berbeda dari usulan awal.
+                            </small>
                         </div>
                         <?php endif; ?>
                     </div>

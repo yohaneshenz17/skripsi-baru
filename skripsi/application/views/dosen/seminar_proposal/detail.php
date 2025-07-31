@@ -90,12 +90,52 @@ ob_start();
                     </div>
                 </div>
                 
-                <!-- Judul Proposal -->
+                <!-- 🆕 UPDATED: Judul Proposal dengan Tracking Perubahan -->
                 <div class="form-group mb-4">
-                    <label class="text-sm font-weight-bold text-muted mb-2">JUDUL PROPOSAL</label>
-                    <div class="border rounded p-3 bg-light">
-                        <h6 class="mb-0 text-dark"><?= htmlspecialchars($seminar->judul) ?></h6>
+                    <label class="text-sm font-weight-bold text-muted mb-2">
+                        <i class="fas fa-file-alt mr-1"></i>
+                        JUDUL PROPOSAL
+                    </label>
+                    
+                    <!-- Judul untuk Seminar (Primary) -->
+                    <div class="border rounded p-3 mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div style="flex: 1;">
+                                <small class="text-white-50">Judul untuk Seminar Proposal:</small>
+                                <h6 class="mb-0 text-white font-weight-600">
+                                    <?php 
+                                    // Logic yang sama: prioritas judul_seminar, fallback ke original
+                                    $judul_display = '';
+                                    if (isset($seminar->judul_seminar) && !empty($seminar->judul_seminar)) {
+                                        $judul_display = $seminar->judul_seminar;
+                                    } else {
+                                        $judul_display = $seminar->judul;  // dari database view yang join ke proposal_mahasiswa
+                                    }
+                                    echo htmlspecialchars($judul_display); 
+                                    ?>
+                                </h6>
+                            </div>
+                            <div class="ml-3">
+                                <i class="fas fa-bookmark fa-lg text-white-50"></i>
+                            </div>
+                        </div>
                     </div>
+                    
+                    <!-- Info Perubahan Judul (jika ada) -->
+                    <?php if (isset($seminar->judul_seminar) && !empty($seminar->judul_seminar) && $seminar->judul_seminar != $seminar->judul): ?>
+                    <div class="alert alert-info mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-info-circle mt-1 mr-2"></i>
+                            <div>
+                                <strong>Perubahan Judul Terdeteksi</strong><br>
+                                <small>
+                                    <strong>Judul Original:</strong> <?= htmlspecialchars($seminar->judul) ?><br>
+                                    <strong>Judul Seminar:</strong> <?= htmlspecialchars($seminar->judul_seminar) ?>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 
                 <!-- ✅ ENHANCED: Detail Pelaksanaan Seminar (Jika Sudah Dijadwalkan) -->

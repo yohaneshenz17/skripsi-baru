@@ -291,6 +291,65 @@
         </div>
     </div>
 
+    <!-- 🆕 TAMBAHAN BARU: FIELD EDIT JUDUL SEMINAR -->
+    <div class="card">
+        <div class="card-header">
+            <h6 style="margin: 0; font-weight: 600; color: #32325d;">
+                <i class="fas fa-edit" style="margin-right: 0.5rem; color: #28a745;"></i>
+                Judul untuk Seminar Proposal
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Catatan:</strong> Anda dapat mengubah judul jika selama bimbingan ada perbaikan formulasi. 
+                Judul ini yang akan digunakan untuk undangan seminar, berita acara, dan dokumen resmi lainnya.
+            </div>
+            
+            <!-- Field Judul Original untuk Referensi -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-history"></i> Judul Proposal Original
+                </label>
+                <div class="form-control" style="background-color: #f8f9fe; border: 1px dashed #e3e6f0;">
+                    <?php echo htmlspecialchars($proposal->judul); ?>
+                </div>
+                <div class="form-text">
+                    Judul dari usulan proposal awal yang disetujui Kaprodi.
+                </div>
+            </div>
+            
+            <!-- Field Edit Judul Seminar -->
+            <div class="form-group">
+                <label for="judul_seminar" class="form-label">
+                    <i class="fas fa-edit"></i> Judul Proposal untuk Seminar <span style="color: #f5365c;">*</span>
+                </label>
+                
+                <textarea name="judul_seminar" id="judul_seminar" class="form-control" 
+                          rows="4" maxlength="250" required 
+                          placeholder="Masukkan judul proposal yang akan digunakan untuk seminar..."><?php echo htmlspecialchars($current_judul); ?></textarea>
+                
+                <div class="form-text">
+                    <div class="d-flex justify-content-between">
+                        <span>Maksimal 250 karakter. Pastikan judul sudah sesuai hasil bimbingan.</span>
+                        <span id="char-counter" class="text-muted">0/250</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Peringatan jika ada perubahan judul -->
+            <?php if (isset($existing_seminar) && $existing_seminar && 
+                      isset($existing_seminar->judul_seminar) && 
+                      $existing_seminar->judul_seminar != $proposal->judul): ?>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Perubahan Terdeteksi:</strong> Judul seminar berbeda dari usulan awal.
+                <br><small>Pastikan perubahan ini sudah didiskusikan dengan dosen pembimbing.</small>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <!-- Upload File Proposal -->
     <div class="card">
         <div class="card-header">
@@ -496,6 +555,39 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 this.classList.remove('is-invalid');
             }
+        });
+    }
+    
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Character counter untuk judul seminar
+    const judulTextarea = document.getElementById('judul_seminar');
+    const charCounter = document.getElementById('char-counter');
+    
+    if (judulTextarea && charCounter) {
+        function updateCounter() {
+            const length = judulTextarea.value.length;
+            charCounter.textContent = length + '/250';
+            
+            // Change color based on length
+            if (length > 230) {
+                charCounter.className = 'text-danger';
+            } else if (length > 200) {
+                charCounter.className = 'text-warning';
+            } else {
+                charCounter.className = 'text-muted';
+            }
+        }
+        
+        judulTextarea.addEventListener('input', updateCounter);
+        updateCounter(); // Initial count
+    }
+    
+    // Auto-resize textarea
+    if (judulTextarea) {
+        judulTextarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
         });
     }
 });

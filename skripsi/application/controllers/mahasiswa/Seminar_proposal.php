@@ -821,8 +821,32 @@ class Seminar_proposal extends CI_Controller {
             'existing_seminar' => $existing_seminar,
             'syarat_jurnal' => $syarat_jurnal,
             'is_edit' => (bool) $existing_seminar,
-            'can_edit' => $existing_seminar ? in_array($existing_seminar->status, ['draft', 'rejected']) : true
+            'can_edit' => $existing_seminar ? in_array($existing_seminar->status, ['draft', 'rejected']) : true,
+            // TAMBAHAN: Pass judul yang akan digunakan (prioritas dari seminar jika ada)
+            'current_judul' => $existing_seminar && $existing_seminar->judul_seminar ? 
+                              $existing_seminar->judul_seminar : $proposal->judul
         ];
+        
+        // ========================================
+        // 🆕 TAMBAHAN BARU UNTUK EDIT JUDUL - AMAN
+        // ========================================
+        
+        // Determine current judul - SAFE with fallback
+        $current_judul = $proposal->judul; // Default fallback
+        
+        if ($existing_seminar && !empty($existing_seminar->judul_seminar)) {
+            // If seminar already has custom title, use it
+            $current_judul = $existing_seminar->judul_seminar;
+        }
+        
+        // Add to existing data array - NO BREAKING CHANGES
+        $data['current_judul'] = $current_judul;
+        $data['judul_original'] = $proposal->judul; // For reference
+        $data['allow_edit_judul'] = true; // Feature flag
+        
+        // ========================================
+        // EXISTING CODE CONTINUES UNCHANGED
+        // ========================================
         
         // Load daftar jurnal bimbingan yang sudah divalidasi
         $data['jurnal_validasi'] = $this->_get_validated_jurnal($proposal->id);
@@ -846,6 +870,20 @@ class Seminar_proposal extends CI_Controller {
         if (!$is_edit || !empty($_FILES['file_proposal']['name'])) {
             $this->form_validation->set_rules('file_proposal', 'File Proposal', 'callback__check_file_proposal');
         }
+
+        // ========================================
+        // 🆕 TAMBAHAN VALIDATION UNTUK JUDUL - AMAN
+        // ========================================
+        
+        // SAFE: Optional validation with fallback
+        $judul_seminar = trim($this->input->post('judul_seminar'));
+        if (!empty($judul_seminar)) {
+            $this->form_validation->set_rules('judul_seminar', 'Judul Seminar', 'min_length[10]|max_length[250]');
+        }
+        
+        // ========================================
+        // VALIDATION RUN - TIDAK BERUBAH
+        // ========================================
         
         if ($this->form_validation->run() === FALSE) {
             $this->session->set_flashdata('error', validation_errors());
@@ -871,6 +909,17 @@ class Seminar_proposal extends CI_Controller {
                 'status_pembimbing' => 'pending',
                 'updated_at' => date('Y-m-d H:i:s')
             ];
+            
+            // ========================================
+            // 🆕 TAMBAHAN UNTUK JUDUL SEMINAR - AMAN
+            // ========================================
+            
+            // SAFE: Add judul_seminar only if provided and valid
+            $judul_seminar = trim($this->input->post('judul_seminar'));
+            if (!empty($judul_seminar) && strlen($judul_seminar) >= 10) {
+                $data['judul_seminar'] = $judul_seminar;
+            }
+            // If not provided, field remains NULL (uses original proposal title via COALESCE)
             
             // Handle file upload if provided
             if (!empty($_FILES['file_proposal']['name'])) {

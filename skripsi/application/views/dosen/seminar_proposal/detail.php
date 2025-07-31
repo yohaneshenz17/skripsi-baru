@@ -1,6 +1,6 @@
 <?php
 /**
- * ✅ PERBAIKAN LENGKAP VIEW DETAIL SEMINAR PROPOSAL DOSEN
+ * âœ… PERBAIKAN LENGKAP VIEW DETAIL SEMINAR PROPOSAL DOSEN
  * File: application/views/dosen/seminar_proposal/detail.php
  * 
  * PERBAIKAN:
@@ -90,7 +90,7 @@ ob_start();
                     </div>
                 </div>
                 
-                <!-- 🆕 UPDATED: Judul Proposal dengan Tracking Perubahan -->
+                <!-- ðŸ†• UPDATED: Judul Proposal dengan Tracking Perubahan -->
                 <div class="form-group mb-4">
                     <label class="text-sm font-weight-bold text-muted mb-2">
                         <i class="fas fa-file-alt mr-1"></i>
@@ -138,7 +138,7 @@ ob_start();
                     <?php endif; ?>
                 </div>
                 
-                <!-- ✅ ENHANCED: Detail Pelaksanaan Seminar (Jika Sudah Dijadwalkan) -->
+                <!-- âœ… ENHANCED: Detail Pelaksanaan Seminar (Jika Sudah Dijadwalkan) -->
                 <?php if($seminar->status === 'scheduled' && !empty($seminar->tanggal_seminar)): ?>
                 <div class="card mb-4" style="background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%);">
                     <div class="card-body">
@@ -167,7 +167,7 @@ ob_start();
                             </div>
                         </div>
                         
-                        <!-- ✅ FIXED: Tim Penguji yang Sudah Ditunjuk -->
+                        <!-- âœ… FIXED: Tim Penguji yang Sudah Ditunjuk -->
                         <hr style="border-color: rgba(255,255,255,0.3);">
                         <h6 class="text-white mb-3">
                             <i class="fas fa-users mr-2"></i>
@@ -177,7 +177,7 @@ ob_start();
                             <div class="col-md-4">
                                 <div class="mb-2">
                                     <small class="text-white-50">Pembimbing:</small><br>
-                                    <!-- ✅ PERBAIKAN: Akses data pembimbing yang benar -->
+                                    <!-- âœ… PERBAIKAN: Akses data pembimbing yang benar -->
                                     <strong><?= htmlspecialchars($seminar->nama_pembimbing ?? 'Belum ditetapkan') ?></strong>
                                 </div>
                             </div>
@@ -283,7 +283,7 @@ ob_start();
             </div>
         </div>
         
-    <!-- ✅ FIXED: Jurnal Bimbingan Summary -->
+    <!-- âœ… FIXED: Jurnal Bimbingan Summary -->
     <div class="card shadow mt-4">
         <div class="card-header">
             <h5 class="mb-0">
@@ -296,7 +296,7 @@ ob_start();
                 <div class="col-md-6">
                     <div class="text-center p-3">
                         <div class="display-4 font-weight-bold text-primary">
-                            <!-- ✅ PERBAIKAN: Handle berbagai format data yang mungkin dikembalikan -->
+                            <!-- âœ… PERBAIKAN: Handle berbagai format data yang mungkin dikembalikan -->
                             <?php
                             $count = 0;
                             if (isset($jurnal_requirement['jurnal_validated_count'])) {
@@ -314,7 +314,7 @@ ob_start();
                 </div>
                 <div class="col-md-6">
                     <div class="text-center p-3">
-                        <!-- ✅ PERBAIKAN: Handle berbagai format status yang mungkin dikembalikan -->
+                        <!-- âœ… PERBAIKAN: Handle berbagai format status yang mungkin dikembalikan -->
                         <?php 
                         $is_sufficient = false;
                         if (isset($jurnal_requirement['eligible'])) {
@@ -343,7 +343,7 @@ ob_start();
                 </div>
             </div>
             
-            <!-- ✅ PERBAIKAN: Alert message yang robust -->
+            <!-- âœ… PERBAIKAN: Alert message yang robust -->
             <?php if ($is_sufficient): ?>
                 <div class="alert alert-success text-center mb-0">
                     <i class="fas fa-thumbs-up mr-2"></i>
@@ -362,7 +362,7 @@ ob_start();
                 </div>
             <?php endif; ?>
                 
-                <!-- ✅ TAMBAHAN: Detail jurnal jika tersedia -->
+                <!-- âœ… TAMBAHAN: Detail jurnal jika tersedia -->
                 <?php if (!empty($jurnal_bimbingan)): ?>
                 <hr>
                 <h6 class="text-muted mb-3">Riwayat Jurnal Bimbingan Tervalidasi:</h6>
@@ -517,7 +517,131 @@ ob_start();
         </div>
         <?php endif; ?>
         
-        <!-- ✅ ENHANCED: Info Pembimbing Card -->
+        <!-- ✅ SECTION BARU: Detail Penolakan Kaprodi -->
+        <?php if(isset($seminar->status_kaprodi) && $seminar->status_kaprodi == 'rejected'): ?>
+        <div class="card shadow">
+            <div class="card-header bg-danger">
+                <h6 class="text-white mb-0">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Pengajuan Ditolak Kaprodi
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Alert Utama -->
+                <div class="alert alert-danger" role="alert">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-times-circle text-danger mr-2 fa-lg"></i>
+                        <h6 class="mb-0 font-weight-bold">Proposal Ditolak oleh Kaprodi</h6>
+                    </div>
+                    <p class="mb-0">Mahasiswa perlu memperbaiki proposal sesuai catatan dan menurunkan tingkat plagiarisme.</p>
+                </div>
+                
+                <!-- Persentase Plagiarisme -->
+                <?php if(isset($seminar->plagiarism_percentage) && $seminar->plagiarism_percentage > 0): ?>
+                <div class="mb-3">
+                    <label class="text-sm font-weight-bold text-muted mb-2">PERSENTASE PLAGIARISME</label>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-fill mr-3">
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-danger progress-bar-striped" 
+                                     role="progressbar" 
+                                     style="width: <?= min($seminar->plagiarism_percentage, 100) ?>%" 
+                                     aria-valuenow="<?= $seminar->plagiarism_percentage ?>" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                        <span class="font-weight-bold text-danger h5 mb-0">
+                            <?= number_format($seminar->plagiarism_percentage, 1) ?>%
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between text-sm">
+                        <small class="text-success">0% (Aman)</small>
+                        <small class="text-warning">30% (Batas Maksimal)</small>
+                        <small class="text-danger">100%</small>
+                    </div>
+                    
+                    <?php if($seminar->plagiarism_percentage >= 30): ?>
+                    <div class="alert alert-warning mt-2 mb-0">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        <strong>Melebihi batas maksimal 30%</strong> - Proposal tidak dapat disetujui
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Catatan Penolakan -->
+                <?php if(isset($seminar->komentar_kaprodi) && !empty($seminar->komentar_kaprodi)): ?>
+                <div class="mb-3">
+                    <label class="text-sm font-weight-bold text-muted mb-2">CATATAN PENOLAKAN</label>
+                    <div class="card">
+                        <div class="card-body bg-light">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-quote-left text-muted mr-2 mt-1"></i>
+                                <div class="flex-fill">
+                                    <p class="mb-0 text-dark" style="line-height: 1.6;">
+                                        <?= nl2br(htmlspecialchars($seminar->komentar_kaprodi)) ?>
+                                    </p>
+                                </div>
+                                <i class="fas fa-quote-right text-muted ml-2 mt-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Info Review -->
+                <div class="border-top pt-3">
+                    <label class="text-sm font-weight-bold text-muted mb-2">INFORMASI REVIEW</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user-tie text-primary mr-2"></i>
+                                <div>
+                                    <small class="text-muted d-block">Direview oleh:</small>
+                                    <strong><?= isset($seminar->nama_kaprodi_penolak) ? $seminar->nama_kaprodi_penolak : 'Kaprodi' ?></strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-calendar-alt text-info mr-2"></i>
+                                <div>
+                                    <small class="text-muted d-block">Tanggal review:</small>
+                                    <strong>
+                                        <?php if(isset($seminar->tanggal_review_kaprodi) && !empty($seminar->tanggal_review_kaprodi)): ?>
+                                            <?= date('d F Y, H:i', strtotime($seminar->tanggal_review_kaprodi)) ?> WIT
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Langkah Selanjutnya -->
+                <div class="card bg-light mt-3">
+                    <div class="card-body py-3">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-lightbulb mr-1"></i>
+                            Langkah Selanjutnya untuk Mahasiswa:
+                        </h6>
+                        <ul class="mb-0 text-sm pl-3">
+                            <li>Perbaiki proposal sesuai catatan penolakan</li>
+                            <li>Kurangi tingkat plagiarisme di bawah 30%</li>
+                            <li>Konsultasikan perbaikan dengan Anda sebagai pembimbing</li>
+                            <li>Ajukan ulang seminar proposal setelah perbaikan selesai</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- âœ… ENHANCED: Info Pembimbing Card -->
         <div class="card shadow mt-4">
             <div class="card-header">
                 <h6 class="mb-0">
@@ -534,7 +658,7 @@ ob_start();
                     </div>
                     <div>
                         <p class="mb-1 font-weight-600">
-                            <!-- ✅ PERBAIKAN: Display nama pembimbing yang benar -->
+                            <!-- âœ… PERBAIKAN: Display nama pembimbing yang benar -->
                             <?= htmlspecialchars($seminar->nama_pembimbing ?? 'Data pembimbing tidak tersedia') ?>
                         </p>
                         <?php if (!empty($seminar->email_pembimbing)): ?>

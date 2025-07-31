@@ -437,20 +437,54 @@ class Seminar_proposal extends CI_Controller {
      */
     private function _get_pengajuan_perlu_review() {
         $this->db->select('
-            spm.*,
-            pm.judul,
+            spm.id,
+            spm.proposal_id,
+            spm.mahasiswa_id,
+            spm.status,
+            spm.status_pembimbing,
+            spm.status_kaprodi,
+            spm.created_at,
+            spm.updated_at,
+            spm.file_proposal,
+            spm.keterangan_mahasiswa,
+            
+            -- ✅ PERBAIKAN: Gunakan IFNULL instead of COALESCE untuk kompatibilitas
+            IFNULL(spm.judul_seminar, pm.judul) as judul,
+            spm.judul_seminar,
+            pm.judul as judul_original,
+            
+            pm.ringkasan,
+            pm.jenis_penelitian,
+            pm.lokasi_penelitian,
+            pm.dosen_id as pembimbing_id,
+            
             m.nim,
             m.nama as nama_mahasiswa,
-            d.nama as nama_pembimbing
+            m.email as email_mahasiswa,
+            m.prodi_id,
+            
+            pr.nama as nama_prodi,
+            
+            d.nama as nama_pembimbing,
+            d.email as email_pembimbing
         ');
+        
         $this->db->from('seminar_proposal_mahasiswa spm');
         $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
         $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->where('m.prodi_id', $this->prodi_id);
+        
+        // Filter berdasarkan prodi kaprodi (tetap sama)
+        if ($this->prodi_id) {
+            $this->db->where('m.prodi_id', $this->prodi_id);
+        }
+        
+        // Filter pengajuan yang perlu review kaprodi (tetap sama)
         $this->db->where('spm.status', 'review_kaprodi');
         $this->db->where('spm.status_pembimbing', 'approved');
         $this->db->where('spm.status_kaprodi', 'pending');
+        
         $this->db->order_by('spm.created_at', 'ASC');
         
         return $this->db->get()->result();

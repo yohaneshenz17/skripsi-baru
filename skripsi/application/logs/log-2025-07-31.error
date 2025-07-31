@@ -1,0 +1,236 @@
+ERROR - 2025-07-31 03:23:23 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-31 06:21:38 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-31 06:22:47 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-31 07:02:50 --> Query error: Table 'stkp7133_skripsi.staf' doesn't exist - Invalid query: SELECT `email`, `nama`
+FROM `staf`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-07-31 07:14:09 --> Severity: Warning --> Undefined property: stdClass::$email_mahasiswa /home/stkp7133/public_html/skripsi/application/controllers/dosen/Penelitian.php 358
+ERROR - 2025-07-31 07:14:11 --> Failed to send approval email to mahasiswa: 220 smtp.gmail.com ESMTP d9443c01a7336-241e8975c03sm2408155ad.97 - gsmtp
+<br /><pre>hello: 250-smtp.gmail.com at your service, [203.175.8.56]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+</pre><pre>starttls: 220 2.0.0 Ready to start TLS
+</pre><pre>hello: 250-smtp.gmail.com at your service, [203.175.8.56]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+</pre><pre>from: 250 2.1.0 OK d9443c01a7336-241e8975c03sm2408155ad.97 - gsmtp
+</pre><pre>to: 555-5.5.2 Syntax error, cannot decode response. For more information, go to
+555-5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321
+555 5.5.2 specifications. d9443c01a7336-241e8975c03sm2408155ad.97 - gsmtp
+</pre>The following SMTP error was encountered: 555-5.5.2 Syntax error, cannot decode response. For more information, go to
+555-5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321
+555 5.5.2 specifications. d9443c01a7336-241e8975c03sm2408155ad.97 - gsmtp
+<br /><pre>quit: 221 2.0.0 closing connection d9443c01a7336-241e8975c03sm2408155ad.97 - gsmtp
+</pre>Unable to send email using PHP SMTP. Your server might not be configured to send mail using this method.<br /><pre>User-Agent: CodeIgniter
+Date: Thu, 31 Jul 2025 07:14:09 +0700
+From: &quot;SIM-TA STK Santo Yakobus&quot; &lt;noreply.stkyakobus@gmail.com&gt;
+Return-Path: &lt;noreply.stkyakobus@gmail.com&gt;
+Subject: =?UTF-8?Q?Permohonan=20Izin=20Penelitian=20Disetujui=20-=20MAHASISWA=20C?= =?UTF-8?Q?ONTOH?=
+Reply-To: &lt;noreply.stkyakobus@gmail.com&gt;
+X-Sender: noreply.stkyakobus@gmail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;688ab5517df7c@gmail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_688ab5517df99&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_688ab5517df99
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+✅ Permohonan Izin Penelitian Disetujui
+
+
+
+ Yth. MAHASISWA CONTOH,
+
+ Selamat! Dosen pembimbing telah menyetujui permohonan izin penelitian Anda.
+
+
+ Detail Penelitian:
+
+ Judul:Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa
+Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025
+ Tempat:Kampung Yawimu
+ Periode:2025-08-06 s/d 2025-08-30
+
+
+
+ Catatan Dosen:
+ Ini simulasi saja, Mohon diterbitkan surat ijin penelitian
+
+
+ Langkah Selanjutnya:
+ Staf akademik akan segera memproses surat izin penelitian Anda. Anda akan
+mendapat notifikasi lanjutan ketika surat sudah siap.
+
+
+
+
+ SIM Tugas Akhir STK Santo Yakobus
+
+
+--B_ALT_688ab5517df99
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+=0A            &lt;div style=3D'font-family: Arial, sans-serif; max-width: 600=
+px; margin: 0 auto;'&gt;=0A                &lt;div style=3D'background-color: #28=
+a745; color: white; padding: 20px; text-align: center;'&gt;=0A                =
+    &lt;h2 style=3D'margin: 0;'&gt;=E2=9C=85 Permohonan Izin Penelitian Disetujui=
+&lt;/h2&gt;=0A                &lt;/div&gt;=0A                =0A                &lt;div st=
+yle=3D'padding: 20px; background-color: #f8f9fa;'&gt;=0A                    &lt;p=
+&gt;Yth. &lt;strong&gt;MAHASISWA CONTOH&lt;/strong&gt;,&lt;/p&gt;=0A                    =0A     =
+               &lt;p&gt;Selamat! Dosen pembimbing telah menyetujui permohonan izi=
+n penelitian Anda.&lt;/p&gt;=0A                    =0A                    &lt;div st=
+yle=3D'background-color: white; padding: 15px; border-radius: 5px; margin: =
+15px 0;'&gt;=0A                        &lt;h4 style=3D'color: #28a745; margin-top=
+: 0;'&gt;Detail Penelitian:&lt;/h4&gt;=0A                        &lt;table style=3D'wid=
+th: 100%; font-size: 14px;'&gt;=0A                            &lt;tr&gt;&lt;td&gt;&lt;strong&gt;=
+Judul:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;Pengaruh Pembelajaran Aktif terhadap Hasil Belajar =
+Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akade=
+mik 2024/2025&lt;/td&gt;&lt;/tr&gt;=0A                            &lt;tr&gt;&lt;td&gt;&lt;strong&gt;Tempa=
+t:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;Kampung Yawimu&lt;/td&gt;&lt;/tr&gt;=0A                            =
+&lt;tr&gt;&lt;td&gt;&lt;strong&gt;Periode:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;2025-08-06 s/d 2025-08-30&lt;/td&gt;&lt;/t=
+r&gt;=0A                        &lt;/table&gt;=0A                    &lt;/div&gt;=0A      =
+              &lt;div style=3D'background-color: #e3f2fd; padding: 15px; borde=
+r-left: 4px solid #2196f3; margin: 15px 0;'&gt;=0A                        &lt;h4 =
+style=3D'color: #1976d2; margin-top: 0;'&gt;Catatan Dosen:&lt;/h4&gt;=0A            =
+            &lt;p style=3D'margin: 0;'&gt;Ini simulasi saja, Mohon diterbitkan su=
+rat ijin penelitian&lt;/p&gt;=0A                    &lt;/div&gt;=0A                    =
+&lt;div style=3D'background-color: #fff3cd; padding: 15px; border-radius: 5px;=
+ border-left: 4px solid #ffc107;'&gt;=0A                        &lt;p style=3D'ma=
+rgin: 0; color: #856404;'&gt;&lt;strong&gt;Langkah Selanjutnya:&lt;/strong&gt;&lt;/p&gt;=0A     =
+                   &lt;p style=3D'margin: 5px 0 0 0; color: #856404;'&gt;Staf aka=
+demik akan segera memproses surat izin penelitian Anda. Anda akan mendapat =
+notifikasi lanjutan ketika surat sudah siap.&lt;/p&gt;=0A                    &lt;/di=
+v&gt;=0A                &lt;/div&gt;=0A                =0A                &lt;div style=
+=3D'background-color: #6c757d; color: white; padding: 15px; text-align: cen=
+ter; font-size: 12px;'&gt;=0A                    &lt;p style=3D'margin: 0;'&gt;SIM T=
+ugas Akhir STK Santo Yakobus&lt;/p&gt;=0A                &lt;/div&gt;=0A            &lt;/d=
+iv&gt;
+
+--B_ALT_688ab5517df99--</pre>
+ERROR - 2025-07-31 07:14:45 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-07-31 07:28:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-31 07:28:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-31 07:28:49 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-31 07:28:53 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-31 07:28:53 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-31 07:28:53 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-31 07:28:54 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-31 07:28:54 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-31 07:28:54 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-31 07:28:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-31 07:28:57 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-31 07:28:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-31 07:28:59 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-31 07:29:06 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-31 07:29:06 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-31 07:29:06 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-31 07:29:08 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-31 07:29:12 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-07-31 07:29:12 --> 404 Page Not Found: Assets/css
+ERROR - 2025-07-31 07:29:12 --> 404 Page Not Found: Assets/img
+ERROR - 2025-07-31 07:29:14 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-31 07:29:21 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-07-31 07:32:37 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-07-31 08:41:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-31 08:41:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-07-31 09:03:50 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'judul asli PM
+            COALESCE(spm.judul_seminar, pm.judul) as judul, `s...' at line 1 - Invalid query: SELECT `spm`.`id`, `spm`.`proposal_id`, `spm`.`mahasiswa_id`, `spm`.`status`, `spm`.`status_pembimbing`, `spm`.`status_kaprodi`, `spm`.`created_at`, `spm`.`updated_at`, `spm`.`file_proposal`, `spm`.`keterangan_mahasiswa`, `-- ✅ PERBAIKAN: Prioritas judul_seminar dari` `SPM`, fallback ke judul asli PM
+            COALESCE(spm.judul_seminar, pm.judul) as judul, `spm`.`judul_seminar`, `pm`.`judul` as `judul_original`, `pm`.`ringkasan`, `pm`.`jenis_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`dosen_id` as `pembimbing_id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `m`.`prodi_id`, `pr`.`nama` as `nama_prodi`, `d`.`nama` as `nama_pembimbing`, `d`.`email` as `email_pembimbing`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `spm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+AND `spm`.`status` = 'review_kaprodi'
+AND `spm`.`status_pembimbing` = 'approved'
+AND `spm`.`status_kaprodi` = 'pending'
+ORDER BY `spm`.`created_at` ASC
+ERROR - 2025-07-31 09:04:18 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'judul asli PM
+            COALESCE(spm.judul_seminar, pm.judul) as judul, `s...' at line 1 - Invalid query: SELECT `spm`.`id`, `spm`.`proposal_id`, `spm`.`mahasiswa_id`, `spm`.`status`, `spm`.`status_pembimbing`, `spm`.`status_kaprodi`, `spm`.`created_at`, `spm`.`updated_at`, `spm`.`file_proposal`, `spm`.`keterangan_mahasiswa`, `-- ✅ PERBAIKAN: Prioritas judul_seminar dari` `SPM`, fallback ke judul asli PM
+            COALESCE(spm.judul_seminar, pm.judul) as judul, `spm`.`judul_seminar`, `pm`.`judul` as `judul_original`, `pm`.`ringkasan`, `pm`.`jenis_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`dosen_id` as `pembimbing_id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `m`.`prodi_id`, `pr`.`nama` as `nama_prodi`, `d`.`nama` as `nama_pembimbing`, `d`.`email` as `email_pembimbing`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `spm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+AND `spm`.`status` = 'review_kaprodi'
+AND `spm`.`status_pembimbing` = 'approved'
+AND `spm`.`status_kaprodi` = 'pending'
+ORDER BY `spm`.`created_at` ASC
+ERROR - 2025-07-31 09:05:26 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'judul asli PM
+            COALESCE(spm.judul_seminar, pm.judul) as judul, `s...' at line 1 - Invalid query: SELECT `spm`.`id`, `spm`.`proposal_id`, `spm`.`mahasiswa_id`, `spm`.`status`, `spm`.`status_pembimbing`, `spm`.`status_kaprodi`, `spm`.`created_at`, `spm`.`updated_at`, `spm`.`file_proposal`, `spm`.`keterangan_mahasiswa`, `-- ✅ PERBAIKAN: Prioritas judul_seminar dari` `SPM`, fallback ke judul asli PM
+            COALESCE(spm.judul_seminar, pm.judul) as judul, `spm`.`judul_seminar`, `pm`.`judul` as `judul_original`, `pm`.`ringkasan`, `pm`.`jenis_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`dosen_id` as `pembimbing_id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `m`.`prodi_id`, `pr`.`nama` as `nama_prodi`, `d`.`nama` as `nama_pembimbing`, `d`.`email` as `email_pembimbing`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `spm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+AND `spm`.`status` = 'review_kaprodi'
+AND `spm`.`status_pembimbing` = 'approved'
+AND `spm`.`status_kaprodi` = 'pending'
+ORDER BY `spm`.`created_at` ASC
+ERROR - 2025-07-31 09:17:31 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`judul_seminar ELSE pm`.`judul END` as `judul`, `spm`.`judul_seminar`, `pm`....' at line 1 - Invalid query: SELECT `spm`.`id`, `spm`.`tanggal_review_kaprodi`, `spm`.`status`, `spm`.`status_kaprodi`, `-- ✅ PERBAIKAN: Gunakan CASE WHEN untuk kompatibilitas CASE WHEN spm`.`judul_seminar IS NOT NULL AND spm`.`judul_seminar != "" THEN spm`.`judul_seminar ELSE pm`.`judul END` as `judul`, `spm`.`judul_seminar`, `pm`.`judul` as `judul_original`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `pr`.`nama` as `nama_prodi`, `d`.`nama` as `nama_pembimbing`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `spm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+AND `spm`.`status_kaprodi` = 'approved'
+AND DATE(spm.tanggal_review_kaprodi) >= '2025-07-24'
+ORDER BY `spm`.`tanggal_review_kaprodi` DESC
+ LIMIT 5
+ERROR - 2025-07-31 09:20:07 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_override_judul_terbaru() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 94
+ERROR - 2025-07-31 09:21:25 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`judul_seminar ELSE pm`.`judul END` as `judul_terbaru`, `spm`.`judul_seminar...' at line 1 - Invalid query: SELECT `CASE WHEN spm`.`judul_seminar IS NOT NULL AND spm`.`judul_seminar != "" THEN spm`.`judul_seminar ELSE pm`.`judul END` as `judul_terbaru`, `spm`.`judul_seminar`, `pm`.`judul` as `judul_original`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+WHERE `spm`.`id` = '3'
+ERROR - 2025-07-31 09:26:39 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php:542) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-07-31 09:26:39 --> Severity: Compile Error --> Cannot redeclare Seminar_proposal::detail() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 542
+ERROR - 2025-07-31 09:26:55 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_get_seminar_detail_kaprodi() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php 79
+ERROR - 2025-07-31 09:59:28 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_kaprodi`, `spm`.`komentar_kaprodi`, `spm`.`plagiarism_percentage`, `...' at line 1 - Invalid query: SELECT `spm`.*, `pm`.`judul` as `proposal_judul_original`, COALESCE(spm.judul_seminar, pm.judul) as judul, `spm`.`judul_seminar`, `pm`.`ringkasan`, `pm`.`jenis_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`uraian_masalah`, `pm`.`file_draft_proposal`, `pm`.`dosen_penguji_id`, `pm`.`dosen_penguji2_id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_pembimbing`.`email` as `email_pembimbing`, `d1`.`nama` as `nama_penguji1`, `d2`.`nama` as `nama_penguji2 spm`.`status_kaprodi`, `spm`.`komentar_kaprodi`, `spm`.`plagiarism_percentage`, `spm`.`tanggal_review_kaprodi`, `dk`.`nama` as `nama_kaprodi_penolak`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `dosen` `dk` ON `spm`.`reviewed_by_kaprodi` = `dk`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `dosen` `d1` ON `spm`.`dosen_penguji1_id` = `d1`.`id`
+LEFT JOIN `dosen` `d2` ON `spm`.`dosen_penguji2_id` = `d2`.`id`
+WHERE `spm`.`id` = '3'
+AND `pm`.`dosen_id` = '25'
+ERROR - 2025-07-31 10:02:46 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_kaprodi`, `spm`.`komentar_kaprodi`, `spm`.`plagiarism_percentage`, `...' at line 1 - Invalid query: SELECT `spm`.*, `pm`.`judul` as `proposal_judul_original`, COALESCE(spm.judul_seminar, pm.judul) as judul, `spm`.`judul_seminar`, `pm`.`ringkasan`, `pm`.`jenis_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`uraian_masalah`, `pm`.`file_draft_proposal`, `pm`.`dosen_penguji_id`, `pm`.`dosen_penguji2_id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_pembimbing`.`email` as `email_pembimbing`, `d1`.`nama` as `nama_penguji1`, `d2`.`nama` as `nama_penguji2 spm`.`status_kaprodi`, `spm`.`komentar_kaprodi`, `spm`.`plagiarism_percentage`, `spm`.`tanggal_review_kaprodi`, `spm`.`reviewed_by_kaprodi`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `dosen` `dk` ON `spm`.`reviewed_by_kaprodi` = `dk`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `dosen` `d1` ON `spm`.`dosen_penguji1_id` = `d1`.`id`
+LEFT JOIN `dosen` `d2` ON `spm`.`dosen_penguji2_id` = `d2`.`id`
+WHERE `spm`.`id` = '3'
+AND `pm`.`dosen_id` = '25'
+ERROR - 2025-07-31 10:04:58 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_add_kaprodi_info() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 873

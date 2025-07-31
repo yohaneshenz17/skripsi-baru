@@ -557,38 +557,5 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Character counter untuk judul seminar
-    const judulTextarea = document.getElementById('judul_seminar');
-    const charCounter = document.getElementById('char-counter');
-    
-    if (judulTextarea && charCounter) {
-        function updateCounter() {
-            const length = judulTextarea.value.length;
-            charCounter.textContent = length + '/250';
-            
-            // Change color based on length
-            if (length > 230) {
-                charCounter.className = 'text-danger';
-            } else if (length > 200) {
-                charCounter.className = 'text-warning';
-            } else {
-                charCounter.className = 'text-muted';
-            }
-        }
-        
-        judulTextarea.addEventListener('input', updateCounter);
-        updateCounter(); // Initial count
-    }
-    
-    // Auto-resize textarea
-    if (judulTextarea) {
-        judulTextarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-    }
 });
 </script>

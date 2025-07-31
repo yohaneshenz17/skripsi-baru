@@ -817,6 +817,178 @@
                 </div>
             </div>
 
+            <!-- 🆕 TAMBAHKAN SECTION INI DI SIDEBAR KANAN -->
+            <!-- Letakkan setelah card "Tindakan" dan sebelum card "Timeline Workflow" -->
+            
+            <!-- Status Penolakan Kaprodi dengan Info Plagiarisme -->
+            <?php if (isset($seminar->status_kaprodi) && $seminar->status_kaprodi == 'rejected'): ?>
+            <div class="card shadow mb-4">
+                <div class="card-header bg-danger">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Pengajuan Ditolak Kaprodi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Alert Utama -->
+                    <div class="alert alert-danger" role="alert">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-times-circle text-danger mr-2 fa-lg"></i>
+                            <h6 class="mb-0 font-weight-bold">Proposal Ditolak oleh Kaprodi</h6>
+                        </div>
+                        <p class="mb-0">Anda perlu memperbaiki proposal sesuai catatan dan menurunkan tingkat plagiarisme.</p>
+                    </div>
+                    
+                    <!-- Catatan Penolakan -->
+                    <?php if (!empty($seminar->komentar_kaprodi)): ?>
+                    <div style="background: #f8f9fe; padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem; border-left: 4px solid #f5365c;">
+                        <h6 style="font-weight: 600; color: #721c24; margin-bottom: 0.5rem;">
+                            <i class="fas fa-comment-alt mr-1"></i> Catatan Penolakan
+                        </h6>
+                        <p style="margin: 0; color: #721c24; line-height: 1.6;">
+                            <?= nl2br(htmlspecialchars($seminar->komentar_kaprodi)) ?>
+                        </p>
+                        <?php if (!empty($seminar->tanggal_review_kaprodi)): ?>
+                        <small style="color: #8898aa; display: block; margin-top: 0.5rem;">
+                            <i class="fas fa-clock mr-1"></i>
+                            Tanggal review: <?= date('d/m/Y H:i', strtotime($seminar->tanggal_review_kaprodi)) ?> WIT
+                        </small>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <!-- Info Plagiarisme (Tampil jika ada data) -->
+            <?php if (isset($seminar->plagiarism_percentage) && $seminar->plagiarism_percentage > 0): ?>
+            <div class="card shadow mb-4">
+                <div class="card-header <?= ($seminar->plagiarism_percentage >= 30) ? 'bg-danger' : 'bg-warning' ?>">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-search mr-2"></i>
+                        Persentase Plagiarisme
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Progress Bar Plagiarisme -->
+                    <div class="text-center mb-3">
+                        <h2 class="font-weight-bold <?= ($seminar->plagiarism_percentage >= 30) ? 'text-danger' : 'text-warning' ?>">
+                            <?= number_format($seminar->plagiarism_percentage, 1) ?>%
+                        </h2>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar <?= ($seminar->plagiarism_percentage >= 30) ? 'bg-danger' : 'bg-warning' ?>" 
+                             role="progressbar" 
+                             style="width: <?= min($seminar->plagiarism_percentage, 100) ?>%">
+                            <?= number_format($seminar->plagiarism_percentage, 1) ?>%
+                        </div>
+                    </div>
+                    
+                    <!-- Status Badge -->
+                    <?php if ($seminar->plagiarism_percentage >= 30): ?>
+                    <div class="alert alert-danger mb-3">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Melebihi batas maksimal 30%</strong><br>
+                        Proposal tidak dapat disetujui
+                    </div>
+                    <?php else: ?>
+                    <div class="alert alert-success mb-3">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <strong>Dalam batas toleransi (&lt; 30%)</strong>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <!-- Skala Referensi -->
+                    <div class="small text-muted">
+                        <div class="d-flex justify-content-between">
+                            <span>0% (Aman)</span>
+                            <span>30% (Batas Maksimal)</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <!-- File Hasil Turnitin -->
+            <?php if (!empty($seminar->file_turnitin)): ?>
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Hasil Pengecekkan Plagiarisme
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center p-3 border rounded" style="background: #f8f9fe;">
+                        <i class="fas fa-file-pdf fa-2x text-danger mr-3"></i>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 font-weight-bold">Laporan Turnitin</h6>
+                            <p class="mb-0 text-muted small">File hasil pengecekkan plagiarisme dari Kaprodi</p>
+                            <?php if (!empty($seminar->tanggal_review_kaprodi)): ?>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar mr-1"></i>
+                                <?= date('d F Y, H:i', strtotime($seminar->tanggal_review_kaprodi)) ?> WIT
+                            </small>
+                            <?php endif; ?>
+                        </div>
+                        <div>
+                            <a href="<?= base_url('mahasiswa/seminar_proposal/download_turnitin/' . $seminar->id) ?>" 
+                               class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-download mr-1"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 small text-muted">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <strong>Catatan:</strong> File ini berisi detail analisis plagiarisme dari sistem Turnitin yang dilakukan oleh Kaprodi.
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <!-- SECTION UNTUK STATUS DISETUJUI (jika disetujui tapi tetap ada info plagiarisme) -->
+            <?php if (isset($seminar->status_kaprodi) && $seminar->status_kaprodi == 'approved' && isset($seminar->plagiarism_percentage) && $seminar->plagiarism_percentage > 0): ?>
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Sudah Disetujui Kaprodi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <strong>Proposal telah disetujui untuk seminar</strong>
+                    </div>
+                    
+                    <div style="background: #f8f9fe; padding: 1rem; border-radius: 0.375rem;">
+                        <h6 style="font-weight: 600; margin-bottom: 0.5rem;">
+                            <i class="fas fa-chart-line mr-1"></i> Hasil Cek Plagiarisme
+                        </h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Persentase:</span>
+                            <span class="badge badge-success"><?= number_format($seminar->plagiarism_percentage, 1) ?>%</span>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            ✓ Memenuhi syarat (&lt; 30%)
+                        </small>
+                    </div>
+                    
+                    <?php if (!empty($seminar->file_turnitin)): ?>
+                    <div class="mt-3">
+                        <a href="<?= base_url('mahasiswa/seminar_proposal/download_turnitin/' . $seminar->id) ?>" 
+                           class="btn btn-outline-success btn-sm btn-block">
+                            <i class="fas fa-download mr-1"></i> Download Laporan Turnitin
+                        </a>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <!-- Timeline Workflow -->
             <div class="card">
                 <div class="card-body">

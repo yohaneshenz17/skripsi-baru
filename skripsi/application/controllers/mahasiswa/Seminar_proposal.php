@@ -1054,6 +1054,88 @@ class Seminar_proposal extends CI_Controller {
         $this->_load_view($data);
     }
 
+    // ========================================================================
+    // 🆕 LETAKKAN METHOD BARU DI SINI - TEPAT SETELAH METHOD detail() SELESAI
+    // ========================================================================
+    
+    /**
+     * 🆕 METHOD BARU: Download file turnitin hasil pengecekkan plagiarisme
+     * URL: mahasiswa/seminar_proposal/download_turnitin/ID
+     */
+    public function download_turnitin($seminar_id)
+    {
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        // Validasi input ID
+        if (!is_numeric($seminar_id)) {
+            $this->session->set_flashdata('error', 'ID seminar tidak valid.');
+            redirect('mahasiswa/seminar_proposal');
+            return;
+        }
+        
+        // Get seminar data dengan security check
+        $seminar = $this->_get_seminar_by_id($seminar_id, $mahasiswa_id);
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar proposal tidak ditemukan atau Anda tidak memiliki akses.');
+            redirect('mahasiswa/seminar_proposal');
+            return;
+        }
+        
+        // Cek apakah ada file turnitin yang diupload kaprodi
+        if (empty($seminar->file_turnitin)) {
+            $this->session->set_flashdata('error', 'File hasil pengecekkan plagiarisme belum tersedia. Kaprodi belum mengupload file turnitin.');
+            redirect('mahasiswa/seminar_proposal/detail/' . $seminar_id);
+            return;
+        }
+        
+        // ✅ PATH SESUAI DENGAN KAPRODI: uploads/turnitin/
+        $file_path = FCPATH . 'uploads/turnitin/' . $seminar->file_turnitin;
+        
+        // Cek apakah file fisik ada di server
+        if (!file_exists($file_path)) {
+            $this->session->set_flashdata('error', 'File tidak ditemukan di server. Hubungi administrator.');
+            
+            // Log error untuk debugging
+            log_message('error', "Turnitin file not found - Expected path: {$file_path}, Seminar ID: {$seminar_id}, File name: {$seminar->file_turnitin}");
+            
+            redirect('mahasiswa/seminar_proposal/detail/' . $seminar_id);
+            return;
+        }
+        
+        // Validasi tipe file (harus PDF sesuai upload kaprodi)
+        $file_info = pathinfo($file_path);
+        if (strtolower($file_info['extension']) !== 'pdf') {
+            $this->session->set_flashdata('error', 'Format file tidak valid. File harus berupa PDF.');
+            redirect('mahasiswa/seminar_proposal/detail/' . $seminar_id);
+            return;
+        }
+        
+        // Load helper download
+        $this->load->helper('download');
+        
+        // Generate nama file yang user-friendly untuk download
+        // Format: Laporan_Turnitin_NamaMahasiswa_NIM_Tahun.pdf
+        $clean_name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $seminar->nama_mahasiswa);
+        $clean_nim = preg_replace('/[^a-zA-Z0-9]/', '', $seminar->nim);
+        $year = date('Y');
+        $download_name = "Laporan_Turnitin_{$clean_name}_{$clean_nim}_{$year}.pdf";
+        
+        // Log download activity untuk audit trail
+        log_message('info', "Turnitin file downloaded - Seminar ID: {$seminar_id}, Mahasiswa ID: {$mahasiswa_id}, Original file: {$seminar->file_turnitin}, Download name: {$download_name}");
+        
+        // Set headers untuk download PDF
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="' . $download_name . '"');
+        header('Content-Length: ' . filesize($file_path));
+        header('Cache-Control: private, max-age=0, must-revalidate');
+        header('Pragma: public');
+        
+        // Baca dan output file
+        readfile($file_path);
+        exit;
+    }
+    
     // =================================================================
     // REMAINING HELPER METHODS
     // =================================================================
@@ -1120,6 +1202,12 @@ class Seminar_proposal extends CI_Controller {
                 pm.judul as proposal_judul_original,
                 COALESCE(sp.judul_seminar, pm.judul) as judul,
                 sp.judul_seminar,
+                sp.plagiarism_percentage,
+                sp.file_turnitin,
+                sp.status_kaprodi,
+                sp.komentar_kaprodi,
+                sp.tanggal_review_kaprodi,
+                sp.reviewed_by_kaprodi,
                 pm.dosen_id,
                 m.nama as nama_mahasiswa,
                 m.nim,
@@ -1129,7 +1217,8 @@ class Seminar_proposal extends CI_Controller {
                 d_pembimbing.nama as nama_pembimbing,
                 d_pembimbing.email as email_pembimbing,
                 d1.nama as nama_penguji1,
-                d2.nama as nama_penguji2
+                d2.nama as nama_penguji2,
+                dk.nama as nama_kaprodi_reviewer
             ');
             $this->db->from('seminar_proposal_mahasiswa sp');
             $this->db->join('proposal_mahasiswa pm', 'sp.proposal_id = pm.id');
@@ -1138,6 +1227,7 @@ class Seminar_proposal extends CI_Controller {
             $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
             $this->db->join('dosen d1', 'sp.dosen_penguji1_id = d1.id', 'left');
             $this->db->join('dosen d2', 'sp.dosen_penguji2_id = d2.id', 'left');
+            $this->db->join('dosen dk', 'sp.reviewed_by_kaprodi = dk.id', 'left'); // 🆕 TAMBAHAN
             
             $this->db->where('sp.id', $seminar_id);
             $this->db->where('pm.mahasiswa_id', $mahasiswa_id); // Security check

@@ -144,9 +144,15 @@ class Seminar_proposal extends CI_Controller {
         exit;
     }
 
+    // ========================================================================
+    // VERSI LENGKAP METHOD (JIKA PERLU REFERENSI COMPLETE)
+    // ========================================================================
+    
     /**
-     * Proses rekomendasi seminar proposal - ENHANCED dengan EMAIL NOTIFICATION
+     * Jika Anda kesulitan menemukan bagian yang tepat, berikut adalah 
+     * versi lengkap method rekomendasi() yang sudah dimodifikasi:
      */
+    
     public function rekomendasi() {
         if ($this->input->method() !== 'post') {
             redirect('dosen/seminar_proposal');
@@ -163,7 +169,7 @@ class Seminar_proposal extends CI_Controller {
             redirect('dosen/seminar_proposal');
             return;
         }
-
+    
         if ($rekomendasi == 'rejected' && empty($komentar)) {
             $this->session->set_flashdata('error', 'Komentar wajib diisi untuk penolakan!');
             redirect('dosen/seminar_proposal/detail/' . $seminar_id);
@@ -180,28 +186,42 @@ class Seminar_proposal extends CI_Controller {
             return;
         }
         
-        // Process rekomendasi
+        // Proses rekomendasi
         $this->db->trans_start();
         
         try {
+            // Update status seminar proposal
             $update_data = [
-                'status_pembimbing' => $rekomendasi == 'approved' ? 'approved' : 'rejected',
+                'status_pembimbing' => $rekomendasi,
                 'komentar_pembimbing' => $komentar,
                 'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
                 'reviewed_by_pembimbing' => $dosen_id,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
             
-            // Update status berdasarkan rekomendasi
+            // ✅ BAGIAN YANG DIMODIFIKASI
             if ($rekomendasi == 'approved') {
-                // DISETUJUI: Lanjut ke Kaprodi
                 $update_data['status'] = 'review_kaprodi';
                 $update_data['current_step'] = 'kaprodi';
+                
+                // ✅ PERBAIKAN: Reset status kaprodi jika ini pengajuan ulang
+                if (isset($seminar->status_kaprodi) && $seminar->status_kaprodi === 'rejected') {
+                    // Reset semua field kaprodi untuk review ulang
+                    $update_data['status_kaprodi'] = 'pending';
+                    $update_data['komentar_kaprodi'] = null;
+                    $update_data['tanggal_review_kaprodi'] = null;
+                    $update_data['reviewed_by_kaprodi'] = null;
+                    $update_data['plagiarism_percentage'] = null;
+                    $update_data['file_turnitin'] = null;
+                    
+                    // Log untuk monitoring
+                    log_message('info', "Reset status kaprodi untuk pengajuan ulang - Seminar ID: $seminar_id, Mahasiswa: {$seminar->nama_mahasiswa}");
+                }
             } else {
-                // DITOLAK: Kembali ke mahasiswa
                 $update_data['status'] = 'rejected';
                 $update_data['current_step'] = 'mahasiswa';
             }
+            // ✅ AKHIR BAGIAN YANG DIMODIFIKASI
             
             $this->db->where('id', $seminar_id);
             $this->db->update('seminar_proposal_mahasiswa', $update_data);
@@ -209,23 +229,22 @@ class Seminar_proposal extends CI_Controller {
             $this->db->trans_complete();
             
             if ($this->db->trans_status() === FALSE) {
-                throw new Exception('Database transaction failed');
+                throw new Exception('Gagal menyimpan rekomendasi');
             }
             
-            // Kirim email notification sesuai logika workflow
-            $this->_kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar, $dosen_id);
+            // Kirim notifikasi email
+            $this->_kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar);
             
-            // Success message
-            $message = $rekomendasi == 'approved' ? 
-                'Pengajuan seminar proposal berhasil disetujui! Email notifikasi telah dikirim ke Kaprodi.' : 
-                'Pengajuan seminar proposal berhasil ditolak! Email notifikasi telah dikirim ke mahasiswa.';
-            
+            $message = ($rekomendasi == 'approved') ? 
+                'Rekomendasi berhasil diberikan! Pengajuan diteruskan ke Kaprodi.' : 
+                'Pengajuan berhasil ditolak. Mahasiswa akan mendapat notifikasi untuk perbaikan.';
+                
             $this->session->set_flashdata('success', $message);
             
         } catch (Exception $e) {
             $this->db->trans_rollback();
-            log_message('error', 'Error processing rekomendasi: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan saat memproses rekomendasi!');
+            log_message('error', 'Error rekomendasi seminar: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
         
         redirect('dosen/seminar_proposal');

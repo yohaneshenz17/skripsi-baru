@@ -26,9 +26,9 @@ class Penelitian extends CI_Controller {
     public function index() {
         // Filter
         $prodi_id = $this->input->get('prodi_id');
-        $status_izin = $this->input->get('status_izin');
+        $status_izin = $this->input->get('status_izin'); 
         $search = $this->input->get('search');
-        
+            
         // Base query
         $this->db->select('
             pm.*,

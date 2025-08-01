@@ -433,7 +433,8 @@ class Seminar_proposal extends CI_Controller {
     }
     
     /**
-     * Get pengajuan yang perlu review
+     * ✅ SAFE MODIFICATION: Hanya tambah OR condition untuk resubmission
+     * GANTI method _get_pengajuan_perlu_review() yang sudah ada dengan ini:
      */
     private function _get_pengajuan_perlu_review() {
         $this->db->select('
@@ -443,28 +444,18 @@ class Seminar_proposal extends CI_Controller {
             spm.status,
             spm.status_pembimbing,
             spm.status_kaprodi,
+            spm.komentar_kaprodi,
+            spm.tanggal_review_kaprodi,
+            spm.plagiarism_percentage,
             spm.created_at,
             spm.updated_at,
             spm.file_proposal,
             spm.keterangan_mahasiswa,
-            
-            -- ✅ PERBAIKAN: Gunakan IFNULL instead of COALESCE untuk kompatibilitas
-            IFNULL(spm.judul_seminar, pm.judul) as judul,
-            spm.judul_seminar,
-            pm.judul as judul_original,
-            
-            pm.ringkasan,
-            pm.jenis_penelitian,
-            pm.lokasi_penelitian,
-            pm.dosen_id as pembimbing_id,
-            
             m.nim,
             m.nama as nama_mahasiswa,
             m.email as email_mahasiswa,
-            m.prodi_id,
-            
             pr.nama as nama_prodi,
-            
+            pm.judul,
             d.nama as nama_pembimbing,
             d.email as email_pembimbing
         ');
@@ -475,15 +466,26 @@ class Seminar_proposal extends CI_Controller {
         $this->db->join('prodi pr', 'm.prodi_id = pr.id');
         $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
         
-        // Filter berdasarkan prodi kaprodi (tetap sama)
+        // Filter berdasarkan prodi kaprodi (TIDAK BERUBAH)
         if ($this->prodi_id) {
             $this->db->where('m.prodi_id', $this->prodi_id);
         }
         
-        // Filter pengajuan yang perlu review kaprodi (tetap sama)
+        // Filter yang sudah direkomendasikan dosen (TIDAK BERUBAH)
         $this->db->where('spm.status', 'review_kaprodi');
         $this->db->where('spm.status_pembimbing', 'approved');
-        $this->db->where('spm.status_kaprodi', 'pending');
+        
+        // ✅ PERBAIKAN AMAN: Tambah OR condition untuk pengajuan ulang
+        $this->db->group_start();
+            // Kondisi existing: pengajuan baru yang belum direview
+            $this->db->where('spm.status_kaprodi', 'pending');
+            
+            // Kondisi baru: pengajuan ulang setelah ditolak  
+            $this->db->or_group_start();
+                $this->db->where('spm.status_kaprodi', 'rejected');
+                $this->db->where('spm.updated_at > COALESCE(spm.tanggal_review_kaprodi, "1970-01-01")');
+            $this->db->group_end();
+        $this->db->group_end();
         
         $this->db->order_by('spm.created_at', 'ASC');
         

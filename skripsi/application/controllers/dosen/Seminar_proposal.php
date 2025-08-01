@@ -153,102 +153,88 @@ class Seminar_proposal extends CI_Controller {
      * versi lengkap method rekomendasi() yang sudah dimodifikasi:
      */
     
-    public function rekomendasi() {
-        if ($this->input->method() !== 'post') {
-            redirect('dosen/seminar_proposal');
-            return;
-        }
-        
-        $seminar_id = $this->input->post('seminar_id');
-        $rekomendasi = $this->input->post('rekomendasi'); // 'approved' atau 'rejected'
-        $komentar = trim($this->input->post('komentar_pembimbing'));
-        
-        // Validasi input
-        if (empty($seminar_id) || empty($rekomendasi)) {
-            $this->session->set_flashdata('error', 'Data tidak lengkap!');
-            redirect('dosen/seminar_proposal');
-            return;
-        }
-    
-        if ($rekomendasi == 'rejected' && empty($komentar)) {
-            $this->session->set_flashdata('error', 'Komentar wajib diisi untuk penolakan!');
-            redirect('dosen/seminar_proposal/detail/' . $seminar_id);
-            return;
-        }
-        
-        $dosen_id = $this->session->userdata('id');
-        
-        // Validasi ownership
-        $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
-        if (!$seminar) {
-            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan bimbingan Anda!');
-            redirect('dosen/seminar_proposal');
-            return;
-        }
-        
-        // Proses rekomendasi
-        $this->db->trans_start();
-        
-        try {
-            // Update status seminar proposal
-            $update_data = [
-                'status_pembimbing' => $rekomendasi,
-                'komentar_pembimbing' => $komentar,
-                'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
-                'reviewed_by_pembimbing' => $dosen_id,
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            // ✅ BAGIAN YANG DIMODIFIKASI
-            if ($rekomendasi == 'approved') {
-                $update_data['status'] = 'review_kaprodi';
-                $update_data['current_step'] = 'kaprodi';
-                
-                // ✅ PERBAIKAN: Reset status kaprodi jika ini pengajuan ulang
-                if (isset($seminar->status_kaprodi) && $seminar->status_kaprodi === 'rejected') {
-                    // Reset semua field kaprodi untuk review ulang
-                    $update_data['status_kaprodi'] = 'pending';
-                    $update_data['komentar_kaprodi'] = null;
-                    $update_data['tanggal_review_kaprodi'] = null;
-                    $update_data['reviewed_by_kaprodi'] = null;
-                    $update_data['plagiarism_percentage'] = null;
-                    $update_data['file_turnitin'] = null;
-                    
-                    // Log untuk monitoring
-                    log_message('info', "Reset status kaprodi untuk pengajuan ulang - Seminar ID: $seminar_id, Mahasiswa: {$seminar->nama_mahasiswa}");
-                }
-            } else {
-                $update_data['status'] = 'rejected';
-                $update_data['current_step'] = 'mahasiswa';
-            }
-            // ✅ AKHIR BAGIAN YANG DIMODIFIKASI
-            
-            $this->db->where('id', $seminar_id);
-            $this->db->update('seminar_proposal_mahasiswa', $update_data);
-            
-            $this->db->trans_complete();
-            
-            if ($this->db->trans_status() === FALSE) {
-                throw new Exception('Gagal menyimpan rekomendasi');
-            }
-            
-            // Kirim notifikasi email
-            $this->_kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar);
-            
-            $message = ($rekomendasi == 'approved') ? 
-                'Rekomendasi berhasil diberikan! Pengajuan diteruskan ke Kaprodi.' : 
-                'Pengajuan berhasil ditolak. Mahasiswa akan mendapat notifikasi untuk perbaikan.';
-                
-            $this->session->set_flashdata('success', $message);
-            
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            log_message('error', 'Error rekomendasi seminar: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
-        
+// BAGIAN 1: PERBAIKAN METHOD rekomendasi() (sekitar line 180-250)
+public function rekomendasi() {
+    if ($this->input->method() !== 'post') {
         redirect('dosen/seminar_proposal');
+        return;
     }
+    
+    $seminar_id = $this->input->post('seminar_id');
+    $rekomendasi = $this->input->post('rekomendasi'); // 'approved' atau 'rejected'
+    $komentar = trim($this->input->post('komentar_pembimbing'));
+    
+    // Validasi input
+    if (empty($seminar_id) || empty($rekomendasi)) {
+        $this->session->set_flashdata('error', 'Data tidak lengkap!');
+        redirect('dosen/seminar_proposal');
+        return;
+    }
+
+    if ($rekomendasi == 'rejected' && empty($komentar)) {
+        $this->session->set_flashdata('error', 'Komentar wajib diisi untuk penolakan!');
+        redirect('dosen/seminar_proposal/detail/' . $seminar_id);
+        return;
+    }
+    
+    $dosen_id = $this->session->userdata('id');
+    
+    // Validasi ownership
+    $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
+    if (!$seminar) {
+        $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan bimbingan Anda!');
+        redirect('dosen/seminar_proposal');
+        return;
+    }
+    
+    // Proses rekomendasi
+    $this->db->trans_start();
+    
+    try {
+        // Update status seminar proposal
+        $update_data = [
+            'status_pembimbing' => $rekomendasi,
+            'komentar_pembimbing' => $komentar,
+            'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
+            'reviewed_by_pembimbing' => $dosen_id,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        if ($rekomendasi == 'approved') {
+            $update_data['status'] = 'review_kaprodi';
+            $update_data['current_step'] = 'kaprodi';
+        } else {
+            $update_data['status'] = 'rejected';
+            $update_data['current_step'] = 'mahasiswa';
+        }
+        
+        $this->db->where('id', $seminar_id);
+        $this->db->update('seminar_proposal_mahasiswa', $update_data);
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            throw new Exception('Gagal menyimpan rekomendasi');
+        }
+        
+        // PERBAIKAN: Kirim notifikasi email dengan parameter yang benar
+        $this->_kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar, $dosen_id);
+        
+        // PERBAIKAN: Pesan notifikasi yang benar sesuai status
+        $message = ($rekomendasi == 'approved') ? 
+            'Pengajuan seminar proposal berhasil disetujui! Email notifikasi telah dikirim ke Kaprodi.' : 
+            'Pengajuan seminar proposal berhasil ditolak. Mahasiswa akan mendapat notifikasi untuk perbaikan.';
+            
+        $this->session->set_flashdata('success', $message);
+        
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        log_message('error', 'Error rekomendasi seminar: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
+    }
+    
+    redirect('dosen/seminar_proposal');
+}
 
     // =================================================================
     // PRIVATE HELPER METHODS - FIXED VERSION
@@ -327,78 +313,168 @@ function validateReject() {
      */
     private function _kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar, $dosen_id) {
         try {
-            // Get dosen info
-            $dosen = $this->_get_dosen_by_id($dosen_id);
-            $dosen_nama = $dosen ? $dosen->nama : 'Dosen Pembimbing';
+            // Setup email configuration
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
             
-            if ($rekomendasi == 'approved') {
-                // DISETUJUI: Kirim email ke Kaprodi
-                $this->_kirim_email_ke_kaprodi($seminar, $dosen_nama);
-            } else {
-                // DITOLAK: Kirim email ke Mahasiswa
-                $this->_kirim_email_ke_mahasiswa($seminar, $dosen_nama, $komentar);
+            $this->email->initialize($config);
+            
+            // Get dosen nama from session or database
+            $dosen_nama = $this->session->userdata('nama');
+            if (empty($dosen_nama)) {
+                $dosen = $this->db->get_where('dosen', ['id' => $dosen_id])->row();
+                $dosen_nama = $dosen ? $dosen->nama : 'Dosen Pembimbing';
             }
             
+            if ($rekomendasi == 'approved') {
+                $this->_kirim_email_rekomendasi_disetujui($seminar, $dosen_nama);
+            } else {
+                $this->_kirim_email_rekomendasi_ditolak($seminar, $dosen_nama, $komentar);
+            }
+            
+            log_message('info', 'Email notifikasi berhasil dikirim untuk seminar ID: ' . $seminar->id);
+            
         } catch (Exception $e) {
-            log_message('error', 'Error sending notification: ' . $e->getMessage());
+            log_message('error', 'Error sending email notification: ' . $e->getMessage());
+            // Jangan throw exception agar proses utama tidak terganggu
         }
     }
 
     /**
      * Kirim email ke mahasiswa jika pengajuan DITOLAK
      */
-    private function _kirim_email_ke_mahasiswa($seminar, $dosen_nama, $komentar) {
-        // Konfigurasi email
-        $config = $this->_get_email_config();
-        $this->email->initialize($config);
-        
-        $subject = 'Pengajuan Seminar Proposal Perlu Diperbaiki - STK Santo Yakobus';
-        
-        $message = $this->_get_template_email_mahasiswa_ditolak($seminar, $dosen_nama, $komentar);
-        
-        $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-        $this->email->to($seminar->email_mahasiswa);
-        $this->email->subject($subject);
-        $this->email->message($message);
-        
-        if (!$this->email->send()) {
-            log_message('error', 'Failed to send rejection email to student: ' . $this->email->print_debugger());
-        } else {
-            log_message('info', 'Rejection email sent to student: ' . $seminar->email_mahasiswa);
+    private function _kirim_email_rekomendasi_ditolak($seminar, $dosen_nama, $komentar) {
+        try {
+            // Email ke mahasiswa
+            $subject = 'Seminar Proposal Perlu Perbaikan - STK Santo Yakobus';
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>⚠️ Seminar Proposal Perlu Perbaikan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Mohon maaf, pengajuan seminar proposal Anda <strong>PERLU DIPERBAIKI</strong> berdasarkan review dari dosen pembimbing.</p>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>📚 Detail Proposal:</h4>
+                        <ul style='color: #856404; margin: 0;'>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Pembimbing:</strong> {$dosen_nama}</li>
+                            <li><strong>Tanggal Review:</strong> " . date('d F Y, H:i') . "</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #dc3545;'>
+                        <h4 style='color: #721c24; margin: 0 0 10px 0;'>📝 Catatan Perbaikan:</h4>
+                        <p style='color: #721c24; margin: 0; font-style: italic;'>\"{$komentar}\"</p>
+                    </div>
+                    
+                    <p><strong>Langkah selanjutnya:</strong></p>
+                    <ol>
+                        <li>Perbaiki proposal sesuai catatan pembimbing</li>
+                        <li>Konsultasikan dengan dosen pembimbing jika perlu klarifikasi</li>
+                        <li>Ajukan kembali seminar proposal setelah perbaikan selesai</li>
+                    </ol>
+                    
+                    <p>Silakan login ke sistem SIM-TA untuk mengajukan kembali setelah melakukan perbaikan.</p>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 10px; text-align: center; font-size: 12px;'>
+                    STK Santo Yakobus Merauke - Sistem Informasi Manajemen Tugas Akhir
+                </div>
+            </div>";
+            
+            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', 'Email penolakan berhasil dikirim ke mahasiswa: ' . $seminar->email_mahasiswa);
+            } else {
+                log_message('error', 'Gagal mengirim email penolakan: ' . $this->email->print_debugger());
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error mengirim email penolakan: ' . $e->getMessage());
         }
     }
 
     /**
      * Kirim email ke kaprodi jika pengajuan DISETUJUI
      */
-    private function _kirim_email_ke_kaprodi($seminar, $dosen_nama) {
-        // Get info kaprodi
-        $kaprodi = $this->_get_kaprodi_info();
-        if (!$kaprodi) {
-            log_message('error', 'Kaprodi info not found');
-            return;
-        }
-        
-        // Konfigurasi email
-        $config = $this->_get_email_config();
-        $this->email->initialize($config);
-        
-        $subject = 'Pengajuan Seminar Proposal Perlu Review - STK Santo Yakobus';
-        
-        $message = $this->_get_template_email_kaprodi_review($seminar, $dosen_nama, $kaprodi);
-        
-        $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-        $this->email->to($kaprodi->email);
-        $this->email->subject($subject);
-        $this->email->message($message);
-        
-        if (!$this->email->send()) {
-            log_message('error', 'Failed to send review email to kaprodi: ' . $this->email->print_debugger());
-        } else {
-            log_message('info', 'Review email sent to kaprodi: ' . $kaprodi->email);
+    private function _kirim_email_rekomendasi_disetujui($seminar, $dosen_nama) {
+        try {
+            // Email ke Kaprodi
+            $kaprodi = $this->db->select('email, nama')
+                               ->from('dosen')
+                               ->where('level', '1') // Assuming level 1 is Kaprodi
+                               ->where('prodi_id', $seminar->prodi_id)
+                               ->get()->row();
+            
+            if (!$kaprodi) {
+                log_message('error', 'Data Kaprodi tidak ditemukan untuk prodi: ' . $seminar->prodi_id);
+                return;
+            }
+            
+            $subject = 'Seminar Proposal Perlu Review - STK Santo Yakobus';
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Seminar Proposal Direkomendasikan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$kaprodi->nama}</strong>,</p>
+                    
+                    <p>Ada pengajuan seminar proposal yang telah direkomendasikan oleh dosen pembimbing dan perlu review Kaprodi.</p>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>📚 Detail Mahasiswa:</h4>
+                        <ul style='color: #155724; margin: 0;'>
+                            <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
+                            <li><strong>NIM:</strong> {$seminar->nim}</li>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Pembimbing:</strong> {$dosen_nama}</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Catatan:</strong> Dosen pembimbing telah memberikan rekomendasi untuk melanjutkan ke tahap seminar proposal.</p>
+                    <p>Silakan login ke sistem untuk melakukan review dan validasi plagiarisme.</p>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 10px; text-align: center; font-size: 12px;'>
+                    STK Santo Yakobus Merauke - Sistem Informasi Manajemen Tugas Akhir
+                </div>
+            </div>";
+            
+            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($kaprodi->email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', 'Email persetujuan berhasil dikirim ke Kaprodi: ' . $kaprodi->email);
+            } else {
+                log_message('error', 'Gagal mengirim email ke Kaprodi: ' . $this->email->print_debugger());
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error mengirim email ke Kaprodi: ' . $e->getMessage());
         }
     }
-
     /**
      * Email configuration
      */

@@ -1439,6 +1439,7 @@ class Seminar_proposal extends CI_Controller {
     /**
      * Kirim notifikasi seminar proposal
      */
+    // BAGIAN 1: GANTI METHOD _kirim_notifikasi_seminar_proposal() yang tidak lengkap
     private function _kirim_notifikasi_seminar_proposal($proposal, $seminar_data, $seminar_id)
     {
         try {
@@ -1458,14 +1459,241 @@ class Seminar_proposal extends CI_Controller {
             
             $this->email->initialize($config);
             
-            // Send notifications (implement as needed)
-            // ... notification logic ...
+            // Get data mahasiswa
+            $mahasiswa = $this->db->select('m.*, p.nama as nama_prodi')
+                                  ->from('mahasiswa m')
+                                  ->join('prodi p', 'm.prodi_id = p.id')
+                                  ->where('m.id', $proposal->mahasiswa_id)
+                                  ->get()->row();
             
-            log_message('info', "Notification sent successfully - Seminar ID: {$seminar_id}, Proposal ID: {$proposal->id}");
+            // Get data dosen pembimbing
+            $dosen_pembimbing = $this->db->get_where('dosen', ['id' => $proposal->dosen_id])->row();
+            
+            if (!$dosen_pembimbing || !$mahasiswa) {
+                log_message('error', 'Data dosen pembimbing atau mahasiswa tidak ditemukan');
+                return false;
+            }
+            
+            // Tentukan apakah ini pengajuan baru atau pengajuan ulang
+            $is_resubmission = $this->_is_resubmission($proposal->id);
+            
+            // Kirim email ke dosen pembimbing
+            $this->_kirim_email_ke_dosen_pembimbing($mahasiswa, $dosen_pembimbing, $proposal, $seminar_data, $is_resubmission);
+            
+            // Kirim email konfirmasi ke mahasiswa
+            $this->_kirim_email_konfirmasi_mahasiswa($mahasiswa, $dosen_pembimbing, $proposal, $seminar_data, $is_resubmission);
+            
+            log_message('info', "Email notifications sent successfully - Seminar ID: {$seminar_id}, Proposal ID: {$proposal->id}");
+            
+            return true;
             
         } catch (Exception $e) {
             log_message('error', 'Error sending seminar proposal notification: ' . $e->getMessage());
             // Don't throw exception, let main process continue
+            return false;
+        }
+    }
+    
+    // BAGIAN 2: METHOD untuk cek apakah ini pengajuan ulang atau baru
+    private function _is_resubmission($proposal_id)
+    {
+        try {
+            // Cek apakah ada seminar proposal sebelumnya yang ditolak untuk proposal ini
+            $this->db->where('proposal_id', $proposal_id);
+            $this->db->where('status', 'rejected');
+            $this->db->where('status_pembimbing', 'rejected');
+            $count = $this->db->count_all_results('seminar_proposal_mahasiswa');
+            
+            return $count > 0;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error checking resubmission status: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    // BAGIAN 3: EMAIL KE DOSEN PEMBIMBING
+    private function _kirim_email_ke_dosen_pembimbing($mahasiswa, $dosen_pembimbing, $proposal, $seminar_data, $is_resubmission)
+    {
+        try {
+            $subject = $is_resubmission ? 
+                '🔄 Pengajuan Ulang Seminar Proposal - Perlu Review' : 
+                '📝 Pengajuan Seminar Proposal Baru - Perlu Review';
+                
+            $status_text = $is_resubmission ? 'PENGAJUAN ULANG' : 'PENGAJUAN BARU';
+            $action_text = $is_resubmission ? 
+                'Mahasiswa telah melakukan perbaikan dan mengajukan ulang seminar proposal yang sebelumnya ditolak.' :
+                'Mahasiswa telah mengajukan seminar proposal.';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📝 {$status_text} Seminar Proposal</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$dosen_pembimbing->nama}</strong>,</p>
+                    
+                    <p>{$action_text}</p>
+                    
+                    <div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2196f3;'>
+                        <h4 style='color: #1565c0; margin: 0 0 10px 0;'>👨‍🎓 Detail Mahasiswa:</h4>
+                        <ul style='color: #1565c0; margin: 0;'>
+                            <li><strong>Nama:</strong> {$mahasiswa->nama}</li>
+                            <li><strong>NIM:</strong> {$mahasiswa->nim}</li>
+                            <li><strong>Program Studi:</strong> {$mahasiswa->nama_prodi}</li>
+                            <li><strong>Email:</strong> {$mahasiswa->email}</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ff9800;'>
+                        <h4 style='color: #ef6c00; margin: 0 0 10px 0;'>📚 Detail Proposal:</h4>
+                        <ul style='color: #ef6c00; margin: 0;'>
+                            <li><strong>Judul:</strong> {$proposal->judul}</li>
+                            <li><strong>Tanggal Pengajuan:</strong> " . date('d F Y, H:i') . "</li>";
+                            
+            if (isset($seminar_data['keterangan_mahasiswa']) && !empty($seminar_data['keterangan_mahasiswa'])) {
+                $message .= "<li><strong>Keterangan:</strong> {$seminar_data['keterangan_mahasiswa']}</li>";
+            }
+            
+            $message .= "
+                        </ul>
+                    </div>";
+            
+            if ($is_resubmission) {
+                $message .= "
+                    <div style='background-color: #fff8e1; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #f57c00; margin: 0 0 10px 0;'>🔄 Informasi Pengajuan Ulang:</h4>
+                        <p style='color: #f57c00; margin: 0;'>
+                            Ini adalah pengajuan ulang setelah perbaikan. Mohon review kembali dengan cermat dan berikan feedback yang konstruktif.
+                        </p>
+                    </div>";
+            }
+            
+            $message .= "
+                    <p><strong>Langkah selanjutnya:</strong></p>
+                    <ol>
+                        <li>Login ke sistem SIM-TA untuk mereview pengajuan</li>
+                        <li>Periksa kelengkapan dokumen dan syarat jurnal bimbingan</li>
+                        <li>Berikan rekomendasi (setujui/tolak) dengan feedback yang jelas</li>
+                        <li>Mahasiswa akan mendapat notifikasi otomatis hasil review Anda</li>
+                    </ol>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('dosen/seminar_proposal') . "' 
+                           style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            🔍 Review Pengajuan Sekarang
+                        </a>
+                    </div>
+                    
+                    <p style='font-size: 12px; color: #6c757d; margin-top: 20px;'>
+                        <em>Email ini dikirim otomatis oleh sistem. Mohon tidak membalas email ini. 
+                        Untuk komunikasi dengan mahasiswa, gunakan sistem internal atau email langsung.</em>
+                    </p>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 10px; text-align: center; font-size: 12px;'>
+                    STK Santo Yakobus Merauke - Sistem Informasi Manajemen Tugas Akhir
+                </div>
+            </div>";
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($dosen_pembimbing->email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', 'Email berhasil dikirim ke dosen pembimbing: ' . $dosen_pembimbing->email);
+            } else {
+                log_message('error', 'Gagal mengirim email ke dosen pembimbing: ' . $this->email->print_debugger());
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error mengirim email ke dosen pembimbing: ' . $e->getMessage());
+        }
+    }
+    
+    // BAGIAN 4: EMAIL KONFIRMASI KE MAHASISWA
+    private function _kirim_email_konfirmasi_mahasiswa($mahasiswa, $dosen_pembimbing, $proposal, $seminar_data, $is_resubmission)
+    {
+        try {
+            $subject = $is_resubmission ? 
+                '✅ Konfirmasi Pengajuan Ulang Seminar Proposal' : 
+                '✅ Konfirmasi Pengajuan Seminar Proposal';
+                
+            $status_text = $is_resubmission ? 'pengajuan ulang' : 'pengajuan';
+            $greeting_text = $is_resubmission ? 
+                'Pengajuan ulang seminar proposal Anda telah berhasil dikirim.' :
+                'Pengajuan seminar proposal Anda telah berhasil dikirim.';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Konfirmasi {$status_text} Seminar Proposal</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$mahasiswa->nama}</strong>,</p>
+                    
+                    <p>{$greeting_text}</p>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>📋 Detail Pengajuan:</h4>
+                        <ul style='color: #155724; margin: 0;'>
+                            <li><strong>Judul:</strong> {$proposal->judul}</li>
+                            <li><strong>Pembimbing:</strong> {$dosen_pembimbing->nama}</li>
+                            <li><strong>Tanggal Pengajuan:</strong> " . date('d F Y, H:i') . "</li>
+                            <li><strong>Status:</strong> Menunggu Review Dosen Pembimbing</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Langkah selanjutnya:</strong></p>
+                    <ol>
+                        <li>Dosen pembimbing akan mereview pengajuan Anda dalam 3-5 hari kerja</li>
+                        <li>Anda akan mendapat notifikasi email hasil review</li>
+                        <li>Jika disetujui, pengajuan akan diteruskan ke Kaprodi</li>
+                        <li>Jika ditolak, lakukan perbaikan sesuai catatan dan ajukan ulang</li>
+                    </ol>
+                    
+                    <div style='background-color: #cce5ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>💡 Tips:</h4>
+                        <ul style='color: #004085; margin: 0;'>
+                            <li>Pantau status pengajuan melalui dashboard Anda</li>
+                            <li>Pastikan email dan notifikasi sistem selalu Anda cek</li>
+                            <li>Jika ada pertanyaan, hubungi dosen pembimbing langsung</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('mahasiswa/seminar_proposal') . "' 
+                           style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📊 Lihat Status Pengajuan
+                        </a>
+                    </div>
+                    
+                    <p>Terima kasih dan semoga sukses!</p>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 10px; text-align: center; font-size: 12px;'>
+                    STK Santo Yakobus Merauke - Sistem Informasi Manajemen Tugas Akhir
+                </div>
+            </div>";
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($mahasiswa->email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', 'Email konfirmasi berhasil dikirim ke mahasiswa: ' . $mahasiswa->email);
+            } else {
+                log_message('error', 'Gagal mengirim email konfirmasi ke mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error mengirim email konfirmasi ke mahasiswa: ' . $e->getMessage());
         }
     }
 

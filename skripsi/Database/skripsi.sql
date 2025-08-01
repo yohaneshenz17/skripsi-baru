@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 31, 2025 at 04:01 PM
+-- Generation Time: Aug 01, 2025 at 08:03 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1609,7 +1609,7 @@ CREATE TABLE `seminar_proposal_mahasiswa` (
 INSERT INTO `seminar_proposal_mahasiswa` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_proposal`, `keterangan_mahasiswa`, `judul_seminar`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
 (1, 44, 44, 'completed', 'mahasiswa', '65deab67fc9fb8be407309c6ff4caf63.docx', 'Proposal Fix ya', 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'approved', 'bisa dilanjutkan seminar', '2025-07-29 12:15:06', 25, 'approved', 'Simulasi saja ya', '2025-07-29 19:31:17', 10, 'TURNITIN_1753792277_6888bf155c784.pdf', 29.00, '2025-08-04', '08:00:00', 'Ruang Ujian', 26, 16, 'pending', NULL, NULL, 'pending', NULL, NULL, '2025-07-28 12:49:03', '2025-07-31 07:56:24', NULL),
 (2, 45, 45, 'approved', 'staf_jadwal', 'SP_20250729114202_6888511ab23cc.docx', 'Tidak ada ya, tolong diterima dengan baik', 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'approved', 'lanjut', '2025-07-29 19:48:54', 25, 'approved', 'ulangi lagi', '2025-07-29 19:49:46', 10, 'TURNITIN_1753793386_6888c36a23112.pdf', 29.00, NULL, NULL, NULL, NULL, NULL, 'pending', NULL, NULL, 'pending', NULL, NULL, '2025-07-29 11:42:02', '2025-07-31 07:56:24', 45),
-(3, 46, 46, 'rejected', 'mahasiswa', 'SP_20250731084550_688acace0e3f6.docx', 'SIAP SEMPRO YA', 'JUDUL HASIL PERBAIKAN TERBARU UNTUK SEMINAR PROPOSAL', 'approved', 'SAYA MEREKOMENDASIKAN SEMINAR PROPOSAL INI', '2025-07-31 08:47:26', 25, 'rejected', 'perbaiki lagi', '2025-07-31 09:28:15', 10, 'TURNITIN_1753928895_688ad4bf98b3b.pdf', 33.00, NULL, NULL, NULL, NULL, NULL, 'pending', NULL, NULL, 'pending', NULL, NULL, '2025-07-31 08:45:50', '2025-07-31 09:28:15', 46);
+(3, 46, 46, 'review_kaprodi', 'kaprodi', 'SP_20250801075314_688c0ffa54319.docx', 'INI LATIHAN UPLOAD ULANG', 'JUDUL PERBAIKAN BARU UNTUK SEMINAR PROPOSAL LATIHAN SAJA', 'approved', 'Ok Lanjutkan', '2025-08-01 07:55:12', 25, 'rejected', 'perbaiki lagi', '2025-07-31 09:28:15', 10, 'TURNITIN_1753928895_688ad4bf98b3b.pdf', 33.00, NULL, NULL, NULL, NULL, NULL, 'pending', NULL, NULL, 'pending', NULL, NULL, '2025-07-31 08:45:50', '2025-08-01 07:55:12', 46);
 
 --
 -- Triggers `seminar_proposal_mahasiswa`

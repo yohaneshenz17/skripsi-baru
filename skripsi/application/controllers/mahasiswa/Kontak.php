@@ -82,7 +82,7 @@ class Kontak extends MY_Controller
             // 3. Get STAF/ADMIN (level = '1') - 1 orang: Yohanes Hendro Pranyoto
             $this->db->select('id, nama, email, nomor_telepon');
             $this->db->from('dosen');
-            $this->db->where('level', '1');
+            $this->db->where('level', '5');  // Ubah dari '1' ke '5'
             $this->db->order_by('nama', 'ASC');
             $query_staf = $this->db->get();
             
@@ -96,7 +96,7 @@ class Kontak extends MY_Controller
                 'debug' => [
                     'kaprodi_count' => count($data['kaprodi_list']),
                     'dosen_count' => count($data['dosen_list']),
-                    'staf_count' => count($data['staf_list'])
+                    'staf_count' => count($data['staf_list'])  // Akan menampilkan akun dengan level 5
                 ]
             ]);
             

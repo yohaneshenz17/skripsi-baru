@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 01, 2025 at 05:21 PM
+-- Generation Time: Aug 02, 2025 at 05:41 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -116,7 +116,7 @@ CREATE TABLE `dosen` (
 --
 
 INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, `level`, `foto`) VALUES
-(2, '20201015', 1, 'Super Admin', '081295111706', 'admin@admin.com', '1', ''),
+(2, '123456', 1, 'Super Admin', '081295111706', 'admin@stkyakobus.ac.id', '1', ''),
 (10, '2721128601', 10, 'Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)', '081290909003', 'dedimus@stkyakobus.ac.id', '4', 'f5f78573e6f98ae0ec49bc71c07024b8.jpg'),
 (11, '2706058401', 11, 'Steven Ronald Ahlaro, S.Pd., M.Pd. (Kaprodi PGSD)', '082271403437', 'pgsd@stkyakobus.ac.id', '4', ''),
 (12, '2720067001', 10, 'Dr. Berlinda Setyo Yunarti, M.Pd.', '085244791002', 'lindayunarti@stkyakobus.ac.id', '2', ''),
@@ -134,13 +134,13 @@ INSERT INTO `dosen` (`id`, `nip`, `prodi_id`, `nama`, `nomor_telepon`, `email`, 
 (25, '2717069001', 10, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '081295111706', 'yohaneshenz@stkyakobus.ac.id', '2', 'cb7f7e58e87bc27937e271490b9d767e.jpg'),
 (26, '2721128601', 10, 'Dedimus Berangka, S.Pd., M.Pd.', '081290909003', 'dedydbeau@gmail.com', '2', ''),
 (27, '2706058401', 11, 'Steven Ronald Ahlaro, S.Pd., M.Pd.', '082271403437', 'steveahlaro@stkyakobus.ac.id', '2', ''),
-(28, '2717069001', 10, 'Yohanes Hendro Pranyoto (Admin)', '081295111706', 'sipd@stkyakobus.ac.id', '1', ''),
+(28, '2717069000', 10, 'Yohanes Hendro Pranyoto (Admin)', '081295111706', 'humas@stkyakobus.ac.id', '1', ''),
 (29, 'STF001', 1, 'Maria Karolina Itu', '082124745593', 'mariadue@stkyakobus.ac.id', '5', 'c8b577cebc9eb3a9387528fe17e45fc6.png'),
 (30, 'STF002', 1, 'Elisabeth Yanu Dwi Astuti', '081240273873', 'elisabethyanu@stkyakobus.ac.id', '5', ''),
 (31, 'STF003', 1, 'Adris Paulina Kause', '085244636278', 'adriskause@stkyakobus.ac.id', '5', ''),
 (32, 'STF004', 1, 'Yuliana Mangera', '082399795210', 'yulimangera@stkyakobus.ac.id', '5', ''),
-(33, 'STF005', 1, 'Staf Akademik 1', '081295111706', 'ppg-pak@stkyakobus.ac.id', '5', ''),
-(34, 'STF001', 10, 'Staf Test PKK', '081234567890', 'ppg-pak@stkyakobus.ac.id', '5', NULL);
+(33, 'STF005', 1, 'Herybertus Oktaviani', '081295111706', 'heribertus@stkyakobus.ac.id', '5', '8b10d5c2d6e13a36d6a718e00d49e064.jpeg'),
+(34, 'STF001', 10, 'Admin SIPD', '081234567890', 'sipd@stkyakobus.ac.id', '5', 'c20b3eff5e1c0a13ab8d524beea7f047.png');
 
 -- --------------------------------------------------------
 

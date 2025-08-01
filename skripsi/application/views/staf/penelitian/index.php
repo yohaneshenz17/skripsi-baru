@@ -191,8 +191,9 @@ ob_start();
                                         </td>
                                         <td><?= $p->nama_prodi ?></td>
                                         <td>
-                                            <div style="max-width: 300px;">
-                                                <?= character_limiter($p->judul, 80) ?>
+                                         <td style="word-wrap: break-word; max-width: 250px; white-space: normal;">
+                                            <div title="<?= htmlspecialchars($p->judul) ?>">
+                                                <?= htmlspecialchars($p->judul) ?>
                                             </div>
                                         </td>
                                         <td><?= $p->lokasi_penelitian ?: '-' ?></td>
@@ -464,6 +465,45 @@ $(document).ready(function() {
     // Tooltip initialization jika menggunakan Bootstrap tooltip
     $('[data-toggle="tooltip"]').tooltip();
 });
+
+<!-- TAMBAHKAN CSS INI UNTUK MEMPERBAIKI WORD WRAP -->
+<style>
+/* Fix tabel penelitian mahasiswa - Word Wrap */
+.table-responsive .table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.table th, .table td {
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    vertical-align: top;
+    padding: 12px 8px;
+}
+
+/* Kolom judul - yang bermasalah */
+.table td:nth-child(3) {
+    width: 35%;
+    max-width: 250px;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 13px;
+}
+
+/* Kolom lokasi penelitian */
+.table td:nth-child(4) {
+    width: 20%;
+    max-width: 150px;
+    word-wrap: break-word;
+}
+
+/* Hover effect */
+.table td:nth-child(3):hover {
+    background-color: #f8f9fa;
+    cursor: help;
+}
+</style>
 </script>
 
 <?php 

@@ -342,22 +342,46 @@ $this->load->view('template/staf', [
 ?>
 
 <script>
+// Upload Surat Function - FIXED VERSION
 function uploadSurat(proposalId) {
+    // Reset form dan set action
+    $('#formUploadSurat')[0].reset();
     $('#formUploadSurat').attr('action', '<?= base_url("staf/penelitian/upload_surat/") ?>' + proposalId);
     $('#modalUploadSurat').modal('show');
 }
 
-// Handle form submit upload surat
+// Form submit handler - ROBUST VERSION
 $('#formUploadSurat').on('submit', function(e) {
     e.preventDefault();
     
     var formData = new FormData(this);
     var actionUrl = $(this).attr('action');
     
-    // Show loading
+    // Validasi client-side
+    var fileInput = $(this).find('input[name="file_surat"]')[0];
+    if (!fileInput.files.length) {
+        showNotification('error', 'Silakan pilih file PDF untuk diupload');
+        return;
+    }
+    
+    var file = fileInput.files[0];
+    
+    // Validasi tipe file
+    if (file.type !== 'application/pdf') {
+        showNotification('error', 'File harus berformat PDF');
+        return;
+    }
+    
+    // Validasi ukuran (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        showNotification('error', 'Ukuran file maksimal 2MB');
+        return;
+    }
+    
+    // Show loading state
     var submitBtn = $(this).find('button[type="submit"]');
     var originalText = submitBtn.html();
-    submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Uploading...').prop('disabled', true);
+    submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Mengupload...').prop('disabled', true);
     
     $.ajax({
         url: actionUrl,
@@ -365,21 +389,141 @@ $('#formUploadSurat').on('submit', function(e) {
         data: formData,
         processData: false,
         contentType: false,
-        success: function(response) {
-            if(response.status == 'success') {
-                alert('✅ ' + response.message);
-                location.reload();
+        timeout: 60000, // 1 menit timeout
+        success: function(response, textStatus, xhr) {
+            console.log('Raw response:', response);
+            console.log('Response type:', typeof response);
+            
+            var data;
+            
+            // Handle berbagai jenis response
+            if (typeof response === 'string') {
+                try {
+                    data = JSON.parse(response);
+                } catch (e) {
+                    console.error('JSON Parse Error:', e);
+                    console.error('Raw response was:', response);
+                    showNotification('error', 'Server mengembalikan response yang tidak valid');
+                    return;
+                }
+            } else if (typeof response === 'object') {
+                data = response;
             } else {
-                alert('❌ Error: ' + response.message);
+                showNotification('error', 'Format response tidak dikenali');
+                return;
+            }
+            
+            // Process response
+            if (data && data.status === 'success') {
+                showNotification('success', data.message || 'Upload berhasil!');
+                $('#modalUploadSurat').modal('hide');
+                
+                // Reload halaman setelah 2 detik
+                setTimeout(function() {
+                    location.reload();
+                }, 2000);
+            } else {
+                var errorMsg = data && data.message ? data.message : 'Upload gagal';
+                showNotification('error', errorMsg);
             }
         },
-        error: function() {
-            alert('❌ Terjadi kesalahan saat upload file');
+        error: function(xhr, status, error) {
+            console.group('AJAX Error Details');
+            console.log('Status:', status);
+            console.log('Error:', error);
+            console.log('HTTP Code:', xhr.status);
+            console.log('Response Text:', xhr.responseText);
+            console.groupEnd();
+            
+            var errorMessage = 'Terjadi kesalahan saat upload';
+            
+            // Handle specific errors
+            if (xhr.status === 404) {
+                errorMessage = 'URL tidak ditemukan (Error 404)';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Kesalahan server (Error 500)';
+            } else if (xhr.status === 413) {
+                errorMessage = 'File terlalu besar';
+            } else if (status === 'timeout') {
+                errorMessage = 'Upload timeout - coba lagi';
+            } else if (status === 'parsererror') {
+                errorMessage = 'Server error - hubungi administrator';
+            } else if (xhr.responseText) {
+                // Coba extract error dari response
+                try {
+                    var errorData = JSON.parse(xhr.responseText);
+                    if (errorData.message) {
+                        errorMessage = errorData.message;
+                    }
+                } catch (e) {
+                    // If not JSON, check for PHP errors
+                    if (xhr.responseText.includes('Fatal error')) {
+                        errorMessage = 'Error fatal pada server';
+                    }
+                }
+            }
+            
+            showNotification('error', errorMessage);
         },
         complete: function() {
-            // Restore button
+            // Restore button state
             submitBtn.html(originalText).prop('disabled', false);
         }
     });
+});
+
+// Notification function
+function showNotification(type, message) {
+    var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    var iconClass = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+    
+    var alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show notification-alert" role="alert">
+            <i class="${iconClass} mr-2"></i>
+            <strong>${type === 'success' ? 'Berhasil!' : 'Error!'}</strong> ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // Remove existing notifications
+    $('.notification-alert').remove();
+    
+    // Add notification
+    if ($('#modalUploadSurat').hasClass('show')) {
+        $('#modalUploadSurat .modal-body').prepend(alertHtml);
+    } else {
+        $('.card-body').first().prepend(alertHtml);
+    }
+    
+    // Auto hide success notifications
+    if (type === 'success') {
+        setTimeout(function() {
+            $('.notification-alert').fadeOut();
+        }, 3000);
+    }
+}
+
+// File input change handler
+$(document).on('change', 'input[name="file_surat"]', function() {
+    var file = this.files[0];
+    if (file) {
+        var fileName = file.name;
+        var fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        $(this).next('.custom-file-label').html(fileName + ' (' + fileSize + ' MB)');
+        
+        // Validate immediately
+        if (file.type !== 'application/pdf') {
+            showNotification('error', 'File harus berformat PDF');
+            this.value = '';
+            $(this).next('.custom-file-label').html('Pilih file...');
+        } else if (file.size > 2 * 1024 * 1024) {
+            showNotification('error', 'Ukuran file maksimal 2MB');
+            this.value = '';
+            $(this).next('.custom-file-label').html('Pilih file...');
+        }
+    }
 });
 </script>

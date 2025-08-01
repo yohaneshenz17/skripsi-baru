@@ -379,6 +379,13 @@ $route['staf/seminar_proposal/export_berita_acara/(:num)'] = 'staf/seminar_propo
 $route['staf/seminar_proposal/cetak_berita_acara/(:num)'] = 'staf/seminar_proposal/cetak_berita_acara/$1';
 
 // 4. Penelitian - Surat Izin Penelitian
+
+// TAMBAHKAN ROUTES INI DI SECTION STAF PENELITIAN EXISTING
+$route['staf/penelitian/cetak_form_permohonan/(:num)'] = 'staf/penelitian/cetak_form_permohonan/$1';
+$route['staf/penelitian/download_template'] = 'staf/penelitian/download_template';
+$route['staf/penelitian/upload_surat_final/(:num)'] = 'staf/penelitian/upload_surat_final/$1';
+$route['staf/penelitian/cetak_surat_enhanced/(:num)'] = 'staf/penelitian/cetak_surat_enhanced/$1';
+
 // Dashboard penelitian staf
 $route['staf/penelitian'] = 'staf/penelitian/index';
 

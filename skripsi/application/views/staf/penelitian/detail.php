@@ -104,6 +104,44 @@ ob_start();
                     </div>
                 </div>
 
+    <!-- TAMBAHKAN FORM UPLOAD INI SETELAH INFO PENELITIAN -->
+    <?php if($proposal->status_izin_penelitian == '0' && !$proposal->surat_izin_penelitian): ?>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="fas fa-upload"></i> Upload Surat Izin Final</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Upload surat izin penelitian yang sudah ditandatangani pimpinan
+                    </div>
+                    
+                    <?= form_open_multipart('staf/penelitian/upload_surat_final/' . $proposal->id) ?>
+                    <div class="form-group">
+                        <label for="file_surat">File Surat Izin (PDF, max 3MB) <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control-file" id="file_surat" name="file_surat" 
+                               accept=".pdf" required>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-lightbulb text-warning"></i> 
+                            Pastikan file sudah ditandatangani dan di-cap resmi oleh pimpinan
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="keterangan_staf">Keterangan (Opsional)</label>
+                        <textarea class="form-control" id="keterangan_staf" name="keterangan_staf" rows="3" 
+                                  placeholder="Catatan tambahan dari staf..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-upload"></i> Upload Surat Final
+                    </button>
+                    <?= form_close() ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
                 <?php if($proposal->surat_izin_penelitian): ?>
                     <div class="form-group">
                         <label class="form-control-label">File Surat Izin</label>

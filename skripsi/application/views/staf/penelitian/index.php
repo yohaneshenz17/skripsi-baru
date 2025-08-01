@@ -7,6 +7,16 @@
 ob_start();
 ?>
 
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="float-right">
+            <a href="<?= base_url('staf/penelitian/download_template') ?>" class="btn btn-info btn-sm" target="_blank">
+                <i class="fas fa-file-download"></i> Download Template Surat
+            </a>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <!-- Statistics Cards -->
     <div class="col-xl-3 col-md-6 mb-4">
@@ -183,6 +193,12 @@ ob_start();
                                                     <a class="dropdown-item" href="<?= base_url('staf/penelitian/download_surat/' . $p->id) ?>" target="_blank">
                                                         <i class="fas fa-download"></i> Download Surat
                                                     </a>
+                                                <?php endif; ?>
+                                                <?php if($p->status_permohonan == 'approved'): ?>
+                                                    <a class="dropdown-item" href="<?= base_url('staf/penelitian/cetak_form_permohonan/' . $p->id) ?>" target="_blank">
+                                                        <i class="fas fa-file-alt text-info"></i> Cetak Form Permohonan
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
                                                 <?php endif; ?>
                                             </div>
                                         </div>

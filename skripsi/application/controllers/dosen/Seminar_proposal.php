@@ -311,9 +311,8 @@ function validateReject() {
     /**
      * Kirim notifikasi email berdasarkan rekomendasi dosen
      */
-    private function _kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar, $dosen_id) {
+    private function _kirim_notifikasi_rekomendasi($seminar, $rekomendasi, $komentar, $dosen_id = null) {
         try {
-            // Setup email configuration
             $config = [
                 'protocol' => 'smtp',
                 'smtp_host' => 'smtp.gmail.com',
@@ -328,9 +327,9 @@ function validateReject() {
             
             $this->email->initialize($config);
             
-            // Get dosen nama from session or database
+            // Get dosen nama dari session atau database
             $dosen_nama = $this->session->userdata('nama');
-            if (empty($dosen_nama)) {
+            if (empty($dosen_nama) && $dosen_id) {
                 $dosen = $this->db->get_where('dosen', ['id' => $dosen_id])->row();
                 $dosen_nama = $dosen ? $dosen->nama : 'Dosen Pembimbing';
             }
@@ -345,7 +344,7 @@ function validateReject() {
             
         } catch (Exception $e) {
             log_message('error', 'Error sending email notification: ' . $e->getMessage());
-            // Jangan throw exception agar proses utama tidak terganggu
+            // Jangan throw exception agar tidak mengganggu workflow utama
         }
     }
 
@@ -415,25 +414,43 @@ function validateReject() {
     /**
      * Kirim email ke kaprodi jika pengajuan DISETUJUI
      */
-    private function _kirim_email_rekomendasi_disetujui($seminar, $dosen_nama) {
+    private function _kirim_email_ke_kaprodi_rekomendasi($seminar, $dosen_nama) {
         try {
-            // Email ke Kaprodi
-            $kaprodi = $this->db->select('email, nama')
-                               ->from('dosen')
-                               ->where('level', '1') // Assuming level 1 is Kaprodi
-                               ->where('prodi_id', $seminar->prodi_id)
-                               ->get()->row();
+            // Ambil data kaprodi dengan error handling
+            $prodi_id = isset($seminar->prodi_id) ? $seminar->prodi_id : 
+                       (isset($seminar->prodi_id_alt) ? $seminar->prodi_id_alt : null);
             
-            if (!$kaprodi) {
-                log_message('error', 'Data Kaprodi tidak ditemukan untuk prodi: ' . $seminar->prodi_id);
+            if (!$prodi_id) {
+                // Fallback: cari prodi_id dari nama prodi
+                if (isset($seminar->nama_prodi)) {
+                    $prodi = $this->db->get_where('prodi', ['nama' => $seminar->nama_prodi])->row();
+                    $prodi_id = $prodi ? $prodi->id : null;
+                }
+            }
+            
+            if (!$prodi_id) {
+                log_message('error', 'Tidak dapat menentukan prodi_id untuk mengirim email ke Kaprodi');
                 return;
             }
             
-            $subject = 'Seminar Proposal Perlu Review - STK Santo Yakobus';
-            $message = "
+            // Ambil data kaprodi
+            $kaprodi = $this->db->select('d.nama, d.email')
+                               ->from('dosen d')
+                               ->join('prodi p', 'd.id = p.dosen_id')
+                               ->where('p.id', $prodi_id)
+                               ->where('d.level', '4') // Level kaprodi
+                               ->get()->row();
+            
+            if (!$kaprodi) {
+                log_message('error', 'Data Kaprodi tidak ditemukan untuk prodi_id: ' . $prodi_id);
+                return;
+            }
+            
+            $subject_kaprodi = 'Seminar Proposal Perlu Review - STK Santo Yakobus';
+            $message_kaprodi = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
-                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
-                    <h2 style='margin: 0;'>✅ Seminar Proposal Direkomendasikan</h2>
+                <div style='background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📝 Seminar Proposal Perlu Review</h2>
                 </div>
                 
                 <div style='padding: 20px; background-color: #f8f9fa;'>
@@ -441,18 +458,31 @@ function validateReject() {
                     
                     <p>Ada pengajuan seminar proposal yang telah direkomendasikan oleh dosen pembimbing dan perlu review Kaprodi.</p>
                     
-                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
-                        <h4 style='color: #155724; margin: 0 0 10px 0;'>📚 Detail Mahasiswa:</h4>
-                        <ul style='color: #155724; margin: 0;'>
+                    <div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2196f3;'>
+                        <h4 style='color: #1565c0; margin: 0 0 10px 0;'>👨‍🎓 Detail Mahasiswa:</h4>
+                        <ul style='color: #1565c0; margin: 0;'>
                             <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
                             <li><strong>NIM:</strong> {$seminar->nim}</li>
+                            <li><strong>Program Studi:</strong> {$seminar->nama_prodi}</li>
                             <li><strong>Judul:</strong> {$seminar->judul}</li>
                             <li><strong>Pembimbing:</strong> {$dosen_nama}</li>
                         </ul>
                     </div>
                     
-                    <p><strong>Catatan:</strong> Dosen pembimbing telah memberikan rekomendasi untuk melanjutkan ke tahap seminar proposal.</p>
-                    <p>Silakan login ke sistem untuk melakukan review dan validasi plagiarisme.</p>
+                    <p><strong>Tugas Kaprodi:</strong></p>
+                    <ol>
+                        <li>Review kelengkapan dan kualitas proposal</li>
+                        <li>Lakukan validasi plagiarisme menggunakan Turnitin</li>
+                        <li>Berikan keputusan: setujui atau tolak</li>
+                        <li>Jika disetujui, jadwalkan seminar dan tunjuk dosen penguji</li>
+                    </ol>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('kaprodi/seminar_proposal') . "' 
+                           style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            🔍 Review Pengajuan Sekarang
+                        </a>
+                    </div>
                 </div>
                 
                 <div style='background-color: #6c757d; color: white; padding: 10px; text-align: center; font-size: 12px;'>
@@ -460,19 +490,93 @@ function validateReject() {
                 </div>
             </div>";
             
+            $this->email->clear();
             $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
             $this->email->to($kaprodi->email);
-            $this->email->subject($subject);
-            $this->email->message($message);
+            $this->email->subject($subject_kaprodi);
+            $this->email->message($message_kaprodi);
             
             if ($this->email->send()) {
-                log_message('info', 'Email persetujuan berhasil dikirim ke Kaprodi: ' . $kaprodi->email);
+                log_message('info', 'Email rekomendasi berhasil dikirim ke Kaprodi: ' . $kaprodi->email);
             } else {
                 log_message('error', 'Gagal mengirim email ke Kaprodi: ' . $this->email->print_debugger());
             }
             
         } catch (Exception $e) {
             log_message('error', 'Error mengirim email ke Kaprodi: ' . $e->getMessage());
+            // Jangan throw exception agar tidak mengganggu workflow utama
+        }
+    }
+
+    private function _kirim_email_rekomendasi_disetujui($seminar, $dosen_nama) {
+        try {
+            // Email ke mahasiswa
+            $subject_mhs = 'Seminar Proposal Direkomendasikan Pembimbing - STK Santo Yakobus';
+            $message_mhs = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Seminar Proposal Direkomendasikan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Selamat! Seminar proposal Anda telah <strong>DIREKOMENDASIKAN</strong> oleh dosen pembimbing.</p>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>📚 Detail Proposal:</h4>
+                        <ul style='color: #155724; margin: 0;'>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Pembimbing:</strong> {$dosen_nama}</li>
+                            <li><strong>Program Studi:</strong> {$seminar->nama_prodi}</li>
+                            <li><strong>Tanggal Rekomendasi:</strong> " . date('d F Y, H:i') . "</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Langkah selanjutnya:</strong></p>
+                    <ol>
+                        <li>Pengajuan akan diteruskan ke Ketua Program Studi untuk review</li>
+                        <li>Kaprodi akan melakukan validasi plagiarisme menggunakan Turnitin</li>
+                        <li>Jika disetujui, Kaprodi akan menjadwalkan seminar dan menunjuk dosen penguji</li>
+                        <li>Anda akan mendapat notifikasi jadwal seminar melalui email</li>
+                    </ol>
+                    
+                    <div style='background-color: #cce5ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>💡 Tips Persiapan:</h4>
+                        <ul style='color: #004085; margin: 0;'>
+                            <li>Siapkan presentasi yang menarik dan mudah dipahami</li>
+                            <li>Pelajari kembali teori-teori yang digunakan dalam proposal</li>
+                            <li>Antisipasi pertanyaan dari dosen penguji</li>
+                            <li>Koordinasi dengan dosen pembimbing untuk sesi latihan</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Selamat dan semoga sukses!</p>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 10px; text-align: center; font-size: 12px;'>
+                    STK Santo Yakobus Merauke - Sistem Informasi Manajemen Tugas Akhir
+                </div>
+            </div>";
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject($subject_mhs);
+            $this->email->message($message_mhs);
+            
+            if ($this->email->send()) {
+                log_message('info', 'Email rekomendasi berhasil dikirim ke mahasiswa: ' . $seminar->email_mahasiswa);
+            } else {
+                log_message('error', 'Gagal mengirim email ke mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            // Email ke Kaprodi - dengan error handling untuk prodi_id
+            $this->_kirim_email_ke_kaprodi_rekomendasi($seminar, $dosen_nama);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error mengirim email rekomendasi disetujui: ' . $e->getMessage());
+            // Jangan throw exception agar tidak mengganggu workflow utama
         }
     }
     /**
@@ -926,46 +1030,48 @@ function validateReject() {
      */
     private function _get_seminar_detail($seminar_id, $dosen_id) {
         try {
-            // ✅ QUERY DASAR DULU - tanpa field kaprodi
             $this->db->select('
                 spm.*,
-                pm.judul as proposal_judul_original,
-                COALESCE(spm.judul_seminar, pm.judul) as judul,
-                spm.judul_seminar,
+                pm.judul,
                 pm.ringkasan,
                 pm.jenis_penelitian,
                 pm.lokasi_penelitian,
                 pm.uraian_masalah,
-                pm.file_draft_proposal,
                 pm.dosen_penguji_id,
                 pm.dosen_penguji2_id,
                 m.nim,
                 m.nama as nama_mahasiswa,
                 m.email as email_mahasiswa,
                 m.nomor_telepon,
+                m.prodi_id,
+                p.id as prodi_id_alt,
                 p.nama as nama_prodi,
                 d_pembimbing.nama as nama_pembimbing,
                 d_pembimbing.email as email_pembimbing,
                 d1.nama as nama_penguji1,
                 d2.nama as nama_penguji2
             ');
-            
             $this->db->from('seminar_proposal_mahasiswa spm');
             $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
             $this->db->join('prodi p', 'm.prodi_id = p.id');
             $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
-            $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left');
-            $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left');
-            
+            $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left'); // sesuai struktur database
+            $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left'); // sesuai struktur database
             $this->db->where('spm.id', $seminar_id);
-            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('pm.dosen_id', $dosen_id); // Validasi ownership
             
             $result = $this->db->get()->row();
             
-            // ✅ TAMBAH INFO KAPRODI SECARA TERPISAH
-            if ($result) {
-                $result = $this->_add_kaprodi_info($result);
+            // Pastikan prodi_id tersedia dengan fallback
+            if ($result && !isset($result->prodi_id)) {
+                $result->prodi_id = isset($result->prodi_id_alt) ? $result->prodi_id_alt : null;
+            }
+            
+            // Debug logging jika development
+            if (ENVIRONMENT === 'development') {
+                log_message('debug', 'Seminar detail query: ' . $this->db->last_query());
+                log_message('debug', 'Seminar result prodi_id: ' . (isset($result->prodi_id) ? $result->prodi_id : 'NULL'));
             }
             
             return $result;

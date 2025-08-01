@@ -276,129 +276,157 @@ class Penelitian extends CI_Controller {
      * Upload surat izin yang sudah ditandatangani - FIXED VERSION
      */
     public function upload_surat($proposal_id) {
-    header('Content-Type: application/json');
+    if (!$proposal_id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID proposal tidak valid']);
+        return;
+    }
     
-    try {
-        if (!$proposal_id) {
-            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+    // Cek apakah permohonan ada dan sudah disetujui pembimbing
+    $this->db->select('pip.*, pm.mahasiswa_id, m.nama as nama_mahasiswa, m.nim');
+    $this->db->from('permohonan_izin_penelitian pip');
+    $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
+    $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+    $this->db->where('pip.proposal_mahasiswa_id', $proposal_id);
+    $this->db->where('pip.status_pembimbing', 'approved');
+    
+    $permohonan = $this->db->get()->row();
+    
+    if (!$permohonan) {
+        echo json_encode(['status' => 'error', 'message' => 'Permohonan tidak ditemukan atau belum disetujui pembimbing']);
+        return;
+    }
+    
+    // ========================================
+    // 🆕 NATIVE PHP UPLOAD - BYPASS CI LIBRARY
+    // ========================================
+    
+    // Validasi file upload
+    if (!isset($_FILES['file_surat']) || $_FILES['file_surat']['error'] !== UPLOAD_ERR_OK) {
+        $error_messages = [
+            UPLOAD_ERR_INI_SIZE => 'File terlalu besar (melebihi upload_max_filesize)',
+            UPLOAD_ERR_FORM_SIZE => 'File terlalu besar (melebihi MAX_FILE_SIZE)',
+            UPLOAD_ERR_PARTIAL => 'File hanya terupload sebagian',
+            UPLOAD_ERR_NO_FILE => 'Tidak ada file yang diupload',
+            UPLOAD_ERR_NO_TMP_DIR => 'Folder temporary tidak ditemukan',
+            UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk',
+            UPLOAD_ERR_EXTENSION => 'Upload dihentikan oleh ekstensi PHP'
+        ];
+        
+        $error_code = $_FILES['file_surat']['error'] ?? UPLOAD_ERR_NO_FILE;
+        $error_message = $error_messages[$error_code] ?? 'Error upload tidak dikenal';
+        
+        echo json_encode(['status' => 'error', 'message' => $error_message]);
+        return;
+    }
+    
+    $uploaded_file = $_FILES['file_surat'];
+    
+    // Validasi tipe file
+    $allowed_types = ['application/pdf'];
+    $file_info = finfo_open(FILEINFO_MIME_TYPE);
+    $detected_type = finfo_file($file_info, $uploaded_file['tmp_name']);
+    finfo_close($file_info);
+    
+    if (!in_array($detected_type, $allowed_types)) {
+        echo json_encode(['status' => 'error', 'message' => 'Hanya file PDF yang diizinkan']);
+        return;
+    }
+    
+    // Validasi ukuran file (max 2MB)
+    if ($uploaded_file['size'] > 2048 * 1024) {
+        echo json_encode(['status' => 'error', 'message' => 'Ukuran file maksimal 2MB']);
+        return;
+    }
+    
+    // Tentukan path upload - GUNAKAN YANG WORKING dari debug
+    $upload_dir = FCPATH . 'uploads/surat_izin/';
+    
+    // Buat folder jika belum ada
+    if (!is_dir($upload_dir)) {
+        if (!mkdir($upload_dir, 0755, true)) {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal membuat folder upload']);
+            return;
+        }
+    }
+    
+    // Generate nama file unik
+    $file_extension = 'pdf'; // Sudah dipastikan PDF dari validasi di atas
+    $filename = 'SURAT_IZIN_' . $permohonan->nim . '_' . date('YmdHis') . '.' . $file_extension;
+    $destination_path = $upload_dir . $filename;
+    
+    // Upload file menggunakan native PHP
+    if (move_uploaded_file($uploaded_file['tmp_name'], $destination_path)) {
+        
+        // Verifikasi file berhasil tersimpan
+        if (!file_exists($destination_path)) {
+            echo json_encode(['status' => 'error', 'message' => 'File gagal tersimpan']);
             return;
         }
         
-        // Get data permohonan
+        // Update database - kedua tabel sekaligus
+        $this->db->trans_start();
+        
+        // Update tabel permohonan_izin_penelitian
         $this->db->where('proposal_mahasiswa_id', $proposal_id);
-        $this->db->where('status_pembimbing', 'approved');
-        $permohonan = $this->db->get('permohonan_izin_penelitian')->row();
-        
-        if (!$permohonan) {
-            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
-            return;
-        }
-        
-        // SMART DIRECTORY CREATION WITH PERMISSION FIX
-        $upload_path = FCPATH . 'uploads/surat_izin/';
-        
-        // Create directory dengan multiple permission attempts
-        if (!is_dir($upload_path)) {
-            // Try different permission levels
-            $permissions = [0755, 0777, 0775, 0755];
-            foreach ($permissions as $perm) {
-                if (mkdir($upload_path, $perm, true)) {
-                    break;
-                }
-            }
-        }
-        
-        // Fix permission jika folder sudah ada tapi tidak writable
-        if (is_dir($upload_path) && !is_writable($upload_path)) {
-            chmod($upload_path, 0777);
-            
-            // Try parent directory too
-            $parent_dir = dirname($upload_path);
-            if (is_dir($parent_dir) && !is_writable($parent_dir)) {
-                chmod($parent_dir, 0755);
-            }
-        }
-        
-        // Final validation
-        if (!is_dir($upload_path)) {
-            echo json_encode([
-                'status' => 'error', 
-                'message' => 'Tidak dapat membuat folder upload: ' . $upload_path
-            ]);
-            return;
-        }
-        
-        if (!is_writable($upload_path)) {
-            echo json_encode([
-                'status' => 'error', 
-                'message' => 'Folder upload tidak dapat ditulis. Cek permission: ' . $upload_path
-            ]);
-            return;
-        }
-        
-        // Test write dengan file temporary
-        $test_file = $upload_path . 'test_' . time() . '.tmp';
-        if (!file_put_contents($test_file, 'test')) {
-            echo json_encode([
-                'status' => 'error', 
-                'message' => 'Write test gagal. Permission folder bermasalah.'
-            ]);
-            return;
-        }
-        unlink($test_file); // cleanup
-        
-        // Configure upload
-        $config = array(
-            'upload_path' => $upload_path,
-            'allowed_types' => 'pdf',
-            'max_size' => 2048,
-            'file_name' => 'SURAT_IZIN_' . $permohonan->nim . '_' . date('YmdHis'),
-            'overwrite' => FALSE
-        );
-        
-        $this->load->library('upload', $config);
-        
-        if ($this->upload->do_upload('file_surat')) {
-            $upload_data = $this->upload->data();
-            
-            // Update database
-            $this->db->where('proposal_mahasiswa_id', $proposal_id);
-            $this->db->update('permohonan_izin_penelitian', [
-                'file_surat_izin_staf' => $upload_data['file_name'],
-                'tanggal_upload_surat_staf' => date('Y-m-d H:i:s'),
-                'uploaded_by_staf' => $this->session->userdata('id'),
-                'keterangan_staf' => $this->input->post('keterangan'),
-                'status' => 'surat_ready'
-            ]);
-            
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Surat berhasil diupload!',
-                'filename' => $upload_data['file_name'],
-                'path' => $upload_path
-            ]);
-            
-        } else {
-            $error = strip_tags($this->upload->display_errors());
-            echo json_encode([
-                'status' => 'error',
-                'message' => $error,
-                'debug_info' => [
-                    'path_exists' => is_dir($upload_path),
-                    'path_writable' => is_writable($upload_path),
-                    'upload_path' => $upload_path
-                ]
-            ]);
-        }
-        
-    } catch (Exception $e) {
-        echo json_encode([
-            'status' => 'error', 
-            'message' => 'System error: ' . $e->getMessage()
+        $this->db->update('permohonan_izin_penelitian', [
+            'file_surat_izin_staf' => $filename,
+            'tanggal_upload_surat_staf' => date('Y-m-d H:i:s'),
+            'uploaded_by_staf' => $this->session->userdata('id'),
+            'keterangan_staf' => $this->input->post('keterangan') ?: null,
+            'status' => 'surat_ready',
+            'updated_at' => date('Y-m-d H:i:s')
         ]);
+        
+        // Update tabel proposal_mahasiswa untuk compatibility
+        $this->db->where('id', $proposal_id);
+        $this->db->update('proposal_mahasiswa', [
+            'surat_izin_penelitian' => $filename,
+            'status_izin_penelitian' => '1' // 1 = disetujui/sudah ada
+        ]);
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            // Hapus file jika database gagal
+            if (file_exists($destination_path)) {
+                unlink($destination_path);
+            }
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data ke database']);
+        } else {
+            // Log aktivitas
+            $this->_log_aktivitas('upload_surat', $proposal_id, 
+                                 "Upload surat izin penelitian untuk {$permohonan->nama_mahasiswa}");
+            
+            echo json_encode([
+                'status' => 'success', 
+                'message' => 'Surat izin berhasil diupload',
+                'filename' => $filename,
+                'file_size' => number_format($uploaded_file['size'] / 1024, 2) . ' KB'
+            ]);
+        }
+        
+    } else {
+        // Cek penyebab gagal move_uploaded_file
+        $error_details = error_get_last();
+        $error_msg = 'Gagal memindahkan file';
+        
+        if ($error_details && strpos($error_details['message'], 'move_uploaded_file') !== false) {
+            $error_msg .= ': ' . $error_details['message'];
+        }
+        
+        // Additional checks
+        if (!is_writable($upload_dir)) {
+            $error_msg .= ' (Folder tidak writable)';
+        }
+        
+        if (!is_uploaded_file($uploaded_file['tmp_name'])) {
+            $error_msg .= ' (File bukan hasil upload yang valid)';
+        }
+        
+        echo json_encode(['status' => 'error', 'message' => $error_msg]);
     }
 }
-    
+   
     /**
      * Download surat izin penelitian
      */

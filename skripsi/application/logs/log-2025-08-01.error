@@ -1,0 +1,306 @@
+ERROR - 2025-08-01 07:52:00 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-01 07:53:29 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-01 08:27:17 --> Severity: error --> Exception: Too few arguments to function Seminar_proposal::_kirim_notifikasi_rekomendasi(), 3 passed in /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php on line 236 and exactly 4 expected /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 328
+ERROR - 2025-08-01 08:47:17 --> Severity: Warning --> Undefined property: stdClass::$prodi_id /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 424
+ERROR - 2025-08-01 08:47:17 --> Severity: Warning --> Undefined property: stdClass::$prodi_id /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 428
+ERROR - 2025-08-01 08:47:17 --> Data Kaprodi tidak ditemukan untuk prodi: 
+ERROR - 2025-08-01 08:47:17 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-01 08:52:22 --> Severity: Warning --> Undefined property: stdClass::$prodi_id /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 424
+ERROR - 2025-08-01 08:52:22 --> Severity: Warning --> Undefined property: stdClass::$prodi_id /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 428
+ERROR - 2025-08-01 08:52:22 --> Data Kaprodi tidak ditemukan untuk prodi: 
+ERROR - 2025-08-01 08:52:22 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-01 09:06:42 --> Severity: error --> Exception: Call to undefined method Seminar_proposal::_kirim_email_ke_kaprodi_rekomendasi() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php 482
+ERROR - 2025-08-01 13:34:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:34:42 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:34:42 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 13:34:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:34:48 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:34:48 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-08-01 13:34:52 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:34:52 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:39:55 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/staf/Penelitian.php:373) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-01 13:39:55 --> Severity: Compile Error --> Cannot redeclare Penelitian::cetak_surat() /home/stkp7133/public_html/skripsi/application/controllers/staf/Penelitian.php 373
+ERROR - 2025-08-01 13:50:39 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:50:39 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:53:02 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:53:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:54:35 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:54:35 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:56:03 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:56:03 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:56:36 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:56:36 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:57:02 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:57:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 13:59:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 13:59:47 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:01:35 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:01:35 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:01:56 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:01:56 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:14:28 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`workflow_status = "penelitian" AND pm`.`status_izin_penelitian = "1" THEN "...' at line 1 - Invalid query: SELECT `pm`.`id`, `pm`.`judul`, `pm`.`workflow_status`, `pm`.`status_izin_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`surat_izin_penelitian`, `pm`.`created_at`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d1`.`nama` as `nama_pembimbing`, `CASE WHEN pm`.`workflow_status = "penelitian" AND pm`.`status_izin_penelitian = "0" THEN "butuh_surat" WHEN pm`.`workflow_status = "penelitian" AND pm`.`status_izin_penelitian = "1" THEN "sudah_ada_surat" WHEN pm`.`workflow_status = "penelitian" AND pm`.`status_izin_penelitian = "2" THEN "ditolak" ELSE "unknown" END` as `status_penelitian_display`
+FROM `proposal_mahasiswa` `pm`
+INNER JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+INNER JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `dosen` `d1` ON `pm`.`dosen_id` = `d1`.`id`
+WHERE (
+            pm.workflow_status = "penelitian" OR 
+            `pm`.`workflow_status` = "seminar_skripsi" OR 
+            `pm`.`workflow_status` = "publikasi" OR 
+            pm.workflow_status = "selesai"
+        )
+ORDER BY `pm`.`created_at` DESC
+ERROR - 2025-08-01 14:18:09 --> Severity: error --> Exception: Call to undefined method Penelitian::_get_penelitian_stats_fixed() /home/stkp7133/public_html/skripsi/application/controllers/staf/Penelitian.php 120
+ERROR - 2025-08-01 14:18:53 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`workflow_status = "penelitian" AND pm`.`status_izin_penelitian = "1" THEN "...' at line 1 - Invalid query: SELECT `pm`.`id`, `pm`.`judul`, `pm`.`workflow_status`, `pm`.`status_izin_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`surat_izin_penelitian`, `pm`.`created_at`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d1`.`nama` as `nama_pembimbing`, `CASE WHEN pm`.`workflow_status = "penelitian" AND pm`.`status_izin_penelitian = "0" THEN "butuh_surat" WHEN pm`.`workflow_status = "penelitian" AND pm`.`status_izin_penelitian = "1" THEN "sudah_ada_surat" WHEN pm`.`workflow_status = "penelitian" AND pm`.`status_izin_penelitian = "2" THEN "ditolak" ELSE "unknown" END` as `status_penelitian_display`
+FROM `proposal_mahasiswa` `pm`
+INNER JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+INNER JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `dosen` `d1` ON `pm`.`dosen_id` = `d1`.`id`
+WHERE (
+            pm.workflow_status = "penelitian" OR 
+            `pm`.`workflow_status` = "seminar_skripsi" OR 
+            `pm`.`workflow_status` = "publikasi" OR 
+            pm.workflow_status = "selesai"
+        )
+ORDER BY `pm`.`created_at` DESC
+ERROR - 2025-08-01 14:19:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:19:08 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:19:36 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:19:37 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:21:50 --> Query error: Unknown column 'm.nim' in 'field list' - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d1`.`nama` as `nama_pembimbing`
+FROM `permohonan_izin_penelitian` `pip`
+LEFT JOIN `dosen` `d` ON `pip`.`dosen_pembimbing_id` = `d`.`id`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `pip`.`proposal_mahasiswa_id` = `pm`.`id`
+WHERE `pm`.`workflow_status` IN('penelitian', 'seminar_skripsi', 'publikasi', 'selesai')
+AND `pm`.`status_izin_penelitian` IS NULL
+ORDER BY `pm`.`created_at` DESC
+ERROR - 2025-08-01 14:23:40 --> Severity: error --> Exception: Call to undefined method Penelitian::_get_penelitian_stats_fixed() /home/stkp7133/public_html/skripsi/application/controllers/staf/Penelitian.php 83
+ERROR - 2025-08-01 14:23:42 --> Severity: error --> Exception: Call to undefined method Penelitian::_get_penelitian_stats_fixed() /home/stkp7133/public_html/skripsi/application/controllers/staf/Penelitian.php 83
+ERROR - 2025-08-01 14:25:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:25:08 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:31:29 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NOT NULL T...' at line 1 - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d1`.`nama` as `nama_pembimbing`, `pip`.`id` as `permohonan_id`, `pip`.`status` as `status_permohonan`, `pip`.`status_pembimbing`, `pip`.`tanggal_review_pembimbing`, `pip`.`file_surat_izin_staf`, `pip`.`tanggal_upload_surat_staf`, `pip`.`keterangan_staf`, `CASE WHEN pip`.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NULL THEN "butuh_surat" WHEN pip`.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NOT NULL THEN "surat_ready" WHEN pip`.`status_pembimbing = "pending" THEN "menunggu_pembimbing" WHEN pip`.`status_pembimbing = "rejected" THEN "ditolak_pembimbing" WHEN pip`.`id IS NULL AND pm`.`workflow_status = "penelitian" THEN "belum_mengajukan" ELSE "unknown" END` as `action_status`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `dosen` `d1` ON `pm`.`dosen_id` = `d1`.`id`
+LEFT JOIN `permohonan_izin_penelitian` `pip` ON `pm`.`id` = `pip`.`proposal_mahasiswa_id`
+WHERE `pm`.`workflow_status` IN('penelitian', 'seminar_skripsi', 'publikasi', 'selesai')
+ORDER BY `pm`.`created_at` DESC
+ERROR - 2025-08-01 14:33:38 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NOT NULL T...' at line 1 - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d1`.`nama` as `nama_pembimbing`, `pip`.`id` as `permohonan_id`, `pip`.`status` as `status_permohonan`, `pip`.`status_pembimbing`, `pip`.`tanggal_review_pembimbing`, `pip`.`file_surat_izin_staf`, `pip`.`tanggal_upload_surat_staf`, `pip`.`keterangan_staf`, `CASE WHEN pip`.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NULL THEN "butuh_surat" WHEN pip`.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NOT NULL THEN "surat_ready" WHEN pip`.`status_pembimbing = "pending" THEN "menunggu_pembimbing" WHEN pip`.`status_pembimbing = "rejected" THEN "ditolak_pembimbing" WHEN pip`.`id IS NULL AND pm`.`workflow_status = "penelitian" THEN "belum_mengajukan" ELSE "unknown" END` as `action_status`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `dosen` `d1` ON `pm`.`dosen_id` = `d1`.`id`
+LEFT JOIN `permohonan_izin_penelitian` `pip` ON `pm`.`id` = `pip`.`proposal_mahasiswa_id`
+WHERE `pm`.`workflow_status` IN('penelitian', 'seminar_skripsi', 'publikasi', 'selesai')
+ORDER BY `pm`.`created_at` DESC
+ERROR - 2025-08-01 14:35:02 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NOT NULL T...' at line 1 - Invalid query: SELECT `pm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `d1`.`nama` as `nama_pembimbing`, `pip`.`id` as `permohonan_id`, `pip`.`status` as `status_permohonan`, `pip`.`status_pembimbing`, `pip`.`tanggal_review_pembimbing`, `pip`.`file_surat_izin_staf`, `pip`.`tanggal_upload_surat_staf`, `pip`.`keterangan_staf`, `CASE WHEN pip`.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NULL THEN "butuh_surat" WHEN pip`.`status_pembimbing = "approved" AND pip`.`file_surat_izin_staf IS NOT NULL THEN "surat_ready" WHEN pip`.`status_pembimbing = "pending" THEN "menunggu_pembimbing" WHEN pip`.`status_pembimbing = "rejected" THEN "ditolak_pembimbing" WHEN pip`.`id IS NULL AND pm`.`workflow_status = "penelitian" THEN "belum_mengajukan" ELSE "unknown" END` as `action_status`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `p` ON `m`.`prodi_id` = `p`.`id`
+LEFT JOIN `dosen` `d1` ON `pm`.`dosen_id` = `d1`.`id`
+LEFT JOIN `permohonan_izin_penelitian` `pip` ON `pm`.`id` = `pip`.`proposal_mahasiswa_id`
+WHERE `pm`.`workflow_status` IN('penelitian', 'seminar_skripsi', 'publikasi', 'selesai')
+ORDER BY `pm`.`created_at` DESC
+ERROR - 2025-08-01 14:39:18 --> Severity: Warning --> Undefined array key "penelitian_bulan_ini" /home/stkp7133/public_html/skripsi/application/views/staf/penelitian/index.php 82
+ERROR - 2025-08-01 14:39:18 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:39:18 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:46:21 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:46:21 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:46:34 --> Query error: Table 'stkp7133_skripsi.staf' doesn't exist - Invalid query: SELECT `sa`.*, `s`.`nama` as `nama_staf`
+FROM `staf_aktivitas` `sa`
+LEFT JOIN `staf` `s` ON `sa`.`staf_id` = `s`.`id`
+WHERE `sa`.`proposal_id` = '44'
+ORDER BY `sa`.`created_at` DESC
+ERROR - 2025-08-01 14:46:40 --> Query error: Unknown column 'jenis_aktivitas' in 'field list' - Invalid query: INSERT INTO `staf_aktivitas` (`jenis_aktivitas`, `staf_id`, `proposal_id`, `keterangan`, `created_at`) VALUES ('cetak_form_permohonan', '29', '44', 'Cetak form permohonan untuk MAHASISWA CONTOH', '2025-08-01 14:46:40')
+ERROR - 2025-08-01 14:46:40 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/third_party/tcpdf/include/tcpdf_static.php:345) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-01 14:46:40 --> Query error: Unknown column 'jenis_aktivitas' in 'field list' - Invalid query: INSERT INTO `staf_aktivitas` (`jenis_aktivitas`, `staf_id`, `proposal_id`, `keterangan`, `created_at`) VALUES ('cetak_form_permohonan', '29', '44', 'Cetak form permohonan untuk MAHASISWA CONTOH', '2025-08-01 14:46:40')
+ERROR - 2025-08-01 14:46:40 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/third_party/tcpdf/include/tcpdf_static.php:345) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-01 14:48:27 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:48:27 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:48:30 --> Query error: Table 'stkp7133_skripsi.staf' doesn't exist - Invalid query: SELECT `sa`.*, `s`.`nama` as `nama_staf`
+FROM `staf_aktivitas` `sa`
+LEFT JOIN `staf` `s` ON `sa`.`staf_id` = `s`.`id`
+WHERE `sa`.`proposal_id` = '44'
+ORDER BY `sa`.`created_at` DESC
+ERROR - 2025-08-01 14:48:54 --> Query error: Unknown column 'sa.created_at' in 'order clause' - Invalid query: SELECT `sa`.*, `d`.`nama` as `nama_staf`
+FROM `staf_aktivitas` `sa`
+LEFT JOIN `dosen` `d` ON `sa`.`staf_id` = `d`.`id`
+WHERE `sa`.`proposal_id` = '44'
+ORDER BY `sa`.`created_at` DESC
+ERROR - 2025-08-01 14:48:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:48:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:49:02 --> Query error: Unknown column 'sa.created_at' in 'order clause' - Invalid query: SELECT `sa`.*, `d`.`nama` as `nama_staf`
+FROM `staf_aktivitas` `sa`
+LEFT JOIN `dosen` `d` ON `sa`.`staf_id` = `d`.`id`
+WHERE `sa`.`proposal_id` = '44'
+ORDER BY `sa`.`created_at` DESC
+ERROR - 2025-08-01 14:49:07 --> Query error: Unknown column 'jenis_aktivitas' in 'field list' - Invalid query: INSERT INTO `staf_aktivitas` (`jenis_aktivitas`, `staf_id`, `proposal_id`, `keterangan`, `created_at`) VALUES ('cetak_form_permohonan', '29', '44', 'Cetak form permohonan untuk MAHASISWA CONTOH', '2025-08-01 14:49:07')
+ERROR - 2025-08-01 14:49:07 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/third_party/tcpdf/include/tcpdf_static.php:345) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-01 14:49:59 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:49:59 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:50:41 --> Query error: Unknown column 'sa.created_at' in 'order clause' - Invalid query: SELECT `sa`.*, `d`.`nama` as `nama_staf`
+FROM `staf_aktivitas` `sa`
+LEFT JOIN `dosen` `d` ON `sa`.`staf_id` = `d`.`id`
+WHERE `sa`.`proposal_id` = '44'
+ORDER BY `sa`.`created_at` DESC
+ERROR - 2025-08-01 14:53:58 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:53:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:54:01 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:54:01 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:59:45 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 14:59:45 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 14:59:46 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:00:40 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:00:42 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:01:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:01:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:01:14 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 15:01:14 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 15:01:18 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:01:21 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:01:21 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:01:21 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 15:01:21 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 15:01:34 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:01:42 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:01:51 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:01:54 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:01:54 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:01:54 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 15:01:54 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 15:02:11 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:05:21 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:05:21 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:05:21 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:08:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:08:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:08:57 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:09:01 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:09:01 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:09:01 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:09:03 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:09:03 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:09:03 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:09:09 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:09:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:09:09 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:09:16 --> Query error: Unknown column 'validasi_kaprodi_publikasi' in 'where clause' - Invalid query: SELECT COUNT(*) AS `numrows`
+FROM `proposal_mahasiswa`
+WHERE `validasi_kaprodi_publikasi` = '1'
+AND `workflow_status` = 'selesai'
+ERROR - 2025-08-01 15:09:18 --> 404 Page Not Found: staf/Seminar_skripsi/index
+ERROR - 2025-08-01 15:09:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:09:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:09:26 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:09:29 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:09:29 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:09:29 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:09:33 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:09:33 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:09:33 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:20:13 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:20:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:20:13 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:20:15 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:20:15 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:20:15 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:20:20 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:20:20 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:20:20 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:22:04 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:22:04 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:22:04 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:22:07 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:22:07 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:22:07 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:22:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:22:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:22:16 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:32:00 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:32:00 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:32:00 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:32:01 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:33:54 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:33:54 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:33:54 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:34:46 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:34:46 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:34:46 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:35:13 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:35:13 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:35:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:35:24 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:35:24 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:35:24 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:35:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:35:42 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:35:42 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:41:13 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:41:13 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:41:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:41:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:41:13 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:41:27 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:41:27 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:41:27 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:41:48 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:46:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:46:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:46:57 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:47:10 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 15:52:40 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 15:52:40 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 15:52:40 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 15:52:50 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:00:17 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:00:17 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:00:17 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 16:00:28 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:01:19 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:01:19 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:01:19 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 16:02:01 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:02:01 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:02:01 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 16:02:01 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 16:03:46 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:03:46 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:03:47 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:03:58 --> The upload path does not appear to be valid.
+ERROR - 2025-08-01 16:04:15 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:04:15 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:04:15 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 16:04:15 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-01 16:07:15 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:07:15 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 16:07:15 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:07:29 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:07:29 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:07:29 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 16:08:21 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:08:21 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 16:08:21 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:08:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:08:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:08:34 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 16:08:34 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 16:09:00 --> 404 Page Not Found: mahasiswa/Penelitian/download_surat
+ERROR - 2025-08-01 16:10:54 --> 404 Page Not Found: mahasiswa/Penelitian/download_surat
+ERROR - 2025-08-01 16:10:58 --> 404 Page Not Found: mahasiswa/Penelitian/download_surat
+ERROR - 2025-08-01 16:11:45 --> 404 Page Not Found: mahasiswa/Penelitian/download_surat
+ERROR - 2025-08-01 16:11:50 --> 404 Page Not Found: mahasiswa/Penelitian/download_surat
+ERROR - 2025-08-01 17:09:10 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-08-01 17:10:53 --> Query error: Unknown column 'status_dosen' in 'where clause' - Invalid query: SELECT COUNT(*) AS `numrows`
+FROM `jurnal_bimbingan`
+WHERE `proposal_id` = '44'
+AND `status_dosen` = 'approved'

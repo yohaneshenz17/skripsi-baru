@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 02, 2025 at 07:07 AM
+-- Generation Time: Aug 02, 2025 at 08:07 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -486,10 +486,10 @@ INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bi
 (48, 46, 6, '2025-07-31', 'yohaneshenz@stkyakobus.ac.id', 'yohaneshenz@stkyakobus.ac.id', 'yohaneshenz@stkyakobus.ac.id', NULL, NULL, '1', '2025-07-31 07:40:15', 25, 'dosen', '2025-07-31 07:40:15', '2025-07-31 07:40:15'),
 (49, 46, 7, '2025-07-31', 'yohaneshenz@stkyakobus.ac.id', 'yohaneshenz@stkyakobus.ac.id', 'yohaneshenz@stkyakobus.ac.id', NULL, NULL, '1', '2025-07-31 07:40:38', 25, 'dosen', '2025-07-31 07:40:38', '2025-07-31 07:40:38'),
 (50, 46, 8, '2025-07-31', 'yohaneshenz@stkyakobus.ac.id', 'yohaneshenz@stkyakobus.ac.id', 'yohaneshenz@stkyakobus.ac.id', NULL, NULL, '1', '2025-07-31 07:41:06', 25, 'dosen', '2025-07-31 07:41:06', '2025-07-31 07:41:06'),
-(51, 44, 11, '2025-08-01', 'Latihan Saja', NULL, 'Latihan Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-01 17:15:39', '2025-08-01 17:15:39'),
-(52, 44, 12, '2025-08-01', 'Latihan Saja', NULL, 'Latihan Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-01 17:15:55', '2025-08-01 17:15:55'),
-(53, 44, 13, '2025-08-01', 'Latihan Saja', NULL, 'Latihan Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-01 17:16:05', '2025-08-01 17:16:05'),
-(54, 44, 14, '2025-08-01', 'Latihan Saja', NULL, 'Latihan Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-01 17:16:20', '2025-08-01 17:16:20');
+(51, 44, 11, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:32', 25, 'mahasiswa', '2025-08-01 17:15:39', '2025-08-02 08:06:32'),
+(52, 44, 12, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:27', 25, 'mahasiswa', '2025-08-01 17:15:55', '2025-08-02 08:06:27'),
+(53, 44, 13, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:21', 25, 'mahasiswa', '2025-08-01 17:16:05', '2025-08-02 08:06:21'),
+(54, 44, 14, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:14', 25, 'mahasiswa', '2025-08-01 17:16:20', '2025-08-02 08:06:14');
 
 -- --------------------------------------------------------
 

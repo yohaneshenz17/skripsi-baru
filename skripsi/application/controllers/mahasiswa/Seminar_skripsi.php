@@ -575,70 +575,159 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get eligible proposals untuk seminar skripsi
+     * Get eligible proposals - FIXED untuk table proposal_mahasiswa
      */
     private function _get_eligible_proposals($mahasiswa_id)
     {
-        $this->db->select('id, judul, workflow_status');
-        $this->db->from('proposal_mahasiswa');
-        $this->db->where('mahasiswa_id', $mahasiswa_id);
-        $this->db->where('workflow_status', 'seminar_skripsi');
-        $this->db->where('status', '1');
-        $this->db->order_by('id', 'DESC');
-        
-        return $this->db->get()->result();
+        try {
+            $this->db->select('id, judul, workflow_status');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $this->db->where('workflow_status', 'seminar_skripsi');
+            $this->db->where('status', '1');
+            $this->db->order_by('id', 'DESC');
+            
+            return $this->db->get()->result();
+            
+        } catch (Exception $e) {
+            if (ENVIRONMENT === 'development') {
+                log_message('error', 'Error getting eligible proposals: ' . $e->getMessage());
+            }
+            return [];
+        }
     }
 
     /**
-     * Get existing seminars
+     * Get existing seminars - FIXED berdasarkan struktur database yang benar
      */
     private function _get_existing_seminars($mahasiswa_id)
     {
-        $this->db->select('*');
-        $this->db->from('seminar_skripsi_mahasiswa_v');
-        $this->db->where('mahasiswa_id', $mahasiswa_id);
-        $this->db->order_by('created_at', 'DESC');
-        
-        return $this->db->get()->result();
+        try {
+            // Prioritas 1: Gunakan view seminar_skripsi_mahasiswa_v (sudah join lengkap)
+            $this->db->select('*');
+            $this->db->from('seminar_skripsi_mahasiswa_v');
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $this->db->order_by('created_at', 'DESC');
+            $result = $this->db->get()->result();
+            
+            if (!empty($result)) {
+                return $result;
+            }
+            
+            // Fallback 2: Query direct table dengan join manual
+            $this->db->select('ss.*, pm.judul, pm.workflow_status, m.nim, m.nama');
+            $this->db->from('seminar_skripsi_mahasiswa ss');
+            $this->db->join('proposal_mahasiswa pm', 'ss.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ss.mahasiswa_id = m.id');
+            $this->db->where('ss.mahasiswa_id', $mahasiswa_id);
+            $this->db->order_by('ss.created_at', 'DESC');
+            $result = $this->db->get()->result();
+            
+            if (!empty($result)) {
+                return $result;
+            }
+            
+            // Fallback 3: Return eligible proposals sebagai "ready to submit"
+            $this->db->select('pm.id as proposal_id, pm.judul, pm.workflow_status, m.nim, m.nama, 
+                              "eligible" as status, "Siap untuk diajukan" as status_description,
+                              pm.created_at');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+            $this->db->where('pm.workflow_status', 'seminar_skripsi');
+            $this->db->where('pm.status', '1');
+            $this->db->order_by('pm.created_at', 'DESC');
+            $result = $this->db->get()->result();
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            if (ENVIRONMENT === 'development') {
+                log_message('error', 'Error getting existing seminars: ' . $e->getMessage());
+            }
+            return [];
+        }
     }
 
     /**
-     * Get proposal by ID dengan ownership validation
+     * Get proposal by ID - FIXED untuk table proposal_mahasiswa
      */
     private function _get_proposal_by_id($proposal_id, $mahasiswa_id)
     {
-        $this->db->select('pm.*, d.nama as nama_pembimbing, d.email as email_pembimbing');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->where('pm.id', $proposal_id);
-        $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-        
-        return $this->db->get()->row();
+        try {
+            $this->db->select('pm.*, d.nama as nama_pembimbing, d.email as email_pembimbing');
+            $this->db->from('proposal_mahasiswa pm');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('pm.id', $proposal_id);
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            if (ENVIRONMENT === 'development') {
+                log_message('error', 'Error getting proposal by ID: ' . $e->getMessage());
+            }
+            return null;
+        }
     }
 
     /**
-     * Get seminar by proposal ID
+     * Get seminar by proposal ID - FIXED untuk table seminar_skripsi_mahasiswa
      */
     private function _get_seminar_by_proposal_id($proposal_id)
     {
-        $this->db->select('*');
-        $this->db->from('seminar_skripsi_mahasiswa');
-        $this->db->where('proposal_id', $proposal_id);
-        
-        return $this->db->get()->row();
+        try {
+            $this->db->select('*');
+            $this->db->from('seminar_skripsi_mahasiswa');
+            $this->db->where('proposal_id', $proposal_id);
+            $result = $this->db->get()->row();
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            if (ENVIRONMENT === 'development') {
+                log_message('error', 'Error getting seminar by proposal ID: ' . $e->getMessage());
+            }
+            return null;
+        }
     }
 
     /**
-     * Get seminar detail
+     * Get seminar detail - FIXED untuk view seminar_skripsi_mahasiswa_v
      */
     private function _get_seminar_detail($seminar_id, $mahasiswa_id)
     {
-        $this->db->select('*');
-        $this->db->from('seminar_skripsi_mahasiswa_v');
-        $this->db->where('id', $seminar_id);
-        $this->db->where('mahasiswa_id', $mahasiswa_id);
-        
-        return $this->db->get()->row();
+        try {
+            // Prioritas 1: Gunakan view lengkap
+            $this->db->select('*');
+            $this->db->from('seminar_skripsi_mahasiswa_v');
+            $this->db->where('id', $seminar_id);
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $result = $this->db->get()->row();
+            
+            if ($result) {
+                return $result;
+            }
+            
+            // Fallback: Query manual dengan join
+            $this->db->select('ss.*, pm.judul, pm.workflow_status, m.nim, m.nama, 
+                              d.nama as nama_pembimbing, d.email as email_pembimbing');
+            $this->db->from('seminar_skripsi_mahasiswa ss');
+            $this->db->join('proposal_mahasiswa pm', 'ss.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ss.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('ss.id', $seminar_id);
+            $this->db->where('ss.mahasiswa_id', $mahasiswa_id);
+            $result = $this->db->get()->row();
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            if (ENVIRONMENT === 'development') {
+                log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
+            }
+            return null;
+        }
     }
 
     /**
@@ -709,27 +798,81 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get progress summary
+     * Get progress summary - FIXED berdasarkan struktur database yang benar
      */
     private function _get_progress_summary($mahasiswa_id)
     {
-        $this->db->select('COUNT(*) as total, status');
-        $this->db->from('seminar_skripsi_mahasiswa');
-        $this->db->where('mahasiswa_id', $mahasiswa_id);
-        $this->db->group_by('status');
-        $results = $this->db->get()->result();
-        
         $summary = [
-            'total' => 0,
-            'draft' => 0,
-            'submitted' => 0,
-            'completed' => 0,
-            'scheduled' => 0
+            'total_proposals' => 0,
+            'eligible_proposals' => 0,
+            'submitted_seminars' => 0,
+            'completed_seminars' => 0,
+            'current_phase' => 'Tidak ada proposal aktif'
         ];
         
-        foreach ($results as $result) {
-            $summary['total'] += $result->total;
-            $summary[$result->status] = $result->total;
+        try {
+            // Total proposals mahasiswa
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $this->db->where('status', '1');
+            $result = $this->db->get()->row();
+            $summary['total_proposals'] = $result ? $result->total : 0;
+            
+            // Eligible proposals (workflow_status = 'seminar_skripsi')
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $this->db->where('workflow_status', 'seminar_skripsi');
+            $this->db->where('status', '1');
+            $result = $this->db->get()->row();
+            $summary['eligible_proposals'] = $result ? $result->total : 0;
+            
+            // Submitted seminars dari table seminar_skripsi_mahasiswa
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('seminar_skripsi_mahasiswa');
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $result = $this->db->get()->row();
+            $summary['submitted_seminars'] = $result ? $result->total : 0;
+            
+            // Completed seminars
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('seminar_skripsi_mahasiswa');
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $this->db->where('status', 'completed');
+            $result = $this->db->get()->row();
+            $summary['completed_seminars'] = $result ? $result->total : 0;
+            
+            // Determine current phase
+            if ($summary['eligible_proposals'] > 0) {
+                $summary['current_phase'] = 'Seminar Skripsi';
+            } else if ($summary['total_proposals'] > 0) {
+                // Check latest proposal workflow status
+                $this->db->select('workflow_status');
+                $this->db->from('proposal_mahasiswa');
+                $this->db->where('mahasiswa_id', $mahasiswa_id);
+                $this->db->where('status', '1');
+                $this->db->order_by('id', 'DESC');
+                $this->db->limit(1);
+                $result = $this->db->get()->row();
+                
+                if ($result) {
+                    $phases = [
+                        'proposal' => 'Usulan Proposal',
+                        'bimbingan' => 'Bimbingan',
+                        'seminar_proposal' => 'Seminar Proposal',
+                        'penelitian' => 'Penelitian',
+                        'seminar_skripsi' => 'Seminar Skripsi',
+                        'publikasi' => 'Publikasi'
+                    ];
+                    $summary['current_phase'] = $phases[$result->workflow_status] ?? 'Status tidak dikenal';
+                }
+            }
+            
+        } catch (Exception $e) {
+            if (ENVIRONMENT === 'development') {
+                log_message('error', 'Error getting progress summary: ' . $e->getMessage());
+            }
         }
         
         return $summary;

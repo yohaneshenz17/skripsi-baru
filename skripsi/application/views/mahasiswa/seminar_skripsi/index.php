@@ -255,6 +255,125 @@
             </div>
         </div>
 
+        <!-- Main Action Section - TAMBAHAN BARU -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-gradient-primary">
+                        <h6 class="m-0 font-weight-bold text-white">
+                            <i class="fas fa-rocket mr-2"></i>
+                            Pengajuan Seminar Skripsi
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        
+                        <?php if (isset($has_eligible_proposals) && $has_eligible_proposals): ?>
+                            <!-- Ada proposal eligible -->
+                            <div class="text-center">
+                                <i class="fas fa-graduation-cap fa-4x text-success mb-3"></i>
+                                <h4 class="text-success mb-3">Siap Mengajukan Seminar Skripsi!</h4>
+                                <p class="text-muted mb-4">
+                                    Anda memiliki proposal yang sudah memenuhi syarat untuk seminar skripsi.
+                                    <br>Pastikan dokumen skripsi Anda sudah lengkap sebelum mengajukan.
+                                </p>
+                                
+                                <?php if (isset($can_create_new) && $can_create_new): ?>
+                                    <!-- TOMBOL ACTION UTAMA -->
+                                    <a href="<?= isset($action_url) ? $action_url : '#' ?>" 
+                                       class="btn <?= isset($action_class) ? $action_class : 'btn-secondary' ?> btn-lg">
+                                        <i class="fas fa-paper-plane mr-2"></i>
+                                        <?= isset($action_text) ? $action_text : 'Ajukan Seminar Skripsi' ?>
+                                    </a>
+                                    
+                                    <?php if (isset($action_proposal_id) && $action_proposal_id): ?>
+                                        <br><small class="text-muted mt-2 d-block">
+                                            Proposal ID: <?= $action_proposal_id ?>
+                                        </small>
+                                    <?php endif; ?>
+                                    
+                                <?php else: ?>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        <strong>Sedang dalam proses:</strong> 
+                                        Anda sudah memiliki pengajuan seminar skripsi yang sedang diproses.
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <!-- Quick Info -->
+                                <div class="row mt-4">
+                                    <div class="col-md-4">
+                                        <div class="bg-light p-3 rounded border">
+                                            <h6 class="text-success mb-1">✓ Syarat Terpenuhi</h6>
+                                            <small class="text-muted">Workflow sudah mencapai tahap seminar skripsi</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="bg-light p-3 rounded border">
+                                            <h6 class="text-success mb-1">✓ Jurnal Lengkap</h6>
+                                            <small class="text-muted">Minimal 14 jurnal bimbingan sudah divalidasi</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="bg-light p-3 rounded border">
+                                            <h6 class="text-success mb-1">✓ Penelitian Selesai</h6>
+                                            <small class="text-muted">Surat izin penelitian sudah disetujui</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        <?php else: ?>
+                            <!-- Tidak ada proposal eligible -->
+                            <div class="text-center">
+                                <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+                                <h4 class="text-warning mb-3">Belum Memenuhi Syarat</h4>
+                                <p class="text-muted mb-4">
+                                    Saat ini Anda belum memiliki proposal yang siap untuk seminar skripsi.
+                                    <br>Pastikan Anda sudah menyelesaikan tahap penelitian dengan lengkap.
+                                </p>
+                                
+                                <div class="alert alert-info">
+                                    <h6 class="mb-3">Syarat yang harus dipenuhi:</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-muted mr-2"></i>
+                                            Proposal sudah disetujui dan lulus seminar proposal
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-muted mr-2"></i>
+                                            Minimal 14 jurnal bimbingan telah divalidasi dosen
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-muted mr-2"></i>
+                                            Surat izin penelitian sudah disetujui
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-muted mr-2"></i>
+                                            Penelitian sudah selesai dilaksanakan
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <a href="<?= base_url('mahasiswa/dashboard') ?>" 
+                                       class="btn btn-outline-primary mr-2">
+                                        <i class="fas fa-arrow-left mr-2"></i>
+                                        Kembali ke Dashboard
+                                    </a>
+                                    <a href="<?= base_url('mahasiswa/penelitian') ?>" 
+                                       class="btn btn-info">
+                                        <i class="fas fa-microscope mr-2"></i>
+                                        Cek Status Penelitian
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Existing Seminar Skripsi -->
         <div class="col-lg-6 mb-4">
             <div class="card shadow h-100">

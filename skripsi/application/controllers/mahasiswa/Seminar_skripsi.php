@@ -46,10 +46,10 @@ class Seminar_skripsi extends CI_Controller {
         
         // Load model dengan fallback
         try {
-            $this->load->model('Seminar_skripsi_mahasiswa_model', 'seminar_model');
+            $this->load->model('Seminar_skripsi_model', 'seminar_model');  // ✅ FIXED
         } catch (Exception $e) {
             if (ENVIRONMENT === 'development') {
-                log_message('error', 'Failed to load Seminar_skripsi_mahasiswa_model: ' . $e->getMessage());
+                log_message('error', 'Failed to load Seminar_skripsi_model: ' . $e->getMessage());
             }
             $this->load->model('Seminar_proposal_mahasiswa_model', 'seminar_model');
         }

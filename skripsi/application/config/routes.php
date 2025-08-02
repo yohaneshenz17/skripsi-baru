@@ -105,10 +105,11 @@ $route['mahasiswa/seminar_skripsi/ajukan'] = 'mahasiswa/seminar_skripsi/ajukan';
 $route['mahasiswa/seminar_skripsi/submit_ajukan'] = 'mahasiswa/seminar_skripsi/submit_ajukan';
 $route['mahasiswa/seminar_skripsi/detail/(:num)'] = 'mahasiswa/seminar_skripsi/detail/$1';
 
-// Backward compatibility dengan dash
-$route['mahasiswa/seminar-skripsi'] = 'mahasiswa/seminar_skripsi/index';
-$route['mahasiswa/seminar-skripsi/ajukan/(:num)'] = 'mahasiswa/seminar_skripsi/ajukan/$1';
-$route['mahasiswa/seminar-skripsi/detail/(:num)'] = 'mahasiswa/seminar_skripsi/detail/$1';
+// TAMBAHKAN INI - Backward compatibility untuk URL lama
+$route['mahasiswa/skripsi'] = 'mahasiswa/seminar_skripsi/index';
+$route['mahasiswa/skripsi/index'] = 'mahasiswa/seminar_skripsi/index';
+$route['mahasiswa/skripsi/detail/(:num)'] = 'mahasiswa/seminar_skripsi/detail/$1';
+$route['mahasiswa/skripsi/ajukan/(:num)'] = 'mahasiswa/seminar_skripsi/ajukan/$1';
 
 // =====================================================
 //      GENERIC ROUTING (HARUS DI BAWAH ROUTING SPESIFIK)
@@ -332,6 +333,8 @@ $route['dosen/seminar_skripsi/berita_acara/(:num)'] = 'dosen/seminar_skripsi/ber
 
 // Routes dengan dash untuk konsistensi URL
 $route['dosen/seminar-skripsi'] = 'dosen/seminar_skripsi';
+$route['dosen/seminar-skripsi/(:any)'] = 'dosen/seminar_skripsi/$1';
+$route['dosen/seminar-skripsi/(:any)/(:num)'] = 'dosen/seminar_skripsi/$1/$2';
 $route['dosen/seminar-skripsi/detail/(:num)'] = 'dosen/seminar_skripsi/detail/$1';
 $route['dosen/seminar-skripsi/rekomendasi'] = 'dosen/seminar_skripsi/rekomendasi';
 

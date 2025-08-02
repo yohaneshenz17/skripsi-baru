@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 02, 2025 at 05:41 AM
+-- Generation Time: Aug 02, 2025 at 07:07 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -56,6 +56,45 @@ CREATE DEFINER=`stkp7133`@`localhost` FUNCTION `check_jurnal_requirement_mahasis
             'Memenuhi syarat untuk mengajukan seminar proposal', 
             CONCAT('Perlu ', (8 - v_count), ' jurnal bimbingan lagi yang divalidasi dosen')
         )
+    );
+    
+    RETURN v_result;
+END$$
+
+CREATE DEFINER=`stkp7133`@`localhost` FUNCTION `check_jurnal_requirement_seminar_skripsi` (`p_proposal_id` BIGINT) RETURNS LONGTEXT CHARSET utf8mb4 COLLATE utf8mb4_bin DETERMINISTIC READS SQL DATA BEGIN
+    DECLARE v_count INT DEFAULT 0;
+    DECLARE v_surat_izin_approved BOOLEAN DEFAULT FALSE;
+    DECLARE v_result JSON;
+    
+    -- Hitung jurnal yang sudah divalidasi minimal 14x
+    SELECT COUNT(*) INTO v_count
+    FROM jurnal_bimbingan 
+    WHERE proposal_id = p_proposal_id 
+    AND status_validasi = '1';
+    
+    -- Cek apakah ada surat izin penelitian yang disetujui
+    SELECT COUNT(*) > 0 INTO v_surat_izin_approved
+    FROM permohonan_izin_penelitian
+    WHERE proposal_mahasiswa_id = p_proposal_id
+    AND status_izin_penelitian = '1';
+    
+    -- Buat result JSON
+    SET v_result = JSON_OBJECT(
+        'eligible', IF(v_count >= 14 AND v_surat_izin_approved, TRUE, FALSE),
+        'jurnal_validated_count', v_count,
+        'minimum_required_jurnal', 14,
+        'missing_jurnal', GREATEST(0, 14 - v_count),
+        'surat_izin_approved', v_surat_izin_approved,
+        'message', CASE 
+            WHEN v_count < 14 AND NOT v_surat_izin_approved THEN 
+                CONCAT('Perlu ', (14 - v_count), ' jurnal bimbingan lagi yang divalidasi dosen dan surat izin penelitian yang disetujui')
+            WHEN v_count < 14 THEN 
+                CONCAT('Perlu ', (14 - v_count), ' jurnal bimbingan lagi yang divalidasi dosen')
+            WHEN NOT v_surat_izin_approved THEN 
+                'Perlu surat izin penelitian yang disetujui dosen pembimbing'
+            ELSE 
+                'Memenuhi syarat untuk mengajukan seminar skripsi'
+        END
     );
     
     RETURN v_result;
@@ -1019,6 +1058,157 @@ CREATE TABLE `penilaian_seminar_proposal_v` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `penilaian_seminar_skripsi`
+--
+
+CREATE TABLE `penilaian_seminar_skripsi` (
+  `id` bigint(20) NOT NULL,
+  `seminar_skripsi_id` bigint(20) NOT NULL COMMENT 'FK ke seminar_skripsi_mahasiswa',
+  `mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke mahasiswa (redundant untuk performance)',
+  `proposal_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa (redundant untuk performance)',
+  `catatan_pendahuluan` text DEFAULT NULL COMMENT 'Catatan revisi untuk Bab I: Pendahuluan (Latar Belakang, Rumusan Masalah, Tujuan)',
+  `catatan_tinjauan_pustaka` text DEFAULT NULL COMMENT 'Catatan revisi untuk Bab II: Tinjauan Pustaka & Landasan Teori',
+  `catatan_metodologi` text DEFAULT NULL COMMENT 'Catatan revisi untuk Bab III: Metodologi Penelitian',
+  `catatan_hasil_pembahasan` text DEFAULT NULL COMMENT 'Catatan revisi untuk Bab IV: Hasil Penelitian & Pembahasan',
+  `catatan_kesimpulan` text DEFAULT NULL COMMENT 'Catatan revisi untuk Bab V: Kesimpulan & Saran',
+  `catatan_umum` text DEFAULT NULL COMMENT 'Catatan umum, sistematika penulisan, atau saran tambahan',
+  `nilai_penguji1` decimal(5,2) DEFAULT NULL COMMENT 'Nilai dari dosen penguji 1 (0-100)',
+  `nilai_penguji2` decimal(5,2) DEFAULT NULL COMMENT 'Nilai dari dosen penguji 2 (0-100)',
+  `nilai_pembimbing` decimal(5,2) DEFAULT NULL COMMENT 'Nilai dari dosen pembimbing (0-100)',
+  `nilai_substansi_hasil` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Substansi & Hasil Penelitian (untuk analisis)',
+  `nilai_presentasi_teknik` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Presentasi & Teknik Penyajian (untuk analisis)',
+  `nilai_penguasaan_diskusi` decimal(5,2) DEFAULT NULL COMMENT 'Nilai Penguasaan Materi & Diskusi (untuk analisis)',
+  `nilai_akhir` decimal(5,2) DEFAULT NULL COMMENT 'Nilai akhir: (nilai_penguji1 + nilai_penguji2 + nilai_pembimbing) / 3',
+  `nilai_huruf` enum('A','B','C','D','E') DEFAULT NULL COMMENT 'Konversi nilai: ≥80=A, 70-79.9=B, 60-69.9=C, 50-59.9=D, <50=E',
+  `rekomendasi` enum('lulus_tanpa_revisi','lulus_dengan_revisi_minor','lulus_dengan_revisi_mayor','tidak_lulus') DEFAULT NULL COMMENT 'Rekomendasi hasil seminar skripsi',
+  `keterangan_rekomendasi` text DEFAULT NULL COMMENT 'Keterangan tambahan untuk rekomendasi',
+  `status_penilaian` enum('draft','published') DEFAULT 'draft' COMMENT 'Status form: draft (masih bisa diedit) atau published (final)',
+  `dinilai_oleh` bigint(20) NOT NULL COMMENT 'FK ke dosen/staf yang menginput penilaian',
+  `role_penilai` enum('dosen_pembimbing','staf') DEFAULT 'dosen_pembimbing' COMMENT 'Role yang menginput: dosen pembimbing atau staf',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Tanggal pembuatan penilaian',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Tanggal terakhir update',
+  `published_at` datetime DEFAULT NULL COMMENT 'Tanggal publikasi penilaian ke mahasiswa'
+) ;
+
+--
+-- Triggers `penilaian_seminar_skripsi`
+--
+DELIMITER $$
+CREATE TRIGGER `tr_penilaian_skripsi_calculate_insert` BEFORE INSERT ON `penilaian_seminar_skripsi` FOR EACH ROW BEGIN
+    -- Auto calculate nilai akhir jika semua nilai tersedia
+    IF NEW.nilai_penguji1 IS NOT NULL AND NEW.nilai_penguji2 IS NOT NULL AND NEW.nilai_pembimbing IS NOT NULL THEN
+        SET NEW.nilai_akhir = ROUND((NEW.nilai_penguji1 + NEW.nilai_penguji2 + NEW.nilai_pembimbing) / 3, 2);
+        
+        -- Auto set nilai huruf (SAMA seperti seminar proposal)
+        SET NEW.nilai_huruf = CASE 
+            WHEN NEW.nilai_akhir >= 80 THEN 'A'
+            WHEN NEW.nilai_akhir >= 70 THEN 'B'
+            WHEN NEW.nilai_akhir >= 60 THEN 'C'
+            WHEN NEW.nilai_akhir >= 50 THEN 'D'
+            ELSE 'E'
+        END;
+    END IF;
+    
+    -- Set published_at jika status published
+    IF NEW.status_penilaian = 'published' THEN
+        SET NEW.published_at = NOW();
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `tr_penilaian_skripsi_calculate_update` BEFORE UPDATE ON `penilaian_seminar_skripsi` FOR EACH ROW BEGIN
+    -- Auto calculate nilai akhir jika semua nilai tersedia
+    IF NEW.nilai_penguji1 IS NOT NULL AND NEW.nilai_penguji2 IS NOT NULL AND NEW.nilai_pembimbing IS NOT NULL THEN
+        SET NEW.nilai_akhir = ROUND((NEW.nilai_penguji1 + NEW.nilai_penguji2 + NEW.nilai_pembimbing) / 3, 2);
+        
+        -- Auto set nilai huruf (SAMA seperti seminar proposal)
+        SET NEW.nilai_huruf = CASE 
+            WHEN NEW.nilai_akhir >= 80 THEN 'A'
+            WHEN NEW.nilai_akhir >= 70 THEN 'B'
+            WHEN NEW.nilai_akhir >= 60 THEN 'C'
+            WHEN NEW.nilai_akhir >= 50 THEN 'D'
+            ELSE 'E'
+        END;
+    END IF;
+    
+    -- Set published_at jika status berubah ke published
+    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
+        SET NEW.published_at = NOW();
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `tr_penilaian_skripsi_workflow` AFTER UPDATE ON `penilaian_seminar_skripsi` FOR EACH ROW BEGIN
+    -- Jika penilaian di-publish, update status seminar skripsi
+    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
+        UPDATE seminar_skripsi_mahasiswa 
+        SET status = 'completed', current_step = 'mahasiswa'
+        WHERE id = NEW.seminar_skripsi_id;
+        
+        -- Logika workflow berdasarkan rekomendasi:
+        -- Jika tidak lulus, workflow tetap di seminar_skripsi (untuk mengulang)
+        -- Jika lulus (semua jenis), workflow lanjut ke publikasi
+        IF NEW.rekomendasi = 'tidak_lulus' THEN
+            UPDATE proposal_mahasiswa 
+            SET workflow_status = 'seminar_skripsi'
+            WHERE id = NEW.proposal_id;
+        ELSE
+            -- Semua jenis lulus (tanpa revisi, revisi minor, revisi mayor) lanjut ke publikasi
+            UPDATE proposal_mahasiswa 
+            SET workflow_status = 'publikasi'
+            WHERE id = NEW.proposal_id;
+        END IF;
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `penilaian_seminar_skripsi_v`
+-- (See below for the actual view)
+--
+CREATE TABLE `penilaian_seminar_skripsi_v` (
+`id` bigint(20)
+,`seminar_skripsi_id` bigint(20)
+,`mahasiswa_id` bigint(20)
+,`proposal_id` bigint(20)
+,`nilai_penguji1` decimal(5,2)
+,`nilai_penguji2` decimal(5,2)
+,`nilai_pembimbing` decimal(5,2)
+,`nilai_akhir` decimal(5,2)
+,`nilai_huruf` enum('A','B','C','D','E')
+,`rekomendasi` enum('lulus_tanpa_revisi','lulus_dengan_revisi_minor','lulus_dengan_revisi_mayor','tidak_lulus')
+,`status_penilaian` enum('draft','published')
+,`role_penilai` enum('dosen_pembimbing','staf')
+,`created_at` datetime
+,`updated_at` datetime
+,`published_at` datetime
+,`nim` varchar(50)
+,`nama_mahasiswa` varchar(100)
+,`email_mahasiswa` varchar(100)
+,`judul` varchar(250)
+,`tanggal_seminar` date
+,`jam_seminar` time
+,`tempat_seminar` varchar(255)
+,`nama_pembimbing` varchar(100)
+,`nama_penguji1` varchar(100)
+,`nama_penguji2` varchar(100)
+,`nama_penilai` varchar(100)
+,`catatan_pendahuluan` text
+,`catatan_tinjauan_pustaka` text
+,`catatan_metodologi` text
+,`catatan_hasil_pembahasan` text
+,`catatan_kesimpulan` text
+,`catatan_umum` text
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `permohonan_izin_penelitian`
 --
 
@@ -1723,6 +1913,148 @@ CREATE TABLE `seminar_proposal_mahasiswa_v` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `seminar_skripsi_mahasiswa`
+--
+
+CREATE TABLE `seminar_skripsi_mahasiswa` (
+  `id` bigint(20) NOT NULL,
+  `proposal_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa (READ ONLY)',
+  `mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke mahasiswa (redundant untuk performance)',
+  `status` enum('draft','submitted','review_pembimbing','review_kaprodi','approved','rejected','scheduled','completed') DEFAULT 'draft',
+  `current_step` varchar(50) DEFAULT 'mahasiswa' COMMENT 'mahasiswa|pembimbing|kaprodi|staf',
+  `file_skripsi` varchar(255) DEFAULT NULL COMMENT 'File skripsi final lengkap (Word/PDF max 2MB)',
+  `keterangan_mahasiswa` text DEFAULT NULL COMMENT 'Keterangan tambahan dari mahasiswa (opsional)',
+  `status_pembimbing` enum('pending','approved','rejected') DEFAULT 'pending',
+  `komentar_pembimbing` text DEFAULT NULL COMMENT 'Komentar/feedback dari dosen pembimbing',
+  `tanggal_review_pembimbing` datetime DEFAULT NULL,
+  `reviewed_by_pembimbing` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen pembimbing',
+  `status_kaprodi` enum('pending','approved','rejected') DEFAULT 'pending',
+  `komentar_kaprodi` text DEFAULT NULL COMMENT 'Komentar validasi dari Kaprodi',
+  `tanggal_review_kaprodi` datetime DEFAULT NULL,
+  `reviewed_by_kaprodi` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen Kaprodi',
+  `file_turnitin` varchar(255) DEFAULT NULL COMMENT 'File hasil Turnitin dari Kaprodi',
+  `plagiarism_percentage` decimal(5,2) DEFAULT NULL COMMENT 'Persentase plagiarisme dari Turnitin (max 30%)',
+  `tanggal_seminar` date DEFAULT NULL COMMENT 'Tanggal pelaksanaan seminar skripsi',
+  `jam_seminar` time DEFAULT NULL COMMENT 'Jam pelaksanaan seminar skripsi',
+  `tempat_seminar` varchar(255) DEFAULT NULL COMMENT 'Tempat pelaksanaan seminar skripsi',
+  `dosen_penguji1_id` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen penguji 1 (auto dari seminar proposal)',
+  `dosen_penguji2_id` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen penguji 2 (auto dari seminar proposal)',
+  `status_penguji1` enum('pending','approved','rejected') DEFAULT 'approved' COMMENT 'Default approved (langsung ditunjuk)',
+  `komentar_penguji1` text DEFAULT NULL COMMENT 'Komentar dari penguji 1 (opsional)',
+  `tanggal_respon_penguji1` datetime DEFAULT NULL,
+  `status_penguji2` enum('pending','approved','rejected') DEFAULT 'approved' COMMENT 'Default approved (langsung ditunjuk)',
+  `komentar_penguji2` text DEFAULT NULL COMMENT 'Komentar dari penguji 2 (opsional)',
+  `tanggal_respon_penguji2` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Tanggal pengajuan oleh mahasiswa',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_by` bigint(20) DEFAULT NULL COMMENT 'FK ke mahasiswa yang membuat pengajuan'
+) ;
+
+--
+-- Triggers `seminar_skripsi_mahasiswa`
+--
+DELIMITER $$
+CREATE TRIGGER `tr_seminar_skripsi_mhs_insert` AFTER INSERT ON `seminar_skripsi_mahasiswa` FOR EACH ROW BEGIN
+    -- Update workflow_status di proposal_mahasiswa ke seminar_skripsi
+    UPDATE proposal_mahasiswa 
+    SET workflow_status = 'seminar_skripsi'
+    WHERE id = NEW.proposal_id;
+    
+    -- Auto-suggest dosen penguji dari seminar proposal (phase 3)
+    UPDATE seminar_skripsi_mahasiswa 
+    SET 
+        dosen_penguji1_id = (SELECT dosen_penguji_id FROM proposal_mahasiswa WHERE id = NEW.proposal_id),
+        dosen_penguji2_id = (SELECT dosen_penguji2_id FROM proposal_mahasiswa WHERE id = NEW.proposal_id)
+    WHERE id = NEW.id
+    AND dosen_penguji1_id IS NULL 
+    AND dosen_penguji2_id IS NULL;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `tr_seminar_skripsi_mhs_update` AFTER UPDATE ON `seminar_skripsi_mahasiswa` FOR EACH ROW BEGIN
+    -- Jika status berubah ke completed, siap ke fase publikasi
+    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+        UPDATE proposal_mahasiswa 
+        SET workflow_status = 'publikasi'
+        WHERE id = NEW.proposal_id;
+    END IF;
+    
+    -- Jika status berubah ke rejected, workflow tetap di seminar_skripsi
+    IF NEW.status = 'rejected' AND OLD.status != 'rejected' THEN
+        UPDATE proposal_mahasiswa 
+        SET workflow_status = 'seminar_skripsi'
+        WHERE id = NEW.proposal_id;
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `seminar_skripsi_mahasiswa_v`
+-- (See below for the actual view)
+--
+CREATE TABLE `seminar_skripsi_mahasiswa_v` (
+`id` bigint(20)
+,`proposal_id` bigint(20)
+,`mahasiswa_id` bigint(20)
+,`status` enum('draft','submitted','review_pembimbing','review_kaprodi','approved','rejected','scheduled','completed')
+,`current_step` varchar(50)
+,`file_skripsi` varchar(255)
+,`keterangan_mahasiswa` text
+,`status_pembimbing` enum('pending','approved','rejected')
+,`status_kaprodi` enum('pending','approved','rejected')
+,`plagiarism_percentage` decimal(5,2)
+,`tanggal_seminar` date
+,`jam_seminar` time
+,`tempat_seminar` varchar(255)
+,`created_at` datetime
+,`updated_at` datetime
+,`nim` varchar(50)
+,`nama_mahasiswa` varchar(100)
+,`email_mahasiswa` varchar(100)
+,`judul` varchar(250)
+,`workflow_status` enum('proposal','bimbingan','seminar_proposal','penelitian','seminar_skripsi','publikasi','selesai')
+,`pembimbing_id` bigint(20)
+,`nama_pembimbing` varchar(100)
+,`email_pembimbing` varchar(100)
+,`nip_pembimbing` varchar(30)
+,`nama_penguji1` varchar(100)
+,`nip_penguji1` varchar(30)
+,`nama_penguji2` varchar(100)
+,`nip_penguji2` varchar(30)
+,`progress_percentage` int(3)
+,`status_description` varchar(45)
+,`eligibility_check` longtext
+,`suggested_penguji1_id` int(11)
+,`suggested_penguji2_id` bigint(20)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `seminar_skripsi_progress_v`
+-- (See below for the actual view)
+--
+CREATE TABLE `seminar_skripsi_progress_v` (
+`phase` varchar(15)
+,`total_mahasiswa` bigint(21)
+,`draft_count` bigint(21)
+,`submitted_count` bigint(21)
+,`review_pembimbing_count` bigint(21)
+,`review_kaprodi_count` bigint(21)
+,`approved_count` bigint(21)
+,`scheduled_count` bigint(21)
+,`completed_count` bigint(21)
+,`rejected_count` bigint(21)
+,`avg_progress_percentage` decimal(6,4)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `skripsi`
 --
 
@@ -2011,6 +2343,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 -- --------------------------------------------------------
 
 --
+-- Structure for view `penilaian_seminar_skripsi_v`
+--
+DROP TABLE IF EXISTS `penilaian_seminar_skripsi_v`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `penilaian_seminar_skripsi_v`  AS SELECT `pss`.`id` AS `id`, `pss`.`seminar_skripsi_id` AS `seminar_skripsi_id`, `pss`.`mahasiswa_id` AS `mahasiswa_id`, `pss`.`proposal_id` AS `proposal_id`, `pss`.`nilai_penguji1` AS `nilai_penguji1`, `pss`.`nilai_penguji2` AS `nilai_penguji2`, `pss`.`nilai_pembimbing` AS `nilai_pembimbing`, `pss`.`nilai_akhir` AS `nilai_akhir`, `pss`.`nilai_huruf` AS `nilai_huruf`, `pss`.`rekomendasi` AS `rekomendasi`, `pss`.`status_penilaian` AS `status_penilaian`, `pss`.`role_penilai` AS `role_penilai`, `pss`.`created_at` AS `created_at`, `pss`.`updated_at` AS `updated_at`, `pss`.`published_at` AS `published_at`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pm`.`judul` AS `judul`, `ssk`.`tanggal_seminar` AS `tanggal_seminar`, `ssk`.`jam_seminar` AS `jam_seminar`, `ssk`.`tempat_seminar` AS `tempat_seminar`, `d`.`nama` AS `nama_pembimbing`, `d1`.`nama` AS `nama_penguji1`, `d2`.`nama` AS `nama_penguji2`, `dp`.`nama` AS `nama_penilai`, `pss`.`catatan_pendahuluan` AS `catatan_pendahuluan`, `pss`.`catatan_tinjauan_pustaka` AS `catatan_tinjauan_pustaka`, `pss`.`catatan_metodologi` AS `catatan_metodologi`, `pss`.`catatan_hasil_pembahasan` AS `catatan_hasil_pembahasan`, `pss`.`catatan_kesimpulan` AS `catatan_kesimpulan`, `pss`.`catatan_umum` AS `catatan_umum` FROM (((((((`penilaian_seminar_skripsi` `pss` join `seminar_skripsi_mahasiswa` `ssk` on(`pss`.`seminar_skripsi_id` = `ssk`.`id`)) join `proposal_mahasiswa` `pm` on(`pss`.`proposal_id` = `pm`.`id`)) join `mahasiswa` `m` on(`pss`.`mahasiswa_id` = `m`.`id`)) left join `dosen` `d` on(`pm`.`dosen_id` = `d`.`id`)) left join `dosen` `d1` on(`ssk`.`dosen_penguji1_id` = `d1`.`id`)) left join `dosen` `d2` on(`ssk`.`dosen_penguji2_id` = `d2`.`id`)) left join `dosen` `dp` on(`pss`.`dinilai_oleh` = `dp`.`id`)) ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `proposal_mahasiswa_detail_v`
 --
 DROP TABLE IF EXISTS `proposal_mahasiswa_detail_v`;
@@ -2034,6 +2375,24 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 DROP TABLE IF EXISTS `seminar_proposal_mahasiswa_v`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `seminar_proposal_mahasiswa_v`  AS SELECT `spm`.`id` AS `id`, `spm`.`proposal_id` AS `proposal_id`, `spm`.`mahasiswa_id` AS `mahasiswa_id`, `spm`.`status` AS `status`, `spm`.`current_step` AS `current_step`, `spm`.`file_proposal` AS `file_proposal`, `spm`.`keterangan_mahasiswa` AS `keterangan_mahasiswa`, `spm`.`status_pembimbing` AS `status_pembimbing`, `spm`.`status_kaprodi` AS `status_kaprodi`, `spm`.`tanggal_seminar` AS `tanggal_seminar`, `spm`.`jam_seminar` AS `jam_seminar`, `spm`.`tempat_seminar` AS `tempat_seminar`, `spm`.`created_at` AS `created_at`, `spm`.`updated_at` AS `updated_at`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pm`.`judul` AS `judul`, `pm`.`workflow_status` AS `workflow_status`, `pm`.`dosen_id` AS `pembimbing_id`, `d`.`nama` AS `nama_pembimbing`, `d`.`email` AS `email_pembimbing`, `d1`.`nama` AS `nama_penguji1`, `d2`.`nama` AS `nama_penguji2`, CASE WHEN `spm`.`status` = 'draft' THEN 'Menyiapkan pengajuan' WHEN `spm`.`status` = 'submitted' THEN 'Menunggu review dosen pembimbing' WHEN `spm`.`status` = 'review_pembimbing' THEN 'Sedang direview dosen pembimbing' WHEN `spm`.`status` = 'review_kaprodi' THEN 'Sedang direview Kaprodi' WHEN `spm`.`status` = 'approved' THEN 'Disetujui, menunggu penjadwalan' WHEN `spm`.`status` = 'rejected' THEN 'Ditolak, perlu revisi' WHEN `spm`.`status` = 'scheduled' THEN 'Terjadwal, menunggu pelaksanaan' WHEN `spm`.`status` = 'completed' THEN 'Selesai, menunggu hasil' ELSE 'Status tidak dikenal' END AS `status_description` FROM (((((`seminar_proposal_mahasiswa` `spm` join `proposal_mahasiswa` `pm` on(`spm`.`proposal_id` = `pm`.`id`)) join `mahasiswa` `m` on(`spm`.`mahasiswa_id` = `m`.`id`)) left join `dosen` `d` on(`pm`.`dosen_id` = `d`.`id`)) left join `dosen` `d1` on(`spm`.`dosen_penguji1_id` = `d1`.`id`)) left join `dosen` `d2` on(`spm`.`dosen_penguji2_id` = `d2`.`id`)) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `seminar_skripsi_mahasiswa_v`
+--
+DROP TABLE IF EXISTS `seminar_skripsi_mahasiswa_v`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `seminar_skripsi_mahasiswa_v`  AS SELECT `ssk`.`id` AS `id`, `ssk`.`proposal_id` AS `proposal_id`, `ssk`.`mahasiswa_id` AS `mahasiswa_id`, `ssk`.`status` AS `status`, `ssk`.`current_step` AS `current_step`, `ssk`.`file_skripsi` AS `file_skripsi`, `ssk`.`keterangan_mahasiswa` AS `keterangan_mahasiswa`, `ssk`.`status_pembimbing` AS `status_pembimbing`, `ssk`.`status_kaprodi` AS `status_kaprodi`, `ssk`.`plagiarism_percentage` AS `plagiarism_percentage`, `ssk`.`tanggal_seminar` AS `tanggal_seminar`, `ssk`.`jam_seminar` AS `jam_seminar`, `ssk`.`tempat_seminar` AS `tempat_seminar`, `ssk`.`created_at` AS `created_at`, `ssk`.`updated_at` AS `updated_at`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pm`.`judul` AS `judul`, `pm`.`workflow_status` AS `workflow_status`, `pm`.`dosen_id` AS `pembimbing_id`, `d`.`nama` AS `nama_pembimbing`, `d`.`email` AS `email_pembimbing`, `d`.`nip` AS `nip_pembimbing`, `d1`.`nama` AS `nama_penguji1`, `d1`.`nip` AS `nip_penguji1`, `d2`.`nama` AS `nama_penguji2`, `d2`.`nip` AS `nip_penguji2`, CASE WHEN `ssk`.`status` = 'draft' THEN 20 WHEN `ssk`.`status` = 'submitted' OR `ssk`.`status` = 'review_pembimbing' THEN 40 WHEN `ssk`.`status` = 'review_kaprodi' THEN 60 WHEN `ssk`.`status` = 'approved' THEN 80 WHEN `ssk`.`status` = 'scheduled' THEN 95 WHEN `ssk`.`status` = 'completed' THEN 100 WHEN `ssk`.`status` = 'rejected' THEN 25 ELSE 0 END AS `progress_percentage`, CASE WHEN `ssk`.`status` = 'draft' THEN 'Persiapan pengajuan seminar skripsi' WHEN `ssk`.`status` = 'submitted' THEN 'Menunggu review dosen pembimbing' WHEN `ssk`.`status` = 'review_pembimbing' THEN 'Sedang direview dosen pembimbing' WHEN `ssk`.`status` = 'review_kaprodi' THEN 'Sedang direview Kaprodi (validasi & Turnitin)' WHEN `ssk`.`status` = 'approved' THEN 'Disetujui Kaprodi, menunggu penjadwalan' WHEN `ssk`.`status` = 'rejected' THEN 'Ditolak, perlu revisi dan pengajuan ulang' WHEN `ssk`.`status` = 'scheduled' THEN 'Terjadwal, menunggu pelaksanaan seminar' WHEN `ssk`.`status` = 'completed' THEN 'Seminar selesai, siap ke publikasi' ELSE 'Status tidak dikenal' END AS `status_description`, `check_jurnal_requirement_seminar_skripsi`(`ssk`.`proposal_id`) AS `eligibility_check`, `pm`.`dosen_penguji_id` AS `suggested_penguji1_id`, `pm`.`dosen_penguji2_id` AS `suggested_penguji2_id` FROM (((((`seminar_skripsi_mahasiswa` `ssk` join `proposal_mahasiswa` `pm` on(`ssk`.`proposal_id` = `pm`.`id`)) join `mahasiswa` `m` on(`ssk`.`mahasiswa_id` = `m`.`id`)) left join `dosen` `d` on(`pm`.`dosen_id` = `d`.`id`)) left join `dosen` `d1` on(`ssk`.`dosen_penguji1_id` = `d1`.`id`)) left join `dosen` `d2` on(`ssk`.`dosen_penguji2_id` = `d2`.`id`)) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `seminar_skripsi_progress_v`
+--
+DROP TABLE IF EXISTS `seminar_skripsi_progress_v`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `seminar_skripsi_progress_v`  AS SELECT 'seminar_skripsi' AS `phase`, count(0) AS `total_mahasiswa`, count(case when `ssk`.`status` = 'draft' then 1 end) AS `draft_count`, count(case when `ssk`.`status` = 'submitted' then 1 end) AS `submitted_count`, count(case when `ssk`.`status` = 'review_pembimbing' then 1 end) AS `review_pembimbing_count`, count(case when `ssk`.`status` = 'review_kaprodi' then 1 end) AS `review_kaprodi_count`, count(case when `ssk`.`status` = 'approved' then 1 end) AS `approved_count`, count(case when `ssk`.`status` = 'scheduled' then 1 end) AS `scheduled_count`, count(case when `ssk`.`status` = 'completed' then 1 end) AS `completed_count`, count(case when `ssk`.`status` = 'rejected' then 1 end) AS `rejected_count`, avg(case when `ssk`.`status` = 'draft' then 20 when `ssk`.`status` = 'submitted' or `ssk`.`status` = 'review_pembimbing' then 40 when `ssk`.`status` = 'review_kaprodi' then 60 when `ssk`.`status` = 'approved' then 80 when `ssk`.`status` = 'scheduled' then 95 when `ssk`.`status` = 'completed' then 100 when `ssk`.`status` = 'rejected' then 25 else 0 end) AS `avg_progress_percentage` FROM (`seminar_skripsi_mahasiswa` `ssk` join `proposal_mahasiswa` `pm` on(`ssk`.`proposal_id` = `pm`.`id`)) WHERE `pm`.`workflow_status` = 'seminar_skripsi' ;
 
 -- --------------------------------------------------------
 
@@ -2217,6 +2576,18 @@ ALTER TABLE `penilaian_seminar_proposal_backup_20250729`
   ADD KEY `idx_published_at` (`published_at`);
 
 --
+-- Indexes for table `penilaian_seminar_skripsi`
+--
+ALTER TABLE `penilaian_seminar_skripsi`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_seminar_penilai` (`seminar_skripsi_id`,`dinilai_oleh`,`role_penilai`),
+  ADD KEY `idx_mahasiswa` (`mahasiswa_id`),
+  ADD KEY `idx_proposal` (`proposal_id`),
+  ADD KEY `idx_status` (`status_penilaian`),
+  ADD KEY `idx_rekomendasi` (`rekomendasi`),
+  ADD KEY `fk_pss_penilai` (`dinilai_oleh`);
+
+--
 -- Indexes for table `permohonan_izin_penelitian`
 --
 ALTER TABLE `permohonan_izin_penelitian`
@@ -2277,6 +2648,21 @@ ALTER TABLE `seminar_proposal_mahasiswa`
   ADD KEY `fk_spm_kaprodi_reviewer` (`reviewed_by_kaprodi`),
   ADD KEY `fk_spm_penguji1` (`dosen_penguji1_id`),
   ADD KEY `fk_spm_penguji2` (`dosen_penguji2_id`);
+
+--
+-- Indexes for table `seminar_skripsi_mahasiswa`
+--
+ALTER TABLE `seminar_skripsi_mahasiswa`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_proposal_seminar_skripsi` (`proposal_id`),
+  ADD KEY `idx_mahasiswa` (`mahasiswa_id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_current_step` (`current_step`),
+  ADD KEY `idx_tanggal_seminar` (`tanggal_seminar`),
+  ADD KEY `fk_ssk_pembimbing_reviewer` (`reviewed_by_pembimbing`),
+  ADD KEY `fk_ssk_kaprodi_reviewer` (`reviewed_by_kaprodi`),
+  ADD KEY `fk_ssk_penguji1` (`dosen_penguji1_id`),
+  ADD KEY `fk_ssk_penguji2` (`dosen_penguji2_id`);
 
 --
 -- Indexes for table `skripsi`
@@ -2400,6 +2786,12 @@ ALTER TABLE `penilaian_seminar_proposal_backup_20250729`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `penilaian_seminar_skripsi`
+--
+ALTER TABLE `penilaian_seminar_skripsi`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `permohonan_izin_penelitian`
 --
 ALTER TABLE `permohonan_izin_penelitian`
@@ -2434,6 +2826,12 @@ ALTER TABLE `seminar`
 --
 ALTER TABLE `seminar_proposal_mahasiswa`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `seminar_skripsi_mahasiswa`
+--
+ALTER TABLE `seminar_skripsi_mahasiswa`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `skripsi`
@@ -2474,6 +2872,15 @@ ALTER TABLE `penilaian_seminar_proposal`
   ADD CONSTRAINT `fk_penilaian_seminar_proposal` FOREIGN KEY (`seminar_proposal_id`) REFERENCES `seminar_proposal_mahasiswa` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `penilaian_seminar_skripsi`
+--
+ALTER TABLE `penilaian_seminar_skripsi`
+  ADD CONSTRAINT `fk_pss_mahasiswa` FOREIGN KEY (`mahasiswa_id`) REFERENCES `mahasiswa` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_pss_penilai` FOREIGN KEY (`dinilai_oleh`) REFERENCES `dosen` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_pss_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_pss_seminar` FOREIGN KEY (`seminar_skripsi_id`) REFERENCES `seminar_skripsi_mahasiswa` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `permohonan_izin_penelitian`
 --
 ALTER TABLE `permohonan_izin_penelitian`
@@ -2497,6 +2904,17 @@ ALTER TABLE `seminar_proposal_mahasiswa`
   ADD CONSTRAINT `fk_spm_penguji1` FOREIGN KEY (`dosen_penguji1_id`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_spm_penguji2` FOREIGN KEY (`dosen_penguji2_id`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_spm_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `seminar_skripsi_mahasiswa`
+--
+ALTER TABLE `seminar_skripsi_mahasiswa`
+  ADD CONSTRAINT `fk_ssk_kaprodi_reviewer` FOREIGN KEY (`reviewed_by_kaprodi`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_ssk_mahasiswa` FOREIGN KEY (`mahasiswa_id`) REFERENCES `mahasiswa` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_ssk_pembimbing_reviewer` FOREIGN KEY (`reviewed_by_pembimbing`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_ssk_penguji1` FOREIGN KEY (`dosen_penguji1_id`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_ssk_penguji2` FOREIGN KEY (`dosen_penguji2_id`) REFERENCES `dosen` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_ssk_proposal` FOREIGN KEY (`proposal_id`) REFERENCES `proposal_mahasiswa` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 03, 2025 at 06:28 AM
+-- Generation Time: Aug 03, 2025 at 06:35 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1389,7 +1389,7 @@ CREATE TABLE `proposal_mahasiswa` (
 --
 
 INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
-(44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'penelitian', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'SURAT_IZIN_12345676_20250801160727.pdf', '1', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'seminar_skripsi', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'SURAT_IZIN_12345676_20250801160727.pdf', '1', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
 (45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '1', '', '2025-07-27 12:38:21', NULL, '2025-07-26 09:52:43', 10, 'penelitian', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
 (46, 46, ' PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Pendidikan merupakan fondasi utama dalam pembentukan masa depan anak bangsa. Ini akan membentuk generasi-generasi bangsa yang memiliki sikap spiritual, sikap sosial, pengetahuan, dan keterampilan yang bermanfaat bagi agama, bangsa, dan negara. Di era', 'Kuantitatif', 'Merauke', 'Pendidikan merupakan fondasi utama dalam pembentukan masa depan anak bangsa. Ini akan membentuk generasi-generasi bangsa yang memiliki sikap spiritual, sikap sosial, pengetahuan, dan keterampilan yang bermanfaat bagi agama, bangsa, dan negara. Di era teknologi yang terus berkembang pesat ini, tatanan pendidikan telah diubah oleh teknologi. Ini telah menciptakan peluang baru dan tantangan baru bagi pendidik untuk menyediakan dan memberikan pengalaman kepada siswa mereka. Pendidik harus memiliki kemampuan abad 21 untuk menyediakan pembelajaran yang lebih bermakna, menarik, efektif, dan memotivasi siswa. (Nursella, 2024)', 'df0317e20e5bbe7d9608ee66b41b49f3.docx', '2025-07-31 07:31:24', 25, 1, NULL, NULL, '0', '1', 'Bagus, lanjutkan bimbingan', '2025-07-31 07:32:09', '1', 'Baik saya akan bimbing', '2025-07-31 07:33:54', NULL, '2025-07-31 07:32:09', 10, 'penelitian', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
 (47, 47, 'INI HANYA LATIHAN', 'Ini hanya latihan', 'Kuantitatif', 'Stasi Santo Mikael, Paroki Sang Penebus Kampung Baru, Keuskupan Agung Merauke', 'Ini hanya latihan', '62e77ae71ac8eac8909b3f16155b5404.docx', '2025-08-02 17:00:38', 25, 1, NULL, NULL, '0', '1', 'ok', '2025-08-02 17:01:15', '1', 'terimakasih', '2025-08-02 17:02:08', NULL, '2025-08-02 17:01:15', 10, 'penelitian', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
@@ -1975,6 +1975,13 @@ CREATE TABLE `seminar_skripsi_mahasiswa` (
 ) ;
 
 --
+-- Dumping data for table `seminar_skripsi_mahasiswa`
+--
+
+INSERT INTO `seminar_skripsi_mahasiswa` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_skripsi`, `keterangan_mahasiswa`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
+(11, 44, 44, 'submitted', 'pembimbing', 'skripsi_1754177659_688ea07b09e52.pdf', 'Tesssssss Baruuuuuu', 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 06:30:48', '2025-08-03 06:34:19', NULL);
+
+--
 -- Triggers `seminar_skripsi_mahasiswa`
 --
 DELIMITER $$
@@ -1995,48 +2002,6 @@ CREATE TRIGGER `tr_seminar_skripsi_mhs_update` AFTER UPDATE ON `seminar_skripsi_
 END
 $$
 DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `seminar_skripsi_mahasiswa_v`
--- (See below for the actual view)
---
-CREATE TABLE `seminar_skripsi_mahasiswa_v` (
-`id` bigint(20)
-,`proposal_id` bigint(20)
-,`mahasiswa_id` bigint(20)
-,`status` enum('draft','submitted','review_pembimbing','review_kaprodi','approved','rejected','scheduled','completed')
-,`current_step` varchar(50)
-,`file_skripsi` varchar(255)
-,`keterangan_mahasiswa` text
-,`status_pembimbing` enum('pending','approved','rejected')
-,`status_kaprodi` enum('pending','approved','rejected')
-,`plagiarism_percentage` decimal(5,2)
-,`tanggal_seminar` date
-,`jam_seminar` time
-,`tempat_seminar` varchar(255)
-,`created_at` datetime
-,`updated_at` datetime
-,`nim` varchar(50)
-,`nama_mahasiswa` varchar(100)
-,`email_mahasiswa` varchar(100)
-,`judul` varchar(250)
-,`workflow_status` enum('proposal','bimbingan','seminar_proposal','penelitian','seminar_skripsi','publikasi','selesai')
-,`pembimbing_id` bigint(20)
-,`nama_pembimbing` varchar(100)
-,`email_pembimbing` varchar(100)
-,`nip_pembimbing` varchar(30)
-,`nama_penguji1` varchar(100)
-,`nip_penguji1` varchar(30)
-,`nama_penguji2` varchar(100)
-,`nip_penguji2` varchar(30)
-,`progress_percentage` int(3)
-,`status_description` varchar(45)
-,`eligibility_check` longtext
-,`suggested_penguji1_id` int(11)
-,`suggested_penguji2_id` bigint(20)
-);
 
 -- --------------------------------------------------------
 
@@ -2381,15 +2346,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 DROP TABLE IF EXISTS `seminar_proposal_mahasiswa_v`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `seminar_proposal_mahasiswa_v`  AS SELECT `spm`.`id` AS `id`, `spm`.`proposal_id` AS `proposal_id`, `spm`.`mahasiswa_id` AS `mahasiswa_id`, `spm`.`status` AS `status`, `spm`.`current_step` AS `current_step`, `spm`.`file_proposal` AS `file_proposal`, `spm`.`keterangan_mahasiswa` AS `keterangan_mahasiswa`, `spm`.`status_pembimbing` AS `status_pembimbing`, `spm`.`status_kaprodi` AS `status_kaprodi`, `spm`.`tanggal_seminar` AS `tanggal_seminar`, `spm`.`jam_seminar` AS `jam_seminar`, `spm`.`tempat_seminar` AS `tempat_seminar`, `spm`.`created_at` AS `created_at`, `spm`.`updated_at` AS `updated_at`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pm`.`judul` AS `judul`, `pm`.`workflow_status` AS `workflow_status`, `pm`.`dosen_id` AS `pembimbing_id`, `d`.`nama` AS `nama_pembimbing`, `d`.`email` AS `email_pembimbing`, `d1`.`nama` AS `nama_penguji1`, `d2`.`nama` AS `nama_penguji2`, CASE WHEN `spm`.`status` = 'draft' THEN 'Menyiapkan pengajuan' WHEN `spm`.`status` = 'submitted' THEN 'Menunggu review dosen pembimbing' WHEN `spm`.`status` = 'review_pembimbing' THEN 'Sedang direview dosen pembimbing' WHEN `spm`.`status` = 'review_kaprodi' THEN 'Sedang direview Kaprodi' WHEN `spm`.`status` = 'approved' THEN 'Disetujui, menunggu penjadwalan' WHEN `spm`.`status` = 'rejected' THEN 'Ditolak, perlu revisi' WHEN `spm`.`status` = 'scheduled' THEN 'Terjadwal, menunggu pelaksanaan' WHEN `spm`.`status` = 'completed' THEN 'Selesai, menunggu hasil' ELSE 'Status tidak dikenal' END AS `status_description` FROM (((((`seminar_proposal_mahasiswa` `spm` join `proposal_mahasiswa` `pm` on(`spm`.`proposal_id` = `pm`.`id`)) join `mahasiswa` `m` on(`spm`.`mahasiswa_id` = `m`.`id`)) left join `dosen` `d` on(`pm`.`dosen_id` = `d`.`id`)) left join `dosen` `d1` on(`spm`.`dosen_penguji1_id` = `d1`.`id`)) left join `dosen` `d2` on(`spm`.`dosen_penguji2_id` = `d2`.`id`)) ;
-
--- --------------------------------------------------------
-
---
--- Structure for view `seminar_skripsi_mahasiswa_v`
---
-DROP TABLE IF EXISTS `seminar_skripsi_mahasiswa_v`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `seminar_skripsi_mahasiswa_v`  AS SELECT `ssk`.`id` AS `id`, `ssk`.`proposal_id` AS `proposal_id`, `ssk`.`mahasiswa_id` AS `mahasiswa_id`, `ssk`.`status` AS `status`, `ssk`.`current_step` AS `current_step`, `ssk`.`file_skripsi` AS `file_skripsi`, `ssk`.`keterangan_mahasiswa` AS `keterangan_mahasiswa`, `ssk`.`status_pembimbing` AS `status_pembimbing`, `ssk`.`status_kaprodi` AS `status_kaprodi`, `ssk`.`plagiarism_percentage` AS `plagiarism_percentage`, `ssk`.`tanggal_seminar` AS `tanggal_seminar`, `ssk`.`jam_seminar` AS `jam_seminar`, `ssk`.`tempat_seminar` AS `tempat_seminar`, `ssk`.`created_at` AS `created_at`, `ssk`.`updated_at` AS `updated_at`, `m`.`nim` AS `nim`, `m`.`nama` AS `nama_mahasiswa`, `m`.`email` AS `email_mahasiswa`, `pm`.`judul` AS `judul`, `pm`.`workflow_status` AS `workflow_status`, `pm`.`dosen_id` AS `pembimbing_id`, `d`.`nama` AS `nama_pembimbing`, `d`.`email` AS `email_pembimbing`, `d`.`nip` AS `nip_pembimbing`, `d1`.`nama` AS `nama_penguji1`, `d1`.`nip` AS `nip_penguji1`, `d2`.`nama` AS `nama_penguji2`, `d2`.`nip` AS `nip_penguji2`, CASE WHEN `ssk`.`status` = 'draft' THEN 20 WHEN `ssk`.`status` = 'submitted' OR `ssk`.`status` = 'review_pembimbing' THEN 40 WHEN `ssk`.`status` = 'review_kaprodi' THEN 60 WHEN `ssk`.`status` = 'approved' THEN 80 WHEN `ssk`.`status` = 'scheduled' THEN 95 WHEN `ssk`.`status` = 'completed' THEN 100 WHEN `ssk`.`status` = 'rejected' THEN 25 ELSE 0 END AS `progress_percentage`, CASE WHEN `ssk`.`status` = 'draft' THEN 'Persiapan pengajuan seminar skripsi' WHEN `ssk`.`status` = 'submitted' THEN 'Menunggu review dosen pembimbing' WHEN `ssk`.`status` = 'review_pembimbing' THEN 'Sedang direview dosen pembimbing' WHEN `ssk`.`status` = 'review_kaprodi' THEN 'Sedang direview Kaprodi (validasi & Turnitin)' WHEN `ssk`.`status` = 'approved' THEN 'Disetujui Kaprodi, menunggu penjadwalan' WHEN `ssk`.`status` = 'rejected' THEN 'Ditolak, perlu revisi dan pengajuan ulang' WHEN `ssk`.`status` = 'scheduled' THEN 'Terjadwal, menunggu pelaksanaan seminar' WHEN `ssk`.`status` = 'completed' THEN 'Seminar selesai, siap ke publikasi' ELSE 'Status tidak dikenal' END AS `status_description`, `check_jurnal_requirement_seminar_skripsi`(`ssk`.`proposal_id`) AS `eligibility_check`, `pm`.`dosen_penguji_id` AS `suggested_penguji1_id`, `pm`.`dosen_penguji2_id` AS `suggested_penguji2_id` FROM (((((`seminar_skripsi_mahasiswa` `ssk` join `proposal_mahasiswa` `pm` on(`ssk`.`proposal_id` = `pm`.`id`)) join `mahasiswa` `m` on(`ssk`.`mahasiswa_id` = `m`.`id`)) left join `dosen` `d` on(`pm`.`dosen_id` = `d`.`id`)) left join `dosen` `d1` on(`ssk`.`dosen_penguji1_id` = `d1`.`id`)) left join `dosen` `d2` on(`ssk`.`dosen_penguji2_id` = `d2`.`id`)) ;
 
 -- --------------------------------------------------------
 

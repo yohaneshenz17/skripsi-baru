@@ -334,6 +334,85 @@ class Penelitian extends CI_Controller {
         }
     }
 
+    /**
+     * PERBAIKAN 2: Tambah Method Download Surat
+     * Tambahkan method ini di application/controllers/mahasiswa/Penelitian.php
+     */
+    public function download_surat($permohonan_id = null) {
+        if (!$permohonan_id) {
+            show_404();
+            return;
+        }
+        
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        try {
+            // Ambil data permohonan dan file surat
+            $this->db->select('
+                pip.file_surat_izin_staf, 
+                pip.status,
+                pm.id as proposal_id,
+                m.nim, 
+                m.nama as nama_mahasiswa
+            ');
+            $this->db->from('permohonan_izin_penelitian pip');
+            $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->where('pip.id', $permohonan_id);
+            $this->db->where('m.id', $mahasiswa_id); // Security: hanya file milik mahasiswa sendiri
+            
+            $data = $this->db->get()->row();
+            
+            // Validasi data dan status
+            if (!$data) {
+                $this->session->set_flashdata('error', 'Data permohonan tidak ditemukan');
+                redirect('mahasiswa/penelitian');
+                return;
+            }
+            
+            if (!$data->file_surat_izin_staf) {
+                $this->session->set_flashdata('error', 'File surat belum tersedia');
+                redirect('mahasiswa/penelitian');
+                return;
+            }
+            
+            if (!in_array($data->status, ['surat_ready', 'completed'])) {
+                $this->session->set_flashdata('error', 'Surat belum siap untuk didownload');
+                redirect('mahasiswa/penelitian');
+                return;
+            }
+            
+            // ✅ PERBAIKAN: Path file sesuai dengan yang diupload staf
+            $file_path = FCPATH . 'uploads/surat_izin/' . $data->file_surat_izin_staf;
+            
+            if (!file_exists($file_path)) {
+                $this->session->set_flashdata('error', 'File surat tidak ditemukan di server');
+                redirect('mahasiswa/penelitian');
+                return;
+            }
+            
+            // Generate nama file yang user-friendly
+            $download_filename = 'Surat_Izin_Penelitian_' . $data->nim . '_' . $data->nama_mahasiswa . '.pdf';
+            
+            // Force download
+            $this->load->helper('download');
+            force_download($download_filename, file_get_contents($file_path));
+            
+            // Optional: Update status jadi 'completed' setelah pertama kali download
+            $this->db->where('id', $permohonan_id);
+            $this->db->update('permohonan_izin_penelitian', [
+                'status' => 'completed',
+                'tanggal_download' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Download surat error: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan saat download file');
+            redirect('mahasiswa/penelitian');
+        }
+    }
+
     // =================================================================
     // PRIVATE HELPER METHODS - SIMPLIFIED & FIXED
     // =================================================================
@@ -664,11 +743,11 @@ class Penelitian extends CI_Controller {
             ['title' => 'Proses Staf', 'status' => 'pending', 'icon' => 'clipboard'],
             ['title' => 'Download Surat', 'status' => 'pending', 'icon' => 'download']
         ];
-
+    
         if (!$permohonan) {
             return $steps;
         }
-
+    
         // Update based on status
         $steps[0]['status'] = 'completed'; // Pengajuan selalu completed jika ada permohonan
         
@@ -687,7 +766,8 @@ class Penelitian extends CI_Controller {
             case 'surat_ready':
                 $steps[1]['status'] = 'completed';
                 $steps[2]['status'] = 'completed';
-                $steps[3]['status'] = 'active';
+                // ✅ PERBAIKAN: Status 'surat_ready' = surat siap download = COMPLETED!
+                $steps[3]['status'] = 'completed'; // BUKAN 'active'
                 break;
             case 'completed':
                 for ($i = 0; $i < 4; $i++) {
@@ -695,7 +775,7 @@ class Penelitian extends CI_Controller {
                 }
                 break;
         }
-
+    
         return $steps;
     }
 }

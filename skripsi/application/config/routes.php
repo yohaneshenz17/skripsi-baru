@@ -93,6 +93,23 @@ $route['mahasiswa/seminar_proposal/ajukan'] = 'mahasiswa/seminar_proposal/ajukan
 $route['mahasiswa/seminar_proposal/submit_ajukan'] = 'mahasiswa/seminar_proposal/submit_ajukan';
 $route['mahasiswa/seminar_proposal/detail/(:num)'] = 'mahasiswa/seminar_proposal/detail/$1';
 
+// =================================================================
+// MAHASISWA ROUTES - Seminar Skripsi (Phase 5)
+// =================================================================
+
+// Tambahkan setelah mahasiswa seminar_proposal routes
+$route['mahasiswa/seminar_skripsi'] = 'mahasiswa/seminar_skripsi/index';
+$route['mahasiswa/seminar_skripsi/index'] = 'mahasiswa/seminar_skripsi/index';
+$route['mahasiswa/seminar_skripsi/ajukan/(:num)'] = 'mahasiswa/seminar_skripsi/ajukan/$1';
+$route['mahasiswa/seminar_skripsi/ajukan'] = 'mahasiswa/seminar_skripsi/ajukan';
+$route['mahasiswa/seminar_skripsi/submit_ajukan'] = 'mahasiswa/seminar_skripsi/submit_ajukan';
+$route['mahasiswa/seminar_skripsi/detail/(:num)'] = 'mahasiswa/seminar_skripsi/detail/$1';
+
+// Backward compatibility dengan dash
+$route['mahasiswa/seminar-skripsi'] = 'mahasiswa/seminar_skripsi/index';
+$route['mahasiswa/seminar-skripsi/ajukan/(:num)'] = 'mahasiswa/seminar_skripsi/ajukan/$1';
+$route['mahasiswa/seminar-skripsi/detail/(:num)'] = 'mahasiswa/seminar_skripsi/detail/$1';
+
 // =====================================================
 //      GENERIC ROUTING (HARUS DI BAWAH ROUTING SPESIFIK)
 // =====================================================
@@ -141,6 +158,18 @@ $route['kaprodi/seminar_proposal/jadwal'] = 'kaprodi/seminar_proposal/jadwal';
 $route['kaprodi/seminar_proposal/tetapkan_penguji'] = 'kaprodi/seminar_proposal/tetapkan_penguji';
 
 // 5. Seminar Skripsi (BARU)
+// =================================================================
+// KAPRODI ROUTES - Seminar Skripsi (Phase 5)
+// =================================================================
+
+// Tambahkan setelah kaprodi seminar_proposal routes (di section 5)
+$route['kaprodi/seminar_skripsi'] = 'kaprodi/seminar_skripsi';
+$route['kaprodi/seminar_skripsi/(:any)'] = 'kaprodi/seminar_skripsi/$1';
+$route['kaprodi/seminar_skripsi/detail/(:num)'] = 'kaprodi/seminar_skripsi/detail/$1';
+$route['kaprodi/seminar_skripsi/validasi'] = 'kaprodi/seminar_skripsi/validasi';
+$route['kaprodi/seminar_skripsi/jadwal'] = 'kaprodi/seminar_skripsi/jadwal';
+$route['kaprodi/seminar_skripsi/tetapkan_penguji'] = 'kaprodi/seminar_skripsi/tetapkan_penguji';
+
 $route['kaprodi/seminar_skripsi'] = 'kaprodi/seminar_skripsi';
 $route['kaprodi/seminar_skripsi/(:any)'] = 'kaprodi/seminar_skripsi/$1';
 $route['kaprodi/seminar_skripsi/detail/(:num)'] = 'kaprodi/seminar_skripsi/detail/$1';
@@ -294,6 +323,27 @@ $route['dosen/penelitian/laporan'] = 'dosen/penelitian/laporan';
 //      PHASE 5: SEMINAR SKRIPSI
 // =====================================================
 
+// Tambahkan setelah dosen seminar_proposal routes (di PHASE 5 section)
+$route['dosen/seminar_skripsi'] = 'dosen/seminar_skripsi';
+$route['dosen/seminar_skripsi/detail/(:num)'] = 'dosen/seminar_skripsi/detail/$1';
+$route['dosen/seminar_skripsi/rekomendasi'] = 'dosen/seminar_skripsi/rekomendasi';
+$route['dosen/seminar_skripsi/input_nilai'] = 'dosen/seminar_skripsi/input_nilai';
+$route['dosen/seminar_skripsi/berita_acara/(:num)'] = 'dosen/seminar_skripsi/berita_acara/$1';
+
+// Routes dengan dash untuk konsistensi URL
+$route['dosen/seminar-skripsi'] = 'dosen/seminar_skripsi';
+$route['dosen/seminar-skripsi/detail/(:num)'] = 'dosen/seminar_skripsi/detail/$1';
+$route['dosen/seminar-skripsi/rekomendasi'] = 'dosen/seminar_skripsi/rekomendasi';
+
+// Route untuk penilaian
+$route['dosen/seminar_skripsi/penilaian/(:num)'] = 'dosen/seminar_skripsi/penilaian/$1';
+$route['dosen/seminar-skripsi/penilaian/(:num)'] = 'dosen/seminar_skripsi/penilaian/$1';
+
+// Route index eksplisit
+$route['dosen/seminar_skripsi/index'] = 'dosen/seminar_skripsi/index';
+$route['dosen/seminar-skripsi/index'] = 'dosen/seminar_skripsi/index';
+
+
 // Seminar Akhir/Skripsi
 $route['dosen/seminar_skripsi'] = 'dosen/seminar_skripsi';
 $route['dosen/seminar_skripsi/detail/(:num)'] = 'dosen/seminar_skripsi/detail/$1';
@@ -406,6 +456,21 @@ $route['staf/penelitian/laporan'] = 'staf/penelitian/laporan';
 $route['staf/penelitian/monitoring'] = 'staf/penelitian/monitoring';
 
 // 5. Seminar Skripsi - Penjadwalan dan Berita Acara
+// =================================================================
+// STAF ROUTES - Seminar Skripsi (Phase 5)
+// =================================================================
+
+// Tambahkan setelah staf seminar_proposal routes (di section 5)
+$route['staf/seminar_skripsi'] = 'staf/seminar_skripsi';
+$route['staf/seminar_skripsi/index'] = 'staf/seminar_skripsi/index';
+$route['staf/seminar_skripsi/detail/(:num)'] = 'staf/seminar_skripsi/detail/$1';
+$route['staf/seminar_skripsi/berita_acara/(:num)'] = 'staf/seminar_skripsi/berita_acara/$1';
+$route['staf/seminar_skripsi/export_berita_acara/(:num)'] = 'staf/seminar_skripsi/export_berita_acara/$1';
+$route['staf/seminar_skripsi/cetak_berita_acara/(:num)'] = 'staf/seminar_skripsi/cetak_berita_acara/$1';
+
+// Backward compatibility dengan dash
+$route['staf/seminar-skripsi'] = 'staf/seminar_skripsi';
+
 $route['staf/seminar-skripsi'] = 'staf/seminar_skripsi';
 $route['staf/seminar_skripsi'] = 'staf/seminar_skripsi';
 $route['staf/seminar_skripsi/index'] = 'staf/seminar_skripsi/index';

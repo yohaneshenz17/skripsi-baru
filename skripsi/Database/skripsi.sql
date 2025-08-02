@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 03, 2025 at 05:50 AM
+-- Generation Time: Aug 03, 2025 at 06:28 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1979,35 +1979,17 @@ CREATE TABLE `seminar_skripsi_mahasiswa` (
 --
 DELIMITER $$
 CREATE TRIGGER `tr_seminar_skripsi_mhs_insert` AFTER INSERT ON `seminar_skripsi_mahasiswa` FOR EACH ROW BEGIN
-    -- Update workflow_status di proposal_mahasiswa ke seminar_skripsi
     UPDATE proposal_mahasiswa 
     SET workflow_status = 'seminar_skripsi'
     WHERE id = NEW.proposal_id;
-    
-    -- Auto-suggest dosen penguji dari seminar proposal (phase 3)
-    UPDATE seminar_skripsi_mahasiswa 
-    SET 
-        dosen_penguji1_id = (SELECT dosen_penguji_id FROM proposal_mahasiswa WHERE id = NEW.proposal_id),
-        dosen_penguji2_id = (SELECT dosen_penguji2_id FROM proposal_mahasiswa WHERE id = NEW.proposal_id)
-    WHERE id = NEW.id
-    AND dosen_penguji1_id IS NULL 
-    AND dosen_penguji2_id IS NULL;
 END
 $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `tr_seminar_skripsi_mhs_update` AFTER UPDATE ON `seminar_skripsi_mahasiswa` FOR EACH ROW BEGIN
-    -- Jika status berubah ke completed, siap ke fase publikasi
     IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
         UPDATE proposal_mahasiswa 
         SET workflow_status = 'publikasi'
-        WHERE id = NEW.proposal_id;
-    END IF;
-    
-    -- Jika status berubah ke rejected, workflow tetap di seminar_skripsi
-    IF NEW.status = 'rejected' AND OLD.status != 'rejected' THEN
-        UPDATE proposal_mahasiswa 
-        SET workflow_status = 'seminar_skripsi'
         WHERE id = NEW.proposal_id;
     END IF;
 END

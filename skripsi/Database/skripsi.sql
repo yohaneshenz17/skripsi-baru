@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 02, 2025 at 09:15 AM
+-- Generation Time: Aug 02, 2025 at 03:34 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -489,7 +489,13 @@ INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bi
 (51, 44, 11, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:32', 25, 'mahasiswa', '2025-08-01 17:15:39', '2025-08-02 08:06:32'),
 (52, 44, 12, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:27', 25, 'mahasiswa', '2025-08-01 17:15:55', '2025-08-02 08:06:27'),
 (53, 44, 13, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:21', 25, 'mahasiswa', '2025-08-01 17:16:05', '2025-08-02 08:06:21'),
-(54, 44, 14, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:14', 25, 'mahasiswa', '2025-08-01 17:16:20', '2025-08-02 08:06:14');
+(54, 44, 14, '2025-08-01', 'Latihan Saja', '', 'Latihan Saja', NULL, NULL, '1', '2025-08-02 08:06:14', 25, 'mahasiswa', '2025-08-01 17:16:20', '2025-08-02 08:06:14'),
+(55, 46, 9, '2025-08-02', 'Tes Saja', '', 'Tes Saja', NULL, NULL, '1', '2025-08-02 12:08:00', 25, 'mahasiswa', '2025-08-02 12:06:36', '2025-08-02 12:08:00'),
+(56, 46, 10, '2025-08-02', 'Tes Saja', NULL, 'Tes Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-02 12:06:45', '2025-08-02 12:06:45'),
+(57, 46, 11, '2025-08-02', 'Tes Saja', NULL, 'Tes Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-02 12:06:54', '2025-08-02 12:06:54'),
+(58, 46, 12, '2025-08-02', 'Tes Saja', NULL, 'Tes Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-02 12:07:03', '2025-08-02 12:07:03'),
+(59, 46, 13, '2025-08-02', 'Tes Saja', NULL, 'Tes Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-02 12:07:13', '2025-08-02 12:07:13'),
+(60, 46, 14, '2025-08-02', 'Tes Saja', NULL, 'Tes Saja', NULL, NULL, '0', NULL, NULL, 'mahasiswa', '2025-08-02 12:07:23', '2025-08-02 12:07:23');
 
 -- --------------------------------------------------------
 
@@ -1269,8 +1275,8 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `tr_workflow_to_seminar_skripsi` AFTER UPDATE ON `permohonan_izin_penelitian` FOR EACH ROW BEGIN
-    -- Jika surat sudah didownload mahasiswa, siap ke tahap seminar skripsi
-    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+    -- Ketika dosen approve, update workflow ke seminar_skripsi
+    IF NEW.status_pembimbing = 'approved' AND OLD.status_pembimbing != 'approved' THEN
         UPDATE proposal_mahasiswa 
         SET workflow_status = 'seminar_skripsi'
         WHERE id = NEW.proposal_mahasiswa_id;
@@ -1367,7 +1373,7 @@ CREATE TABLE `proposal_mahasiswa` (
 --
 
 INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `jenis_penelitian`, `lokasi_penelitian`, `uraian_masalah`, `file_draft_proposal`, `created_at`, `dosen_id`, `dosen2_id`, `dosen_penguji_id`, `dosen_penguji2_id`, `status`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_respon_pembimbing`, `deadline`, `tanggal_penetapan`, `penetapan_oleh`, `workflow_status`, `status_seminar_proposal`, `komentar_seminar_proposal`, `tanggal_review_seminar_proposal`, `tanggal_seminar_proposal`, `tempat_seminar_proposal`, `status_seminar_skripsi`, `komentar_seminar_skripsi`, `tanggal_review_seminar_skripsi`, `tanggal_seminar_skripsi`, `tempat_seminar_skripsi`, `status_publikasi`, `komentar_publikasi`, `tanggal_review_publikasi`, `link_repository`, `tanggal_publikasi`, `file_seminar_proposal`, `file_seminar_skripsi`, `file_skripsi_final`, `surat_izin_penelitian`, `status_izin_penelitian`, `tanggal_penetapan_ulang`, `penetapan_ulang_oleh`, `alasan_penetapan_ulang`, `jumlah_penetapan_ulang`, `validasi_staf_publikasi`, `staf_validator_id`, `tanggal_validasi_staf`, `catatan_staf`) VALUES
-(44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'penelitian', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'SURAT_IZIN_12345676_20250801160727.pdf', '1', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(44, 44, 'Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide ', 'Kuantitatif', 'STK St. Yakobus Merauke', 'Admin: mengedit profil, menambah, mengedit dan menghapus setiap user dan kewenangan setiap role, mengedit tampilan website awal, membuat pengumuman seperti kaprodi, menambah, mengedit dan menghapus setiap pengusulan yang dilakukan mahasiswa, overide keputusan kaprodi, memantau laporan setiap tahapan secara komprehensif (Tambahkan indikator visual (progress bar) di akun mahasiswa).', '20e20ff71f01a7d6808490873f8a8220.docx', '2025-07-25 10:37:33', 25, 1, NULL, NULL, '0', '1', 'Proposal ini sudah baik, tolong dibimbing ya', '2025-07-25 10:39:30', '1', 'Terimakasih atas kepercayaananya', '2025-07-25 10:49:11', NULL, '2025-07-25 10:39:30', 10, 'seminar_skripsi', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'SURAT_IZIN_12345676_20250801160727.pdf', '1', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
 (45, 45, 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru', 'Kualitatif', 'Sekolah Tinggi Katolik Santo Yakobus Merauke, Kabupaten Merauke, Papua Selatan', 'Setiap kali  kita diperdengarkan dengan kata teknologi, maka secara langsung perhatian kita tertuju pada komputer, pemutar audio digital yang  berupa lapisan (Layer)  3 atau disebut MP3, dan perangkat lunak lainnya. Pemahaman tersebut tidaklah keliru, namun cenderung kata teknologi ini dimaknai secara sederhana dan hanya dilihat sebatas peralatan fisik saja.  Terkait dengan pemahaman tersebut ada salah satu temuan yang menarik dari banyak profesor di luar bidang teknologi yang memandang teknologi pembelajaran itu berhubungan dengan peralatan yang membantu guru mengajar di kelas- kelas besar, dan merupakan salah satu jalan yang mampu memberi kenyamanan dalam hal pemberian tes dan pengelolaan nilai di kelas. Ini revisi saya ya', 'bff3d26516ea4e5b282ca01f53650587.docx', '2025-07-26 07:12:16', 25, 1, NULL, NULL, '0', '1', 'Update belum sesuai', '2025-07-26 09:52:43', '1', '', '2025-07-27 12:38:21', NULL, '2025-07-26 09:52:43', 10, 'seminar_proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
 (46, 46, ' PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Pendidikan merupakan fondasi utama dalam pembentukan masa depan anak bangsa. Ini akan membentuk generasi-generasi bangsa yang memiliki sikap spiritual, sikap sosial, pengetahuan, dan keterampilan yang bermanfaat bagi agama, bangsa, dan negara. Di era', 'Kuantitatif', 'Merauke', 'Pendidikan merupakan fondasi utama dalam pembentukan masa depan anak bangsa. Ini akan membentuk generasi-generasi bangsa yang memiliki sikap spiritual, sikap sosial, pengetahuan, dan keterampilan yang bermanfaat bagi agama, bangsa, dan negara. Di era teknologi yang terus berkembang pesat ini, tatanan pendidikan telah diubah oleh teknologi. Ini telah menciptakan peluang baru dan tantangan baru bagi pendidik untuk menyediakan dan memberikan pengalaman kepada siswa mereka. Pendidik harus memiliki kemampuan abad 21 untuk menyediakan pembelajaran yang lebih bermakna, menarik, efektif, dan memotivasi siswa. (Nursella, 2024)', 'df0317e20e5bbe7d9608ee66b41b49f3.docx', '2025-07-31 07:31:24', 25, 1, NULL, NULL, '0', '1', 'Bagus, lanjutkan bimbingan', '2025-07-31 07:32:09', '1', 'Baik saya akan bimbing', '2025-07-31 07:33:54', NULL, '2025-07-31 07:32:09', 10, 'seminar_proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
 
@@ -2735,7 +2741,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`

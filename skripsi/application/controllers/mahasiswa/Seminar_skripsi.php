@@ -131,7 +131,9 @@ class Seminar_skripsi extends CI_Controller {
             'proposal' => $proposal,
             'existing_seminar' => $existing_seminar,
             'is_edit' => $is_edit,
-            'eligibility' => $eligibility
+            'eligibility' => $eligibility,
+            'form_title' => $is_edit ? 'Edit Pengajuan Seminar Skripsi' : 'Form Pengajuan Seminar Skripsi', // FIX ERROR
+            'requirements' => ['requirements' => [], 'all_met' => true] // FIX ERROR
         ];
 
         // Load form view
@@ -495,20 +497,21 @@ class Seminar_skripsi extends CI_Controller {
      */
     private function _get_proposal_by_id($proposal_id, $mahasiswa_id)
     {
-        try {
-            $this->db->select('pm.*, m.nim, m.nama as nama_mahasiswa');
-            $this->db->from('proposal_mahasiswa pm');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->where('pm.id', $proposal_id);
-            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-            // REMOVED: $this->db->where('pm.status', '1');
-            
-            return $this->db->get()->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting proposal by ID: ' . $e->getMessage());
-            return null;
+        $this->db->select('p.*, d.nama as nama_pembimbing, d.email as email_pembimbing, pr.nama as nama_prodi');
+        $this->db->from('proposal_mahasiswa p');
+        $this->db->join('dosen d', 'p.dosen_id = d.id', 'left');
+        $this->db->join('mahasiswa m', 'p.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'left');
+        $this->db->where('p.id', $proposal_id);
+        $this->db->where('p.mahasiswa_id', $mahasiswa_id);
+        $result = $this->db->get()->row();
+        
+        // Ensure nama_pembimbing exists
+        if ($result && !isset($result->nama_pembimbing)) {
+            $result->nama_pembimbing = 'Belum ditetapkan';
         }
+        
+        return $result;
     }
 
     /**
@@ -965,68 +968,138 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Send notification (optional)
+     * ✅ IMPROVED: Send notification with better error handling and support for resubmission
      */
     private function _send_notification($proposal_id, $action_type = 'created')
     {
         try {
-            // Get proposal dan dosen data
+            // Get proposal dengan JOIN untuk data lengkap
             $proposal = $this->_get_proposal_by_id($proposal_id, $this->session->userdata('id'));
             $mahasiswa = $this->session->userdata();
             
-            if ($proposal && $proposal->dosen_id) {
-                // Get dosen email
-                $dosen = $this->db->get_where('dosen', ['id' => $proposal->dosen_id])->row();
-                
-                if ($dosen && $dosen->email) {
-                    // Setup email config
-                    $config = [
-                        'protocol' => 'smtp',
-                        'smtp_host' => 'smtp.gmail.com',
-                        'smtp_port' => 587,
-                        'smtp_user' => 'stkyakobus@gmail.com',
-                        'smtp_pass' => 'yonroxhraathnaug',
-                        'charset' => 'utf-8',
-                        'newline' => "\r\n",
-                        'mailtype' => 'html',
-                        'smtp_crypto' => 'tls'
-                    ];
-                    
-                    $this->email->initialize($config);
-                    
-                    $subject = '📋 Pengajuan Seminar Skripsi - ' . $mahasiswa['nama'];
-                    $message = "
-                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-                        <div style='background: #007bff; color: white; padding: 20px; text-align: center;'>
-                            <h2>📋 Pengajuan Seminar Skripsi</h2>
-                        </div>
-                        <div style='padding: 20px; background: #f8f9fa;'>
-                            <p>Kepada Yth. <strong>{$dosen->nama}</strong>,</p>
-                            <p>Mahasiswa bimbingan Anda telah mengajukan seminar skripsi:</p>
-                            <ul>
-                                <li><strong>Nama:</strong> {$mahasiswa['nama']}</li>
-                                <li><strong>NIM:</strong> {$mahasiswa['nim']}</li>
-                                <li><strong>Judul:</strong> {$proposal->judul}</li>
-                                <li><strong>Tanggal Pengajuan:</strong> " . date('d F Y, H:i') . " WIB</li>
-                            </ul>
-                            <p>Silakan login ke sistem untuk melakukan review.</p>
-                            <p><a href='" . base_url('dosen/seminar_skripsi') . "' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Review Pengajuan</a></p>
-                        </div>
-                    </div>";
-                    
-                    $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-                    $this->email->to($dosen->email);
-                    $this->email->subject($subject);
-                    $this->email->message($message);
-                    
-                    return $this->email->send();
-                }
+            if (!$proposal || !$proposal->dosen_id) {
+                log_message('debug', 'No proposal or dosen_id found for notification');
+                return false;
             }
             
-            return false;
+            // Get dosen email dengan error handling
+            $dosen = $this->db->get_where('dosen', ['id' => $proposal->dosen_id])->row();
+            
+            if (!$dosen || !$dosen->email) {
+                log_message('warning', 'Dosen not found or no email for dosen_id: ' . $proposal->dosen_id);
+                return false;
+            }
+            
+            // ✅ IMPROVED: Better email config with timeout
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls',
+                'smtp_timeout' => 30, // ✅ TAMBAHAN: Timeout
+                'wordwrap' => TRUE
+            ];
+            
+            $this->email->initialize($config);
+            
+            // ✅ IMPROVED: Dynamic subject based on action type
+            $is_resubmission = ($action_type === 'resubmitted' || $action_type === 'updated');
+            $subject_prefix = $is_resubmission ? '🔄 Pengajuan Ulang' : '📋 Pengajuan Baru';
+            $subject = $subject_prefix . ' Seminar Skripsi - ' . $mahasiswa['nama'];
+            
+            // ✅ IMPROVED: Better template with fallbacks
+            $nim = isset($mahasiswa['nim']) ? $mahasiswa['nim'] : 'Tidak tersedia';
+            $status_text = $is_resubmission ? 'PENGAJUAN ULANG' : 'PENGAJUAN BARU';
+            $action_text = $is_resubmission ? 
+                'telah melakukan perbaikan dan mengajukan ulang seminar skripsi.' :
+                'telah mengajukan seminar skripsi.';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2>📋 {$status_text} Seminar Skripsi</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>" . htmlspecialchars($dosen->nama) . "</strong>,</p>
+                    
+                    <p>Mahasiswa bimbingan Anda <strong>" . htmlspecialchars($mahasiswa['nama']) . "</strong> {$action_text}</p>
+                    
+                    <div style='background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #0056b3; margin: 0 0 10px 0;'>📋 Detail Pengajuan:</h4>
+                        <ul style='color: #0056b3; margin: 0; padding-left: 20px;'>
+                            <li><strong>Nama:</strong> " . htmlspecialchars($mahasiswa['nama']) . "</li>
+                            <li><strong>NIM:</strong> " . htmlspecialchars($nim) . "</li>
+                            <li><strong>Judul:</strong> " . htmlspecialchars($proposal->judul) . "</li>
+                            <li><strong>Tanggal Pengajuan:</strong> " . date('d F Y, H:i') . " WIB</li>
+                        </ul>
+                    </div>";
+            
+            // ✅ IMPROVED: Add different message for resubmission
+            if ($is_resubmission) {
+                $message .= "
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>🔄 Informasi Pengajuan Ulang:</h4>
+                        <p style='color: #856404; margin: 0;'>
+                            Ini adalah pengajuan ulang setelah perbaikan dari feedback sebelumnya. 
+                            Mohon review kembali dengan seksama.
+                        </p>
+                    </div>";
+            }
+            
+            $message .= "
+                    <p><strong>Langkah Selanjutnya:</strong></p>
+                    <ol style='margin: 10px 0; padding-left: 20px;'>
+                        <li>Review file skripsi yang diajukan</li>
+                        <li>Berikan rekomendasi (setujui/tolak)</li>
+                        <li>Jika disetujui, akan diteruskan ke Kaprodi</li>
+                    </ol>
+                    
+                    <p style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('dosen/seminar_skripsi') . "' 
+                           style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); 
+                                  color: white; padding: 12px 25px; text-decoration: none; 
+                                  border-radius: 5px; display: inline-block; font-weight: bold;'>
+                            📝 Review Pengajuan Sekarang
+                        </a>
+                    </p>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Terima kasih atas perhatian dan bimbingannya.
+                    </p>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 10px; text-align: center; font-size: 12px;'>
+                    STK Santo Yakobus Merauke - Sistem Informasi Manajemen Tugas Akhir<br>
+                    Email ini dikirim secara otomatis, mohon tidak membalas langsung.
+                </div>
+            </div>";
+            
+            // ✅ IMPROVED: Better email setup with error handling
+            $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($dosen->email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            // ✅ IMPROVED: Send email with detailed logging
+            $email_sent = $this->email->send();
+            
+            if ($email_sent) {
+                log_message('info', "Email notification sent successfully - Proposal ID: {$proposal_id}, Dosen: {$dosen->email}, Action: {$action_type}");
+            } else {
+                $error_msg = $this->email->print_debugger();
+                log_message('error', "Failed to send email notification - Proposal ID: {$proposal_id}, Error: {$error_msg}");
+            }
+            
+            return $email_sent;
             
         } catch (Exception $e) {
-            log_message('error', 'Error sending notification: ' . $e->getMessage());
+            log_message('error', 'Exception in _send_notification: ' . $e->getMessage() . ' - Proposal ID: ' . $proposal_id);
             return false;
         }
     }

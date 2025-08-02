@@ -137,7 +137,7 @@ class Seminar_skripsi extends CI_Controller {
         // Load form view
         $this->load->view('template/mahasiswa', [
             'title' => $is_edit ? 'Edit Pengajuan Seminar Skripsi' : 'Ajukan Seminar Skripsi',
-            'content' => $this->load->view('mahasiswa/seminar_skripsi/form', $data, TRUE),
+            'content' => $this->load->view('mahasiswa/seminar_skripsi/pengajuan', $data, TRUE),
             'script' => $this->_get_form_script()
         ]);
     }
@@ -705,6 +705,199 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
+     * Method untuk pengajuan ulang seminar skripsi yang ditolak
+     */
+    public function pengajuan_ulang($proposal_id = null)
+    {
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        // Validate proposal_id
+        if (!$proposal_id || !is_numeric($proposal_id)) {
+            $this->session->set_flashdata('error', 'ID proposal tidak valid.');
+            redirect('mahasiswa/seminar_skripsi');
+            return;
+        }
+    
+        // Get existing rejected seminar
+        $rejected_seminar = $this->_get_rejected_seminar($proposal_id, $mahasiswa_id);
+        if (!$rejected_seminar) {
+            $this->session->set_flashdata('error', 'Tidak ada pengajuan yang ditolak untuk diajukan ulang.');
+            redirect('mahasiswa/seminar_skripsi');
+            return;
+        }
+    
+        // Handle form submission untuk pengajuan ulang
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $this->_handle_resubmission($proposal_id, $rejected_seminar);
+            return;
+        }
+    
+        // Prepare data untuk form pengajuan ulang
+        $data = [
+            'proposal' => $this->_get_proposal_by_id($proposal_id, $mahasiswa_id),
+            'rejected_seminar' => $rejected_seminar,
+            'is_resubmission' => true
+        ];
+    
+        // Load view
+        $this->load->view('template/mahasiswa', [
+            'title' => 'Pengajuan Ulang Seminar Skripsi',
+            'content' => $this->load->view('mahasiswa/seminar_skripsi/pengajuan_ulang', $data, TRUE),
+            'script' => $this->_get_form_script()
+        ]);
+    }
+    
+    /**
+     * Get rejected seminar for resubmission
+     */
+    private function _get_rejected_seminar($proposal_id, $mahasiswa_id)
+    {
+        try {
+            $this->db->select('ss.*, p.judul, p.dosen_id');
+            $this->db->from('seminar_skripsi_mahasiswa ss');
+            $this->db->join('proposal_mahasiswa p', 'ss.proposal_id = p.id');
+            $this->db->where('ss.proposal_id', $proposal_id);
+            $this->db->where('ss.mahasiswa_id', $mahasiswa_id);
+            $this->db->where('ss.status', 'rejected');
+            $this->db->order_by('ss.created_at', 'DESC');
+            $this->db->limit(1);
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting rejected seminar: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Handle resubmission process
+     */
+    private function _handle_resubmission($proposal_id, $rejected_seminar)
+    {
+        // Validation seperti biasa
+        $this->form_validation->set_rules('keterangan_mahasiswa', 'Keterangan', 'required|trim|max_length[1000]');
+        $this->form_validation->set_rules('file_skripsi', 'File Skripsi', 'callback__validate_file_upload');
+        
+        if (!$this->form_validation->run()) {
+            $this->session->set_flashdata('error', validation_errors());
+            redirect('mahasiswa/seminar_skripsi/pengajuan_ulang/' . $proposal_id);
+            return;
+        }
+        
+        // Handle file upload
+        $file_name = $this->_handle_file_upload();
+        if (!$file_name) {
+            redirect('mahasiswa/seminar_skripsi/pengajuan_ulang/' . $proposal_id);
+            return;
+        }
+        
+        // Create new submission (pengajuan ulang)
+        $data = [
+            'proposal_id' => $proposal_id,
+            'mahasiswa_id' => $this->session->userdata('id'),
+            'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
+            'file_skripsi' => $file_name,
+            'status' => 'resubmitted',
+            'current_step' => 'pembimbing',
+            'previous_rejection_id' => $rejected_seminar->id,
+            'resubmission_count' => ($rejected_seminar->resubmission_count ?? 0) + 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        try {
+            $this->db->insert('seminar_skripsi_mahasiswa', $data);
+            
+            // Send notification untuk pengajuan ulang
+            $this->_send_resubmission_notification($proposal_id, $rejected_seminar);
+            
+            $this->session->set_flashdata('success', 'Pengajuan ulang seminar skripsi berhasil dikirim.');
+            redirect('mahasiswa/seminar_skripsi');
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error saving resubmission: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan saat menyimpan pengajuan ulang.');
+            redirect('mahasiswa/seminar_skripsi/pengajuan_ulang/' . $proposal_id);
+        }
+    }
+
+    /**
+     * Send notification untuk pengajuan ulang
+     */
+    private function _send_resubmission_notification($proposal_id, $rejected_seminar)
+    {
+        try {
+            $proposal = $this->_get_proposal_by_id($proposal_id, $this->session->userdata('id'));
+            $mahasiswa = $this->session->userdata();
+            $dosen = $this->db->get_where('dosen', ['id' => $proposal->dosen_id])->row();
+            
+            if ($dosen && $dosen->email) {
+                // Setup email config
+                $config = [
+                    'protocol' => 'smtp',
+                    'smtp_host' => 'smtp.gmail.com',
+                    'smtp_port' => 587,
+                    'smtp_user' => 'stkyakobus@gmail.com',
+                    'smtp_pass' => 'yonroxhraathnaug',
+                    'charset' => 'utf-8',
+                    'newline' => "\r\n",
+                    'mailtype' => 'html',
+                    'smtp_crypto' => 'tls'
+                ];
+                
+                $this->email->initialize($config);
+                
+                $subject = '🔄 Pengajuan Ulang Seminar Skripsi - ' . $mahasiswa['nama'];
+                $message = "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <div style='background: #17a2b8; color: white; padding: 20px; text-align: center;'>
+                        <h2>🔄 Pengajuan Ulang Seminar Skripsi</h2>
+                    </div>
+                    <div style='padding: 20px; background: #f8f9fa;'>
+                        <p>Kepada Yth. <strong>{$dosen->nama}</strong>,</p>
+                        
+                        <div style='background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                            <p><strong>📋 PENGAJUAN ULANG</strong></p>
+                            <p>Mahasiswa telah melakukan perbaikan dan mengajukan ulang seminar skripsi yang sebelumnya ditolak.</p>
+                        </div>
+                        
+                        <h4>Detail Pengajuan:</h4>
+                        <ul>
+                            <li><strong>Nama:</strong> {$mahasiswa['nama']}</li>
+                            <li><strong>NIM:</strong> {$mahasiswa['nim']}</li>
+                            <li><strong>Judul:</strong> {$proposal->judul}</li>
+                            <li><strong>Tanggal Pengajuan Ulang:</strong> " . date('d F Y, H:i') . " WIB</li>
+                            <li><strong>Alasan Penolakan Sebelumnya:</strong> {$rejected_seminar->komentar_pembimbing}</li>
+                        </ul>
+                        
+                        <p><strong>Keterangan Perbaikan dari Mahasiswa:</strong></p>
+                        <div style='background: #e7f3ff; padding: 10px; border-radius: 5px; margin: 10px 0;'>
+                            {$this->input->post('keterangan_mahasiswa')}
+                        </div>
+                        
+                        <p>Silakan login ke sistem untuk melakukan review pengajuan ulang ini.</p>
+                        <p><a href='" . base_url('dosen/seminar_skripsi') . "' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Review Pengajuan Ulang</a></p>
+                    </div>
+                </div>";
+                
+                $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+                $this->email->to($dosen->email);
+                $this->email->subject($subject);
+                $this->email->message($message);
+                
+                return $this->email->send();
+            }
+            
+            return false;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending resubmission notification: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Calculate seminar progress
      */
     private function _calculate_seminar_progress($seminar)
@@ -777,35 +970,64 @@ class Seminar_skripsi extends CI_Controller {
     private function _send_notification($proposal_id, $action_type = 'created')
     {
         try {
-            // Get proposal dan mahasiswa data
+            // Get proposal dan dosen data
             $proposal = $this->_get_proposal_by_id($proposal_id, $this->session->userdata('id'));
-            if (!$proposal) return;
+            $mahasiswa = $this->session->userdata();
             
-            // Get pembimbing data dari proposal_mahasiswa
-            if (isset($proposal->dosen_id)) {
-                $this->db->select('email, nama');
-                $this->db->from('dosen');
-                $this->db->where('id', $proposal->dosen_id);
-                $pembimbing = $this->db->get()->row();
+            if ($proposal && $proposal->dosen_id) {
+                // Get dosen email
+                $dosen = $this->db->get_where('dosen', ['id' => $proposal->dosen_id])->row();
                 
-                if ($pembimbing && $pembimbing->email) {
-                    $mahasiswa_name = $proposal->nama_mahasiswa;
-                    $nim = $proposal->nim;
+                if ($dosen && $dosen->email) {
+                    // Setup email config
+                    $config = [
+                        'protocol' => 'smtp',
+                        'smtp_host' => 'smtp.gmail.com',
+                        'smtp_port' => 587,
+                        'smtp_user' => 'stkyakobus@gmail.com',
+                        'smtp_pass' => 'yonroxhraathnaug',
+                        'charset' => 'utf-8',
+                        'newline' => "\r\n",
+                        'mailtype' => 'html',
+                        'smtp_crypto' => 'tls'
+                    ];
                     
-                    $subject = "Pengajuan Seminar Skripsi - {$mahasiswa_name}";
-                    $message = "Pengajuan seminar skripsi telah ";
-                    $message .= ($action_type === 'updated' ? 'diperbarui' : 'dikirim') . " oleh mahasiswa:\n\n";
-                    $message .= "Nama: {$mahasiswa_name}\n";
-                    $message .= "NIM: {$nim}\n";
-                    $message .= "Judul: {$proposal->judul}\n\n";
-                    $message .= "Silakan login ke sistem untuk melakukan review.";
+                    $this->email->initialize($config);
                     
-                    // Implementasi send email sesuai config sistem
-                    // send_email_notification($pembimbing->email, $subject, $message);
+                    $subject = '📋 Pengajuan Seminar Skripsi - ' . $mahasiswa['nama'];
+                    $message = "
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                        <div style='background: #007bff; color: white; padding: 20px; text-align: center;'>
+                            <h2>📋 Pengajuan Seminar Skripsi</h2>
+                        </div>
+                        <div style='padding: 20px; background: #f8f9fa;'>
+                            <p>Kepada Yth. <strong>{$dosen->nama}</strong>,</p>
+                            <p>Mahasiswa bimbingan Anda telah mengajukan seminar skripsi:</p>
+                            <ul>
+                                <li><strong>Nama:</strong> {$mahasiswa['nama']}</li>
+                                <li><strong>NIM:</strong> {$mahasiswa['nim']}</li>
+                                <li><strong>Judul:</strong> {$proposal->judul}</li>
+                                <li><strong>Tanggal Pengajuan:</strong> " . date('d F Y, H:i') . " WIB</li>
+                            </ul>
+                            <p>Silakan login ke sistem untuk melakukan review.</p>
+                            <p><a href='" . base_url('dosen/seminar_skripsi') . "' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Review Pengajuan</a></p>
+                        </div>
+                    </div>";
+                    
+                    $this->email->from('stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+                    $this->email->to($dosen->email);
+                    $this->email->subject($subject);
+                    $this->email->message($message);
+                    
+                    return $this->email->send();
                 }
             }
+            
+            return false;
+            
         } catch (Exception $e) {
-            log_message('error', 'Failed to send notification: ' . $e->getMessage());
+            log_message('error', 'Error sending notification: ' . $e->getMessage());
+            return false;
         }
     }
 

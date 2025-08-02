@@ -2,10 +2,10 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Seminar Skripsi Controller - Role Mahasiswa (Phase 5) - FIXED VERSION
+ * Seminar Skripsi Controller - Complete Fixed Version
  * 
- * Controller untuk mengelola pengajuan seminar skripsi mahasiswa
- * PERBAIKAN: Simplified 3 requirements + workflow status fix
+ * FIXED: Removed proposal status = '1' requirement
+ * Controller lengkap untuk mengelola pengajuan seminar skripsi mahasiswa
  * 
  * File: application/controllers/mahasiswa/Seminar_skripsi.php
  * 
@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Mahasiswa  
  * @category    Seminar Skripsi
  * @author      Unit SIPD STK Santo Yakobus
- * @version     1.1 (Fixed Version)
+ * @version     1.2 (Complete Fixed Version)
  */
 
 class Seminar_skripsi extends CI_Controller {
@@ -211,11 +211,11 @@ class Seminar_skripsi extends CI_Controller {
     // =================================================================
 
     /**
-     * FIXED: Prepare dashboard data
+     * FIXED: Prepare dashboard data tanpa syarat proposal aktif
      */
     private function _prepare_dashboard_data($mahasiswa_id)
     {
-        // Get proposal yang eligible (dengan 3 syarat sederhana)
+        // Get proposal yang eligible (FIXED: tanpa syarat status = '1')
         $eligible_proposals = $this->_get_eligible_proposals($mahasiswa_id);
         
         // Get existing seminar skripsi
@@ -246,21 +246,28 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * FIXED: Get eligible proposals berdasarkan 3 syarat sederhana
+     * FIXED: Get eligible proposals TANPA syarat status = '1'
      */
     private function _get_eligible_proposals($mahasiswa_id)
     {
         try {
-            // Query proposals yang memenuhi syarat dasar
-            $this->db->select('pm.id, pm.judul, pm.workflow_status, pm.mahasiswa_id');
+            // FIXED: Query proposals TANPA filter status = '1'
+            $this->db->select('pm.id, pm.judul, pm.workflow_status, pm.mahasiswa_id, pm.status');
             $this->db->from('proposal_mahasiswa pm');
             $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-            $this->db->where('pm.status', '1'); // Proposal aktif
+            // REMOVED: $this->db->where('pm.status', '1'); // Proposal aktif
             
-            // PERBAIKAN: Allow 'penelitian' workflow_status (tidak harus 'seminar_skripsi')
+            // Allow workflow status penelitian DAN seminar_skripsi
             $this->db->where_in('pm.workflow_status', ['penelitian', 'seminar_skripsi']);
             
             $proposals = $this->db->get()->result();
+            
+            if (ENVIRONMENT === 'development') {
+                log_message('debug', "Found " . count($proposals) . " proposals for mahasiswa {$mahasiswa_id}");
+                foreach ($proposals as $p) {
+                    log_message('debug', "Proposal ID: {$p->id}, workflow: {$p->workflow_status}, status: {$p->status}");
+                }
+            }
             
             if (empty($proposals)) {
                 return [];
@@ -278,6 +285,10 @@ class Seminar_skripsi extends CI_Controller {
                 }
             }
             
+            if (ENVIRONMENT === 'development') {
+                log_message('debug', "Final eligible proposals: " . count($eligible_proposals));
+            }
+            
             return $eligible_proposals;
             
         } catch (Exception $e) {
@@ -287,7 +298,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * NEW: Check eligibility dengan 3 syarat sederhana
+     * Check eligibility dengan 3 syarat sederhana (FIXED tabel penelitian)
      */
     private function _check_simple_eligibility($proposal_id)
     {
@@ -313,7 +324,7 @@ class Seminar_skripsi extends CI_Controller {
                 $errors[] = "Perlu " . (14 - $jurnal_count) . " jurnal bimbingan lagi";
             }
             
-            // SYARAT 2: Seminar proposal completed dengan nilai
+            // SYARAT 2: Seminar proposal completed
             $this->db->select('COUNT(*) as count');
             $this->db->from('seminar_proposal_mahasiswa');
             $this->db->where('proposal_id', $proposal_id);
@@ -331,11 +342,24 @@ class Seminar_skripsi extends CI_Controller {
                 $errors[] = "Belum lulus seminar proposal";
             }
             
-            // SYARAT 3: Surat izin penelitian diajukan
-            $this->db->select('COUNT(*) as count');
-            $this->db->from('penelitian');
-            $this->db->where('proposal_mahasiswa_id', $proposal_id);
-            $penelitian_count = $this->db->get()->row()->count;
+            // SYARAT 3: FIXED - Surat izin penelitian (tabel yang benar)
+            $penelitian_count = 0;
+            
+            // Cek di tabel permohonan_izin_penelitian (tabel yang benar)
+            if ($this->db->table_exists('permohonan_izin_penelitian')) {
+                $this->db->select('COUNT(*) as count');
+                $this->db->from('permohonan_izin_penelitian');
+                $this->db->where('proposal_mahasiswa_id', $proposal_id);
+                $penelitian_count = $this->db->get()->row()->count;
+            }
+            
+            // Fallback: cek di tabel penelitian (jika ada)
+            if ($penelitian_count == 0 && $this->db->table_exists('penelitian')) {
+                $this->db->select('COUNT(*) as count');
+                $this->db->from('penelitian');
+                $this->db->where('proposal_mahasiswa_id', $proposal_id);
+                $penelitian_count = $this->db->get()->row()->count;
+            }
             
             $requirements['penelitian'] = [
                 'name' => 'Surat Izin Penelitian',
@@ -366,7 +390,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get existing seminars - berdasarkan struktur database yang benar
+     * Get existing seminars
      */
     private function _get_existing_seminars($mahasiswa_id)
     {
@@ -385,14 +409,18 @@ class Seminar_skripsi extends CI_Controller {
             }
             
             // Fallback: Query direct table dengan join manual
-            $this->db->select('ss.*, pm.judul, m.nim, m.nama as nama_mahasiswa');
-            $this->db->from('seminar_skripsi_mahasiswa ss');
-            $this->db->join('proposal_mahasiswa pm', 'ss.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'ss.mahasiswa_id = m.id');
-            $this->db->where('ss.mahasiswa_id', $mahasiswa_id);
-            $this->db->order_by('ss.created_at', 'DESC');
+            if ($this->db->table_exists('seminar_skripsi_mahasiswa')) {
+                $this->db->select('ss.*, pm.judul, m.nim, m.nama as nama_mahasiswa');
+                $this->db->from('seminar_skripsi_mahasiswa ss');
+                $this->db->join('proposal_mahasiswa pm', 'ss.proposal_id = pm.id');
+                $this->db->join('mahasiswa m', 'ss.mahasiswa_id = m.id');
+                $this->db->where('ss.mahasiswa_id', $mahasiswa_id);
+                $this->db->order_by('ss.created_at', 'DESC');
+                
+                return $this->db->get()->result();
+            }
             
-            return $this->db->get()->result();
+            return [];
             
         } catch (Exception $e) {
             log_message('error', 'Error getting existing seminars: ' . $e->getMessage());
@@ -414,11 +442,11 @@ class Seminar_skripsi extends CI_Controller {
         ];
         
         try {
-            // Total proposals mahasiswa
+            // Total proposals mahasiswa (FIXED: tanpa filter status)
             $this->db->select('COUNT(*) as total');
             $this->db->from('proposal_mahasiswa');
             $this->db->where('mahasiswa_id', $mahasiswa_id);
-            $this->db->where('status', '1');
+            // REMOVED: $this->db->where('status', '1');
             $result = $this->db->get()->row();
             $summary['total_proposals'] = $result ? $result->total : 0;
             
@@ -427,7 +455,7 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->from('proposal_mahasiswa');
             $this->db->where('mahasiswa_id', $mahasiswa_id);
             $this->db->where_in('workflow_status', ['penelitian', 'seminar_skripsi']);
-            $this->db->where('status', '1');
+            // REMOVED: $this->db->where('status', '1');
             $result = $this->db->get()->row();
             $summary['eligible_proposals'] = $result ? $result->total : 0;
             
@@ -463,7 +491,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get proposal by ID dengan ownership check
+     * Get proposal by ID dengan ownership check (FIXED: tanpa filter status)
      */
     private function _get_proposal_by_id($proposal_id, $mahasiswa_id)
     {
@@ -473,7 +501,7 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
             $this->db->where('pm.id', $proposal_id);
             $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-            $this->db->where('pm.status', '1');
+            // REMOVED: $this->db->where('pm.status', '1');
             
             return $this->db->get()->row();
             
@@ -524,14 +552,18 @@ class Seminar_skripsi extends CI_Controller {
             }
             
             // Fallback: Manual join
-            $this->db->select('ss.*, pm.judul, m.nim, m.nama as nama_mahasiswa');
-            $this->db->from('seminar_skripsi_mahasiswa ss');
-            $this->db->join('proposal_mahasiswa pm', 'ss.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'ss.mahasiswa_id = m.id');
-            $this->db->where('ss.id', $seminar_id);
-            $this->db->where('ss.mahasiswa_id', $mahasiswa_id);
+            if ($this->db->table_exists('seminar_skripsi_mahasiswa')) {
+                $this->db->select('ss.*, pm.judul, m.nim, m.nama as nama_mahasiswa');
+                $this->db->from('seminar_skripsi_mahasiswa ss');
+                $this->db->join('proposal_mahasiswa pm', 'ss.proposal_id = pm.id');
+                $this->db->join('mahasiswa m', 'ss.mahasiswa_id = m.id');
+                $this->db->where('ss.id', $seminar_id);
+                $this->db->where('ss.mahasiswa_id', $mahasiswa_id);
+                
+                return $this->db->get()->row();
+            }
             
-            return $this->db->get()->row();
+            return null;
             
         } catch (Exception $e) {
             log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
@@ -583,6 +615,11 @@ class Seminar_skripsi extends CI_Controller {
         }
         
         try {
+            // Pastikan tabel ada
+            if (!$this->db->table_exists('seminar_skripsi_mahasiswa')) {
+                throw new Exception('Tabel seminar_skripsi_mahasiswa belum tersedia');
+            }
+            
             if ($is_edit) {
                 // Update existing
                 $existing = $this->_get_seminar_by_proposal_id($proposal_id);
@@ -607,7 +644,7 @@ class Seminar_skripsi extends CI_Controller {
             
         } catch (Exception $e) {
             log_message('error', 'Error saving seminar skripsi: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan saat menyimpan data.');
+            $this->session->set_flashdata('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
         }
         
         redirect('mahasiswa/seminar_skripsi');
@@ -744,26 +781,28 @@ class Seminar_skripsi extends CI_Controller {
             $proposal = $this->_get_proposal_by_id($proposal_id, $this->session->userdata('id'));
             if (!$proposal) return;
             
-            // Get pembimbing data
-            $this->db->select('email, nama');
-            $this->db->from('dosen');
-            $this->db->where('id', $proposal->dosen_id);
-            $pembimbing = $this->db->get()->row();
-            
-            if ($pembimbing && $pembimbing->email) {
-                $mahasiswa_name = $proposal->nama_mahasiswa;
-                $nim = $proposal->nim;
+            // Get pembimbing data dari proposal_mahasiswa
+            if (isset($proposal->dosen_id)) {
+                $this->db->select('email, nama');
+                $this->db->from('dosen');
+                $this->db->where('id', $proposal->dosen_id);
+                $pembimbing = $this->db->get()->row();
                 
-                $subject = "Pengajuan Seminar Skripsi - {$mahasiswa_name}";
-                $message = "Pengajuan seminar skripsi telah ";
-                $message .= ($action_type === 'updated' ? 'diperbarui' : 'dikirim') . " oleh mahasiswa:\n\n";
-                $message .= "Nama: {$mahasiswa_name}\n";
-                $message .= "NIM: {$nim}\n";
-                $message .= "Judul: {$proposal->judul}\n\n";
-                $message .= "Silakan login ke sistem untuk melakukan review.";
-                
-                // Implementasi send email sesuai config sistem
-                // send_email_notification($pembimbing->email, $subject, $message);
+                if ($pembimbing && $pembimbing->email) {
+                    $mahasiswa_name = $proposal->nama_mahasiswa;
+                    $nim = $proposal->nim;
+                    
+                    $subject = "Pengajuan Seminar Skripsi - {$mahasiswa_name}";
+                    $message = "Pengajuan seminar skripsi telah ";
+                    $message .= ($action_type === 'updated' ? 'diperbarui' : 'dikirim') . " oleh mahasiswa:\n\n";
+                    $message .= "Nama: {$mahasiswa_name}\n";
+                    $message .= "NIM: {$nim}\n";
+                    $message .= "Judul: {$proposal->judul}\n\n";
+                    $message .= "Silakan login ke sistem untuk melakukan review.";
+                    
+                    // Implementasi send email sesuai config sistem
+                    // send_email_notification($pembimbing->email, $subject, $message);
+                }
             }
         } catch (Exception $e) {
             log_message('error', 'Failed to send notification: ' . $e->getMessage());

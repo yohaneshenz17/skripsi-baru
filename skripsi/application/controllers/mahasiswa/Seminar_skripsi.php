@@ -218,35 +218,36 @@ class Seminar_skripsi extends CI_Controller {
     private function _prepare_dashboard_data($mahasiswa_id)
     {
         try {
-            // ✅ FIX: Cek existing seminar DULU sebelum eligible proposals
-            $existing_seminar = $this->_get_existing_seminar_by_mahasiswa($mahasiswa_id);
+            // ✅ DIRECT QUERY: Cek seminar existing
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $this->db->order_by('created_at', 'DESC');
+            $existing_seminar = $this->db->get('seminar_skripsi_mahasiswa')->row();
             
             if ($existing_seminar) {
-                // Ada seminar yang sudah disubmit - tampilkan progress
+                // ✅ ADA SEMINAR: Tampilkan progress
                 return [
                     'has_existing_seminar' => true,
                     'current_seminar' => $existing_seminar,
-                    'progress_data' => $this->_build_progress_data($existing_seminar),
+                    'show_progress' => true,
                     'show_form' => false,
-                    'can_create_new' => false
+                    'status_text' => 'Menunggu Review Dosen Pembimbing',
+                    'progress_percentage' => 20
                 ];
             } else {
-                // Belum ada seminar - cek eligibility untuk form pengajuan
+                // ✅ TIDAK ADA: Tampilkan eligibility check
                 $eligible_proposals = $this->_get_eligible_proposals($mahasiswa_id);
-                
                 return [
                     'has_existing_seminar' => false,
                     'proposals_eligible' => $eligible_proposals,
                     'can_create_new' => count($eligible_proposals) > 0,
                     'show_form' => true,
-                    'action_url' => count($eligible_proposals) > 0 ? 
-                        base_url('mahasiswa/seminar_skripsi/pengajuan/' . $eligible_proposals[0]->id) : null
+                    'show_progress' => false
                 ];
             }
             
         } catch (Exception $e) {
             log_message('error', 'Dashboard data error: ' . $e->getMessage());
-            return ['has_existing_seminar' => false, 'can_create_new' => false, 'show_form' => true];
+            return ['has_existing_seminar' => false, 'show_form' => true];
         }
     }
 

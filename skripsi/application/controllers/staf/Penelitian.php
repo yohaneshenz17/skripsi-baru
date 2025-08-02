@@ -14,7 +14,7 @@ class Penelitian extends CI_Controller {
         $this->load->database();
         $this->load->library('session');
         $this->load->helper(['url', 'date', 'file', 'text']);
-        $this->load->library(['pdf', 'upload', 'form_validation']);
+        $this->load->library(['pdf', 'upload', 'form_validation', 'email']); // ← TAMBAHKAN 'email'
         
         // Cek login dan level staf (level 5 di tabel dosen)
         if (!$this->session->userdata('logged_in') || $this->session->userdata('level') != '5') {
@@ -297,7 +297,7 @@ class Penelitian extends CI_Controller {
     }
     
     // ========================================
-    // 🆕 NATIVE PHP UPLOAD - BYPASS CI LIBRARY
+    // ðŸ†• NATIVE PHP UPLOAD - BYPASS CI LIBRARY
     // ========================================
     
     // Validasi file upload
@@ -403,6 +403,8 @@ class Penelitian extends CI_Controller {
                 'filename' => $filename,
                 'file_size' => number_format($uploaded_file['size'] / 1024, 2) . ' KB'
             ]);
+            // ✅ TAMBAHKAN BARIS INI:
+            $this->send_upload_notification($proposal_id);
         }
         
     } else {
@@ -511,6 +513,46 @@ class Penelitian extends CI_Controller {
     }
 
     /**
+     * ✅ BARU: Kirim notifikasi email setelah surat izin diupload oleh staf
+     * Method ini dipanggil SETELAH upload_surat() berhasil
+     */
+    public function send_upload_notification($proposal_id) {
+        try {
+            // Ambil data lengkap untuk notifikasi
+            $this->db->select('
+                pip.*, 
+                pm.mahasiswa_id, 
+                m.nama as nama_mahasiswa, 
+                m.nim, 
+                m.email as email_mahasiswa, 
+                d.nama as nama_pembimbing, 
+                d.email as email_pembimbing
+            ');
+            $this->db->from('permohonan_izin_penelitian pip');
+            $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pip.dosen_pembimbing_id = d.id');
+            $this->db->where('pip.proposal_mahasiswa_id', $proposal_id);
+            
+            $permohonan = $this->db->get()->row();
+            
+            if (!$permohonan) {
+                log_message('error', 'Data permohonan tidak ditemukan untuk notifikasi: ' . $proposal_id);
+                return false;
+            }
+            
+            // Kirim notifikasi
+            $this->_send_notification_surat_ready($permohonan);
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in send_upload_notification: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Get statistik penelitian
      */
     private function _get_penelitian_stats() {
@@ -582,5 +624,182 @@ class Penelitian extends CI_Controller {
             
             $this->db->insert('staf_aktivitas', $data);
         }
+    }
+    
+    /**
+     * ✅ BARU: Method utama untuk kirim notifikasi email
+     */
+    private function _send_notification_surat_ready($permohonan) {
+        try {
+            // Load email library jika belum ada
+            if (!isset($this->email)) {
+                $this->load->library('email');
+            }
+            
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            // 1. Kirim email ke MAHASISWA
+            $email_mahasiswa_sent = $this->_send_email_to_mahasiswa($permohonan);
+            
+            // 2. Kirim email ke DOSEN PEMBIMBING  
+            $email_dosen_sent = $this->_send_email_to_dosen($permohonan);
+            
+            // Log hasil
+            if ($email_mahasiswa_sent && $email_dosen_sent) {
+                log_message('info', 'All upload notifications sent successfully for proposal: ' . $permohonan->proposal_mahasiswa_id);
+            } else {
+                log_message('warning', 'Some upload notifications failed for proposal: ' . $permohonan->proposal_mahasiswa_id);
+            }
+            
+            return ($email_mahasiswa_sent && $email_dosen_sent);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending surat ready notification: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ BARU: Kirim email notifikasi ke mahasiswa
+     */
+    private function _send_email_to_mahasiswa($permohonan) {
+        try {
+            $subject = 'Surat Izin Penelitian Siap - ' . $permohonan->nama_mahasiswa;
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #28a745; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Surat Izin Penelitian Siap</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. <strong>{$permohonan->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Surat izin penelitian Anda telah <strong>siap dan telah ditandatangani</strong> oleh pihak akademik.</p>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745; margin: 15px 0;'>
+                        <p style='margin: 0; color: #155724;'><strong>Detail Penelitian:</strong></p>
+                        <ul style='color: #155724; margin: 10px 0;'>
+                            <li><strong>NIM:</strong> {$permohonan->nim}</li>
+                            <li><strong>Tempat:</strong> {$permohonan->tempat_penelitian}</li>
+                            <li><strong>Periode:</strong> " . date('d-m-Y', strtotime($permohonan->tanggal_mulai_penelitian)) . " s/d " . date('d-m-Y', strtotime($permohonan->tanggal_selesai_penelitian)) . "</li>
+                            <li><strong>Pembimbing:</strong> {$permohonan->nama_pembimbing}</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;'>
+                        <p style='margin: 0; color: #856404;'><strong>Langkah Selanjutnya:</strong></p>
+                        <p style='margin: 5px 0 0 0; color: #856404;'>
+                            1. Login ke sistem untuk mengunduh surat izin penelitian<br>
+                            2. Gunakan surat tersebut untuk keperluan penelitian Anda<br>
+                            3. Lanjutkan ke tahap penelitian dan dokumentasi
+                        </p>
+                    </div>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                    <p style='margin: 0;'>SIM Tugas Akhir STK Santo Yakobus</p>
+                    <p style='margin: 5px 0 0 0;'>Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->clear();
+            $this->email->from('noreply.stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($permohonan->email_mahasiswa);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            $result = $this->email->send();
+            
+            if ($result) {
+                log_message('info', 'Surat ready notification sent to mahasiswa: ' . $permohonan->email_mahasiswa);
+            } else {
+                log_message('error', 'Failed to send surat ready notification to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Exception sending email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ BARU: Kirim email notifikasi ke dosen pembimbing
+     */
+    private function _send_email_to_dosen($permohonan) {
+        try {
+            $subject = 'Surat Izin Penelitian Telah Diproses - ' . $permohonan->nama_mahasiswa;
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #007bff; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📋 Surat Izin Penelitian Diproses</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. <strong>{$permohonan->nama_pembimbing}</strong>,</p>
+                    
+                    <p>Surat izin penelitian untuk mahasiswa bimbingan Anda telah <strong>siap dan ditandatangani</strong> oleh staf akademik.</p>
+                    
+                    <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; border-left: 4px solid #0c5460; margin: 15px 0;'>
+                        <p style='margin: 0; color: #0c5460;'><strong>Detail Mahasiswa:</strong></p>
+                        <ul style='color: #0c5460; margin: 10px 0;'>
+                            <li><strong>Nama:</strong> {$permohonan->nama_mahasiswa}</li>
+                            <li><strong>NIM:</strong> {$permohonan->nim}</li>
+                            <li><strong>Tempat Penelitian:</strong> {$permohonan->tempat_penelitian}</li>
+                            <li><strong>Periode:</strong> " . date('d-m-Y', strtotime($permohonan->tanggal_mulai_penelitian)) . " s/d " . date('d-m-Y', strtotime($permohonan->tanggal_selesai_penelitian)) . "</li>
+                        </ul>
+                    </div>
+                    
+                    <p style='color: #6c757d;'>Mahasiswa dapat melanjutkan ke tahap penelitian lapangan dengan surat izin yang telah disetujui.</p>
+                </div>
+                
+                <div style='background-color: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                    <p style='margin: 0;'>SIM Tugas Akhir STK Santo Yakobus</p>
+                </div>
+            </div>";
+            
+            $this->email->clear();
+            $this->email->from('noreply.stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($permohonan->email_pembimbing);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            $result = $this->email->send();
+            
+            if ($result) {
+                log_message('info', 'Surat ready notification sent to dosen: ' . $permohonan->email_pembimbing);
+            } else {
+                log_message('error', 'Failed to send surat ready notification to dosen: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Exception sending email to dosen: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ BARU: Konfigurasi email - sama dengan controller dosen yang sudah stabil
+     */
+    private function _get_email_config() {
+        return [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug',
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls',
+            'smtp_timeout' => 30,
+            'wordwrap' => TRUE
+        ];
     }
 }

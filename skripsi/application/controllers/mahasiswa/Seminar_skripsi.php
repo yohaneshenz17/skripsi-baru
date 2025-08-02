@@ -575,7 +575,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Handle form submission
+     * ✅ IMPROVED: Handle form submission with better error handling
      */
     private function _handle_submission($proposal_id, $is_edit = false)
     {
@@ -624,29 +624,65 @@ class Seminar_skripsi extends CI_Controller {
             }
             
             if ($is_edit) {
-                // Update existing
+                // ✅ IMPROVED: Add validation for existing record
                 $existing = $this->_get_seminar_by_proposal_id($proposal_id);
+                if (!$existing) {
+                    throw new Exception('Data seminar yang akan diupdate tidak ditemukan');
+                }
+                
                 $data['updated_at'] = date('Y-m-d H:i:s');
                 
                 $this->db->where('id', $existing->id);
-                $this->db->update('seminar_skripsi_mahasiswa', $data);
+                $affected = $this->db->update('seminar_skripsi_mahasiswa', $data);
+                
+                // ✅ IMPROVED: Check if update actually happened
+                if ($affected === 0) {
+                    throw new Exception('Tidak ada data yang diupdate');
+                }
                 
                 $this->session->set_flashdata('success', 'Pengajuan seminar skripsi berhasil diperbarui.');
+                $action_type = 'updated';
+                
             } else {
+                // ✅ IMPROVED: Check for duplicate submission
+                $existing_check = $this->_get_seminar_by_proposal_id($proposal_id);
+                if ($existing_check) {
+                    $this->session->set_flashdata('error', 'Pengajuan untuk proposal ini sudah ada. Gunakan fitur edit untuk memperbarui.');
+                    redirect('mahasiswa/seminar_skripsi/pengajuan/' . $proposal_id);
+                    return;
+                }
+                
                 // Create new
                 $data['created_at'] = date('Y-m-d H:i:s');
                 $data['updated_at'] = date('Y-m-d H:i:s');
                 
-                $this->db->insert('seminar_skripsi_mahasiswa', $data);
+                $insert_id = $this->db->insert('seminar_skripsi_mahasiswa', $data);
+                
+                // ✅ IMPROVED: Check if insert was successful
+                if (!$insert_id) {
+                    throw new Exception('Gagal menyimpan data pengajuan');
+                }
                 
                 $this->session->set_flashdata('success', 'Pengajuan seminar skripsi berhasil dikirim.');
+                $action_type = 'created';
             }
             
-            // Send notification (optional)
-            $this->_send_notification($proposal_id, $is_edit ? 'updated' : 'created');
+            // ✅ IMPROVED: Safe email notification with try-catch
+            try {
+                $notification_sent = $this->_send_notification($proposal_id, $action_type);
+                if ($notification_sent) {
+                    log_message('info', "Email notification sent successfully - Proposal ID: {$proposal_id}, Action: {$action_type}");
+                } else {
+                    log_message('warning', "Email notification failed but process continued - Proposal ID: {$proposal_id}");
+                }
+            } catch (Exception $email_error) {
+                // ✅ IMPROVED: Jangan gagalkan proses utama jika email gagal
+                log_message('error', 'Email notification error (process continued): ' . $email_error->getMessage() . " - Proposal ID: {$proposal_id}");
+                // Tidak set flashdata error untuk email, karena proses utama berhasil
+            }
             
         } catch (Exception $e) {
-            log_message('error', 'Error saving seminar skripsi: ' . $e->getMessage());
+            log_message('error', 'Error saving seminar skripsi: ' . $e->getMessage() . " - Proposal ID: {$proposal_id}, Mahasiswa ID: {$mahasiswa_id}");
             $this->session->set_flashdata('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
         }
         

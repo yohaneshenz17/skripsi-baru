@@ -304,3 +304,44 @@ ERROR - 2025-08-01 17:10:53 --> Query error: Unknown column 'status_dosen' in 'w
 FROM `jurnal_bimbingan`
 WHERE `proposal_id` = '44'
 AND `status_dosen` = 'approved'
+ERROR - 2025-08-01 17:31:48 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:31:48 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:31:48 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 17:31:51 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:31:51 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:31:51 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 17:33:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:33:42 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:41:29 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:41:29 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:41:29 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 17:41:35 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:41:35 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:41:35 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-01 17:42:18 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:42:18 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:43:51 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:43:51 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:47:09 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:47:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:47:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:47:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:47:22 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:47:22 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:52:27 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:52:27 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:52:50 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:52:50 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 17:52:56 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 17:52:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 18:07:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 18:07:08 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 18:07:12 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 18:07:12 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 18:11:28 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 18:11:28 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 18:14:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 18:14:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 18:14:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-01 18:14:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-01 18:15:09 --> 404 Page Not Found: staf/Seminar_skripsi/index

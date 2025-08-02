@@ -217,34 +217,37 @@ class Seminar_skripsi extends CI_Controller {
      */
     private function _prepare_dashboard_data($mahasiswa_id)
     {
-        // Get proposal yang eligible (FIXED: tanpa syarat status = '1')
-        $eligible_proposals = $this->_get_eligible_proposals($mahasiswa_id);
-        
-        // Get existing seminar skripsi
-        $existing_seminars = $this->_get_existing_seminars($mahasiswa_id);
-        
-        // Get progress summary
-        $progress_summary = $this->_get_progress_summary($mahasiswa_id);
-        
-        // Set variable untuk view
-        $data = [
-            'proposals_eligible' => $eligible_proposals,
-            'existing_seminars' => $existing_seminars,
-            'progress_summary' => $progress_summary,
-            'can_create_new' => count($eligible_proposals) > 0,
-            'has_eligible_proposals' => count($eligible_proposals) > 0
-        ];
-        
-        // Set action URL dan text jika ada proposal eligible
-        if (count($eligible_proposals) > 0) {
-            $first_proposal = $eligible_proposals[0];
-            $data['action_url'] = base_url('mahasiswa/seminar_skripsi/pengajuan/' . $first_proposal->id);
-            $data['action_text'] = 'Ajukan Seminar Skripsi';
-            $data['action_class'] = 'btn-success';
-            $data['action_proposal_id'] = $first_proposal->id;
+        try {
+            // ✅ FIX: Cek existing seminar DULU sebelum eligible proposals
+            $existing_seminar = $this->_get_existing_seminar_by_mahasiswa($mahasiswa_id);
+            
+            if ($existing_seminar) {
+                // Ada seminar yang sudah disubmit - tampilkan progress
+                return [
+                    'has_existing_seminar' => true,
+                    'current_seminar' => $existing_seminar,
+                    'progress_data' => $this->_build_progress_data($existing_seminar),
+                    'show_form' => false,
+                    'can_create_new' => false
+                ];
+            } else {
+                // Belum ada seminar - cek eligibility untuk form pengajuan
+                $eligible_proposals = $this->_get_eligible_proposals($mahasiswa_id);
+                
+                return [
+                    'has_existing_seminar' => false,
+                    'proposals_eligible' => $eligible_proposals,
+                    'can_create_new' => count($eligible_proposals) > 0,
+                    'show_form' => true,
+                    'action_url' => count($eligible_proposals) > 0 ? 
+                        base_url('mahasiswa/seminar_skripsi/pengajuan/' . $eligible_proposals[0]->id) : null
+                ];
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Dashboard data error: ' . $e->getMessage());
+            return ['has_existing_seminar' => false, 'can_create_new' => false, 'show_form' => true];
         }
-        
-        return $data;
     }
 
     /**
@@ -257,8 +260,7 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->select('pm.id, pm.judul, pm.workflow_status, pm.mahasiswa_id, pm.status');
             $this->db->from('proposal_mahasiswa pm');
             $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
-            // REMOVED: $this->db->where('pm.status', '1'); // Proposal aktif
-            
+ 
             // Allow workflow status penelitian DAN seminar_skripsi
             $this->db->where_in('pm.workflow_status', ['penelitian', 'seminar_skripsi']);
             
@@ -388,6 +390,107 @@ class Seminar_skripsi extends CI_Controller {
                 'errors' => ['Error sistem: ' . $e->getMessage()],
                 'summary' => 'Terjadi kesalahan sistem'
             ];
+        }
+    }
+
+    // ===============================================
+    // 2. ADD METHOD: _get_existing_seminar_by_mahasiswa()
+    // LOKASI: Tambahkan di bagian private methods
+    // ===============================================
+    
+    /**
+     * TAMBAHKAN method baru ini:
+     */
+    private function _get_existing_seminar_by_mahasiswa($mahasiswa_id)
+    {
+        try {
+            // Direct query tanpa dependency pada view
+            $this->db->select('
+                ssm.*, 
+                pm.judul, pm.workflow_status,
+                m.nim, m.nama as nama_mahasiswa,
+                d.nama as nama_pembimbing
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('ssm.mahasiswa_id', $mahasiswa_id);
+            $this->db->order_by('ssm.created_at', 'DESC');
+            $this->db->limit(1);
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Get existing seminar error: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    // ===============================================
+    // 3. ADD METHOD: _build_progress_data()
+    // LOKASI: Tambahkan di bagian private methods  
+    // ===============================================
+    
+    /**
+     * TAMBAHKAN method baru ini:
+     */
+    private function _build_progress_data($seminar)
+    {
+        // Progress steps definition
+        $steps = [
+            ['title' => 'Pengajuan Dikirim', 'status' => 'completed'],
+            ['title' => 'Review Pembimbing', 'status' => $this->_get_step_status($seminar, 'pembimbing')],
+            ['title' => 'Validasi Kaprodi', 'status' => $this->_get_step_status($seminar, 'kaprodi')],
+            ['title' => 'Penjadwalan', 'status' => $this->_get_step_status($seminar, 'jadwal')],
+            ['title' => 'Pelaksanaan', 'status' => $this->_get_step_status($seminar, 'selesai')]
+        ];
+        
+        // Calculate percentage
+        $completed_steps = 1; // Submit selalu completed
+        if ($seminar->status_pembimbing == 'approved') $completed_steps++;
+        if ($seminar->status_kaprodi == 'approved') $completed_steps++;
+        if ($seminar->status == 'scheduled') $completed_steps++;
+        if ($seminar->status == 'completed') $completed_steps++;
+        
+        $percentage = ($completed_steps / 5) * 100;
+        
+        return [
+            'steps' => $steps,
+            'percentage' => $percentage,
+            'current_status' => $seminar->status,
+            'status_pembimbing' => $seminar->status_pembimbing,
+            'status_kaprodi' => $seminar->status_kaprodi
+        ];
+    }
+    
+    // ===============================================
+    // 4. ADD METHOD: _get_step_status()
+    // LOKASI: Tambahkan di bagian private methods
+    // ===============================================
+    
+    /**
+     * TAMBAHKAN method baru ini:
+     */
+    private function _get_step_status($seminar, $step)
+    {
+        switch ($step) {
+            case 'pembimbing':
+                return ($seminar->status_pembimbing == 'approved') ? 'completed' : 
+                       (($seminar->status_pembimbing == 'pending') ? 'active' : 'pending');
+                       
+            case 'kaprodi':
+                return ($seminar->status_kaprodi == 'approved') ? 'completed' :
+                       (($seminar->status_kaprodi == 'pending' && $seminar->status_pembimbing == 'approved') ? 'active' : 'pending');
+                       
+            case 'jadwal':
+                return ($seminar->status == 'scheduled' || $seminar->status == 'completed') ? 'completed' : 'pending';
+                
+            case 'selesai':
+                return ($seminar->status == 'completed') ? 'completed' : 'pending';
+                
+            default:
+                return 'pending';
         }
     }
 

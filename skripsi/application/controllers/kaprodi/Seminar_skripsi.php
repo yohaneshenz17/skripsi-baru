@@ -4,17 +4,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * FINAL FIXED - Seminar Skripsi Controller untuk Kaprodi
  * 
- * DISESUAIKAN DENGAN DATABASE STRUCTURE:
- * - Tabel: seminar_skripsi_mahasiswa 
- * - Model: Seminar_skripsi_model
- * - View: seminar_skripsi_progress_v
- * - Tabel penilaian: penilaian_seminar_skripsi
+ * PERBAIKAN BERDASARKAN STRUKTUR DATABASE AKTUAL:
+ * - proposal_mahasiswa TIDAK punya prodi_id
+ * - Relasi prodi melalui mahasiswa.prodi_id  
+ * - Menggunakan join yang benar sesuai database structure
+ * - Query disesuaikan dengan view yang ada
  * 
- * PERBAIKAN YANG DITERAPKAN:
- * 1. Load text helper untuk word_limiter()
- * 2. Menggunakan model Seminar_skripsi_model yang benar
- * 3. Query sesuai struktur database aktual
- * 4. Proper error handling untuk prevent fallback ke dashboard
+ * STRUKTUR JOIN YANG BENAR:
+ * seminar_skripsi_mahasiswa -> proposal_mahasiswa -> mahasiswa -> prodi
  * 
  * File: application/controllers/kaprodi/Seminar_skripsi.php
  * URL: https://stkyakobus.ac.id/skripsi/kaprodi/seminar_skripsi/index
@@ -43,7 +40,7 @@ class Seminar_skripsi extends CI_Controller {
             show_error('Akses ditolak. Anda bukan Kaprodi.', 403);
         }
         
-        // ✅ FIX: Load model yang sesuai dengan database structure
+        // ✅ FIX: Load model dengan error handling
         try {
             $this->load->model('Seminar_skripsi_model', 'seminar_model');
         } catch (Exception $e) {
@@ -67,7 +64,7 @@ class Seminar_skripsi extends CI_Controller {
      */
     public function index() {
         try {
-            // Prepare data untuk view berdasarkan database structure
+            // Prepare data untuk view berdasarkan database structure yang benar
             $data = [
                 'title' => 'Kelola Seminar Skripsi',
                 'seminar_skripsi' => $this->_get_seminar_skripsi_list(),
@@ -125,7 +122,7 @@ class Seminar_skripsi extends CI_Controller {
         }
         
         try {
-            // Get detail seminar berdasarkan database structure
+            // Get detail seminar berdasarkan database structure yang benar
             $seminar = $this->_get_seminar_detail($seminar_id);
             
             if (!$seminar) {
@@ -274,15 +271,16 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     // ================================================================
-    // HELPER METHODS - DISESUAIKAN DENGAN DATABASE STRUCTURE
+    // HELPER METHODS - DISESUAIKAN DENGAN DATABASE STRUCTURE YANG BENAR
     // ================================================================
 
     /**
-     * ✅ FIXED: Get seminar skripsi list berdasarkan database structure
+     * ✅ FIXED: Get seminar skripsi list dengan JOIN yang benar
+     * Relasi: seminar_skripsi_mahasiswa -> proposal_mahasiswa -> mahasiswa -> prodi
      */
     private function _get_seminar_skripsi_list() {
         try {
-            // Query sesuai dengan struktur tabel seminar_skripsi_mahasiswa
+            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
             $sql = "
                 SELECT 
                     ss.id,
@@ -302,19 +300,22 @@ class Seminar_skripsi extends CI_Controller {
                     m.nim,
                     m.nama as nama_mahasiswa,
                     m.email as email_mahasiswa,
+                    m.prodi_id,
                     pm.judul as judul_proposal,
                     pm.dosen_id as pembimbing_id,
                     d.nama as nama_pembimbing,
                     d.email as email_pembimbing,
                     d1.nama as nama_penguji1,
-                    d2.nama as nama_penguji2
+                    d2.nama as nama_penguji2,
+                    pr.nama as nama_prodi
                 FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
                 LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id  
+                LEFT JOIN prodi pr ON m.prodi_id = pr.id
                 LEFT JOIN dosen d ON pm.dosen_id = d.id
                 LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
                 LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
-                WHERE (pm.prodi_id = ? OR pm.prodi_id IS NULL)
+                WHERE m.prodi_id = ? OR m.prodi_id IS NULL
                 ORDER BY ss.created_at DESC
                 LIMIT 100
             ";
@@ -334,25 +335,33 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get detail seminar berdasarkan database structure
+     * ✅ FIXED: Get detail seminar dengan JOIN yang benar
      */
     private function _get_seminar_detail($seminar_id) {
         try {
+            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
             $sql = "
                 SELECT 
                     ss.*,
-                    m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                    pm.judul as judul_proposal, pm.dosen_id as pembimbing_id,
-                    d.nama as nama_pembimbing, d.email as email_pembimbing,
+                    m.nim, 
+                    m.nama as nama_mahasiswa, 
+                    m.email as email_mahasiswa,
+                    m.prodi_id,
+                    pm.judul as judul_proposal, 
+                    pm.dosen_id as pembimbing_id,
+                    d.nama as nama_pembimbing, 
+                    d.email as email_pembimbing,
                     d1.nama as nama_penguji1,
-                    d2.nama as nama_penguji2
+                    d2.nama as nama_penguji2,
+                    pr.nama as nama_prodi
                 FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
                 LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
+                LEFT JOIN prodi pr ON m.prodi_id = pr.id
                 LEFT JOIN dosen d ON pm.dosen_id = d.id
                 LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
                 LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
-                WHERE ss.id = ? AND (pm.prodi_id = ? OR pm.prodi_id IS NULL)
+                WHERE ss.id = ? AND (m.prodi_id = ? OR m.prodi_id IS NULL)
                 LIMIT 1
             ";
             
@@ -371,28 +380,30 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * ✅ FIXED: Get statistics menggunakan view seminar_skripsi_progress_v
+     * ✅ FIXED: Get statistics menggunakan view atau manual query yang benar
      */
     private function _get_statistics_from_view() {
         try {
-            // Menggunakan view seminar_skripsi_progress_v yang sudah ada
-            $query = $this->db->get('seminar_skripsi_progress_v');
-            
-            if ($query && $query->num_rows() > 0) {
-                $result = $query->row();
+            // Coba gunakan view seminar_skripsi_progress_v jika ada
+            if ($this->db->table_exists('seminar_skripsi_progress_v')) {
+                $query = $this->db->get('seminar_skripsi_progress_v');
                 
-                return [
-                    'pending_review' => $result->review_kaprodi_count ?? 0,
-                    'approved_month' => $result->approved_count ?? 0,
-                    'rejected_month' => $result->rejected_count ?? 0,
-                    'scheduled' => $result->scheduled_count ?? 0,
-                    'completed' => $result->completed_count ?? 0,
-                    'total_mahasiswa' => $result->total_mahasiswa ?? 0,
-                    'avg_progress' => $result->avg_progress_percentage ?? 0
-                ];
+                if ($query && $query->num_rows() > 0) {
+                    $result = $query->row();
+                    
+                    return [
+                        'pending_review' => $result->review_kaprodi_count ?? 0,
+                        'approved_month' => $result->approved_count ?? 0,
+                        'rejected_month' => $result->rejected_count ?? 0,
+                        'scheduled' => $result->scheduled_count ?? 0,
+                        'completed' => $result->completed_count ?? 0,
+                        'total_mahasiswa' => $result->total_mahasiswa ?? 0,
+                        'avg_progress' => $result->avg_progress_percentage ?? 0
+                    ];
+                }
             }
             
-            // Fallback manual query jika view tidak tersedia
+            // Fallback manual query dengan JOIN yang benar
             return $this->_get_statistics_manual();
             
         } catch (Exception $e) {
@@ -402,7 +413,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get statistics manual sebagai fallback
+     * ✅ FIXED: Get statistics manual dengan JOIN yang benar
      */
     private function _get_statistics_manual() {
         try {
@@ -415,15 +426,16 @@ class Seminar_skripsi extends CI_Controller {
                 'total_mahasiswa' => 0
             ];
 
-            // Count berdasarkan status_kaprodi
+            // ✅ COUNT DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
             $sql = "
                 SELECT 
-                    status_kaprodi,
+                    ss.status_kaprodi,
                     COUNT(*) as total
                 FROM seminar_skripsi_mahasiswa ss
                 LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
-                WHERE (pm.prodi_id = ? OR pm.prodi_id IS NULL)
-                GROUP BY status_kaprodi
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
+                WHERE m.prodi_id = ? OR m.prodi_id IS NULL
+                GROUP BY ss.status_kaprodi
             ";
             
             $query = $this->db->query($sql, [$this->prodi_id]);
@@ -460,17 +472,19 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get pengajuan yang perlu review kaprodi
+     * ✅ FIXED: Get pengajuan yang perlu review kaprodi dengan JOIN yang benar
      */
     private function _get_pengajuan_perlu_review() {
         try {
+            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
             $sql = "
                 SELECT COUNT(*) as total
                 FROM seminar_skripsi_mahasiswa ss
                 LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
                 WHERE ss.status = 'review_kaprodi' 
                 AND ss.status_kaprodi = 'pending'
-                AND (pm.prodi_id = ? OR pm.prodi_id IS NULL)
+                AND (m.prodi_id = ? OR m.prodi_id IS NULL)
             ";
             
             $query = $this->db->query($sql, [$this->prodi_id]);
@@ -485,17 +499,19 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get seminar yang perlu dijadwalkan
+     * ✅ FIXED: Get seminar yang perlu dijadwalkan dengan JOIN yang benar
      */
     private function _get_seminar_perlu_dijadwalkan() {
         try {
+            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
             $sql = "
                 SELECT COUNT(*) as total
                 FROM seminar_skripsi_mahasiswa ss
                 LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
                 WHERE ss.status_kaprodi = 'approved' 
                 AND ss.tanggal_seminar IS NULL
-                AND (pm.prodi_id = ? OR pm.prodi_id IS NULL)
+                AND (m.prodi_id = ? OR m.prodi_id IS NULL)
             ";
             
             $query = $this->db->query($sql, [$this->prodi_id]);
@@ -510,10 +526,11 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get jadwal mendatang
+     * ✅ FIXED: Get jadwal mendatang dengan JOIN yang benar
      */
     private function _get_jadwal_mendatang() {
         try {
+            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
             $sql = "
                 SELECT 
                     ss.id,
@@ -524,11 +541,11 @@ class Seminar_skripsi extends CI_Controller {
                     m.nim,
                     ss.judul_skripsi
                 FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
                 LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
                 WHERE ss.tanggal_seminar >= CURDATE()
                 AND ss.status = 'scheduled'
-                AND (pm.prodi_id = ? OR pm.prodi_id IS NULL)
+                AND (m.prodi_id = ? OR m.prodi_id IS NULL)
                 ORDER BY ss.tanggal_seminar ASC, ss.jam_seminar ASC
                 LIMIT 10
             ";

@@ -429,32 +429,54 @@ public function index()
     // =================================================================
 
     /**
-     * Show pengajuan form
+     * ✅ MINIMAL FIX: Show pengajuan form - hanya tambah variable yang missing
      */
     private function _show_pengajuan_form($proposal_id, $mahasiswa_id)
     {
-        // Validasi proposal ownership
+        // Validasi proposal ownership (TIDAK BERUBAH)
         $proposal = $this->_get_proposal_by_id($proposal_id, $mahasiswa_id);
         if (!$proposal) {
             $this->session->set_flashdata('error', 'Proposal tidak ditemukan');
             redirect('mahasiswa/seminar_skripsi');
             return;
         }
-
-        // Check eligibility
+    
+        // Check eligibility (TIDAK BERUBAH)
         $eligibility = $this->_check_simplified_eligibility($mahasiswa_id);
         if (!$eligibility['eligible']) {
             $this->session->set_flashdata('error', 'Belum memenuhi syarat: ' . implode(', ', $eligibility['errors']));
             redirect('mahasiswa/seminar_skripsi');
             return;
         }
-
+    
+        // ✅ TAMBAHAN MINIMAL: Cek existing seminar untuk edit mode
+        $existing_seminar = null;
+        $this->db->where('proposal_id', $proposal_id);
+        $existing_seminar = $this->db->get('seminar_skripsi_mahasiswa')->row();
+        
+        $is_edit = !empty($existing_seminar);
+        
+        // ✅ TAMBAHAN MINIMAL: Tentukan judul current (prioritas dari existing seminar)
+        $current_judul = $proposal->judul; // Default: judul proposal
+        if ($existing_seminar && !empty($existing_seminar->judul_skripsi)) {
+            $current_judul = $existing_seminar->judul_skripsi; // Gunakan judul skripsi jika ada
+        }
+    
+        // ✅ FIX: Tambah variable yang missing untuk mengatasi error
         $data = [
             'proposal' => $proposal,
             'eligibility' => $eligibility,
-            'form_action' => base_url('mahasiswa/seminar_skripsi/pengajuan/' . $proposal_id)
+            'form_action' => base_url('mahasiswa/seminar_skripsi/pengajuan/' . $proposal_id),
+            // Variable yang ditambahkan untuk fix error
+            'is_edit' => $is_edit,
+            'form_title' => $is_edit ? 'Edit Pengajuan Seminar Skripsi' : 'Form Pengajuan Seminar Skripsi',
+            'existing_seminar' => $existing_seminar,
+            'current_judul' => $current_judul,
+            'judul_original' => $proposal->judul,
+            'requirements' => ['requirements' => [], 'all_met' => true]
         ];
-
+    
+        // Load view (TIDAK BERUBAH)
         $this->load->view('template/mahasiswa', [
             'title' => 'Ajukan Seminar Skripsi',
             'content' => $this->load->view('mahasiswa/seminar_skripsi/pengajuan', $data, TRUE),

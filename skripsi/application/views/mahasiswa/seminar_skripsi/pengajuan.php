@@ -1,23 +1,24 @@
 <?php
 /**
  * File: application/views/mahasiswa/seminar_skripsi/pengajuan.php
- * FIXED VERSION - Ready for Copy Paste Replace
+ * FIXED VERSION - Pattern seperti Seminar Proposal
  * 
  * PERBAIKAN:
- * 1. Fixed undefined variable $form_title
- * 2. Fixed undefined property nama_pembimbing
- * 3. Added proper error handling untuk semua variables
- * 4. Improved UI dan UX
- * 5. Added complete form validation
+ * 1. Fixed undefined variable $is_edit dan $form_title
+ * 2. Pattern form seperti seminar proposal (input judul baru)
+ * 3. Upload file skripsi + surat penelitian
+ * 4. Proper error handling untuk semua variables
  */
 
 // ✅ FIXED: Ensure all variables are defined with default values
+$is_edit = isset($is_edit) ? $is_edit : false;
 $form_title = isset($form_title) ? $form_title : ($is_edit ? 'Edit Pengajuan Seminar Skripsi' : 'Form Pengajuan Seminar Skripsi');
 $proposal = isset($proposal) ? $proposal : new stdClass();
 $existing_seminar = isset($existing_seminar) ? $existing_seminar : null;
-$is_edit = isset($is_edit) ? $is_edit : false;
 $eligibility = isset($eligibility) ? $eligibility : ['eligible' => true, 'errors' => []];
-$requirements = isset($requirements) ? $requirements : ['requirements' => [], 'all_met' => true];
+$current_judul = isset($current_judul) ? $current_judul : (isset($proposal->judul) ? $proposal->judul : '');
+$judul_original = isset($judul_original) ? $judul_original : (isset($proposal->judul) ? $proposal->judul : '');
+$form_action = isset($form_action) ? $form_action : base_url('mahasiswa/seminar_skripsi/submit_ajukan');
 
 // ✅ FIXED: Ensure proposal properties exist
 if (!isset($proposal->nama_pembimbing)) {
@@ -55,460 +56,291 @@ if (!isset($proposal->id)) {
             </ol>
         </nav>
     </div>
-    
-    <!-- Flash Messages -->
+
+    <!-- Alert Messages -->
     <?php if($this->session->flashdata('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle mr-2"></i>
-            <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
+            <?= $this->session->flashdata('success') ?>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
     <?php endif; ?>
-    
+
     <?php if($this->session->flashdata('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-triangle mr-2"></i>
-            <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
+            <?= $this->session->flashdata('error') ?>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
     <?php endif; ?>
 
-    <div class="row">
-        
-        <!-- Form Column -->
-        <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-edit mr-2"></i>
-                        <?= htmlspecialchars($form_title) ?>
-                    </h6>
-                </div>
-                <div class="card-body">
-                    
-                    <!-- Proposal Information -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="bg-light p-3 rounded border-left-primary">
-                                <h6 class="font-weight-bold mb-2 text-primary">
-                                    <i class="fas fa-file-alt mr-2"></i>
-                                    Informasi Proposal
-                                </h6>
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <p class="mb-1"><strong>Judul:</strong> <?= htmlspecialchars($proposal->judul) ?></p>
-                                        <p class="mb-1"><strong>Pembimbing:</strong> <?= htmlspecialchars($proposal->nama_pembimbing) ?></p>
-                                    </div>
-                                    <div class="col-md-4 text-md-right">
-                                        <span class="badge badge-success badge-lg">
-                                            <i class="fas fa-graduation-cap mr-1"></i>
-                                            Seminar Skripsi
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Form -->
-                    <?= form_open_multipart('mahasiswa/seminar_skripsi/pengajuan/' . $proposal->id, [
-                        'id' => 'seminarForm',
-                        'data-is-edit' => $is_edit ? 'true' : 'false'
-                    ]) ?>
-                    
-                        <!-- File Upload Section -->
-                        <div class="form-group">
-                            <label for="file_skripsi" class="font-weight-bold">
-                                <i class="fas fa-cloud-upload-alt text-primary mr-2"></i>
-                                File Skripsi Final
-                                <?php if (!$is_edit || ($existing_seminar && empty($existing_seminar->file_skripsi))): ?>
-                                    <span class="text-danger">*</span>
-                                <?php endif; ?>
-                            </label>
-                            
-                            <!-- Custom File Upload Area -->
-                            <div class="file-upload-wrapper">
-                                <div class="custom-file">
-                                    <input type="file" 
-                                           class="custom-file-input" 
-                                           id="file_skripsi" 
-                                           name="file_skripsi" 
-                                           accept=".pdf,.doc,.docx"
-                                           <?php if (!$is_edit || ($existing_seminar && empty($existing_seminar->file_skripsi))): ?>required<?php endif; ?>>
-                                    <label class="custom-file-label" for="file_skripsi">
-                                        Pilih file skripsi (PDF, DOC, DOCX)
-                                    </label>
-                                </div>
-                                
-                                <!-- File Info -->
-                                <small class="form-text text-muted mt-2">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Format yang diterima: PDF, DOC, DOCX | Ukuran maksimal: 2MB
-                                </small>
-                                
-                                <!-- Progress Bar (Hidden by default) -->
-                                <div class="progress mt-2" id="uploadProgress" style="display: none;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                         role="progressbar" style="width: 0%"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- Existing File Info -->
-                            <?php if ($is_edit && $existing_seminar && !empty($existing_seminar->file_skripsi)): ?>
-                                <div class="alert alert-info mt-3">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-file-pdf text-danger fa-2x mr-3"></i>
-                                        <div>
-                                            <strong>File saat ini:</strong> <?= htmlspecialchars($existing_seminar->file_skripsi) ?>
-                                            <br><small class="text-muted">Upload file baru jika ingin mengubah</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?= form_error('file_skripsi', '<small class="text-danger d-block mt-1"><i class="fas fa-exclamation-triangle mr-1"></i>', '</small>') ?>
-                        </div>
-
-                        <!-- Keterangan -->
-                        <div class="form-group">
-                            <label for="keterangan_mahasiswa" class="font-weight-bold">
-                                <i class="fas fa-comment text-primary mr-2"></i>
-                                Keterangan Tambahan
-                            </label>
-                            <textarea class="form-control" 
-                                      id="keterangan_mahasiswa" 
-                                      name="keterangan_mahasiswa" 
-                                      rows="4" 
-                                      placeholder="Tambahkan keterangan atau catatan khusus mengenai skripsi Anda..."><?= $is_edit && $existing_seminar && isset($existing_seminar->keterangan_mahasiswa) ? htmlspecialchars($existing_seminar->keterangan_mahasiswa) : set_value('keterangan_mahasiswa') ?></textarea>
-                            <small class="form-text text-muted">
-                                <i class="fas fa-lightbulb mr-1"></i>
-                                Contoh: perubahan dari proposal awal, hasil penelitian utama, kendala yang dihadapi, dll.
-                            </small>
-                            <?= form_error('keterangan_mahasiswa', '<small class="text-danger d-block mt-1"><i class="fas fa-exclamation-triangle mr-1"></i>', '</small>') ?>
-                        </div>
-
-                        <!-- Submit Buttons -->
-                        <div class="form-group text-right pt-3 border-top">
-                            <a href="<?= base_url('mahasiswa/seminar_skripsi') ?>" class="btn btn-secondary mr-2">
-                                <i class="fas fa-times mr-1"></i> Batal
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                                <i class="fas fa-paper-plane mr-1"></i>
-                                <?= $is_edit ? 'Perbarui Pengajuan' : 'Kirim Pengajuan' ?>
-                            </button>
-                        </div>
-
-                    <?= form_close() ?>
-                </div>
-            </div>
+    <!-- Proposal Info Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-info-circle mr-2"></i>
+                Informasi Proposal
+            </h6>
         </div>
-
-        <!-- Information Sidebar -->
-        <div class="col-lg-4">
-            
-            <!-- Requirements Check -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-success text-white">
-                    <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        Status Kelengkapan
-                    </h6>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Pembimbing:</strong> <?= htmlspecialchars($proposal->nama_pembimbing) ?></p>
+                    <p><strong>Status Proposal:</strong> 
+                        <span class="badge badge-success">Disetujui Kaprodi</span>
+                    </p>
                 </div>
-                <div class="card-body">
-                    <?php if (!empty($requirements['requirements'])): ?>
-                        <?php foreach ($requirements['requirements'] as $req): ?>
-                            <div class="requirement-item mb-2 p-2 rounded" style="background-color: <?= isset($req['met']) && $req['met'] ? '#d4edda' : '#f8d7da' ?>;">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-<?= isset($req['met']) && $req['met'] ? 'check-circle text-success' : 'times-circle text-danger' ?> mr-2"></i>
-                                    <span class="<?= isset($req['met']) && $req['met'] ? 'text-success' : 'text-danger' ?> font-weight-bold">
-                                        <?= htmlspecialchars($req['name'] ?? 'Requirement') ?>
-                                    </span>
-                                </div>
-                                <?php if (isset($req['description'])): ?>
-                                    <small class="text-muted ml-3 d-block"><?= htmlspecialchars($req['description']) ?></small>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="text-center py-3">
-                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                            <h6 class="text-success mb-0">Semua Syarat Terpenuhi</h6>
-                            <small class="text-muted">Anda dapat mengajukan seminar skripsi</small>
-                        </div>
+                <div class="col-md-6">
+                    <?php if ($is_edit && $existing_seminar): ?>
+                        <p><strong>Status Seminar:</strong> 
+                            <span class="badge badge-info"><?= ucfirst($existing_seminar->status) ?></span>
+                        </p>
+                        <p><strong>Tanggal Pengajuan:</strong> 
+                            <?= date('d/m/Y H:i', strtotime($existing_seminar->tanggal_pengajuan)) ?>
+                        </p>
                     <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Help Information -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-info text-white">
-                    <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-question-circle mr-2"></i>
-                        Petunjuk Pengajuan
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="small">
-                        <h6 class="font-weight-bold text-primary mb-2">Persyaratan Seminar Skripsi:</h6>
-                        <ul class="mb-3">
-                            <li>Skripsi telah selesai (Bab 1-5)</li>
-                            <li>Telah menyelesaikan penelitian</li>
-                            <li>File dalam format PDF/DOC/DOCX</li>
-                            <li>Sudah konsultasi dengan pembimbing</li>
-                            <li>Proposal telah disetujui sebelumnya</li>
-                        </ul>
-                        
-                        <h6 class="font-weight-bold text-primary mb-2">Alur Proses:</h6>
-                        <ol class="mb-3">
-                            <li><strong>Review Pembimbing</strong><br>
-                                <small class="text-muted">Dosen pembimbing akan mereview pengajuan Anda</small>
-                            </li>
-                            <li><strong>Validasi Kaprodi</strong><br>
-                                <small class="text-muted">Kaprodi akan memvalidasi dan menjadwalkan</small>
-                            </li>
-                            <li><strong>Pelaksanaan Seminar</strong><br>
-                                <small class="text-muted">Presentasi skripsi di hadapan tim penguji</small>
-                            </li>
-                        </ol>
-                        
-                        <div class="alert alert-warning p-2">
-                            <small>
-                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                <strong>Penting:</strong> Pastikan semua data sudah benar sebelum mengirim pengajuan.
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Info -->
-            <div class="card shadow">
-                <div class="card-header bg-secondary text-white">
-                    <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-phone mr-2"></i>
-                        Butuh Bantuan?
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="small">
-                        <p class="mb-2">
-                            <i class="fas fa-user-tie text-primary mr-2"></i>
-                            <strong>Dosen Pembimbing:</strong><br>
-                            <?= htmlspecialchars($proposal->nama_pembimbing) ?>
-                        </p>
-                        <p class="mb-2">
-                            <i class="fas fa-envelope text-primary mr-2"></i>
-                            <strong>Admin Akademik:</strong><br>
-                            sipd@stkyakobus.ac.id
-                        </p>
-                        <p class="mb-0">
-                            <i class="fas fa-phone text-primary mr-2"></i>
-                            <strong>Telepon:</strong><br>
-                            (0971) 333-0264
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Main Form -->
+    <div class="card">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-edit mr-2"></i>
+                <?= $is_edit ? 'Edit Data Seminar Skripsi' : 'Form Pengajuan Seminar Skripsi' ?>
+            </h6>
+        </div>
+        <div class="card-body">
+            
+            <?php if (!$is_edit): ?>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle mr-2"></i>
+                <strong>Perhatian:</strong> Pastikan semua dokumen sudah siap sebelum mengajukan seminar skripsi. 
+                Setelah diajukan, pengajuan akan direview oleh dosen pembimbing.
+            </div>
+            <?php endif; ?>
+
+            <form method="post" action="<?= $form_action ?>" enctype="multipart/form-data" id="form-seminar-skripsi">
+                <input type="hidden" name="proposal_id" value="<?= $proposal->id ?>">
+                <input type="hidden" name="is_edit" value="<?= $is_edit ? '1' : '0' ?>">
+
+                <!-- Judul Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-edit mr-2"></i>
+                            Judul Skripsi
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Catatan:</strong> Anda dapat mengubah judul jika selama penelitian ada perbaikan formulasi. 
+                            Judul ini yang akan digunakan untuk undangan seminar, berita acara, dan dokumen resmi lainnya.
+                        </div>
+                        
+                        <!-- Judul Original untuk Referensi -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-history mr-1"></i> Judul Proposal Original
+                            </label>
+                            <div class="form-control" style="background-color: #f8f9fe; border: 1px dashed #e3e6f0; min-height: 60px; padding: 15px;">
+                                <?= htmlspecialchars($judul_original) ?>
+                            </div>
+                            <small class="text-muted">Judul dari proposal awal yang disetujui Kaprodi.</small>
+                        </div>
+                        
+                        <!-- Field Edit Judul Skripsi -->
+                        <div class="form-group">
+                            <label for="judul_skripsi" class="form-label">
+                                <i class="fas fa-edit mr-1"></i> Judul Skripsi <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="judul_skripsi" id="judul_skripsi" class="form-control" 
+                                      rows="4" maxlength="250" required 
+                                      placeholder="Masukkan judul skripsi yang akan digunakan untuk seminar..."><?= htmlspecialchars($current_judul) ?></textarea>
+                            
+                            <div class="form-text">
+                                <div class="d-flex justify-content-between">
+                                    <span>Maksimal 250 karakter. Pastikan judul sudah sesuai hasil penelitian.</span>
+                                    <span id="char-counter" class="text-muted">0/250</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Files Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-warning">
+                            <i class="fas fa-upload mr-2"></i>
+                            Upload Berkas
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- File Skripsi -->
+                        <div class="form-group">
+                            <label for="file_skripsi" class="form-label">
+                                <i class="fas fa-file-pdf mr-1"></i> 
+                                File Skripsi Lengkap <span class="text-danger">*</span>
+                            </label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file_skripsi" name="file_skripsi" 
+                                       accept=".pdf,.doc,.docx" <?= !$is_edit ? 'required' : '' ?>>
+                                <label class="custom-file-label" for="file_skripsi">
+                                    <?php if ($is_edit && $existing_seminar && !empty($existing_seminar->file_skripsi)): ?>
+                                        File saat ini: <?= htmlspecialchars($existing_seminar->file_skripsi) ?>
+                                    <?php else: ?>
+                                        Pilih file skripsi...
+                                    <?php endif; ?>
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                Format: PDF, DOC, atau DOCX. Maksimal 5MB. 
+                                <?= $is_edit ? 'Kosongkan jika tidak ingin mengubah file.' : '' ?>
+                            </small>
+                        </div>
+
+                        <!-- Surat Keterangan Penelitian -->
+                        <div class="form-group">
+                            <label for="surat_penelitian" class="form-label">
+                                <i class="fas fa-certificate mr-1"></i> 
+                                Surat Keterangan Penelitian <span class="text-danger">*</span>
+                            </label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="surat_penelitian" name="surat_penelitian" 
+                                       accept=".pdf,.jpg,.jpeg,.png" <?= !$is_edit ? 'required' : '' ?>>
+                                <label class="custom-file-label" for="surat_penelitian">
+                                    <?php if ($is_edit && $existing_seminar && !empty($existing_seminar->surat_penelitian)): ?>
+                                        File saat ini: <?= htmlspecialchars($existing_seminar->surat_penelitian) ?>
+                                    <?php else: ?>
+                                        Pilih surat keterangan...
+                                    <?php endif; ?>
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                Format: PDF, JPG, JPEG, atau PNG. Maksimal 3MB. Surat dari tempat penelitian.
+                                <?= $is_edit ? 'Kosongkan jika tidak ingin mengubah file.' : '' ?>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keterangan Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-info">
+                            <i class="fas fa-comment mr-2"></i>
+                            Keterangan Tambahan
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="keterangan_mahasiswa" class="form-label">
+                                Keterangan <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="keterangan_mahasiswa" id="keterangan_mahasiswa" class="form-control" 
+                                      rows="5" maxlength="1000" required 
+                                      placeholder="Tuliskan keterangan tambahan, catatan khusus, atau hal penting yang perlu disampaikan terkait pengajuan seminar skripsi ini..."><?php if ($is_edit && $existing_seminar): echo htmlspecialchars($existing_seminar->keterangan_mahasiswa); endif; ?></textarea>
+                            <small class="text-muted">
+                                Minimal 10 karakter, maksimal 1000 karakter. 
+                                Jelaskan progress penelitian, temuan penting, atau hal lain yang relevan.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="card">
+                    <div class="card-body text-center">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            <?= $is_edit ? 'Perbarui Pengajuan' : 'Ajukan Seminar Skripsi' ?>
+                        </button>
+                        <a href="<?= base_url('mahasiswa/seminar_skripsi') ?>" class="btn btn-secondary btn-lg ml-3 px-5">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Kembali
+                        </a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
 </div>
 
-<!-- Custom Styles -->
-<style>
-.file-upload-wrapper .custom-file-label {
-    border: 2px dashed #007bff;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.file-upload-wrapper .custom-file-label:hover {
-    border-color: #0056b3;
-    background-color: #f8f9fa;
-}
-
-.file-upload-wrapper .custom-file-label::after {
-    display: none;
-}
-
-.file-upload-wrapper .custom-file-input:focus ~ .custom-file-label {
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.requirement-item {
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
-}
-
-.requirement-item:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.badge-lg {
-    font-size: 0.875rem;
-    padding: 0.5rem 0.75rem;
-}
-
-.border-left-primary {
-    border-left: 0.25rem solid #007bff !important;
-}
-</style>
-
-<!-- JavaScript -->
 <script>
 $(document).ready(function() {
-    
-    // File input change handler
-    $('.custom-file-input').on('change', function() {
-        let fileName = $(this).val().split('\\').pop();
-        let fileSize = this.files[0] ? (this.files[0].size / (1024 * 1024)).toFixed(2) : 0;
+    // Character counter for judul
+    $('#judul_skripsi').on('input', function() {
+        const length = $(this).val().length;
+        $('#char-counter').text(length + '/250');
         
-        if (fileName) {
-            $(this).next('.custom-file-label').addClass("selected").html(
-                '<i class="fas fa-file-alt mr-2"></i>' + fileName + 
-                '<br><small class="text-muted">Ukuran: ' + fileSize + ' MB</small>'
-            );
+        if (length > 200) {
+            $('#char-counter').addClass('text-warning');
         } else {
-            $(this).next('.custom-file-label').removeClass("selected").html('Pilih file skripsi (PDF, DOC, DOCX)');
+            $('#char-counter').removeClass('text-warning');
+        }
+        
+        if (length >= 250) {
+            $('#char-counter').addClass('text-danger');
+        } else {
+            $('#char-counter').removeClass('text-danger');
+        }
+    });
+    
+    // Initial character count
+    $('#judul_skripsi').trigger('input');
+    
+    // File upload handling
+    $('.custom-file-input').on('change', function() {
+        const file = this.files[0];
+        const label = $(this).next('.custom-file-label');
+        
+        if (file) {
+            label.text(file.name);
+            
+            // Validate file size
+            const maxSize = $(this).attr('id') === 'file_skripsi' ? 5242880 : 3145728; // 5MB or 3MB
+            if (file.size > maxSize) {
+                const maxSizeMB = maxSize / 1048576;
+                alert(`Ukuran file terlalu besar. Maksimal ${maxSizeMB}MB.`);
+                $(this).val('');
+                label.text('Pilih file...');
+            }
         }
     });
     
     // Form validation
-    $('#seminarForm').on('submit', function(e) {
-        let isEdit = $(this).data('is-edit');
-        let fileInput = $('#file_skripsi')[0];
-        let submitBtn = $('#submitBtn');
+    $('#form-seminar-skripsi').on('submit', function(e) {
+        const judul = $('#judul_skripsi').val().trim();
+        const keterangan = $('#keterangan_mahasiswa').val().trim();
         
-        // Check if file is required
-        if (!isEdit && (!fileInput.files || fileInput.files.length === 0)) {
+        if (judul.length < 10) {
+            alert('Judul skripsi minimal 10 karakter');
             e.preventDefault();
-            Swal.fire({
-                icon: 'warning',
-                title: 'File Diperlukan',
-                text: 'Harap upload file skripsi sebelum mengirim pengajuan!',
-                confirmButtonColor: '#007bff'
-            });
             return false;
         }
         
-        // File size validation (2MB = 2 * 1024 * 1024 bytes)
-        if (fileInput.files && fileInput.files.length > 0) {
-            let fileSize = fileInput.files[0].size;
-            let fileName = fileInput.files[0].name;
-            let allowedTypes = ['.pdf', '.doc', '.docx'];
-            let fileExt = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
-            
-            if (!allowedTypes.includes(fileExt)) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Format File Tidak Valid',
-                    text: 'Hanya file PDF, DOC, dan DOCX yang diperbolehkan!',
-                    confirmButtonColor: '#007bff'
-                });
-                return false;
-            }
-            
-            if (fileSize > 2 * 1024 * 1024) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'File Terlalu Besar',
-                    text: 'Ukuran file maksimal 2MB. File Anda: ' + (fileSize / (1024 * 1024)).toFixed(2) + ' MB',
-                    confirmButtonColor: '#007bff'
-                });
-                return false;
-            }
+        if (keterangan.length < 10) {
+            alert('Keterangan tambahan minimal 10 karakter');
+            e.preventDefault();
+            return false;
         }
         
-        // Show confirmation
-        e.preventDefault();
-        Swal.fire({
-            title: 'Konfirmasi Pengajuan',
-            text: isEdit ? 'Yakin ingin memperbarui pengajuan seminar skripsi?' : 'Yakin ingin mengirim pengajuan seminar skripsi?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#007bff',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, ' + (isEdit ? 'Perbarui' : 'Kirim'),
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Show loading
-                submitBtn.prop('disabled', true).html(
-                    '<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...'
-                );
-                
-                // Show progress bar
-                $('#uploadProgress').show();
-                
-                // Simulate progress (for better UX)
-                let progress = 0;
-                let progressInterval = setInterval(() => {
-                    progress += Math.random() * 15;
-                    if (progress > 90) progress = 90;
-                    $('#uploadProgress .progress-bar').css('width', progress + '%');
-                }, 200);
-                
-                // Submit form after a short delay
-                setTimeout(() => {
-                    clearInterval(progressInterval);
-                    $('#uploadProgress .progress-bar').css('width', '100%');
-                    $('#seminarForm')[0].submit();
-                }, 1500);
-            }
-        });
-        
-        return false;
-    });
-    
-    // Drag and drop functionality
-    let uploadArea = $('.custom-file-label');
-    
-    uploadArea.on('dragover', function(e) {
-        e.preventDefault();
-        $(this).addClass('border-primary bg-light');
-    });
-    
-    uploadArea.on('dragleave', function(e) {
-        e.preventDefault();
-        $(this).removeClass('border-primary bg-light');
-    });
-    
-    uploadArea.on('drop', function(e) {
-        e.preventDefault();
-        $(this).removeClass('border-primary bg-light');
-        
-        let files = e.originalEvent.dataTransfer.files;
-        if (files.length > 0) {
-            $('#file_skripsi')[0].files = files;
-            $('#file_skripsi').trigger('change');
+        // Confirm submission
+        const action = $('input[name="is_edit"]').val() === '1' ? 'memperbarui' : 'mengajukan';
+        if (!confirm(`Apakah Anda yakin akan ${action} seminar skripsi ini?`)) {
+            e.preventDefault();
+            return false;
         }
     });
 });
-
-// Sweet Alert fallback if not loaded
-if (typeof Swal === 'undefined') {
-    window.Swal = {
-        fire: function(options) {
-            if (typeof options === 'object' && options.text) {
-                alert(options.text);
-            } else {
-                alert(options);
-            }
-            return Promise.resolve({isConfirmed: true});
-        }
-    };
-}
 </script>
-
-<!-- Load Sweet Alert if not already loaded -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

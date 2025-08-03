@@ -60,56 +60,37 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * ✅ FIXED: Index - Dashboard seminar skripsi untuk kaprodi
-     * Mengatasi masalah redirect ke dashboard dengan proper error handling
+     * MENGGUNAKAN EXACT PATTERN DOSEN YANG STABLE
      */
     public function index() {
-        try {
-            // Prepare data untuk view berdasarkan database structure yang benar
-            $data = [
-                'title' => 'Kelola Seminar Skripsi',
-                'seminar_skripsi' => $this->_get_seminar_skripsi_list(),
-                'pengajuan_review' => $this->_get_pengajuan_perlu_review(),
-                'perlu_dijadwalkan' => $this->_get_seminar_perlu_dijadwalkan(),
-                'jadwal_mendatang' => $this->_get_jadwal_mendatang(),
-                'stats' => $this->_get_statistics_from_view()
-            ];
-            
-            // ✅ FIX: Load view dengan error handling untuk prevent fallback
-            try {
-                $content = $this->load->view('kaprodi/seminar_skripsi/index', $data, TRUE);
-            } catch (Exception $e) {
-                // Jika view utama error, gunakan view sederhana
-                log_message('error', 'Seminar_skripsi view error: ' . $e->getMessage());
-                $content = $this->load->view('kaprodi/seminar_skripsi/index_simple', $data, TRUE);
-            }
-            
-            // Data untuk template kaprodi
-            $template_data = [
-                'title' => 'Kelola Seminar Skripsi',
-                'content' => $content
-            ];
-            
-            $this->load->view('template/kaprodi', $template_data);
-            
-        } catch (Exception $e) {
-            log_message('error', 'Seminar_skripsi index critical error: ' . $e->getMessage());
-            
-            // Jangan redirect ke dashboard - tampilkan error page
-            $error_data = [
-                'title' => 'Error - Seminar Skripsi',
-                'error_message' => 'Terjadi kesalahan sistem pada modul Seminar Skripsi.',
-                'technical_error' => ENVIRONMENT === 'development' ? $e->getMessage() : null
-            ];
-            
-            $error_content = $this->load->view('errors/custom_error', $error_data, TRUE);
-            
-            $template_data = [
-                'title' => 'Error - Seminar Skripsi',
-                'content' => $error_content
-            ];
-            
-            $this->load->view('template/kaprodi', $template_data);
-        }
+        // Prepare data untuk view berdasarkan database structure yang benar
+        $data = [
+            'title' => 'Kelola Seminar Skripsi',
+            'seminar_skripsi' => $this->_get_seminar_skripsi_list(),
+            'pengajuan_review' => $this->_get_pengajuan_perlu_review(),
+            'perlu_dijadwalkan' => $this->_get_seminar_perlu_dijadwalkan(),
+            'jadwal_mendatang' => $this->_get_jadwal_mendatang(),
+            'stats' => $this->_get_statistics_from_view()
+        ];
+        
+        // Pastikan semua data tidak null (EXACT seperti dosen)
+        $data['seminar_skripsi'] = $data['seminar_skripsi'] ?: [];
+        $data['pengajuan_review'] = $data['pengajuan_review'] ?: [];
+        $data['perlu_dijadwalkan'] = $data['perlu_dijadwalkan'] ?: [];
+        $data['jadwal_mendatang'] = $data['jadwal_mendatang'] ?: [];
+        $data['stats'] = $data['stats'] ?: [
+            'pending_review' => 0, 
+            'approved_month' => 0, 
+            'rejected_month' => 0, 
+            'scheduled' => 0
+        ];
+        
+        // Load view dengan template kaprodi (EXACT pattern dosen)
+        $this->load->view('template/kaprodi', [
+            'title' => 'Kelola Seminar Skripsi',
+            'content' => $this->load->view('kaprodi/seminar_skripsi/index', $data, TRUE),
+            'script' => '' // atau $this->_get_index_script() jika ada
+        ]);
     }
 
     /**

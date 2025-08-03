@@ -1,14 +1,11 @@
 <?php
 /**
- * MINIMAL DETAIL VIEW - Kaprodi Seminar Skripsi Detail
+ * FIXED DETAIL VIEW - Kaprodi Seminar Skripsi Detail
  * File: application/views/kaprodi/seminar_skripsi/detail.php
  * 
- * View sederhana untuk mengatasi error /detail/12
- * Menggunakan pola yang sama dengan view lainnya
+ * PERBAIKAN: Hapus template call untuk mengatasi double header
+ * Hanya berisi pure content HTML tanpa ob_start dan template loading
  */
-
-// Start output buffering untuk content
-ob_start();
 ?>
 
 <!-- Flash Messages -->
@@ -250,13 +247,6 @@ ob_start();
     </div>
 </div>
 
-<?php
-// Tangkap content
-$content = ob_get_clean();
-
-// Start script
-ob_start();
-?>
 <script>
 function approveSubmission() {
     if (confirm('Yakin ingin menyetujui seminar skripsi ini?')) {
@@ -278,13 +268,3 @@ function scheduleModal() {
     alert('Fitur penjadwalan akan diimplementasi sesuai kebutuhan');
 }
 </script>
-<?php
-$script = ob_get_clean();
-
-// Load template kaprodi
-$this->load->view('template/kaprodi', [
-    'title' => isset($title) ? $title : 'Detail Seminar Skripsi',
-    'content' => $content,
-    'script' => $script
-]);
-?>

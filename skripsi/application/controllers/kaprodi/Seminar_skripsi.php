@@ -70,6 +70,7 @@ class Seminar_skripsi extends CI_Controller {
                 'perlu_dijadwalkan' => $this->_get_seminar_perlu_dijadwalkan(),
                 'jadwal_mendatang' => $this->_get_jadwal_mendatang(),
                 'riwayat_review' => $this->_get_riwayat_review(),
+                'seminar_list' => $this->_get_all_seminar_list(), // ADDED: Tampilkan semua pengajuan untuk monitoring
                 'stats' => $this->_get_statistics()
             ];
             
@@ -339,18 +340,41 @@ class Seminar_skripsi extends CI_Controller {
     // ===============================================
 
     /**
-     * Set prodi_id dari session atau database
+     * Set prodi_id dari session atau database - ENHANCED dengan debugging
      */
     private function _set_prodi_id() {
-        $kaprodi = $this->db->get_where('prodi', ['dosen_id' => $this->session->userdata('id')])->row();
-        if ($kaprodi) {
-            $this->session->set_userdata('prodi_id', $kaprodi->id);
-            $this->prodi_id = $kaprodi->id;
+        try {
+            $user_id = $this->session->userdata('id');
+            log_message('debug', 'Setting prodi_id for user_id: ' . $user_id);
+            
+            $kaprodi = $this->db->get_where('prodi', ['dosen_id' => $user_id])->row();
+            if ($kaprodi) {
+                $this->session->set_userdata('prodi_id', $kaprodi->id);
+                $this->prodi_id = $kaprodi->id;
+                log_message('debug', 'Prodi_id set to: ' . $this->prodi_id);
+            } else {
+                // Fallback: cek di tabel dosen apakah ada prodi_id
+                $dosen = $this->db->get_where('dosen', ['id' => $user_id])->row();
+                if ($dosen && isset($dosen->prodi_id)) {
+                    $this->prodi_id = $dosen->prodi_id;
+                    $this->session->set_userdata('prodi_id', $this->prodi_id);
+                    log_message('debug', 'Prodi_id fallback set to: ' . $this->prodi_id);
+                } else {
+                    log_message('error', 'Cannot find prodi_id for user_id: ' . $user_id);
+                    // Default ke prodi_id = 1 jika tidak ditemukan
+                    $this->prodi_id = 1;
+                    $this->session->set_userdata('prodi_id', $this->prodi_id);
+                }
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Error setting prodi_id: ' . $e->getMessage());
+            $this->prodi_id = 1; // Default fallback
         }
     }
 
     /**
      * Get pengajuan yang perlu review kaprodi
+     * FIXED: Sesuaikan dengan data aktual di database
      */
     private function _get_pengajuan_perlu_review() {
         try {
@@ -359,19 +383,36 @@ class Seminar_skripsi extends CI_Controller {
                 pm.judul,
                 m.nim,
                 m.nama as nama_mahasiswa,
-                d.nama as nama_pembimbing
+                d.nama as nama_pembimbing,
+                ssm.created_at as tanggal_pengajuan
             ');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
             $this->db->where('m.prodi_id', $this->prodi_id);
+            
+            // FIXED: Logic yang benar - yang sudah approved dosen dan belum direview kaprodi
             $this->db->where('ssm.status_pembimbing', 'approved'); // Sudah approve dosen
             $this->db->where('ssm.status_kaprodi', 'pending'); // Menunggu review kaprodi
-            $this->db->where('ssm.current_step', 'kaprodi');
+            
+            // Alternative condition jika current_step belum diupdate
+            $this->db->group_start();
+                $this->db->where('ssm.current_step', 'kaprodi');
+                $this->db->or_group_start();
+                    $this->db->where('ssm.status_pembimbing', 'approved');
+                    $this->db->where('ssm.status_kaprodi', 'pending');
+                $this->db->group_end();
+            $this->db->group_end();
+            
             $this->db->order_by('ssm.created_at', 'ASC');
             
-            return $this->db->get()->result();
+            $result = $this->db->get()->result();
+            
+            // Debug log untuk melihat hasil query
+            log_message('debug', 'Pengajuan perlu review query result: ' . count($result) . ' records found');
+            
+            return $result;
         } catch (Exception $e) {
             log_message('error', 'Error getting pengajuan review: ' . $e->getMessage());
             return [];
@@ -403,6 +444,48 @@ class Seminar_skripsi extends CI_Controller {
             return $this->db->get()->result();
         } catch (Exception $e) {
             log_message('error', 'Error getting seminar perlu dijadwalkan: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get ALL seminar list untuk monitoring keseluruhan proses
+     * ADDED: Tampilkan semua pengajuan dengan berbagai status
+     */
+    private function _get_all_seminar_list() {
+        try {
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                d.nama as nama_pembimbing,
+                CASE 
+                    WHEN ssm.status_pembimbing = "pending" AND ssm.current_step = "pembimbing" THEN "Menunggu Review Dosen"
+                    WHEN ssm.status_pembimbing = "approved" AND ssm.status_kaprodi = "pending" THEN "Menunggu Review Kaprodi"
+                    WHEN ssm.status_kaprodi = "approved" AND ssm.tanggal_seminar IS NULL THEN "Menunggu Penjadwalan"
+                    WHEN ssm.status_kaprodi = "approved" AND ssm.tanggal_seminar IS NOT NULL THEN "Terjadwal"
+                    WHEN ssm.status_kaprodi = "rejected" THEN "Ditolak"
+                    WHEN ssm.status_pembimbing = "rejected" THEN "Ditolak Dosen"
+                    ELSE "Status Tidak Dikenal"
+                END as status_text
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->order_by('ssm.created_at', 'DESC');
+            $this->db->limit(20); // Batasi 20 pengajuan terbaru
+            
+            $result = $this->db->get()->result();
+            
+            // Debug log
+            log_message('debug', 'All seminar list: ' . count($result) . ' records found');
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error getting all seminar list: ' . $e->getMessage());
             return [];
         }
     }
@@ -469,38 +552,49 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get statistics
+     * Get statistics - FIXED: Konsisten dengan query list
      */
     private function _get_statistics() {
         try {
             $stats = [];
             
-            // Total pengajuan
+            // Pending review - hanya yang sudah approved dosen
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
-            $stats['total_pengajuan'] = $this->db->count_all_results();
-            
-            // Pending review
-            $this->db->from('seminar_skripsi_mahasiswa ssm');
-            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-            $this->db->where('m.prodi_id', $this->prodi_id);
-            $this->db->where('ssm.status_kaprodi', 'pending');
+            $this->db->where('ssm.status_pembimbing', 'approved'); // FIXED: Sudah approved dosen
+            $this->db->where('ssm.status_kaprodi', 'pending'); // Menunggu kaprodi
             $stats['pending_review'] = $this->db->count_all_results();
             
-            // Approved
+            // Approved (sudah disetujui kaprodi)
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
             $this->db->where('ssm.status_kaprodi', 'approved');
             $stats['approved'] = $this->db->count_all_results();
             
-            // Scheduled
+            // Rejected (ditolak kaprodi)
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.status_kaprodi', 'rejected');
+            $stats['rejected'] = $this->db->count_all_results();
+            
+            // Scheduled (sudah dijadwalkan)
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
             $this->db->where('ssm.status', 'scheduled');
             $stats['scheduled'] = $this->db->count_all_results();
+            
+            // Total pengajuan untuk referensi
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $stats['total_pengajuan'] = $this->db->count_all_results();
+            
+            // Debug log untuk troubleshooting
+            log_message('debug', 'Statistics: ' . json_encode($stats));
             
             return $stats;
         } catch (Exception $e) {
@@ -509,6 +603,7 @@ class Seminar_skripsi extends CI_Controller {
                 'total_pengajuan' => 0,
                 'pending_review' => 0,
                 'approved' => 0,
+                'rejected' => 0,
                 'scheduled' => 0
             ];
         }
@@ -612,12 +707,12 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Check apakah seminar bisa direview
+     * Check apakah seminar bisa direview - FIXED: Logic yang lebih fleksibel
      */
     private function _can_review_seminar($seminar) {
+        // Bisa review jika sudah approved dosen dan belum direview kaprodi
         return $seminar->status_pembimbing == 'approved' && 
-               $seminar->status_kaprodi == 'pending' && 
-               $seminar->current_step == 'kaprodi';
+               $seminar->status_kaprodi == 'pending';
     }
 
     /**

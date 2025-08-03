@@ -515,3 +515,5 @@ ERROR - 2025-08-03 16:45:36 --> Severity: error --> Exception: Call to undefined
 ERROR - 2025-08-03 17:24:43 --> 404 Page Not Found: kaprodi/Seminar_skripsi/download_file
 ERROR - 2025-08-03 17:24:49 --> 404 Page Not Found: kaprodi/Seminar_skripsi/view_file
 ERROR - 2025-08-03 17:45:46 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-08-03 18:00:46 --> Severity: error --> Exception: syntax error, unexpected token "private", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 11
+ERROR - 2025-08-03 18:00:57 --> Severity: error --> Exception: syntax error, unexpected token "private", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 11

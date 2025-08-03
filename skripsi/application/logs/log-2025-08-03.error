@@ -398,3 +398,42 @@ ERROR - 2025-08-03 13:19:09 --> Query error: Unknown column 'pm.prodi_id' in 'wh
                 ORDER BY ss.created_at DESC
                 LIMIT 100
             
+ERROR - 2025-08-03 13:45:00 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "M...' at line 1 - Invalid query: SELECT `ssm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `d`.`nama` as `nama_pembimbing`, `CASE WHEN ssm`.`status_pembimbing = "pending" AND ssm`.`current_step = "pembimbing" THEN "Menunggu Review Dosen" WHEN ssm`.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "Menunggu Review Kaprodi" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NULL THEN "Menunggu Penjadwalan" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NOT NULL THEN "Terjadwal" WHEN ssm`.`status_kaprodi = "rejected" THEN "Ditolak" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak Dosen" ELSE "Status Tidak Dikenal" END` as `status_text`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+ORDER BY `ssm`.`created_at` DESC
+ LIMIT 20
+ERROR - 2025-08-03 13:59:03 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "M...' at line 1 - Invalid query: SELECT `ssm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `d`.`nama` as `nama_pembimbing`, `CASE WHEN ssm`.`status_pembimbing = "pending" AND ssm`.`current_step = "pembimbing" THEN "Menunggu Review Dosen" WHEN ssm`.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "Menunggu Review Kaprodi" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NULL THEN "Menunggu Penjadwalan" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NOT NULL THEN "Terjadwal" WHEN ssm`.`status_kaprodi = "rejected" THEN "Ditolak" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak Dosen" ELSE "Status Tidak Dikenal" END` as `status_text`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+ORDER BY `ssm`.`created_at` DESC
+ LIMIT 20
+ERROR - 2025-08-03 14:00:16 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "M...' at line 1 - Invalid query: SELECT `ssm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `d`.`nama` as `nama_pembimbing`, `CASE WHEN ssm`.`status_pembimbing = "pending" AND ssm`.`current_step = "pembimbing" THEN "Menunggu Review Dosen" WHEN ssm`.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "Menunggu Review Kaprodi" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NULL THEN "Menunggu Penjadwalan" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NOT NULL THEN "Terjadwal" WHEN ssm`.`status_kaprodi = "rejected" THEN "Ditolak" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak Dosen" ELSE "Status Tidak Dikenal" END` as `status_text`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+ORDER BY `ssm`.`created_at` DESC
+ LIMIT 20
+ERROR - 2025-08-03 14:04:40 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "M...' at line 1 - Invalid query: SELECT `ssm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `d`.`nama` as `nama_pembimbing`, `CASE WHEN ssm`.`status_pembimbing = "pending" AND ssm`.`current_step = "pembimbing" THEN "Menunggu Review Dosen" WHEN ssm`.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "Menunggu Review Kaprodi" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NULL THEN "Menunggu Penjadwalan" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NOT NULL THEN "Terjadwal" WHEN ssm`.`status_kaprodi = "rejected" THEN "Ditolak" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak Dosen" ELSE "Status Tidak Dikenal" END` as `status_text`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+ORDER BY `ssm`.`created_at` DESC
+ LIMIT 20
+ERROR - 2025-08-03 14:05:02 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_statistics_simple() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 70
+ERROR - 2025-08-03 14:05:29 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_statistics_simple() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 70
+ERROR - 2025-08-03 14:05:57 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_statistics_simple() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 70
+ERROR - 2025-08-03 14:36:08 --> Severity: error --> Exception: syntax error, unexpected token "*", expecting "function" or "const" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 536
+ERROR - 2025-08-03 14:36:20 --> Severity: error --> Exception: syntax error, unexpected token "*", expecting "function" or "const" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 536
+ERROR - 2025-08-03 14:42:43 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:1152) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 14:42:43 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_get_pengajuan_perlu_review() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 1152

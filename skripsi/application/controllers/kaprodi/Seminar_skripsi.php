@@ -359,38 +359,39 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * FIXED: Get pengajuan menggunakan query sederhana seperti dosen
+    * FIXED: Get pengajuan - ikuti pola persis dari controller dosen
      */
     private function _get_pengajuan_perlu_review() {
         try {
-            // Query sederhana tanpa CASE WHEN yang bermasalah
+            // PERSIS seperti controller dosen, tapi untuk kaprodi
             $this->db->select('
                 ssm.*,
-                pm.judul,
-                m.nim,
-                m.nama as nama_mahasiswa,
+                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+                pm.judul, pm.dosen_id as pembimbing_id,
                 d.nama as nama_pembimbing
             ');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
-            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
             $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
             $this->db->where('m.prodi_id', $this->prodi_id);
             
-            // LOGIC YANG BENAR: Ikuti pola dosen tapi untuk kaprodi
-            // Dosen: status = 'submitted' AND current_step = 'pembimbing'  
-            // Kaprodi: status_pembimbing = 'approved' AND status_kaprodi = 'pending'
+            // LOGIC KAPRODI: Yang sudah approved dosen dan belum direview kaprodi
             $this->db->where('ssm.status_pembimbing', 'approved'); // Sudah disetujui dosen
             $this->db->where('ssm.status_kaprodi', 'pending'); // Menunggu review kaprodi
             
-            $this->db->order_by('ssm.created_at', 'ASC');
+            $this->db->order_by('ssm.created_at', 'DESC'); // Sama seperti dosen
             
             $result = $this->db->get()->result();
             
-            // Debug log
+            // Debug: Print query yang dijalankan
+            log_message('debug', 'Last query: ' . $this->db->last_query());
             log_message('debug', 'Pengajuan perlu review found: ' . count($result) . ' records');
+            if (!empty($result)) {
+                log_message('debug', 'First record: ' . json_encode($result[0]));
+            }
             
-            return $result;
+            return $result ?: []; // Pastikan return array kosong jika null
         } catch (Exception $e) {
             log_message('error', 'Error getting pengajuan review: ' . $e->getMessage());
             return [];
@@ -530,42 +531,53 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * FIXED: Get statistics sederhana
+     * FIXED: Get statistics - pastikan query PERSIS sama dengan list
      */
     private function _get_statistics_simple() {
         try {
             $stats = [];
             
-            // Pending review - yang sudah approved dosen tapi pending kaprodi
+            // Pending review - QUERY HARUS PERSIS SAMA dengan _get_pengajuan_perlu_review
+            $this->db->select('COUNT(*) as count');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
-            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
             $this->db->where('m.prodi_id', $this->prodi_id);
             $this->db->where('ssm.status_pembimbing', 'approved'); 
             $this->db->where('ssm.status_kaprodi', 'pending');
-            $stats['pending_review'] = $this->db->count_all_results();
+            $result = $this->db->get()->row();
+            $stats['pending_review'] = $result ? $result->count : 0;
             
             // Approved
+            $this->db->select('COUNT(*) as count');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
             $this->db->where('ssm.status_kaprodi', 'approved');
-            $stats['approved'] = $this->db->count_all_results();
+            $result = $this->db->get()->row();
+            $stats['approved'] = $result ? $result->count : 0;
             
             // Rejected
+            $this->db->select('COUNT(*) as count');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
             $this->db->where('ssm.status_kaprodi', 'rejected');
-            $stats['rejected'] = $this->db->count_all_results();
+            $result = $this->db->get()->row();
+            $stats['rejected'] = $result ? $result->count : 0;
             
             // Scheduled
+            $this->db->select('COUNT(*) as count');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
             $this->db->where('ssm.tanggal_seminar IS NOT NULL');
-            $stats['scheduled'] = $this->db->count_all_results();
+            $result = $this->db->get()->row();
+            $stats['scheduled'] = $result ? $result->count : 0;
             
             // Debug log
+            log_message('debug', 'Statistics query pending: ' . $this->db->last_query());
             log_message('debug', 'Statistics: ' . json_encode($stats));
             
             return $stats;

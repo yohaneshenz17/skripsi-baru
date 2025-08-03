@@ -16,3 +16,132 @@ ERROR - 2025-08-03 06:30:51 --> Query error: View 'stkp7133_skripsi.seminar_skri
 FROM `seminar_skripsi_mahasiswa_v`
 WHERE `mahasiswa_id` = '44'
 ORDER BY `created_at` DESC
+ERROR - 2025-08-03 06:46:01 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_existing_seminar_by_mahasiswa() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 222
+ERROR - 2025-08-03 06:46:06 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_existing_seminar_by_mahasiswa() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 222
+ERROR - 2025-08-03 06:52:23 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:404) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 06:52:23 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_prepare_dashboard_data() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 404
+ERROR - 2025-08-03 06:59:50 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_status_text() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 235
+ERROR - 2025-08-03 07:03:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-03 07:03:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-03 07:04:35 --> Severity: Warning --> Undefined property: stdClass::$email_mahasiswa /home/stkp7133/public_html/skripsi/application/controllers/dosen/Penelitian.php 358
+ERROR - 2025-08-03 07:04:36 --> Failed to send approval email to mahasiswa: 220 smtp.gmail.com ESMTP 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+<br /><pre>hello: 250-smtp.gmail.com at your service, [203.175.8.56]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+</pre><pre>starttls: 220 2.0.0 Ready to start TLS
+</pre><pre>hello: 250-smtp.gmail.com at your service, [203.175.8.56]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+</pre><pre>from: 250 2.1.0 OK 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+</pre><pre>to: 555-5.5.2 Syntax error, cannot decode response. For more information, go to
+555-5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321
+555 5.5.2 specifications. 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+</pre>The following SMTP error was encountered: 555-5.5.2 Syntax error, cannot decode response. For more information, go to
+555-5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321
+555 5.5.2 specifications. 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+<br /><pre>quit: 221 2.0.0 closing connection 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+</pre>Unable to send email using PHP SMTP. Your server might not be configured to send mail using this method.<br /><pre>User-Agent: CodeIgniter
+Date: Sun, 3 Aug 2025 07:04:35 +0700
+From: &quot;SIM-TA STK Santo Yakobus&quot; &lt;noreply.stkyakobus@gmail.com&gt;
+Return-Path: &lt;noreply.stkyakobus@gmail.com&gt;
+Subject: =?UTF-8?Q?Permohonan=20Izin=20Penelitian=20Disetujui=20-=20MAHASISWA=20C?= =?UTF-8?Q?ONTOH=203?=
+Reply-To: &lt;noreply.stkyakobus@gmail.com&gt;
+X-Sender: noreply.stkyakobus@gmail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;688ea79313108@gmail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_688ea79313128&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_688ea79313128
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+✅ Permohonan Izin Penelitian Disetujui
+
+
+
+ Yth. MAHASISWA CONTOH 3,
+
+ Selamat! Dosen pembimbing telah menyetujui permohonan izin penelitian Anda.
+
+
+ Detail Penelitian:
+
+ Judul:PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN
+PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE
+ Tempat:SMP Mikael
+ Periode:2025-08-27 s/d 2025-09-17
+
+
+
+ Catatan Dosen:
+ Lanjutkan
+
+
+ Langkah Selanjutnya:
+ Staf akademik akan segera memproses surat izin penelitian Anda. Anda akan
+mendapat notifikasi lanjutan ketika surat sudah siap.
+
+
+
+
+ SIM Tugas Akhir STK Santo Yakobus
+
+
+--B_ALT_688ea79313128
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+=0A            &lt;div style=3D'font-family: Arial, sans-serif; max-width: 600=
+px; margin: 0 auto;'&gt;=0A                &lt;div style=3D'background-color: #28=
+a745; color: white; padding: 20px; text-align: center;'&gt;=0A                =
+    &lt;h2 style=3D'margin: 0;'&gt;=E2=9C=85 Permohonan Izin Penelitian Disetujui=
+&lt;/h2&gt;=0A                &lt;/div&gt;=0A                =0A                &lt;div st=
+yle=3D'padding: 20px; background-color: #f8f9fa;'&gt;=0A                    &lt;p=
+&gt;Yth. &lt;strong&gt;MAHASISWA CONTOH 3&lt;/strong&gt;,&lt;/p&gt;=0A                    =0A   =
+                 &lt;p&gt;Selamat! Dosen pembimbing telah menyetujui permohonan i=
+zin penelitian Anda.&lt;/p&gt;=0A                    =0A                    &lt;div =
+style=3D'background-color: white; padding: 15px; border-radius: 5px; margin=
+: 15px 0;'&gt;=0A                        &lt;h4 style=3D'color: #28a745; margin-t=
+op: 0;'&gt;Detail Penelitian:&lt;/h4&gt;=0A                        &lt;table style=3D'w=
+idth: 100%; font-size: 14px;'&gt;=0A                            &lt;tr&gt;&lt;td&gt;&lt;stron=
+g&gt;Judul:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF=
+ PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA =
+SMPN 2 MERAUKE&lt;/td&gt;&lt;/tr&gt;=0A                            &lt;tr&gt;&lt;td&gt;&lt;strong&gt;Temp=
+at:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;SMP Mikael&lt;/td&gt;&lt;/tr&gt;=0A                            &lt;tr=
+&gt;&lt;td&gt;&lt;strong&gt;Periode:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;2025-08-27 s/d 2025-09-17&lt;/td&gt;&lt;/tr&gt;=
+=0A                        &lt;/table&gt;=0A                    &lt;/div&gt;=0A        =
+            &lt;div style=3D'background-color: #e3f2fd; padding: 15px; border-=
+left: 4px solid #2196f3; margin: 15px 0;'&gt;=0A                        &lt;h4 st=
+yle=3D'color: #1976d2; margin-top: 0;'&gt;Catatan Dosen:&lt;/h4&gt;=0A              =
+          &lt;p style=3D'margin: 0;'&gt;Lanjutkan&lt;/p&gt;=0A                    &lt;/div=
+&gt;=0A                    &lt;div style=3D'background-color: #fff3cd; padding: 1=
+5px; border-radius: 5px; border-left: 4px solid #ffc107;'&gt;=0A              =
+          &lt;p style=3D'margin: 0; color: #856404;'&gt;&lt;strong&gt;Langkah Selanjutn=
+ya:&lt;/strong&gt;&lt;/p&gt;=0A                        &lt;p style=3D'margin: 5px 0 0 0; c=
+olor: #856404;'&gt;Staf akademik akan segera memproses surat izin penelitian A=
+nda. Anda akan mendapat notifikasi lanjutan ketika surat sudah siap.&lt;/p&gt;=0A=
+                    &lt;/div&gt;=0A                &lt;/div&gt;=0A                =0A  =
+              &lt;div style=3D'background-color: #6c757d; color: white; paddin=
+g: 15px; text-align: center; font-size: 12px;'&gt;=0A                    &lt;p st=
+yle=3D'margin: 0;'&gt;SIM Tugas Akhir STK Santo Yakobus&lt;/p&gt;=0A                =
+&lt;/div&gt;=0A            &lt;/div&gt;
+
+--B_ALT_688ea79313128--</pre>
+ERROR - 2025-08-03 07:04:54 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564

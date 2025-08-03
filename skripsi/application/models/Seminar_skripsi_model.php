@@ -2,11 +2,16 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Seminar Skripsi Model - Universal untuk Semua Role (Phase 5)
+ * Seminar Skripsi Model - Universal untuk Semua Role (Phase 5) - FIXED VERSION
  * 
  * Model universal yang mengikuti pattern Seminar_proposal_mahasiswa_model.php
  * Dapat digunakan oleh semua role: mahasiswa, dosen, kaprodi, staf
  * 100% kompatibel dengan database existing
+ * 
+ * PERBAIKAN:
+ * - Fixed method can_submit() untuk pengecekan surat penelitian
+ * - Added method check_eligibility() yang lebih robust
+ * - Added debug methods untuk troubleshooting
  * 
  * File: application/models/Seminar_skripsi_model.php
  * 
@@ -14,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Models
  * @category    Seminar Skripsi
  * @author      Unit SIPD STK Santo Yakobus
- * @version     1.0 (Universal Simple Model)
+ * @version     1.1 (FIXED - Penelitian Table Issue)
  */
 class Seminar_skripsi_model extends CI_Model {
 
@@ -234,7 +239,7 @@ class Seminar_skripsi_model extends CI_Model {
     }
 
     // =================================================================
-    // ELIGIBILITY & VALIDATION METHODS - Follow Seminar_proposal pattern
+    // ELIGIBILITY & VALIDATION METHODS - FIXED VERSION
     // =================================================================
 
     /**
@@ -288,29 +293,34 @@ class Seminar_skripsi_model extends CI_Model {
     }
 
     /**
-     * Check eligibility untuk submit seminar skripsi
+     * 🔧 FIXED: Check eligibility untuk submit seminar skripsi
+     * Perbaikan utama: pengecekan surat izin penelitian menggunakan tabel yang benar
      * 
      * @param int $proposal_id
      * @param int $mahasiswa_id
      * @return array
      */
-    public function can_submit($proposal_id, $mahasiswa_id)
+    public function check_eligibility($proposal_id, $mahasiswa_id = null)
     {
         $errors = [];
         $requirements = [];
         
         try {
-            // 1. Check proposal exists dan workflow status
-            $this->db->select('pm.*, m.nim, m.nama as nama_mahasiswa');
-            $this->db->from('proposal_mahasiswa pm');
-            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-            $this->db->where('pm.id', $proposal_id);
-            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+            // 1. Check proposal exists
+            $this->db->select('*');
+            $this->db->from('proposal_mahasiswa');
+            $this->db->where('id', $proposal_id);
+            if ($mahasiswa_id) {
+                $this->db->where('mahasiswa_id', $mahasiswa_id);
+            }
             $proposal = $this->db->get()->row();
             
             if (!$proposal) {
-                $errors[] = 'Proposal tidak ditemukan atau bukan milik Anda';
-                return ['eligible' => false, 'errors' => $errors, 'requirements' => $requirements];
+                return [
+                    'eligible' => false,
+                    'errors' => ['Proposal tidak ditemukan'],
+                    'requirements' => []
+                ];
             }
             
             // 2. Check workflow status
@@ -326,16 +336,21 @@ class Seminar_skripsi_model extends CI_Model {
             }
             
             // 3. Check jurnal bimbingan (14x untuk seminar skripsi)
-            $jurnal_req = $this->check_jurnal_requirement($proposal_id, 14);
+            $this->db->select('COUNT(*) as count');
+            $this->db->from('jurnal_bimbingan');
+            $this->db->where('proposal_id', $proposal_id);
+            $this->db->where('status_validasi', '1');
+            $jurnal_count = $this->db->get()->row()->count;
+            
             $requirements['jurnal_bimbingan'] = [
                 'name' => 'Jurnal Bimbingan',
                 'required' => 14,
-                'current' => $jurnal_req['jurnal_validated_count'],
-                'met' => $jurnal_req['eligible']
+                'current' => $jurnal_count,
+                'met' => $jurnal_count >= 14
             ];
             
-            if (!$jurnal_req['eligible']) {
-                $errors[] = $jurnal_req['message'];
+            if ($jurnal_count < 14) {
+                $errors[] = 'Perlu ' . (14 - $jurnal_count) . ' jurnal bimbingan lagi yang divalidasi dosen';
             }
             
             // 4. Check seminar proposal completed
@@ -356,21 +371,44 @@ class Seminar_skripsi_model extends CI_Model {
                 $errors[] = 'Belum menyelesaikan seminar proposal';
             }
             
-            // 5. Check surat izin penelitian
-            $this->db->select('COUNT(*) as count');
-            $this->db->from('penelitian');
-            $this->db->where('proposal_mahasiswa_id', $proposal_id);
-            $this->db->where('persetujuan_pembimbing', '1');
-            $penelitian_count = $this->db->get()->row()->count;
+            // 🔧 PERBAIKAN UTAMA: Check surat izin penelitian menggunakan tabel yang benar
+            $penelitian_approved = false;
+            
+            try {
+                // Gunakan tabel permohonan_izin_penelitian yang benar
+                $this->db->select('COUNT(*) as count');
+                $this->db->from('permohonan_izin_penelitian');
+                $this->db->where('proposal_mahasiswa_id', $proposal_id);
+                $this->db->where('status_pembimbing', 'approved');
+                $permohonan_count = $this->db->get()->row()->count;
+                
+                $penelitian_approved = ($permohonan_count > 0);
+                
+            } catch (Exception $e) {
+                log_message('error', 'Error checking permohonan_izin_penelitian: ' . $e->getMessage());
+                
+                // Fallback ke tabel lama jika ada error
+                try {
+                    $this->db->select('COUNT(*) as count');
+                    $this->db->from('penelitian');
+                    $this->db->where('proposal_mahasiswa_id', $proposal_id);
+                    $this->db->where('persetujuan_pembimbing', '1');
+                    $penelitian_count = $this->db->get()->row()->count;
+                    
+                    $penelitian_approved = ($penelitian_count > 0);
+                } catch (Exception $e2) {
+                    log_message('error', 'Error checking both penelitian tables: ' . $e2->getMessage());
+                }
+            }
             
             $requirements['surat_penelitian'] = [
                 'name' => 'Surat Izin Penelitian',
                 'required' => 1,
-                'current' => $penelitian_count,
-                'met' => $penelitian_count >= 1
+                'current' => $penelitian_approved ? 1 : 0,
+                'met' => $penelitian_approved
             ];
             
-            if ($penelitian_count < 1) {
+            if (!$penelitian_approved) {
                 $errors[] = 'Belum ada surat izin penelitian yang disetujui';
             }
             
@@ -384,6 +422,132 @@ class Seminar_skripsi_model extends CI_Model {
             'errors' => $errors,
             'requirements' => $requirements
         ];
+    }
+
+    /**
+     * 🔧 FIXED: Check eligibility untuk submit seminar skripsi (alias untuk backward compatibility)
+     * 
+     * @param int $proposal_id
+     * @param int $mahasiswa_id
+     * @return array
+     */
+    public function can_submit($proposal_id, $mahasiswa_id)
+    {
+        return $this->check_eligibility($proposal_id, $mahasiswa_id);
+    }
+
+    // =================================================================
+    // 🔍 DEBUG METHODS - Untuk Troubleshooting
+    // =================================================================
+
+    /**
+     * 🔍 DEBUG: Method untuk test model langsung
+     * 
+     * @param int $proposal_id
+     * @param int $mahasiswa_id
+     * @return array
+     */
+    public function debug_check_eligibility($proposal_id, $mahasiswa_id = null)
+    {
+        echo "<h3>🔧 Debug Model check_eligibility untuk Proposal ID: {$proposal_id}</h3>";
+        
+        $result = $this->check_eligibility($proposal_id, $mahasiswa_id);
+        
+        echo "<p><strong>Eligible:</strong> " . ($result['eligible'] ? '✅ YES' : '❌ NO') . "</p>";
+        
+        if (!empty($result['errors'])) {
+            echo "<p><strong>Errors:</strong> " . implode(', ', $result['errors']) . "</p>";
+        } else {
+            echo "<p>✅ <strong>No errors - All requirements met!</strong></p>";
+        }
+        
+        if (isset($result['requirements'])) {
+            echo "<h4>Requirements Details:</h4>";
+            echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+            echo "<tr><th>Requirement</th><th>Current</th><th>Required</th><th>Met</th></tr>";
+            foreach ($result['requirements'] as $name => $req) {
+                $met_icon = $req['met'] ? '✅' : '❌';
+                echo "<tr>";
+                echo "<td>{$req['name']}</td>";
+                echo "<td>{$req['current']}</td>";
+                echo "<td>{$req['required']}</td>";
+                echo "<td>{$met_icon}</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+        }
+        
+        return $result;
+    }
+
+    /**
+     * 🔍 DEBUG: Method untuk test pengecekan surat penelitian
+     * 
+     * @param int $proposal_id
+     * @return array
+     */
+    public function debug_penelitian_check($proposal_id)
+    {
+        echo "<h3>🔬 Debug Pengecekan Surat Penelitian untuk Proposal ID: {$proposal_id}</h3>";
+        
+        $results = [];
+        
+        // Test tabel permohonan_izin_penelitian
+        try {
+            $this->db->select('id, status_pembimbing, created_at');
+            $this->db->from('permohonan_izin_penelitian');
+            $this->db->where('proposal_mahasiswa_id', $proposal_id);
+            $permohonan = $this->db->get()->result();
+            
+            echo "<h4>📋 Tabel permohonan_izin_penelitian:</h4>";
+            echo "<p><strong>SQL Query:</strong> " . $this->db->last_query() . "</p>";
+            echo "<p><strong>Count:</strong> " . count($permohonan) . "</p>";
+            
+            if ($permohonan) {
+                $approved_count = 0;
+                foreach ($permohonan as $p) {
+                    echo "<p>- ID: {$p->id}, Status: {$p->status_pembimbing}, Created: {$p->created_at}</p>";
+                    if ($p->status_pembimbing === 'approved') {
+                        $approved_count++;
+                    }
+                }
+                echo "<p><strong>Approved Count:</strong> {$approved_count} " . ($approved_count > 0 ? '✅' : '❌') . "</p>";
+                $results['permohonan'] = $approved_count;
+            } else {
+                echo "<p>❌ Tidak ada data di tabel permohonan_izin_penelitian</p>";
+                $results['permohonan'] = 0;
+            }
+            
+        } catch (Exception $e) {
+            echo "<p>❌ Error tabel permohonan: " . $e->getMessage() . "</p>";
+            $results['permohonan'] = 0;
+        }
+        
+        // Test tabel penelitian lama
+        try {
+            $this->db->select('COUNT(*) as count');
+            $this->db->from('penelitian');
+            $this->db->where('proposal_mahasiswa_id', $proposal_id);
+            $this->db->where('persetujuan_pembimbing', '1');
+            $penelitian_count = $this->db->get()->row()->count;
+            
+            echo "<h4>📋 Tabel penelitian (lama):</h4>";
+            echo "<p><strong>SQL Query:</strong> " . $this->db->last_query() . "</p>";
+            echo "<p><strong>Count:</strong> {$penelitian_count} " . ($penelitian_count > 0 ? '✅' : '❌') . "</p>";
+            $results['penelitian'] = $penelitian_count;
+            
+        } catch (Exception $e) {
+            echo "<p>❌ Error tabel penelitian: " . $e->getMessage() . "</p>";
+            $results['penelitian'] = 0;
+        }
+        
+        // Summary
+        echo "<h4>📊 Summary:</h4>";
+        $total_approved = $results['permohonan'] + $results['penelitian'];
+        echo "<p><strong>Total Approved:</strong> {$total_approved} " . ($total_approved > 0 ? '✅' : '❌') . "</p>";
+        echo "<p><strong>Memenuhi Syarat:</strong> " . ($total_approved > 0 ? '✅ YES' : '❌ NO') . "</p>";
+        
+        return $results;
     }
 
     // =================================================================
@@ -612,29 +776,22 @@ class Seminar_skripsi_model extends CI_Model {
 }
 
 /**
- * CATATAN PENGGUNAAN:
+ * 🔧 PERBAIKAN SUMMARY:
  * 
- * 1. Model universal untuk semua role - load dengan nama yang sama
- * 2. Pattern konsisten dengan Seminar_proposal_mahasiswa_model
- * 3. Role-based methods untuk query sesuai akses
- * 4. Eligibility check yang comprehensive tapi simple
- * 5. Badge counter untuk template integration
+ * 1. ✅ FIXED method check_eligibility() - pengecekan surat penelitian menggunakan tabel permohonan_izin_penelitian
+ * 2. ✅ Added method debug_check_eligibility() - untuk troubleshooting model
+ * 3. ✅ Added method debug_penelitian_check() - untuk test spesifik surat penelitian
+ * 4. ✅ Backward compatibility - can_submit() masih berfungsi
+ * 5. ✅ Error handling yang robust dengan fallback ke tabel lama
  * 
- * CONTOH PENGGUNAAN:
+ * TESTING METHODS:
  * 
- * // Di controller mahasiswa
- * $this->load->model('Seminar_skripsi_model', 'seminar_model');
- * $proposals = $this->seminar_model->get_by_mahasiswa($mahasiswa_id);
+ * // Test di controller
+ * $this->load->model('Seminar_skripsi_model', 'ss_model');
+ * $result = $this->ss_model->debug_check_eligibility(47, 47);
+ * $penelitian = $this->ss_model->debug_penelitian_check(47);
  * 
- * // Di controller dosen
- * $this->load->model('Seminar_skripsi_model', 'seminar_model');
- * $perlu_review = $this->seminar_model->get_perlu_review_dosen($dosen_id);
- * 
- * // Di controller kaprodi
- * $this->load->model('Seminar_skripsi_model', 'seminar_model');
- * $perlu_validasi = $this->seminar_model->get_perlu_review_kaprodi($prodi_id);
- * 
- * // Di controller staf
- * $this->load->model('Seminar_skripsi_model', 'seminar_model');
- * $scheduled = $this->seminar_model->get_for_staf(['scheduled', 'completed']);
+ * EXPECTED RESULT:
+ * - check_eligibility() akan return ['eligible' => true, 'errors' => []]
+ * - Mahasiswa Agus Bumagi akan bisa mengajukan seminar skripsi
  */

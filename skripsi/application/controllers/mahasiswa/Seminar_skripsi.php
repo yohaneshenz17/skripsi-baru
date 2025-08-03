@@ -58,40 +58,81 @@ class Seminar_skripsi extends CI_Controller {
         }
     }
 
-    /**
-     * ✅ FIXED: Index - Dashboard Seminar Skripsi untuk Mahasiswa
-     */
-    public function index()
-    {
-        $mahasiswa_id = $this->session->userdata('id');
+/**
+ * ✅ SIMPLE FIXED: Index method yang disederhanakan
+ * Langsung gunakan hasil debug yang sudah benar
+ */
+public function index()
+{
+    $mahasiswa_id = $this->session->userdata('id');
+    
+    try {
+        // STEP 1: Cek existing seminar
+        $existing_seminar = $this->_get_latest_seminar($mahasiswa_id);
         
-        if (ENVIRONMENT === 'development') {
-            log_message('debug', 'Seminar_skripsi index called for mahasiswa_id: ' . $mahasiswa_id);
-        }
-
-        try {
-            // ✅ FIXED: Get data dengan prioritas yang benar
-            $data = $this->_prepare_dashboard_data($mahasiswa_id);
+        if ($existing_seminar) {
+            // Ada seminar existing - tampilkan progress
+            $data = [
+                'has_existing_seminar' => true,
+                'current_seminar' => $existing_seminar,
+                'show_progress' => true,
+                'show_form' => false,
+                'show_eligibility_check' => false,
+                'status_text' => $this->_get_status_text($existing_seminar),
+                'progress_percentage' => $this->_get_progress_percentage($existing_seminar)
+            ];
+        } else {
+            // STEP 2: Tidak ada seminar - cek eligibility (SIMPLIFIED)
+            $eligibility = $this->_check_simplified_eligibility($mahasiswa_id);
             
-            // Load view dengan template mahasiswa
-            $this->load->view('template/mahasiswa', [
-                'title' => 'Seminar Skripsi',
-                'content' => $this->load->view('mahasiswa/seminar_skripsi/index', $data, TRUE),
-                'script' => $this->_get_index_script()
-            ]);
-            
-        } catch (Exception $e) {
-            if (ENVIRONMENT === 'development') {
-                log_message('error', 'Seminar_skripsi index error: ' . $e->getMessage());
+            if ($eligibility['eligible']) {
+                // ✅ ELIGIBLE - tampilkan form pengajuan
+                $data = [
+                    'has_existing_seminar' => false,
+                    'show_progress' => false,
+                    'show_form' => true,
+                    'show_eligibility_check' => false,
+                    'can_create_new' => true,
+                    'eligible_proposal' => $eligibility['proposal'],
+                    'action_url' => base_url('mahasiswa/seminar_skripsi/pengajuan/' . $eligibility['proposal']->id),
+                    'requirements' => $eligibility['requirements'],
+                    'summary' => $eligibility['summary']
+                ];
+            } else {
+                // ❌ NOT ELIGIBLE - tampilkan syarat
+                $data = [
+                    'has_existing_seminar' => false,
+                    'show_progress' => false,
+                    'show_form' => false,
+                    'show_eligibility_check' => true,
+                    'can_create_new' => false,
+                    'eligibility' => $eligibility,
+                    'errors' => $eligibility['errors'],
+                    'requirements' => $eligibility['requirements']
+                ];
             }
-            
-            $this->session->set_flashdata('error', 'Terjadi kesalahan saat memuat data');
-            $this->load->view('template/mahasiswa', [
-                'title' => 'Seminar Skripsi',
-                'content' => '<div class="alert alert-danger">Error memuat data</div>'
-            ]);
         }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Seminar_skripsi index error: ' . $e->getMessage());
+        
+        // FALLBACK: Error handling
+        $data = [
+            'has_existing_seminar' => false,
+            'show_progress' => false,
+            'show_form' => false,
+            'show_eligibility_check' => true,
+            'error' => true,
+            'error_message' => 'Terjadi kesalahan sistem. Silakan coba lagi.'
+        ];
     }
+    
+    // Load view dengan data yang sudah jelas
+    $this->load->view('template/mahasiswa', [
+        'title' => 'Seminar Skripsi',
+        'content' => $this->load->view('mahasiswa/seminar_skripsi/index', $data, TRUE)
+    ]);
+}
 
     /**
      * Pengajuan Seminar Skripsi - Form submission
@@ -668,10 +709,10 @@ class Seminar_skripsi extends CI_Controller {
     }
     
 /**
- * 🔍 DEBUG: Method yang sudah diperbaiki
- * URL: mahasiswa/seminar_skripsi/debug_eligibility
+ * 🔍 DEBUG: Test method _check_simplified_eligibility
+ * URL: mahasiswa/seminar_skripsi/debug_simplified
  */
-public function debug_eligibility()
+public function debug_simplified()
 {
     if (ENVIRONMENT !== 'development') {
         show_404();
@@ -680,90 +721,74 @@ public function debug_eligibility()
     
     $mahasiswa_id = $this->session->userdata('id');
     
-    echo "<h2>🔍 Debug Eligibility Seminar Skripsi untuk Mahasiswa ID: {$mahasiswa_id}</h2>";
+    echo "<h2>🔍 Debug Method _check_simplified_eligibility untuk Mahasiswa ID: {$mahasiswa_id}</h2>";
     
-    // ===== TEST 1: Cek proposal =====
-    echo "<h3>📋 Test 1: Cek Proposal</h3>";
-    $this->db->select('id, judul, workflow_status, status_kaprodi, status_pembimbing, dosen_id');
-    $this->db->from('proposal_mahasiswa');
-    $this->db->where('mahasiswa_id', $mahasiswa_id);
-    $proposals = $this->db->get()->result();
+    // Test method simplified
+    echo "<div style='border: 2px solid #007bff; padding: 15px; margin: 10px;'>";
+    echo "<h3>🎯 Test _check_simplified_eligibility</h3>";
     
-    echo "<p><strong>Proposals found:</strong> " . count($proposals) . "</p>";
-    
-    if ($proposals) {
-        foreach ($proposals as $p) {
-            echo "<div style='border: 1px solid #ccc; padding: 10px; margin: 10px;'>";
-            echo "<h4>Proposal ID: {$p->id}</h4>";
-            echo "<p>Workflow Status: <strong>{$p->workflow_status}</strong></p>";
-            echo "<p>Status Kaprodi: {$p->status_kaprodi}, Status Pembimbing: {$p->status_pembimbing}</p>";
-            
-            // ===== TEST 2: Cek Jurnal Bimbingan =====
-            echo "<h5>📝 Test 2: Jurnal Bimbingan</h5>";
-            $this->db->select('COUNT(*) as count');
-            $this->db->from('jurnal_bimbingan');
-            $this->db->where('proposal_id', $p->id);
-            $this->db->where('status_validasi', '1');
-            $jurnal_count = $this->db->get()->row()->count;
-            
-            echo "<p>Jurnal Tervalidasi: <strong>{$jurnal_count}/14</strong> " . ($jurnal_count >= 14 ? '✅' : '❌') . "</p>";
-            
-            // ===== TEST 3: Cek Seminar Proposal =====
-            echo "<h5>🎯 Test 3: Seminar Proposal</h5>";
-            $this->db->select('status');
-            $this->db->from('seminar_proposal_mahasiswa');
-            $this->db->where('proposal_id', $p->id);
-            $this->db->where('status', 'completed');
-            $seminar_proposal = $this->db->get()->row();
-            
-            echo "<p>Seminar Proposal Completed: " . ($seminar_proposal ? '✅ YES' : '❌ NO') . "</p>";
-            
-            // ===== TEST 4: PERBAIKAN - Cek Surat Penelitian =====
-            echo "<h5>🔬 Test 4: Surat Penelitian (FIXED)</h5>";
-            
-            try {
-                // PERBAIKAN: Query yang aman tanpa field bermasalah
-                $this->db->select('id, status_pembimbing');
-                $this->db->from('permohonan_izin_penelitian');
-                $this->db->where('proposal_mahasiswa_id', $p->id);
-                $permohonan = $this->db->get()->result();
-                
-                echo "<p>Permohonan Count: <strong>" . count($permohonan) . "</strong></p>";
-                
-                if ($permohonan) {
-                    $approved_count = 0;
-                    foreach ($permohonan as $pm) {
-                        echo "<p>- ID: {$pm->id}, Status Pembimbing: {$pm->status_pembimbing}</p>";
-                        if ($pm->status_pembimbing === 'approved') {
-                            $approved_count++;
-                        }
-                    }
-                    echo "<p>Approved Count: <strong>{$approved_count}</strong> " . ($approved_count >= 1 ? '✅' : '❌') . "</p>";
-                } else {
-                    echo "<p>❌ Tidak ada data permohonan penelitian</p>";
-                }
-                
-            } catch (Exception $e) {
-                echo "<p>❌ Database Error: " . $e->getMessage() . "</p>";
-                
-                // Fallback ke tabel lama
-                echo "<p>🔄 Trying fallback table...</p>";
-                try {
-                    $this->db->select('COUNT(*) as count');
-                    $this->db->from('penelitian');
-                    $this->db->where('proposal_mahasiswa_id', $p->id);
-                    $this->db->where('persetujuan_pembimbing', '1');
-                    $penelitian_count = $this->db->get()->row()->count;
-                    
-                    echo "<p>Penelitian Count (tabel lama): <strong>{$penelitian_count}</strong> " . ($penelitian_count >= 1 ? '✅' : '❌') . "</p>";
-                } catch (Exception $e2) {
-                    echo "<p>❌ Both tables failed: " . $e2->getMessage() . "</p>";
-                }
+    try {
+        $result = $this->_check_simplified_eligibility($mahasiswa_id);
+        
+        echo "<p><strong>Result:</strong> " . ($result['eligible'] ? '✅ ELIGIBLE' : '❌ NOT ELIGIBLE') . "</p>";
+        
+        if (!empty($result['errors'])) {
+            echo "<p><strong>Errors:</strong></p>";
+            echo "<ul>";
+            foreach ($result['errors'] as $error) {
+                echo "<li>❌ {$error}</li>";
             }
-            
-            echo "</div>";
+            echo "</ul>";
         }
+        
+        if (!empty($result['requirements'])) {
+            echo "<h4>Requirements Detail:</h4>";
+            echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+            echo "<tr><th>Requirement</th><th>Current</th><th>Required</th><th>Status</th></tr>";
+            foreach ($result['requirements'] as $name => $req) {
+                $status_icon = $req['met'] ? '✅' : '❌';
+                echo "<tr>";
+                echo "<td>{$req['name']}</td>";
+                echo "<td>{$req['current']}</td>";
+                echo "<td>{$req['required']}</td>";
+                echo "<td>{$status_icon}</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+        }
+        
+        if (isset($result['proposal'])) {
+            echo "<p><strong>Proposal Found:</strong> ID {$result['proposal']->id}, Workflow: {$result['proposal']->workflow_status}</p>";
+        }
+        
+        echo "<p><strong>Summary:</strong> {$result['summary']}</p>";
+        
+    } catch (Exception $e) {
+        echo "<p>❌ <strong>ERROR:</strong> " . $e->getMessage() . "</p>";
     }
+    
+    echo "</div>";
+    
+    // Test dashboard data
+    echo "<div style='border: 2px solid #28a745; padding: 15px; margin: 10px;'>";
+    echo "<h3>🎯 Test _prepare_dashboard_data</h3>";
+    
+    try {
+        $dashboard_data = $this->_prepare_dashboard_data($mahasiswa_id);
+        
+        echo "<p><strong>Has Existing Seminar:</strong> " . ($dashboard_data['has_existing_seminar'] ? '✅ YES' : '❌ NO') . "</p>";
+        echo "<p><strong>Can Create New:</strong> " . ($dashboard_data['can_create_new'] ?? false ? '✅ YES' : '❌ NO') . "</p>";
+        echo "<p><strong>Show Form:</strong> " . ($dashboard_data['show_form'] ?? false ? '✅ YES' : '❌ NO') . "</p>";
+        
+        if (isset($dashboard_data['eligibility'])) {
+            echo "<p><strong>Eligibility Eligible:</strong> " . ($dashboard_data['eligibility']['eligible'] ? '✅ YES' : '❌ NO') . "</p>";
+        }
+        
+    } catch (Exception $e) {
+        echo "<p>❌ <strong>ERROR:</strong> " . $e->getMessage() . "</p>";
+    }
+    
+    echo "</div>";
 }
     
 }

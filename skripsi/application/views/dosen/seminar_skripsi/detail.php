@@ -1,514 +1,468 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<!-- 
+File: application/views/dosen/seminar_skripsi/detail.php
+IMPROVED UI - Detail Seminar Skripsi untuk Review Dosen
+-->
 
-<!-- Content Header (Page header) -->
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0">Detail Seminar Skripsi</h1>
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Detail Seminar Skripsi</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<?= base_url('dosen/dashboard') ?>">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="<?= base_url('dosen/seminar_skripsi') ?>">Seminar Skripsi</a></li>
+                <li class="breadcrumb-item active">Detail</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Alert Messages -->
+    <?php if ($this->session->flashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> <?= $this->session->flashdata('success') ?>
+            <button type="button" class="close" data-dismiss="alert">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($this->session->flashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> <?= $this->session->flashdata('error') ?>
+            <button type="button" class="close" data-dismiss="alert">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <div class="row">
+        <!-- Info Mahasiswa & Proposal -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user-graduate"></i> Informasi Mahasiswa & Skripsi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td width="40%" class="font-weight-bold">Nama</td>
+                                    <td><?= htmlspecialchars($seminar->nama_mahasiswa) ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">NIM</td>
+                                    <td><?= htmlspecialchars($seminar->nim) ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Email</td>
+                                    <td><?= htmlspecialchars($seminar->email_mahasiswa) ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Status</td>
+                                    <td>
+                                        <?php
+                                        $status_badges = [
+                                            'draft' => '<span class="badge badge-secondary">Draft</span>',
+                                            'submitted' => '<span class="badge badge-info">Diajukan</span>',
+                                            'review_pembimbing' => '<span class="badge badge-warning">Review Pembimbing</span>',
+                                            'review_kaprodi' => '<span class="badge badge-warning">Review Kaprodi</span>',
+                                            'approved' => '<span class="badge badge-success">Disetujui</span>',
+                                            'rejected' => '<span class="badge badge-danger">Ditolak</span>',
+                                            'scheduled' => '<span class="badge badge-primary">Terjadwal</span>',
+                                            'completed' => '<span class="badge badge-success">Selesai</span>'
+                                        ];
+                                        echo $status_badges[$seminar->status] ?? '<span class="badge badge-secondary">Unknown</span>';
+                                        ?>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td width="40%" class="font-weight-bold">Tanggal Pengajuan</td>
+                                    <td><?= date('d/m/Y H:i', strtotime($seminar->created_at)) ?></td>
+                                </tr>
+                                <?php if (!empty($seminar->tanggal_seminar)): ?>
+                                <tr>
+                                    <td class="font-weight-bold">Jadwal Seminar</td>
+                                    <td>
+                                        <?= date('d/m/Y', strtotime($seminar->tanggal_seminar)) ?><br>
+                                        <small class="text-muted">
+                                            <?= $seminar->jam_seminar ?> - <?= htmlspecialchars($seminar->tempat_seminar) ?>
+                                        </small>
+                                    </td>
+                                </tr>
+                                <?php endif; ?>
+                                <?php if (!empty($seminar->nama_penguji1) || !empty($seminar->nama_penguji2)): ?>
+                                <tr>
+                                    <td class="font-weight-bold">Dosen Penguji</td>
+                                    <td>
+                                        <?php if (!empty($seminar->nama_penguji1)): ?>
+                                            <div>1. <?= htmlspecialchars($seminar->nama_penguji1) ?></div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($seminar->nama_penguji2)): ?>
+                                            <div>2. <?= htmlspecialchars($seminar->nama_penguji2) ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endif; ?>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Judul Skripsi -->
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary mb-2">
+                            <i class="fas fa-book"></i> Judul Skripsi
+                        </h6>
+                        <p class="text-justify"><?= htmlspecialchars($seminar->judul) ?></p>
+                    </div>
+
+                    <!-- Keterangan Mahasiswa -->
+                    <?php if (!empty($seminar->keterangan_mahasiswa)): ?>
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary mb-2">
+                            <i class="fas fa-comment"></i> Keterangan Mahasiswa
+                        </h6>
+                        <div class="alert alert-light">
+                            <?= nl2br(htmlspecialchars($seminar->keterangan_mahasiswa)) ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- File Skripsi -->
+                    <?php if (!empty($seminar->file_skripsi)): ?>
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary mb-2">
+                            <i class="fas fa-file-pdf"></i> File Skripsi
+                        </h6>
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-pdf fa-2x text-danger mr-3"></i>
+                                <div>
+                                    <strong><?= htmlspecialchars($seminar->file_skripsi) ?></strong><br>
+                                    <small class="text-muted">Diunggah: <?= date('d/m/Y H:i', strtotime($seminar->created_at)) ?></small>
+                                </div>
+                                <div class="ml-auto">
+                                    <a href="<?= base_url('dosen/seminar_skripsi/view_file/' . $seminar->id) ?>" 
+                                       class="btn btn-primary btn-sm" target="_blank">
+                                        <i class="fas fa-eye"></i> Lihat File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Surat Keterangan Penelitian -->
+                    <?php if (!empty($seminar->file_surat_penelitian)): ?>
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary mb-2">
+                            <i class="fas fa-certificate"></i> Surat Keterangan Penelitian
+                        </h6>
+                        <div class="alert alert-success">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-certificate fa-2x text-success mr-3"></i>
+                                <div>
+                                    <strong><?= htmlspecialchars($seminar->file_surat_penelitian) ?></strong><br>
+                                    <small class="text-muted">Penelitian telah selesai dilaksanakan</small>
+                                </div>
+                                <div class="ml-auto">
+                                    <a href="<?= base_url('uploads/surat_penelitian/' . $seminar->file_surat_penelitian) ?>" 
+                                       class="btn btn-success btn-sm" target="_blank">
+                                        <i class="fas fa-eye"></i> Lihat Surat
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Review History -->
+                    <?php if (!empty($seminar->komentar_pembimbing) || !empty($seminar->tanggal_review_pembimbing)): ?>
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary mb-2">
+                            <i class="fas fa-history"></i> Riwayat Review
+                        </h6>
+                        <div class="timeline">
+                            <?php if (!empty($seminar->tanggal_review_pembimbing)): ?>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Review Pembimbing</strong>
+                                        <small class="text-muted">
+                                            <?= date('d/m/Y H:i', strtotime($seminar->tanggal_review_pembimbing)) ?>
+                                        </small>
+                                    </div>
+                                    <?php if ($seminar->status_pembimbing == 'approved'): ?>
+                                        <span class="badge badge-success mb-2">Disetujui</span>
+                                    <?php elseif ($seminar->status_pembimbing == 'rejected'): ?>
+                                        <span class="badge badge-danger mb-2">Ditolak</span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($seminar->komentar_pembimbing)): ?>
+                                        <p class="mb-0"><?= nl2br(htmlspecialchars($seminar->komentar_pembimbing)) ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="<?= base_url('dosen') ?>">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="<?= base_url('dosen/seminar_skripsi') ?>">Seminar Skripsi</a></li>
-                    <li class="breadcrumb-item active">Detail</li>
-                </ol>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Eligibility Check -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-check-circle"></i> Kelayakan Seminar
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Seminar Proposal</span>
+                            <?php if ($eligibility['seminar_proposal_completed']): ?>
+                                <span class="badge badge-success"><i class="fas fa-check"></i> Selesai</span>
+                            <?php else: ?>
+                                <span class="badge badge-warning"><i class="fas fa-clock"></i> Belum</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Penelitian</span>
+                            <?php if ($eligibility['penelitian_completed']): ?>
+                                <span class="badge badge-success"><i class="fas fa-check"></i> Selesai</span>
+                            <?php else: ?>
+                                <span class="badge badge-warning"><i class="fas fa-clock"></i> Belum</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <?php if ($eligibility['can_proceed']): ?>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> 
+                            Memenuhi syarat untuk seminar skripsi
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            Ada persyaratan yang belum terpenuhi:
+                            <ul class="mb-0 mt-2">
+                                <?php foreach ($eligibility['issues'] as $issue): ?>
+                                    <li><?= htmlspecialchars($issue) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Form Rekomendasi -->
+            <?php if ($seminar->status == 'submitted' && $seminar->current_step == 'pembimbing'): ?>
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-thumbs-up"></i> Berikan Rekomendasi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form id="rekomendasi-form" method="POST" action="<?= base_url('dosen/seminar_skripsi/rekomendasi') ?>">
+                        <input type="hidden" name="seminar_id" value="<?= $seminar->id ?>">
+                        
+                        <div class="form-group">
+                            <label class="font-weight-bold">Pilih Rekomendasi:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rekomendasi" id="approved" value="approved">
+                                <label class="form-check-label text-success" for="approved">
+                                    <i class="fas fa-check"></i> Setujui untuk dilanjutkan ke Kaprodi
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rekomendasi" id="rejected" value="rejected">
+                                <label class="form-check-label text-danger" for="rejected">
+                                    <i class="fas fa-times"></i> Tolak dan minta revisi
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="komentar-section" style="display: none;">
+                            <label for="komentar_pembimbing" class="font-weight-bold">
+                                Komentar/Feedback <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" 
+                                      id="komentar_pembimbing" 
+                                      name="komentar_pembimbing" 
+                                      rows="4" 
+                                      placeholder="Berikan komentar atau feedback untuk mahasiswa..."></textarea>
+                            <small class="form-text text-muted">
+                                Komentar wajib diisi jika menolak pengajuan
+                            </small>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-paper-plane"></i> Kirim Rekomendasi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Jurnal Bimbingan Reference -->
+            <?php if (!empty($jurnal_bimbingan)): ?>
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-book-open"></i> Jurnal Bimbingan Terkini
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="small">
+                        <?php $count = 0; foreach ($jurnal_bimbingan as $jurnal): $count++; ?>
+                            <div class="mb-2 <?= $count > 3 ? 'd-none' : '' ?>">
+                                <div class="d-flex justify-content-between">
+                                    <strong><?= date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)) ?></strong>
+                                    <span class="badge badge-success badge-sm">Valid</span>
+                                </div>
+                                <p class="mb-1"><?= character_limiter($jurnal->topik_bimbingan, 60) ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                        
+                        <?php if (count($jurnal_bimbingan) > 3): ?>
+                            <button class="btn btn-link btn-sm p-0" onclick="toggleJurnal()">
+                                <span id="toggle-text">Lihat selengkapnya...</span>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Quick Actions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt"></i> Aksi Cepat
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="<?= base_url('dosen/seminar_skripsi') ?>" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+                        </a>
+                        
+                        <?php if (!empty($seminar->file_skripsi)): ?>
+                        <a href="<?= base_url('dosen/seminar_skripsi/view_file/' . $seminar->id) ?>" 
+                           class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="fas fa-file-pdf"></i> Buka File Skripsi
+                        </a>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array($seminar->status, ['scheduled', 'completed'])): ?>
+                        <a href="<?= base_url('dosen/seminar_skripsi/penilaian/' . $seminar->id) ?>" 
+                           class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-edit"></i> Input Penilaian
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Main content -->
-<section class="content">
-    <div class="container-fluid">
-        
-        <!-- Flash Messages -->
-        <?php if ($this->session->flashdata('success')): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle mr-2"></i>
-                <?= $this->session->flashdata('success') ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($this->session->flashdata('error')): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
-                <?= $this->session->flashdata('error') ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-
-        <div class="row">
-            <!-- Informasi Mahasiswa & Skripsi -->
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-user-graduate mr-2"></i>
-                            Informasi Mahasiswa & Skripsi
-                        </h3>
-                        <div class="card-tools">
-                            <!-- Status Badge -->
-                            <?php if ($seminar->status == 'submitted'): ?>
-                                <span class="badge badge-info badge-lg">Submitted</span>
-                            <?php elseif ($seminar->status == 'review_pembimbing'): ?>
-                                <span class="badge badge-warning badge-lg">Review Pembimbing</span>
-                            <?php elseif ($seminar->status == 'review_kaprodi'): ?>
-                                <span class="badge badge-primary badge-lg">Review Kaprodi</span>
-                            <?php elseif ($seminar->status == 'approved'): ?>
-                                <span class="badge badge-success badge-lg">Disetujui</span>
-                            <?php elseif ($seminar->status == 'rejected'): ?>
-                                <span class="badge badge-danger badge-lg">Ditolak</span>
-                            <?php elseif ($seminar->status == 'scheduled'): ?>
-                                <span class="badge badge-info badge-lg">Terjadwal</span>
-                            <?php elseif ($seminar->status == 'completed'): ?>
-                                <span class="badge badge-success badge-lg">Selesai</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <table class="table table-borderless table-sm">
-                                    <tr>
-                                        <td class="font-weight-bold">NIM</td>
-                                        <td>:</td>
-                                        <td><?= $seminar->nim ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-weight-bold">Nama</td>
-                                        <td>:</td>
-                                        <td><?= $seminar->nama_mahasiswa ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-weight-bold">Email</td>
-                                        <td>:</td>
-                                        <td><?= $seminar->email_mahasiswa ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-weight-bold">Pembimbing</td>
-                                        <td>:</td>
-                                        <td><?= $seminar->nama_pembimbing ?></td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div class="col-md-6">
-                                <table class="table table-borderless table-sm">
-                                    <tr>
-                                        <td class="font-weight-bold">Status Proposal</td>
-                                        <td>:</td>
-                                        <td>
-                                            <span class="badge badge-<?= $seminar->workflow_status == 'seminar_skripsi' ? 'success' : 'secondary' ?>">
-                                                <?= ucfirst(str_replace('_', ' ', $seminar->workflow_status)) ?>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-weight-bold">Tanggal Pengajuan</td>
-                                        <td>:</td>
-                                        <td><?= date('d/m/Y H:i', strtotime($seminar->created_at)) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-weight-bold">Current Step</td>
-                                        <td>:</td>
-                                        <td>
-                                            <span class="badge badge-info"><?= ucfirst($seminar->current_step) ?></span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-weight-bold">Plagiarism Check</td>
-                                        <td>:</td>
-                                        <td>
-                                            <?php if ($seminar->plagiarism_percentage !== null): ?>
-                                                <span class="badge badge-<?= $seminar->plagiarism_percentage <= 20 ? 'success' : 'warning' ?>">
-                                                    <?= $seminar->plagiarism_percentage ?>%
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="text-muted">Belum dicek</span>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <!-- Judul Skripsi -->
-                        <div class="mt-3">
-                            <strong>Judul Skripsi:</strong>
-                            <p class="mt-2 p-3 bg-light border-left border-primary">
-                                <?= $seminar->judul ?>
-                            </p>
-                        </div>
-                        
-                        <!-- Keterangan Mahasiswa -->
-                        <?php if ($seminar->keterangan_mahasiswa): ?>
-                            <div class="mt-3">
-                                <strong>Keterangan dari Mahasiswa:</strong>
-                                <p class="mt-2 p-3 bg-light border-left border-info">
-                                    <?= nl2br($seminar->keterangan_mahasiswa) ?>
-                                </p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- File Skripsi -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-file-pdf mr-2"></i>
-                            File Skripsi
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <?php if ($seminar->file_skripsi): ?>
-                            <div class="d-flex align-items-center">
-                                <div class="mr-3">
-                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1"><?= $seminar->file_skripsi ?></h6>
-                                    <small class="text-muted">
-                                        Diunggah: <?= date('d/m/Y H:i', strtotime($seminar->created_at)) ?>
-                                    </small>
-                                </div>
-                                <div>
-                                    <a href="<?= base_url('dosen/seminar_skripsi/view_file/' . $seminar->id) ?>" 
-                                       class="btn btn-primary" target="_blank">
-                                        <i class="fas fa-eye mr-2"></i>Lihat File
-                                    </a>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-file-times fa-3x mb-3"></i>
-                                <p>File skripsi belum diunggah</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Eligibility Check -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            Kelayakan Seminar Skripsi
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="mr-3">
-                                        <?php if ($eligibility['seminar_proposal_ok']): ?>
-                                            <i class="fas fa-check-circle fa-2x text-success"></i>
-                                        <?php else: ?>
-                                            <i class="fas fa-times-circle fa-2x text-danger"></i>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Seminar Proposal</h6>
-                                        <small class="text-muted">
-                                            <?= $eligibility['seminar_proposal_ok'] ? 'Sudah selesai' : 'Belum selesai' ?>
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="mr-3">
-                                        <?php if ($eligibility['penelitian_ok']): ?>
-                                            <i class="fas fa-check-circle fa-2x text-success"></i>
-                                        <?php else: ?>
-                                            <i class="fas fa-times-circle fa-2x text-danger"></i>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Izin Penelitian</h6>
-                                        <small class="text-muted">
-                                            <?= $eligibility['penelitian_ok'] ? 'Sudah disetujui' : 'Belum disetujui' ?>
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-3">
-                            <?php if ($eligibility['eligible']): ?>
-                                <div class="alert alert-success">
-                                    <i class="fas fa-check mr-2"></i>
-                                    Mahasiswa memenuhi syarat untuk seminar skripsi
-                                </div>
-                            <?php else: ?>
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    Mahasiswa belum memenuhi syarat untuk seminar skripsi
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Panel -->
-            <div class="col-md-4">
-                <!-- Aksi Rekomendasi -->
-                <?php if ($seminar->status == 'review_pembimbing' && $seminar->current_step == 'pembimbing'): ?>
-                    <div class="card">
-                        <div class="card-header bg-warning">
-                            <h3 class="card-title text-white">
-                                <i class="fas fa-tasks mr-2"></i>
-                                Aksi Diperlukan
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <p class="text-center mb-4">
-                                <strong>Berikan rekomendasi untuk pengajuan seminar skripsi ini</strong>
-                            </p>
-                            
-                            <?php if ($eligibility['eligible']): ?>
-                                <!-- Form Rekomendasi -->
-                                <form action="<?= base_url('dosen/seminar_skripsi/rekomendasi') ?>" method="POST">
-                                    <input type="hidden" name="seminar_id" value="<?= $seminar->id ?>">
-                                    
-                                    <div class="form-group">
-                                        <label for="komentar_pembimbing">Komentar/Feedback:</label>
-                                        <textarea name="komentar_pembimbing" id="komentar_pembimbing" 
-                                                  class="form-control" rows="4" 
-                                                  placeholder="Berikan komentar atau feedback (opsional untuk persetujuan, wajib untuk penolakan)"></textarea>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <button type="submit" name="rekomendasi" value="approved" 
-                                                    class="btn btn-success btn-block"
-                                                    onclick="return confirmRekomendasi('approved')">
-                                                <i class="fas fa-check mr-2"></i>Setujui
-                                            </button>
-                                        </div>
-                                        <div class="col-6">
-                                            <button type="submit" name="rekomendasi" value="rejected" 
-                                                    class="btn btn-danger btn-block"
-                                                    onclick="return confirmRekomendasi('rejected')">
-                                                <i class="fas fa-times mr-2"></i>Tolak
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            <?php else: ?>
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    <strong>Tidak dapat diproses!</strong><br>
-                                    Mahasiswa belum memenuhi syarat untuk seminar skripsi.
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Status Rekomendasi -->
-                <?php if ($seminar->status_pembimbing != 'pending'): ?>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-clipboard-check mr-2"></i>
-                                Status Rekomendasi
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center mb-3">
-                                <?php if ($seminar->status_pembimbing == 'approved'): ?>
-                                    <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
-                                    <h5 class="text-success">Disetujui</h5>
-                                <?php else: ?>
-                                    <i class="fas fa-times-circle fa-3x text-danger mb-2"></i>
-                                    <h5 class="text-danger">Ditolak</h5>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <?php if ($seminar->komentar_pembimbing): ?>
-                                <div class="mt-3">
-                                    <strong>Komentar:</strong>
-                                    <p class="mt-2 p-3 bg-light border-left border-primary">
-                                        <?= nl2br($seminar->komentar_pembimbing) ?>
-                                    </p>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if ($seminar->tanggal_review_pembimbing): ?>
-                                <small class="text-muted">
-                                    Direview: <?= date('d/m/Y H:i', strtotime($seminar->tanggal_review_pembimbing)) ?>
-                                </small>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Informasi Seminar -->
-                <?php if ($seminar->tanggal_seminar): ?>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-calendar-alt mr-2"></i>
-                                Jadwal Seminar
-                            </h3>
-                        </div>
-                        <div class="card-body text-center">
-                            <i class="fas fa-calendar fa-3x text-primary mb-3"></i>
-                            <h5><?= date('d F Y', strtotime($seminar->tanggal_seminar)) ?></h5>
-                            <p class="mb-1">
-                                <i class="fas fa-clock mr-2"></i>
-                                <?= date('H:i', strtotime($seminar->jam_seminar)) ?> WIB
-                            </p>
-                            <p class="mb-0">
-                                <i class="fas fa-map-marker-alt mr-2"></i>
-                                <?= $seminar->tempat_seminar ?>
-                            </p>
-                            
-                            <?php if (in_array($seminar->status, ['scheduled', 'completed'])): ?>
-                                <div class="mt-3">
-                                    <a href="<?= base_url('dosen/seminar_skripsi/penilaian/' . $seminar->id) ?>" 
-                                       class="btn btn-primary btn-block">
-                                        <i class="fas fa-edit mr-2"></i>Input Penilaian
-                                    </a>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Jurnal Bimbingan -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-book mr-2"></i>
-                            Jurnal Bimbingan Terbaru
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <?php if (empty($jurnal_bimbingan)): ?>
-                            <div class="text-center text-muted py-3">
-                                <i class="fas fa-inbox fa-2x mb-2"></i>
-                                <p>Belum ada jurnal bimbingan</p>
-                            </div>
-                        <?php else: ?>
-                            <?php foreach (array_slice($jurnal_bimbingan, 0, 3) as $jurnal): ?>
-                                <div class="border-bottom pb-2 mb-2">
-                                    <div class="d-flex justify-content-between">
-                                        <small class="font-weight-bold">
-                                            <?= date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)) ?>
-                                        </small>
-                                        <?php if ($jurnal->status_validasi == '1'): ?>
-                                            <span class="badge badge-success badge-sm">Valid</span>
-                                        <?php else: ?>
-                                            <span class="badge badge-warning badge-sm">Pending</span>
-                                        <?php endif; ?>
-                                    </div>
-                                    <p class="mb-0 text-sm">
-                                        <?= character_limiter($jurnal->topik_bimbingan, 60) ?>
-                                    </p>
-                                </div>
-                            <?php endforeach; ?>
-                            
-                            <?php if (count($jurnal_bimbingan) > 3): ?>
-                                <div class="text-center mt-2">
-                                    <small class="text-muted">
-                                        Dan <?= count($jurnal_bimbingan) - 3 ?> jurnal lainnya...
-                                    </small>
-                                </div>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-bolt mr-2"></i>
-                            Quick Actions
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="<?= base_url('dosen/seminar_skripsi') ?>" 
-                               class="btn btn-outline-secondary btn-block mb-2">
-                                <i class="fas fa-arrow-left mr-2"></i>Kembali ke Daftar
-                            </a>
-                            
-                            <?php if ($seminar->file_skripsi): ?>
-                                <a href="<?= base_url('dosen/seminar_skripsi/view_file/' . $seminar->id) ?>" 
-                                   class="btn btn-outline-primary btn-block mb-2" target="_blank">
-                                    <i class="fas fa-download mr-2"></i>Download Skripsi
-                                </a>
-                            <?php endif; ?>
-                            
-                            <a href="mailto:<?= $seminar->email_mahasiswa ?>?subject=Seminar Skripsi - <?= $seminar->nama_mahasiswa ?>" 
-                               class="btn btn-outline-info btn-block">
-                                <i class="fas fa-envelope mr-2"></i>Email Mahasiswa
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</section>
-
+<!-- Additional CSS -->
 <style>
-.badge-lg {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
+.timeline {
+    position: relative;
+    padding-left: 30px;
 }
 
-.border-left {
-    border-left: 4px solid !important;
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
 }
 
-.bg-light {
-    background-color: #f8f9fa !important;
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #007bff;
 }
 
-.card {
-    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
-    border: none;
-    margin-bottom: 1.5rem;
+.timeline-content {
+    background: #f8f9fc;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #007bff;
 }
 
 .table-borderless td {
     border: none;
-    padding: 0.5rem 0.75rem;
+    padding: 0.3rem 0.5rem;
 }
 
-.text-sm {
-    font-size: 0.875rem;
+.alert-light {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #495057;
 }
 
-.d-grid {
-    display: grid;
+.form-check-label {
+    cursor: pointer;
 }
 
-.gap-2 {
-    gap: 0.5rem;
+.form-check-input:checked + .form-check-label {
+    font-weight: bold;
 }
 
-.btn-block {
-    display: block;
-    width: 100%;
-}
-
-.fa-3x {
-    font-size: 3em;
-}
-
-.fa-2x {
-    font-size: 2em;
+@media (max-width: 768px) {
+    .d-grid {
+        display: grid !important;
+        gap: 0.5rem !important;
+    }
+    
+    .timeline {
+        padding-left: 20px;
+    }
+    
+    .timeline-marker {
+        left: -25px;
+        width: 10px;
+        height: 10px;
+    }
 }
 </style>
+
+<script>
+function toggleJurnal() {
+    const hiddenItems = document.querySelectorAll('.d-none');
+    const toggleText = document.getElementById('toggle-text');
+    
+    if (hiddenItems.length > 0) {
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        toggleText.textContent = 'Sembunyikan...';
+    } else {
+        const items = document.querySelectorAll('.mb-2');
+        for (let i = 3; i < items.length - 1; i++) {
+            items[i].classList.add('d-none');
+        }
+        toggleText.textContent = 'Lihat selengkapnya...';
+    }
+}
+</script>

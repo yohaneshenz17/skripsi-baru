@@ -121,7 +121,14 @@ IMPROVED UI - Detail Seminar Skripsi untuk Review Dosen
                         <h6 class="font-weight-bold text-primary mb-2">
                             <i class="fas fa-book"></i> Judul Skripsi
                         </h6>
-                        <p class="text-justify"><?= htmlspecialchars($seminar->judul) ?></p>
+                        <p class="text-justify">
+                            <?= htmlspecialchars(!empty($seminar->judul_skripsi) ? $seminar->judul_skripsi : $seminar->judul) ?>
+                        </p>
+                        <?php if (!empty($seminar->judul_skripsi) && $seminar->judul_skripsi != $seminar->judul): ?>
+                            <small class="text-muted">
+                                <strong>Judul Proposal:</strong> <?= htmlspecialchars($seminar->judul) ?>
+                            </small>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Keterangan Mahasiswa -->
@@ -160,8 +167,36 @@ IMPROVED UI - Detail Seminar Skripsi untuk Review Dosen
                     </div>
                     <?php endif; ?>
 
+                    <!-- File Turnitin (jika ada) -->
+                    <?php if (!empty($seminar->file_turnitin)): ?>
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-primary mb-2">
+                            <i class="fas fa-file-alt"></i> File Turnitin
+                        </h6>
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-alt fa-2x text-info mr-3"></i>
+                                <div>
+                                    <strong><?= htmlspecialchars($seminar->file_turnitin) ?></strong><br>
+                                    <?php if (!empty($seminar->plagiarism_percentage)): ?>
+                                        <small class="text-muted">
+                                            Persentase Kemiripan: <strong><?= $seminar->plagiarism_percentage ?>%</strong>
+                                        </small>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="ml-auto">
+                                    <a href="<?= base_url('uploads/turnitin/' . $seminar->file_turnitin) ?>" 
+                                       class="btn btn-info btn-sm" target="_blank">
+                                        <i class="fas fa-eye"></i> Lihat File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Surat Keterangan Penelitian -->
-                    <?php if (!empty($seminar->file_surat_penelitian)): ?>
+                    <?php if (!empty($seminar->surat_keterangan_penelitian)): ?>
                     <div class="mb-4">
                         <h6 class="font-weight-bold text-primary mb-2">
                             <i class="fas fa-certificate"></i> Surat Keterangan Penelitian
@@ -170,11 +205,11 @@ IMPROVED UI - Detail Seminar Skripsi untuk Review Dosen
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-certificate fa-2x text-success mr-3"></i>
                                 <div>
-                                    <strong><?= htmlspecialchars($seminar->file_surat_penelitian) ?></strong><br>
+                                    <strong><?= htmlspecialchars($seminar->surat_keterangan_penelitian) ?></strong><br>
                                     <small class="text-muted">Penelitian telah selesai dilaksanakan</small>
                                 </div>
                                 <div class="ml-auto">
-                                    <a href="<?= base_url('uploads/surat_penelitian/' . $seminar->file_surat_penelitian) ?>" 
+                                    <a href="<?= base_url('uploads/surat_penelitian/' . $seminar->surat_keterangan_penelitian) ?>" 
                                        class="btn btn-success btn-sm" target="_blank">
                                         <i class="fas fa-eye"></i> Lihat Surat
                                     </a>
@@ -185,12 +220,14 @@ IMPROVED UI - Detail Seminar Skripsi untuk Review Dosen
                     <?php endif; ?>
 
                     <!-- Review History -->
-                    <?php if (!empty($seminar->komentar_pembimbing) || !empty($seminar->tanggal_review_pembimbing)): ?>
+                    <?php if (!empty($seminar->komentar_pembimbing) || !empty($seminar->tanggal_review_pembimbing) || 
+                              !empty($seminar->komentar_kaprodi) || !empty($seminar->tanggal_review_kaprodi)): ?>
                     <div class="mb-4">
                         <h6 class="font-weight-bold text-primary mb-2">
                             <i class="fas fa-history"></i> Riwayat Review
                         </h6>
                         <div class="timeline">
+                            <!-- Review Pembimbing -->
                             <?php if (!empty($seminar->tanggal_review_pembimbing)): ?>
                             <div class="timeline-item">
                                 <div class="timeline-marker bg-primary"></div>
@@ -205,9 +242,36 @@ IMPROVED UI - Detail Seminar Skripsi untuk Review Dosen
                                         <span class="badge badge-success mb-2">Disetujui</span>
                                     <?php elseif ($seminar->status_pembimbing == 'rejected'): ?>
                                         <span class="badge badge-danger mb-2">Ditolak</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-warning mb-2">Pending</span>
                                     <?php endif; ?>
                                     <?php if (!empty($seminar->komentar_pembimbing)): ?>
                                         <p class="mb-0"><?= nl2br(htmlspecialchars($seminar->komentar_pembimbing)) ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Review Kaprodi -->
+                            <?php if (!empty($seminar->tanggal_review_kaprodi)): ?>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Review Kaprodi</strong>
+                                        <small class="text-muted">
+                                            <?= date('d/m/Y H:i', strtotime($seminar->tanggal_review_kaprodi)) ?>
+                                        </small>
+                                    </div>
+                                    <?php if ($seminar->status_kaprodi == 'approved'): ?>
+                                        <span class="badge badge-success mb-2">Disetujui</span>
+                                    <?php elseif ($seminar->status_kaprodi == 'rejected'): ?>
+                                        <span class="badge badge-danger mb-2">Ditolak</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-warning mb-2">Pending</span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($seminar->komentar_kaprodi)): ?>
+                                        <p class="mb-0"><?= nl2br(htmlspecialchars($seminar->komentar_kaprodi)) ?></p>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -333,9 +397,18 @@ IMPROVED UI - Detail Seminar Skripsi untuk Review Dosen
                             <div class="mb-2 <?= $count > 3 ? 'd-none' : '' ?>">
                                 <div class="d-flex justify-content-between">
                                     <strong><?= date('d/m/Y', strtotime($jurnal->tanggal_bimbingan)) ?></strong>
-                                    <span class="badge badge-success badge-sm">Valid</span>
+                                    <?php if ($jurnal->status_validasi == '1'): ?>
+                                        <span class="badge badge-success badge-sm">Valid</span>
+                                    <?php elseif ($jurnal->status_validasi == '2'): ?>
+                                        <span class="badge badge-warning badge-sm">Revisi</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-secondary badge-sm">Pending</span>
+                                    <?php endif; ?>
                                 </div>
-                                <p class="mb-1"><?= character_limiter($jurnal->topik_bimbingan, 60) ?></p>
+                                <p class="mb-1"><?= character_limiter($jurnal->materi_bimbingan, 60) ?></p>
+                                <?php if (!empty($jurnal->catatan_dosen)): ?>
+                                    <small class="text-muted">Catatan: <?= character_limiter($jurnal->catatan_dosen, 40) ?></small>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                         

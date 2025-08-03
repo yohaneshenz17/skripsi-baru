@@ -159,8 +159,8 @@ Konsisten dengan design pattern Seminar Proposal
                                             <small class="text-muted"><?= htmlspecialchars($pengajuan->nim) ?></small>
                                         </td>
                                         <td>
-                                            <span class="text-wrap" title="<?= htmlspecialchars($pengajuan->judul) ?>">
-                                                <?= character_limiter(htmlspecialchars($pengajuan->judul), 60) ?>
+                                            <span class="text-wrap" title="<?= htmlspecialchars(!empty($pengajuan->judul_skripsi) ? $pengajuan->judul_skripsi : $pengajuan->judul) ?>">
+                                                <?= character_limiter(htmlspecialchars(!empty($pengajuan->judul_skripsi) ? $pengajuan->judul_skripsi : $pengajuan->judul), 60) ?>
                                             </span>
                                         </td>
                                         <td>
@@ -221,7 +221,7 @@ Konsisten dengan design pattern Seminar Proposal
                                     <tr>
                                         <th width="30%">Mahasiswa</th>
                                         <th width="35%">Judul</th>
-                                        <th width="20%">Tanggal Seminar</th>
+                                        <th width="20%">Tanggal Pengajuan</th>
                                         <th width="15%">Aksi</th>
                                     </tr>
                                 </thead>
@@ -233,23 +233,38 @@ Konsisten dengan design pattern Seminar Proposal
                                             <small class="text-muted"><?= htmlspecialchars($seminar->nim) ?></small>
                                         </td>
                                         <td>
-                                            <span class="text-wrap" title="<?= htmlspecialchars($seminar->judul) ?>">
-                                                <?= character_limiter(htmlspecialchars($seminar->judul), 50) ?>
+                                            <span class="text-wrap" title="<?= htmlspecialchars(!empty($seminar->judul_skripsi) ? $seminar->judul_skripsi : $seminar->judul) ?>">
+                                                <?= character_limiter(htmlspecialchars(!empty($seminar->judul_skripsi) ? $seminar->judul_skripsi : $seminar->judul), 50) ?>
                                             </span>
                                         </td>
                                         <td>
                                             <small>
-                                                <?= date('d/m/Y', strtotime($seminar->tanggal_seminar)) ?><br>
-                                                <span class="text-muted"><?= $seminar->jam_seminar ?></span>
+                                                <?= date('d/m/Y', strtotime($seminar->created_at)) ?><br>
+                                                <span class="text-muted">
+                                                    <?php if (!empty($seminar->tanggal_seminar)): ?>
+                                                        Seminar: <?= date('d/m/Y', strtotime($seminar->tanggal_seminar)) ?>
+                                                    <?php else: ?>
+                                                        Diajukan
+                                                    <?php endif; ?>
+                                                </span>
                                             </small>
                                         </td>
                                         <td>
-                                            <a href="<?= base_url('dosen/seminar_skripsi/penilaian/' . $seminar->id) ?>" 
-                                               class="btn btn-primary btn-sm"
-                                               data-toggle="tooltip" 
-                                               title="Input Penilaian">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                            <div class="btn-group-vertical btn-group-sm w-100">
+                                                <a href="<?= base_url('dosen/seminar_skripsi/penilaian/' . $seminar->id) ?>" 
+                                                   class="btn btn-primary btn-sm mb-1"
+                                                   data-toggle="tooltip" 
+                                                   title="Input/Edit Penilaian">
+                                                    <i class="fas fa-edit"></i> 
+                                                    <?= !empty($seminar->status_penilaian) ? 'Edit' : 'Input' ?> Penilaian
+                                                </a>
+                                                <a href="<?= base_url('dosen/seminar_skripsi/detail/' . $seminar->id) ?>" 
+                                                   class="btn btn-outline-info btn-sm"
+                                                   data-toggle="tooltip" 
+                                                   title="Lihat Detail">
+                                                    <i class="fas fa-eye"></i> Detail
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -292,8 +307,8 @@ Konsisten dengan design pattern Seminar Proposal
                                         <small class="text-muted"><?= htmlspecialchars($riwayat->nim) ?></small>
                                     </td>
                                     <td>
-                                        <span class="text-wrap" title="<?= htmlspecialchars($riwayat->judul) ?>">
-                                            <?= character_limiter(htmlspecialchars($riwayat->judul), 80) ?>
+                                        <span class="text-wrap" title="<?= htmlspecialchars(!empty($riwayat->judul_skripsi) ? $riwayat->judul_skripsi : $riwayat->judul) ?>">
+                                            <?= character_limiter(htmlspecialchars(!empty($riwayat->judul_skripsi) ? $riwayat->judul_skripsi : $riwayat->judul), 80) ?>
                                         </span>
                                     </td>
                                     <td>

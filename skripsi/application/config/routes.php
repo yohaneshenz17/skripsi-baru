@@ -267,10 +267,6 @@ if (ENVIRONMENT === 'development') {
     $route['kaprodi/test/(:any)'] = 'kaprodi/test/$1';
 }
 
-// Catch-all fallback (harus di paling bawah)
-$route['kaprodi/(:any)'] = 'kaprodi/kaprodi/$1';
-$route['kaprodi/(:any)/(:num)'] = 'kaprodi/kaprodi/$1/$2';
-
 // =====================================================
 //      ROUTE DOSEN - WORKFLOW TERBARU
 // =====================================================
@@ -422,9 +418,6 @@ $route['dosen/proposal'] = 'dosen/usulan_proposal'; // Redirect ke usulan_propos
 $route['dosen/konsultasi'] = 'dosen/bimbingan';     // Redirect ke bimbingan
 $route['dosen/seminar'] = 'dosen/seminar_proposal'; // Redirect ke seminar_proposal
 $route['dosen/skripsi'] = 'dosen/seminar_skripsi';  // Redirect ke seminar_skripsi
-
-// Catch-all untuk dosen routes yang belum didefinisikan
-$route['dosen/(:any)'] = 'dosen/$1';
 
 // =====================================================
 //      ROUTE STAF - WORKFLOW SISTEM SIM-TA (BARU)
@@ -598,8 +591,15 @@ $route['staf/publikasi/export_laporan'] = 'staf/publikasi/export_laporan';
 // Test PDF untuk troubleshooting
 $route['test_pdf'] = 'test_pdf';
 
+// Catch-all untuk dosen routes yang belum didefinisikan
+$route['dosen/(:any)'] = 'dosen/$1';
+
 // Catch-all untuk staf routes yang belum didefinisikan (HARUS DI BAWAH)
 $route['staf/(:any)'] = 'staf/$1';
+
+// Catch-all fallback (harus di paling bawah)
+$route['kaprodi/(:any)'] = 'kaprodi/kaprodi/$1';
+$route['kaprodi/(:any)/(:num)'] = 'kaprodi/kaprodi/$1/$2';
 
 // =====================================================
 //      KAPRODI ROUTES SUMMARY - MENU BARU

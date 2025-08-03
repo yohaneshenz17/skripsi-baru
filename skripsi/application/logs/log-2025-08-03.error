@@ -145,3 +145,116 @@ yle=3D'margin: 0;'&gt;SIM Tugas Akhir STK Santo Yakobus&lt;/p&gt;=0A            
 
 --B_ALT_688ea79313128--</pre>
 ERROR - 2025-08-03 07:04:54 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-03 08:00:17 --> Severity: error --> Exception: syntax error, unexpected token "catch" /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_proposal.php 263
+ERROR - 2025-08-03 08:14:32 --> Query error: Unknown column 'status_staf' in 'field list' - Invalid query: SELECT `id`, `status`, `status_pembimbing`, `status_staf`
+FROM `permohonan_izin_penelitian`
+WHERE `proposal_mahasiswa_id` = '47'
+ERROR - 2025-08-03 08:14:32 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:16:06 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:16:06 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:16:09 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:16:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:16:29 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:16:29 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:16:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:16:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:16:49 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-03 08:17:12 --> Query error: Unknown column 'status_staf' in 'field list' - Invalid query: SELECT `id`, `status`, `status_pembimbing`, `status_staf`
+FROM `permohonan_izin_penelitian`
+WHERE `proposal_mahasiswa_id` = '47'
+ERROR - 2025-08-03 08:17:12 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:18:12 --> Severity: Warning --> Undefined variable $p /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 697
+ERROR - 2025-08-03 08:18:12 --> Severity: Warning --> Attempt to read property "id" on null /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 697
+ERROR - 2025-08-03 08:18:45 --> Query error: Unknown column 'status_staf' in 'field list' - Invalid query: SELECT `id`, `status`, `status_pembimbing`, `status_staf`
+FROM `permohonan_izin_penelitian`
+WHERE `proposal_mahasiswa_id` = '47'
+ERROR - 2025-08-03 08:18:45 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:20:13 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi_model::check_eligibility() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 769
+ERROR - 2025-08-03 08:20:13 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:20:55 --> Query error: Unknown column 'status_staf' in 'field list' - Invalid query: SELECT `id`, `status`, `status_pembimbing`, `status_staf`
+FROM `permohonan_izin_penelitian`
+WHERE `proposal_mahasiswa_id` = '47'
+ERROR - 2025-08-03 08:20:55 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:28:55 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/test_model_fixed
+ERROR - 2025-08-03 08:32:11 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_check_simplified_eligibility() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 177
+ERROR - 2025-08-03 08:39:13 --> Severity: Warning --> Undefined variable $is_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 15
+ERROR - 2025-08-03 08:41:16 --> Severity: Warning --> Undefined variable $is_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 15
+ERROR - 2025-08-03 08:43:04 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:43:04 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:44:18 --> Severity: Warning --> Undefined variable $is_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 15
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $can_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 134
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 186
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 186
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 208
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 208
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 282
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $can_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 454
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $can_resubmit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 468
+ERROR - 2025-08-03 09:18:54 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/view_file
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $can_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 134
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 186
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 186
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 208
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 208
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 282
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $can_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 454
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $can_resubmit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 468
+ERROR - 2025-08-03 09:29:09 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:1078) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:29:09 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_get_seminar_detail() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1078
+ERROR - 2025-08-03 09:32:12 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:487) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:32:12 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 487
+ERROR - 2025-08-03 09:32:37 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:487) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:32:37 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 487
+ERROR - 2025-08-03 09:32:39 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:487) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:32:39 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 487
+ERROR - 2025-08-03 09:33:49 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:487) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:33:49 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 487
+ERROR - 2025-08-03 09:35:28 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/view_file
+ERROR - 2025-08-03 09:35:33 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 103
+ERROR - 2025-08-03 09:36:28 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/view_file
+ERROR - 2025-08-03 09:38:17 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 103
+ERROR - 2025-08-03 09:38:36 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 103
+ERROR - 2025-08-03 09:44:52 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_safe_build_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 178
+ERROR - 2025-08-03 09:45:09 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 103
+ERROR - 2025-08-03 10:24:05 --> Query error: Unknown column 'CASE WHEN ssm.status_pembimbing = "approved" THEN "Disetujui" WHEN ssm.status_pembimbing = "rejected" THEN "Ditolak" ELSE "Pending" END' in 'field list' - Invalid query: SELECT `ssm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `pm`.`judul`, `CASE WHEN ssm`.`status_pembimbing = "approved" THEN "Disetujui" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak" ELSE "Pending" END` as `status_rekomendasi`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+LEFT JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `ssm`.`reviewed_by_pembimbing` IS NOT NULL
+ORDER BY `ssm`.`tanggal_review_pembimbing` DESC
+ LIMIT 5
+ERROR - 2025-08-03 10:25:53 --> Query error: Unknown column 'CASE WHEN ssm.status_pembimbing = "approved" THEN "Disetujui" WHEN ssm.status_pembimbing = "rejected" THEN "Ditolak" ELSE "Pending" END' in 'field list' - Invalid query: SELECT `ssm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `pm`.`judul`, `CASE WHEN ssm`.`status_pembimbing = "approved" THEN "Disetujui" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak" ELSE "Pending" END` as `status_rekomendasi`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+LEFT JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `ssm`.`reviewed_by_pembimbing` IS NOT NULL
+ORDER BY `ssm`.`tanggal_review_pembimbing` DESC
+ LIMIT 5
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 11:46:35 --> Severity: error --> Exception: Call to undefined method CI_Loader::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 83
+ERROR - 2025-08-03 11:47:18 --> Severity: error --> Exception: Call to undefined method CI_Loader::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 83
+ERROR - 2025-08-03 11:47:20 --> Severity: error --> Exception: Call to undefined method CI_Loader::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 83
+ERROR - 2025-08-03 11:48:26 --> Severity: error --> Exception: Call to undefined method CI_Loader::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 83
+ERROR - 2025-08-03 12:12:51 --> Query error: Table 'stkp7133_skripsi.users' doesn't exist - Invalid query: SELECT `d`.*, `u`.`email`
+FROM `dosen` `d`
+LEFT JOIN `users` `u` ON `d`.`user_id` = `u`.`id`
+WHERE `u`.`level` = '3'
+ LIMIT 1
+ERROR - 2025-08-03 12:45:59 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php:991) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 12:45:59 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php 991
+ERROR - 2025-08-03 12:47:15 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php:991) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 12:47:15 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php 991
+ERROR - 2025-08-03 12:47:19 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php:991) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 12:47:19 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php 991

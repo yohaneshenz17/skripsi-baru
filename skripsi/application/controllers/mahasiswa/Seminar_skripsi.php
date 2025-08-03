@@ -555,30 +555,69 @@ public function index()
     // =================================================================
 
     /**
-     * Handle file upload
+     * ✅ MINIMAL FIX: Hanya perbaiki path upload untuk konsistensi
      */
     private function _handle_file_upload()
     {
+        // ✅ FIXED: Gunakan FCPATH seperti controller lain
+        $upload_path = FCPATH . 'uploads/seminar_skripsi/skripsi_files/';
+        
+        // Buat folder jika belum ada
+        if (!is_dir($upload_path)) {
+            mkdir($upload_path, 0755, true);
+        }
+    
         $config = [
-            'upload_path' => './uploads/seminar_skripsi/skripsi_files/',
+            'upload_path' => $upload_path,  // ✅ KONSISTEN dengan controller lain
             'allowed_types' => 'pdf|doc|docx',
-            'max_size' => 2048, // 2MB
+            'max_size' => 5120, // 5MB (disesuaikan dengan form)
             'encrypt_name' => TRUE
         ];
-
-        if (!is_dir($config['upload_path'])) {
-            mkdir($config['upload_path'], 0755, true);
-        }
-
+    
         $this->upload->initialize($config);
-
+    
         if (!$this->upload->do_upload('file_skripsi')) {
             return [
                 'success' => false,
                 'message' => $this->upload->display_errors('', '')
             ];
         }
+    
+        $upload_data = $this->upload->data();
+        return [
+            'success' => true,
+            'filename' => $upload_data['file_name'],
+            'original_name' => $upload_data['orig_name']
+        ];
+    }
 
+    /**
+     * ✅ TAMBAHAN: Method untuk upload surat penelitian (jika diperlukan)
+     */
+    private function _handle_surat_penelitian_upload()
+    {
+        $upload_path = FCPATH . 'uploads/seminar_skripsi/surat_penelitian/';
+        
+        if (!is_dir($upload_path)) {
+            mkdir($upload_path, 0755, true);
+        }
+    
+        $config = [
+            'upload_path' => $upload_path,
+            'allowed_types' => 'pdf|jpg|jpeg|png',
+            'max_size' => 3072, // 3MB
+            'encrypt_name' => TRUE
+        ];
+    
+        $this->upload->initialize($config);
+    
+        if (!$this->upload->do_upload('surat_penelitian')) {
+            return [
+                'success' => false,
+                'message' => $this->upload->display_errors('', '')
+            ];
+        }
+    
         $upload_data = $this->upload->data();
         return [
             'success' => true,

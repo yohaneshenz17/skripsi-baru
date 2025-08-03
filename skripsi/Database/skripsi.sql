@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 03, 2025 at 09:09 AM
+-- Generation Time: Aug 03, 2025 at 09:20 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1952,6 +1952,8 @@ CREATE TABLE `seminar_skripsi_mahasiswa` (
   `current_step` varchar(50) DEFAULT 'mahasiswa' COMMENT 'mahasiswa|pembimbing|kaprodi|staf',
   `file_skripsi` varchar(255) DEFAULT NULL COMMENT 'File skripsi final lengkap (Word/PDF max 2MB)',
   `keterangan_mahasiswa` text DEFAULT NULL COMMENT 'Keterangan tambahan dari mahasiswa (opsional)',
+  `judul_skripsi` varchar(250) DEFAULT NULL COMMENT 'Judul skripsi untuk seminar (bisa berbeda dari proposal)',
+  `surat_keterangan_penelitian` varchar(255) DEFAULT NULL COMMENT 'File surat keterangan penelitian',
   `status_pembimbing` enum('pending','approved','rejected') DEFAULT 'pending',
   `komentar_pembimbing` text DEFAULT NULL COMMENT 'Komentar/feedback dari dosen pembimbing',
   `tanggal_review_pembimbing` datetime DEFAULT NULL,
@@ -1982,8 +1984,9 @@ CREATE TABLE `seminar_skripsi_mahasiswa` (
 -- Dumping data for table `seminar_skripsi_mahasiswa`
 --
 
-INSERT INTO `seminar_skripsi_mahasiswa` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_skripsi`, `keterangan_mahasiswa`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
-(11, 44, 44, 'submitted', 'pembimbing', 'skripsi_1754177659_688ea07b09e52.pdf', 'Tesssssss Baruuuuuu', 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 06:30:48', '2025-08-03 06:34:19', NULL);
+INSERT INTO `seminar_skripsi_mahasiswa` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_skripsi`, `keterangan_mahasiswa`, `judul_skripsi`, `surat_keterangan_penelitian`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
+(11, 44, 44, 'submitted', 'pembimbing', 'skripsi_1754177659_688ea07b09e52.pdf', 'Tesssssss Baruuuuuu', NULL, NULL, 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 06:30:48', '2025-08-03 06:34:19', NULL),
+(12, 46, 46, 'submitted', 'pembimbing', 'df6c327d48141b9b85fcbcc07203c423.pdf', 'INI LATIHAN SAJA', NULL, NULL, 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 09:17:54', '2025-08-03 09:17:54', NULL);
 
 --
 -- Triggers `seminar_skripsi_mahasiswa`

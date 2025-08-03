@@ -419,8 +419,8 @@
                     Jika ada pertanyaan tentang status permohonan, silakan hubungi:
                     <br><br>
                     <strong>Unit SIPD</strong><br>
-                    Email: sipd@stkstjak.ac.id<br>
-                    Telp: (021) 123-4567<br>
+                    Email: sipd@stkstyakobus.ac.id<br>
+                    Telp: (0971)3330264<br>
                     <br>
                     <strong>Dosen Pembimbing</strong><br>
                     <?= $permohonan->nama_pembimbing ?><br>

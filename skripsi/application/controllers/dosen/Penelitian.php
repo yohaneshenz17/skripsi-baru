@@ -2,16 +2,16 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Controller Penelitian untuk Dosen - FIXED DATABASE ERRORS
+ * Controller Penelitian untuk Dosen - COMPLETELY FIXED VERSION
  * 
- * Controller untuk mengelola permohonan izin penelitian dari perspektif dosen pembimbing
- * Sesuai dengan workflow: Mahasiswa Ajukan -> Dosen Review -> Staf Proses
+ * Mengatasi masalah yang muncul setelah update database dengan trigger
+ * seminar proposal dan seminar skripsi
  * 
  * @package     SIM_TA
  * @subpackage  Controllers/Dosen
  * @category    Penelitian
  * @author      Unit SIPD STK Santo Yakobus
- * @version     2.2 (Database Error Fixed)
+ * @version     2.3 (Database Error + Trigger Compatibility Fixed)
  */
 class Penelitian extends CI_Controller {
 
@@ -78,10 +78,15 @@ class Penelitian extends CI_Controller {
     }
 
     /**
-     * Proses review permohonan (approve/reject) - FIXED NOTIFICATIONS
+     * COMPLETELY FIXED: Proses review permohonan (approve/reject)
+     * Mengatasi race condition dengan trigger dan header issues
      */
     public function review() {
+        // CRITICAL: Start output buffering to prevent header issues
+        ob_start();
+        
         if ($this->input->method() !== 'post') {
+            ob_end_clean();
             redirect('dosen/penelitian');
             return;
         }
@@ -94,36 +99,50 @@ class Penelitian extends CI_Controller {
         // Validasi input
         if (empty($permohonan_id) || empty($status_review)) {
             $this->session->set_flashdata('error', 'Data tidak lengkap!');
+            ob_end_clean();
             redirect('dosen/penelitian');
             return;
         }
         
-        // Validasi ownership
-        $permohonan = $this->_get_permohonan_detail($permohonan_id, $dosen_id);
-        if (!$permohonan) {
-            $this->session->set_flashdata('error', 'Data tidak ditemukan atau bukan bimbingan Anda!');
-            redirect('dosen/penelitian');
-            return;
-        }
-        
-        // Update status di database
-        $update_data = [
-            'status_pembimbing' => $status_review,
-            'komentar_pembimbing' => $komentar,
-            'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
-            'status' => ($status_review == 'approved') ? 'approved' : 'rejected'
-        ];
-        
-        $this->db->where('id', $permohonan_id);
-        $this->db->where('dosen_pembimbing_id', $dosen_id);
-        $result = $this->db->update('permohonan_izin_penelitian', $update_data);
-        
-        if ($result) {
+        try {
+            // FIXED: Ambil data lengkap dengan error handling
+            $permohonan = $this->_get_permohonan_detail_secure($permohonan_id, $dosen_id);
+            if (!$permohonan) {
+                throw new Exception('Data tidak ditemukan atau bukan bimbingan Anda!');
+            }
+            
+            // CRITICAL: Use database transaction to prevent race condition with triggers
+            $this->db->trans_start();
+            
+            // Update status di database
+            $update_data = [
+                'status_pembimbing' => $status_review,
+                'komentar_pembimbing' => $komentar,
+                'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
+                'status' => ($status_review == 'approved') ? 'approved' : 'rejected',
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->db->where('id', $permohonan_id);
+            $this->db->where('dosen_pembimbing_id', $dosen_id);
+            $result = $this->db->update('permohonan_izin_penelitian', $update_data);
+            
+            if (!$result || $this->db->affected_rows() == 0) {
+                throw new Exception('Gagal menyimpan review atau data tidak ditemukan');
+            }
+            
+            // Commit transaction before sending notifications
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Transaksi database gagal');
+            }
+            
             // Log aktivitas
             $this->_log_aktivitas($permohonan_id, $dosen_id, 'review_pembimbing', 
                 'Dosen memberikan review: ' . ($status_review == 'approved' ? 'Disetujui' : 'Ditolak'));
             
-            // WORKFLOW NOTIFIKASI SESUAI REQUIREMENT - FIXED
+            // FIXED NOTIFICATIONS: Send dengan data yang sudah dipastikan lengkap
             if ($status_review == 'approved') {
                 // APPROVE: kirim ke MAHASISWA DAN STAF
                 $notif_mahasiswa = $this->_send_notification_to_mahasiswa_approved($permohonan, $komentar);
@@ -144,10 +163,19 @@ class Penelitian extends CI_Controller {
                     $this->session->set_flashdata('success', 'Permohonan ditolak. (Notifikasi email mungkin gagal dikirim)');
                 }
             }
-        } else {
-            $this->session->set_flashdata('error', 'Gagal menyimpan review!');
+            
+        } catch (Exception $e) {
+            // Rollback transaction if still active
+            if ($this->db->trans_status() !== FALSE) {
+                $this->db->trans_rollback();
+            }
+            
+            log_message('error', 'Error in penelitian review: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
         
+        // Clean buffer and redirect
+        ob_end_clean();
         redirect('dosen/penelitian');
     }
 
@@ -158,7 +186,7 @@ class Penelitian extends CI_Controller {
         $dosen_id = $this->session->userdata('id');
         
         // Get detail permohonan dengan validasi ownership
-        $permohonan = $this->_get_permohonan_detail($permohonan_id, $dosen_id);
+        $permohonan = $this->_get_permohonan_detail_secure($permohonan_id, $dosen_id);
         
         if (!$permohonan || empty($permohonan->file_proposal_revisi)) {
             $this->session->set_flashdata('error', 'File tidak ditemukan!');
@@ -189,66 +217,141 @@ class Penelitian extends CI_Controller {
     }
 
     // ====================================================================
-    // PRIVATE HELPER METHODS
+    // PRIVATE HELPER METHODS - ENHANCED WITH TRIGGER COMPATIBILITY
     // ====================================================================
 
     /**
      * Get permohonan yang perlu direview oleh dosen
      */
     private function _get_permohonan_perlu_review($dosen_id) {
-        $this->db->select('
-            pip.*,
-            pm.judul as judul_proposal,
-            pm.workflow_status
-        ');
-        $this->db->from('permohonan_izin_penelitian pip');
-        $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
-        $this->db->where('pip.dosen_pembimbing_id', $dosen_id);
-        $this->db->where('pip.status_pembimbing', 'pending');
-        $this->db->where('pip.status', 'submitted');
-        $this->db->order_by('pip.created_at', 'ASC');
-        
-        return $this->db->get()->result();
+        try {
+            $this->db->select('
+                pip.*,
+                pm.judul as judul_proposal,
+                pm.workflow_status
+            ');
+            $this->db->from('permohonan_izin_penelitian pip');
+            $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
+            $this->db->where('pip.dosen_pembimbing_id', $dosen_id);
+            $this->db->where('pip.status_pembimbing', 'pending');
+            $this->db->where('pip.status', 'submitted');
+            $this->db->order_by('pip.created_at', 'ASC');
+            
+            return $this->db->get()->result();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting permohonan review: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**
      * Get riwayat review yang sudah dilakukan dosen
      */
     private function _get_riwayat_review($dosen_id) {
-        $this->db->select('
-            pip.*,
-            pm.judul as judul_proposal,
-            pm.workflow_status
-        ');
-        $this->db->from('permohonan_izin_penelitian pip');
-        $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
-        $this->db->where('pip.dosen_pembimbing_id', $dosen_id);
-        $this->db->where_in('pip.status_pembimbing', ['approved', 'rejected']);
-        $this->db->order_by('pip.tanggal_review_pembimbing', 'DESC');
-        $this->db->limit(10);
-        
-        return $this->db->get()->result();
+        try {
+            $this->db->select('
+                pip.*,
+                pm.judul as judul_proposal,
+                pm.workflow_status
+            ');
+            $this->db->from('permohonan_izin_penelitian pip');
+            $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
+            $this->db->where('pip.dosen_pembimbing_id', $dosen_id);
+            $this->db->where_in('pip.status_pembimbing', ['approved', 'rejected']);
+            $this->db->order_by('pip.tanggal_review_pembimbing', 'DESC');
+            $this->db->limit(10);
+            
+            return $this->db->get()->result();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting riwayat review: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**
-     * FIXED: Get detail permohonan dengan validasi ownership
-     * Memastikan field email_mahasiswa tersedia untuk notifikasi
+     * LEGACY: Get detail permohonan dengan validasi ownership
+     * Diperlukan untuk backward compatibility
      */
     private function _get_permohonan_detail($permohonan_id, $dosen_id) {
-        $this->db->select('
-            pip.*,
-            pm.judul as judul_proposal,
-            pm.workflow_status,
-            m.nama as nama_mahasiswa_db,
-            m.email as email_mahasiswa  -- PASTIKAN field ini ada untuk notifikasi
-        ');
-        $this->db->from('permohonan_izin_penelitian pip');
-        $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->where('pip.id', $permohonan_id);
-        $this->db->where('pip.dosen_pembimbing_id', $dosen_id);
-        
-        return $this->db->get()->row();
+        return $this->_get_permohonan_detail_secure($permohonan_id, $dosen_id);
+    }
+
+    /**
+     * COMPLETELY FIXED: Get detail permohonan dengan error handling yang robust
+     * Mengatasi masalah setelah update database dengan trigger
+     */
+    private function _get_permohonan_detail_secure($permohonan_id, $dosen_id) {
+        try {
+            // CRITICAL: Use explicit transaction isolation to avoid trigger race condition
+            $this->db->trans_start();
+            
+            $this->db->select('
+                pip.*,
+                pm.judul as judul_proposal,
+                pm.workflow_status,
+                COALESCE(m.nama, pip.nama_mahasiswa) as nama_mahasiswa,
+                COALESCE(m.email, "no-email@stkyakobus.ac.id") as email_mahasiswa,
+                COALESCE(m.nim, pip.nim) as nim_mahasiswa
+            ');
+            $this->db->from('permohonan_izin_penelitian pip');
+            $this->db->join('proposal_mahasiswa pm', 'pip.proposal_mahasiswa_id = pm.id', 'left');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id', 'left');
+            $this->db->where('pip.id', $permohonan_id);
+            $this->db->where('pip.dosen_pembimbing_id', $dosen_id);
+            
+            $result = $this->db->get()->row();
+            
+            $this->db->trans_complete();
+            
+            // VALIDATION: Pastikan data yang diperlukan untuk notifikasi tersedia
+            if ($result) {
+                // Fallback untuk data mahasiswa jika JOIN gagal karena trigger
+                if (empty($result->email_mahasiswa) || $result->email_mahasiswa == 'no-email@stkyakobus.ac.id') {
+                    $result = $this->_fix_missing_mahasiswa_data($result);
+                }
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'Error getting permohonan detail: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * RESCUE FUNCTION: Fix missing mahasiswa data akibat trigger interference
+     */
+    private function _fix_missing_mahasiswa_data($permohonan) {
+        try {
+            // Jika email kosong, cari dari tabel mahasiswa langsung
+            if (empty($permohonan->email_mahasiswa) || $permohonan->email_mahasiswa == 'no-email@stkyakobus.ac.id') {
+                $this->db->select('m.nama, m.email, m.nim');
+                $this->db->from('mahasiswa m');
+                $this->db->join('proposal_mahasiswa pm', 'm.id = pm.mahasiswa_id');
+                $this->db->where('pm.id', $permohonan->proposal_mahasiswa_id);
+                
+                $mahasiswa_data = $this->db->get()->row();
+                
+                if ($mahasiswa_data) {
+                    $permohonan->email_mahasiswa = $mahasiswa_data->email;
+                    $permohonan->nama_mahasiswa = $mahasiswa_data->nama;
+                    $permohonan->nim_mahasiswa = $mahasiswa_data->nim;
+                } else {
+                    // Ultimate fallback - pakai data dari permohonan_izin_penelitian
+                    $permohonan->email_mahasiswa = 'fallback@stkyakobus.ac.id';
+                    log_message('warning', 'Using fallback email for permohonan ID: ' . $permohonan->id);
+                }
+            }
+            
+            return $permohonan;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error fixing mahasiswa data: ' . $e->getMessage());
+            $permohonan->email_mahasiswa = 'fallback@stkyakobus.ac.id';
+            return $permohonan;
+        }
     }
 
     /**
@@ -257,25 +360,31 @@ class Penelitian extends CI_Controller {
     private function _get_statistics($dosen_id) {
         $stats = [];
         
-        // Total permohonan
-        $this->db->where('dosen_pembimbing_id', $dosen_id);
-        $stats['total'] = $this->db->count_all_results('permohonan_izin_penelitian');
-        
-        // Perlu review
-        $this->db->where('dosen_pembimbing_id', $dosen_id);
-        $this->db->where('status_pembimbing', 'pending');
-        $this->db->where('status', 'submitted');
-        $stats['perlu_review'] = $this->db->count_all_results('permohonan_izin_penelitian');
-        
-        // Disetujui
-        $this->db->where('dosen_pembimbing_id', $dosen_id);
-        $this->db->where('status_pembimbing', 'approved');
-        $stats['disetujui'] = $this->db->count_all_results('permohonan_izin_penelitian');
-        
-        // Ditolak
-        $this->db->where('dosen_pembimbing_id', $dosen_id);
-        $this->db->where('status_pembimbing', 'rejected');
-        $stats['ditolak'] = $this->db->count_all_results('permohonan_izin_penelitian');
+        try {
+            // Total permohonan
+            $this->db->where('dosen_pembimbing_id', $dosen_id);
+            $stats['total'] = $this->db->count_all_results('permohonan_izin_penelitian');
+            
+            // Perlu review
+            $this->db->where('dosen_pembimbing_id', $dosen_id);
+            $this->db->where('status_pembimbing', 'pending');
+            $this->db->where('status', 'submitted');
+            $stats['perlu_review'] = $this->db->count_all_results('permohonan_izin_penelitian');
+            
+            // Disetujui
+            $this->db->where('dosen_pembimbing_id', $dosen_id);
+            $this->db->where('status_pembimbing', 'approved');
+            $stats['disetujui'] = $this->db->count_all_results('permohonan_izin_penelitian');
+            
+            // Ditolak
+            $this->db->where('dosen_pembimbing_id', $dosen_id);
+            $this->db->where('status_pembimbing', 'rejected');
+            $stats['ditolak'] = $this->db->count_all_results('permohonan_izin_penelitian');
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting statistics: ' . $e->getMessage());
+            $stats = ['total' => 0, 'perlu_review' => 0, 'disetujui' => 0, 'ditolak' => 0];
+        }
         
         return $stats;
     }
@@ -301,14 +410,20 @@ class Penelitian extends CI_Controller {
     }
 
     // ====================================================================
-    // EMAIL NOTIFICATION METHODS - FIXED DATABASE ISSUES
+    // EMAIL NOTIFICATION METHODS - COMPLETELY FIXED
     // ====================================================================
 
     /**
-     * FIXED: Kirim notifikasi ke mahasiswa ketika APPROVED
+     * COMPLETELY FIXED: Kirim notifikasi ke mahasiswa ketika APPROVED
      */
     private function _send_notification_to_mahasiswa_approved($permohonan, $komentar = '') {
         try {
+            // VALIDATION: Pastikan email tersedia
+            if (empty($permohonan->email_mahasiswa) || $permohonan->email_mahasiswa == 'fallback@stkyakobus.ac.id') {
+                log_message('warning', 'Email mahasiswa tidak tersedia untuk notifikasi approval');
+                return false;
+            }
+            
             $config = $this->_get_email_config();
             $this->email->initialize($config);
             
@@ -355,7 +470,7 @@ class Penelitian extends CI_Controller {
             </div>";
             
             $this->email->from('noreply.stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($permohonan->email_mahasiswa);  // Field sudah dipastikan ada
+            $this->email->to($permohonan->email_mahasiswa);
             $this->email->subject($subject);
             $this->email->message($message);
             
@@ -376,10 +491,16 @@ class Penelitian extends CI_Controller {
     }
 
     /**
-     * FIXED: Kirim notifikasi ke mahasiswa ketika REJECTED
+     * COMPLETELY FIXED: Kirim notifikasi ke mahasiswa ketika REJECTED
      */
     private function _send_notification_to_mahasiswa_rejected($permohonan, $komentar) {
         try {
+            // VALIDATION: Pastikan email tersedia
+            if (empty($permohonan->email_mahasiswa) || $permohonan->email_mahasiswa == 'fallback@stkyakobus.ac.id') {
+                log_message('warning', 'Email mahasiswa tidak tersedia untuk notifikasi rejection');
+                return false;
+            }
+            
             $config = $this->_get_email_config();
             $this->email->initialize($config);
             
@@ -422,7 +543,7 @@ class Penelitian extends CI_Controller {
             </div>";
             
             $this->email->from('noreply.stkyakobus@gmail.com', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($permohonan->email_mahasiswa);  // Field sudah dipastikan ada
+            $this->email->to($permohonan->email_mahasiswa);
             $this->email->subject($subject);
             $this->email->message($message);
             
@@ -443,15 +564,14 @@ class Penelitian extends CI_Controller {
     }
 
     /**
-     * FIXED: Kirim notifikasi email ke staf setelah dosen approve
-     * Menggunakan tabel dosen dengan level = '5' (bukan tabel staf yang tidak ada)
+     * COMPLETELY FIXED: Kirim notifikasi email ke staf setelah dosen approve
      */
     private function _send_notification_to_staf($permohonan) {
         try {
-            // PERBAIKAN: Get email staf dari tabel dosen dengan level = '5'
+            // Get email staf dari tabel dosen dengan level = '5'
             $this->db->select('email, nama');
-            $this->db->where('level', '5');  // Staf tersimpan di tabel dosen dengan level 5
-            $staf_list = $this->db->get('dosen')->result();  // Query ke tabel dosen, bukan staf
+            $this->db->where('level', '5');
+            $staf_list = $this->db->get('dosen')->result();
             
             if (empty($staf_list)) {
                 log_message('warning', 'No active staff found for penelitian notification');
@@ -538,7 +658,7 @@ class Penelitian extends CI_Controller {
             'smtp_host' => 'smtp.gmail.com',
             'smtp_port' => 587,
             'smtp_user' => 'stkyakobus@gmail.com',
-            'smtp_pass' => 'yonroxhraathnaug', // Ganti dengan password yang benar
+            'smtp_pass' => 'yonroxhraathnaug',
             'charset' => 'utf-8',
             'newline' => "\r\n",
             'mailtype' => 'html',

@@ -184,6 +184,66 @@ public function index()
         ]);
     }
 
+/**
+ * View/Download file skripsi
+ * URL: mahasiswa/seminar_skripsi/view_file/ID
+ */
+public function view_file($seminar_id = null)
+{
+    if (!$seminar_id) {
+        show_404();
+        return;
+    }
+
+    $mahasiswa_id = $this->session->userdata('id');
+    
+    try {
+        // Get seminar data dengan validasi ownership
+        $this->db->select('ssm.*, pm.id as proposal_id');
+        $this->db->from('seminar_skripsi_mahasiswa ssm');
+        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+        $this->db->where('ssm.id', $seminar_id);
+        $this->db->where('ssm.mahasiswa_id', $mahasiswa_id);
+        
+        $seminar = $this->db->get()->row();
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau Anda tidak memiliki akses');
+            redirect('mahasiswa/seminar_skripsi');
+            return;
+        }
+        
+        if (empty($seminar->file_skripsi)) {
+            $this->session->set_flashdata('error', 'File skripsi tidak tersedia');
+            redirect('mahasiswa/seminar_skripsi/detail/' . $seminar_id);
+            return;
+        }
+        
+        // ✅ PERBAIKAN: Path file sesuai struktur upload
+        $file_path = FCPATH . 'uploads/seminar_skripsi/skripsi_files/' . $seminar->file_skripsi;
+        
+        if (!file_exists($file_path)) {
+            $this->session->set_flashdata('error', 'File tidak ditemukan di server');
+            redirect('mahasiswa/seminar_skripsi/detail/' . $seminar_id);
+            return;
+        }
+        
+        // Force download dengan nama yang user-friendly
+        $this->load->helper('download');
+        
+        // Get file extension
+        $file_ext = pathinfo($seminar->file_skripsi, PATHINFO_EXTENSION);
+        $download_name = 'Skripsi_' . $mahasiswa_id . '_' . date('Ymd') . '.' . $file_ext;
+        
+        force_download($download_name, file_get_contents($file_path));
+        
+    } catch (Exception $e) {
+        log_message('error', 'View file skripsi error: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Terjadi kesalahan saat mengakses file');
+        redirect('mahasiswa/seminar_skripsi');
+    }
+}
+
     // =================================================================
     // ✅ FIXED PRIVATE METHODS - DASHBOARD LOGIC
     // =================================================================
@@ -716,19 +776,58 @@ public function index()
                        ->get()->row();
     }
 
-    /**
-     * Get seminar detail with ownership validation
-     */
-    private function _get_seminar_detail($seminar_id, $mahasiswa_id)
-    {
-        return $this->db->select('ssm.*, pm.judul, m.nim, m.nama as nama_mahasiswa')
-                       ->from('seminar_skripsi_mahasiswa ssm')
-                       ->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id')
-                       ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
-                       ->where('ssm.id', $seminar_id)
-                       ->where('ssm.mahasiswa_id', $mahasiswa_id)
-                       ->get()->row();
+// ==================================================================
+// PERBAIKAN 2: Fix method _get_seminar_detail untuk ambil judul_skripsi 
+// ==================================================================
+
+/**
+ * Get seminar detail dengan field yang benar - FIXED VERSION
+ * Pastikan mengambil judul_skripsi dari tabel seminar_skripsi_mahasiswa
+ */
+private function _get_seminar_detail($seminar_id, $mahasiswa_id)
+{
+    try {
+        $this->db->select('
+            ssm.*,
+            COALESCE(ssm.judul_skripsi, pm.judul) as judul_skripsi,
+            pm.judul as proposal_judul,
+            pm.workflow_status,
+            m.nim, 
+            m.nama as nama_mahasiswa,
+            m.email as email_mahasiswa,
+            d.nama as nama_pembimbing,
+            d.email as email_pembimbing,
+            pr.nama as nama_prodi
+        ');
+        $this->db->from('seminar_skripsi_mahasiswa ssm');
+        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'left');
+        $this->db->where('ssm.id', $seminar_id);
+        $this->db->where('ssm.mahasiswa_id', $mahasiswa_id);
+        
+        $result = $this->db->get()->row();
+        
+        // ✅ PERBAIKAN: Pastikan field-field penting ada
+        if ($result) {
+            if (!isset($result->status_pembimbing)) $result->status_pembimbing = 'pending';
+            if (!isset($result->status_kaprodi)) $result->status_kaprodi = 'pending';
+            if (!isset($result->file_skripsi)) $result->file_skripsi = '';
+            
+            // ✅ IMPORTANT: Pastikan judul_skripsi tidak null
+            if (empty($result->judul_skripsi)) {
+                $result->judul_skripsi = $result->proposal_judul ?? 'Judul tidak tersedia';
+            }
+        }
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Get seminar detail error: ' . $e->getMessage());
+        return null;
     }
+}
 
     /**
      * Get index page script
@@ -768,90 +867,6 @@ public function index()
         </script>
         ';
     }
-    
-/**
- * 🔍 DEBUG: Test method _check_simplified_eligibility
- * URL: mahasiswa/seminar_skripsi/debug_simplified
- */
-public function debug_simplified()
-{
-    if (ENVIRONMENT !== 'development') {
-        show_404();
-        return;
-    }
-    
-    $mahasiswa_id = $this->session->userdata('id');
-    
-    echo "<h2>🔍 Debug Method _check_simplified_eligibility untuk Mahasiswa ID: {$mahasiswa_id}</h2>";
-    
-    // Test method simplified
-    echo "<div style='border: 2px solid #007bff; padding: 15px; margin: 10px;'>";
-    echo "<h3>🎯 Test _check_simplified_eligibility</h3>";
-    
-    try {
-        $result = $this->_check_simplified_eligibility($mahasiswa_id);
-        
-        echo "<p><strong>Result:</strong> " . ($result['eligible'] ? '✅ ELIGIBLE' : '❌ NOT ELIGIBLE') . "</p>";
-        
-        if (!empty($result['errors'])) {
-            echo "<p><strong>Errors:</strong></p>";
-            echo "<ul>";
-            foreach ($result['errors'] as $error) {
-                echo "<li>❌ {$error}</li>";
-            }
-            echo "</ul>";
-        }
-        
-        if (!empty($result['requirements'])) {
-            echo "<h4>Requirements Detail:</h4>";
-            echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
-            echo "<tr><th>Requirement</th><th>Current</th><th>Required</th><th>Status</th></tr>";
-            foreach ($result['requirements'] as $name => $req) {
-                $status_icon = $req['met'] ? '✅' : '❌';
-                echo "<tr>";
-                echo "<td>{$req['name']}</td>";
-                echo "<td>{$req['current']}</td>";
-                echo "<td>{$req['required']}</td>";
-                echo "<td>{$status_icon}</td>";
-                echo "</tr>";
-            }
-            echo "</table>";
-        }
-        
-        if (isset($result['proposal'])) {
-            echo "<p><strong>Proposal Found:</strong> ID {$result['proposal']->id}, Workflow: {$result['proposal']->workflow_status}</p>";
-        }
-        
-        echo "<p><strong>Summary:</strong> {$result['summary']}</p>";
-        
-    } catch (Exception $e) {
-        echo "<p>❌ <strong>ERROR:</strong> " . $e->getMessage() . "</p>";
-    }
-    
-    echo "</div>";
-    
-    // Test dashboard data
-    echo "<div style='border: 2px solid #28a745; padding: 15px; margin: 10px;'>";
-    echo "<h3>🎯 Test _prepare_dashboard_data</h3>";
-    
-    try {
-        $dashboard_data = $this->_prepare_dashboard_data($mahasiswa_id);
-        
-        echo "<p><strong>Has Existing Seminar:</strong> " . ($dashboard_data['has_existing_seminar'] ? '✅ YES' : '❌ NO') . "</p>";
-        echo "<p><strong>Can Create New:</strong> " . ($dashboard_data['can_create_new'] ?? false ? '✅ YES' : '❌ NO') . "</p>";
-        echo "<p><strong>Show Form:</strong> " . ($dashboard_data['show_form'] ?? false ? '✅ YES' : '❌ NO') . "</p>";
-        
-        if (isset($dashboard_data['eligibility'])) {
-            echo "<p><strong>Eligibility Eligible:</strong> " . ($dashboard_data['eligibility']['eligible'] ? '✅ YES' : '❌ NO') . "</p>";
-        }
-        
-    } catch (Exception $e) {
-        echo "<p>❌ <strong>ERROR:</strong> " . $e->getMessage() . "</p>";
-    }
-    
-    echo "</div>";
-}
-    
 }
 
 /* End of file Seminar_skripsi.php */

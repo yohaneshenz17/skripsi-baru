@@ -360,8 +360,8 @@
                     Jika ada kendala dalam proses pengajuan, silakan hubungi:
                     <br><br>
                     <strong>Unit SIPD</strong><br>
-                    Email: sipd@stkstjak.ac.id<br>
-                    Telp: (021) 123-4567
+                    Email: sipd@stkstyakobus.ac.id<br>
+                    Telp: (0971)3330264
                 </small>
             </div>
         </div>

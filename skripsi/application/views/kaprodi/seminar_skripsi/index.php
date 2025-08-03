@@ -2,16 +2,11 @@
 /**
  * FINAL FIXED - Kaprodi Seminar Skripsi Index View
  * 
- * DISESUAIKAN DENGAN DATABASE STRUCTURE:
- * - Tabel: seminar_skripsi_mahasiswa 
- * - View: seminar_skripsi_progress_v
- * - Field sesuai dengan struktur database aktual
- * 
- * PERBAIKAN:
- * 1. Fix word_limiter() dengan fallback function
- * 2. Field names sesuai database structure
- * 3. Status handling sesuai enum values di database
- * 4. Proper null checks untuk semua data
+ * PERBAIKAN UTAMA:
+ * 1. ✅ FIXED: Ubah $seminar_skripsi menjadi $pengajuan_review (sesuai controller)
+ * 2. ✅ FIXED: Field names sesuai dengan data actual dari debug
+ * 3. ✅ FIXED: Fallback functions untuk mencegah error
+ * 4. ✅ FIXED: Stats variable names disesuaikan
  * 
  * File: application/views/kaprodi/seminar_skripsi/index.php
  */
@@ -48,9 +43,12 @@ function get_status_badge($status_kaprodi, $status_pembimbing = null) {
     }
 }
 
-// Pastikan data tersedia
-$seminar_skripsi = isset($seminar_skripsi) ? $seminar_skripsi : [];
+// ✅ FIXED: Pastikan data tersedia dengan variable name yang benar
+$pengajuan_review = isset($pengajuan_review) ? $pengajuan_review : [];
 $stats = isset($stats) ? $stats : [];
+
+// ✅ DEBUG: Tampilkan info debug jika diperlukan
+$debug_mode = $this->input->get('debug') == '1';
 ?>
 
 <!-- Page Header -->
@@ -75,6 +73,15 @@ $stats = isset($stats) ? $stats : [];
                     <a href="#" class="btn btn-sm btn-neutral" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i> Refresh
                     </a>
+                    <?php if ($debug_mode): ?>
+                        <a href="<?= current_url() ?>" class="btn btn-sm btn-warning ml-2">
+                            <i class="fas fa-bug"></i> Exit Debug
+                        </a>
+                    <?php else: ?>
+                        <a href="<?= current_url() ?>?debug=1" class="btn btn-sm btn-info ml-2">
+                            <i class="fas fa-search"></i> Debug
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -84,6 +91,44 @@ $stats = isset($stats) ? $stats : [];
 <!-- Page Content -->
 <div class="container-fluid mt--6">
     
+    <?php if ($debug_mode): ?>
+    <!-- DEBUG INFO -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-bug mr-2"></i>DEBUG MODE</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>📊 Data Variables:</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>$pengajuan_review:</strong> <?= isset($pengajuan_review) ? 'EXISTS (' . count($pengajuan_review) . ' items)' : 'NOT SET' ?></li>
+                                <li><strong>$stats:</strong> <?= isset($stats) ? 'EXISTS' : 'NOT SET' ?></li>
+                                <li><strong>Session prodi_id:</strong> <?= $this->session->userdata('prodi_id') ?></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>🔍 Data Preview:</h5>
+                            <?php if (!empty($pengajuan_review)): ?>
+                                <div class="alert alert-success">
+                                    <strong>✅ DATA DITEMUKAN!</strong><br>
+                                    Mahasiswa: <?= $pengajuan_review[0]->nama_mahasiswa ?? 'N/A' ?><br>
+                                    Status Pembimbing: <?= $pengajuan_review[0]->status_pembimbing ?? 'N/A' ?><br>
+                                    Status Kaprodi: <?= $pengajuan_review[0]->status_kaprodi ?? 'N/A' ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="alert alert-warning">❌ Tidak ada data dalam $pengajuan_review</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
     <!-- Statistics Cards -->
     <div class="row">
         <div class="col-xl-3 col-md-6">
@@ -92,7 +137,7 @@ $stats = isset($stats) ? $stats : [];
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Perlu Review</h5>
-                            <span class="h2 font-weight-bold mb-0"><?= isset($stats['pending_review']) ? $stats['pending_review'] : 0 ?></span>
+                            <span class="h2 font-weight-bold mb-0"><?= isset($stats['perlu_review']) ? $stats['perlu_review'] : count($pengajuan_review) ?></span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
@@ -114,7 +159,7 @@ $stats = isset($stats) ? $stats : [];
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Disetujui</h5>
-                            <span class="h2 font-weight-bold mb-0"><?= isset($stats['approved_month']) ? $stats['approved_month'] : 0 ?></span>
+                            <span class="h2 font-weight-bold mb-0"><?= isset($stats['disetujui']) ? $stats['disetujui'] : 0 ?></span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-success text-white rounded-circle shadow">
@@ -136,7 +181,7 @@ $stats = isset($stats) ? $stats : [];
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Ditolak</h5>
-                            <span class="h2 font-weight-bold mb-0"><?= isset($stats['rejected_month']) ? $stats['rejected_month'] : 0 ?></span>
+                            <span class="h2 font-weight-bold mb-0"><?= isset($stats['ditolak']) ? $stats['ditolak'] : 0 ?></span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
@@ -158,7 +203,7 @@ $stats = isset($stats) ? $stats : [];
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Terjadwal</h5>
-                            <span class="h2 font-weight-bold mb-0"><?= isset($stats['scheduled']) ? $stats['scheduled'] : 0 ?></span>
+                            <span class="h2 font-weight-bold mb-0"><?= isset($stats['terjadwal']) ? $stats['terjadwal'] : 0 ?></span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-info text-white rounded-circle shadow">
@@ -188,7 +233,7 @@ $stats = isset($stats) ? $stats : [];
                         <div class="col text-right">
                             <span class="text-muted">
                                 <i class="fas fa-list mr-1"></i>
-                                <?= is_array($seminar_skripsi) ? count($seminar_skripsi) : 0 ?> pengajuan
+                                <?= is_array($pengajuan_review) ? count($pengajuan_review) : 0 ?> pengajuan
                             </span>
                         </div>
                     </div>
@@ -233,18 +278,28 @@ $stats = isset($stats) ? $stats : [];
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if(empty($seminar_skripsi)): ?>
+                                <?php if(empty($pengajuan_review)): ?>
                                     <tr>
                                         <td colspan="8" class="text-center py-5">
                                             <div class="text-muted">
                                                 <i class="fas fa-graduation-cap fa-3x mb-3 text-muted"></i><br>
                                                 <h5 class="text-muted">Tidak ada data seminar skripsi</h5>
-                                                <p class="text-muted mb-0">Belum ada mahasiswa yang mengajukan seminar skripsi</p>
+                                                <p class="text-muted mb-0">Belum ada mahasiswa yang mengajukan seminar skripsi untuk direview</p>
+                                                <?php if (ENVIRONMENT === 'development'): ?>
+                                                    <div class="mt-3">
+                                                        <small class="text-info">
+                                                            🔍 Debug: 
+                                                            <a href="<?= current_url() ?>?debug=1" class="btn btn-sm btn-outline-info">
+                                                                Check Debug Mode
+                                                            </a>
+                                                        </small>
+                                                    </div>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
                                 <?php else: ?>
-                                    <?php foreach($seminar_skripsi as $key => $item): ?>
+                                    <?php foreach($pengajuan_review as $key => $item): ?>
                                         <tr>
                                             <td>
                                                 <span class="badge badge-soft-primary"><?= $key + 1 ?></span>
@@ -262,8 +317,8 @@ $stats = isset($stats) ? $stats : [];
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="text-sm" title="<?= htmlspecialchars($item->judul_skripsi ?? $item->judul_proposal ?? 'N/A') ?>">
-                                                    <?= safe_word_limiter($item->judul_skripsi ?? $item->judul_proposal ?? 'N/A', 8) ?>
+                                                <span class="text-sm" title="<?= htmlspecialchars($item->judul ?? 'N/A') ?>">
+                                                    <?= safe_word_limiter($item->judul ?? 'N/A', 8) ?>
                                                 </span>
                                                 <?php if(!empty($item->file_skripsi)): ?>
                                                     <br><small class="text-muted">
@@ -279,7 +334,7 @@ $stats = isset($stats) ? $stats : [];
                                             <td>
                                                 <?= get_status_badge($item->status_kaprodi ?? 'pending', $item->status_pembimbing ?? null) ?>
                                                 <?php if($item->status_pembimbing == 'approved' && $item->status_kaprodi == 'pending'): ?>
-                                                    <br><small class="text-info mt-1">
+                                                    <br><small class="text-success mt-1">
                                                         <i class="fas fa-user-check mr-1"></i>Direkomendasikan pembimbing
                                                     </small>
                                                 <?php endif; ?>
@@ -294,7 +349,7 @@ $stats = isset($stats) ? $stats : [];
                                                         <?= number_format($plagiarism, 1) ?>%
                                                     </span>
                                                 <?php else: ?>
-                                                    <span class="text-muted">-</span>
+                                                    <span class="text-muted">Belum dicek</span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>

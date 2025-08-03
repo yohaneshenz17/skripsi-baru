@@ -50,23 +50,26 @@ class Seminar_skripsi extends CI_Controller {
             log_message('error', 'Failed to load Seminar_skripsi_model: ' . $e->getMessage());
         }
         
-        // Set prodi_id dari session
-        $this->prodi_id = $this->session->userdata('prodi_id');
-        
-        if (!$this->prodi_id) {
-            $this->_set_prodi_id();
-        }
+        // ENHANCED: Set prodi_id dengan debug
+        $this->_set_prodi_id_debug();
     }
 
-   /**
-     * FIXED: Index - Dashboard sederhana tanpa query error
+    /**
+     * ENHANCED: Index dengan debug mode
      */
     public function index() {
         try {
-            // Data sederhana tanpa CASE WHEN yang bermasalah
+            // Enable debug mode jika parameter debug=1
+            $debug_mode = $this->input->get('debug') == '1';
+            
+            if ($debug_mode) {
+                return $this->debug_data();
+            }
+
+            // Data normal
             $data = [
                 'title' => 'Kelola Seminar Skripsi',
-                'pengajuan_review' => $this->_get_pengajuan_perlu_review(),
+                'pengajuan_review' => $this->_get_pengajuan_perlu_review_enhanced(),
                 'stats' => $this->_get_statistics_simple()
             ];
             
@@ -81,12 +84,176 @@ class Seminar_skripsi extends CI_Controller {
             
         } catch (Exception $e) {
             log_message('error', 'Seminar_skripsi index error: ' . $e->getMessage());
-            
-            // Tampilkan error sederhana
-            $this->session->set_flashdata('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
             redirect('kaprodi/dashboard');
         }
     }
+
+    /**
+     * ✅ NEW: Debug method untuk troubleshooting
+     * URL: kaprodi/seminar_skripsi?debug=1
+     */
+    public function debug_data() {
+        // Hanya untuk development atau admin
+        if (ENVIRONMENT === 'production' && $this->session->userdata('level') != '1') {
+            show_error('Access denied in production', 403);
+        }
+
+        echo "<h2>🔍 DEBUG - Kaprodi Seminar Skripsi</h2>";
+        echo "<p><a href='" . base_url('kaprodi/seminar_skripsi') . "'>← Kembali ke Dashboard Normal</a></p>";
+        
+        // 1. DEBUG SESSION
+        echo "<h3>1. 📊 Session Data:</h3>";
+        echo "<table border='1' style='border-collapse: collapse; margin-bottom: 20px;'>";
+        echo "<tr><th>Key</th><th>Value</th></tr>";
+        foreach ($this->session->userdata() as $key => $value) {
+            if ($key != 'password') { // Jangan tampilkan password
+                echo "<tr><td><strong>$key</strong></td><td>" . 
+                     (is_array($value) ? json_encode($value) : $value) . "</td></tr>";
+            }
+        }
+        echo "</table>";
+
+        // 2. DEBUG PRODI ID
+        echo "<h3>2. 🏫 Prodi ID Detection:</h3>";
+        echo "<table border='1' style='border-collapse: collapse; margin-bottom: 20px;'>";
+        echo "<tr><th>Source</th><th>Value</th><th>Status</th></tr>";
+        
+        $session_prodi = $this->session->userdata('prodi_id');
+        echo "<tr><td>Session prodi_id</td><td>$session_prodi</td><td>" . 
+             ($session_prodi ? '✅ Found' : '❌ Not Set') . "</td></tr>";
+        
+        $user_id = $this->session->userdata('id');
+        $prodi_from_table = $this->db->get_where('prodi', ['dosen_id' => $user_id])->row();
+        echo "<tr><td>Prodi table lookup</td><td>" . 
+             ($prodi_from_table ? $prodi_from_table->id : 'NULL') . "</td><td>" . 
+             ($prodi_from_table ? '✅ Found' : '❌ Not Found') . "</td></tr>";
+        
+        echo "<tr><td><strong>Active prodi_id</strong></td><td><strong>$this->prodi_id</strong></td><td>" . 
+             ($this->prodi_id ? '✅ Set' : '❌ Missing') . "</td></tr>";
+        echo "</table>";
+
+        // 3. DEBUG MAHASISWA DATA
+        echo "<h3>3. 👨‍🎓 Mahasiswa Data in Prodi:</h3>";
+        $mahasiswa_query = $this->db->select('id, nim, nama, prodi_id')
+                                   ->from('mahasiswa')
+                                   ->where('prodi_id', $this->prodi_id)
+                                   ->get();
+        
+        if ($mahasiswa_query->num_rows() > 0) {
+            echo "<table border='1' style='border-collapse: collapse; margin-bottom: 20px;'>";
+            echo "<tr><th>ID</th><th>NIM</th><th>Nama</th><th>Prodi ID</th></tr>";
+            foreach ($mahasiswa_query->result() as $mhs) {
+                $highlight = ($mhs->nama == 'Mahasiswa Contoh 3') ? 'style="background-color: yellow;"' : '';
+                echo "<tr $highlight><td>$mhs->id</td><td>$mhs->nim</td><td>$mhs->nama</td><td>$mhs->prodi_id</td></tr>";
+            }
+            echo "</table>";
+        } else {
+            echo "<p>❌ Tidak ada mahasiswa di prodi_id: $this->prodi_id</p>";
+        }
+
+        // 4. DEBUG SEMINAR SKRIPSI DATA
+        echo "<h3>4. 📝 Raw Seminar Skripsi Data:</h3>";
+        $seminar_query = $this->db->select('
+                ssm.id, ssm.mahasiswa_id, ssm.status, ssm.status_pembimbing, ssm.status_kaprodi,
+                m.nim, m.nama as nama_mahasiswa, m.prodi_id,
+                pm.judul
+            ')
+            ->from('seminar_skripsi_mahasiswa ssm')
+            ->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left')
+            ->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left')
+            ->get();
+
+        if ($seminar_query->num_rows() > 0) {
+            echo "<table border='1' style='border-collapse: collapse; margin-bottom: 20px;'>";
+            echo "<tr><th>SSM ID</th><th>Mahasiswa</th><th>NIM</th><th>Prodi ID</th><th>Status</th><th>Status Pembimbing</th><th>Status Kaprodi</th><th>Match Criteria</th></tr>";
+            foreach ($seminar_query->result() as $ssm) {
+                $highlight = ($ssm->nama_mahasiswa == 'Mahasiswa Contoh 3') ? 'style="background-color: yellow;"' : '';
+                
+                // Check if matches criteria
+                $match_prodi = ($ssm->prodi_id == $this->prodi_id);
+                $match_status_pembimbing = ($ssm->status_pembimbing == 'approved');
+                $match_status_kaprodi = ($ssm->status_kaprodi == 'pending');
+                $all_match = $match_prodi && $match_status_pembimbing && $match_status_kaprodi;
+                
+                $criteria_text = "Prodi: " . ($match_prodi ? '✅' : '❌') . " | " .
+                               "Pembimbing: " . ($match_status_pembimbing ? '✅' : '❌') . " | " .
+                               "Kaprodi: " . ($match_status_kaprodi ? '✅' : '❌') . " | " .
+                               "ALL: " . ($all_match ? '✅ MATCH' : '❌ NO MATCH');
+                
+                echo "<tr $highlight>";
+                echo "<td>$ssm->id</td>";
+                echo "<td>$ssm->nama_mahasiswa</td>";
+                echo "<td>$ssm->nim</td>";
+                echo "<td>$ssm->prodi_id</td>";
+                echo "<td>$ssm->status</td>";
+                echo "<td>$ssm->status_pembimbing</td>";
+                echo "<td>$ssm->status_kaprodi</td>";
+                echo "<td><small>$criteria_text</small></td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+        } else {
+            echo "<p>❌ Tidak ada data di tabel seminar_skripsi_mahasiswa</p>";
+        }
+
+        // 5. DEBUG QUERY RESULT
+        echo "<h3>5. 🔍 Query Result from _get_pengajuan_perlu_review():</h3>";
+        $pengajuan = $this->_get_pengajuan_perlu_review_enhanced();
+        
+        if (!empty($pengajuan)) {
+            echo "<p style='color: green;'>✅ Query berhasil, ditemukan " . count($pengajuan) . " pengajuan</p>";
+            echo "<table border='1' style='border-collapse: collapse; margin-bottom: 20px;'>";
+            echo "<tr><th>ID</th><th>Mahasiswa</th><th>Judul</th><th>Status Pembimbing</th><th>Status Kaprodi</th></tr>";
+            foreach ($pengajuan as $p) {
+                echo "<tr>";
+                echo "<td>$p->id</td>";
+                echo "<td>$p->nama_mahasiswa</td>";
+                echo "<td>" . substr($p->judul, 0, 50) . "...</td>";
+                echo "<td>$p->status_pembimbing</td>";
+                echo "<td>$p->status_kaprodi</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+        } else {
+            echo "<p style='color: red;'>❌ Query tidak mengembalikan data</p>";
+        }
+
+        // 6. RECOMMENDED ACTIONS
+        echo "<h3>6. 💡 Rekomendasi Perbaikan:</h3>";
+        echo "<ul>";
+        
+        if (!$this->prodi_id) {
+            echo "<li>❌ <strong>Set prodi_id untuk kaprodi ini</strong></li>";
+        }
+        
+        $mahasiswa_contoh3 = $this->db->get_where('mahasiswa', ['nama' => 'Mahasiswa Contoh 3'])->row();
+        if ($mahasiswa_contoh3) {
+            if ($mahasiswa_contoh3->prodi_id != $this->prodi_id) {
+                echo "<li>⚠️ <strong>Update prodi_id Mahasiswa Contoh 3 dari {$mahasiswa_contoh3->prodi_id} ke {$this->prodi_id}</strong></li>";
+            }
+        }
+        
+        $seminar_contoh3 = $this->db->select('ssm.*, m.nama')
+                                   ->from('seminar_skripsi_mahasiswa ssm')
+                                   ->join('mahasiswa m', 'ssm.mahasiswa_id = m.id')
+                                   ->where('m.nama', 'Mahasiswa Contoh 3')
+                                   ->get()->row();
+        
+        if ($seminar_contoh3) {
+            if ($seminar_contoh3->status_pembimbing != 'approved') {
+                echo "<li>⚠️ <strong>Update status_pembimbing Mahasiswa Contoh 3 menjadi 'approved'</strong></li>";
+            }
+            if ($seminar_contoh3->status_kaprodi != 'pending') {
+                echo "<li>⚠️ <strong>Update status_kaprodi Mahasiswa Contoh 3 menjadi 'pending'</strong></li>";
+            }
+        }
+        
+        echo "</ul>";
+
+        echo "<br><p><a href='" . base_url('kaprodi/seminar_skripsi') . "'>← Kembali ke Dashboard Normal</a></p>";
+    }
+
     
     /**
      * Detail pengajuan - sederhana
@@ -328,15 +495,26 @@ class Seminar_skripsi extends CI_Controller {
     /**
      * Set prodi_id dari session atau database - ENHANCED dengan debugging
      */
-    private function _set_prodi_id() {
+    /**
+     * ✅ ENHANCED: Set prodi_id dengan debugging
+     */
+    private function _set_prodi_id_debug() {
         try {
             $user_id = $this->session->userdata('id');
+            
+            // Check session first
+            $this->prodi_id = $this->session->userdata('prodi_id');
+            if ($this->prodi_id) {
+                log_message('debug', "Prodi ID from session: {$this->prodi_id}");
+                return;
+            }
             
             // Try from prodi table
             $kaprodi = $this->db->get_where('prodi', ['dosen_id' => $user_id])->row();
             if ($kaprodi) {
                 $this->prodi_id = $kaprodi->id;
                 $this->session->set_userdata('prodi_id', $this->prodi_id);
+                log_message('debug', "Prodi ID from prodi table: {$this->prodi_id}");
                 return;
             }
             
@@ -345,12 +523,14 @@ class Seminar_skripsi extends CI_Controller {
             if ($dosen && isset($dosen->prodi_id)) {
                 $this->prodi_id = $dosen->prodi_id;
                 $this->session->set_userdata('prodi_id', $this->prodi_id);
+                log_message('debug', "Prodi ID from dosen table: {$this->prodi_id}");
                 return;
             }
             
             // Final fallback
             $this->prodi_id = 1; // Default ke prodi_id = 1
             $this->session->set_userdata('prodi_id', $this->prodi_id);
+            log_message('debug', "Prodi ID fallback: {$this->prodi_id}");
             
         } catch (Exception $e) {
             log_message('error', 'Error setting prodi_id: ' . $e->getMessage());
@@ -361,9 +541,11 @@ class Seminar_skripsi extends CI_Controller {
     /**
     * FIXED: Get pengajuan - ikuti pola persis dari controller dosen
      */
-    private function _get_pengajuan_perlu_review() {
+    private function _get_pengajuan_perlu_review_enhanced() {
         try {
-            // PERSIS seperti controller dosen, tapi untuk kaprodi
+            // Log query attempt
+            log_message('debug', "Attempting to get seminar skripsi for prodi_id: {$this->prodi_id}");
+            
             $this->db->select('
                 ssm.*,
                 m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
@@ -371,32 +553,49 @@ class Seminar_skripsi extends CI_Controller {
                 d.nama as nama_pembimbing
             ');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
-            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
-            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'inner'); // Changed to INNER
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'inner'); // Changed to INNER
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            
+            // Main criteria
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.status_pembimbing', 'approved');
+            $this->db->where('ssm.status_kaprodi', 'pending');
+            
+            $this->db->order_by('ssm.created_at', 'DESC');
+            
+            // Log the query
+            $query_string = $this->db->get_compiled_select();
+            log_message('debug', 'Seminar skripsi query: ' . $query_string);
+            
+            // Reset query and execute
+            $this->db->select('
+                ssm.*,
+                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+                pm.judul, pm.dosen_id as pembimbing_id,
+                d.nama as nama_pembimbing
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'inner');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'inner');
             $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
             $this->db->where('m.prodi_id', $this->prodi_id);
-            
-            // LOGIC KAPRODI: Yang sudah approved dosen dan belum direview kaprodi
-            $this->db->where('ssm.status_pembimbing', 'approved'); // Sudah disetujui dosen
-            $this->db->where('ssm.status_kaprodi', 'pending'); // Menunggu review kaprodi
-            
-            $this->db->order_by('ssm.created_at', 'DESC'); // Sama seperti dosen
+            $this->db->where('ssm.status_pembimbing', 'approved');
+            $this->db->where('ssm.status_kaprodi', 'pending');
+            $this->db->order_by('ssm.created_at', 'DESC');
             
             $result = $this->db->get()->result();
             
-            // Debug: Print query yang dijalankan
-            log_message('debug', 'Last query: ' . $this->db->last_query());
-            log_message('debug', 'Pengajuan perlu review found: ' . count($result) . ' records');
-            if (!empty($result)) {
-                log_message('debug', 'First record: ' . json_encode($result[0]));
-            }
+            log_message('debug', 'Seminar skripsi result count: ' . count($result));
             
-            return $result ?: []; // Pastikan return array kosong jika null
+            return $result;
+            
         } catch (Exception $e) {
-            log_message('error', 'Error getting pengajuan review: ' . $e->getMessage());
+            log_message('error', 'Error in _get_pengajuan_perlu_review: ' . $e->getMessage());
             return [];
         }
     }
+
     
     /**
      * Get seminar yang perlu dijadwalkan (sudah approved tapi belum dijadwal)
@@ -534,62 +733,50 @@ class Seminar_skripsi extends CI_Controller {
      * FIXED: Get statistics - pastikan query PERSIS sama dengan list
      */
     private function _get_statistics_simple() {
+        $stats = [];
+        
         try {
-            $stats = [];
-            
-            // Pending review - QUERY HARUS PERSIS SAMA dengan _get_pengajuan_perlu_review
-            $this->db->select('COUNT(*) as count');
+            // Perlu review
+            $this->db->select('COUNT(*) as perlu_review');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
-            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
-            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
-            $this->db->where('ssm.status_pembimbing', 'approved'); 
+            $this->db->where('ssm.status_pembimbing', 'approved');
             $this->db->where('ssm.status_kaprodi', 'pending');
-            $result = $this->db->get()->row();
-            $stats['pending_review'] = $result ? $result->count : 0;
+            $stats['perlu_review'] = $this->db->get()->row()->perlu_review ?? 0;
             
-            // Approved
-            $this->db->select('COUNT(*) as count');
+            // Disetujui bulan ini
+            $this->db->select('COUNT(*) as disetujui');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
             $this->db->where('ssm.status_kaprodi', 'approved');
-            $result = $this->db->get()->row();
-            $stats['approved'] = $result ? $result->count : 0;
+            $this->db->where('MONTH(ssm.tanggal_review_kaprodi)', date('n'));
+            $this->db->where('YEAR(ssm.tanggal_review_kaprodi)', date('Y'));
+            $stats['disetujui'] = $this->db->get()->row()->disetujui ?? 0;
             
-            // Rejected
-            $this->db->select('COUNT(*) as count');
+            // Ditolak
+            $this->db->select('COUNT(*) as ditolak');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
             $this->db->where('ssm.status_kaprodi', 'rejected');
-            $result = $this->db->get()->row();
-            $stats['rejected'] = $result ? $result->count : 0;
+            $stats['ditolak'] = $this->db->get()->row()->ditolak ?? 0;
             
-            // Scheduled
-            $this->db->select('COUNT(*) as count');
+            // Terjadwal
+            $this->db->select('COUNT(*) as terjadwal');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
             $this->db->where('m.prodi_id', $this->prodi_id);
-            $this->db->where('ssm.tanggal_seminar IS NOT NULL');
-            $result = $this->db->get()->row();
-            $stats['scheduled'] = $result ? $result->count : 0;
+            $this->db->where('ssm.status', 'scheduled');
+            $stats['terjadwal'] = $this->db->get()->row()->terjadwal ?? 0;
             
-            // Debug log
-            log_message('debug', 'Statistics query pending: ' . $this->db->last_query());
-            log_message('debug', 'Statistics: ' . json_encode($stats));
-            
-            return $stats;
         } catch (Exception $e) {
             log_message('error', 'Error getting statistics: ' . $e->getMessage());
-            return [
-                'pending_review' => 0,
-                'approved' => 0,
-                'rejected' => 0,
-                'scheduled' => 0
-            ];
+            $stats = ['perlu_review' => 0, 'disetujui' => 0, 'ditolak' => 0, 'terjadwal' => 0];
         }
+        
+        return $stats;
     }
 
     /**

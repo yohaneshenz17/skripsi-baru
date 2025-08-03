@@ -437,3 +437,81 @@ ERROR - 2025-08-03 14:36:08 --> Severity: error --> Exception: syntax error, une
 ERROR - 2025-08-03 14:36:20 --> Severity: error --> Exception: syntax error, unexpected token "*", expecting "function" or "const" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 536
 ERROR - 2025-08-03 14:42:43 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:1152) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
 ERROR - 2025-08-03 14:42:43 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_get_pengajuan_perlu_review() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 1152
+ERROR - 2025-08-03 14:56:33 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_pengajuan_perlu_review_enhanced() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 72
+ERROR - 2025-08-03 15:18:12 --> Query error: Unknown column 'pm.prodi_id' in 'where clause' - Invalid query: 
+                SELECT 
+                    ss.id,
+                    ss.proposal_id,
+                    ss.mahasiswa_id,
+                    ss.status,
+                    ss.current_step,
+                    ss.judul_skripsi,
+                    ss.file_skripsi,
+                    ss.status_pembimbing,
+                    ss.status_kaprodi,
+                    ss.tanggal_seminar,
+                    ss.jam_seminar,
+                    ss.tempat_seminar,
+                    ss.plagiarism_percentage,
+                    ss.created_at,
+                    m.nim,
+                    m.nama as nama_mahasiswa,
+                    m.email as email_mahasiswa,
+                    pm.judul as judul_proposal,
+                    pm.dosen_id as pembimbing_id,
+                    d.nama as nama_pembimbing,
+                    d.email as email_pembimbing,
+                    d1.nama as nama_penguji1,
+                    d2.nama as nama_penguji2
+                FROM seminar_skripsi_mahasiswa ss
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
+                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN dosen d ON pm.dosen_id = d.id
+                LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
+                LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
+                WHERE (pm.prodi_id = '10' OR pm.prodi_id IS NULL)
+                ORDER BY ss.created_at DESC
+                LIMIT 100
+            
+ERROR - 2025-08-03 15:19:04 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:19:40 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:19:55 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:19:56 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:20:16 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:26:24 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:29:08 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:34:23 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:46:54 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:66) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 15:46:54 --> Severity: Compile Error --> Cannot use try without catch or finally /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 66
+ERROR - 2025-08-03 15:48:07 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:66) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 15:48:07 --> Severity: Compile Error --> Cannot use try without catch or finally /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 66
+ERROR - 2025-08-03 16:45:10 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:66) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 16:45:10 --> Severity: Compile Error --> Cannot use try without catch or finally /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 66
+ERROR - 2025-08-03 16:45:36 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_index_script() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 92
+ERROR - 2025-08-03 17:24:43 --> 404 Page Not Found: kaprodi/Seminar_skripsi/download_file
+ERROR - 2025-08-03 17:24:49 --> 404 Page Not Found: kaprodi/Seminar_skripsi/view_file
+ERROR - 2025-08-03 17:45:46 --> 404 Page Not Found: mahasiswa/Publikasi/index

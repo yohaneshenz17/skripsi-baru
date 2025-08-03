@@ -115,45 +115,62 @@ class Seminar_skripsi extends CI_Controller {
     /**
      * Detail pengajuan seminar skripsi untuk review
      */
-    public function detail($seminar_id) {
-        if (!is_numeric($seminar_id)) {
-            show_404();
+public function detail($seminar_id) {
+    // Validasi ID
+    if (!is_numeric($seminar_id)) {
+        show_404();
+        return;
+    }
+    
+    try {
+        // ✅ QUERY SEDERHANA - Ambil data seminar berdasarkan ID
+        $this->db->select('
+            ssm.*,
+            pm.judul,
+            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+            d.nama as nama_pembimbing
+        ');
+        $this->db->from('seminar_skripsi_mahasiswa ssm');
+        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->where('ssm.id', $seminar_id);
+        
+        // Validasi prodi jika ada
+        if ($this->prodi_id) {
+            $this->db->where('m.prodi_id', $this->prodi_id);
+        }
+        
+        $seminar = $this->db->get()->row();
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan dari prodi Anda!');
+            redirect('kaprodi/seminar_skripsi');
             return;
         }
         
-        try {
-            // Get detail seminar berdasarkan database structure yang benar
-            $seminar = $this->_get_seminar_detail($seminar_id);
-            
-            if (!$seminar) {
-                $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan dari prodi Anda!');
-                redirect('kaprodi/seminar_skripsi');
-                return;
-            }
-            
-            // Data untuk view
-            $data = [
-                'title' => 'Detail Seminar Skripsi - ' . $seminar->nama_mahasiswa,
-                'seminar' => $seminar,
-                'dosen_list' => $this->_get_dosen_penguji(),
-                'allow_edit' => ($seminar->status == 'review_kaprodi')
-            ];
-            
-            $content = $this->load->view('kaprodi/seminar_skripsi/detail', $data, TRUE);
-            
-            $template_data = [
-                'title' => 'Detail Seminar Skripsi',
-                'content' => $content
-            ];
-            
-            $this->load->view('template/kaprodi', $template_data);
-            
-        } catch (Exception $e) {
-            log_message('error', 'Seminar_skripsi detail error: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan sistem.');
-            redirect('kaprodi/seminar_skripsi');
-        }
+        // Data untuk view
+        $data = [
+            'seminar' => $seminar,
+            'allow_edit' => true
+        ];
+        
+        // ✅ POLA YANG SAMA dengan controller stable
+        $content = $this->load->view('kaprodi/seminar_skripsi/detail', $data, TRUE);
+        
+        $template_data = [
+            'title' => 'Detail Seminar Skripsi - ' . $seminar->nama_mahasiswa,
+            'content' => $content
+        ];
+        
+        $this->load->view('template/kaprodi', $template_data);
+        
+    } catch (Exception $e) {
+        log_message('error', 'Seminar_skripsi detail error: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Terjadi kesalahan sistem.');
+        redirect('kaprodi/seminar_skripsi');
     }
+}
 
     /**
      * Validasi turnitin dan approve/reject seminar

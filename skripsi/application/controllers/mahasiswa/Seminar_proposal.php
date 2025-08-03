@@ -210,50 +210,69 @@ class Seminar_proposal extends CI_Controller {
                 return ['proposal' => null, 'seminar_data' => null];
             }
             
-            // STEP 2: Untuk setiap proposal, cek apakah ada data seminar
-            foreach ($proposals as $proposal) {
-                $seminar_data = $this->_get_seminar_with_details($proposal->id);
-                
-                // STEP 3: Logic prioritas pemilihan proposal
-                if ($seminar_data) {
-                    // Jika ada seminar data, prioritaskan yang terbaru
+        // 🔧 PERBAIKAN: STEP 2 - Prioritas 1: Proposal dengan seminar data (ANY workflow status)
+        foreach ($proposals as $proposal) {
+            // ✅ UBAH: Cari proposal yang PERNAH punya seminar proposal, terlepas dari workflow status
+            $seminar_data = $this->_get_seminar_with_details($proposal->id);
+            
+            if ($seminar_data) {
+                // ✅ Prioritaskan yang masih aktif (belum completed)
+                if (in_array($seminar_data->status, ['draft', 'submitted', 'review_pembimbing', 'review_kaprodi', 'approved', 'scheduled'])) {
                     if (ENVIRONMENT === 'development') {
-                        log_message('debug', 'Found proposal with seminar: ID ' . $proposal->id . 
-                                   ', workflow: ' . $proposal->workflow_status . 
-                                   ', seminar_status: ' . $seminar_data->status);
+                        log_message('debug', 'Found active seminar proposal: ID ' . $proposal->id . 
+                                   ', workflow: ' . $proposal->workflow_status . ', seminar_status: ' . $seminar_data->status);
                     }
                     return ['proposal' => $proposal, 'seminar_data' => $seminar_data];
-                    
-                } else if ($proposal->workflow_status === 'bimbingan' || $proposal->workflow_status === 'seminar_proposal') {
-                    // Proposal yang belum ada seminar tapi sudah eligible
-                    if (ENVIRONMENT === 'development') {
-                        log_message('debug', 'Found eligible proposal without seminar: ID ' . $proposal->id . 
-                                   ', workflow: ' . $proposal->workflow_status);
-                    }
-                    return ['proposal' => $proposal, 'seminar_data' => null];
                 }
             }
+        }
+        
+        // 🔧 PERBAIKAN: STEP 3 - Prioritas 2: Proposal dengan seminar completed (RIWAYAT)
+        foreach ($proposals as $proposal) {
+            $seminar_data = $this->_get_seminar_with_details($proposal->id);
             
-            // STEP 4: Jika tidak ada yang cocok dengan logic di atas, ambil yang pertama
-            if (!empty($proposals)) {
-                $proposal = $proposals[0];
-                $seminar_data = $this->_get_seminar_with_details($proposal->id);
-                
+            if ($seminar_data && $seminar_data->status === 'completed') {
+                // ✅ TETAP TAMPILKAN RIWAYAT meskipun workflow sudah lanjut
                 if (ENVIRONMENT === 'development') {
-                    log_message('debug', 'Using first available proposal: ID ' . $proposal->id . 
-                               ', workflow: ' . $proposal->workflow_status);
+                    log_message('debug', 'Found completed seminar proposal: ID ' . $proposal->id . 
+                               ', workflow: ' . $proposal->workflow_status . ', seminar_status: ' . $seminar_data->status);
                 }
-                
                 return ['proposal' => $proposal, 'seminar_data' => $seminar_data];
             }
-            
-            return ['proposal' => null, 'seminar_data' => null];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting comprehensive proposal data: ' . $e->getMessage());
-            return ['proposal' => null, 'seminar_data' => null];
         }
+        
+        // STEP 4: Proposal yang eligible tapi belum ada seminar
+        foreach ($proposals as $proposal) {
+            // ✅ UBAH: Workflow status yang bisa mengajukan seminar proposal
+            if (in_array($proposal->workflow_status, ['bimbingan', 'seminar_proposal'])) {
+                if (ENVIRONMENT === 'development') {
+                    log_message('debug', 'Found eligible proposal without seminar: ID ' . $proposal->id . 
+                               ', workflow: ' . $proposal->workflow_status);
+                }
+                return ['proposal' => $proposal, 'seminar_data' => null];
+            }
+        }
+        
+        // STEP 5: Fallback - ambil proposal pertama yang tersedia
+        if (!empty($proposals)) {
+            $proposal = $proposals[0];
+            $seminar_data = $this->_get_seminar_with_details($proposal->id);
+            
+            if (ENVIRONMENT === 'development') {
+                log_message('debug', 'Using first available proposal: ID ' . $proposal->id . 
+                           ', workflow: ' . $proposal->workflow_status);
+            }
+            
+            return ['proposal' => $proposal, 'seminar_data' => $seminar_data];
+        }
+        
+        return ['proposal' => null, 'seminar_data' => null];
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error getting comprehensive proposal data: ' . $e->getMessage());
+        return ['proposal' => null, 'seminar_data' => null];
     }
+}
 
     /**
      * 🔧 ENHANCED: Get seminar data dengan detail lengkap
@@ -1755,5 +1774,50 @@ class Seminar_proposal extends CI_Controller {
         
         echo "<hr>";
         echo "<p><a href='" . base_url('mahasiswa/seminar_proposal') . "'>← Kembali ke Dashboard Seminar Proposal</a></p>";
+    }
+    
+    /**
+     * 🔧 HELPER: Method untuk debug proposal data
+     * Tambahkan di akhir class sebelum closing brace
+     */
+    public function debug_proposal_data()
+    {
+        if (ENVIRONMENT !== 'development') {
+            show_404();
+            return;
+        }
+        
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        echo "<h2>🔍 Debug Proposal Data untuk Mahasiswa ID: {$mahasiswa_id}</h2>";
+        
+        // Test query proposal
+        $this->db->select('id, judul, workflow_status, status_kaprodi, status_pembimbing');
+        $this->db->from('proposal_mahasiswa');
+        $this->db->where('mahasiswa_id', $mahasiswa_id);
+        $proposals = $this->db->get()->result();
+        
+        echo "<h3>📋 Daftar Proposal:</h3>";
+        if ($proposals) {
+            echo "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+            echo "<tr><th>ID</th><th>Judul</th><th>Workflow Status</th><th>Status Kaprodi</th><th>Status Pembimbing</th></tr>";
+            foreach ($proposals as $p) {
+                echo "<tr>";
+                echo "<td>{$p->id}</td>";
+                echo "<td>" . substr($p->judul, 0, 50) . "...</td>";
+                echo "<td><strong>{$p->workflow_status}</strong></td>";
+                echo "<td>{$p->status_kaprodi}</td>";
+                echo "<td>{$p->status_pembimbing}</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+        } else {
+            echo "<p>❌ Tidak ada proposal ditemukan</p>";
+        }
+        
+        // Test comprehensive method
+        echo "<h3>🔧 Test Comprehensive Method:</h3>";
+        $result = $this->_get_comprehensive_proposal_data($mahasiswa_id);
+        echo "<pre>" . print_r($result, true) . "</pre>";
     }
 }

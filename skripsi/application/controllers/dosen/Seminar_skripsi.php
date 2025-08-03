@@ -2,10 +2,10 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Seminar Skripsi Controller untuk Dosen Pembimbing - DATABASE STRUCTURE CORRECT
+ * Seminar Skripsi Controller untuk Dosen Pembimbing - ENHANCED WITH COMPLETE NOTIFICATIONS
  * 
  * Controller untuk mengelola seminar skripsi dari perspektif dosen pembimbing
- * FIXED: Berdasarkan struktur database sebenarnya dari tabel seminar_skripsi_mahasiswa
+ * ENHANCED: Ditambahkan implementasi notifikasi lengkap dan handling pengajuan ulang
  * 
  * STRUKTUR DATABASE YANG BENAR (dari screenshot):
  * - Tabel: seminar_skripsi_mahasiswa
@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Dosen
  * @category    Seminar Skripsi
  * @author      Unit SIPD STK Santo Yakobus
- * @version     4.0 (Database Structure Correct)
+ * @version     5.0 (Enhanced with Complete Notifications)
  */
 class Seminar_skripsi extends CI_Controller {
 
@@ -39,7 +39,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Index - Dashboard seminar skripsi untuk dosen
-     * FIXED: Query sesuai struktur database sebenarnya
+     * STABLE - TIDAK DIUBAH
      */
     public function index() {
         $dosen_id = $this->session->userdata('id');
@@ -68,6 +68,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Detail pengajuan seminar skripsi
+     * STABLE - TIDAK DIUBAH
      */
     public function detail($seminar_id) {
         $dosen_id = $this->session->userdata('id');
@@ -104,6 +105,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * View file skripsi
+     * STABLE - TIDAK DIUBAH
      */
     public function view_file($seminar_id) {
         $dosen_id = $this->session->userdata('id');
@@ -140,7 +142,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Proses rekomendasi seminar skripsi (Setujui/Tolak)
-     * FIXED: Menggunakan kolom yang benar dari database
+     * ENHANCED: Ditambahkan handling untuk pengajuan ulang
      */
     public function rekomendasi() {
         if ($this->input->method() !== 'post') {
@@ -210,7 +212,7 @@ class Seminar_skripsi extends CI_Controller {
             if ($success) {
                 $this->session->set_flashdata('success', $message);
                 
-                // Send email notification
+                // ENHANCED: Send complete email notification
                 $this->_send_email_notification($seminar, $rekomendasi, $komentar);
             } else {
                 $this->session->set_flashdata('error', 'Gagal memproses rekomendasi!');
@@ -224,7 +226,61 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
+     * NEW: Handle pengajuan ulang setelah ditolak dosen atau kaprodi
+     */
+    public function handle_resubmission($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Validasi ownership dan status
+        $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan!');
+            redirect('dosen/seminar_skripsi');
+            return;
+        }
+        
+        // Hanya bisa handle resubmission jika status rejected
+        if (!in_array($seminar->status, ['rejected'])) {
+            $this->session->set_flashdata('error', 'Seminar ini tidak dalam status yang bisa diajukan ulang!');
+            redirect('dosen/seminar_skripsi');
+            return;
+        }
+        
+        try {
+            // Reset status untuk review ulang
+            $update_data = [
+                'status' => 'submitted',
+                'current_step' => 'pembimbing',
+                'status_pembimbing' => 'pending',
+                'komentar_pembimbing' => null,
+                'tanggal_review_pembimbing' => null,
+                'reviewed_by_pembimbing' => null,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->db->where('id', $seminar_id);
+            $success = $this->db->update('seminar_skripsi_mahasiswa', $update_data);
+            
+            if ($success) {
+                $this->session->set_flashdata('success', 'Pengajuan ulang berhasil diproses. Silakan review kembali!');
+                
+                // Send notification untuk pengajuan ulang
+                $this->_send_resubmission_notification($seminar);
+            } else {
+                $this->session->set_flashdata('error', 'Gagal memproses pengajuan ulang!');
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Error handling resubmission: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan saat memproses pengajuan ulang!');
+        }
+        
+        redirect('dosen/seminar_skripsi');
+    }
+
+    /**
      * Form penilaian seminar skripsi
+     * STABLE - TIDAK DIUBAH
      */
     public function penilaian($seminar_id) {
         $dosen_id = $this->session->userdata('id');
@@ -275,11 +331,12 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     // =================================================================
-    // PRIVATE HELPER METHODS - FIXED: Sesuai struktur database
+    // PRIVATE HELPER METHODS - STABLE (TIDAK DIUBAH)
     // =================================================================
 
     /**
-     * FIXED: Get pengajuan yang perlu review oleh dosen
+     * Get pengajuan yang perlu review oleh dosen
+     * ENHANCED: Tambah support untuk resubmission
      */
     private function _get_pengajuan_perlu_review($dosen_id) {
         try {
@@ -291,9 +348,11 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
-            $this->db->where('pm.dosen_id', $dosen_id); // Filter by dosen pembimbing
-            $this->db->where('ssm.status', 'submitted'); // Status submitted (perlu review)
-            $this->db->where('ssm.current_step', 'pembimbing'); // Current step di pembimbing
+            $this->db->where('pm.dosen_id', $dosen_id);
+            
+            // ENHANCED: Support untuk pengajuan ulang
+            $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
+            $this->db->where('ssm.current_step', 'pembimbing');
             $this->db->order_by('ssm.created_at', 'DESC');
             
             $result = $this->db->get()->result();
@@ -305,7 +364,8 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * FIXED: Get riwayat rekomendasi yang sudah diberikan dosen
+     * Get riwayat rekomendasi yang sudah diberikan dosen
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_riwayat_rekomendasi($dosen_id) {
         try {
@@ -318,9 +378,9 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
             $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
             $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where('ssm.reviewed_by_pembimbing', $dosen_id); // Sudah direview oleh dosen ini
+            $this->db->where('ssm.reviewed_by_pembimbing', $dosen_id);
             $this->db->order_by('ssm.tanggal_review_pembimbing', 'DESC');
-            $this->db->limit(5); // Limit 5 riwayat terakhir
+            $this->db->limit(5);
             
             $result = $this->db->get()->result();
             return $result ?: [];
@@ -331,8 +391,8 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * FIXED: Get seminar yang perlu penilaian
-     * Langsung muncul setelah mahasiswa submit, tanpa syarat tambahan
+     * Get seminar yang perlu penilaian
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_seminar_perlu_penilaian($dosen_id) {
         try {
@@ -348,7 +408,6 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->join('penilaian_seminar_skripsi ps', 'ps.seminar_skripsi_id = ssm.id AND ps.role_penilai = "dosen_pembimbing" AND ps.dinilai_oleh = ' . $dosen_id, 'left');
             $this->db->where('pm.dosen_id', $dosen_id);
             
-            // Seminar yang sudah submitted dan belum ada penilaian yang dipublish
             $this->db->where_in('ssm.status', ['submitted', 'review_pembimbing', 'review_kaprodi', 'approved', 'scheduled']);
             $this->db->where('(ps.status_penilaian IS NULL OR ps.status_penilaian = "draft")');
             
@@ -363,7 +422,8 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * FIXED: Get statistics untuk dashboard
+     * Get statistics untuk dashboard
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_statistics($dosen_id) {
         try {
@@ -387,7 +447,7 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
             $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where('ssm.status', 'submitted');
+            $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
             $this->db->where('ssm.current_step', 'pembimbing');
             $perlu_review = $this->db->get()->row();
             $stats['perlu_review'] = $perlu_review ? (int)$perlu_review->perlu_review : 0;
@@ -418,7 +478,8 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * FIXED: Get detail seminar dengan validasi ownership
+     * Get detail seminar dengan validasi ownership
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_seminar_detail($seminar_id, $dosen_id) {
         try {
@@ -435,7 +496,7 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->join('dosen d1', 'ssm.dosen_penguji1_id = d1.id', 'left');
             $this->db->join('dosen d2', 'ssm.dosen_penguji2_id = d2.id', 'left');
             $this->db->where('ssm.id', $seminar_id);
-            $this->db->where('pm.dosen_id', $dosen_id); // Validasi ownership
+            $this->db->where('pm.dosen_id', $dosen_id);
             
             return $this->db->get()->row();
         } catch (Exception $e) {
@@ -446,7 +507,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Get detail seminar untuk penilaian
-     * FIXED: Tidak perlu syarat khusus, langsung bisa dinilai setelah submit
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_seminar_detail_for_penilaian($seminar_id, $dosen_id) {
         $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
@@ -455,9 +516,8 @@ class Seminar_skripsi extends CI_Controller {
             return null;
         }
         
-        // Seminar bisa dinilai setelah submitted (tidak perlu scheduled)
         if ($seminar->status == 'draft') {
-            return null; // Hanya draft yang tidak bisa dinilai
+            return null;
         }
         
         return $seminar;
@@ -465,6 +525,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Check eligibility untuk seminar skripsi
+     * STABLE - TIDAK DIUBAH
      */
     private function _check_eligibility($proposal_id) {
         $eligibility = [
@@ -475,7 +536,6 @@ class Seminar_skripsi extends CI_Controller {
         ];
         
         try {
-            // Check seminar proposal completed
             $this->db->select('status');
             $this->db->from('seminar_proposal_mahasiswa');
             $this->db->where('proposal_id', $proposal_id);
@@ -488,10 +548,8 @@ class Seminar_skripsi extends CI_Controller {
                 $eligibility['issues'][] = 'Seminar proposal belum selesai';
             }
             
-            // Check penelitian completed - bisa disesuaikan dengan kebutuhan
-            $eligibility['penelitian_completed'] = true; // Untuk sementara
+            $eligibility['penelitian_completed'] = true;
             
-            // Can proceed jika semua requirement terpenuhi
             $eligibility['can_proceed'] = $eligibility['seminar_proposal_completed'] && 
                                         $eligibility['penelitian_completed'];
                                         
@@ -505,6 +563,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Safe get jurnal bimbingan
+     * STABLE - TIDAK DIUBAH
      */
     private function _safe_get_jurnal_bimbingan($proposal_id) {
         try {
@@ -524,6 +583,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Get existing penilaian
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_existing_penilaian($seminar_id, $dosen_id) {
         try {
@@ -542,6 +602,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Get dosen by ID
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_dosen_by_id($dosen_id) {
         try {
@@ -558,12 +619,11 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Process penilaian (form submission)
-     * FIXED: Complete implementation dengan workflow update
+     * STABLE - TIDAK DIUBAH
      */
     private function _process_penilaian($seminar_id, $dosen_id, $seminar) {
-        $action = $this->input->post('action'); // 'draft' atau 'publish'
+        $action = $this->input->post('action');
         
-        // Validasi input required
         $required_fields = [
             'nilai_pembimbing',
             'rekomendasi'
@@ -577,7 +637,6 @@ class Seminar_skripsi extends CI_Controller {
             }
         }
         
-        // Validasi action untuk publish
         if ($action == 'publish') {
             $additional_required = ['nilai_penguji1', 'nilai_penguji2'];
             foreach ($additional_required as $field) {
@@ -589,12 +648,10 @@ class Seminar_skripsi extends CI_Controller {
             }
         }
         
-        // Prepare data penilaian
         $nilai_penguji1 = (float)$this->input->post('nilai_penguji1');
         $nilai_penguji2 = (float)$this->input->post('nilai_penguji2');
         $nilai_pembimbing = (float)$this->input->post('nilai_pembimbing');
         
-        // Hitung nilai akhir (rata-rata dari yang diisi)
         $total_nilai = 0;
         $count_nilai = 0;
         
@@ -636,35 +693,29 @@ class Seminar_skripsi extends CI_Controller {
             'updated_at' => date('Y-m-d H:i:s')
         ];
         
-        // Check if update or insert
         $existing = $this->_get_existing_penilaian($seminar_id, $dosen_id);
         
         try {
             $this->db->trans_start();
             
             if ($existing) {
-                // Update existing penilaian
                 $this->db->where('id', $existing->id);
                 $success = $this->db->update('penilaian_seminar_skripsi', $penilaian_data);
             } else {
-                // Insert new penilaian
                 $penilaian_data['created_at'] = date('Y-m-d H:i:s');
                 $success = $this->db->insert('penilaian_seminar_skripsi', $penilaian_data);
             }
             
-            // Jika publish, update workflow status mahasiswa menjadi completed
             if ($action == 'publish' && $success) {
-                // Update seminar status menjadi completed
                 $this->db->where('id', $seminar_id);
                 $this->db->update('seminar_skripsi_mahasiswa', [
                     'status' => 'completed',
                     'updated_at' => date('Y-m-d H:i:s')
                 ]);
                 
-                // Update workflow status proposal mahasiswa menjadi completed atau publikasi
                 $this->db->where('id', $seminar->proposal_id);
                 $this->db->update('proposal_mahasiswa', [
-                    'workflow_status' => 'publikasi', // atau 'selesai' sesuai kebutuhan
+                    'workflow_status' => 'publikasi',
                     'status_seminar_skripsi' => 'completed',
                     'updated_at' => date('Y-m-d H:i:s')
                 ]);
@@ -689,19 +740,375 @@ class Seminar_skripsi extends CI_Controller {
         redirect('dosen/seminar_skripsi');
     }
 
+    // =================================================================
+    // NEW ENHANCED EMAIL NOTIFICATION METHODS
+    // =================================================================
+
     /**
-     * Send email notification
+     * ENHANCED: Send complete email notification
      */
     private function _send_email_notification($seminar, $rekomendasi, $komentar) {
         try {
-            log_message('info', "Email notification: Seminar skripsi {$seminar->nama_mahasiswa} - {$rekomendasi}");
+            if ($rekomendasi == 'approved') {
+                // Kirim notifikasi ke mahasiswa bahwa disetujui dosen
+                $this->_kirim_email_disetujui_mahasiswa($seminar);
+                
+                // Kirim notifikasi ke kaprodi untuk review selanjutnya
+                $this->_kirim_email_disetujui_kaprodi($seminar);
+                
+                log_message('info', "Email approval sent: Seminar skripsi {$seminar->nama_mahasiswa} - approved");
+            } else {
+                // Kirim notifikasi ke mahasiswa bahwa ditolak
+                $this->_kirim_email_ditolak_mahasiswa($seminar, $komentar);
+                
+                log_message('info', "Email rejection sent: Seminar skripsi {$seminar->nama_mahasiswa} - rejected");
+            }
         } catch (Exception $e) {
-            log_message('error', 'Error sending email: ' . $e->getMessage());
+            log_message('error', 'Error sending email notification: ' . $e->getMessage());
         }
     }
 
     /**
+     * NEW: Kirim email ke mahasiswa saat disetujui dosen
+     */
+    private function _kirim_email_disetujui_mahasiswa($seminar) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('✅ Seminar Skripsi Disetujui Pembimbing - ' . $seminar->nama_mahasiswa);
+            
+            $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
+            $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Seminar Skripsi Disetujui Pembimbing</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Selamat! Pengajuan seminar skripsi Anda telah <strong>DISETUJUI</strong> oleh dosen pembimbing dan diteruskan ke Ketua Program Studi untuk validasi selanjutnya.</p>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>📚 Detail Seminar:</h4>
+                        <ul style='color: #155724; margin: 0;'>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Pembimbing:</strong> {$nama_pembimbing}</li>
+                            <li><strong>Status:</strong> Menunggu validasi Kaprodi</li>
+                            <li><strong>Tanggal Disetujui:</strong> " . date('d F Y, H:i') . " WIB</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #cce7ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>📋 Langkah Selanjutnya:</h4>
+                        <ol style='color: #004085; margin: 0;'>
+                            <li>Kaprodi akan melakukan validasi plagiarisme</li>
+                            <li>Jika disetujui, akan dilakukan penjadwalan seminar</li>
+                            <li>Anda akan mendapat notifikasi hasil validasi via email</li>
+                            <li>Pantau status melalui dashboard mahasiswa</li>
+                        </ol>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem. Untuk informasi lebih lanjut, silakan hubungi bagian akademik atau dosen pembimbing Anda.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send approval email to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending approval email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * NEW: Kirim email ke kaprodi saat disetujui dosen
+     */
+    private function _kirim_email_disetujui_kaprodi($seminar) {
+        try {
+            // Get kaprodi email
+            $kaprodi = $this->_get_kaprodi_data();
+            if (!$kaprodi) {
+                log_message('warning', 'Kaprodi data not found for notification');
+                return false;
+            }
+            
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($kaprodi->email);
+            $this->email->subject('🔔 Seminar Skripsi Perlu Validasi - ' . $seminar->nama_mahasiswa);
+            
+            $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
+            $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>🔔 Seminar Skripsi Perlu Validasi</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>Ketua Program Studi</strong>,</p>
+                    
+                    <p>Terdapat pengajuan seminar skripsi yang telah disetujui dosen pembimbing dan memerlukan validasi Anda.</p>
+                    
+                    <div style='background-color: #cce7ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>👨‍🎓 Detail Mahasiswa:</h4>
+                        <ul style='color: #004085; margin: 0;'>
+                            <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
+                            <li><strong>NIM:</strong> {$seminar->nim}</li>
+                            <li><strong>Judul Skripsi:</strong> {$seminar->judul}</li>
+                            <li><strong>Dosen Pembimbing:</strong> {$nama_pembimbing}</li>
+                            <li><strong>Tanggal Disetujui:</strong> " . date('d F Y, H:i') . " WIB</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>📋 Tindakan yang Diperlukan:</h4>
+                        <ol style='color: #856404; margin: 0;'>
+                            <li>Login ke sistem SIM Tugas Akhir</li>
+                            <li>Cek file skripsi yang telah diupload</li>
+                            <li>Lakukan validasi plagiarisme (maksimal 30%)</li>
+                            <li>Setujui atau tolak pengajuan dengan komentar</li>
+                            <li>Jika disetujui, lakukan penjadwalan seminar</li>
+                        </ol>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('kaprodi/seminar_skripsi') . "' style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            🔍 Buka Sistem SIM-TA
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem. Mohon segera melakukan validasi untuk kelancaran proses akademik mahasiswa.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send notification email to kaprodi: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending notification email to kaprodi: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * NEW: Kirim email ke mahasiswa saat ditolak dosen
+     */
+    private function _kirim_email_ditolak_mahasiswa($seminar, $komentar) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('⚠️ Seminar Skripsi Perlu Perbaikan - ' . $seminar->nama_mahasiswa);
+            
+            $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
+            $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>⚠️ Seminar Skripsi Perlu Perbaikan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Mohon maaf, pengajuan seminar skripsi Anda <strong>PERLU DIPERBAIKI</strong> berdasarkan review dari dosen pembimbing.</p>
+                    
+                    <div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #dc3545;'>
+                        <h4 style='color: #721c24; margin: 0 0 10px 0;'>📚 Detail Seminar:</h4>
+                        <ul style='color: #721c24; margin: 0;'>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Pembimbing:</strong> {$nama_pembimbing}</li>
+                            <li><strong>Tanggal Review:</strong> " . date('d F Y, H:i') . " WIB</li>
+                        </ul>
+                    </div>";
+            
+            if (!empty($komentar)) {
+                $message .= "
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>💬 Komentar Dosen Pembimbing:</h4>
+                        <p style='color: #856404; margin: 0; background-color: white; padding: 10px; border-radius: 3px;'>" . nl2br(htmlspecialchars($komentar)) . "</p>
+                    </div>";
+            }
+            
+            $message .= "
+                    <div style='background-color: #cce7ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>📋 Langkah Selanjutnya:</h4>
+                        <ol style='color: #004085; margin: 0;'>
+                            <li>Perbaiki dokumen skripsi sesuai komentar dosen</li>
+                            <li>Konsultasi dengan dosen pembimbing jika diperlukan</li>
+                            <li>Upload ulang file skripsi yang sudah diperbaiki</li>
+                            <li>Ajukan ulang seminar skripsi melalui sistem</li>
+                        </ol>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('mahasiswa/seminar_skripsi') . "' style='background-color: #dc3545; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            🔄 Ajukan Ulang Seminar
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem. Untuk konsultasi lebih lanjut, silakan hubungi dosen pembimbing Anda.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send rejection email to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending rejection email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * NEW: Send notification untuk pengajuan ulang
+     */
+    private function _send_resubmission_notification($seminar) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('🔄 Pengajuan Ulang Seminar Skripsi Diterima - ' . $seminar->nama_mahasiswa);
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #17a2b8 0%, #28a745 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>🔄 Pengajuan Ulang Diterima</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Pengajuan ulang seminar skripsi Anda telah diterima dan siap untuk direview kembali oleh dosen pembimbing.</p>
+                    
+                    <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #17a2b8;'>
+                        <h4 style='color: #0c5460; margin: 0 0 10px 0;'>📚 Detail Pengajuan:</h4>
+                        <ul style='color: #0c5460; margin: 0;'>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Status:</strong> Menunggu review pembimbing</li>
+                            <li><strong>Tanggal Pengajuan Ulang:</strong> " . date('d F Y, H:i') . " WIB</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Silakan pantau status melalui dashboard mahasiswa. Anda akan mendapat notifikasi hasil review via email.</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            return $this->email->send();
+        } catch (Exception $e) {
+            log_message('error', 'Error sending resubmission notification: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    // =================================================================
+    // UTILITY METHODS
+    // =================================================================
+
+    /**
+     * Get email configuration
+     */
+    private function _get_email_config() {
+        return [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug',
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls',
+            'smtp_timeout' => 30
+        ];
+    }
+
+    /**
+     * Get kaprodi data
+     */
+    private function _get_kaprodi_data() {
+        try {
+            $this->db->select('d.*, u.email');
+            $this->db->from('dosen d');
+            $this->db->join('users u', 'd.user_id = u.id', 'left');
+            $this->db->where('u.level', '3'); // Level 3 = Kaprodi
+            $this->db->limit(1);
+            
+            return $this->db->get()->row();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting kaprodi data: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Convert nilai to letter grade
+     */
+    private function _convert_to_letter_grade($nilai) {
+        if ($nilai >= 80) return 'A';
+        if ($nilai >= 70) return 'B';
+        if ($nilai >= 60) return 'C';
+        if ($nilai >= 50) return 'D';
+        return 'E';
+    }
+
+    /**
      * Get content type for file viewing
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_content_type($extension) {
         $types = [
@@ -716,6 +1123,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Get JavaScript for index page
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_index_script() {
         return "
@@ -735,6 +1143,7 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Get JavaScript for detail page
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_detail_script() {
         return "
@@ -775,13 +1184,12 @@ class Seminar_skripsi extends CI_Controller {
 
     /**
      * Get JavaScript for penilaian page
-     * ENHANCED: Auto calculate dan form validation
+     * STABLE - TIDAK DIUBAH
      */
     private function _get_penilaian_script() {
         return "
         <script>
         $(document).ready(function() {
-            // Auto calculate nilai akhir
             $('.nilai-input').on('input', function() {
                 calculateNilaiAkhir();
             });
@@ -816,20 +1224,17 @@ class Seminar_skripsi extends CI_Controller {
                 return 'E';
             }
             
-            // Form validation
             $('#penilaian-form').on('submit', function(e) {
                 const action = $('button[type=submit][clicked=true]').val();
                 const pembimbing = $('#nilai_pembimbing').val();
                 const rekomendasi = $('input[name=\"rekomendasi\"]:checked').val();
                 
-                // Basic validation
                 if (!pembimbing || !rekomendasi) {
                     e.preventDefault();
                     alert('Nilai pembimbing dan rekomendasi wajib diisi!');
                     return;
                 }
                 
-                // Validation for publish
                 if (action === 'publish') {
                     const penguji1 = $('#nilai_penguji1').val();
                     const penguji2 = $('#nilai_penguji2').val();
@@ -852,13 +1257,11 @@ class Seminar_skripsi extends CI_Controller {
                 }
             });
             
-            // Track which submit button was clicked
             $('button[type=submit]').click(function() {
                 $('button[type=submit]').removeAttr('clicked');
                 $(this).attr('clicked', 'true');
             });
             
-            // Initialize calculation on page load
             calculateNilaiAkhir();
         });
         </script>";

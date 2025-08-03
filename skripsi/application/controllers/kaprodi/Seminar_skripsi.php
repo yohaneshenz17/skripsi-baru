@@ -34,6 +34,7 @@ class Seminar_skripsi extends CI_Controller {
         $this->load->library('email');
         $this->load->library('upload');
         $this->load->helper(['url', 'date', 'file']);
+        $this->load->model('Seminar_skripsi_model', 'seminar_model');
         
         // Cek login dan level kaprodi
         if(!$this->session->userdata('logged_in') || $this->session->userdata('level') != '3') {
@@ -69,28 +70,8 @@ class Seminar_skripsi extends CI_Controller {
             return;
         }
         
-        // Get detail seminar dengan join untuk data lengkap
-        $this->db->select('
-            ssm.*,
-            pm.judul,
-            pm.dosen_id as pembimbing_id,
-            m.nim,
-            m.nama as nama_mahasiswa,
-            m.email as email_mahasiswa,
-            m.prodi_id,
-            d.nama as nama_pembimbing,
-            d.email as email_pembimbing,
-            p.nama as nama_prodi
-        ');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->where('ssm.id', $seminar_id);
-        $this->db->where('m.prodi_id', $this->prodi_id); // Filter prodi
-        
-        $seminar = $this->db->get()->row();
+        // Get detail seminar menggunakan model method
+        $seminar = $this->seminar_model->get_seminar_detail($seminar_id, $this->prodi_id);
         
         if (!$seminar) {
             $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan dari prodi Anda!');
@@ -371,175 +352,49 @@ class Seminar_skripsi extends CI_Controller {
      * Get pengajuan yang perlu direview kaprodi
      */
     private function _get_pengajuan_perlu_review() {
-        $this->db->select('
-            ssm.*,
-            pm.judul,
-            m.nim,
-            m.nama as nama_mahasiswa,
-            d.nama as nama_pembimbing
-        ');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->where('ssm.status', 'review_kaprodi');
-        $this->db->where('ssm.status_pembimbing', 'approved');
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        $this->db->order_by('ssm.tanggal_review_pembimbing', 'ASC');
-        
-        return $this->db->get()->result();
+        return $this->seminar_model->get_perlu_review_kaprodi($this->prodi_id);
     }
 
     /**
      * Get seminar yang perlu dijadwalkan
      */
     private function _get_seminar_perlu_dijadwalkan() {
-        $this->db->select('
-            ssm.*,
-            pm.judul,
-            m.nim,
-            m.nama as nama_mahasiswa,
-            d.nama as nama_pembimbing
-        ');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->where('ssm.status', 'approved');
-        $this->db->where('ssm.status_kaprodi', 'approved');
-        $this->db->where('ssm.tanggal_seminar IS NULL');
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        $this->db->order_by('ssm.tanggal_review_kaprodi', 'ASC');
-        
-        return $this->db->get()->result();
+        return $this->seminar_model->get_perlu_dijadwalkan($this->prodi_id);
     }
 
     /**
      * Get jadwal seminar mendatang
      */
     private function _get_jadwal_mendatang() {
-        $this->db->select('
-            ssm.*,
-            pm.judul,
-            m.nim,
-            m.nama as nama_mahasiswa,
-            d.nama as nama_pembimbing,
-            d1.nama as nama_penguji1,
-            d2.nama as nama_penguji2
-        ');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->join('dosen d1', 'ssm.dosen_penguji1_id = d1.id', 'left');
-        $this->db->join('dosen d2', 'ssm.dosen_penguji2_id = d2.id', 'left');
-        $this->db->where('ssm.status', 'scheduled');
-        $this->db->where('ssm.tanggal_seminar >=', date('Y-m-d'));
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        $this->db->order_by('ssm.tanggal_seminar', 'ASC');
-        $this->db->order_by('ssm.jam_seminar', 'ASC');
-        
-        return $this->db->get()->result();
+        return $this->seminar_model->get_jadwal_mendatang($this->prodi_id);
     }
 
     /**
      * Get statistics untuk dashboard
      */
     private function _get_statistics() {
-        // Total pengajuan dalam prodi
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        $total = $this->db->get()->row()->total;
-        
-        // Perlu review
-        $this->db->select('COUNT(*) as perlu_review');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->where('ssm.status', 'review_kaprodi');
-        $this->db->where('ssm.status_pembimbing', 'approved');
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        $perlu_review = $this->db->get()->row()->perlu_review;
-        
-        // Perlu dijadwalkan
-        $this->db->select('COUNT(*) as perlu_dijadwalkan');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->where('ssm.status', 'approved');
-        $this->db->where('ssm.status_kaprodi', 'approved');
-        $this->db->where('ssm.tanggal_seminar IS NULL');
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        $perlu_dijadwalkan = $this->db->get()->row()->perlu_dijadwalkan;
-        
-        // Terjadwal
-        $this->db->select('COUNT(*) as terjadwal');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->where('ssm.status', 'scheduled');
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        $terjadwal = $this->db->get()->row()->terjadwal;
-        
-        return [
-            'total' => $total,
-            'perlu_review' => $perlu_review,
-            'perlu_dijadwalkan' => $perlu_dijadwalkan,
-            'terjadwal' => $terjadwal
-        ];
+        return $this->seminar_model->get_statistics_kaprodi($this->prodi_id);
     }
 
     /**
      * Get seminar by ID dengan data lengkap
      */
     private function _get_seminar_by_id($seminar_id) {
-        $this->db->select('
-            ssm.*,
-            pm.judul,
-            pm.dosen_id as pembimbing_id,
-            m.nim,
-            m.nama as nama_mahasiswa,
-            m.email as email_mahasiswa,
-            d.nama as nama_pembimbing,
-            d.email as email_pembimbing
-        ');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->where('ssm.id', $seminar_id);
-        $this->db->where('m.prodi_id', $this->prodi_id);
-        
-        return $this->db->get()->row();
+        return $this->seminar_model->get_seminar_detail($seminar_id, $this->prodi_id);
     }
 
     /**
      * Get rekomendasi dosen penguji dari seminar proposal
      */
     private function _get_dosen_penguji_rekomendasi($proposal_id) {
-        $this->db->select('
-            spm.dosen_penguji1_id,
-            spm.dosen_penguji2_id,
-            d1.nama as nama_penguji1,
-            d2.nama as nama_penguji2
-        ');
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('dosen d1', 'spm.dosen_penguji1_id = d1.id', 'left');
-        $this->db->join('dosen d2', 'spm.dosen_penguji2_id = d2.id', 'left');
-        $this->db->where('spm.proposal_id', $proposal_id);
-        
-        return $this->db->get()->row();
+        return $this->seminar_model->get_dosen_penguji_rekomendasi($proposal_id);
     }
 
     /**
      * Get daftar dosen untuk dropdown
      */
     private function _get_dosen_list() {
-        $this->db->select('id, nama, email');
-        $this->db->from('dosen');
-        $this->db->where('status', '1'); // Aktif
-        $this->db->order_by('nama', 'ASC');
-        
-        return $this->db->get()->result();
+        return $this->seminar_model->get_dosen_list();
     }
 
     /**
@@ -704,29 +559,8 @@ class Seminar_skripsi extends CI_Controller {
      */
     private function _kirim_notifikasi_jadwal($seminar_id) {
         try {
-            // Get data seminar lengkap dengan dosen penguji
-            $this->db->select('
-                ssm.*,
-                pm.judul,
-                m.nim,
-                m.nama as nama_mahasiswa,
-                m.email as email_mahasiswa,
-                d.nama as nama_pembimbing,
-                d.email as email_pembimbing,
-                d1.nama as nama_penguji1,
-                d1.email as email_penguji1,
-                d2.nama as nama_penguji2,
-                d2.email as email_penguji2
-            ');
-            $this->db->from('seminar_skripsi_mahasiswa ssm');
-            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-            $this->db->join('dosen d1', 'ssm.dosen_penguji1_id = d1.id', 'left');
-            $this->db->join('dosen d2', 'ssm.dosen_penguji2_id = d2.id', 'left');
-            $this->db->where('ssm.id', $seminar_id);
-            
-            $seminar = $this->db->get()->row();
+            // Get data seminar lengkap dengan dosen penguji menggunakan model
+            $seminar = $this->seminar_model->get_seminar_lengkap_notifikasi($seminar_id);
             
             if (!$seminar) return;
             

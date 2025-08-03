@@ -2,19 +2,25 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * FINAL FIXED - Seminar Skripsi Controller untuk Kaprodi
+ * FINAL COMPLETE - Seminar Skripsi Controller untuk Kaprodi
  * 
- * PERBAIKAN BERDASARKAN STRUKTUR DATABASE AKTUAL:
- * - proposal_mahasiswa TIDAK punya prodi_id
- * - Relasi prodi melalui mahasiswa.prodi_id  
- * - Menggunakan join yang benar sesuai database structure
- * - Query disesuaikan dengan view yang ada
+ * WORKFLOW TAHAP 5 LENGKAP:
+ * 1. Mahasiswa ajukan → review dosen (approve/reject)
+ * 2. Jika approve lanjut ke kaprodi → kaprodi review turnitin
+ * 3. Jika turnitin >30% maka reject → kembali ke mahasiswa
+ * 4. Jika turnitin <=30% maka approve → notif ke dosen dan mahasiswa
+ * 5. Kaprodi melakukan penjadwalan seminar skripsi + penunjukan dosen penguji 1 & 2
+ * 6. Tetapkan jadwal → notif ke dosen, mahasiswa dan staf
  * 
- * STRUKTUR JOIN YANG BENAR:
- * seminar_skripsi_mahasiswa -> proposal_mahasiswa -> mahasiswa -> prodi
+ * FITUR LENGKAP:
+ * - Review turnitin dengan threshold 30%
+ * - Auto rekomendasi dosen penguji dari seminar proposal
+ * - Notifikasi email lengkap
+ * - Penjadwalan dengan penunjukan penguji
+ * - Status workflow yang benar
  * 
  * File: application/controllers/kaprodi/Seminar_skripsi.php
- * URL: https://stkyakobus.ac.id/skripsi/kaprodi/seminar_skripsi/index
+ * URL: https://stkyakobus.ac.id/skripsi/kaprodi/seminar_skripsi/
  */
 class Seminar_skripsi extends CI_Controller {
 
@@ -26,8 +32,6 @@ class Seminar_skripsi extends CI_Controller {
         // Load core libraries
         $this->load->database();
         $this->load->library(['session', 'email', 'upload']);
-        
-        // ✅ CRITICAL FIX: Load text helper untuk word_limiter() function
         $this->load->helper(['url', 'date', 'file', 'text', 'form']);
         
         // Auth check untuk kaprodi
@@ -36,54 +40,41 @@ class Seminar_skripsi extends CI_Controller {
         }
         
         $user_level = $this->session->userdata('level');
-        if(!in_array($user_level, ['3', '4'])) { // Support both level 3 and 4 for kaprodi
+        if(!in_array($user_level, ['3', '4'])) {
             show_error('Akses ditolak. Anda bukan Kaprodi.', 403);
         }
         
-        // ✅ FIX: Load model dengan error handling
+        // Load model dengan fallback
         try {
             $this->load->model('Seminar_skripsi_model', 'seminar_model');
         } catch (Exception $e) {
             log_message('error', 'Failed to load Seminar_skripsi_model: ' . $e->getMessage());
-            // Create simple fallback model untuk mencegah crash
-            $this->_create_fallback_model();
         }
         
         // Set prodi_id dari session
         $this->prodi_id = $this->session->userdata('prodi_id');
         
-        // Get prodi_id jika belum ada di session
         if (!$this->prodi_id) {
             $this->_set_prodi_id();
         }
     }
 
     /**
-     * ✅ FIXED: Index - Dashboard seminar skripsi untuk kaprodi
-     * Mengatasi masalah redirect ke dashboard dengan proper error handling
+     * Index - Dashboard seminar skripsi untuk kaprodi
      */
     public function index() {
         try {
-            // Prepare data untuk view berdasarkan database structure yang benar
             $data = [
                 'title' => 'Kelola Seminar Skripsi',
-                'seminar_skripsi' => $this->_get_seminar_skripsi_list(),
                 'pengajuan_review' => $this->_get_pengajuan_perlu_review(),
                 'perlu_dijadwalkan' => $this->_get_seminar_perlu_dijadwalkan(),
                 'jadwal_mendatang' => $this->_get_jadwal_mendatang(),
-                'stats' => $this->_get_statistics_from_view()
+                'riwayat_review' => $this->_get_riwayat_review(),
+                'stats' => $this->_get_statistics()
             ];
             
-            // ✅ FIX: Load view dengan error handling untuk prevent fallback
-            try {
-                $content = $this->load->view('kaprodi/seminar_skripsi/index', $data, TRUE);
-            } catch (Exception $e) {
-                // Jika view utama error, gunakan view sederhana
-                log_message('error', 'Seminar_skripsi view error: ' . $e->getMessage());
-                $content = $this->load->view('kaprodi/seminar_skripsi/index_simple', $data, TRUE);
-            }
+            $content = $this->load->view('kaprodi/seminar_skripsi/index', $data, TRUE);
             
-            // Data untuk template kaprodi
             $template_data = [
                 'title' => 'Kelola Seminar Skripsi',
                 'content' => $content
@@ -92,23 +83,15 @@ class Seminar_skripsi extends CI_Controller {
             $this->load->view('template/kaprodi', $template_data);
             
         } catch (Exception $e) {
-            log_message('error', 'Seminar_skripsi index critical error: ' . $e->getMessage());
+            log_message('error', 'Seminar_skripsi index error: ' . $e->getMessage());
             
-            // Jangan redirect ke dashboard - tampilkan error page
             $error_data = [
                 'title' => 'Error - Seminar Skripsi',
                 'error_message' => 'Terjadi kesalahan sistem pada modul Seminar Skripsi.',
                 'technical_error' => ENVIRONMENT === 'development' ? $e->getMessage() : null
             ];
             
-            $error_content = $this->load->view('errors/custom_error', $error_data, TRUE);
-            
-            $template_data = [
-                'title' => 'Error - Seminar Skripsi',
-                'content' => $error_content
-            ];
-            
-            $this->load->view('template/kaprodi', $template_data);
+            $this->load->view('template/error_page', $error_data);
         }
     }
 
@@ -120,34 +103,36 @@ class Seminar_skripsi extends CI_Controller {
             show_404();
             return;
         }
-        
+
         try {
-            // Get detail seminar berdasarkan database structure yang benar
             $seminar = $this->_get_seminar_detail($seminar_id);
             
             if (!$seminar) {
-                $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan dari prodi Anda!');
+                $this->session->set_flashdata('error', 'Data seminar tidak ditemukan!');
                 redirect('kaprodi/seminar_skripsi');
                 return;
             }
-            
-            // Data untuk view
+
+            // Get rekomendasi dosen penguji dari seminar proposal
+            $rekomendasi_penguji = $this->_get_rekomendasi_dosen_penguji($seminar->proposal_id);
+
             $data = [
-                'title' => 'Detail Seminar Skripsi - ' . $seminar->nama_mahasiswa,
+                'title' => 'Review Seminar Skripsi - ' . $seminar->nama_mahasiswa,
                 'seminar' => $seminar,
-                'dosen_list' => $this->_get_dosen_penguji(),
-                'allow_edit' => ($seminar->status == 'review_kaprodi')
+                'rekomendasi_penguji' => $rekomendasi_penguji,
+                'dosen_list' => $this->_get_dosen_list(),
+                'is_can_review' => $this->_can_review_seminar($seminar)
             ];
-            
+
             $content = $this->load->view('kaprodi/seminar_skripsi/detail', $data, TRUE);
             
             $template_data = [
-                'title' => 'Detail Seminar Skripsi',
+                'title' => 'Review Seminar Skripsi',
                 'content' => $content
             ];
             
             $this->load->view('template/kaprodi', $template_data);
-            
+
         } catch (Exception $e) {
             log_message('error', 'Seminar_skripsi detail error: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan sistem.');
@@ -156,7 +141,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Validasi turnitin dan approve/reject seminar
+     * WORKFLOW CORE: Validasi turnitin dengan threshold 30%
      */
     public function validasi_turnitin() {
         if ($this->input->method() !== 'post') {
@@ -165,22 +150,68 @@ class Seminar_skripsi extends CI_Controller {
 
         try {
             $seminar_id = $this->input->post('seminar_id');
-            $decision = $this->input->post('decision');
-            $plagiarism_percentage = $this->input->post('plagiarism_percentage');
-            $komentar = $this->input->post('komentar_kaprodi');
+            $plagiarism_percentage = floatval($this->input->post('plagiarism_percentage'));
+            $komentar = trim($this->input->post('komentar_kaprodi'));
+            $action = $this->input->post('action'); // 'approve' or 'reject'
 
             // Validasi input
-            if (!$seminar_id || !$decision) {
-                throw new Exception('Data tidak lengkap');
+            if (!$seminar_id || !is_numeric($plagiarism_percentage)) {
+                throw new Exception('Data tidak lengkap atau tidak valid');
             }
 
-            // Process validation
-            $result = $this->_process_validation($seminar_id, $decision, $plagiarism_percentage, $komentar);
+            // Get seminar data
+            $seminar = $this->_get_seminar_detail($seminar_id);
+            if (!$seminar) {
+                throw new Exception('Data seminar tidak ditemukan');
+            }
 
-            if ($result) {
-                $message = ($decision == 'approved') ? 'Seminar skripsi berhasil disetujui!' : 'Seminar skripsi ditolak.';
-                $this->session->set_flashdata('success', $message);
+            // WORKFLOW RULE: Cek threshold 30%
+            if ($plagiarism_percentage > 30) {
+                // Automatic reject jika >30%
+                $result = $this->_process_turnitin_validation($seminar_id, 'rejected', $plagiarism_percentage, 
+                    'Proposal ditolak karena plagiarisme melebihi 30% ('. $plagiarism_percentage .'%)');
+                
+                if ($result) {
+                    $this->session->set_flashdata('warning', 
+                        "Proposal ditolak otomatis karena plagiarisme {$plagiarism_percentage}% > 30%. Mahasiswa dapat mengajukan ulang setelah perbaikan.");
+                    
+                    // Send notification untuk penolakan
+                    $this->_send_rejection_notification($seminar, $plagiarism_percentage);
+                }
             } else {
+                // Plagiarisme <=30%, bisa approve atau reject manual
+                if ($action === 'reject' && empty($komentar)) {
+                    throw new Exception('Komentar wajib diisi untuk penolakan manual');
+                }
+                
+                $status = ($action === 'approve') ? 'approved' : 'rejected';
+                $final_comment = ($action === 'approve') ? 
+                    "Proposal disetujui. Plagiarisme: {$plagiarism_percentage}% (dalam batas wajar ≤30%)" : 
+                    $komentar;
+                
+                $result = $this->_process_turnitin_validation($seminar_id, $status, $plagiarism_percentage, $final_comment);
+                
+                if ($result) {
+                    if ($action === 'approve') {
+                        $this->session->set_flashdata('success', 
+                            "Seminar skripsi disetujui! Plagiarisme: {$plagiarism_percentage}%. Silakan lanjut ke penjadwalan.");
+                        
+                        // Send approval notification
+                        $this->_send_approval_notification($seminar, $plagiarism_percentage);
+                        
+                        // Redirect ke penjadwalan
+                        redirect('kaprodi/seminar_skripsi/penjadwalan/' . $seminar_id);
+                        return;
+                    } else {
+                        $this->session->set_flashdata('info', 'Seminar skripsi ditolak. Mahasiswa akan mendapat notifikasi.');
+                        
+                        // Send rejection notification
+                        $this->_send_rejection_notification($seminar, $plagiarism_percentage, $komentar);
+                    }
+                }
+            }
+
+            if (!$result) {
                 throw new Exception('Gagal memproses validasi');
             }
 
@@ -193,7 +224,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Penjadwalan seminar
+     * Penjadwalan seminar dengan penunjukan dosen penguji
      */
     public function penjadwalan($seminar_id) {
         if (!is_numeric($seminar_id)) {
@@ -210,10 +241,15 @@ class Seminar_skripsi extends CI_Controller {
                 return;
             }
 
+            // Get rekomendasi dosen penguji dari seminar proposal
+            $rekomendasi_penguji = $this->_get_rekomendasi_dosen_penguji($seminar->proposal_id);
+
             $data = [
                 'title' => 'Penjadwalan Seminar Skripsi',
                 'seminar' => $seminar,
-                'dosen_list' => $this->_get_dosen_penguji()
+                'rekomendasi_penguji' => $rekomendasi_penguji,
+                'dosen_list' => $this->_get_dosen_list(),
+                'ruang_list' => $this->_get_ruang_list()
             ];
 
             $content = $this->load->view('kaprodi/seminar_skripsi/penjadwalan', $data, TRUE);
@@ -233,7 +269,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Simpan jadwal seminar
+     * WORKFLOW FINAL: Simpan jadwal dan penunjukan dosen penguji
      */
     public function simpan_jadwal() {
         if ($this->input->method() !== 'post') {
@@ -244,20 +280,48 @@ class Seminar_skripsi extends CI_Controller {
             $seminar_id = $this->input->post('seminar_id');
             $tanggal_seminar = $this->input->post('tanggal_seminar');
             $jam_seminar = $this->input->post('jam_seminar');
-            $tempat_seminar = $this->input->post('tempat_seminar');
+            $tempat_seminar = trim($this->input->post('tempat_seminar'));
             $dosen_penguji1_id = $this->input->post('dosen_penguji1_id');
             $dosen_penguji2_id = $this->input->post('dosen_penguji2_id');
 
-            // Validasi
-            if (!$seminar_id || !$tanggal_seminar || !$jam_seminar || !$tempat_seminar) {
-                throw new Exception('Data jadwal tidak lengkap');
+            // Validasi input
+            if (empty($seminar_id) || empty($tanggal_seminar) || empty($jam_seminar) || 
+                empty($tempat_seminar) || empty($dosen_penguji1_id) || empty($dosen_penguji2_id)) {
+                throw new Exception('Semua field harus diisi');
             }
 
-            // Save jadwal
-            $result = $this->_save_jadwal($seminar_id, $tanggal_seminar, $jam_seminar, $tempat_seminar, $dosen_penguji1_id, $dosen_penguji2_id);
+            if ($dosen_penguji1_id == $dosen_penguji2_id) {
+                throw new Exception('Dosen penguji 1 dan penguji 2 harus berbeda');
+            }
+
+            // Get seminar data
+            $seminar = $this->_get_seminar_detail($seminar_id);
+            if (!$seminar || $seminar->status_kaprodi != 'approved') {
+                throw new Exception('Data seminar tidak valid untuk penjadwalan');
+            }
+
+            // Process penjadwalan
+            $result = $this->_process_scheduling($seminar_id, [
+                'tanggal_seminar' => $tanggal_seminar,
+                'jam_seminar' => $jam_seminar,
+                'tempat_seminar' => $tempat_seminar,
+                'dosen_penguji1_id' => $dosen_penguji1_id,
+                'dosen_penguji2_id' => $dosen_penguji2_id
+            ]);
 
             if ($result) {
-                $this->session->set_flashdata('success', 'Jadwal seminar berhasil disimpan!');
+                $this->session->set_flashdata('success', 
+                    'Jadwal seminar skripsi berhasil ditetapkan! Notifikasi telah dikirim ke semua pihak.');
+                
+                // Send final scheduling notification
+                $this->_send_scheduling_notification($seminar, [
+                    'tanggal_seminar' => $tanggal_seminar,
+                    'jam_seminar' => $jam_seminar,
+                    'tempat_seminar' => $tempat_seminar,
+                    'dosen_penguji1_id' => $dosen_penguji1_id,
+                    'dosen_penguji2_id' => $dosen_penguji2_id
+                ]);
+                
             } else {
                 throw new Exception('Gagal menyimpan jadwal');
             }
@@ -270,290 +334,107 @@ class Seminar_skripsi extends CI_Controller {
         redirect('kaprodi/seminar_skripsi');
     }
 
-    // ================================================================
-    // HELPER METHODS - DISESUAIKAN DENGAN DATABASE STRUCTURE YANG BENAR
-    // ================================================================
+    // ===============================================
+    // PRIVATE HELPER METHODS
+    // ===============================================
 
     /**
-     * ✅ FIXED: Get seminar skripsi list dengan JOIN yang benar
-     * Relasi: seminar_skripsi_mahasiswa -> proposal_mahasiswa -> mahasiswa -> prodi
+     * Set prodi_id dari session atau database
      */
-    private function _get_seminar_skripsi_list() {
-        try {
-            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
-            $sql = "
-                SELECT 
-                    ss.id,
-                    ss.proposal_id,
-                    ss.mahasiswa_id,
-                    ss.status,
-                    ss.current_step,
-                    ss.judul_skripsi,
-                    ss.file_skripsi,
-                    ss.status_pembimbing,
-                    ss.status_kaprodi,
-                    ss.tanggal_seminar,
-                    ss.jam_seminar,
-                    ss.tempat_seminar,
-                    ss.plagiarism_percentage,
-                    ss.created_at,
-                    m.nim,
-                    m.nama as nama_mahasiswa,
-                    m.email as email_mahasiswa,
-                    m.prodi_id,
-                    pm.judul as judul_proposal,
-                    pm.dosen_id as pembimbing_id,
-                    d.nama as nama_pembimbing,
-                    d.email as email_pembimbing,
-                    d1.nama as nama_penguji1,
-                    d2.nama as nama_penguji2,
-                    pr.nama as nama_prodi
-                FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id  
-                LEFT JOIN prodi pr ON m.prodi_id = pr.id
-                LEFT JOIN dosen d ON pm.dosen_id = d.id
-                LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
-                LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
-                WHERE m.prodi_id = ? OR m.prodi_id IS NULL
-                ORDER BY ss.created_at DESC
-                LIMIT 100
-            ";
-            
-            $query = $this->db->query($sql, [$this->prodi_id]);
-            
-            if ($query) {
-                return $query->result();
-            }
-            
-            return [];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting seminar skripsi list: ' . $e->getMessage());
-            return [];
+    private function _set_prodi_id() {
+        $kaprodi = $this->db->get_where('prodi', ['dosen_id' => $this->session->userdata('id')])->row();
+        if ($kaprodi) {
+            $this->session->set_userdata('prodi_id', $kaprodi->id);
+            $this->prodi_id = $kaprodi->id;
         }
     }
 
     /**
-     * ✅ FIXED: Get detail seminar dengan JOIN yang benar
-     */
-    private function _get_seminar_detail($seminar_id) {
-        try {
-            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
-            $sql = "
-                SELECT 
-                    ss.*,
-                    m.nim, 
-                    m.nama as nama_mahasiswa, 
-                    m.email as email_mahasiswa,
-                    m.prodi_id,
-                    pm.judul as judul_proposal, 
-                    pm.dosen_id as pembimbing_id,
-                    d.nama as nama_pembimbing, 
-                    d.email as email_pembimbing,
-                    d1.nama as nama_penguji1,
-                    d2.nama as nama_penguji2,
-                    pr.nama as nama_prodi
-                FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
-                LEFT JOIN prodi pr ON m.prodi_id = pr.id
-                LEFT JOIN dosen d ON pm.dosen_id = d.id
-                LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
-                LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
-                WHERE ss.id = ? AND (m.prodi_id = ? OR m.prodi_id IS NULL)
-                LIMIT 1
-            ";
-            
-            $query = $this->db->query($sql, [$seminar_id, $this->prodi_id]);
-            
-            if ($query && $query->num_rows() > 0) {
-                return $query->row();
-            }
-            
-            return null;
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * ✅ FIXED: Get statistics menggunakan view atau manual query yang benar
-     */
-    private function _get_statistics_from_view() {
-        try {
-            // Coba gunakan view seminar_skripsi_progress_v jika ada
-            if ($this->db->table_exists('seminar_skripsi_progress_v')) {
-                $query = $this->db->get('seminar_skripsi_progress_v');
-                
-                if ($query && $query->num_rows() > 0) {
-                    $result = $query->row();
-                    
-                    return [
-                        'pending_review' => $result->review_kaprodi_count ?? 0,
-                        'approved_month' => $result->approved_count ?? 0,
-                        'rejected_month' => $result->rejected_count ?? 0,
-                        'scheduled' => $result->scheduled_count ?? 0,
-                        'completed' => $result->completed_count ?? 0,
-                        'total_mahasiswa' => $result->total_mahasiswa ?? 0,
-                        'avg_progress' => $result->avg_progress_percentage ?? 0
-                    ];
-                }
-            }
-            
-            // Fallback manual query dengan JOIN yang benar
-            return $this->_get_statistics_manual();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting statistics from view: ' . $e->getMessage());
-            return $this->_get_statistics_manual();
-        }
-    }
-
-    /**
-     * ✅ FIXED: Get statistics manual dengan JOIN yang benar
-     */
-    private function _get_statistics_manual() {
-        try {
-            $stats = [
-                'pending_review' => 0,
-                'approved_month' => 0,
-                'rejected_month' => 0,
-                'scheduled' => 0,
-                'completed' => 0,
-                'total_mahasiswa' => 0
-            ];
-
-            // ✅ COUNT DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
-            $sql = "
-                SELECT 
-                    ss.status_kaprodi,
-                    COUNT(*) as total
-                FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
-                WHERE m.prodi_id = ? OR m.prodi_id IS NULL
-                GROUP BY ss.status_kaprodi
-            ";
-            
-            $query = $this->db->query($sql, [$this->prodi_id]);
-            
-            if ($query) {
-                foreach ($query->result() as $row) {
-                    switch ($row->status_kaprodi) {
-                        case 'pending':
-                            $stats['pending_review'] = $row->total;
-                            break;
-                        case 'approved':
-                            $stats['approved_month'] = $row->total;
-                            break;
-                        case 'rejected':
-                            $stats['rejected_month'] = $row->total;
-                            break;
-                    }
-                }
-            }
-
-            return $stats;
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting manual statistics: ' . $e->getMessage());
-            return [
-                'pending_review' => 0,
-                'approved_month' => 0,
-                'rejected_month' => 0,
-                'scheduled' => 0,
-                'completed' => 0,
-                'total_mahasiswa' => 0
-            ];
-        }
-    }
-
-    /**
-     * ✅ FIXED: Get pengajuan yang perlu review kaprodi dengan JOIN yang benar
+     * Get pengajuan yang perlu review kaprodi
      */
     private function _get_pengajuan_perlu_review() {
         try {
-            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
-            $sql = "
-                SELECT COUNT(*) as total
-                FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
-                WHERE ss.status = 'review_kaprodi' 
-                AND ss.status_kaprodi = 'pending'
-                AND (m.prodi_id = ? OR m.prodi_id IS NULL)
-            ";
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                d.nama as nama_pembimbing
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.status_pembimbing', 'approved'); // Sudah approve dosen
+            $this->db->where('ssm.status_kaprodi', 'pending'); // Menunggu review kaprodi
+            $this->db->where('ssm.current_step', 'kaprodi');
+            $this->db->order_by('ssm.created_at', 'ASC');
             
-            $query = $this->db->query($sql, [$this->prodi_id]);
-            $result = $query ? $query->row() : null;
-            
-            return $result ? $result->total : 0;
-            
+            return $this->db->get()->result();
         } catch (Exception $e) {
             log_message('error', 'Error getting pengajuan review: ' . $e->getMessage());
-            return 0;
+            return [];
         }
     }
 
     /**
-     * ✅ FIXED: Get seminar yang perlu dijadwalkan dengan JOIN yang benar
+     * Get seminar yang perlu dijadwalkan (sudah approved tapi belum dijadwal)
      */
     private function _get_seminar_perlu_dijadwalkan() {
         try {
-            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
-            $sql = "
-                SELECT COUNT(*) as total
-                FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
-                WHERE ss.status_kaprodi = 'approved' 
-                AND ss.tanggal_seminar IS NULL
-                AND (m.prodi_id = ? OR m.prodi_id IS NULL)
-            ";
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                d.nama as nama_pembimbing
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.status_kaprodi', 'approved');
+            $this->db->where('ssm.status', 'approved');
+            $this->db->where('ssm.tanggal_seminar IS NULL'); // Belum dijadwalkan
+            $this->db->order_by('ssm.tanggal_review_kaprodi', 'ASC');
             
-            $query = $this->db->query($sql, [$this->prodi_id]);
-            $result = $query ? $query->row() : null;
-            
-            return $result ? $result->total : 0;
-            
+            return $this->db->get()->result();
         } catch (Exception $e) {
             log_message('error', 'Error getting seminar perlu dijadwalkan: ' . $e->getMessage());
-            return 0;
+            return [];
         }
     }
 
     /**
-     * ✅ FIXED: Get jadwal mendatang dengan JOIN yang benar
+     * Get jadwal seminar mendatang
      */
     private function _get_jadwal_mendatang() {
         try {
-            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
-            $sql = "
-                SELECT 
-                    ss.id,
-                    ss.tanggal_seminar,
-                    ss.jam_seminar,
-                    ss.tempat_seminar,
-                    m.nama as nama_mahasiswa,
-                    m.nim,
-                    ss.judul_skripsi
-                FROM seminar_skripsi_mahasiswa ss
-                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
-                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
-                WHERE ss.tanggal_seminar >= CURDATE()
-                AND ss.status = 'scheduled'
-                AND (m.prodi_id = ? OR m.prodi_id IS NULL)
-                ORDER BY ss.tanggal_seminar ASC, ss.jam_seminar ASC
-                LIMIT 10
-            ";
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                d.nama as nama_pembimbing,
+                d1.nama as nama_penguji1,
+                d2.nama as nama_penguji2
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('dosen d1', 'ssm.dosen_penguji1_id = d1.id', 'left');
+            $this->db->join('dosen d2', 'ssm.dosen_penguji2_id = d2.id', 'left');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.status', 'scheduled');
+            $this->db->where('ssm.tanggal_seminar >=', date('Y-m-d'));
+            $this->db->order_by('ssm.tanggal_seminar', 'ASC');
+            $this->db->order_by('ssm.jam_seminar', 'ASC');
+            $this->db->limit(10);
             
-            $query = $this->db->query($sql, [$this->prodi_id]);
-            
-            return $query ? $query->result() : [];
-            
+            return $this->db->get()->result();
         } catch (Exception $e) {
             log_message('error', 'Error getting jadwal mendatang: ' . $e->getMessage());
             return [];
@@ -561,136 +442,629 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get dosen penguji list
+     * Get riwayat review kaprodi
      */
-    private function _get_dosen_penguji() {
+    private function _get_riwayat_review() {
         try {
-            $query = $this->db->select('id, nama, email')
-                             ->from('dosen')
-                             ->where('aktif', 1)
-                             ->order_by('nama')
-                             ->get();
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.reviewed_by_kaprodi', $this->session->userdata('id'));
+            $this->db->where_in('ssm.status_kaprodi', ['approved', 'rejected']);
+            $this->db->order_by('ssm.tanggal_review_kaprodi', 'DESC');
+            $this->db->limit(5);
             
-            return $query ? $query->result() : [];
-            
+            return $this->db->get()->result();
         } catch (Exception $e) {
-            log_message('error', 'Error getting dosen penguji: ' . $e->getMessage());
+            log_message('error', 'Error getting riwayat review: ' . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Process validation berdasarkan database structure
+     * Get statistics
      */
-    private function _process_validation($seminar_id, $decision, $plagiarism_percentage, $komentar) {
+    private function _get_statistics() {
         try {
-            $this->db->trans_start();
+            $stats = [];
             
+            // Total pengajuan
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $stats['total_pengajuan'] = $this->db->count_all_results();
+            
+            // Pending review
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.status_kaprodi', 'pending');
+            $stats['pending_review'] = $this->db->count_all_results();
+            
+            // Approved
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.status_kaprodi', 'approved');
+            $stats['approved'] = $this->db->count_all_results();
+            
+            // Scheduled
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            $this->db->where('ssm.status', 'scheduled');
+            $stats['scheduled'] = $this->db->count_all_results();
+            
+            return $stats;
+        } catch (Exception $e) {
+            log_message('error', 'Error getting statistics: ' . $e->getMessage());
+            return [
+                'total_pengajuan' => 0,
+                'pending_review' => 0,
+                'approved' => 0,
+                'scheduled' => 0
+            ];
+        }
+    }
+
+    /**
+     * Get detail seminar dengan relasi lengkap
+     */
+    private function _get_seminar_detail($seminar_id) {
+        try {
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                pm.abstrak,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                m.email as email_mahasiswa,
+                d.nama as nama_pembimbing,
+                d.email as email_pembimbing
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('ssm.id', $seminar_id);
+            $this->db->where('m.prodi_id', $this->prodi_id);
+            
+            return $this->db->get()->row();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get rekomendasi dosen penguji dari seminar proposal sebelumnya
+     */
+    private function _get_rekomendasi_dosen_penguji($proposal_id) {
+        try {
+            // Cari dosen penguji dari seminar proposal
+            $this->db->select('spm.dosen_penguji1_id, spm.dosen_penguji2_id');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->where('spm.proposal_id', $proposal_id);
+            $this->db->where('spm.status_kaprodi', 'approved');
+            $seminar_proposal = $this->db->get()->row();
+            
+            if (!$seminar_proposal) {
+                return null;
+            }
+            
+            // Get data dosen penguji
+            $penguji1 = null;
+            $penguji2 = null;
+            
+            if ($seminar_proposal->dosen_penguji1_id) {
+                $penguji1 = $this->db->get_where('dosen', ['id' => $seminar_proposal->dosen_penguji1_id])->row();
+            }
+            
+            if ($seminar_proposal->dosen_penguji2_id) {
+                $penguji2 = $this->db->get_where('dosen', ['id' => $seminar_proposal->dosen_penguji2_id])->row();
+            }
+            
+            return [
+                'penguji1' => $penguji1,
+                'penguji2' => $penguji2
+            ];
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting rekomendasi penguji: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get daftar dosen untuk penguji
+     */
+    private function _get_dosen_list() {
+        try {
+            return $this->db->select('id, nama, email')
+                           ->from('dosen')
+                           ->where('status', 'aktif')
+                           ->order_by('nama', 'ASC')
+                           ->get()->result();
+        } catch (Exception $e) {
+            log_message('error', 'Error getting dosen list: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get daftar ruang untuk seminar
+     */
+    private function _get_ruang_list() {
+        return [
+            'Ruang Seminar 1',
+            'Ruang Seminar 2', 
+            'Ruang Kelas A',
+            'Ruang Kelas B',
+            'Aula'
+        ];
+    }
+
+    /**
+     * Check apakah seminar bisa direview
+     */
+    private function _can_review_seminar($seminar) {
+        return $seminar->status_pembimbing == 'approved' && 
+               $seminar->status_kaprodi == 'pending' && 
+               $seminar->current_step == 'kaprodi';
+    }
+
+    /**
+     * CORE WORKFLOW: Process turnitin validation
+     */
+    private function _process_turnitin_validation($seminar_id, $status, $plagiarism_percentage, $komentar) {
+        $this->db->trans_start();
+        
+        try {
+            // Update seminar_skripsi_mahasiswa
             $update_data = [
-                'status_kaprodi' => $decision,
+                'status_kaprodi' => $status,
                 'komentar_kaprodi' => $komentar,
                 'tanggal_review_kaprodi' => date('Y-m-d H:i:s'),
                 'reviewed_by_kaprodi' => $this->session->userdata('id'),
+                'plagiarism_percentage' => $plagiarism_percentage,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
             
-            if ($decision == 'approved') {
+            // Handle file turnitin upload jika ada
+            if (!empty($_FILES['file_turnitin']['name'])) {
+                $upload_result = $this->_handle_turnitin_upload();
+                if ($upload_result['success']) {
+                    $update_data['file_turnitin'] = $upload_result['filename'];
+                }
+            }
+            
+            // Update status dan current_step berdasarkan hasil validasi
+            if ($status == 'approved') {
                 $update_data['status'] = 'approved';
-                $update_data['current_step'] = 'staf';
+                $update_data['current_step'] = 'kaprodi_jadwal'; // Lanjut ke penjadwalan
             } else {
                 $update_data['status'] = 'rejected';
-                $update_data['current_step'] = 'mahasiswa';
-            }
-            
-            if ($plagiarism_percentage !== null && $plagiarism_percentage !== '') {
-                $update_data['plagiarism_percentage'] = $plagiarism_percentage;
+                $update_data['current_step'] = 'mahasiswa'; // Kembali ke mahasiswa untuk perbaikan
             }
             
             $this->db->where('id', $seminar_id);
             $this->db->update('seminar_skripsi_mahasiswa', $update_data);
             
+            // Update workflow_status di proposal_mahasiswa jika diperlukan
+            if ($status == 'approved') {
+                $seminar = $this->db->get_where('seminar_skripsi_mahasiswa', ['id' => $seminar_id])->row();
+                if ($seminar) {
+                    $this->db->where('id', $seminar->proposal_id);
+                    $this->db->update('proposal_mahasiswa', [
+                        'workflow_status' => 'seminar_skripsi',
+                        'status_seminar_skripsi' => '1' // Approved
+                    ]);
+                }
+            }
+            
             $this->db->trans_complete();
             
-            return $this->db->trans_status();
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Database transaction failed');
+            }
+            
+            return true;
             
         } catch (Exception $e) {
             $this->db->trans_rollback();
-            log_message('error', 'Process validation error: ' . $e->getMessage());
+            log_message('error', 'Process turnitin validation error: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Save jadwal seminar
+     * CORE WORKFLOW: Process scheduling dengan penunjukan dosen penguji
      */
-    private function _save_jadwal($seminar_id, $tanggal_seminar, $jam_seminar, $tempat_seminar, $dosen_penguji1_id, $dosen_penguji2_id) {
+    private function _process_scheduling($seminar_id, $schedule_data) {
+        $this->db->trans_start();
+        
         try {
-            $this->db->trans_start();
-            
+            // Update seminar_skripsi_mahasiswa dengan jadwal dan penguji
             $update_data = [
-                'tanggal_seminar' => $tanggal_seminar,
-                'jam_seminar' => $jam_seminar,
-                'tempat_seminar' => $tempat_seminar,
+                'tanggal_seminar' => $schedule_data['tanggal_seminar'],
+                'jam_seminar' => $schedule_data['jam_seminar'],
+                'tempat_seminar' => $schedule_data['tempat_seminar'],
+                'dosen_penguji1_id' => $schedule_data['dosen_penguji1_id'],
+                'dosen_penguji2_id' => $schedule_data['dosen_penguji2_id'],
+                'status_penguji1' => 'approved', // Auto approved (kebijakan STK)
+                'status_penguji2' => 'approved', // Auto approved (kebijakan STK)
+                'tanggal_respon_penguji1' => date('Y-m-d H:i:s'),
+                'tanggal_respon_penguji2' => date('Y-m-d H:i:s'),
                 'status' => 'scheduled',
-                'current_step' => 'staf',
+                'current_step' => 'staf', // Lanjut ke staf untuk monitoring
                 'updated_at' => date('Y-m-d H:i:s')
             ];
             
-            if ($dosen_penguji1_id) {
-                $update_data['dosen_penguji1_id'] = $dosen_penguji1_id;
-            }
-            
-            if ($dosen_penguji2_id) {
-                $update_data['dosen_penguji2_id'] = $dosen_penguji2_id;
-            }
-            
             $this->db->where('id', $seminar_id);
             $this->db->update('seminar_skripsi_mahasiswa', $update_data);
             
+            // Update proposal_mahasiswa workflow status
+            $seminar = $this->db->get_where('seminar_skripsi_mahasiswa', ['id' => $seminar_id])->row();
+            if ($seminar) {
+                $this->db->where('id', $seminar->proposal_id);
+                $this->db->update('proposal_mahasiswa', [
+                    'tanggal_seminar_skripsi' => $schedule_data['tanggal_seminar'],
+                    'tempat_seminar_skripsi' => $schedule_data['tempat_seminar']
+                ]);
+            }
+            
             $this->db->trans_complete();
             
-            return $this->db->trans_status();
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Database transaction failed');
+            }
+            
+            return true;
             
         } catch (Exception $e) {
             $this->db->trans_rollback();
-            log_message('error', 'Save jadwal error: ' . $e->getMessage());
+            log_message('error', 'Process scheduling error: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Set prodi_id dari session
+     * Handle file upload turnitin
      */
-    private function _set_prodi_id() {
+    private function _handle_turnitin_upload() {
+        $config = [
+            'upload_path' => './uploads/turnitin/',
+            'allowed_types' => 'pdf|doc|docx',
+            'max_size' => 5120, // 5MB
+            'encrypt_name' => TRUE
+        ];
+        
+        if (!is_dir($config['upload_path'])) {
+            mkdir($config['upload_path'], 0755, true);
+        }
+        
+        $this->upload->initialize($config);
+        
+        if ($this->upload->do_upload('file_turnitin')) {
+            return [
+                'success' => true,
+                'filename' => $this->upload->data('file_name')
+            ];
+        } else {
+            return [
+                'success' => false,
+                'error' => $this->upload->display_errors()
+            ];
+        }
+    }
+
+    // ===============================================
+    // NOTIFICATION METHODS
+    // ===============================================
+
+    /**
+     * Send approval notification
+     */
+    private function _send_approval_notification($seminar, $plagiarism_percentage) {
         try {
-            $kaprodi = $this->db->select('id')
-                               ->from('prodi')
-                               ->where('dosen_id', $this->session->userdata('id'))
-                               ->get()
-                               ->row();
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
             
-            if ($kaprodi) {
-                $this->session->set_userdata('prodi_id', $kaprodi->id);
-                $this->prodi_id = $kaprodi->id;
+            $this->email->initialize($config);
+            
+            // Email ke mahasiswa
+            $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('[SIM-TA] Seminar Skripsi Disetujui');
+            
+            $message = "
+            <h3>Seminar Skripsi Disetujui</h3>
+            <p>Yth. {$seminar->nama_mahasiswa},</p>
+            <p>Pengajuan seminar skripsi Anda telah <strong>DISETUJUI</strong> oleh Kaprodi.</p>
+            <ul>
+                <li><strong>Judul:</strong> {$seminar->judul}</li>
+                <li><strong>Persentase Plagiarisme:</strong> {$plagiarism_percentage}% (dalam batas wajar ≤30%)</li>
+                <li><strong>Status:</strong> Menunggu penjadwalan</li>
+            </ul>
+            <p>Kaprodi akan segera melakukan penjadwalan seminar. Anda akan mendapat notifikasi jadwal melalui email ini.</p>
+            <p>Terima kasih.</p>
+            ";
+            
+            $this->email->message($message);
+            $this->email->send();
+            
+            // Email ke dosen pembimbing
+            if (!empty($seminar->email_pembimbing)) {
+                $this->email->clear();
+                $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+                $this->email->to($seminar->email_pembimbing);
+                $this->email->subject('[SIM-TA] Seminar Skripsi Mahasiswa Bimbingan Disetujui');
+                
+                $message_dosen = "
+                <h3>Seminar Skripsi Mahasiswa Bimbingan Disetujui</h3>
+                <p>Yth. {$seminar->nama_pembimbing},</p>
+                <p>Seminar skripsi mahasiswa bimbingan Anda telah disetujui oleh Kaprodi:</p>
+                <ul>
+                    <li><strong>Nama Mahasiswa:</strong> {$seminar->nama_mahasiswa} ({$seminar->nim})</li>
+                    <li><strong>Judul:</strong> {$seminar->judul}</li>
+                    <li><strong>Persentase Plagiarisme:</strong> {$plagiarism_percentage}%</li>
+                </ul>
+                <p>Kaprodi akan segera melakukan penjadwalan seminar.</p>
+                ";
+                
+                $this->email->message($message_dosen);
+                $this->email->send();
             }
             
+            return true;
+            
         } catch (Exception $e) {
-            log_message('error', 'Error setting prodi_id: ' . $e->getMessage());
-            $this->prodi_id = 1; // Default fallback
+            log_message('error', 'Send approval notification error: ' . $e->getMessage());
+            return false;
         }
     }
 
     /**
-     * Create fallback model untuk mencegah crash
+     * Send rejection notification
      */
-    private function _create_fallback_model() {
-        $this->seminar_model = (object) [
-            'get_seminar_detail' => function($id) {
-                return $this->_get_seminar_detail($id);
-            },
-            'get_seminar_list' => function() {
-                return $this->_get_seminar_skripsi_list();
+    private function _send_rejection_notification($seminar, $plagiarism_percentage, $komentar = '') {
+        try {
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
+            
+            $this->email->initialize($config);
+            
+            // Email ke mahasiswa
+            $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('[SIM-TA] Seminar Skripsi Ditolak - Perlu Perbaikan');
+            
+            $auto_reject = ($plagiarism_percentage > 30);
+            $reason = $auto_reject ? 
+                "plagiarisme melebihi batas maksimal 30% ({$plagiarism_percentage}%)" : 
+                "alasan berikut";
+            
+            $message = "
+            <h3>Seminar Skripsi Ditolak</h3>
+            <p>Yth. {$seminar->nama_mahasiswa},</p>
+            <p>Pengajuan seminar skripsi Anda <strong>DITOLAK</strong> karena {$reason}:</p>
+            <ul>
+                <li><strong>Judul:</strong> {$seminar->judul}</li>
+                <li><strong>Persentase Plagiarisme:</strong> {$plagiarism_percentage}%</li>
+            </ul>";
+            
+            if (!empty($komentar)) {
+                $message .= "<p><strong>Komentar Kaprodi:</strong><br>" . nl2br($komentar) . "</p>";
             }
-        ];
+            
+            $message .= "
+            <p><strong>Langkah selanjutnya:</strong></p>
+            <ol>
+                <li>Perbaiki dokumen skripsi sesuai komentar</li>
+                <li>Pastikan plagiarisme ≤30%</li>
+                <li>Ajukan ulang melalui sistem</li>
+            </ol>
+            <p>Silakan berkonsultasi dengan dosen pembimbing untuk perbaikan.</p>
+            ";
+            
+            $this->email->message($message);
+            $this->email->send();
+            
+            // Email ke dosen pembimbing
+            if (!empty($seminar->email_pembimbing)) {
+                $this->email->clear();
+                $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+                $this->email->to($seminar->email_pembimbing);
+                $this->email->subject('[SIM-TA] Seminar Skripsi Mahasiswa Bimbingan Ditolak');
+                
+                $message_dosen = "
+                <h3>Seminar Skripsi Mahasiswa Bimbingan Ditolak</h3>
+                <p>Yth. {$seminar->nama_pembimbing},</p>
+                <p>Seminar skripsi mahasiswa bimbingan Anda ditolak oleh Kaprodi:</p>
+                <ul>
+                    <li><strong>Nama Mahasiswa:</strong> {$seminar->nama_mahasiswa} ({$seminar->nim})</li>
+                    <li><strong>Judul:</strong> {$seminar->judul}</li>
+                    <li><strong>Persentase Plagiarisme:</strong> {$plagiarism_percentage}%</li>
+                </ul>
+                <p>Silakan bimbing mahasiswa untuk melakukan perbaikan sebelum mengajukan ulang.</p>
+                ";
+                
+                $this->email->message($message_dosen);
+                $this->email->send();
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Send rejection notification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Send final scheduling notification ke semua pihak
+     */
+    private function _send_scheduling_notification($seminar, $schedule_data) {
+        try {
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
+            
+            $this->email->initialize($config);
+            
+            // Get data dosen penguji
+            $penguji1 = $this->db->get_where('dosen', ['id' => $schedule_data['dosen_penguji1_id']])->row();
+            $penguji2 = $this->db->get_where('dosen', ['id' => $schedule_data['dosen_penguji2_id']])->row();
+            
+            $tanggal_formatted = date('d F Y', strtotime($schedule_data['tanggal_seminar']));
+            $jam_formatted = date('H:i', strtotime($schedule_data['jam_seminar']));
+            
+            $recipients = [
+                [
+                    'email' => $seminar->email_mahasiswa,
+                    'nama' => $seminar->nama_mahasiswa,
+                    'role' => 'mahasiswa'
+                ],
+                [
+                    'email' => $seminar->email_pembimbing,
+                    'nama' => $seminar->nama_pembimbing,
+                    'role' => 'pembimbing'
+                ],
+                [
+                    'email' => $penguji1->email,
+                    'nama' => $penguji1->nama,
+                    'role' => 'penguji1'
+                ],
+                [
+                    'email' => $penguji2->email,
+                    'nama' => $penguji2->nama,
+                    'role' => 'penguji2'
+                ]
+            ];
+            
+            foreach ($recipients as $recipient) {
+                if (empty($recipient['email'])) continue;
+                
+                $this->email->clear();
+                $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+                $this->email->to($recipient['email']);
+                $this->email->subject('[SIM-TA] Jadwal Seminar Skripsi - ' . $seminar->nama_mahasiswa);
+                
+                $role_text = ($recipient['role'] == 'mahasiswa') ? 'Yth. ' . $recipient['nama'] : 
+                            'Yth. ' . $recipient['nama'] . ' (' . ucfirst($recipient['role']) . ')';
+                
+                $message = "
+                <h3>Jadwal Seminar Skripsi</h3>
+                <p>{$role_text},</p>
+                <p>Seminar skripsi telah dijadwalkan dengan detail sebagai berikut:</p>
+                <table border='1' cellpadding='8' cellspacing='0' style='border-collapse:collapse; width:100%; max-width:500px;'>
+                    <tr><td><strong>Nama Mahasiswa</strong></td><td>{$seminar->nama_mahasiswa}</td></tr>
+                    <tr><td><strong>NIM</strong></td><td>{$seminar->nim}</td></tr>
+                    <tr><td><strong>Judul</strong></td><td>{$seminar->judul}</td></tr>
+                    <tr><td><strong>Tanggal</strong></td><td>{$tanggal_formatted}</td></tr>
+                    <tr><td><strong>Jam</strong></td><td>{$jam_formatted} WIB</td></tr>
+                    <tr><td><strong>Tempat</strong></td><td>{$schedule_data['tempat_seminar']}</td></tr>
+                    <tr><td><strong>Pembimbing</strong></td><td>{$seminar->nama_pembimbing}</td></tr>
+                    <tr><td><strong>Penguji 1</strong></td><td>{$penguji1->nama}</td></tr>
+                    <tr><td><strong>Penguji 2</strong></td><td>{$penguji2->nama}</td></tr>
+                </table>
+                <p>Harap hadir tepat waktu. Terima kasih.</p>
+                ";
+                
+                $this->email->message($message);
+                $this->email->send();
+            }
+            
+            // Send notification ke staf juga
+            $this->_send_staff_notification($seminar, $schedule_data);
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Send scheduling notification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Send notification ke staf
+     */
+    private function _send_staff_notification($seminar, $schedule_data) {
+        try {
+            // Get email staf
+            $staf_emails = $this->db->select('email')
+                                   ->from('dosen')
+                                   ->where('level', '1') // Level 1 = staf
+                                   ->where('email IS NOT NULL')
+                                   ->where('email !=', '')
+                                   ->get()->result();
+            
+            if (empty($staf_emails)) return true;
+            
+            $tanggal_formatted = date('d F Y', strtotime($schedule_data['tanggal_seminar']));
+            $jam_formatted = date('H:i', strtotime($schedule_data['jam_seminar']));
+            
+            foreach ($staf_emails as $staf) {
+                $this->email->clear();
+                $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+                $this->email->to($staf->email);
+                $this->email->subject('[SIM-TA] Jadwal Seminar Skripsi Baru - ' . $seminar->nama_mahasiswa);
+                
+                $message = "
+                <h3>Jadwal Seminar Skripsi Baru</h3>
+                <p>Yth. Staf Akademik,</p>
+                <p>Kaprodi telah menetapkan jadwal seminar skripsi:</p>
+                <ul>
+                    <li><strong>Mahasiswa:</strong> {$seminar->nama_mahasiswa} ({$seminar->nim})</li>
+                    <li><strong>Tanggal:</strong> {$tanggal_formatted}</li>
+                    <li><strong>Jam:</strong> {$jam_formatted} WIB</li>
+                    <li><strong>Tempat:</strong> {$schedule_data['tempat_seminar']}</li>
+                </ul>
+                <p>Silakan lakukan persiapan administrasi yang diperlukan.</p>
+                ";
+                
+                $this->email->message($message);
+                $this->email->send();
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Send staff notification error: ' . $e->getMessage());
+            return false;
+        }
     }
 }

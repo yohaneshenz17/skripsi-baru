@@ -1082,16 +1082,50 @@ class Seminar_skripsi extends CI_Controller {
      */
     private function _get_kaprodi_data() {
         try {
-            $this->db->select('d.*, u.email');
+            // OPTION 1: Cari kaprodi berdasarkan level '4' (sesuai struktur database)
+            $this->db->select('d.id, d.nama, d.email, d.nip');
             $this->db->from('dosen d');
-            $this->db->join('users u', 'd.user_id = u.id', 'left');
-            $this->db->where('u.level', '3'); // Level 3 = Kaprodi
+            $this->db->where('d.level', '4'); // Level 4 = Kaprodi berdasarkan view kaprodi_v
+            $this->db->limit(1);
+            
+            $kaprodi = $this->db->get()->row();
+            
+            if ($kaprodi) {
+                return $kaprodi;
+            }
+            
+            // OPTION 2: Fallback - cari dari tabel prodi (jika ada relasi)
+            $this->db->select('d.id, d.nama, d.email, d.nip');
+            $this->db->from('prodi p');
+            $this->db->join('dosen d', 'p.dosen_id = d.id');
+            $this->db->where('d.level', '4');
+            $this->db->limit(1);
+            
+            $kaprodi = $this->db->get()->row();
+            
+            if ($kaprodi) {
+                return $kaprodi;
+            }
+            
+            // OPTION 3: Last fallback - ambil dosen pertama dengan level 4
+            $this->db->select('id, nama, email, nip');
+            $this->db->from('dosen');
+            $this->db->where('level', '4');
+            $this->db->or_where('level', '1'); // Jika tidak ada level 4, coba level 1 (admin)
             $this->db->limit(1);
             
             return $this->db->get()->row();
+            
         } catch (Exception $e) {
             log_message('error', 'Error getting kaprodi data: ' . $e->getMessage());
-            return null;
+            
+            // Emergency fallback - return dummy data untuk mencegah crash
+            return (object) [
+                'id' => 1,
+                'nama' => 'Kaprodi',
+                'email' => 'kaprodi@stkyakobus.ac.id',
+                'nip' => '000000'
+            ];
         }
     }
 

@@ -158,10 +158,38 @@ $route['kaprodi/seminar_proposal/validasi'] = 'kaprodi/seminar_proposal/validasi
 $route['kaprodi/seminar_proposal/jadwal'] = 'kaprodi/seminar_proposal/jadwal';
 $route['kaprodi/seminar_proposal/tetapkan_penguji'] = 'kaprodi/seminar_proposal/tetapkan_penguji';
 
-// 5. Seminar Skripsi (BARU)
-// =================================================================
-// KAPRODI ROUTES - Seminar Skripsi (Phase 5)
-// =================================================================
+// =====================================================
+//      PHASE 5: SEMINAR SKRIPSI - KAPRODI
+// =====================================================
+
+// Dashboard seminar skripsi kaprodi
+$route['kaprodi/seminar_skripsi'] = 'kaprodi/seminar_skripsi/index';
+$route['kaprodi/seminar_skripsi/index'] = 'kaprodi/seminar_skripsi/index';
+
+// Detail review turnitin
+$route['kaprodi/seminar_skripsi/detail/(:num)'] = 'kaprodi/seminar_skripsi/detail/$1';
+
+// Validasi turnitin (POST action)
+$route['kaprodi/seminar_skripsi/validasi_turnitin'] = 'kaprodi/seminar_skripsi/validasi_turnitin';
+
+// Penjadwalan seminar
+$route['kaprodi/seminar_skripsi/penjadwalan/(:num)'] = 'kaprodi/seminar_skripsi/penjadwalan/$1';
+
+// Simpan jadwal (POST action)
+$route['kaprodi/seminar_skripsi/simpan_jadwal'] = 'kaprodi/seminar_skripsi/simpan_jadwal';
+
+// Routes dengan dash untuk konsistensi URL (OPSIONAL)
+$route['kaprodi/seminar-skripsi'] = 'kaprodi/seminar_skripsi/index';
+$route['kaprodi/seminar-skripsi/detail/(:num)'] = 'kaprodi/seminar_skripsi/detail/$1';
+$route['kaprodi/seminar-skripsi/penjadwalan/(:num)'] = 'kaprodi/seminar_skripsi/penjadwalan/$1';
+
+// Routes untuk laporan dan monitoring (future development)
+$route['kaprodi/seminar_skripsi/laporan'] = 'kaprodi/seminar_skripsi/laporan';
+$route['kaprodi/seminar_skripsi/monitoring'] = 'kaprodi/seminar_skripsi/monitoring';
+
+// Route untuk export/print (future development)
+$route['kaprodi/seminar_skripsi/export/(:any)'] = 'kaprodi/seminar_skripsi/export/$1';
+$route['kaprodi/seminar_skripsi/print/(:num)'] = 'kaprodi/seminar_skripsi/print/$1';
 
 // Tambahkan setelah kaprodi seminar_proposal routes (di section 5)
 $route['kaprodi/seminar_skripsi'] = 'kaprodi/seminar_skripsi';

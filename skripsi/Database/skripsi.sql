@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 03, 2025 at 01:43 PM
+-- Generation Time: Aug 03, 2025 at 05:48 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1985,7 +1985,7 @@ CREATE TABLE `seminar_skripsi_mahasiswa` (
 --
 
 INSERT INTO `seminar_skripsi_mahasiswa` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_skripsi`, `keterangan_mahasiswa`, `judul_skripsi`, `surat_keterangan_penelitian`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
-(11, 44, 44, 'submitted', 'pembimbing', 'skripsi_1754177659_688ea07b09e52.pdf', 'Tesssssss Baruuuuuu', NULL, NULL, 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 06:30:48', '2025-08-03 06:34:19', NULL),
+(11, 44, 44, 'rejected', 'mahasiswa', 'skripsi_1754177659_688ea07b09e52.pdf', 'Tesssssss Baruuuuuu', NULL, NULL, 'rejected', 'belum ada surat ijin penelitian', '2025-08-03 17:30:13', 25, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 06:30:48', '2025-08-03 17:30:13', NULL),
 (12, 46, 46, 'review_kaprodi', 'kaprodi', 'df6c327d48141b9b85fcbcc07203c423.pdf', 'INI LATIHAN SAJA', NULL, NULL, 'approved', '', '2025-08-03 12:16:41', 25, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 09:17:54', '2025-08-03 12:16:41', NULL);
 
 --

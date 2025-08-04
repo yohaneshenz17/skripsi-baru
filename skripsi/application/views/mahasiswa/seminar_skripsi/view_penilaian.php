@@ -395,7 +395,7 @@
 
                     <!-- Download File Skripsi -->
                     <?php if (!empty($seminar->file_skripsi)): ?>
-                    <a href="<?= base_url('mahasiswa/seminar_skripsi/view_file/' . $seminar->id) ?>" 
+                    <a href="<?= base_url('mahasiswa/seminar_skripsi/download_file/' . $seminar->id) ?>" 
                        class="btn btn-secondary btn-block mb-3">
                         <i class="fas fa-download mr-2"></i>
                         Download Skripsi

@@ -414,7 +414,7 @@
     margin-bottom: 5px;
 }
 
-/* ✅ STYLING UNTUK MODAL PENILAIAN */
+/* ✅ STYLING UNTUK MODAL PENILAIAN - UPDATED */
 .penilaian-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -456,6 +456,30 @@
     border-radius: 15px;
 }
 
+/* ✅ STYLING BARU UNTUK PENILAIAN SKRIPSI */
+.badge-lg {
+    font-size: 16px !important;
+    padding: 8px 16px !important;
+}
+
+.penilaian-section .border {
+    border: 2px solid #dee2e6 !important;
+}
+
+.penilaian-section .border:hover {
+    border-color: #007bff !important;
+    box-shadow: 0 0 10px rgba(0,123,255,0.2);
+    transition: all 0.3s ease;
+}
+
+.catatan-detail {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 10px 15px;
+    margin: 5px 0;
+    border-radius: 0 5px 5px 0;
+}
+
 @media (max-width: 768px) {
     .btn-group-sm .btn {
         padding: 0.25rem 0.5rem;
@@ -464,6 +488,10 @@
     
     .modal-dialog {
         margin: 10px;
+    }
+    
+    .penilaian-section .col-md-4 {
+        margin-bottom: 15px;
     }
 }
 </style>
@@ -562,99 +590,159 @@ function lihatPenilaian(seminarId, mahasiswaName) {
     });
 }
 
-// ✅ RENDER PENILAIAN FUNCTION
+// ✅ RENDER PENILAIAN FUNCTION - FIXED VERSION
 function renderPenilaian(data, mahasiswaName) {
     var penilaianHtml = 
         '<div class="penilaian-header">' +
             '<h5 class="mb-1"><i class="fas fa-user-graduate mr-2"></i>' + mahasiswaName + '</h5>' +
             '<p class="mb-0 small">' + (data.nim || '') + ' | ' + (data.judul || '') + '</p>' +
-        '</div>' +
-        
-        '<div class="row">' +
-            '<div class="col-md-6">' +
-                '<div class="penilaian-section">' +
-                    '<h6><i class="fas fa-star mr-2"></i>Penilaian Akademik</h6>' +
-                    '<div class="nilai-item">' +
-                        '<span>Sistematika Penulisan</span>' +
-                        '<span class="badge nilai-badge badge-primary">' + (data.sistematika || 0) + '</span>' +
+        '</div>';
+    
+    // ✅ INFORMASI SEMINAR    
+    if (data.tanggal_seminar) {
+        penilaianHtml += 
+            '<div class="penilaian-section">' +
+                '<h6><i class="fas fa-calendar mr-2"></i>Informasi Seminar</h6>' +
+                '<div class="row">' +
+                    '<div class="col-md-4">' +
+                        '<small class="text-muted">Tanggal</small><br>' +
+                        '<strong>' + (data.tanggal_seminar || 'N/A') + '</strong>' +
                     '</div>' +
-                    '<div class="nilai-item">' +
-                        '<span>Kelengkapan Materi</span>' +
-                        '<span class="badge nilai-badge badge-primary">' + (data.kelengkapan || 0) + '</span>' +
+                    '<div class="col-md-4">' +
+                        '<small class="text-muted">Waktu</small><br>' +
+                        '<strong>' + (data.jam_seminar || 'N/A') + '</strong>' +
                     '</div>' +
-                    '<div class="nilai-item">' +
-                        '<span>Analisis & Pembahasan</span>' +
-                        '<span class="badge nilai-badge badge-primary">' + (data.analisis || 0) + '</span>' +
-                    '</div>' +
-                    '<div class="nilai-item">' +
-                        '<span>Kesimpulan</span>' +
-                        '<span class="badge nilai-badge badge-primary">' + (data.kesimpulan || 0) + '</span>' +
+                    '<div class="col-md-4">' +
+                        '<small class="text-muted">Tempat</small><br>' +
+                        '<strong>' + (data.tempat_seminar || 'N/A') + '</strong>' +
                     '</div>' +
                 '</div>' +
-            '</div>' +
-            
-            '<div class="col-md-6">' +
-                '<div class="penilaian-section">' +
-                    '<h6><i class="fas fa-comments mr-2"></i>Penilaian Presentasi</h6>' +
-                    '<div class="nilai-item">' +
-                        '<span>Penguasaan Materi</span>' +
-                        '<span class="badge nilai-badge badge-info">' + (data.penguasaan_materi || 0) + '</span>' +
-                    '</div>' +
-                    '<div class="nilai-item">' +
-                        '<span>Komunikasi</span>' +
-                        '<span class="badge nilai-badge badge-info">' + (data.komunikasi || 0) + '</span>' +
-                    '</div>' +
-                    '<div class="nilai-item">' +
-                        '<span>Kemampuan Menjawab</span>' +
-                        '<span class="badge nilai-badge badge-info">' + (data.kemampuan_jawab || 0) + '</span>' +
-                    '</div>' +
-                    '<div class="nilai-item">' +
-                        '<span>Etika & Sikap</span>' +
-                        '<span class="badge nilai-badge badge-info">' + (data.etika || 0) + '</span>' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-        '</div>' +
-        
+            '</div>';
+    }
+    
+    // ✅ NILAI PER PENGUJI (sesuai dengan form penilaian actual)
+    penilaianHtml += 
         '<div class="penilaian-section">' +
-            '<h6><i class="fas fa-calculator mr-2"></i>Rekapitulasi Nilai</h6>' +
+            '<h6><i class="fas fa-star mr-2"></i>Nilai Per Penguji</h6>' +
             '<div class="row">' +
                 '<div class="col-md-4">' +
-                    '<div class="text-center p-3 bg-light rounded">' +
-                        '<h4 class="text-primary mb-1">' + (data.nilai_angka || 0) + '</h4>' +
-                        '<small class="text-muted">Nilai Angka</small>' +
+                    '<div class="text-center p-3 border rounded">' +
+                        '<h4 class="text-primary mb-1">' + (data.nilai_penguji1 || 0) + '</h4>' +
+                        '<small class="text-muted">Penguji 1</small><br>' +
+                        '<small class="font-weight-bold">' + (data.nama_penguji1 || 'N/A') + '</small>' +
                     '</div>' +
                 '</div>' +
                 '<div class="col-md-4">' +
-                    '<div class="text-center p-3 bg-light rounded">' +
-                        '<h4 class="text-success mb-1">' + (data.nilai_huruf || 'N/A') + '</h4>' +
-                        '<small class="text-muted">Nilai Huruf</small>' +
+                    '<div class="text-center p-3 border rounded">' +
+                        '<h4 class="text-success mb-1">' + (data.nilai_penguji2 || 0) + '</h4>' +
+                        '<small class="text-muted">Penguji 2</small><br>' +
+                        '<small class="font-weight-bold">' + (data.nama_penguji2 || 'N/A') + '</small>' +
                     '</div>' +
                 '</div>' +
                 '<div class="col-md-4">' +
-                    '<div class="text-center p-3 bg-light rounded">' +
-                        '<h4 class="text-info mb-1">' + (data.predikat || 'N/A') + '</h4>' +
-                        '<small class="text-muted">Predikat</small>' +
+                    '<div class="text-center p-3 border rounded">' +
+                        '<h4 class="text-info mb-1">' + (data.nilai_pembimbing || 0) + '</h4>' +
+                        '<small class="text-muted">Pembimbing</small><br>' +
+                        '<small class="font-weight-bold">' + (data.nama_pembimbing || 'N/A') + '</small>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    
+    // ✅ REKAPITULASI NILAI FINAL
+    penilaianHtml += 
+        '<div class="penilaian-section">' +
+            '<h6><i class="fas fa-calculator mr-2"></i>Rekapitulasi Nilai Final</h6>' +
+            '<div class="row">' +
+                '<div class="col-md-4">' +
+                    '<div class="text-center p-3 bg-primary text-white rounded">' +
+                        '<h3 class="mb-1">' + (data.nilai_akhir || 0) + '</h3>' +
+                        '<small>Nilai Akhir</small>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                    '<div class="text-center p-3 bg-success text-white rounded">' +
+                        '<h3 class="mb-1">' + (data.nilai_huruf || 'N/A') + '</h3>' +
+                        '<small>Nilai Huruf</small>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                    '<div class="text-center p-3 bg-info text-white rounded">' +
+                        '<h3 class="mb-1">' + (data.predikat || 'N/A') + '</h3>' +
+                        '<small>Predikat</small>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
         '</div>';
         
-    if (data.catatan_penguji) {
+    // ✅ REKOMENDASI
+    if (data.rekomendasi) {
+        var rekomendasiBadge = 'secondary';
+        if (data.rekomendasi.toLowerCase() === 'lulus_langsung') rekomendasiBadge = 'success';
+        else if (data.rekomendasi.toLowerCase() === 'lulus_revisi_minor') rekomendasiBadge = 'warning';
+        else if (data.rekomendasi.toLowerCase() === 'lulus_revisi_mayor') rekomendasiBadge = 'danger';
+        
         penilaianHtml += 
             '<div class="penilaian-section">' +
-                '<h6><i class="fas fa-sticky-note mr-2"></i>Catatan Penguji</h6>' +
-                '<div class="bg-white p-3 rounded border">' +
-                    data.catatan_penguji.replace(/\n/g, '<br>') +
-                '</div>' +
+                '<h6><i class="fas fa-thumbs-up mr-2"></i>Rekomendasi</h6>' +
+                '<div class="text-center p-3 border rounded">' +
+                    '<span class="badge badge-' + rekomendasiBadge + ' badge-lg p-2 mb-2" style="font-size: 14px;">' +
+                        data.rekomendasi.replace(/_/g, ' ').toUpperCase() +
+                    '</span>';
+        
+        if (data.keterangan_rekomendasi) {
+            penilaianHtml += 
+                '<br><div class="mt-2">' +
+                    '<small class="text-muted">Keterangan:</small><br>' +
+                    '<em>' + data.keterangan_rekomendasi + '</em>' +
+                '</div>';
+        }
+        
+        penilaianHtml += '</div></div>';
+    }
+    
+    // ✅ SEMUA CATATAN LENGKAP
+    var catatanItems = [
+        {label: 'Pendahuluan', field: 'catatan_pendahuluan'},
+        {label: 'Tinjauan Pustaka', field: 'catatan_tinjauan_pustaka'},
+        {label: 'Metodologi', field: 'catatan_metodologi'},
+        {label: 'Hasil & Pembahasan', field: 'catatan_hasil_pembahasan'},
+        {label: 'Kesimpulan', field: 'catatan_kesimpulan'},
+        {label: 'Catatan Umum', field: 'catatan_umum'}
+    ];
+    
+    var hasCatatan = false;
+    var catatanHtml = '';
+    
+    for (var i = 0; i < catatanItems.length; i++) {
+        var item = catatanItems[i];
+        if (data[item.field] && data[item.field].trim() !== '') {
+            hasCatatan = true;
+            catatanHtml += 
+                '<div class="mb-3">' +
+                    '<strong class="text-primary">' + item.label + ':</strong>' +
+                    '<div class="bg-light p-2 rounded mt-1" style="border-left: 3px solid #007bff;">' +
+                        data[item.field].replace(/\n/g, '<br>') +
+                    '</div>' +
+                '</div>';
+        }
+    }
+    
+    if (hasCatatan) {
+        penilaianHtml += 
+            '<div class="penilaian-section">' +
+                '<h6><i class="fas fa-comments mr-2"></i>Catatan Detail</h6>' +
+                catatanHtml +
             '</div>';
     }
     
+    // ✅ FOOTER INFO
     penilaianHtml += 
-        '<div class="text-center text-muted mt-3">' +
+        '<div class="text-center text-muted mt-3 pt-3 border-top">' +
             '<small>' +
                 '<i class="fas fa-calendar mr-1"></i>' +
-                'Dinilai pada: ' + (data.tanggal_penilaian ? new Date(data.tanggal_penilaian).toLocaleDateString('id-ID') : 'N/A') +
+                'Dinilai pada: ' + (data.tanggal_penilaian ? new Date(data.tanggal_penilaian).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric'}) : 'N/A') +
+                ' oleh ' + (data.dinilai_oleh || 'Dosen Pembimbing') +
             '</small>' +
         '</div>';
     

@@ -378,6 +378,10 @@ $route['dosen/seminar_skripsi/rekomendasi'] = 'dosen/seminar_skripsi/rekomendasi
 $route['dosen/seminar_skripsi/input_nilai'] = 'dosen/seminar_skripsi/input_nilai';
 $route['dosen/seminar_skripsi/berita_acara/(:num)'] = 'dosen/seminar_skripsi/berita_acara/$1';
 
+// Route untuk view surat keterangan penelitian
+$route['dosen/seminar_skripsi/view_surat_penelitian/(:num)'] = 'dosen/seminar_skripsi/view_surat_penelitian/$1';
+$route['dosen/seminar-skripsi/view-surat-penelitian/(:num)'] = 'dosen/seminar_skripsi/view_surat_penelitian/$1';
+
 // =====================================================
 //      PHASE 6: PUBLIKASI
 // =====================================================

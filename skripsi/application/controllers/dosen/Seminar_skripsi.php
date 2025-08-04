@@ -139,6 +139,43 @@ class Seminar_skripsi extends CI_Controller {
         readfile($file_path);
         exit;
     }
+    
+    /**
+     * NEW: View/Download surat keterangan penelitian
+     * TAMBAHKAN METHOD INI SETELAH view_file() METHOD
+     */
+    public function view_surat_penelitian($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Get detail seminar dengan validasi ownership
+        $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
+        
+        if (!$seminar || empty($seminar->surat_keterangan_penelitian)) {
+            $this->session->set_flashdata('error', 'File surat keterangan penelitian tidak ditemukan!');
+            redirect('dosen/seminar_skripsi/detail/' . $seminar_id);
+            return;
+        }
+        
+        // Path file surat keterangan penelitian
+        $file_path = FCPATH . 'uploads/seminar_skripsi/surat_files/' . $seminar->surat_keterangan_penelitian;
+        
+        if (!file_exists($file_path)) {
+            $this->session->set_flashdata('error', 'File surat keterangan penelitian tidak ditemukan di server!');
+            redirect('dosen/seminar_skripsi/detail/' . $seminar_id);
+            return;
+        }
+        
+        // Set proper headers for file viewing
+        $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);
+        $content_type = $this->_get_content_type($file_extension);
+        
+        header('Content-Type: ' . $content_type);
+        header('Content-Disposition: inline; filename="' . basename($seminar->surat_keterangan_penelitian) . '"');
+        header('Content-Length: ' . filesize($file_path));
+        
+        readfile($file_path);
+        exit;
+    }
 
     /**
      * Proses rekomendasi seminar skripsi (Setujui/Tolak)
@@ -478,15 +515,15 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get detail seminar dengan validasi ownership
-     * STABLE - TIDAK DIUBAH
+     * ENHANCED: Get seminar detail dengan judul original dari proposal
+     * REPLACE METHOD _get_seminar_detail() YANG ADA DENGAN INI
      */
     private function _get_seminar_detail($seminar_id, $dosen_id) {
         try {
             $this->db->select('
                 ssm.*,
                 m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                pm.judul, pm.dosen_id as pembimbing_id,
+                pm.judul as judul_proposal_original, pm.dosen_id as pembimbing_id,
                 d1.nama as nama_penguji1,
                 d2.nama as nama_penguji2
             ');
@@ -498,12 +535,22 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->where('ssm.id', $seminar_id);
             $this->db->where('pm.dosen_id', $dosen_id);
             
-            return $this->db->get()->row();
+            $result = $this->db->get()->row();
+            
+            // ENHANCEMENT: Tambahkan logic untuk menentukan judul yang digunakan
+            if ($result) {
+                // Jika ada judul_skripsi baru, gunakan itu. Jika tidak, gunakan judul proposal original
+                $result->judul_current = !empty($result->judul_skripsi) ? $result->judul_skripsi : $result->judul_proposal_original;
+                $result->is_judul_changed = !empty($result->judul_skripsi) && ($result->judul_skripsi !== $result->judul_proposal_original);
+            }
+            
+            return $result;
         } catch (Exception $e) {
             log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
             return null;
         }
     }
+
 
     /**
      * Get detail seminar untuk penilaian
@@ -618,8 +665,8 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Process penilaian (form submission)
-     * STABLE - TIDAK DIUBAH
+     * ENHANCED: Process penilaian dengan notifikasi mahasiswa setelah publish
+     * REPLACE METHOD _process_penilaian() DENGAN VERSI INI
      */
     private function _process_penilaian($seminar_id, $dosen_id, $seminar) {
         $action = $this->input->post('action');
@@ -693,6 +740,10 @@ class Seminar_skripsi extends CI_Controller {
             'updated_at' => date('Y-m-d H:i:s')
         ];
         
+        if ($action == 'publish') {
+            $penilaian_data['published_at'] = date('Y-m-d H:i:s');
+        }
+        
         $existing = $this->_get_existing_penilaian($seminar_id, $dosen_id);
         
         try {
@@ -707,18 +758,23 @@ class Seminar_skripsi extends CI_Controller {
             }
             
             if ($action == 'publish' && $success) {
+                // Update status seminar skripsi ke completed
                 $this->db->where('id', $seminar_id);
                 $this->db->update('seminar_skripsi_mahasiswa', [
                     'status' => 'completed',
                     'updated_at' => date('Y-m-d H:i:s')
                 ]);
                 
+                // Update workflow status proposal ke publikasi
                 $this->db->where('id', $seminar->proposal_id);
                 $this->db->update('proposal_mahasiswa', [
                     'workflow_status' => 'publikasi',
                     'status_seminar_skripsi' => 'completed',
                     'updated_at' => date('Y-m-d H:i:s')
                 ]);
+                
+                // ENHANCEMENT: Send email notification ke mahasiswa saat penilaian dipublikasi
+                $this->_send_penilaian_published_notification($seminar, $penilaian_data);
             }
             
             $this->db->trans_complete();
@@ -727,7 +783,7 @@ class Seminar_skripsi extends CI_Controller {
                 $this->session->set_flashdata('error', 'Gagal menyimpan penilaian!');
             } else {
                 if ($action == 'publish') {
-                    $this->session->set_flashdata('success', 'Penilaian berhasil dipublikasikan! Status mahasiswa telah diupdate ke tahap selanjutnya.');
+                    $this->session->set_flashdata('success', 'Penilaian berhasil dipublikasikan! Mahasiswa dapat melihat hasil penilaian dan melanjutkan ke tahap publikasi.');
                 } else {
                     $this->session->set_flashdata('success', 'Penilaian berhasil disimpan sebagai draft!');
                 }
@@ -1055,6 +1111,145 @@ class Seminar_skripsi extends CI_Controller {
         }
     }
 
+    /**
+     * NEW: Send notification ke mahasiswa ketika penilaian dipublikasi
+     */
+    private function _send_penilaian_published_notification($seminar, $penilaian_data) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('🎓 Hasil Penilaian Seminar Skripsi Telah Dipublikasi - ' . $seminar->nama_mahasiswa);
+            
+            // Get dosen pembimbing info
+            $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
+            $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            // Color untuk nilai
+            $nilai_color = $penilaian_data['nilai_akhir'] >= 80 ? '#28a745' : 
+                          ($penilaian_data['nilai_akhir'] >= 70 ? '#ffc107' : '#dc3545');
+            
+            // Color untuk rekomendasi
+            $rekomendasi_text = '';
+            $rekomendasi_color = '';
+            switch($penilaian_data['rekomendasi']) {
+                case 'diterima_tanpa_revisi':
+                    $rekomendasi_text = 'Diterima tanpa revisi';
+                    $rekomendasi_color = '#28a745';
+                    break;
+                case 'revisi_minor':
+                    $rekomendasi_text = 'Diterima dengan revisi minor';
+                    $rekomendasi_color = '#17a2b8';
+                    break;
+                case 'revisi_mayor':
+                    $rekomendasi_text = 'Diterima dengan revisi mayor';
+                    $rekomendasi_color = '#ffc107';
+                    break;
+                case 'ditolak':
+                    $rekomendasi_text = 'Ditolak';
+                    $rekomendasi_color = '#dc3545';
+                    break;
+            }
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>🎓 Hasil Penilaian Seminar Skripsi</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Hasil penilaian seminar skripsi Anda telah <strong>DIPUBLIKASI</strong> dan dapat dilihat melalui sistem.</p>
+                    
+                    <div style='background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #495057; margin: 0 0 10px 0;'>📚 Detail Seminar:</h4>
+                        <ul style='color: #495057; margin: 0;'>
+                            <li><strong>Judul:</strong> " . ($seminar->judul_current ?? $seminar->judul_proposal_original) . "</li>
+                            <li><strong>Pembimbing:</strong> {$nama_pembimbing}</li>
+                            <li><strong>Tanggal Publikasi:</strong> " . date('d F Y, H:i') . " WIB</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid {$nilai_color};'>
+                        <h4 style='color: {$nilai_color}; margin: 0 0 10px 0;'>📊 Hasil Penilaian:</h4>
+                        <div style='display: flex; justify-content: space-between; align-items: center;'>
+                            <div>
+                                <strong style='font-size: 18px; color: {$nilai_color};'>Nilai Akhir: {$penilaian_data['nilai_akhir']} ({$penilaian_data['nilai_huruf']})</strong><br>
+                                <span style='color: {$rekomendasi_color}; font-weight: bold;'>Rekomendasi: {$rekomendasi_text}</span>
+                            </div>
+                        </div>
+                    </div>";
+            
+            // Tambahkan catatan jika ada
+            $ada_catatan = false;
+            $catatan_sections = [
+                'catatan_pendahuluan' => 'Bab I: Pendahuluan',
+                'catatan_tinjauan_pustaka' => 'Bab II: Tinjauan Pustaka',
+                'catatan_metodologi' => 'Bab III: Metodologi',
+                'catatan_hasil_pembahasan' => 'Bab IV: Hasil & Pembahasan',
+                'catatan_kesimpulan' => 'Bab V: Kesimpulan',
+                'catatan_umum' => 'Catatan Umum'
+            ];
+            
+            foreach ($catatan_sections as $field => $label) {
+                if (!empty($penilaian_data[$field])) {
+                    $ada_catatan = true;
+                    break;
+                }
+            }
+            
+            if ($ada_catatan) {
+                $message .= "
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>📝 Terdapat Catatan Revisi</h4>
+                        <p style='color: #856404; margin: 0;'>Silakan cek detail catatan untuk setiap bab melalui sistem SIM-TA.</p>
+                    </div>";
+            }
+            
+            $message .= "
+                    <div style='background-color: #cce7ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>📋 Langkah Selanjutnya:</h4>
+                        <ol style='color: #004085; margin: 0;'>
+                            <li>Login ke sistem SIM Tugas Akhir</li>
+                            <li>Lihat detail hasil penilaian dan catatan</li>
+                            <li>Lakukan revisi sesuai catatan (jika ada)</li>
+                            <li>Lanjutkan ke tahap Publikasi Tugas Akhir</li>
+                        </ol>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('mahasiswa/seminar_skripsi/view_penilaian/' . $seminar->id) . "' style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            👁️ Lihat Hasil Penilaian
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem. Selamat atas pencapaian Anda!
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send penilaian published email: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending penilaian published email: ' . $e->getMessage());
+            return false;
+        }
+    }
     // =================================================================
     // UTILITY METHODS
     // =================================================================

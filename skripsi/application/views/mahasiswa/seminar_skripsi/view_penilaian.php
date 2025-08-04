@@ -148,51 +148,87 @@
                         </div>
                     </div>
 
-                    <!-- Rekomendasi Section -->
+                    <!-- ✅ FIXED: Rekomendasi Section - Handle Empty Data -->
                     <div class="rekomendasi-section">
                         <h6 class="text-primary border-bottom pb-2 mb-3">
                             <i class="fas fa-graduation-cap mr-2"></i>Rekomendasi Kelulusan
                         </h6>
                         
                         <?php
-                        // Determine recommendation styling
-                        $rekomendasi_config = [
-                            'lulus_tanpa_revisi' => [
-                                'class' => 'success',
-                                'icon' => 'check-circle',
-                                'text' => 'LULUS TANPA REVISI'
-                            ],
-                            'lulus_dengan_revisi_minor' => [
-                                'class' => 'warning',
-                                'icon' => 'edit',
-                                'text' => 'LULUS DENGAN REVISI MINOR'
-                            ],
-                            'lulus_dengan_revisi_mayor' => [
-                                'class' => 'info',
-                                'icon' => 'tools',
-                                'text' => 'LULUS DENGAN REVISI MAYOR'
-                            ],
-                            'tidak_lulus' => [
-                                'class' => 'danger',
-                                'icon' => 'times-circle',
-                                'text' => 'TIDAK LULUS'
-                            ]
-                        ];
+                        // ✅ HANDLE EMPTY/INVALID REKOMENDASI
+                        $rekomendasi_raw = trim($penilaian->rekomendasi ?? '');
                         
-                        $config = $rekomendasi_config[$penilaian->rekomendasi] ?? $rekomendasi_config['tidak_lulus'];
+                        if (empty($rekomendasi_raw)) {
+                            // Rekomendasi kosong - tampilkan peringatan
+                            ?>
+                            <div class="alert alert-warning border-left-warning">
+                                <i class="fas fa-exclamation-triangle mr-3"></i>
+                                <strong>REKOMENDASI DIKIRIMKAN MELALUI EMAIL</strong>
+                                <p class="mb-2 mt-2">Silakan cek inbox email Anda untuk melihat hasil rekomendasi atau hubungi dosen.</p>
+                                <small class="text-muted">
+                                    Nilai Anda: <strong><?= number_format($penilaian->nilai_akhir, 1) ?> (<?= $penilaian->nilai_huruf ?>)</strong>
+                                </small>
+                            </div>
+                            <?php
+                        } else {
+                            // Ada rekomendasi - tampilkan sesuai data
+                            $rekomendasi_config = [
+                                'lulus_tanpa_revisi' => [
+                                    'class' => 'success',
+                                    'icon' => 'check-circle',
+                                    'text' => 'LULUS TANPA REVISI'
+                                ],
+                                'lulus_dengan_revisi_minor' => [
+                                    'class' => 'warning',
+                                    'icon' => 'edit',
+                                    'text' => 'LULUS DENGAN REVISI MINOR'
+                                ],
+                                'lulus_dengan_revisi_mayor' => [
+                                    'class' => 'info',
+                                    'icon' => 'tools',
+                                    'text' => 'LULUS DENGAN REVISI MAYOR'
+                                ],
+                                'tidak_lulus' => [
+                                    'class' => 'danger',
+                                    'icon' => 'times-circle',
+                                    'text' => 'TIDAK LULUS'
+                                ]
+                            ];
+                            
+                            $rekomendasi_key = strtolower($rekomendasi_raw);
+                            $config = $rekomendasi_config[$rekomendasi_key] ?? [
+                                'class' => 'secondary',
+                                'icon' => 'question-circle',  
+                                'text' => 'DATA TIDAK VALID: "' . htmlspecialchars($rekomendasi_raw) . '"'
+                            ];
+                            ?>
+                            
+                            <div class="alert alert-<?= $config['class'] ?> border-left-<?= $config['class'] ?> h5 mb-3">
+                                <i class="fas fa-<?= $config['icon'] ?> mr-3"></i>
+                                <strong><?= $config['text'] ?></strong>
+                            </div>
+                            <?php
+                        }
                         ?>
-                        
-                        <div class="alert alert-<?= $config['class'] ?> border-left-<?= $config['class'] ?> h5 mb-3">
-                            <i class="fas fa-<?= $config['icon'] ?> mr-3"></i>
-                            <strong><?= $config['text'] ?></strong>
-                        </div>
-
+                    
+                        <!-- Keterangan Rekomendasi (jika ada) -->
                         <?php if (!empty($penilaian->keterangan_rekomendasi)): ?>
                         <div class="alert alert-light border">
                             <h6 class="text-muted mb-2">
                                 <i class="fas fa-comment-alt mr-2"></i>Keterangan Rekomendasi:
                             </h6>
                             <p class="mb-0"><?= nl2br(htmlspecialchars($penilaian->keterangan_rekomendasi)) ?></p>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <!-- ✅ INFO: Debugging untuk admin (bisa dihapus di production) -->
+                        <?php if ($this->session->userdata('level') == '1'): // Admin only ?>
+                        <div class="alert alert-info small">
+                            <strong>Debug Info (Admin Only):</strong><br>
+                            Raw rekomendasi: "<?= htmlspecialchars($penilaian->rekomendasi ?? 'NULL') ?>"<br>
+                            Length: <?= strlen($penilaian->rekomendasi ?? '') ?><br>
+                            Dinilai oleh: <?= $penilaian->dinilai_oleh ?><br>
+                            Role penilai: <?= $penilaian->role_penilai ?>
                         </div>
                         <?php endif; ?>
                     </div>

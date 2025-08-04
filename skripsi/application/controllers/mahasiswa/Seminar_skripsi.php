@@ -1046,7 +1046,7 @@ private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
     }
     
     /**
-     * ✅ PERBAIKAN: Update method view_penilaian untuk handling rekomendasi yang benar
+     * ✅ SIMPLE FIX: Method view_penilaian tanpa _process_rekomendasi
      */
     public function view_penilaian($seminar_id = null)
     {
@@ -1057,14 +1057,14 @@ private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
         
         $mahasiswa_id = $this->session->userdata('id');
         
-        // Validasi akses mahasiswa (SUDAH FIXED)
+        // Validasi akses mahasiswa
         $seminar = $this->_get_seminar_by_id($seminar_id, $mahasiswa_id);
         if (!$seminar) {
             show_404();
             return;
         }
         
-        // Get penilaian data yang sudah published (SUDAH FIXED)
+        // Get penilaian data yang sudah published
         $penilaian = $this->_get_penilaian_published($seminar_id);
         if (!$penilaian) {
             $this->session->set_flashdata('error', 'Penilaian belum tersedia atau belum dipublikasikan');
@@ -1072,9 +1072,7 @@ private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
             return;
         }
         
-        // ✅ NEW: Process rekomendasi untuk fix tampilan "TIDAK LULUS"
-        $penilaian = $this->_process_rekomendasi($penilaian);
-        
+         // ✅ TAMPILKAN APA ADANYA - tidak ada processing tambahan
         $data = [
             'title' => 'Hasil Penilaian Seminar Skripsi',
             'seminar' => $seminar,
@@ -1086,7 +1084,7 @@ private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
             'content' => $this->load->view('mahasiswa/seminar_skripsi/view_penilaian', $data, TRUE)
         ]);
     }
-    
+        
     /**
  * ✅ NEW: Process rekomendasi untuk fix tampilan yang salah
  */

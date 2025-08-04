@@ -304,85 +304,156 @@ public function detail($seminar_id) {
     }
 
     /**
-     * Enhanced penjadwalan method - UPDATE existing method
-     * Menambah data rekomendasi penguji tanpa mengubah logic existing
+     * ✅ PERBAIKAN 2: Method penjadwalan() - Fix untuk mengambil data seminar dan dosen
+     * UPDATE method existing dengan perbaikan ini
      */
     public function penjadwalan($seminar_id) {
+        // Validasi ID
         if (!is_numeric($seminar_id)) {
             show_404();
             return;
         }
-    
+        
         try {
-            // Logic existing (UNCHANGED)
-            $seminar = $this->_get_seminar_detail($seminar_id);
+            // ✅ Ambil data seminar dengan JOIN yang benar
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                m.nim, 
+                m.nama as nama_mahasiswa, 
+                m.email as email_mahasiswa,
+                d.nama as nama_pembimbing,
+                d.email as email_pembimbing
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->where('ssm.id', $seminar_id);
             
-            if (!$seminar || $seminar->status_kaprodi != 'approved') {
-                $this->session->set_flashdata('error', 'Data tidak valid untuk penjadwalan!');
+            // Validasi prodi jika ada
+            if ($this->prodi_id) {
+                $this->db->where('m.prodi_id', $this->prodi_id);
+            }
+            
+            $seminar = $this->db->get()->row();
+            
+            if (!$seminar) {
+                $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan dari prodi Anda!');
                 redirect('kaprodi/seminar_skripsi');
                 return;
             }
-    
-            // Enhanced data dengan rekomendasi (NEW)
+            
+            // ✅ Validasi status - harus sudah approved
+            if (($seminar->status_kaprodi ?? 'pending') !== 'approved') {
+                $this->session->set_flashdata('error', 'Seminar belum disetujui, tidak dapat dijadwalkan!');
+                redirect('kaprodi/seminar_skripsi');
+                return;
+            }
+            
+            // ✅ Get dosen list untuk penguji
             $data = [
-                'title' => 'Penjadwalan Seminar Skripsi',
                 'seminar' => $seminar,
                 'dosen_list' => $this->_get_dosen_penguji(),
-                'penguji_recommendations' => $this->_get_penguji_recommendations($seminar->proposal_id) // NEW
+                'penguji_recommendations' => $this->_get_penguji_recommendations($seminar->proposal_id ?? null)
             ];
-    
-            // Views loading (UNCHANGED)
+            
+            // Load view dengan template
             $content = $this->load->view('kaprodi/seminar_skripsi/penjadwalan', $data, TRUE);
             
             $template_data = [
-                'title' => 'Penjadwalan Seminar Skripsi',
+                'title' => 'Penjadwalan Seminar Skripsi - ' . $seminar->nama_mahasiswa,
                 'content' => $content
             ];
             
             $this->load->view('template/kaprodi', $template_data);
-    
+            
         } catch (Exception $e) {
-            log_message('error', 'Enhanced penjadwalan error: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan sistem.');
+            log_message('error', 'Penjadwalan error: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
             redirect('kaprodi/seminar_skripsi');
         }
     }
 
     /**
-     * Simpan jadwal seminar
+     * ✅ PERBAIKAN 4: Method simpan_jadwal() - untuk menyimpan jadwal
+     * UPDATE method existing dengan perbaikan ini
      */
     public function simpan_jadwal() {
         if ($this->input->method() !== 'post') {
             redirect('kaprodi/seminar_skripsi');
+            return;
         }
-
+    
         try {
+            // Get input data
             $seminar_id = $this->input->post('seminar_id');
             $tanggal_seminar = $this->input->post('tanggal_seminar');
             $jam_seminar = $this->input->post('jam_seminar');
-            $tempat_seminar = $this->input->post('tempat_seminar');
+            $tempat_seminar = trim($this->input->post('tempat_seminar'));
             $dosen_penguji1_id = $this->input->post('dosen_penguji1_id');
             $dosen_penguji2_id = $this->input->post('dosen_penguji2_id');
-
-            // Validasi
-            if (!$seminar_id || !$tanggal_seminar || !$jam_seminar || !$tempat_seminar) {
-                throw new Exception('Data jadwal tidak lengkap');
+            $catatan_kaprodi = trim($this->input->post('catatan_kaprodi'));
+    
+            // Validasi input
+            if (empty($seminar_id) || empty($tanggal_seminar) || empty($jam_seminar) || 
+                empty($tempat_seminar) || empty($dosen_penguji1_id) || empty($dosen_penguji2_id)) {
+                throw new Exception('Semua field wajib diisi!');
             }
-
-            // Save jadwal
-            $result = $this->_save_jadwal($seminar_id, $tanggal_seminar, $jam_seminar, $tempat_seminar, $dosen_penguji1_id, $dosen_penguji2_id);
-
-            if ($result) {
-                $this->session->set_flashdata('success', 'Jadwal seminar berhasil disimpan!');
-            } else {
-                throw new Exception('Gagal menyimpan jadwal');
+    
+            if ($dosen_penguji1_id === $dosen_penguji2_id) {
+                throw new Exception('Penguji 1 dan Penguji 2 tidak boleh sama!');
             }
-
+    
+            // Validasi tanggal (minimal H+1)
+            $datetime_seminar = $tanggal_seminar . ' ' . $jam_seminar;
+            if (strtotime($datetime_seminar) <= strtotime('+1 day')) {
+                throw new Exception('Jadwal seminar minimal H+1 dari sekarang!');
+            }
+    
+            // Update database
+            $update_data = [
+                'tanggal_seminar' => $tanggal_seminar,
+                'jam_seminar' => $jam_seminar,
+                'tempat_seminar' => $tempat_seminar,
+                'dosen_penguji1_id' => $dosen_penguji1_id,
+                'dosen_penguji2_id' => $dosen_penguji2_id,
+                'status' => 'scheduled',
+                'current_step' => 'staf',
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+    
+            if (!empty($catatan_kaprodi)) {
+                $update_data['komentar_kaprodi'] = $catatan_kaprodi;
+            }
+    
+            $this->db->trans_start();
+            
+            $this->db->where('id', $seminar_id);
+            $affected = $this->db->update('seminar_skripsi_mahasiswa', $update_data);
+    
+            if (!$affected) {
+                throw new Exception('Gagal memperbarui data di database');
+            }
+    
+            $this->db->trans_complete();
+    
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Transaksi database gagal');
+            }
+    
+            // Kirim notifikasi (opsional)
+            $this->_send_scheduling_notifications($seminar_id);
+    
+            $this->session->set_flashdata('success', 'Jadwal seminar berhasil disimpan!');
+    
         } catch (Exception $e) {
             log_message('error', 'Simpan jadwal error: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            redirect('kaprodi/seminar_skripsi/penjadwalan/' . $seminar_id);
+            return;
         }
-
+    
         redirect('kaprodi/seminar_skripsi');
     }
 
@@ -751,17 +822,19 @@ public function detail($seminar_id) {
     }
 
     /**
-     * Get dosen penguji list
+     * ✅ PERBAIKAN 1: Method _get_dosen_penguji() - Fix query kolom aktif
+     * GANTI method existing dengan ini
      */
     private function _get_dosen_penguji() {
         try {
-            $query = $this->db->select('id, nama, email')
-                             ->from('dosen')
-                             ->where('aktif', 1)
-                             ->order_by('nama')
-                             ->get();
+            $this->db->select('id, nama, email');
+            $this->db->from('dosen');
+            // ✅ FIX: Ganti 'aktif' dengan 'level'
+            $this->db->where_in('level', ['2', '4']); // Level 2=dosen, 4=kaprodi
+            $this->db->order_by('nama', 'ASC');
             
-            return $query ? $query->result() : [];
+            $result = $this->db->get()->result();
+            return $result ? $result : [];
             
         } catch (Exception $e) {
             log_message('error', 'Error getting dosen penguji: ' . $e->getMessage());
@@ -1482,6 +1555,41 @@ public function detail($seminar_id) {
             return false;
         }
     }
+
+/**
+ * ✅ PERBAIKAN 5: Method _send_scheduling_notifications() - notifikasi sederhana
+ * TAMBAHKAN method ini (opsional, untuk notifikasi)
+ */
+private function _send_scheduling_notifications($seminar_id) {
+    try {
+        // Get seminar data lengkap untuk notifikasi
+        $this->db->select('
+            ssm.*,
+            pm.judul,
+            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+            d.nama as nama_pembimbing, d.email as email_pembimbing
+        ');
+        $this->db->from('seminar_skripsi_mahasiswa ssm');
+        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
+        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->where('ssm.id', $seminar_id);
+        
+        $seminar = $this->db->get()->row();
+        
+        if ($seminar) {
+            // Log untuk tracking - bisa dikembangkan ke email nantinya
+            log_message('info', 'Seminar scheduled for: ' . $seminar->nama_mahasiswa . 
+                       ' on ' . $seminar->tanggal_seminar . ' at ' . $seminar->jam_seminar);
+        }
+        
+        return true;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error sending notifications: ' . $e->getMessage());
+        return false;
+    }
+}
 
     /**
      * Create fallback model untuk mencegah crash

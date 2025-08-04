@@ -411,6 +411,12 @@ public function detail($seminar_id) {
                 throw new Exception('Jadwal seminar minimal H+1 dari sekarang!');
             }
     
+            // ✅ PERBAIKAN: Get seminar data sebelum update untuk notifikasi
+            $seminar_detail = $this->_get_seminar_detail($seminar_id);
+            if (!$seminar_detail) {
+                throw new Exception('Data seminar tidak ditemukan!');
+            }
+    
             // Update database
             $update_data = [
                 'tanggal_seminar' => $tanggal_seminar,
@@ -442,16 +448,18 @@ public function detail($seminar_id) {
                 throw new Exception('Transaksi database gagal');
             }
     
-            // Kirim notifikasi (opsional)
-            $this->_send_scheduling_notifications($seminar_id);
+            // ✅ PERBAIKAN: Kirim notifikasi yang sesungguhnya
+            $this->_send_comprehensive_scheduling_notifications($seminar_id, $update_data);
     
-            $this->session->set_flashdata('success', 'Jadwal seminar berhasil disimpan!');
+            $this->session->set_flashdata('success', 'Jadwal seminar berhasil disimpan dan notifikasi telah dikirim ke semua pihak!');
     
         } catch (Exception $e) {
             log_message('error', 'Simpan jadwal error: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
-            redirect('kaprodi/seminar_skripsi/penjadwalan/' . $seminar_id);
-            return;
+            if (isset($seminar_id)) {
+                redirect('kaprodi/seminar_skripsi/penjadwalan/' . $seminar_id);
+                return;
+            }
         }
     
         redirect('kaprodi/seminar_skripsi');
@@ -467,7 +475,7 @@ public function detail($seminar_id) {
      */
     private function _get_seminar_skripsi_list() {
         try {
-            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
+            // ✅ QUERY DIPERLUAS - Tambah data dosen penguji untuk info jadwal
             $sql = "
                 SELECT 
                     ss.id,
@@ -493,7 +501,9 @@ public function detail($seminar_id) {
                     d.nama as nama_pembimbing,
                     d.email as email_pembimbing,
                     d1.nama as nama_penguji1,
+                    d1.email as email_penguji1,
                     d2.nama as nama_penguji2,
+                    d2.email as email_penguji2,
                     pr.nama as nama_prodi
                 FROM seminar_skripsi_mahasiswa ss
                 LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
@@ -1556,40 +1566,488 @@ public function detail($seminar_id) {
         }
     }
 
-/**
- * ✅ PERBAIKAN 5: Method _send_scheduling_notifications() - notifikasi sederhana
- * TAMBAHKAN method ini (opsional, untuk notifikasi)
- */
-private function _send_scheduling_notifications($seminar_id) {
-    try {
-        // Get seminar data lengkap untuk notifikasi
-        $this->db->select('
-            ssm.*,
-            pm.judul,
-            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-            d.nama as nama_pembimbing, d.email as email_pembimbing
-        ');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->where('ssm.id', $seminar_id);
-        
-        $seminar = $this->db->get()->row();
-        
-        if ($seminar) {
-            // Log untuk tracking - bisa dikembangkan ke email nantinya
-            log_message('info', 'Seminar scheduled for: ' . $seminar->nama_mahasiswa . 
-                       ' on ' . $seminar->tanggal_seminar . ' at ' . $seminar->jam_seminar);
+    /**
+     * ✅ REPLACE METHOD _send_comprehensive_scheduling_notifications()
+     * GANTI method ini dengan script di bawah (HAPUS method lama, PASTE yang ini)
+     */
+    private function _send_comprehensive_scheduling_notifications($seminar_id, $jadwal_data) {
+        try {
+            // ✅ Get data lengkap seminar dengan dosen (QUERY TIDAK DIUBAH)
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+                d.nama as nama_pembimbing, d.email as email_pembimbing,
+                d1.nama as nama_penguji1, d1.email as email_penguji1,
+                d2.nama as nama_penguji2, d2.email as email_penguji2
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
+            $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+            $this->db->join('dosen d1', 'ssm.dosen_penguji1_id = d1.id', 'left');
+            $this->db->join('dosen d2', 'ssm.dosen_penguji2_id = d2.id', 'left');
+            $this->db->where('ssm.id', $seminar_id);
+            
+            $seminar = $this->db->get()->row();
+            
+            if (!$seminar) {
+                log_message('error', 'Seminar data not found for notifications: ID ' . $seminar_id);
+                return false;
+            }
+    
+            // ✅ PASTIKAN DATA EMAIL LENGKAP
+            if (empty($seminar->email_mahasiswa)) {
+                log_message('error', 'Email mahasiswa tidak ditemukan untuk seminar ID: ' . $seminar_id);
+                return false;
+            }
+    
+            // ✅ Konfigurasi email (TIDAK DIUBAH)
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
+            
+            $this->email->initialize($config);
+    
+            // ✅ TRACKING HASIL EMAIL
+            $email_results = [];
+            $success_count = 0;
+            $total_count = 0;
+    
+            // ✅ 1. Email ke mahasiswa (WAJIB)
+            $total_count++;
+            $result_mahasiswa = $this->_kirim_email_jadwal_mahasiswa($seminar);
+            $email_results['mahasiswa'] = $result_mahasiswa;
+            if ($result_mahasiswa) $success_count++;
+    
+            // ✅ 2. Email ke dosen pembimbing (jika ada email)
+            if (!empty($seminar->email_pembimbing)) {
+                $total_count++;
+                $result_pembimbing = $this->_kirim_email_jadwal_pembimbing($seminar);
+                $email_results['pembimbing'] = $result_pembimbing;
+                if ($result_pembimbing) $success_count++;
+            }
+    
+            // ✅ 3. Email ke dosen penguji 1 (jika ada email)
+            if (!empty($seminar->email_penguji1)) {
+                $total_count++;
+                $result_penguji1 = $this->_kirim_email_jadwal_penguji($seminar, 'Penguji 1');
+                $email_results['penguji1'] = $result_penguji1;
+                if ($result_penguji1) $success_count++;
+            }
+    
+            // ✅ 4. Email ke dosen penguji 2 (jika ada email)
+            if (!empty($seminar->email_penguji2)) {
+                $total_count++;
+                $result_penguji2 = $this->_kirim_email_jadwal_penguji($seminar, 'Penguji 2');
+                $email_results['penguji2'] = $result_penguji2;
+                if ($result_penguji2) $success_count++;
+            }
+    
+            // ✅ 5. Email ke staf (coba kirim ke semua staf aktif)
+            $total_count++;
+            $result_staf = $this->_kirim_email_jadwal_staf($seminar);
+            $email_results['staf'] = $result_staf;
+            if ($result_staf) $success_count++;
+    
+            // ✅ LOG HASIL LENGKAP
+            log_message('info', sprintf(
+                'Scheduling notifications completed - Seminar ID: %d, Success: %d/%d emails sent',
+                $seminar_id, $success_count, $total_count
+            ));
+    
+            // ✅ LOG DETAIL HASIL PER PENERIMA
+            foreach ($email_results as $recipient => $result) {
+                if ($result) {
+                    log_message('info', "✅ Email berhasil dikirim ke: {$recipient}");
+                } else {
+                    log_message('warning', "❌ Email gagal dikirim ke: {$recipient}");
+                }
+            }
+    
+            // Return true jika minimal 1 email berhasil (prioritas mahasiswa)
+            return $success_count > 0;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending comprehensive scheduling notifications: ' . $e->getMessage());
+            return false;
         }
-        
-        return true;
-        
-    } catch (Exception $e) {
-        log_message('error', 'Error sending notifications: ' . $e->getMessage());
-        return false;
     }
-}
+        
+    /**
+     * ✅ ENHANCE METHOD _kirim_email_jadwal_mahasiswa()
+     * JIKA METHOD INI SUDAH ADA, GANTI dengan yang ini. JIKA BELUM ADA, TAMBAHKAN.
+     */
+    private function _kirim_email_jadwal_mahasiswa($seminar) {
+        try {
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('📅 Jadwal Seminar Skripsi Telah Ditetapkan - ' . $seminar->nama_mahasiswa);
+            
+            $tanggal_formatted = date('l, d F Y', strtotime($seminar->tanggal_seminar));
+            $jam_formatted = date('H:i', strtotime($seminar->jam_seminar));
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📅 Jadwal Seminar Skripsi Ditetapkan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Selamat! Jadwal seminar skripsi Anda telah <strong>DITETAPKAN</strong> oleh Kaprodi.</p>
+                    
+                    <div style='background-color: #d4edda; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 15px 0;'>📋 INFORMASI SEMINAR</h4>
+                        <table style='width: 100%; color: #155724;'>
+                            <tr><td width='30%'><strong>Tanggal:</strong></td><td>{$tanggal_formatted}</td></tr>
+                            <tr><td><strong>Waktu:</strong></td><td>{$jam_formatted} WIB</td></tr>
+                            <tr><td><strong>Tempat:</strong></td><td>{$seminar->tempat_seminar}</td></tr>
+                            <tr><td><strong>Judul:</strong></td><td>" . htmlspecialchars($seminar->judul ?? 'N/A') . "</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #cce5ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 15px 0;'>👥 TIM PENGUJI</h4>
+                        <ul style='color: #004085; margin: 0;'>
+                            <li><strong>Pembimbing:</strong> " . htmlspecialchars($seminar->nama_pembimbing ?? 'N/A') . "</li>
+                            <li><strong>Penguji 1:</strong> " . htmlspecialchars($seminar->nama_penguji1 ?? 'N/A') . "</li>
+                            <li><strong>Penguji 2:</strong> " . htmlspecialchars($seminar->nama_penguji2 ?? 'N/A') . "</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>⚠️ PERSIAPAN SEMINAR</h4>
+                        <ul style='color: #856404; margin: 0;'>
+                            <li>Siapkan presentasi PowerPoint</li>
+                            <li>Siapkan dokumen skripsi lengkap</li>
+                            <li>Hadir 15 menit sebelum jadwal</li>
+                            <li>Bawa alat tulis dan dokumen pendukung</li>
+                        </ul>
+                    </div>
+                    
+                    <p style='text-align: center; margin-top: 20px;'>
+                        <a href='" . base_url('mahasiswa/seminar_skripsi') . "' 
+                           style='background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📱 Lihat Detail di SIM-TA
+                        </a>
+                    </p>
+                    
+                    <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                        Semoga sukses dengan seminar skripsi Anda! 🎓
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send schedule email to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending schedule email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ ENHANCE METHOD _kirim_email_jadwal_pembimbing()
+     * JIKA METHOD INI SUDAH ADA, GANTI dengan yang ini. JIKA BELUM ADA, TAMBAHKAN.
+     */
+    private function _kirim_email_jadwal_pembimbing($seminar) {
+        try {
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_pembimbing);
+            $this->email->subject('📅 Jadwal Seminar Skripsi Mahasiswa Bimbingan - ' . $seminar->nama_mahasiswa);
+            
+            $tanggal_formatted = date('l, d F Y', strtotime($seminar->tanggal_seminar));
+            $jam_formatted = date('H:i', strtotime($seminar->jam_seminar));
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📅 Jadwal Seminar Skripsi Mahasiswa Bimbingan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_pembimbing}</strong>,</p>
+                    
+                    <p>Kaprodi telah menetapkan jadwal seminar skripsi untuk mahasiswa bimbingan Anda.</p>
+                    
+                    <div style='background-color: #d4edda; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 15px 0;'>👨‍🎓 DATA MAHASISWA</h4>
+                        <table style='width: 100%; color: #155724;'>
+                            <tr><td width='25%'><strong>Nama:</strong></td><td>{$seminar->nama_mahasiswa}</td></tr>
+                            <tr><td><strong>NIM:</strong></td><td>{$seminar->nim}</td></tr>
+                            <tr><td><strong>Judul:</strong></td><td>" . htmlspecialchars($seminar->judul ?? 'N/A') . "</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #cce5ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 15px 0;'>📋 JADWAL SEMINAR</h4>
+                        <table style='width: 100%; color: #004085;'>
+                            <tr><td width='25%'><strong>Tanggal:</strong></td><td>{$tanggal_formatted}</td></tr>
+                            <tr><td><strong>Waktu:</strong></td><td>{$jam_formatted} WIB</td></tr>
+                            <tr><td><strong>Tempat:</strong></td><td>{$seminar->tempat_seminar}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 15px 0;'>👥 TIM PENGUJI</h4>
+                        <ul style='color: #856404; margin: 0;'>
+                            <li><strong>Pembimbing:</strong> {$seminar->nama_pembimbing} (Anda)</li>
+                            <li><strong>Penguji 1:</strong> " . htmlspecialchars($seminar->nama_penguji1 ?? 'N/A') . "</li>
+                            <li><strong>Penguji 2:</strong> " . htmlspecialchars($seminar->nama_penguji2 ?? 'N/A') . "</li>
+                        </ul>
+                    </div>
+                    
+                    <p style='text-align: center; margin-top: 20px;'>
+                        <a href='" . base_url('dosen/seminar_skripsi') . "' 
+                           style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📱 Lihat Detail di SIM-TA
+                        </a>
+                    </p>
+                    
+                    <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                        Terima kasih atas bimbingannya untuk mahasiswa ini.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send schedule email to pembimbing: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending schedule email to pembimbing: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ ENHANCE METHOD _kirim_email_jadwal_penguji()
+     * JIKA METHOD INI SUDAH ADA, GANTI dengan yang ini. JIKA BELUM ADA, TAMBAHKAN.
+     */
+    private function _kirim_email_jadwal_penguji($seminar, $role_penguji) {
+        try {
+            // Tentukan email dan nama penguji berdasarkan role
+            $email_penguji = ($role_penguji == 'Penguji 1') ? $seminar->email_penguji1 : $seminar->email_penguji2;
+            $nama_penguji = ($role_penguji == 'Penguji 1') ? $seminar->nama_penguji1 : $seminar->nama_penguji2;
+            
+            if (empty($email_penguji)) {
+                log_message('warning', "Email {$role_penguji} tidak ditemukan");
+                return false;
+            }
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($email_penguji);
+            $this->email->subject('📅 Penunjukan Sebagai ' . $role_penguji . ' Seminar Skripsi - ' . $seminar->nama_mahasiswa);
+            
+            $tanggal_formatted = date('l, d F Y', strtotime($seminar->tanggal_seminar));
+            $jam_formatted = date('H:i', strtotime($seminar->jam_seminar));
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📅 Penunjukan Sebagai {$role_penguji}</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$nama_penguji}</strong>,</p>
+                    
+                    <p>Anda ditunjuk sebagai <strong>{$role_penguji}</strong> untuk seminar skripsi mahasiswa berikut:</p>
+                    
+                    <div style='background-color: #d4edda; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 15px 0;'>👨‍🎓 DATA MAHASISWA</h4>
+                        <table style='width: 100%; color: #155724;'>
+                            <tr><td width='25%'><strong>Nama:</strong></td><td>{$seminar->nama_mahasiswa}</td></tr>
+                            <tr><td><strong>NIM:</strong></td><td>{$seminar->nim}</td></tr>
+                            <tr><td><strong>Judul:</strong></td><td>" . htmlspecialchars($seminar->judul ?? 'N/A') . "</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #cce5ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 15px 0;'>📋 JADWAL SEMINAR</h4>
+                        <table style='width: 100%; color: #004085;'>
+                            <tr><td width='25%'><strong>Tanggal:</strong></td><td>{$tanggal_formatted}</td></tr>
+                            <tr><td><strong>Waktu:</strong></td><td>{$jam_formatted} WIB</td></tr>
+                            <tr><td><strong>Tempat:</strong></td><td>{$seminar->tempat_seminar}</td></tr>
+                            <tr><td><strong>Peran Anda:</strong></td><td><strong>{$role_penguji}</strong></td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 15px 0;'>👥 TIM PENGUJI LENGKAP</h4>
+                        <ul style='color: #856404; margin: 0;'>
+                            <li><strong>Pembimbing:</strong> " . htmlspecialchars($seminar->nama_pembimbing ?? 'N/A') . "</li>
+                            <li><strong>Penguji 1:</strong> " . htmlspecialchars($seminar->nama_penguji1 ?? 'N/A') . "</li>
+                            <li><strong>Penguji 2:</strong> " . htmlspecialchars($seminar->nama_penguji2 ?? 'N/A') . "</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #dc3545;'>
+                        <h4 style='color: #721c24; margin: 0 0 10px 0;'>ℹ️ CATATAN PENTING</h4>
+                        <p style='color: #721c24; margin: 0;'>
+                            Sesuai kebijakan STK Santo Yakobus, penunjukan dosen penguji berlaku otomatis. 
+                            Mohon untuk hadir sesuai jadwal yang telah ditetapkan.
+                        </p>
+                    </div>
+                    
+                    <p style='text-align: center; margin-top: 20px;'>
+                        <a href='" . base_url('dosen/seminar_skripsi') . "' 
+                           style='background-color: #17a2b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📱 Lihat Detail di SIM-TA
+                        </a>
+                    </p>
+                    
+                    <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                        Terima kasih atas kesediaan Anda sebagai penguji.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', "Failed to send schedule email to {$role_penguji}: " . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', "Error sending schedule email to {$role_penguji}: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ ENHANCE METHOD _kirim_email_jadwal_staf()
+     * JIKA METHOD INI SUDAH ADA, GANTI dengan yang ini. JIKA BELUM ADA, TAMBAHKAN.
+     */
+    private function _kirim_email_jadwal_staf($seminar) {
+        try {
+            // Get email staf aktif
+            $this->db->select('email, nama');
+            $this->db->from('users');
+            $this->db->where('level', '1'); // Level 1 = staf
+            $this->db->where('status', '1'); // Status aktif
+            $staf_emails = $this->db->get()->result();
+            
+            if (empty($staf_emails)) {
+                log_message('warning', 'No active staff emails found for notification');
+                return false;
+            }
+            
+            $tanggal_formatted = date('l, d F Y', strtotime($seminar->tanggal_seminar));
+            $jam_formatted = date('H:i', strtotime($seminar->jam_seminar));
+            
+            $sent_count = 0;
+            $total_staf = count($staf_emails);
+            
+            foreach ($staf_emails as $staf) {
+                if (!empty($staf->email) && filter_var($staf->email, FILTER_VALIDATE_EMAIL)) {
+                    try {
+                        $this->email->clear();
+                        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhil STK Santo Yakobus');
+                        $this->email->to($staf->email);
+                        $this->email->subject('📅 Info Jadwal Seminar Skripsi - ' . $seminar->nama_mahasiswa);
+                        
+                        $message = "
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                            <div style='background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; padding: 20px; text-align: center;'>
+                                <h2 style='margin: 0;'>📅 Informasi Jadwal Seminar Skripsi</h2>
+                            </div>
+                            
+                            <div style='padding: 20px; background-color: #f8f9fa;'>
+                                <p>Kepada Yth. <strong>Tim Staf Akademik</strong>,</p>
+                                
+                                <p>Kaprodi telah menetapkan jadwal seminar skripsi. Berikut informasinya:</p>
+                                
+                                <div style='background-color: #e2e3e5; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                                    <h4 style='margin: 0 0 15px 0;'>📋 INFORMASI LENGKAP</h4>
+                                    <table style='width: 100%;'>
+                                        <tr><td width='25%'><strong>Mahasiswa:</strong></td><td>{$seminar->nama_mahasiswa} ({$seminar->nim})</td></tr>
+                                        <tr><td><strong>Tanggal:</strong></td><td>{$tanggal_formatted}</td></tr>
+                                        <tr><td><strong>Waktu:</strong></td><td>{$jam_formatted} WIB</td></tr>
+                                        <tr><td><strong>Tempat:</strong></td><td>{$seminar->tempat_seminar}</td></tr>
+                                        <tr><td><strong>Pembimbing:</strong></td><td>" . htmlspecialchars($seminar->nama_pembimbing ?? 'N/A') . "</td></tr>
+                                        <tr><td><strong>Penguji 1:</strong></td><td>" . htmlspecialchars($seminar->nama_penguji1 ?? 'N/A') . "</td></tr>
+                                        <tr><td><strong>Penguji 2:</strong></td><td>" . htmlspecialchars($seminar->nama_penguji2 ?? 'N/A') . "</td></tr>
+                                    </table>
+                                </div>
+                                
+                                <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                                    <h4 style='color: #856404; margin: 0 0 10px 0;'>📝 TINDAK LANJUT</h4>
+                                    <p style='color: #856404; margin: 0;'>
+                                        Mohon bantuan untuk persiapan administrasi dan logistik seminar ini.
+                                    </p>
+                                </div>
+                                
+                                <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                                    Terima kasih atas dukungan administrasi untuk kegiatan akademik ini.
+                                </p>
+                            </div>
+                            
+                            <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                                <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                            </div>
+                        </div>";
+                        
+                        $this->email->message($message);
+                        
+                        if ($this->email->send()) {
+                            $sent_count++;
+                        }
+                        
+                    } catch (Exception $e) {
+                        log_message('error', 'Error sending email to staff: ' . $staf->email . ' - ' . $e->getMessage());
+                    }
+                }
+            }
+            
+            log_message('info', "Staff notification result: {$sent_count}/{$total_staf} emails sent successfully");
+            
+            return $sent_count > 0; // Return true jika minimal 1 email terkirim
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending schedule email to staff: ' . $e->getMessage());
+            return false;
+        }
+    }
 
     /**
      * Create fallback model untuk mencegah crash

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 04, 2025 at 05:18 PM
+-- Generation Time: Aug 04, 2025 at 06:03 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1125,7 +1125,7 @@ CREATE TABLE `penilaian_seminar_skripsi` (
 --
 
 INSERT INTO `penilaian_seminar_skripsi` (`id`, `seminar_skripsi_id`, `mahasiswa_id`, `proposal_id`, `catatan_pendahuluan`, `catatan_tinjauan_pustaka`, `catatan_metodologi`, `catatan_hasil_pembahasan`, `catatan_kesimpulan`, `catatan_umum`, `nilai_penguji1`, `nilai_penguji2`, `nilai_pembimbing`, `nilai_substansi_hasil`, `nilai_presentasi_teknik`, `nilai_penguasaan_diskusi`, `nilai_akhir`, `nilai_huruf`, `rekomendasi`, `keterangan_rekomendasi`, `status_penilaian`, `dinilai_oleh`, `role_penilai`, `created_at`, `updated_at`, `published_at`) VALUES
-(1, 13, 45, 45, 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 85.00, 80.00, 80.00, NULL, NULL, NULL, 81.67, 'A', '', 'Catatan perbaikan latihan saja untuk simulasi', 'published', 25, 'dosen_pembimbing', '2025-08-04 15:32:37', '2025-08-04 15:39:16', '2025-08-04 15:39:16');
+(1, 13, 45, 45, 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 'Catatan perbaikan latihan saja untuk simulasi', 85.00, 80.00, 80.00, NULL, NULL, NULL, 81.67, 'A', 'lulus_dengan_revisi_minor', 'Catatan perbaikan latihan saja untuk simulasi', 'published', 25, 'dosen_pembimbing', '2025-08-04 15:32:37', '2025-08-04 17:50:37', '2025-08-04 15:39:16');
 
 --
 -- Triggers `penilaian_seminar_skripsi`
@@ -1136,7 +1136,7 @@ CREATE TRIGGER `tr_penilaian_skripsi_calculate_insert` BEFORE INSERT ON `penilai
     IF NEW.nilai_penguji1 IS NOT NULL AND NEW.nilai_penguji2 IS NOT NULL AND NEW.nilai_pembimbing IS NOT NULL THEN
         SET NEW.nilai_akhir = ROUND((NEW.nilai_penguji1 + NEW.nilai_penguji2 + NEW.nilai_pembimbing) / 3, 2);
         
-        -- Auto set nilai huruf (SAMA seperti seminar proposal)
+        -- Auto set nilai huruf
         SET NEW.nilai_huruf = CASE 
             WHEN NEW.nilai_akhir >= 80 THEN 'A'
             WHEN NEW.nilai_akhir >= 70 THEN 'B'
@@ -1144,11 +1144,9 @@ CREATE TRIGGER `tr_penilaian_skripsi_calculate_insert` BEFORE INSERT ON `penilai
             WHEN NEW.nilai_akhir >= 50 THEN 'D'
             ELSE 'E'
         END;
-    END IF;
-    
-    -- Set published_at jika status published
-    IF NEW.status_penilaian = 'published' THEN
-        SET NEW.published_at = NOW();
+        
+        -- ❌ DIHAPUS: Auto set rekomendasi 
+        -- Rekomendasi harus input manual dari dosen, bukan auto-generate
     END IF;
 END
 $$
@@ -1159,7 +1157,7 @@ CREATE TRIGGER `tr_penilaian_skripsi_calculate_update` BEFORE UPDATE ON `penilai
     IF NEW.nilai_penguji1 IS NOT NULL AND NEW.nilai_penguji2 IS NOT NULL AND NEW.nilai_pembimbing IS NOT NULL THEN
         SET NEW.nilai_akhir = ROUND((NEW.nilai_penguji1 + NEW.nilai_penguji2 + NEW.nilai_pembimbing) / 3, 2);
         
-        -- Auto set nilai huruf (SAMA seperti seminar proposal)
+        -- Auto set nilai huruf
         SET NEW.nilai_huruf = CASE 
             WHEN NEW.nilai_akhir >= 80 THEN 'A'
             WHEN NEW.nilai_akhir >= 70 THEN 'B'
@@ -1167,11 +1165,9 @@ CREATE TRIGGER `tr_penilaian_skripsi_calculate_update` BEFORE UPDATE ON `penilai
             WHEN NEW.nilai_akhir >= 50 THEN 'D'
             ELSE 'E'
         END;
-    END IF;
-    
-    -- Set published_at jika status berubah ke published
-    IF NEW.status_penilaian = 'published' AND OLD.status_penilaian = 'draft' THEN
-        SET NEW.published_at = NOW();
+        
+        -- ❌ DIHAPUS: Auto set rekomendasi 
+        -- Rekomendasi tetap sesuai input dosen
     END IF;
 END
 $$

@@ -262,174 +262,115 @@ class Seminar_skripsi extends CI_Controller {
         redirect('dosen/seminar_skripsi');
     }
 
-    /**
-     * NEW: Handle pengajuan ulang setelah ditolak dosen atau kaprodi
-     */
-    public function handle_resubmission($seminar_id) {
-        $dosen_id = $this->session->userdata('id');
-        
-        // Validasi ownership dan status
-        $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
-        
-        if (!$seminar) {
-            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan!');
-            redirect('dosen/seminar_skripsi');
-            return;
-        }
-        
-        // Hanya bisa handle resubmission jika status rejected
-        if (!in_array($seminar->status, ['rejected'])) {
-            $this->session->set_flashdata('error', 'Seminar ini tidak dalam status yang bisa diajukan ulang!');
-            redirect('dosen/seminar_skripsi');
-            return;
-        }
-        
-        try {
-            // Reset status untuk review ulang
-            $update_data = [
-                'status' => 'submitted',
-                'current_step' => 'pembimbing',
-                'status_pembimbing' => 'pending',
-                'komentar_pembimbing' => null,
-                'tanggal_review_pembimbing' => null,
-                'reviewed_by_pembimbing' => null,
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->db->where('id', $seminar_id);
-            $success = $this->db->update('seminar_skripsi_mahasiswa', $update_data);
-            
-            if ($success) {
-                $this->session->set_flashdata('success', 'Pengajuan ulang berhasil diproses. Silakan review kembali!');
-                
-                // Send notification untuk pengajuan ulang
-                $this->_send_resubmission_notification($seminar);
-            } else {
-                $this->session->set_flashdata('error', 'Gagal memproses pengajuan ulang!');
-            }
-        } catch (Exception $e) {
-            log_message('error', 'Error handling resubmission: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Terjadi kesalahan saat memproses pengajuan ulang!');
-        }
-        
+/**
+ * LANGKAH 2: PERBAIKI METHOD handle_resubmission()
+ * Update method yang sudah ada untuk handle pengajuan ulang dengan benar:
+ */
+public function handle_resubmission($seminar_id) {
+    $dosen_id = $this->session->userdata('id');
+    
+    // Validasi ownership dan status
+    $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
+    
+    if (!$seminar) {
+        $this->session->set_flashdata('error', 'Data seminar tidak ditemukan!');
         redirect('dosen/seminar_skripsi');
+        return;
     }
-
-    /**
-     * Form penilaian seminar skripsi
-     * STABLE - TIDAK DIUBAH
-     */
-    public function penilaian($seminar_id) {
-        $dosen_id = $this->session->userdata('id');
-        
-        // Get detail seminar dengan validasi
-        $seminar = $this->_get_seminar_detail_for_penilaian($seminar_id, $dosen_id);
-        
-        if (!$seminar) {
-            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau belum bisa dinilai!');
-            redirect('dosen/seminar_skripsi');
-            return;
-        }
-        
-        // Handle form submission
-        if ($this->input->method() === 'post') {
-            $this->_process_penilaian($seminar_id, $dosen_id, $seminar);
-            return;
-        }
-        
-        // Get existing penilaian jika ada
-        $existing_penilaian = $this->_get_existing_penilaian($seminar_id, $dosen_id);
-        
-        // Get info dosen penguji untuk ditampilkan
-        $dosen_penguji1 = null;
-        $dosen_penguji2 = null;
-        if (!empty($seminar->dosen_penguji1_id)) {
-            $dosen_penguji1 = $this->_get_dosen_by_id($seminar->dosen_penguji1_id);
-        }
-        if (!empty($seminar->dosen_penguji2_id)) {
-            $dosen_penguji2 = $this->_get_dosen_by_id($seminar->dosen_penguji2_id);
-        }
-        
-        // Prepare data untuk view
-        $view_data = [
-            'seminar' => $seminar,
-            'penilaian' => $existing_penilaian,
-            'dosen_penguji1' => $dosen_penguji1,
-            'dosen_penguji2' => $dosen_penguji2,
-            'is_edit' => !empty($existing_penilaian)
+    
+    // PERBAIKAN: Expand kondisi yang bisa di-resubmit
+    $allowed_statuses = ['rejected'];
+    $allowed_conditions = [
+        // Ditolak kaprodi
+        ($seminar->status == 'rejected' && $seminar->status_kaprodi == 'rejected'),
+        // Ditolak dosen
+        ($seminar->status == 'rejected' && $seminar->status_pembimbing == 'rejected')
+    ];
+    
+    if (!in_array($seminar->status, $allowed_statuses) || !array_filter($allowed_conditions)) {
+        $this->session->set_flashdata('error', 'Seminar ini tidak dalam status yang bisa diajukan ulang!');
+        redirect('dosen/seminar_skripsi');
+        return;
+    }
+    
+    try {
+        // PERBAIKAN: Reset status untuk review ulang dengan logic yang benar
+        $update_data = [
+            'status' => 'submitted',
+            'current_step' => 'pembimbing',
+            'status_pembimbing' => 'pending',
+            'komentar_pembimbing' => null,
+            'tanggal_review_pembimbing' => null,
+            'reviewed_by_pembimbing' => null,
+            'updated_at' => date('Y-m-d H:i:s')
         ];
         
-        // Load view dengan template dosen
-        $this->load->view('template/dosen', [
-            'title' => 'Penilaian Seminar Skripsi - ' . $seminar->nama_mahasiswa,
-            'content' => $this->load->view('dosen/seminar_skripsi/penilaian', $view_data, TRUE),
-            'script' => $this->_get_penilaian_script()
-        ]);
+        // Jika sebelumnya ditolak kaprodi, reset juga status kaprodi
+        if ($seminar->status_kaprodi == 'rejected') {
+            $update_data['status_kaprodi'] = 'pending';
+            $update_data['komentar_kaprodi'] = null;
+            $update_data['tanggal_review_kaprodi'] = null;
+            $update_data['reviewed_by_kaprodi'] = null;
+        }
+        
+        $this->db->where('id', $seminar_id);
+        $success = $this->db->update('seminar_skripsi_mahasiswa', $update_data);
+        
+        if ($success) {
+            $this->session->set_flashdata('success', 'Pengajuan ulang berhasil diproses. Silakan review kembali!');
+            
+            // Send notification untuk pengajuan ulang
+            $this->_send_resubmission_notification($seminar);
+        } else {
+            $this->session->set_flashdata('error', 'Gagal memproses pengajuan ulang!');
+        }
+    } catch (Exception $e) {
+        log_message('error', 'Error handling resubmission: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Terjadi kesalahan saat memproses pengajuan ulang!');
     }
+    
+    redirect('dosen/seminar_skripsi');
+}
 
     // =================================================================
     // PRIVATE HELPER METHODS - STABLE (TIDAK DIUBAH)
     // =================================================================
 
 /**
- * FIXED: Get pengajuan yang perlu review oleh dosen
- * PERBAIKAN: Kondisi lebih fleksibel untuk handle data yang current_step nya belum ter-update
+ * LANGKAH 1: REPLACE METHOD _get_pengajuan_perlu_review()
+ * Gunakan pola sederhana yang sama dengan Seminar_proposal.php
  */
 private function _get_pengajuan_perlu_review($dosen_id) {
     try {
         $this->db->select('
             ssm.*,
-            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-            pm.judul, pm.dosen_id as pembimbing_id
+            pm.judul,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            m.email as email_mahasiswa,
+            p.nama as nama_prodi
         ');
         $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
+        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi p', 'm.prodi_id = p.id');
         $this->db->where('pm.dosen_id', $dosen_id);
         
-        // FIXED: Kondisi yang lebih fleksibel untuk menangani data yang current_step belum ter-update
-        $this->db->group_start();
-            // Kondisi ideal: status submitted/resubmitted + current_step = pembimbing + status_pembimbing = pending
-            $this->db->group_start();
-                $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
-                $this->db->where('ssm.current_step', 'pembimbing');
-                $this->db->where('ssm.status_pembimbing', 'pending');
-            $this->db->group_end();
-            
-            // ATAU kondisi fallback: status submitted tapi current_step masih mahasiswa (data belum ter-update)
-            $this->db->or_group_start();
-                $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
-                $this->db->where('ssm.current_step', 'mahasiswa');
-                $this->db->where('ssm.status_pembimbing', 'pending');
-                $this->db->where('ssm.tanggal_review_pembimbing IS NULL'); // Belum pernah direview
-            $this->db->group_end();
-        $this->db->group_end();
+        // SIMPLE LOGIC - SAMA SEPERTI SEMINAR_PROPOSAL.PHP YANG WORKING
+        $this->db->where_in('ssm.status', ['submitted', 'review_pembimbing']);
+        $this->db->where('ssm.status_pembimbing', 'pending');
         
-        $this->db->order_by('ssm.created_at', 'DESC');
+        $this->db->order_by('ssm.created_at', 'ASC');
         
         $result = $this->db->get()->result();
-        
-        // BONUS: Auto-fix data current_step yang salah
-        if ($result) {
-            foreach ($result as $row) {
-                if ($row->current_step == 'mahasiswa' && in_array($row->status, ['submitted', 'resubmitted'])) {
-                    // Fix current_step ke pembimbing
-                    $this->db->where('id', $row->id);
-                    $this->db->update('seminar_skripsi_mahasiswa', [
-                        'current_step' => 'pembimbing',
-                        'updated_at' => date('Y-m-d H:i:s')
-                    ]);
-                    log_message('info', "Auto-fixed current_step for seminar_skripsi_mahasiswa ID: {$row->id}");
-                }
-            }
-        }
-        
         return $result ?: [];
+        
     } catch (Exception $e) {
         log_message('error', 'Error getting pengajuan perlu review: ' . $e->getMessage());
         return [];
     }
 }
+
 
     /**
      * Get riwayat rekomendasi yang sudah diberikan dosen
@@ -903,7 +844,8 @@ private function _get_pengajuan_perlu_review($dosen_id) {
     }
 
     /**
-     * NEW: Kirim email ke mahasiswa saat disetujui dosen
+     * REPLACE METHOD _kirim_email_disetujui_mahasiswa()
+     * Yang bermasalah di line yang menggunakan {$seminar->judul}
      */
     private function _kirim_email_disetujui_mahasiswa($seminar) {
         try {
@@ -917,6 +859,9 @@ private function _get_pengajuan_perlu_review($dosen_id) {
             
             $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
             $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            // FIX: Gunakan judul_current yang sudah tersedia dari _get_seminar_detail()
+            $judul_seminar = $seminar->judul_current;
             
             $message = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
@@ -932,7 +877,7 @@ private function _get_pengajuan_perlu_review($dosen_id) {
                     <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
                         <h4 style='color: #155724; margin: 0 0 10px 0;'>📚 Detail Seminar:</h4>
                         <ul style='color: #155724; margin: 0;'>
-                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
                             <li><strong>Pembimbing:</strong> {$nama_pembimbing}</li>
                             <li><strong>Status:</strong> Menunggu validasi Kaprodi</li>
                             <li><strong>Tanggal Disetujui:</strong> " . date('d F Y, H:i') . " WIB</li>
@@ -974,7 +919,8 @@ private function _get_pengajuan_perlu_review($dosen_id) {
     }
 
     /**
-     * NEW: Kirim email ke kaprodi saat disetujui dosen
+     * REPLACE METHOD _kirim_email_disetujui_kaprodi()
+     * Fix penggunaan property judul juga
      */
     private function _kirim_email_disetujui_kaprodi($seminar) {
         try {
@@ -996,6 +942,9 @@ private function _get_pengajuan_perlu_review($dosen_id) {
             $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
             $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
             
+            // FIX: Gunakan judul_current yang sudah tersedia
+            $judul_seminar = $seminar->judul_current;
+            
             $message = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
                 <div style='background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; padding: 20px; text-align: center;'>
@@ -1012,7 +961,7 @@ private function _get_pengajuan_perlu_review($dosen_id) {
                         <ul style='color: #004085; margin: 0;'>
                             <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
                             <li><strong>NIM:</strong> {$seminar->nim}</li>
-                            <li><strong>Judul Skripsi:</strong> {$seminar->judul}</li>
+                            <li><strong>Judul Skripsi:</strong> {$judul_seminar}</li>
                             <li><strong>Dosen Pembimbing:</strong> {$nama_pembimbing}</li>
                             <li><strong>Tanggal Disetujui:</strong> " . date('d F Y, H:i') . " WIB</li>
                         </ul>
@@ -1060,7 +1009,8 @@ private function _get_pengajuan_perlu_review($dosen_id) {
     }
 
     /**
-     * NEW: Kirim email ke mahasiswa saat ditolak dosen
+     * REPLACE METHOD _kirim_email_ditolak_mahasiswa()
+     * Di controller dosen/Seminar_skripsi.php
      */
     private function _kirim_email_ditolak_mahasiswa($seminar, $komentar) {
         try {
@@ -1074,6 +1024,9 @@ private function _get_pengajuan_perlu_review($dosen_id) {
             
             $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
             $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            // FIX: Gunakan judul_current yang sudah tersedia
+            $judul_seminar = $seminar->judul_current;
             
             $message = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
@@ -1089,7 +1042,7 @@ private function _get_pengajuan_perlu_review($dosen_id) {
                     <div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #dc3545;'>
                         <h4 style='color: #721c24; margin: 0 0 10px 0;'>📚 Detail Seminar:</h4>
                         <ul style='color: #721c24; margin: 0;'>
-                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
                             <li><strong>Pembimbing:</strong> {$nama_pembimbing}</li>
                             <li><strong>Tanggal Review:</strong> " . date('d F Y, H:i') . " WIB</li>
                         </ul>
@@ -1145,7 +1098,8 @@ private function _get_pengajuan_perlu_review($dosen_id) {
     }
 
     /**
-     * NEW: Send notification untuk pengajuan ulang
+     * REPLACE METHOD _send_resubmission_notification()
+     * Di controller dosen/Seminar_skripsi.php
      */
     private function _send_resubmission_notification($seminar) {
         try {
@@ -1156,6 +1110,9 @@ private function _get_pengajuan_perlu_review($dosen_id) {
             $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
             $this->email->to($seminar->email_mahasiswa);
             $this->email->subject('🔄 Pengajuan Ulang Seminar Skripsi Diterima - ' . $seminar->nama_mahasiswa);
+            
+            // FIX: Gunakan judul_current yang sudah tersedia
+            $judul_seminar = $seminar->judul_current;
             
             $message = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
@@ -1171,13 +1128,21 @@ private function _get_pengajuan_perlu_review($dosen_id) {
                     <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #17a2b8;'>
                         <h4 style='color: #0c5460; margin: 0 0 10px 0;'>📚 Detail Pengajuan:</h4>
                         <ul style='color: #0c5460; margin: 0;'>
-                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
                             <li><strong>Status:</strong> Menunggu review pembimbing</li>
                             <li><strong>Tanggal Pengajuan Ulang:</strong> " . date('d F Y, H:i') . " WIB</li>
                         </ul>
                     </div>
                     
                     <p>Silakan pantau status melalui dashboard mahasiswa. Anda akan mendapat notifikasi hasil review via email.</p>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem. Terima kasih atas kesabaran Anda.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
                 </div>
             </div>";
             
@@ -1190,7 +1155,8 @@ private function _get_pengajuan_perlu_review($dosen_id) {
     }
 
     /**
-     * NEW: Send notification ke mahasiswa ketika penilaian dipublikasi
+     * REPLACE METHOD _send_penilaian_published_notification()
+     * Di controller dosen/Seminar_skripsi.php
      */
     private function _send_penilaian_published_notification($seminar, $penilaian_data) {
         try {
@@ -1205,6 +1171,9 @@ private function _get_pengajuan_perlu_review($dosen_id) {
             // Get dosen pembimbing info
             $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
             $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            // FIX: Gunakan judul_current yang sudah tersedia
+            $judul_seminar = $seminar->judul_current;
             
             // Color untuk nilai
             $nilai_color = $penilaian_data['nilai_akhir'] >= 80 ? '#28a745' : 
@@ -1246,7 +1215,7 @@ private function _get_pengajuan_perlu_review($dosen_id) {
                     <div style='background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;'>
                         <h4 style='color: #495057; margin: 0 0 10px 0;'>📚 Detail Seminar:</h4>
                         <ul style='color: #495057; margin: 0;'>
-                            <li><strong>Judul:</strong> " . ($seminar->judul_current ?? $seminar->judul_proposal_original) . "</li>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
                             <li><strong>Pembimbing:</strong> {$nama_pembimbing}</li>
                             <li><strong>Tanggal Publikasi:</strong> " . date('d F Y, H:i') . " WIB</li>
                         </ul>
@@ -1328,6 +1297,7 @@ private function _get_pengajuan_perlu_review($dosen_id) {
             return false;
         }
     }
+
     // =================================================================
     // UTILITY METHODS
     // =================================================================

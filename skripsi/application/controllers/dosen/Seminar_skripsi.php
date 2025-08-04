@@ -845,6 +845,8 @@ private function _get_pengajuan_perlu_review($dosen_id) {
                 
                 // ENHANCEMENT: Send email notification ke mahasiswa saat penilaian dipublikasi
                 $this->_send_penilaian_published_notification($seminar, $penilaian_data);
+                $this->_send_penilaian_notification_to_kaprodi($seminar, $penilaian_data);
+                $this->_send_penilaian_notification_to_staf($seminar, $penilaian_data);
             }
             
             $this->db->trans_complete();
@@ -1349,6 +1351,191 @@ private function _get_pengajuan_perlu_review($dosen_id) {
         }
     }
 
+    /**
+     * NEW: Send notification to Kaprodi when penilaian is published
+     * Kaprodi perlu tahu ada mahasiswa yang siap untuk tahap publikasi
+     */
+    private function _send_penilaian_notification_to_kaprodi($seminar, $penilaian_data) {
+        try {
+            // Get kaprodi data - menggunakan method yang sudah ada
+            $kaprodi = $this->_get_kaprodi_data();
+            if (!$kaprodi) {
+                log_message('warning', 'Kaprodi data not found for penilaian notification');
+                return false;
+            }
+            
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($kaprodi->email);
+            $this->email->subject('📋 Mahasiswa Siap Tahap Publikasi - ' . $seminar->nama_mahasiswa);
+            
+            // Get dosen pembimbing info
+            $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
+            $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            // Gunakan judul_current yang sudah tersedia
+            $judul_seminar = $seminar->judul_current;
+            
+            // Color untuk nilai
+            $nilai_color = $penilaian_data['nilai_akhir'] >= 80 ? '#28a745' : 
+                          ($penilaian_data['nilai_akhir'] >= 70 ? '#ffc107' : '#dc3545');
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📋 Mahasiswa Siap Tahap Publikasi</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>Ketua Program Studi</strong>,</p>
+                    
+                    <p>Penilaian seminar skripsi telah selesai dipublikasi dan mahasiswa siap melanjutkan ke <strong>tahap publikasi tugas akhir</strong>.</p>
+                    
+                    <div style='background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #495057; margin: 0 0 10px 0;'>👨‍🎓 Detail Mahasiswa:</h4>
+                        <ul style='color: #495057; margin: 0;'>
+                            <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
+                            <li><strong>NIM:</strong> {$seminar->nim}</li>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
+                            <li><strong>Pembimbing:</strong> {$nama_pembimbing}</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid {$nilai_color};'>
+                        <h4 style='color: {$nilai_color}; margin: 0 0 10px 0;'>📊 Hasil Penilaian:</h4>
+                        <p style='margin: 0;'><strong>Nilai Akhir:</strong> {$penilaian_data['nilai_akhir']} ({$penilaian_data['nilai_huruf']})</p>
+                    </div>
+                    
+                    <div style='background-color: #cce7ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>📋 Tahap Selanjutnya:</h4>
+                        <p style='color: #004085; margin: 0;'>
+                            Mahasiswa akan mengajukan publikasi tugas akhir melalui sistem. 
+                            Mohon siap untuk melakukan validasi publikasi ketika mahasiswa mengajukan.
+                        </p>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('kaprodi/publikasi') . "' style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📋 Buka Menu Publikasi
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem untuk memberitahu ada mahasiswa yang siap tahap publikasi.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send penilaian notification to kaprodi: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending penilaian notification to kaprodi: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * NEW: Send notification to Staf when penilaian is published  
+     * Staf perlu tahu ada mahasiswa yang siap untuk tahap publikasi
+     */
+    private function _send_penilaian_notification_to_staf($seminar, $penilaian_data) {
+        try {
+            // Get staf data (level 5 di tabel dosen)
+            $staf_list = $this->_get_staf_data();
+            if (empty($staf_list)) {
+                log_message('warning', 'No staf found for penilaian notification');
+                return false;
+            }
+            
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            // Get dosen pembimbing info
+            $dosen_pembimbing = $this->_get_dosen_by_id($seminar->pembimbing_id);
+            $nama_pembimbing = $dosen_pembimbing ? $dosen_pembimbing->nama : 'Dosen Pembimbing';
+            
+            // Gunakan judul_current yang sudah tersedia
+            $judul_seminar = $seminar->judul_current;
+            
+            // Send to all staf
+            foreach ($staf_list as $staf) {
+                $this->email->clear();
+                $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+                $this->email->to($staf->email);
+                $this->email->subject('📄 Mahasiswa Siap Publikasi - ' . $seminar->nama_mahasiswa);
+                
+                $message = "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                    <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                        <h2 style='margin: 0;'>📄 Mahasiswa Siap untuk Publikasi</h2>
+                    </div>
+                    
+                    <div style='padding: 20px; background-color: #f8f9fa;'>
+                        <p>Kepada Yth. <strong>{$staf->nama}</strong>,</p>
+                        
+                        <p>Penilaian seminar skripsi telah selesai dan mahasiswa siap untuk <strong>mengajukan publikasi tugas akhir</strong>.</p>
+                        
+                        <div style='background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                            <h4 style='color: #495057; margin: 0 0 10px 0;'>👨‍🎓 Detail Mahasiswa:</h4>
+                            <ul style='color: #495057; margin: 0;'>
+                                <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
+                                <li><strong>NIM:</strong> {$seminar->nim}</li>
+                                <li><strong>Judul:</strong> {$judul_seminar}</li>
+                                <li><strong>Pembimbing:</strong> {$nama_pembimbing}</li>
+                                <li><strong>Nilai Akhir:</strong> {$penilaian_data['nilai_akhir']} ({$penilaian_data['nilai_huruf']})</li>
+                            </ul>
+                        </div>
+                        
+                        <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                            <h4 style='color: #856404; margin: 0 0 10px 0;'>📋 Persiapan yang Diperlukan:</h4>
+                            <ol style='color: #856404; margin: 0;'>
+                                <li>Siapkan template repository publikasi</li>
+                                <li>Persiapkan proses validasi dokumen publikasi</li>
+                                <li>Monitor pengajuan publikasi dari mahasiswa</li>
+                                <li>Siap membantu proses upload ke repository</li>
+                            </ol>
+                        </div>
+                        
+                        <div style='text-align: center; margin: 20px 0;'>
+                            <a href='" . base_url('staf/publikasi') . "' style='background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                                📄 Buka Menu Publikasi
+                            </a>
+                        </div>
+                        
+                        <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                            Email ini dikirim otomatis oleh sistem untuk koordinasi proses publikasi tugas akhir.
+                        </p>
+                    </div>
+                    
+                    <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                        <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                    </div>
+                </div>";
+                
+                $this->email->message($message);
+                $this->email->send();
+            }
+            
+            return true;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending penilaian notification to staf: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     // =================================================================
     // UTILITY METHODS
     // =================================================================
@@ -1420,6 +1607,27 @@ private function _get_pengajuan_perlu_review($dosen_id) {
                 'email' => 'kaprodi@stkyakobus.ac.id',
                 'nip' => '000000'
             ];
+        }
+    }
+
+    /**
+     * NEW: Get staf data (level 5 di tabel dosen)
+     * Method helper untuk mengambil data staf
+     */
+    private function _get_staf_data() {
+        try {
+            $this->db->select('id, nama, email, nip');
+            $this->db->from('dosen');
+            $this->db->where('level', '5'); // Level 5 = Staf sesuai penjelasan user
+            $this->db->where('email IS NOT NULL');
+            $this->db->where('email !=', '');
+            
+            $result = $this->db->get()->result();
+            return $result ?: [];
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting staf data: ' . $e->getMessage());
+            return [];
         }
     }
 

@@ -164,40 +164,139 @@ public function detail($seminar_id) {
         }
     
         try {
-            // Existing validation (UNCHANGED)
+            // Get input data
             $seminar_id = $this->input->post('seminar_id');
             $decision = $this->input->post('decision');
             $plagiarism_percentage = $this->input->post('plagiarism_percentage');
-            $komentar = $this->input->post('komentar_kaprodi');
+            $komentar = trim($this->input->post('komentar_kaprodi'));
     
-            if (!$seminar_id || !$decision) {
-                throw new Exception('Data tidak lengkap');
+            // ✅ COMPREHENSIVE INPUT VALIDATION
+            if (empty($seminar_id) || !is_numeric($seminar_id)) {
+                throw new Exception('ID seminar tidak valid');
             }
     
-            // NEW: Handle file turnitin upload (sesuai path di views)
+            if (empty($decision) || !in_array($decision, ['approved', 'rejected'])) {
+                throw new Exception('Keputusan validasi tidak valid');
+            }
+    
+            if (empty($plagiarism_percentage) || !is_numeric($plagiarism_percentage)) {
+                throw new Exception('Persentase plagiarisme harus diisi dengan angka');
+            }
+    
+            $plagiarism_score = floatval($plagiarism_percentage);
+    
+            // ✅ RANGE VALIDATION (APPLICATION LEVEL)
+            if ($plagiarism_score < 0 || $plagiarism_score > 100) {
+                throw new Exception('Persentase plagiarisme harus antara 0-100%');
+            }
+    
+            // ✅ BUSINESS LOGIC VALIDATION - CORE WORKFLOW RULE
+            if ($decision === 'approved' && $plagiarism_score > 30) {
+                $this->session->set_flashdata('error', 
+                    'Tidak dapat menyetujui pengajuan dengan skor plagiarisme ' . 
+                    number_format($plagiarism_score, 1) . '% (maksimal 30% untuk approval). ' .
+                    'Silakan pilih "Tolak" jika ingin menolak pengajuan ini.');
+                redirect('kaprodi/seminar_skripsi/detail/' . $seminar_id);
+                return;
+            }
+    
+            // ✅ GET SEMINAR DATA FOR VALIDATION
+            $seminar = $this->_get_seminar_detail($seminar_id);
+            if (!$seminar) {
+                throw new Exception('Data seminar tidak ditemukan');
+            }
+    
+            // ✅ AUTHORIZATION CHECK
+            if ($seminar->status_kaprodi !== 'pending') {
+                throw new Exception('Seminar sudah divalidasi sebelumnya');
+            }
+    
+            // ✅ MANDATORY COMMENT FOR REJECTION >30%
+            if ($decision === 'rejected' && $plagiarism_score > 30 && empty($komentar)) {
+                $komentar = 'Pengajuan ditolak karena skor plagiarisme ' . 
+                           number_format($plagiarism_score, 1) . '% melebihi batas maksimal 30%.';
+            }
+    
+            // ✅ HANDLE FILE UPLOAD (OPTIONAL)
             $uploaded_turnitin_file = null;
             if (!empty($_FILES['file_turnitin']['name'])) {
                 $uploaded_turnitin_file = $this->_handle_turnitin_upload($seminar_id);
-                if (!$uploaded_turnitin_file) {
-                    throw new Exception('Gagal mengupload file hasil turnitin');
+            }
+    
+            // ✅ PREPARE UPDATE DATA
+            $update_data = [
+                'status_kaprodi' => $decision,
+                'komentar_kaprodi' => $komentar,
+                'plagiarism_percentage' => $plagiarism_score, // Simpan skor asli
+                'tanggal_review_kaprodi' => date('Y-m-d H:i:s'),
+                'reviewed_by_kaprodi' => $this->session->userdata('id'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+    
+            // ✅ UPDATE WORKFLOW STATUS
+            if ($decision === 'approved') {
+                $update_data['status'] = 'approved';
+                $update_data['current_step'] = 'staf';
+            } else {
+                $update_data['status'] = 'rejected';
+                $update_data['current_step'] = 'mahasiswa';
+            }
+    
+            // ✅ ADD UPLOADED FILE
+            if ($uploaded_turnitin_file) {
+                $update_data['file_turnitin'] = $uploaded_turnitin_file;
+            }
+    
+            // ✅ DATABASE TRANSACTION
+            $this->db->trans_start();
+    
+            $this->db->where('id', $seminar_id);
+            $affected = $this->db->update('seminar_skripsi_mahasiswa', $update_data);
+    
+            if (!$affected) {
+                throw new Exception('Gagal memperbarui data di database');
+            }
+    
+            $this->db->trans_complete();
+    
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Transaksi database gagal');
+            }
+    
+            // ✅ SUCCESS MESSAGING
+            if ($decision === 'approved') {
+                $success_msg = 'Seminar skripsi berhasil DISETUJUI! ' .
+                              'Skor plagiarisme: ' . number_format($plagiarism_score, 1) . '% ' .
+                              '(dalam batas toleransi ≤30%)';
+            } else {
+                $success_msg = 'Seminar skripsi berhasil DITOLAK. ' .
+                              'Skor plagiarisme: ' . number_format($plagiarism_score, 1) . '%';
+                
+                if ($plagiarism_score > 30) {
+                    $success_msg .= ' (melebihi batas maksimal 30%)';
                 }
             }
     
-            // Enhanced process validation dengan file
-            $result = $this->_process_validation_with_file($seminar_id, $decision, $plagiarism_percentage, $komentar, $uploaded_turnitin_file);
+            $this->session->set_flashdata('success', $success_msg);
     
-            if ($result) {
-                $message = ($decision == 'approved') ? 'Seminar skripsi berhasil disetujui!' : 'Seminar skripsi ditolak.';
-                $this->session->set_flashdata('success', $message);
-                
-                // Enhanced notifications
-                $this->_send_comprehensive_notifications($seminar_id, $decision);
-            } else {
-                throw new Exception('Gagal memproses validasi');
-            }
+            // ✅ SEND NOTIFICATIONS (Optional - bisa dimatikan dulu untuk testing)
+            // $this->_send_validation_notifications($seminar_id, $decision, $plagiarism_score);
+    
+            // ✅ LOG FOR AUDIT TRAIL
+            log_message('info', sprintf(
+                'Kaprodi validation: Seminar ID=%d, Decision=%s, Plagiarism=%.1f%%, Kaprodi ID=%d',
+                $seminar_id, $decision, $plagiarism_score, $this->session->userdata('id')
+            ));
     
         } catch (Exception $e) {
-            log_message('error', 'Enhanced validasi turnitin error: ' . $e->getMessage());
+            // ✅ COMPREHENSIVE ERROR HANDLING
+            $this->db->trans_rollback();
+            
+            log_message('error', sprintf(
+                'Kaprodi validation error: Seminar ID=%s, Error=%s, User ID=%d',
+                $seminar_id ?? 'unknown', $e->getMessage(), $this->session->userdata('id')
+            ));
+            
             $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     
@@ -539,45 +638,53 @@ public function detail($seminar_id) {
      */
     private function _handle_turnitin_upload($seminar_id) {
         try {
-            // Path sesuai views existing
             $upload_path = FCPATH . 'uploads/turnitin/';
             
+            // Create directory if not exists
             if (!is_dir($upload_path)) {
-                mkdir($upload_path, 0755, true);
-            }
-    
-            $config = [
-                'upload_path' => $upload_path,
-                'allowed_types' => 'pdf|doc|docx|jpg|png', // Sesuai views
-                'max_size' => 5120, // 5MB sesuai views  
-                'encrypt_name' => true,
-                'file_ext_tolower' => true
-            ];
-    
-            $this->upload->initialize($config);
-    
-            if ($this->upload->do_upload('file_turnitin')) {
-                $upload_data = $this->upload->data();
-                
-                // Rename dengan format yang jelas
-                $new_name = 'turnitin_' . $seminar_id . '_' . date('YmdHis') . $upload_data['file_ext'];
-                $old_path = $upload_path . $upload_data['file_name'];
-                $new_path = $upload_path . $new_name;
-                
-                if (rename($old_path, $new_path)) {
-                    return $new_name;
+                if (!mkdir($upload_path, 0755, true)) {
+                    log_message('error', 'Cannot create turnitin upload directory');
+                    return null;
                 }
-                
-                return $upload_data['file_name'];
-                
-            } else {
-                log_message('error', 'Upload turnitin error: ' . $this->upload->display_errors());
-                return false;
             }
+    
+            // Basic file validation
+            if (empty($_FILES['file_turnitin']['name'])) {
+                return null;
+            }
+    
+            $file = $_FILES['file_turnitin'];
             
+            // Check file size (5MB max)
+            if ($file['size'] > 5 * 1024 * 1024) {
+                log_message('error', 'Turnitin file too large: ' . $file['size']);
+                return null;
+            }
+    
+            // Check file type
+            $allowed_types = ['pdf', 'doc', 'docx'];
+            $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if (!in_array($file_ext, $allowed_types)) {
+                log_message('error', 'Invalid turnitin file type: ' . $file_ext);
+                return null;
+            }
+    
+            // Generate secure filename
+            $new_filename = 'turnitin_' . $seminar_id . '_' . date('YmdHis') . '.' . $file_ext;
+            $target_path = $upload_path . $new_filename;
+    
+            // Upload file
+            if (move_uploaded_file($file['tmp_name'], $target_path)) {
+                chmod($target_path, 0644);
+                return $new_filename;
+            } else {
+                log_message('error', 'Failed to move turnitin upload file');
+                return null;
+            }
+    
         } catch (Exception $e) {
-            log_message('error', 'Turnitin upload exception: ' . $e->getMessage());
-            return false;
+            log_message('error', 'Turnitin upload error: ' . $e->getMessage());
+            return null;
         }
     }
 

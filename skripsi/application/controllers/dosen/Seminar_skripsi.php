@@ -371,34 +371,65 @@ class Seminar_skripsi extends CI_Controller {
     // PRIVATE HELPER METHODS - STABLE (TIDAK DIUBAH)
     // =================================================================
 
-    /**
-     * Get pengajuan yang perlu review oleh dosen
-     * ENHANCED: Tambah support untuk resubmission
-     */
-    private function _get_pengajuan_perlu_review($dosen_id) {
-        try {
-            $this->db->select('
-                ssm.*,
-                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                pm.judul, pm.dosen_id as pembimbing_id
-            ');
-            $this->db->from('seminar_skripsi_mahasiswa ssm');
-            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
-            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
-            $this->db->where('pm.dosen_id', $dosen_id);
+/**
+ * FIXED: Get pengajuan yang perlu review oleh dosen
+ * PERBAIKAN: Kondisi lebih fleksibel untuk handle data yang current_step nya belum ter-update
+ */
+private function _get_pengajuan_perlu_review($dosen_id) {
+    try {
+        $this->db->select('
+            ssm.*,
+            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+            pm.judul, pm.dosen_id as pembimbing_id
+        ');
+        $this->db->from('seminar_skripsi_mahasiswa ssm');
+        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
+        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
+        $this->db->where('pm.dosen_id', $dosen_id);
+        
+        // FIXED: Kondisi yang lebih fleksibel untuk menangani data yang current_step belum ter-update
+        $this->db->group_start();
+            // Kondisi ideal: status submitted/resubmitted + current_step = pembimbing + status_pembimbing = pending
+            $this->db->group_start();
+                $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
+                $this->db->where('ssm.current_step', 'pembimbing');
+                $this->db->where('ssm.status_pembimbing', 'pending');
+            $this->db->group_end();
             
-            // ENHANCED: Support untuk pengajuan ulang
-            $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
-            $this->db->where('ssm.current_step', 'pembimbing');
-            $this->db->order_by('ssm.created_at', 'DESC');
-            
-            $result = $this->db->get()->result();
-            return $result ?: [];
-        } catch (Exception $e) {
-            log_message('error', 'Error getting pengajuan perlu review: ' . $e->getMessage());
-            return [];
+            // ATAU kondisi fallback: status submitted tapi current_step masih mahasiswa (data belum ter-update)
+            $this->db->or_group_start();
+                $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
+                $this->db->where('ssm.current_step', 'mahasiswa');
+                $this->db->where('ssm.status_pembimbing', 'pending');
+                $this->db->where('ssm.tanggal_review_pembimbing IS NULL'); // Belum pernah direview
+            $this->db->group_end();
+        $this->db->group_end();
+        
+        $this->db->order_by('ssm.created_at', 'DESC');
+        
+        $result = $this->db->get()->result();
+        
+        // BONUS: Auto-fix data current_step yang salah
+        if ($result) {
+            foreach ($result as $row) {
+                if ($row->current_step == 'mahasiswa' && in_array($row->status, ['submitted', 'resubmitted'])) {
+                    // Fix current_step ke pembimbing
+                    $this->db->where('id', $row->id);
+                    $this->db->update('seminar_skripsi_mahasiswa', [
+                        'current_step' => 'pembimbing',
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    log_message('info', "Auto-fixed current_step for seminar_skripsi_mahasiswa ID: {$row->id}");
+                }
+            }
         }
+        
+        return $result ?: [];
+    } catch (Exception $e) {
+        log_message('error', 'Error getting pengajuan perlu review: ' . $e->getMessage());
+        return [];
     }
+}
 
     /**
      * Get riwayat rekomendasi yang sudah diberikan dosen
@@ -459,8 +490,8 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * Get statistics untuk dashboard
-     * STABLE - TIDAK DIUBAH
+     * FIXED: Get statistics untuk dashboard
+     * Update kondisi sesuai query yang sudah diperbaiki
      */
     private function _get_statistics($dosen_id) {
         try {
@@ -468,9 +499,10 @@ class Seminar_skripsi extends CI_Controller {
                 'total' => 0,
                 'perlu_review' => 0,
                 'disetujui' => 0,
-                'ditolak' => 0
+                'ditolak' => 0,
+                'perlu_penilaian' => 0
             ];
-
+    
             // Total bimbingan skripsi
             $this->db->select('COUNT(*) as total');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
@@ -478,17 +510,33 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->where('pm.dosen_id', $dosen_id);
             $total = $this->db->get()->row();
             $stats['total'] = $total ? (int)$total->total : 0;
-
-            // Perlu review
+    
+            // FIXED: Perlu review - kondisi sama dengan _get_pengajuan_perlu_review()
             $this->db->select('COUNT(*) as perlu_review');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
             $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
             $this->db->where('pm.dosen_id', $dosen_id);
-            $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
-            $this->db->where('ssm.current_step', 'pembimbing');
+            
+            $this->db->group_start();
+                // Kondisi ideal
+                $this->db->group_start();
+                    $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
+                    $this->db->where('ssm.current_step', 'pembimbing');
+                    $this->db->where('ssm.status_pembimbing', 'pending');
+                $this->db->group_end();
+                
+                // Kondisi fallback untuk data yang current_step belum ter-update
+                $this->db->or_group_start();
+                    $this->db->where_in('ssm.status', ['submitted', 'resubmitted']);
+                    $this->db->where('ssm.current_step', 'mahasiswa');
+                    $this->db->where('ssm.status_pembimbing', 'pending');
+                    $this->db->where('ssm.tanggal_review_pembimbing IS NULL');
+                $this->db->group_end();
+            $this->db->group_end();
+            
             $perlu_review = $this->db->get()->row();
             $stats['perlu_review'] = $perlu_review ? (int)$perlu_review->perlu_review : 0;
-
+    
             // Disetujui
             $this->db->select('COUNT(*) as disetujui');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
@@ -497,7 +545,7 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->where('ssm.status_pembimbing', 'approved');
             $disetujui = $this->db->get()->row();
             $stats['disetujui'] = $disetujui ? (int)$disetujui->disetujui : 0;
-
+    
             // Ditolak
             $this->db->select('COUNT(*) as ditolak');
             $this->db->from('seminar_skripsi_mahasiswa ssm');
@@ -506,13 +554,43 @@ class Seminar_skripsi extends CI_Controller {
             $this->db->where('ssm.status_pembimbing', 'rejected');
             $ditolak = $this->db->get()->row();
             $stats['ditolak'] = $ditolak ? (int)$ditolak->ditolak : 0;
-
+    
+            // FIXED: Perlu penilaian - kondisi sama dengan _get_seminar_perlu_penilaian()
+            $this->db->select('COUNT(*) as perlu_penilaian');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
+            $this->db->join('penilaian_seminar_skripsi ps', 'ps.seminar_skripsi_id = ssm.id AND ps.role_penilai = "dosen_pembimbing" AND ps.dinilai_oleh = ' . $dosen_id, 'left');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            
+            $this->db->group_start();
+                $this->db->group_start();
+                    $this->db->where('ssm.status', 'scheduled');
+                    $this->db->where('ssm.tanggal_seminar IS NOT NULL');
+                    $this->db->where('(ps.status_penilaian IS NULL OR ps.status_penilaian = "draft")');
+                $this->db->group_end();
+                
+                $this->db->or_group_start();
+                    $this->db->where('ssm.status', 'approved');
+                    $this->db->where('ssm.tanggal_seminar IS NOT NULL');
+                    $this->db->where('(ps.status_penilaian IS NULL OR ps.status_penilaian = "draft")');
+                $this->db->group_end();
+                
+                $this->db->or_group_start();
+                    $this->db->where('ssm.status', 'completed');
+                    $this->db->where('ps.status_penilaian = "draft"');
+                $this->db->group_end();
+            $this->db->group_end();
+            
+            $perlu_penilaian = $this->db->get()->row();
+            $stats['perlu_penilaian'] = $perlu_penilaian ? (int)$perlu_penilaian->perlu_penilaian : 0;
+    
             return $stats;
         } catch (Exception $e) {
             log_message('error', 'Error getting statistics: ' . $e->getMessage());
-            return ['total' => 0, 'perlu_review' => 0, 'disetujui' => 0, 'ditolak' => 0];
+            return ['total' => 0, 'perlu_review' => 0, 'disetujui' => 0, 'ditolak' => 0, 'perlu_penilaian' => 0];
         }
     }
+
 
     /**
      * ENHANCED: Get seminar detail dengan judul original dari proposal

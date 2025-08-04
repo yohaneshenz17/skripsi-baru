@@ -1,17 +1,10 @@
 <?php
 /**
- * COMPLETE SET VIEWS UNTUK DOSEN SEMINAR SKRIPSI
+ * ENHANCED VIEWS UNTUK DOSEN SEMINAR SKRIPSI - DENGAN FITUR LIHAT PENILAIAN
  * 
- * File: application/views/dosen/seminar_skripsi/
- * 
- * 1. index.php - Dashboard dengan seminar perlu penilaian
- * 2. detail.php - Detail pengajuan dengan judul baru vs lama + 2 file download
- * 3. penilaian.php - Form penilaian lengkap
+ * File: application/views/dosen/seminar_skripsi/index.php
+ * Ditambahkan: Fitur Lihat Penilaian pada Riwayat Rekomendasi
  */
-
-// =========================================================================
-// FILE 1: application/views/dosen/seminar_skripsi/index.php
-// =========================================================================
 ?>
 
 <div class="container-fluid">
@@ -302,7 +295,7 @@
     </div>
     <?php endif; ?>
 
-    <!-- Riwayat Rekomendasi -->
+    <!-- ✅ ENHANCED: Riwayat Rekomendasi - DENGAN FITUR LIHAT PENILAIAN -->
     <?php if(!empty($riwayat_rekomendasi)): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -320,6 +313,7 @@
                             <th>Judul</th>
                             <th>Tanggal Review</th>
                             <th>Rekomendasi</th>
+                            <th width="120">Aksi</th> <!-- ✅ KOLOM BARU -->
                         </tr>
                     </thead>
                     <tbody>
@@ -344,6 +338,21 @@
                                         <span class="badge badge-danger">Ditolak</span>
                                     <?php endif; ?>
                                 </td>
+                                <td>
+                                    <!-- ✅ BUTTON LIHAT PENILAIAN -->
+                                    <?php 
+                                    $has_penilaian = isset($riwayat->status_penilaian) && $riwayat->status_penilaian == 'published';
+                                    ?>
+                                    <?php if($has_penilaian): ?>
+                                        <button class="btn btn-info btn-sm" 
+                                                onclick="lihatPenilaian(<?= $riwayat->id ?>, '<?= addslashes($riwayat->nama_mahasiswa) ?>')" 
+                                                title="Lihat Penilaian">
+                                            <i class="fas fa-eye"></i> Penilaian
+                                        </button>
+                                    <?php else: ?>
+                                        <span class="text-muted small">Belum dinilai</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -352,6 +361,37 @@
         </div>
     </div>
     <?php endif; ?>
+</div>
+
+<!-- ✅ MODAL LIHAT PENILAIAN -->
+<div class="modal fade" id="modalPenilaian" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-clipboard-list mr-2"></i>
+                    Detail Penilaian Seminar Skripsi
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="penilaian-content">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-2">Memuat data penilaian...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-primary" onclick="cetakPenilaian()">
+                    <i class="fas fa-print mr-1"></i> Cetak Penilaian
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- CSS Custom -->
@@ -374,16 +414,66 @@
     margin-bottom: 5px;
 }
 
+/* ✅ STYLING UNTUK MODAL PENILAIAN */
+.penilaian-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.penilaian-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #e3e6f0;
+    border-radius: 8px;
+    background: #f8f9fc;
+}
+
+.penilaian-section h6 {
+    color: #5a5c69;
+    border-bottom: 2px solid #e3e6f0;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+
+.nilai-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.nilai-item:last-child {
+    border-bottom: none;
+}
+
+.nilai-badge {
+    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 15px;
+}
+
 @media (max-width: 768px) {
     .btn-group-sm .btn {
         padding: 0.25rem 0.5rem;
         font-size: 0.775rem;
+    }
+    
+    .modal-dialog {
+        margin: 10px;
     }
 }
 </style>
 
 <!-- JavaScript -->
 <script>
+// ✅ DECLARE GLOBAL VARIABLES FIRST
+var currentSeminarId = null;
+
+// ✅ DOCUMENT READY
 $(document).ready(function() {
     // Initialize DataTable jika ada data
     if ($('#pengajuan-table').length && $('#pengajuan-table tbody tr').length > 0) {
@@ -397,7 +487,7 @@ $(document).ready(function() {
     }
 });
 
-// Quick approve function
+// ✅ QUICK APPROVE FUNCTION
 function quickApprove(seminarId, mahasiswaName) {
     if (confirm('Yakin menyetujui pengajuan seminar skripsi ' + mahasiswaName + '?')) {
         $.post('<?= base_url('dosen/seminar_skripsi/rekomendasi') ?>', {
@@ -410,9 +500,9 @@ function quickApprove(seminarId, mahasiswaName) {
     }
 }
 
-// Quick reject function  
+// ✅ QUICK REJECT FUNCTION  
 function quickReject(seminarId, mahasiswaName) {
-    const komentar = prompt('Masukkan alasan penolakan untuk ' + mahasiswaName + ':');
+    var komentar = prompt('Masukkan alasan penolakan untuk ' + mahasiswaName + ':');
     if (komentar && komentar.trim() !== '') {
         $.post('<?= base_url('dosen/seminar_skripsi/rekomendasi') ?>', {
             seminar_id: seminarId,
@@ -421,6 +511,162 @@ function quickReject(seminarId, mahasiswaName) {
         }, function(response) {
             location.reload();
         });
+    }
+}
+
+// ✅ FUNGSI LIHAT PENILAIAN - MAIN FUNCTION
+function lihatPenilaian(seminarId, mahasiswaName) {
+    console.log('lihatPenilaian called with:', seminarId, mahasiswaName); // Debug log
+    
+    currentSeminarId = seminarId;
+    $('#modalPenilaian').modal('show');
+    
+    // Reset content to loading state
+    $('#penilaian-content').html(`
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-2">Memuat data penilaian...</p>
+        </div>
+    `);
+    
+    // Load data penilaian via AJAX
+    $.ajax({
+        url: '<?= base_url('dosen/seminar_skripsi/get_penilaian/') ?>' + seminarId,
+        type: 'GET',
+        dataType: 'json',
+        timeout: 10000, // 10 second timeout
+        success: function(response) {
+            console.log('AJAX Response:', response); // Debug log
+            if (response && response.success) {
+                renderPenilaian(response.data, mahasiswaName);
+            } else {
+                $('#penilaian-content').html(
+                    '<div class="alert alert-warning">' +
+                        '<i class="fas fa-exclamation-triangle mr-2"></i>' +
+                        (response.message || 'Data penilaian tidak ditemukan') +
+                    '</div>'
+                );
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', status, error); // Debug log
+            $('#penilaian-content').html(
+                '<div class="alert alert-danger">' +
+                    '<i class="fas fa-exclamation-circle mr-2"></i>' +
+                    'Terjadi kesalahan saat memuat data penilaian: ' + error +
+                '</div>'
+            );
+        }
+    });
+}
+
+// ✅ RENDER PENILAIAN FUNCTION
+function renderPenilaian(data, mahasiswaName) {
+    var penilaianHtml = 
+        '<div class="penilaian-header">' +
+            '<h5 class="mb-1"><i class="fas fa-user-graduate mr-2"></i>' + mahasiswaName + '</h5>' +
+            '<p class="mb-0 small">' + (data.nim || '') + ' | ' + (data.judul || '') + '</p>' +
+        '</div>' +
+        
+        '<div class="row">' +
+            '<div class="col-md-6">' +
+                '<div class="penilaian-section">' +
+                    '<h6><i class="fas fa-star mr-2"></i>Penilaian Akademik</h6>' +
+                    '<div class="nilai-item">' +
+                        '<span>Sistematika Penulisan</span>' +
+                        '<span class="badge nilai-badge badge-primary">' + (data.sistematika || 0) + '</span>' +
+                    '</div>' +
+                    '<div class="nilai-item">' +
+                        '<span>Kelengkapan Materi</span>' +
+                        '<span class="badge nilai-badge badge-primary">' + (data.kelengkapan || 0) + '</span>' +
+                    '</div>' +
+                    '<div class="nilai-item">' +
+                        '<span>Analisis & Pembahasan</span>' +
+                        '<span class="badge nilai-badge badge-primary">' + (data.analisis || 0) + '</span>' +
+                    '</div>' +
+                    '<div class="nilai-item">' +
+                        '<span>Kesimpulan</span>' +
+                        '<span class="badge nilai-badge badge-primary">' + (data.kesimpulan || 0) + '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            
+            '<div class="col-md-6">' +
+                '<div class="penilaian-section">' +
+                    '<h6><i class="fas fa-comments mr-2"></i>Penilaian Presentasi</h6>' +
+                    '<div class="nilai-item">' +
+                        '<span>Penguasaan Materi</span>' +
+                        '<span class="badge nilai-badge badge-info">' + (data.penguasaan_materi || 0) + '</span>' +
+                    '</div>' +
+                    '<div class="nilai-item">' +
+                        '<span>Komunikasi</span>' +
+                        '<span class="badge nilai-badge badge-info">' + (data.komunikasi || 0) + '</span>' +
+                    '</div>' +
+                    '<div class="nilai-item">' +
+                        '<span>Kemampuan Menjawab</span>' +
+                        '<span class="badge nilai-badge badge-info">' + (data.kemampuan_jawab || 0) + '</span>' +
+                    '</div>' +
+                    '<div class="nilai-item">' +
+                        '<span>Etika & Sikap</span>' +
+                        '<span class="badge nilai-badge badge-info">' + (data.etika || 0) + '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        
+        '<div class="penilaian-section">' +
+            '<h6><i class="fas fa-calculator mr-2"></i>Rekapitulasi Nilai</h6>' +
+            '<div class="row">' +
+                '<div class="col-md-4">' +
+                    '<div class="text-center p-3 bg-light rounded">' +
+                        '<h4 class="text-primary mb-1">' + (data.nilai_angka || 0) + '</h4>' +
+                        '<small class="text-muted">Nilai Angka</small>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                    '<div class="text-center p-3 bg-light rounded">' +
+                        '<h4 class="text-success mb-1">' + (data.nilai_huruf || 'N/A') + '</h4>' +
+                        '<small class="text-muted">Nilai Huruf</small>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="col-md-4">' +
+                    '<div class="text-center p-3 bg-light rounded">' +
+                        '<h4 class="text-info mb-1">' + (data.predikat || 'N/A') + '</h4>' +
+                        '<small class="text-muted">Predikat</small>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+        
+    if (data.catatan_penguji) {
+        penilaianHtml += 
+            '<div class="penilaian-section">' +
+                '<h6><i class="fas fa-sticky-note mr-2"></i>Catatan Penguji</h6>' +
+                '<div class="bg-white p-3 rounded border">' +
+                    data.catatan_penguji.replace(/\n/g, '<br>') +
+                '</div>' +
+            '</div>';
+    }
+    
+    penilaianHtml += 
+        '<div class="text-center text-muted mt-3">' +
+            '<small>' +
+                '<i class="fas fa-calendar mr-1"></i>' +
+                'Dinilai pada: ' + (data.tanggal_penilaian ? new Date(data.tanggal_penilaian).toLocaleDateString('id-ID') : 'N/A') +
+            '</small>' +
+        '</div>';
+    
+    $('#penilaian-content').html(penilaianHtml);
+}
+
+// ✅ CETAK PENILAIAN FUNCTION
+function cetakPenilaian() {
+    if (currentSeminarId) {
+        window.open('<?= base_url('dosen/seminar_skripsi/cetak_penilaian/') ?>' + currentSeminarId, '_blank');
+    } else {
+        alert('ID Seminar tidak ditemukan');
     }
 }
 </script>

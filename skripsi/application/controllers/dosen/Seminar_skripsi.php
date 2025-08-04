@@ -386,10 +386,12 @@ public function handle_resubmission($seminar_id) {
 }
 
 /**
- * ✅ TAMBAHAN: Method untuk get data penilaian via AJAX
- * Diperlukan untuk modal "Lihat Penilaian"
+ * Method untuk get data penilaian via AJAX
+ * Tambahkan method ini di Controller Seminar_skripsi.php
  */
 public function get_penilaian($seminar_id) {
+    header('Content-Type: application/json');
+    
     $dosen_id = $this->session->userdata('id');
     
     try {
@@ -419,7 +421,7 @@ public function get_penilaian($seminar_id) {
             return;
         }
         
-        // Format data untuk view
+        // Format data untuk view - sesuaikan dengan field yang ada di database
         $data = [
             'nim' => $penilaian->nim,
             'nama_mahasiswa' => $penilaian->nama_mahasiswa,
@@ -428,17 +430,17 @@ public function get_penilaian($seminar_id) {
             'jam_seminar' => $penilaian->jam_seminar,
             'tempat_seminar' => $penilaian->tempat_seminar,
             
-            // Nilai akademik
-            'sistematika' => $penilaian->nilai_sistematika ?? 0,
-            'kelengkapan' => $penilaian->nilai_kelengkapan ?? 0,
-            'analisis' => $penilaian->nilai_analisis ?? 0,
-            'kesimpulan' => $penilaian->nilai_kesimpulan ?? 0,
+            // Nilai akademik - sesuaikan dengan field database Anda
+            'sistematika' => $penilaian->nilai_penguji1 ?? 0, // Ganti sesuai field actual
+            'kelengkapan' => $penilaian->nilai_penguji2 ?? 0, // Ganti sesuai field actual
+            'analisis' => $penilaian->nilai_pembimbing ?? 0, // Ganti sesuai field actual
+            'kesimpulan' => 0, // Tambahkan field jika ada
             
-            // Nilai presentasi  
-            'penguasaan_materi' => $penilaian->nilai_penguasaan_materi ?? 0,
-            'komunikasi' => $penilaian->nilai_komunikasi ?? 0,
-            'kemampuan_jawab' => $penilaian->nilai_kemampuan_jawab ?? 0,
-            'etika' => $penilaian->nilai_etika ?? 0,
+            // Nilai presentasi - sesuaikan dengan field database Anda
+            'penguasaan_materi' => 0, // Tambahkan field jika ada
+            'komunikasi' => 0, // Tambahkan field jika ada  
+            'kemampuan_jawab' => 0, // Tambahkan field jika ada
+            'etika' => 0, // Tambahkan field jika ada
             
             // Rekapitulasi
             'nilai_angka' => $penilaian->nilai_akhir ?? 0,
@@ -465,7 +467,8 @@ public function get_penilaian($seminar_id) {
 }
 
 /**
- * ✅ TAMBAHAN: Method untuk cetak penilaian
+ * Method untuk cetak penilaian
+ * Tambahkan method ini di Controller Seminar_skripsi.php
  */
 public function cetak_penilaian($seminar_id) {
     $dosen_id = $this->session->userdata('id');
@@ -496,8 +499,20 @@ public function cetak_penilaian($seminar_id) {
         return;
     }
     
-    // Load view untuk cetak
-    $this->load->view('dosen/seminar_skripsi/cetak_penilaian', $data);
+    // Load view untuk cetak (Anda bisa buat view terpisah untuk cetak)
+    $html = $this->load->view('dosen/seminar_skripsi/cetak_penilaian', $data, TRUE);
+    
+    // Jika ingin langsung print HTML
+    echo $html;
+    
+    // Atau jika ingin generate PDF, uncomment kode di bawah:
+    /*
+    $this->load->library('pdf');
+    $this->pdf->loadHtml($html);
+    $this->pdf->setPaper('A4', 'portrait');
+    $this->pdf->render();
+    $this->pdf->stream("penilaian_seminar_skripsi_" . $seminar_id . ".pdf");
+    */
 }
 
     // =================================================================
@@ -1843,6 +1858,17 @@ private function _get_riwayat_rekomendasi($dosen_id) {
         });
         </script>";
     }
+
+/**
+ * Helper function untuk menentukan predikat nilai
+ */
+private function _get_predikat($nilai) {
+    if ($nilai >= 85) return 'Sangat Baik';
+    if ($nilai >= 75) return 'Baik';
+    if ($nilai >= 65) return 'Cukup';
+    if ($nilai >= 55) return 'Kurang';
+    return 'Sangat Kurang';
+}
 
     /**
      * Get JavaScript for penilaian page

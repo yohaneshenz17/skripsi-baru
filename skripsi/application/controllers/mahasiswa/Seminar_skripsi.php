@@ -765,36 +765,75 @@ private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
         redirect('mahasiswa/seminar_skripsi');
     }
 
-    /**
-     * NEW: Get file info for download (supports multiple file types)
-     */
-    private function _get_file_info($seminar, $type)
-    {
-        $base_path = FCPATH . 'uploads/seminar_skripsi/';
-        
-        switch ($type) {
-            case 'skripsi':
-                return [
-                    'filename' => $seminar->file_skripsi,
-                    'path' => $base_path . 'skripsi_files/' . $seminar->file_skripsi,
-                    'download_name' => 'Skripsi_' . date('Ymd') . '_' . pathinfo($seminar->file_skripsi, PATHINFO_EXTENSION)
-                ];
-                
-            case 'surat':
-                return [
-                    'filename' => $seminar->surat_keterangan_penelitian,
-                    'path' => $base_path . 'surat_penelitian/' . $seminar->surat_keterangan_penelitian,
-                    'download_name' => 'Surat_Penelitian_' . date('Ymd') . '.' . pathinfo($seminar->surat_keterangan_penelitian, PATHINFO_EXTENSION)
-                ];
-                
-            default:
+/**
+ * ✅ FIXED: Get file info for download - Ganti method _get_file_info yang ada
+ * Tambahkan method ini di Seminar_skripsi.php (ganti yang ada)
+ */
+private function _get_file_info($seminar, $type)
+{
+    // Debug log untuk memastikan data seminar
+    log_message('debug', 'Getting file info for type: ' . $type);
+    log_message('debug', 'Seminar file_skripsi: ' . ($seminar->file_skripsi ?? 'NULL'));
+    log_message('debug', 'Seminar surat_keterangan_penelitian: ' . ($seminar->surat_keterangan_penelitian ?? 'NULL'));
+    
+    $base_path = FCPATH . 'uploads/seminar_skripsi/';
+    
+    switch ($type) {
+        case 'skripsi':
+            if (empty($seminar->file_skripsi)) {
+                log_message('error', 'file_skripsi is empty');
                 return [
                     'filename' => null,
                     'path' => null,
                     'download_name' => null
                 ];
-        }
+            }
+            
+            $file_path = $base_path . 'skripsi_files/' . $seminar->file_skripsi;
+            $file_extension = pathinfo($seminar->file_skripsi, PATHINFO_EXTENSION);
+            
+            // Debug log
+            log_message('debug', 'Skripsi file path: ' . $file_path);
+            log_message('debug', 'File exists: ' . (file_exists($file_path) ? 'YES' : 'NO'));
+            
+            return [
+                'filename' => $seminar->file_skripsi,
+                'path' => $file_path,
+                'download_name' => 'Skripsi_' . ($seminar->nim ?? 'Unknown') . '_' . date('Ymd') . '.' . $file_extension
+            ];
+            
+        case 'surat':
+            if (empty($seminar->surat_keterangan_penelitian)) {
+                log_message('error', 'surat_keterangan_penelitian is empty');
+                return [
+                    'filename' => null,
+                    'path' => null,
+                    'download_name' => null
+                ];
+            }
+            
+            $file_path = $base_path . 'surat_penelitian/' . $seminar->surat_keterangan_penelitian;
+            $file_extension = pathinfo($seminar->surat_keterangan_penelitian, PATHINFO_EXTENSION);
+            
+            // Debug log
+            log_message('debug', 'Surat file path: ' . $file_path);
+            log_message('debug', 'File exists: ' . (file_exists($file_path) ? 'YES' : 'NO'));
+            
+            return [
+                'filename' => $seminar->surat_keterangan_penelitian,
+                'path' => $file_path,
+                'download_name' => 'Surat_Penelitian_' . ($seminar->nim ?? 'Unknown') . '_' . date('Ymd') . '.' . $file_extension
+            ];
+            
+        default:
+            log_message('error', 'Invalid file type: ' . $type);
+            return [
+                'filename' => null,
+                'path' => null,
+                'download_name' => null
+            ];
     }
+}
 
     /**
      * NEW: Delete uploaded file

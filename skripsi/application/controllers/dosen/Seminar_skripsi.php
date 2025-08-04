@@ -262,6 +262,59 @@ class Seminar_skripsi extends CI_Controller {
         redirect('dosen/seminar_skripsi');
     }
 
+    /**
+     * SIMPLE: Method penilaian() untuk menampilkan form penilaian seminar skripsi
+     * TAMBAHKAN INI ke controller dosen/Seminar_skripsi.php setelah method rekomendasi()
+     */
+    public function penilaian($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Get detail seminar - pakai method yang sudah ada
+        $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan bimbingan Anda!');
+            redirect('dosen/seminar_skripsi');
+            return;
+        }
+        
+        // Handle form submission - pakai method yang sudah ada
+        if ($this->input->method() === 'post') {
+            $this->_process_penilaian($seminar_id, $dosen_id, $seminar);
+            return;
+        }
+        
+        // Get existing penilaian - pakai method yang sudah ada  
+        $existing_penilaian = $this->_get_existing_penilaian($seminar_id, $dosen_id);
+        
+        // Get info dosen penguji - simple query
+        $dosen_penguji1 = null;
+        $dosen_penguji2 = null;
+        
+        if (isset($seminar->dosen_penguji1_id) && $seminar->dosen_penguji1_id) {
+            $dosen_penguji1 = $this->_get_dosen_by_id($seminar->dosen_penguji1_id);
+        }
+        if (isset($seminar->dosen_penguji2_id) && $seminar->dosen_penguji2_id) {
+            $dosen_penguji2 = $this->_get_dosen_by_id($seminar->dosen_penguji2_id);
+        }
+        
+        // Prepare data untuk view - sesuai yang dibutuhkan view penilaian.php
+        $view_data = [
+            'seminar' => $seminar,
+            'penilaian' => $existing_penilaian,
+            'dosen_penguji1' => $dosen_penguji1,
+            'dosen_penguji2' => $dosen_penguji2,
+            'is_edit' => !empty($existing_penilaian)
+        ];
+        
+        // Load view dengan template dosen - pakai struktur yang sudah ada
+        $this->load->view('template/dosen', [
+            'title' => 'Penilaian Seminar Skripsi - ' . $seminar->nama_mahasiswa,
+            'content' => $this->load->view('dosen/seminar_skripsi/penilaian', $view_data, TRUE),
+            'script' => $this->_get_penilaian_script()
+        ]);
+    }
+
 /**
  * LANGKAH 2: PERBAIKI METHOD handle_resubmission()
  * Update method yang sudah ada untuk handle pengajuan ulang dengan benar:
@@ -648,8 +701,7 @@ private function _get_pengajuan_perlu_review($dosen_id) {
     }
 
     /**
-     * Get existing penilaian
-     * STABLE - TIDAK DIUBAH
+     * Get existing penilaian - simple query sesuai struktur DB real
      */
     private function _get_existing_penilaian($seminar_id, $dosen_id) {
         try {
@@ -657,7 +709,6 @@ private function _get_pengajuan_perlu_review($dosen_id) {
             $this->db->from('penilaian_seminar_skripsi');
             $this->db->where('seminar_skripsi_id', $seminar_id);
             $this->db->where('dinilai_oleh', $dosen_id);
-            $this->db->where('role_penilai', 'dosen_pembimbing');
             
             return $this->db->get()->row();
         } catch (Exception $e) {

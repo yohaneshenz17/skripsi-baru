@@ -186,11 +186,70 @@
                                     <div class="card-body text-center">
                                         <h6 class="card-title">Aksi</h6>
                                         
+                                        <?php 
+                                        // ✅ NEW: Cek apakah penilaian sudah dipublikasikan
+                                        $has_published_penilaian = false;
+                                        $penilaian_published = null;
+                                    
+                                        if (isset($seminar) && $seminar->status == 'completed') {
+                                            $this->db->select('id, published_at');
+                                            $this->db->from('penilaian_seminar_skripsi');
+                                            $this->db->where('seminar_skripsi_id', $seminar->id);
+                                            $this->db->where('status_penilaian', 'published');
+                                            $this->db->where('published_at IS NOT NULL');
+                                            $penilaian_published = $this->db->get()->row();
+                                            $has_published_penilaian = !empty($penilaian_published);
+                                        } elseif (isset($existing_seminar) && $existing_seminar->status == 'completed') {
+                                            // Fallback jika variable bernama $existing_seminar
+                                            $this->db->select('id, published_at');
+                                            $this->db->from('penilaian_seminar_skripsi');
+                                            $this->db->where('seminar_skripsi_id', $existing_seminar->id);
+                                            $this->db->where('status_penilaian', 'published');
+                                            $this->db->where('published_at IS NOT NULL');
+                                            $penilaian_published = $this->db->get()->row();
+                                            $has_published_penilaian = !empty($penilaian_published);
+                                        }
+                                        
+                                        // Tentukan seminar object yang digunakan
+                                        $current_seminar = isset($seminar) ? $seminar : (isset($existing_seminar) ? $existing_seminar : null);
+                                        ?>
+                                    
+                                        <?php if ($has_published_penilaian && $current_seminar): ?>
+                                            <!-- ✅ TOMBOL BARU: Lihat Hasil Penilaian -->
+                                            <a href="<?= base_url('mahasiswa/seminar_skripsi/view_penilaian/' . $current_seminar->id) ?>" 
+                                               class="btn btn-success btn-sm mb-2">
+                                                <i class="fas fa-star mr-1"></i> Lihat Hasil Penilaian
+                                            </a>
+                                            <div class="alert alert-success p-2 mb-2">
+                                                <small>
+                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                    Nilai dipublikasi: <?= date('d/m/Y H:i', strtotime($penilaian_published->published_at)) ?>
+                                                </small>
+                                            </div>
+                                        <?php endif; ?>
+                                    
+                                        <?php if ($current_seminar && $current_seminar->status == 'completed' && !$has_published_penilaian): ?>
+                                            <!-- ✅ STATUS: Menunggu Publikasi Nilai -->
+                                            <button class="btn btn-outline-secondary btn-sm mb-2" disabled>
+                                                <i class="fas fa-clock mr-1"></i> Menunggu Publikasi Nilai
+                                            </button>
+                                            <div class="alert alert-info p-2 mb-2">
+                                                <small>
+                                                    <i class="fas fa-info-circle mr-1"></i>
+                                                    Nilai akan segera dipublikasikan
+                                                </small>
+                                            </div>
+                                        <?php endif; ?>
+                                    
                                         <?php if ($can_resubmit ?? false): ?>
-                                            <button type="button" class="btn btn-warning btn-sm" onclick="showResubmitForm()">
+                                            <!-- ✅ TOMBOL EXISTING: Ajukan Ulang (TIDAK BERUBAH) -->
+                                            <button type="button" class="btn btn-warning btn-sm mb-2" onclick="showResubmitForm()">
                                                 <i class="fas fa-redo mr-1"></i> Ajukan Ulang
                                             </button>
-                                        <?php else: ?>
+                                        <?php endif; ?>
+                                    
+                                        <?php if (!($can_resubmit ?? false) && !$has_published_penilaian && (!$current_seminar || $current_seminar->status != 'completed')): ?>
+                                            <!-- ✅ DEFAULT: Tidak ada aksi (hanya tampil jika tidak ada tombol lain) -->
                                             <small class="text-muted">Tidak ada aksi yang tersedia</small>
                                         <?php endif; ?>
                                     </div>

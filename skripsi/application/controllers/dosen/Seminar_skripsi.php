@@ -385,213 +385,242 @@ public function handle_resubmission($seminar_id) {
     redirect('dosen/seminar_skripsi');
 }
 
-/**
- * Method untuk get data penilaian via AJAX
- * Tambahkan method ini di Controller Seminar_skripsi.php
- */
-public function get_penilaian($seminar_id) {
-    header('Content-Type: application/json');
-    
-    $dosen_id = $this->session->userdata('id');
-    
-    try {
-        // Get penilaian data dengan validasi akses
-        $this->db->select('
-            pss.*,
-            ssm.id as seminar_id,
-            m.nim, m.nama as nama_mahasiswa,
-            pm.judul,
-            ssm.tanggal_seminar, ssm.jam_seminar, ssm.tempat_seminar
-        ');
-        $this->db->from('penilaian_seminar_skripsi pss');
-        $this->db->join('seminar_skripsi_mahasiswa ssm', 'pss.seminar_skripsi_id = ssm.id');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-        $this->db->where('ssm.id', $seminar_id);
-        $this->db->where('pm.dosen_id', $dosen_id); // Validasi akses
-        $this->db->where('pss.status_penilaian', 'published'); // Hanya yang sudah dipublish
+    /**
+     * Method untuk get data penilaian via AJAX
+     * Tambahkan method ini di Controller Seminar_skripsi.php
+     */
+    public function get_penilaian($seminar_id) {
+        header('Content-Type: application/json');
         
-        $penilaian = $this->db->get()->row();
+        $dosen_id = $this->session->userdata('id');
         
-        if (!$penilaian) {
+        try {
+            // Get penilaian data dengan validasi akses
+            $this->db->select('
+                pss.*,
+                ssm.id as seminar_id,
+                m.nim, m.nama as nama_mahasiswa,
+                pm.judul,
+                ssm.tanggal_seminar, ssm.jam_seminar, ssm.tempat_seminar,
+                d1.nama as nama_penguji1,
+                d2.nama as nama_penguji2,
+                dp.nama as nama_pembimbing
+            ');
+            $this->db->from('penilaian_seminar_skripsi pss');
+            $this->db->join('seminar_skripsi_mahasiswa ssm', 'pss.seminar_skripsi_id = ssm.id');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('dosen dp', 'pm.dosen_id = dp.id', 'left'); // Pembimbing
+            $this->db->join('dosen d1', 'ssm.dosen_penguji1_id = d1.id', 'left'); // Penguji 1
+            $this->db->join('dosen d2', 'ssm.dosen_penguji2_id = d2.id', 'left'); // Penguji 2
+            $this->db->where('ssm.id', $seminar_id);
+            $this->db->where('pm.dosen_id', $dosen_id); // Validasi akses
+            $this->db->where('pss.status_penilaian', 'published'); // Hanya yang sudah dipublish
+            
+            $penilaian = $this->db->get()->row();
+            
+            if (!$penilaian) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Data penilaian tidak ditemukan atau belum dipublish'
+                ]);
+                return;
+            }
+            
+            // Format data sesuai dengan field database actual
+            $data = [
+                'nim' => $penilaian->nim,
+                'nama_mahasiswa' => $penilaian->nama_mahasiswa,
+                'judul' => $penilaian->judul,
+                'tanggal_seminar' => $penilaian->tanggal_seminar,
+                'jam_seminar' => $penilaian->jam_seminar,
+                'tempat_seminar' => $penilaian->tempat_seminar,
+                
+                // Nama penguji untuk label
+                'nama_penguji1' => $penilaian->nama_penguji1 ?? 'Belum ditentukan',
+                'nama_penguji2' => $penilaian->nama_penguji2 ?? 'Belum ditentukan', 
+                'nama_pembimbing' => $penilaian->nama_pembimbing ?? 'Belum ditentukan',
+                
+                // Nilai dari penguji
+                'nilai_penguji1' => $penilaian->nilai_penguji1 ?? 0,
+                'nilai_penguji2' => $penilaian->nilai_penguji2 ?? 0,
+                'nilai_pembimbing' => $penilaian->nilai_pembimbing ?? 0,
+                
+                // Rekapitulasi
+                'nilai_akhir' => $penilaian->nilai_akhir ?? 0,
+                'nilai_huruf' => $penilaian->nilai_huruf ?? 'N/A',
+                'predikat' => $this->_get_predikat($penilaian->nilai_akhir ?? 0),
+                
+                // Semua catatan
+                'catatan_pendahuluan' => $penilaian->catatan_pendahuluan ?? '',
+                'catatan_tinjauan_pustaka' => $penilaian->catatan_tinjauan_pustaka ?? '',
+                'catatan_metodologi' => $penilaian->catatan_metodologi ?? '',
+                'catatan_hasil_pembahasan' => $penilaian->catatan_hasil_pembahasan ?? '',
+                'catatan_kesimpulan' => $penilaian->catatan_kesimpulan ?? '',
+                'catatan_umum' => $penilaian->catatan_umum ?? '',
+                
+                // Rekomendasi
+                'rekomendasi' => $penilaian->rekomendasi ?? '',
+                'keterangan_rekomendasi' => $penilaian->keterangan_rekomendasi ?? '',
+                
+                // Tanggal
+                'tanggal_penilaian' => $penilaian->published_at ?? $penilaian->updated_at,
+                'dinilai_oleh' => $penilaian->role_penilai ?? 'dosen_pembimbing'
+            ];
+            
+            echo json_encode([
+                'success' => true,
+                'data' => $data
+            ]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting penilaian data: ' . $e->getMessage());
             echo json_encode([
                 'success' => false,
-                'message' => 'Data penilaian tidak ditemukan atau belum dipublish'
+                'message' => 'Terjadi kesalahan saat mengambil data penilaian: ' . $e->getMessage()
             ]);
-            return;
         }
-        
-        // Format data untuk view - sesuaikan dengan field yang ada di database
-        $data = [
-            'nim' => $penilaian->nim,
-            'nama_mahasiswa' => $penilaian->nama_mahasiswa,
-            'judul' => $penilaian->judul,
-            'tanggal_seminar' => $penilaian->tanggal_seminar,
-            'jam_seminar' => $penilaian->jam_seminar,
-            'tempat_seminar' => $penilaian->tempat_seminar,
-            
-            // Nilai akademik - sesuaikan dengan field database Anda
-            'sistematika' => $penilaian->nilai_penguji1 ?? 0, // Ganti sesuai field actual
-            'kelengkapan' => $penilaian->nilai_penguji2 ?? 0, // Ganti sesuai field actual
-            'analisis' => $penilaian->nilai_pembimbing ?? 0, // Ganti sesuai field actual
-            'kesimpulan' => 0, // Tambahkan field jika ada
-            
-            // Nilai presentasi - sesuaikan dengan field database Anda
-            'penguasaan_materi' => 0, // Tambahkan field jika ada
-            'komunikasi' => 0, // Tambahkan field jika ada  
-            'kemampuan_jawab' => 0, // Tambahkan field jika ada
-            'etika' => 0, // Tambahkan field jika ada
-            
-            // Rekapitulasi
-            'nilai_angka' => $penilaian->nilai_akhir ?? 0,
-            'nilai_huruf' => $penilaian->nilai_huruf ?? 'N/A',
-            'predikat' => $this->_get_predikat($penilaian->nilai_akhir ?? 0),
-            
-            // Catatan
-            'catatan_penguji' => $penilaian->catatan_umum ?? '',
-            'tanggal_penilaian' => $penilaian->published_at ?? $penilaian->updated_at
-        ];
-        
-        echo json_encode([
-            'success' => true,
-            'data' => $data
-        ]);
-        
-    } catch (Exception $e) {
-        log_message('error', 'Error getting penilaian data: ' . $e->getMessage());
-        echo json_encode([
-            'success' => false,
-            'message' => 'Terjadi kesalahan saat mengambil data penilaian'
-        ]);
-    }
-}
-
-/**
- * Method untuk cetak penilaian
- * Tambahkan method ini di Controller Seminar_skripsi.php
- */
-public function cetak_penilaian($seminar_id) {
-    $dosen_id = $this->session->userdata('id');
-    
-    // Validasi akses dan get data
-    $this->db->select('
-        pss.*,
-        ssm.*,
-        m.nim, m.nama as nama_mahasiswa,
-        pm.judul,
-        d.nama as nama_pembimbing,
-        pr.nama as nama_prodi
-    ');
-    $this->db->from('penilaian_seminar_skripsi pss');
-    $this->db->join('seminar_skripsi_mahasiswa ssm', 'pss.seminar_skripsi_id = ssm.id');
-    $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-    $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
-    $this->db->join('dosen d', 'pm.dosen_id = d.id');
-    $this->db->join('prodi pr', 'm.prodi_id = pr.id');
-    $this->db->where('ssm.id', $seminar_id);
-    $this->db->where('pm.dosen_id', $dosen_id);
-    $this->db->where('pss.status_penilaian', 'published');
-    
-    $data['penilaian'] = $this->db->get()->row();
-    
-    if (!$data['penilaian']) {
-        show_404();
-        return;
     }
     
-    // Load view untuk cetak (Anda bisa buat view terpisah untuk cetak)
-    $html = $this->load->view('dosen/seminar_skripsi/cetak_penilaian', $data, TRUE);
-    
-    // Jika ingin langsung print HTML
-    echo $html;
-    
-    // Atau jika ingin generate PDF, uncomment kode di bawah:
-    /*
-    $this->load->library('pdf');
-    $this->pdf->loadHtml($html);
-    $this->pdf->setPaper('A4', 'portrait');
-    $this->pdf->render();
-    $this->pdf->stream("penilaian_seminar_skripsi_" . $seminar_id . ".pdf");
-    */
-}
-
-    // =================================================================
-    // PRIVATE HELPER METHODS - STABLE (TIDAK DIUBAH)
-    // =================================================================
-
-/**
- * LANGKAH 1: REPLACE METHOD _get_pengajuan_perlu_review()
- * Gunakan pola sederhana yang sama dengan Seminar_proposal.php
- */
-private function _get_pengajuan_perlu_review($dosen_id) {
-    try {
-        $this->db->select('
-            ssm.*,
-            pm.judul,
-            m.nim,
-            m.nama as nama_mahasiswa,
-            m.email as email_mahasiswa,
-            p.nama as nama_prodi
-        ');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->where('pm.dosen_id', $dosen_id);
+    /**
+     * Method cetak_penilaian yang sudah diperbaiki dengan Ketua Prodi
+     * Replace method cetak_penilaian() di Controller Seminar_skripsi.php
+     */
+    public function cetak_penilaian($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
         
-        // SIMPLE LOGIC - SAMA SEPERTI SEMINAR_PROPOSAL.PHP YANG WORKING
-        $this->db->where_in('ssm.status', ['submitted', 'review_pembimbing']);
-        $this->db->where('ssm.status_pembimbing', 'pending');
-        
-        $this->db->order_by('ssm.created_at', 'ASC');
-        
-        $result = $this->db->get()->result();
-        return $result ?: [];
-        
-    } catch (Exception $e) {
-        log_message('error', 'Error getting pengajuan perlu review: ' . $e->getMessage());
-        return [];
+        try {
+            // Validasi akses dan get data lengkap
+            $this->db->select('
+                pss.*,
+                ssm.*,
+                m.nim, m.nama as nama_mahasiswa, m.prodi_id,
+                pm.judul,
+                dp.nama as nama_pembimbing,
+                pr.nama as nama_prodi,
+                d1.nama as nama_penguji1,
+                d2.nama as nama_penguji2
+            ');
+            $this->db->from('penilaian_seminar_skripsi pss');
+            $this->db->join('seminar_skripsi_mahasiswa ssm', 'pss.seminar_skripsi_id = ssm.id');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id');
+            $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+            $this->db->join('dosen dp', 'pm.dosen_id = dp.id', 'left'); // Pembimbing
+            $this->db->join('dosen d1', 'ssm.dosen_penguji1_id = d1.id', 'left'); // Penguji 1
+            $this->db->join('dosen d2', 'ssm.dosen_penguji2_id = d2.id', 'left'); // Penguji 2
+            $this->db->where('ssm.id', $seminar_id);
+            $this->db->where('pm.dosen_id', $dosen_id); // Validasi akses
+            $this->db->where('pss.status_penilaian', 'published'); // Hanya yang sudah dipublish
+            
+            $penilaian = $this->db->get()->row();
+            
+            if (!$penilaian) {
+                // Redirect dengan error message jika tidak ada data
+                $this->session->set_flashdata('error', 'Data penilaian tidak ditemukan atau belum dipublish!');
+                redirect('dosen/seminar_skripsi');
+                return;
+            }
+            
+            // ✅ GET KETUA PROGRAM STUDI sesuai prodi mahasiswa
+            $this->db->select('d.nama, d.nip');
+            $this->db->from('prodi pr');
+            $this->db->join('dosen d', 'pr.dosen_id = d.id'); // dosen_id di tabel prodi adalah ketua prodi
+            $this->db->where('pr.id', $penilaian->prodi_id); // sesuai prodi mahasiswa
+            $ketua_prodi = $this->db->get()->row();
+            
+            // Prepare data untuk view
+            $data = [
+                'penilaian' => $penilaian,
+                'ketua_prodi' => $ketua_prodi, // ✅ KETUA PRODI sesuai prodi mahasiswa
+                'title' => 'Cetak Penilaian Seminar Skripsi - ' . $penilaian->nama_mahasiswa
+            ];
+            
+            // Load view untuk cetak
+            $this->load->view('dosen/seminar_skripsi/cetak_penilaian', $data);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error cetak penilaian: ' . $e->getMessage());
+            show_404();
+        }
     }
-}
-
+    
+        // =================================================================
+        // PRIVATE HELPER METHODS - STABLE (TIDAK DIUBAH)
+        // =================================================================
+    
+    /**
+     * LANGKAH 1: REPLACE METHOD _get_pengajuan_perlu_review()
+     * Gunakan pola sederhana yang sama dengan Seminar_proposal.php
+     */
+    private function _get_pengajuan_perlu_review($dosen_id) {
+        try {
+            $this->db->select('
+                ssm.*,
+                pm.judul,
+                m.nim,
+                m.nama as nama_mahasiswa,
+                m.email as email_mahasiswa,
+                p.nama as nama_prodi
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+            $this->db->join('prodi p', 'm.prodi_id = p.id');
+            $this->db->where('pm.dosen_id', $dosen_id);
+            
+            // SIMPLE LOGIC - SAMA SEPERTI SEMINAR_PROPOSAL.PHP YANG WORKING
+            $this->db->where_in('ssm.status', ['submitted', 'review_pembimbing']);
+            $this->db->where('ssm.status_pembimbing', 'pending');
+            
+            $this->db->order_by('ssm.created_at', 'ASC');
+            
+            $result = $this->db->get()->result();
+            return $result ?: [];
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting pengajuan perlu review: ' . $e->getMessage());
+            return [];
+        }
+    }
 
     /**
      * Get riwayat rekomendasi yang sudah diberikan dosen
      * STABLE - TIDAK DIUBAH
      */
-private function _get_riwayat_rekomendasi($dosen_id) {
-    try {
-        $this->db->select('
-            ssm.*,
-            m.nim, m.nama as nama_mahasiswa,
-            pm.judul,
-            pss.status_penilaian,
-            pss.id as penilaian_id,
-            pss.published_at
-        ');
-        $this->db->from('seminar_skripsi_mahasiswa ssm');
-        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
-        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
-        
-        // ✅ PERBAIKAN: JOIN dengan tabel penilaian_seminar_skripsi
-        $this->db->join('penilaian_seminar_skripsi pss', 
-            'pss.seminar_skripsi_id = ssm.id AND pss.dinilai_oleh = ' . $dosen_id, 
-            'left'
-        );
-        
-        $this->db->where('pm.dosen_id', $dosen_id);
-        $this->db->where('ssm.status_pembimbing !=', 'pending'); // Sudah direkomendasi
-        $this->db->where('ssm.tanggal_review_pembimbing IS NOT NULL');
-        $this->db->order_by('ssm.tanggal_review_pembimbing', 'DESC');
-        $this->db->limit(10); // Ubah dari 5 ke 10 sesuai view
-        
-        $result = $this->db->get()->result();
-        return $result ?: [];
-    } catch (Exception $e) {
-        log_message('error', 'Error getting riwayat rekomendasi: ' . $e->getMessage());
-        return [];
+    private function _get_riwayat_rekomendasi($dosen_id) {
+        try {
+            $this->db->select('
+                ssm.*,
+                m.nim, m.nama as nama_mahasiswa,
+                pm.judul,
+                pss.status_penilaian,
+                pss.id as penilaian_id,
+                pss.published_at
+            ');
+            $this->db->from('seminar_skripsi_mahasiswa ssm');
+            $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id', 'left');
+            $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id', 'left');
+            
+            // ✅ PERBAIKAN: JOIN dengan tabel penilaian_seminar_skripsi
+            $this->db->join('penilaian_seminar_skripsi pss', 
+                'pss.seminar_skripsi_id = ssm.id AND pss.dinilai_oleh = ' . $dosen_id, 
+                'left'
+            );
+            
+            $this->db->where('pm.dosen_id', $dosen_id);
+            $this->db->where('ssm.status_pembimbing !=', 'pending'); // Sudah direkomendasi
+            $this->db->where('ssm.tanggal_review_pembimbing IS NOT NULL');
+            $this->db->order_by('ssm.tanggal_review_pembimbing', 'DESC');
+            $this->db->limit(10); // Ubah dari 5 ke 10 sesuai view
+            
+            $result = $this->db->get()->result();
+            return $result ?: [];
+        } catch (Exception $e) {
+            log_message('error', 'Error getting riwayat rekomendasi: ' . $e->getMessage());
+            return [];
+        }
     }
-}
 
     /**
      * Get seminar yang perlu penilaian

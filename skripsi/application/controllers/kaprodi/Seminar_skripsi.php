@@ -1955,17 +1955,29 @@ public function detail($seminar_id) {
     }
     
     /**
-     * ✅ ENHANCE METHOD _kirim_email_jadwal_staf()
-     * JIKA METHOD INI SUDAH ADA, GANTI dengan yang ini. JIKA BELUM ADA, TAMBAHKAN.
+     * ✅ PERBAIKAN 1: FIX METHOD _kirim_email_jadwal_staf()
+     * GANTI method existing dengan ini (HANYA perbaikan typo dan table consistency)
      */
     private function _kirim_email_jadwal_staf($seminar) {
         try {
-            // Get email staf aktif
+            // ✅ FIXED: Konsistensi dengan controller lain - gunakan table dosen level 5
             $this->db->select('email, nama');
-            $this->db->from('users');
-            $this->db->where('level', '1'); // Level 1 = staf
-            $this->db->where('status', '1'); // Status aktif
+            $this->db->from('dosen');
+            $this->db->where('level', '5'); // Level 5 = staf (konsisten dengan seminar_proposal)
+            $this->db->where('email IS NOT NULL');
+            $this->db->where('email !=', '');
             $staf_emails = $this->db->get()->result();
+            
+            // ✅ FALLBACK: Jika tidak ada di table dosen, coba table users
+            if (empty($staf_emails)) {
+                $this->db->select('email, nama');
+                $this->db->from('users');
+                $this->db->where('level', '1'); // Level 1 = staf di table users
+                $this->db->where('status', '1'); // Status aktif
+                $this->db->where('email IS NOT NULL');
+                $this->db->where('email !=', '');
+                $staf_emails = $this->db->get()->result();
+            }
             
             if (empty($staf_emails)) {
                 log_message('warning', 'No active staff emails found for notification');
@@ -1982,7 +1994,8 @@ public function detail($seminar_id) {
                 if (!empty($staf->email) && filter_var($staf->email, FILTER_VALIDATE_EMAIL)) {
                     try {
                         $this->email->clear();
-                        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhil STK Santo Yakobus');
+                        // ✅ FIXED TYPO: "Akhil" → "Akhir"
+                        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
                         $this->email->to($staf->email);
                         $this->email->subject('📅 Info Jadwal Seminar Skripsi - ' . $seminar->nama_mahasiswa);
                         
@@ -1993,7 +2006,7 @@ public function detail($seminar_id) {
                             </div>
                             
                             <div style='padding: 20px; background-color: #f8f9fa;'>
-                                <p>Kepada Yth. <strong>Tim Staf Akademik</strong>,</p>
+                                <p>Kepada Yth. <strong>" . ($staf->nama ?? 'Tim Staf Akademik') . "</strong>,</p>
                                 
                                 <p>Kaprodi telah menetapkan jadwal seminar skripsi. Berikut informasinya:</p>
                                 
@@ -2004,6 +2017,7 @@ public function detail($seminar_id) {
                                         <tr><td><strong>Tanggal:</strong></td><td>{$tanggal_formatted}</td></tr>
                                         <tr><td><strong>Waktu:</strong></td><td>{$jam_formatted} WIB</td></tr>
                                         <tr><td><strong>Tempat:</strong></td><td>{$seminar->tempat_seminar}</td></tr>
+                                        <tr><td><strong>Judul:</strong></td><td>" . htmlspecialchars($seminar->judul ?? 'N/A') . "</td></tr>
                                         <tr><td><strong>Pembimbing:</strong></td><td>" . htmlspecialchars($seminar->nama_pembimbing ?? 'N/A') . "</td></tr>
                                         <tr><td><strong>Penguji 1:</strong></td><td>" . htmlspecialchars($seminar->nama_penguji1 ?? 'N/A') . "</td></tr>
                                         <tr><td><strong>Penguji 2:</strong></td><td>" . htmlspecialchars($seminar->nama_penguji2 ?? 'N/A') . "</td></tr>
@@ -2012,9 +2026,12 @@ public function detail($seminar_id) {
                                 
                                 <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
                                     <h4 style='color: #856404; margin: 0 0 10px 0;'>📝 TINDAK LANJUT</h4>
-                                    <p style='color: #856404; margin: 0;'>
-                                        Mohon bantuan untuk persiapan administrasi dan logistik seminar ini.
-                                    </p>
+                                    <ul style='color: #856404; margin: 0;'>
+                                        <li>Persiapan ruang seminar</li>
+                                        <li>Koordinasi dengan dosen penguji</li>
+                                        <li>Penyiapan dokumen administrasi</li>
+                                        <li>Backup teknis (proyektor, laptop, dll)</li>
+                                    </ul>
                                 </div>
                                 
                                 <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
@@ -2031,6 +2048,9 @@ public function detail($seminar_id) {
                         
                         if ($this->email->send()) {
                             $sent_count++;
+                            log_message('info', 'Schedule email sent to staff: ' . ($staf->nama ?? 'Staff') . ' (' . $staf->email . ')');
+                        } else {
+                            log_message('error', 'Failed to send schedule email to staff: ' . $staf->email . ' - ' . $this->email->print_debugger());
                         }
                         
                     } catch (Exception $e) {

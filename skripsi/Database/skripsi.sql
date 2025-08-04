@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 04, 2025 at 07:23 AM
+-- Generation Time: Aug 04, 2025 at 09:14 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1993,8 +1993,8 @@ CREATE TABLE `seminar_skripsi_mahasiswa` (
 
 INSERT INTO `seminar_skripsi_mahasiswa` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_skripsi`, `keterangan_mahasiswa`, `judul_skripsi`, `surat_keterangan_penelitian`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
 (11, 44, 44, 'submitted', 'mahasiswa', '1fba172d0cb18a5a282f585a2d8d781d.pdf', 'Perbaikan pengajuan', 'Perbaikan Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', '0cabd8645f96a6b4a58e9e0f6f3bdf89.pdf', 'pending', NULL, '2025-08-03 17:30:13', 25, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 06:30:48', '2025-08-04 07:21:34', NULL),
-(12, 46, 46, 'review_kaprodi', 'kaprodi', 'df6c327d48141b9b85fcbcc07203c423.pdf', 'INI LATIHAN SAJA', NULL, NULL, 'approved', '', '2025-08-03 12:16:41', 25, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 09:17:54', '2025-08-03 12:16:41', NULL),
-(13, 45, 45, 'submitted', 'mahasiswa', 'c8988a951c333c3c93c5b101981316bb.pdf', 'Pengajuan Seminar Baru', 'BARU PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', '7cff7dc2b9f0be396787f32057c56594.pdf', 'pending', NULL, NULL, NULL, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-04 07:22:46', '2025-08-04 07:22:46', NULL);
+(12, 46, 46, 'approved', 'staf', 'df6c327d48141b9b85fcbcc07203c423.pdf', 'INI LATIHAN SAJA', NULL, NULL, 'approved', '', '2025-08-03 12:16:41', 25, 'approved', 'Lanjutkan', '2025-08-04 08:58:24', 10, 'turnitin_12_20250804085824.pdf', 30.00, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 09:17:54', '2025-08-04 08:58:24', NULL),
+(13, 45, 45, 'submitted', 'mahasiswa', '89c73059d00948a3b5823c220e3e5143.pdf', 'Pengajuan ulang', 'BARU PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', '9d612499540f8b2a590f85f313c005b9.pdf', 'pending', NULL, '2025-08-04 08:35:55', 25, 'pending', NULL, '2025-08-04 08:56:24', 10, 'turnitin_13_20250804085624.pdf', 45.00, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-04 07:22:46', '2025-08-04 08:59:13', NULL);
 
 --
 -- Triggers `seminar_skripsi_mahasiswa`
@@ -2017,6 +2017,57 @@ CREATE TRIGGER `tr_seminar_skripsi_mhs_update` AFTER UPDATE ON `seminar_skripsi_
 END
 $$
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `seminar_skripsi_mahasiswa_backup_20250804`
+--
+
+CREATE TABLE `seminar_skripsi_mahasiswa_backup_20250804` (
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `proposal_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa (READ ONLY)',
+  `mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke mahasiswa (redundant untuk performance)',
+  `status` enum('draft','submitted','review_pembimbing','review_kaprodi','approved','rejected','scheduled','completed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
+  `current_step` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'mahasiswa' COMMENT 'mahasiswa|pembimbing|kaprodi|staf',
+  `file_skripsi` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'File skripsi final lengkap (Word/PDF max 2MB)',
+  `keterangan_mahasiswa` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Keterangan tambahan dari mahasiswa (opsional)',
+  `judul_skripsi` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Judul skripsi untuk seminar (bisa berbeda dari proposal)',
+  `surat_keterangan_penelitian` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'File surat keterangan penelitian',
+  `status_pembimbing` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `komentar_pembimbing` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Komentar/feedback dari dosen pembimbing',
+  `tanggal_review_pembimbing` datetime DEFAULT NULL,
+  `reviewed_by_pembimbing` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen pembimbing',
+  `status_kaprodi` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `komentar_kaprodi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Komentar validasi dari Kaprodi',
+  `tanggal_review_kaprodi` datetime DEFAULT NULL,
+  `reviewed_by_kaprodi` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen Kaprodi',
+  `file_turnitin` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'File hasil Turnitin dari Kaprodi',
+  `plagiarism_percentage` decimal(5,2) DEFAULT NULL COMMENT 'Persentase plagiarisme dari Turnitin (max 30%)',
+  `tanggal_seminar` date DEFAULT NULL COMMENT 'Tanggal pelaksanaan seminar skripsi',
+  `jam_seminar` time DEFAULT NULL COMMENT 'Jam pelaksanaan seminar skripsi',
+  `tempat_seminar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Tempat pelaksanaan seminar skripsi',
+  `dosen_penguji1_id` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen penguji 1 (auto dari seminar proposal)',
+  `dosen_penguji2_id` bigint(20) DEFAULT NULL COMMENT 'FK ke dosen penguji 2 (auto dari seminar proposal)',
+  `status_penguji1` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'approved' COMMENT 'Default approved (langsung ditunjuk)',
+  `komentar_penguji1` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Komentar dari penguji 1 (opsional)',
+  `tanggal_respon_penguji1` datetime DEFAULT NULL,
+  `status_penguji2` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'approved' COMMENT 'Default approved (langsung ditunjuk)',
+  `komentar_penguji2` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Komentar dari penguji 2 (opsional)',
+  `tanggal_respon_penguji2` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Tanggal pengajuan oleh mahasiswa',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_by` bigint(20) DEFAULT NULL COMMENT 'FK ke mahasiswa yang membuat pengajuan'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `seminar_skripsi_mahasiswa_backup_20250804`
+--
+
+INSERT INTO `seminar_skripsi_mahasiswa_backup_20250804` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_skripsi`, `keterangan_mahasiswa`, `judul_skripsi`, `surat_keterangan_penelitian`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
+(11, 44, 44, 'submitted', 'mahasiswa', '1fba172d0cb18a5a282f585a2d8d781d.pdf', 'Perbaikan pengajuan', 'Perbaikan Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', '0cabd8645f96a6b4a58e9e0f6f3bdf89.pdf', 'pending', NULL, '2025-08-03 17:30:13', 25, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 06:30:48', '2025-08-04 07:21:34', NULL),
+(12, 46, 46, 'review_kaprodi', 'kaprodi', 'df6c327d48141b9b85fcbcc07203c423.pdf', 'INI LATIHAN SAJA', NULL, NULL, 'approved', '', '2025-08-03 12:16:41', 25, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 09:17:54', '2025-08-03 12:16:41', NULL),
+(13, 45, 45, 'review_kaprodi', 'kaprodi', 'c8988a951c333c3c93c5b101981316bb.pdf', 'Pengajuan Seminar Baru', 'BARU PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', '7cff7dc2b9f0be396787f32057c56594.pdf', 'approved', 'Disetujui', '2025-08-04 08:35:55', 25, 'pending', NULL, NULL, NULL, NULL, 25.50, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-04 07:22:46', '2025-08-04 08:45:23', NULL);
 
 -- --------------------------------------------------------
 

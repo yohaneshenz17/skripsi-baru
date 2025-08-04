@@ -228,6 +228,163 @@
             </div>
         </div>
 
+            <!-- Enhanced: Perbandingan Judul Skripsi -->
+            <div class="card shadow mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-book mr-2"></i>
+                        Perbandingan Judul Skripsi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <?php if (isset($seminar->is_judul_changed) && $seminar->is_judul_changed): ?>
+                        <!-- Ada perubahan judul -->
+                        <div class="alert alert-warning border-left-warning">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle fa-2x text-warning mr-3"></i>
+                                <div>
+                                    <h6 class="mb-1">
+                                        <strong>Mahasiswa Mengubah Judul!</strong>
+                                    </h6>
+                                    <p class="mb-0">
+                                        Judul skripsi berbeda dari proposal awal. 
+                                        <?php if (isset($seminar->judul_similarity)): ?>
+                                            <strong>Kemiripan: <?= $seminar->judul_similarity ?>%</strong>
+                                        <?php endif; ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-left-secondary">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-2">
+                                            <i class="fas fa-history mr-1"></i>
+                                            Judul Proposal (Original):
+                                        </h6>
+                                        <div class="bg-light p-3 rounded">
+                                            <small class="text-muted d-block">Judul awal dari proposal:</small>
+                                            <div class="mt-1">
+                                                <?= htmlspecialchars($seminar->judul_proposal_original ?? 'N/A') ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-left-primary">
+                                    <div class="card-body">
+                                        <h6 class="text-primary mb-2">
+                                            <i class="fas fa-edit mr-1"></i>
+                                            Judul Skripsi (Baru):
+                                        </h6>
+                                        <div class="bg-primary text-white p-3 rounded">
+                                            <small class="d-block" style="opacity: 0.8;">Judul yang diubah mahasiswa:</small>
+                                            <div class="mt-1 font-weight-bold">
+                                                <?= htmlspecialchars($seminar->judul_skripsi ?? 'N/A') ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <!-- Similarity Analysis -->
+                        <?php if (isset($seminar->judul_similarity)): ?>
+                        <div class="mt-3 p-3 bg-light rounded">
+                            <h6 class="mb-2">
+                                <i class="fas fa-chart-pie mr-1"></i>
+                                Analisis Kemiripan:
+                            </h6>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <?php 
+                                $similarity = $seminar->judul_similarity;
+                                $progress_class = $similarity >= 70 ? 'bg-success' : ($similarity >= 40 ? 'bg-warning' : 'bg-danger');
+                                ?>
+                                <div class="progress-bar <?= $progress_class ?>" 
+                                     style="width: <?= $similarity ?>%">
+                                    <?= $similarity ?>%
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                <?php if ($similarity >= 70): ?>
+                                    <i class="fas fa-check-circle text-success mr-1"></i>
+                                    Perubahan minor - masih dalam konteks yang sama
+                                <?php elseif ($similarity >= 40): ?>
+                                    <i class="fas fa-exclamation-circle text-warning mr-1"></i>
+                                    Perubahan signifikan - perlu evaluasi lebih lanjut
+                                <?php else: ?>
+                                    <i class="fas fa-times-circle text-danger mr-1"></i>
+                                    Perubahan major - hampir sepenuhnya berbeda
+                                <?php endif; ?>
+                            </small>
+                        </div>
+                        <?php endif; ?>
+            
+                    <?php else: ?>
+                        <!-- Tidak ada perubahan judul -->
+                        <div class="alert alert-success border-left-success">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle fa-2x text-success mr-3"></i>
+                                <div>
+                                    <h6 class="mb-1">
+                                        <strong>Judul Konsisten</strong>
+                                    </h6>
+                                    <p class="mb-0">
+                                        Mahasiswa menggunakan judul yang sama dengan proposal awal.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="text-muted mb-2">
+                                <i class="fas fa-book mr-1"></i>
+                                Judul Skripsi:
+                            </h6>
+                            <div class="font-weight-bold">
+                                <?= htmlspecialchars($seminar->judul_current ?? $seminar->judul_proposal_original ?? 'N/A') ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+            
+                    <!-- Additional Information -->
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="border-right">
+                                    <i class="fas fa-calendar text-muted"></i>
+                                    <div class="mt-1">
+                                        <small class="text-muted d-block">Tanggal Submit</small>
+                                        <strong><?= $seminar->created_at ? date('d/m/Y', strtotime($seminar->created_at)) : '-' ?></strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border-right">
+                                    <i class="fas fa-user-tie text-muted"></i>
+                                    <div class="mt-1">
+                                        <small class="text-muted d-block">Pembimbing</small>
+                                        <strong><?= htmlspecialchars($seminar->nama_pembimbing ?? 'N/A') ?></strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-file-alt text-muted"></i>
+                                <div class="mt-1">
+                                    <small class="text-muted d-block">Status Berkas</small>
+                                    <strong class="text-<?= (!empty($seminar->file_skripsi) && !empty($seminar->surat_keterangan_penelitian)) ? 'success' : 'warning' ?>">
+                                        <?= (!empty($seminar->file_skripsi) && !empty($seminar->surat_keterangan_penelitian)) ? 'Lengkap' : 'Belum Lengkap' ?>
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         <!-- REKOMENDASI PEMBIMBING -->
         <?php if(!empty($seminar->status_pembimbing) && $seminar->status_pembimbing != 'pending'): ?>
         <div class="card shadow mb-4">
@@ -716,6 +873,47 @@
     font-size: 0.85rem;
     line-height: 1.3;
 }
+
+.border-left-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+
+.border-left-success {
+    border-left: 4px solid #28a745 !important;
+}
+
+.border-left-secondary {
+    border-left: 4px solid #6c757d !important;
+}
+
+.border-left-primary {
+    border-left: 4px solid #007bff !important;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+.card-body .row .col-md-4:not(:last-child) .border-right {
+    border-right: 1px solid #dee2e6;
+    padding-right: 15px;
+}
+
+.card-body .row .col-md-4:not(:first-child) {
+    padding-left: 15px;
+}
+
+@media (max-width: 768px) {
+    .card-body .row .col-md-4:not(:last-child) .border-right {
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
 
 /* Responsive improvements */
 @media (max-width: 768px) {

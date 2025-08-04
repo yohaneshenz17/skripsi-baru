@@ -70,7 +70,7 @@
                         </div>
                     </div>
 
-                    <!-- Rekomendasi Dosen Penguji -->
+                    <!-- Enhanced Rekomendasi Dosen Penguji -->
                     <div class="card card-info">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -79,46 +79,52 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <?php if ($dosen_penguji_rekomendasi && 
-                                      ($dosen_penguji_rekomendasi->dosen_penguji1_id || $dosen_penguji_rekomendasi->dosen_penguji2_id)): ?>
-                                <p class="text-muted mb-3">
-                                    <small>
-                                        <i class="fas fa-info-circle mr-1"></i>
-                                        Berdasarkan seminar proposal sebelumnya:
-                                    </small>
-                                </p>
+                            <?php if (isset($penguji_recommendations) && $penguji_recommendations['found']): ?>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    <strong>Rekomendasi Ditemukan!</strong> Berdasarkan seminar proposal 
+                                    (<?= date('d/m/Y', strtotime($penguji_recommendations['tanggal_proposal'])) ?>):
+                                </div>
                                 
-                                <?php if ($dosen_penguji_rekomendasi->dosen_penguji1_id): ?>
-                                    <div class="mb-2">
-                                        <strong>Penguji 1:</strong><br>
-                                        <span class="text-primary">
-                                            <?= $dosen_penguji_rekomendasi->nama_penguji1 ?>
+                                <?php if ($penguji_recommendations['penguji1']): ?>
+                                    <div class="mb-3 p-3 border border-success rounded">
+                                        <strong class="text-success">
+                                            <i class="fas fa-user-tie mr-1"></i>
+                                            Rekomendasi Penguji 1:
+                                        </strong><br>
+                                        <span class="text-primary font-weight-bold">
+                                            <?= $penguji_recommendations['penguji1']['nama'] ?>
                                         </span>
+                                        <br><small class="text-muted"><?= $penguji_recommendations['penguji1']['email'] ?></small>
                                     </div>
                                 <?php endif; ?>
                                 
-                                <?php if ($dosen_penguji_rekomendasi->dosen_penguji2_id): ?>
-                                    <div class="mb-2">
-                                        <strong>Penguji 2:</strong><br>
-                                        <span class="text-primary">
-                                            <?= $dosen_penguji_rekomendasi->nama_penguji2 ?>
+                                <?php if ($penguji_recommendations['penguji2']): ?>
+                                    <div class="mb-3 p-3 border border-success rounded">
+                                        <strong class="text-success">
+                                            <i class="fas fa-user-tie mr-1"></i>
+                                            Rekomendasi Penguji 2:
+                                        </strong><br>
+                                        <span class="text-primary font-weight-bold">
+                                            <?= $penguji_recommendations['penguji2']['nama'] ?>
                                         </span>
+                                        <br><small class="text-muted"><?= $penguji_recommendations['penguji2']['email'] ?></small>
                                     </div>
                                 <?php endif; ?>
                                 
                                 <small class="text-muted">
                                     <i class="fas fa-edit mr-1"></i>
-                                    Anda dapat mengubah penguji sesuai kebutuhan.
+                                    Anda dapat mengubah penguji sesuai kebutuhan di form bawah.
                                 </small>
                             <?php else: ?>
                                 <div class="alert alert-warning">
                                     <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    Tidak ada rekomendasi dari seminar proposal.
+                                    <strong>Tidak ada rekomendasi</strong> dari seminar proposal sebelumnya.
+                                    Silakan pilih dosen penguji secara manual.
                                 </div>
                             <?php endif; ?>
                         </div>
                     </div>
-                </div>
 
                 <!-- Form Penjadwalan -->
                 <div class="col-md-8">
@@ -222,17 +228,29 @@
                                                         <?php foreach ($dosen_list as $dosen): ?>
                                                             <?php if ($dosen->id != $seminar->pembimbing_id): ?>
                                                                 <option value="<?= $dosen->id ?>"
-                                                                    <?= ($dosen_penguji_rekomendasi && 
-                                                                         $dosen_penguji_rekomendasi->dosen_penguji1_id == $dosen->id) ? 
-                                                                         'selected' : '' ?>>
+                                                                    <?php
+                                                                    // Auto-select rekomendasi
+                                                                    $selected = false;
+                                                                    if (isset($penguji_recommendations) && 
+                                                                        $penguji_recommendations['found'] && 
+                                                                        $penguji_recommendations['penguji1'] && 
+                                                                        $penguji_recommendations['penguji1']['id'] == $dosen->id) {
+                                                                        $selected = true;
+                                                                        echo 'selected';
+                                                                    }
+                                                                    ?>>
                                                                     <?= $dosen->nama ?>
-                                                                    <?= ($dosen_penguji_rekomendasi && 
-                                                                         $dosen_penguji_rekomendasi->dosen_penguji1_id == $dosen->id) ? 
-                                                                         ' (Rekomendasi)' : '' ?>
+                                                                    <?= $selected ? ' (Rekomendasi ✓)' : '' ?>
                                                                 </option>
                                                             <?php endif; ?>
                                                         <?php endforeach; ?>
                                                     </select>
+                                                    <?php if (isset($penguji_recommendations) && $penguji_recommendations['found'] && $penguji_recommendations['penguji1']): ?>
+                                                        <small class="text-success">
+                                                            <i class="fas fa-info-circle mr-1"></i>
+                                                            Rekomendasi: <?= $penguji_recommendations['penguji1']['nama'] ?> (sudah dipilih)
+                                                        </small>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -248,21 +266,32 @@
                                                         <?php foreach ($dosen_list as $dosen): ?>
                                                             <?php if ($dosen->id != $seminar->pembimbing_id): ?>
                                                                 <option value="<?= $dosen->id ?>"
-                                                                    <?= ($dosen_penguji_rekomendasi && 
-                                                                         $dosen_penguji_rekomendasi->dosen_penguji2_id == $dosen->id) ? 
-                                                                         'selected' : '' ?>>
+                                                                    <?php
+                                                                    // Auto-select rekomendasi
+                                                                    $selected = false;
+                                                                    if (isset($penguji_recommendations) && 
+                                                                        $penguji_recommendations['found'] && 
+                                                                        $penguji_recommendations['penguji2'] && 
+                                                                        $penguji_recommendations['penguji2']['id'] == $dosen->id) {
+                                                                        $selected = true;
+                                                                        echo 'selected';
+                                                                    }
+                                                                    ?>>
                                                                     <?= $dosen->nama ?>
-                                                                    <?= ($dosen_penguji_rekomendasi && 
-                                                                         $dosen_penguji_rekomendasi->dosen_penguji2_id == $dosen->id) ? 
-                                                                         ' (Rekomendasi)' : '' ?>
+                                                                    <?= $selected ? ' (Rekomendasi ✓)' : '' ?>
                                                                 </option>
                                                             <?php endif; ?>
                                                         <?php endforeach; ?>
                                                     </select>
+                                                    <?php if (isset($penguji_recommendations) && $penguji_recommendations['found'] && $penguji_recommendations['penguji2']): ?>
+                                                        <small class="text-success">
+                                                            <i class="fas fa-info-circle mr-1"></i>
+                                                            Rekomendasi: <?= $penguji_recommendations['penguji2']['nama'] ?> (sudah dipilih)
+                                                        </small>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </div>
-
                                         <!-- Info Pembimbing -->
                                         <div class="alert alert-info">
                                             <i class="fas fa-user-tie mr-2"></i>

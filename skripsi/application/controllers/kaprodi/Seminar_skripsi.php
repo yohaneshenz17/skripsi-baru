@@ -154,52 +154,68 @@ public function detail($seminar_id) {
 }
 
     /**
-     * Validasi turnitin dan approve/reject seminar
+     * Enhanced validasi_turnitin - REPLACE method existing
+     * Menambah file upload handling tanpa mengubah logic existing
      */
     public function validasi_turnitin() {
         if ($this->input->method() !== 'post') {
             redirect('kaprodi/seminar_skripsi');
+            return;
         }
-
+    
         try {
+            // Existing validation (UNCHANGED)
             $seminar_id = $this->input->post('seminar_id');
             $decision = $this->input->post('decision');
             $plagiarism_percentage = $this->input->post('plagiarism_percentage');
             $komentar = $this->input->post('komentar_kaprodi');
-
-            // Validasi input
+    
             if (!$seminar_id || !$decision) {
                 throw new Exception('Data tidak lengkap');
             }
-
-            // Process validation
-            $result = $this->_process_validation($seminar_id, $decision, $plagiarism_percentage, $komentar);
-
+    
+            // NEW: Handle file turnitin upload (sesuai path di views)
+            $uploaded_turnitin_file = null;
+            if (!empty($_FILES['file_turnitin']['name'])) {
+                $uploaded_turnitin_file = $this->_handle_turnitin_upload($seminar_id);
+                if (!$uploaded_turnitin_file) {
+                    throw new Exception('Gagal mengupload file hasil turnitin');
+                }
+            }
+    
+            // Enhanced process validation dengan file
+            $result = $this->_process_validation_with_file($seminar_id, $decision, $plagiarism_percentage, $komentar, $uploaded_turnitin_file);
+    
             if ($result) {
                 $message = ($decision == 'approved') ? 'Seminar skripsi berhasil disetujui!' : 'Seminar skripsi ditolak.';
                 $this->session->set_flashdata('success', $message);
+                
+                // Enhanced notifications
+                $this->_send_comprehensive_notifications($seminar_id, $decision);
             } else {
                 throw new Exception('Gagal memproses validasi');
             }
-
+    
         } catch (Exception $e) {
-            log_message('error', 'Validasi turnitin error: ' . $e->getMessage());
+            log_message('error', 'Enhanced validasi turnitin error: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
+    
         redirect('kaprodi/seminar_skripsi');
     }
 
     /**
-     * Penjadwalan seminar
+     * Enhanced penjadwalan method - UPDATE existing method
+     * Menambah data rekomendasi penguji tanpa mengubah logic existing
      */
     public function penjadwalan($seminar_id) {
         if (!is_numeric($seminar_id)) {
             show_404();
             return;
         }
-
+    
         try {
+            // Logic existing (UNCHANGED)
             $seminar = $this->_get_seminar_detail($seminar_id);
             
             if (!$seminar || $seminar->status_kaprodi != 'approved') {
@@ -207,13 +223,16 @@ public function detail($seminar_id) {
                 redirect('kaprodi/seminar_skripsi');
                 return;
             }
-
+    
+            // Enhanced data dengan rekomendasi (NEW)
             $data = [
                 'title' => 'Penjadwalan Seminar Skripsi',
                 'seminar' => $seminar,
-                'dosen_list' => $this->_get_dosen_penguji()
+                'dosen_list' => $this->_get_dosen_penguji(),
+                'penguji_recommendations' => $this->_get_penguji_recommendations($seminar->proposal_id) // NEW
             ];
-
+    
+            // Views loading (UNCHANGED)
             $content = $this->load->view('kaprodi/seminar_skripsi/penjadwalan', $data, TRUE);
             
             $template_data = [
@@ -222,9 +241,9 @@ public function detail($seminar_id) {
             ];
             
             $this->load->view('template/kaprodi', $template_data);
-
+    
         } catch (Exception $e) {
-            log_message('error', 'Penjadwalan error: ' . $e->getMessage());
+            log_message('error', 'Enhanced penjadwalan error: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan sistem.');
             redirect('kaprodi/seminar_skripsi');
         }
@@ -333,11 +352,12 @@ public function detail($seminar_id) {
     }
 
     /**
-     * ✅ FIXED: Get detail seminar dengan JOIN yang benar
+     * Enhanced _get_seminar_detail - REPLACE existing method
+     * Menambah judul comparison logic
      */
     private function _get_seminar_detail($seminar_id) {
         try {
-            // ✅ QUERY DIPERBAIKI - Menggunakan m.prodi_id bukan pm.prodi_id
+            // Query existing (UNCHANGED)
             $sql = "
                 SELECT 
                     ss.*,
@@ -345,7 +365,7 @@ public function detail($seminar_id) {
                     m.nama as nama_mahasiswa, 
                     m.email as email_mahasiswa,
                     m.prodi_id,
-                    pm.judul as judul_proposal, 
+                    pm.judul as judul_proposal_original, 
                     pm.dosen_id as pembimbing_id,
                     d.nama as nama_pembimbing, 
                     d.email as email_pembimbing,
@@ -366,13 +386,30 @@ public function detail($seminar_id) {
             $query = $this->db->query($sql, [$seminar_id, $this->prodi_id]);
             
             if ($query && $query->num_rows() > 0) {
-                return $query->row();
+                $result = $query->row();
+                
+                // NEW: Enhanced judul comparison logic
+                $result->judul_current = !empty($result->judul_skripsi) ? $result->judul_skripsi : $result->judul_proposal_original;
+                $result->is_judul_changed = !empty($result->judul_skripsi) && 
+                                           ($result->judul_skripsi !== $result->judul_proposal_original);
+                
+                // NEW: Calculate similarity percentage
+                if ($result->is_judul_changed) {
+                    $result->judul_similarity = $this->_calculate_title_similarity(
+                        $result->judul_proposal_original, 
+                        $result->judul_skripsi
+                    );
+                } else {
+                    $result->judul_similarity = 100;
+                }
+                
+                return $result;
             }
             
             return null;
             
         } catch (Exception $e) {
-            log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
+            log_message('error', 'Enhanced get seminar detail error: ' . $e->getMessage());
             return null;
         }
     }
@@ -497,6 +534,54 @@ public function detail($seminar_id) {
     }
 
     /**
+     * Handle upload file turnitin - METHOD BARU
+     * Path sesuai yang sudah ditulis di views: uploads/turnitin/
+     */
+    private function _handle_turnitin_upload($seminar_id) {
+        try {
+            // Path sesuai views existing
+            $upload_path = FCPATH . 'uploads/turnitin/';
+            
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0755, true);
+            }
+    
+            $config = [
+                'upload_path' => $upload_path,
+                'allowed_types' => 'pdf|doc|docx|jpg|png', // Sesuai views
+                'max_size' => 5120, // 5MB sesuai views  
+                'encrypt_name' => true,
+                'file_ext_tolower' => true
+            ];
+    
+            $this->upload->initialize($config);
+    
+            if ($this->upload->do_upload('file_turnitin')) {
+                $upload_data = $this->upload->data();
+                
+                // Rename dengan format yang jelas
+                $new_name = 'turnitin_' . $seminar_id . '_' . date('YmdHis') . $upload_data['file_ext'];
+                $old_path = $upload_path . $upload_data['file_name'];
+                $new_path = $upload_path . $new_name;
+                
+                if (rename($old_path, $new_path)) {
+                    return $new_name;
+                }
+                
+                return $upload_data['file_name'];
+                
+            } else {
+                log_message('error', 'Upload turnitin error: ' . $this->upload->display_errors());
+                return false;
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Turnitin upload exception: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * ✅ FIXED: Get seminar yang perlu dijadwalkan dengan JOIN yang benar
      */
     private function _get_seminar_perlu_dijadwalkan() {
@@ -574,6 +659,71 @@ public function detail($seminar_id) {
         } catch (Exception $e) {
             log_message('error', 'Error getting dosen penguji: ' . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Get rekomendasi penguji dari seminar proposal - METHOD BARU
+     * Untuk views penjadwalan yang sudah ada
+     */
+    private function _get_penguji_recommendations($proposal_id) {
+        try {
+            $sql = "
+                SELECT 
+                    spm.dosen_penguji1_id, 
+                    spm.dosen_penguji2_id,
+                    d1.nama as nama_penguji1,
+                    d1.email as email_penguji1,
+                    d2.nama as nama_penguji2,  
+                    d2.email as email_penguji2,
+                    spm.tanggal_seminar as tanggal_seminar_proposal
+                FROM seminar_proposal_mahasiswa spm
+                LEFT JOIN dosen d1 ON spm.dosen_penguji1_id = d1.id
+                LEFT JOIN dosen d2 ON spm.dosen_penguji2_id = d2.id
+                WHERE spm.proposal_id = ? 
+                AND spm.status = 'completed'
+                ORDER BY spm.tanggal_seminar DESC
+                LIMIT 1
+            ";
+            
+            $query = $this->db->query($sql, [$proposal_id]);
+            
+            if ($query && $query->num_rows() > 0) {
+                $result = $query->row();
+                
+                $recommendations = [
+                    'found' => false,
+                    'penguji1' => null,
+                    'penguji2' => null,
+                    'tanggal_proposal' => $result->tanggal_seminar_proposal
+                ];
+                
+                if (!empty($result->dosen_penguji1_id)) {
+                    $recommendations['found'] = true;
+                    $recommendations['penguji1'] = [
+                        'id' => $result->dosen_penguji1_id,
+                        'nama' => $result->nama_penguji1,
+                        'email' => $result->email_penguji1
+                    ];
+                }
+                
+                if (!empty($result->dosen_penguji2_id)) {
+                    $recommendations['found'] = true;
+                    $recommendations['penguji2'] = [
+                        'id' => $result->dosen_penguji2_id,
+                        'nama' => $result->nama_penguji2,
+                        'email' => $result->email_penguji2
+                    ];
+                }
+                
+                return $recommendations;
+            }
+            
+            return ['found' => false, 'penguji1' => null, 'penguji2' => null];
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting penguji recommendations: ' . $e->getMessage());
+            return ['found' => false, 'penguji1' => null, 'penguji2' => null];
         }
     }
 
@@ -676,6 +826,205 @@ public function detail($seminar_id) {
             log_message('error', 'Error setting prodi_id: ' . $e->getMessage());
             $this->prodi_id = 1; // Default fallback
         }
+    }
+
+    /**
+     * Calculate title similarity percentage - METHOD BARU
+     */
+    private function _calculate_title_similarity($original, $new) {
+        if (empty($original) || empty($new)) {
+            return 0;
+        }
+        
+        // Clean and split titles
+        $original_clean = strtolower(preg_replace('/[^\w\s]/', '', $original));
+        $new_clean = strtolower(preg_replace('/[^\w\s]/', '', $new));
+        
+        $original_words = array_filter(explode(' ', $original_clean));
+        $new_words = array_filter(explode(' ', $new_clean));
+        
+        if (empty($original_words) || empty($new_words)) {
+            return 0;
+        }
+        
+        // Calculate Jaccard similarity
+        $intersection = array_intersect($original_words, $new_words);
+        $union = array_unique(array_merge($original_words, $new_words));
+        
+        return count($union) > 0 ? round((count($intersection) / count($union)) * 100, 1) : 0;
+    }
+
+    /**
+     * Enhanced process validation dengan file handling - METHOD BARU
+     */
+    private function _process_validation_with_file($seminar_id, $decision, $plagiarism_percentage, $komentar, $uploaded_file = null) {
+        try {
+            $this->db->trans_start();
+            
+            // Data update existing (UNCHANGED)
+            $update_data = [
+                'status_kaprodi' => $decision,
+                'komentar_kaprodi' => $komentar,
+                'tanggal_review_kaprodi' => date('Y-m-d H:i:s'),
+                'reviewed_by_kaprodi' => $this->session->userdata('id'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            if ($decision == 'approved') {
+                $update_data['status'] = 'approved';
+                $update_data['current_step'] = 'staf';
+            } else {
+                $update_data['status'] = 'rejected';
+                $update_data['current_step'] = 'mahasiswa';
+            }
+            
+            if ($plagiarism_percentage !== null && $plagiarism_percentage !== '') {
+                $update_data['plagiarism_percentage'] = $plagiarism_percentage;
+            }
+            
+            // NEW: Save uploaded turnitin file
+            if ($uploaded_file) {
+                $update_data['file_turnitin'] = $uploaded_file;
+            }
+            
+            $this->db->where('id', $seminar_id);
+            $this->db->update('seminar_skripsi_mahasiswa', $update_data);
+            
+            $this->db->trans_complete();
+            
+            return $this->db->trans_status();
+            
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'Enhanced validation process error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Send comprehensive notifications - METHOD BARU
+     */
+    private function _send_comprehensive_notifications($seminar_id, $decision) {
+        try {
+            $seminar = $this->_get_seminar_detail($seminar_id);
+            if (!$seminar) return false;
+            
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls',
+                'smtp_timeout' => 30
+            ];
+            
+            $this->email->initialize($config);
+            
+            // 1. Email ke mahasiswa
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            
+            if ($decision == 'approved') {
+                $this->email->subject('✅ Seminar Skripsi Disetujui - ' . $seminar->nama_mahasiswa);
+                $message = $this->_build_approval_email($seminar);
+            } else {
+                $this->email->subject('❌ Seminar Skripsi Perlu Perbaikan - ' . $seminar->nama_mahasiswa);
+                $message = $this->_build_rejection_email($seminar);
+            }
+            
+            $this->email->message($message);
+            $email_sent = $this->email->send();
+            
+            // 2. Email ke dosen pembimbing
+            if (!empty($seminar->email_pembimbing)) {
+                $this->email->clear();
+                $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+                $this->email->to($seminar->email_pembimbing);
+                $this->email->subject('📋 Status Seminar Skripsi Mahasiswa - ' . $seminar->nama_mahasiswa);
+                
+                $message_dosen = $this->_build_notification_email_dosen($seminar, $decision);
+                $this->email->message($message_dosen);
+                $this->email->send();
+            }
+            
+            return $email_sent;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending comprehensive notifications: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Build email templates - METHODS BARU
+     */
+    private function _build_approval_email($seminar) {
+        return "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: #28a745; color: white; padding: 20px; text-align: center;'>
+                <h2>✅ Seminar Skripsi Disetujui</h2>
+            </div>
+            <div style='padding: 20px;'>
+                <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                <p>Selamat! Pengajuan seminar skripsi Anda telah <strong>DISETUJUI</strong> oleh Ketua Program Studi.</p>
+                <div style='background: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                    <h4>📚 Detail Seminar:</h4>
+                    <ul>
+                        <li><strong>Judul:</strong> " . ($seminar->judul_current ?? 'N/A') . "</li>
+                        <li><strong>Status:</strong> Menunggu Penjadwalan</li>
+                    </ul>
+                </div>
+                <p>Anda akan menerima email pemberitahuan jadwal seminar setelah Kaprodi menetapkan jadwal.</p>
+            </div>
+        </div>";
+    }
+    
+    private function _build_rejection_email($seminar) {
+        return "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: #dc3545; color: white; padding: 20px; text-align: center;'>
+                <h2>❌ Seminar Skripsi Perlu Perbaikan</h2>
+            </div>
+            <div style='padding: 20px;'>
+                <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                <p>Pengajuan seminar skripsi Anda <strong>PERLU DIPERBAIKI</strong>.</p>
+                <div style='background: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                    <h4>📝 Catatan:</h4>
+                    <p>" . ($seminar->komentar_kaprodi ?? 'Silakan konsultasi dengan dosen pembimbing.') . "</p>
+                </div>
+                <p>Silakan lakukan perbaikan dan submit ulang pengajuan Anda.</p>
+            </div>
+        </div>";
+    }
+    
+    private function _build_notification_email_dosen($seminar, $decision) {
+        $status_text = $decision == 'approved' ? 'DISETUJUI' : 'DITOLAK';
+        $bg_color = $decision == 'approved' ? '#28a745' : '#dc3545';
+        
+        return "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: {$bg_color}; color: white; padding: 20px; text-align: center;'>
+                <h2>📋 Status Seminar Skripsi Mahasiswa</h2>
+            </div>
+            <div style='padding: 20px;'>
+                <p>Kepada Yth. <strong>{$seminar->nama_pembimbing}</strong>,</p>
+                <p>Seminar skripsi mahasiswa bimbingan Anda telah <strong>{$status_text}</strong> oleh Kaprodi.</p>
+                <div style='background: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                    <h4>👨‍🎓 Detail Mahasiswa:</h4>
+                    <ul>
+                        <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
+                        <li><strong>NIM:</strong> {$seminar->nim}</li>
+                        <li><strong>Judul:</strong> " . ($seminar->judul_current ?? 'N/A') . "</li>
+                        <li><strong>Status:</strong> {$status_text}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>";
     }
 
     /**

@@ -439,23 +439,51 @@ class Seminar_skripsi extends CI_Controller {
         }
     }
 
-    /**
-     * Get seminar by ID with ownership validation (UNCHANGED)
-     */
-    private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
-    {
-        try {
-            return $this->db->select('ssm.*, pm.judul as proposal_judul')
-                          ->from('seminar_skripsi_mahasiswa ssm')
-                          ->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id')
-                          ->where('ssm.id', $seminar_id)
-                          ->where('ssm.mahasiswa_id', $mahasiswa_id)
-                          ->get()->row();
-        } catch (Exception $e) {
-            log_message('error', 'Get seminar by ID error: ' . $e->getMessage());
-            return null;
+/**
+ * ✅ FIXED: Get seminar by ID with ownership validation + complete data
+ */
+private function _get_seminar_by_id($seminar_id, $mahasiswa_id)
+{
+    try {
+        // ✅ FIXED: Tambahkan JOIN dengan mahasiswa, dosen, dan prodi
+        $this->db->select('
+            ssm.*, 
+            pm.judul as proposal_judul,
+            pm.judul as judul_skripsi,
+            m.nim, 
+            m.nama as nama_mahasiswa, 
+            m.email as email_mahasiswa,
+            pr.nama as nama_prodi,
+            d.nama as nama_pembimbing,
+            d.email as email_pembimbing,
+            ssm.tanggal_seminar,
+            ssm.jam_seminar,
+            ssm.tempat_seminar
+        ');
+        $this->db->from('seminar_skripsi_mahasiswa ssm');
+        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'ssm.mahasiswa_id = m.id'); // <- TAMBAHAN
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'left'); // <- TAMBAHAN
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left'); // <- TAMBAHAN
+        $this->db->where('ssm.id', $seminar_id);
+        $this->db->where('ssm.mahasiswa_id', $mahasiswa_id);
+        
+        $result = $this->db->get()->row();
+        
+        // Debug log untuk memastikan data lengkap
+        if ($result) {
+            log_message('debug', 'Seminar data fields: ' . implode(', ', array_keys((array)$result)));
+            log_message('debug', 'nama_mahasiswa: ' . ($result->nama_mahasiswa ?? 'NULL'));
+            log_message('debug', 'nim: ' . ($result->nim ?? 'NULL'));
+            log_message('debug', 'nama_pembimbing: ' . ($result->nama_pembimbing ?? 'NULL'));
         }
+        
+        return $result;
+    } catch (Exception $e) {
+        log_message('error', 'Get seminar by ID error: ' . $e->getMessage());
+        return null;
     }
+}
 
     /**
      * Show resubmit form (UNCHANGED)
@@ -1018,7 +1046,7 @@ class Seminar_skripsi extends CI_Controller {
     }
     
     /**
-     * ✅ NEW: View hasil penilaian seminar skripsi
+     * ✅ PERBAIKAN: Update method view_penilaian untuk handling rekomendasi yang benar
      */
     public function view_penilaian($seminar_id = null)
     {
@@ -1029,20 +1057,23 @@ class Seminar_skripsi extends CI_Controller {
         
         $mahasiswa_id = $this->session->userdata('id');
         
-        // Validasi akses mahasiswa
+        // Validasi akses mahasiswa (SUDAH FIXED)
         $seminar = $this->_get_seminar_by_id($seminar_id, $mahasiswa_id);
         if (!$seminar) {
             show_404();
             return;
         }
         
-        // Get penilaian data yang sudah published
+        // Get penilaian data yang sudah published (SUDAH FIXED)
         $penilaian = $this->_get_penilaian_published($seminar_id);
         if (!$penilaian) {
             $this->session->set_flashdata('error', 'Penilaian belum tersedia atau belum dipublikasikan');
             redirect('mahasiswa/seminar_skripsi');
             return;
         }
+        
+        // ✅ NEW: Process rekomendasi untuk fix tampilan "TIDAK LULUS"
+        $penilaian = $this->_process_rekomendasi($penilaian);
         
         $data = [
             'title' => 'Hasil Penilaian Seminar Skripsi',
@@ -1057,23 +1088,110 @@ class Seminar_skripsi extends CI_Controller {
     }
     
     /**
-     * ✅ NEW: Get published penilaian data
-     */
-    private function _get_penilaian_published($seminar_id)
-    {
-        try {
+ * ✅ NEW: Process rekomendasi untuk fix tampilan yang salah
+ */
+private function _process_rekomendasi($penilaian)
+{
+    // Standardize rekomendasi values
+    $rekomendasi_map = [
+        'diterima_tanpa_revisi' => 'lulus_tanpa_revisi',
+        'revisi_minor' => 'lulus_dengan_revisi_minor', 
+        'revisi_mayor' => 'lulus_dengan_revisi_mayor',
+        'ditolak' => 'tidak_lulus',
+        'lulus' => 'lulus_tanpa_revisi',
+        'tidak_lulus' => 'tidak_lulus'
+    ];
+    
+    // Map rekomendasi jika perlu
+    if (isset($rekomendasi_map[strtolower($penilaian->rekomendasi)])) {
+        $penilaian->rekomendasi = $rekomendasi_map[strtolower($penilaian->rekomendasi)];
+    }
+    
+    // ✅ FIX: Jika rekomendasi kosong atau salah, tentukan berdasarkan nilai
+    if (empty($penilaian->rekomendasi) || $penilaian->rekomendasi == 'tidak_lulus') {
+        if ($penilaian->nilai_akhir >= 80) {
+            $penilaian->rekomendasi = 'lulus_tanpa_revisi';
+        } elseif ($penilaian->nilai_akhir >= 70) {
+            $penilaian->rekomendasi = 'lulus_dengan_revisi_minor';
+        } elseif ($penilaian->nilai_akhir >= 60) {
+            $penilaian->rekomendasi = 'lulus_dengan_revisi_mayor';
+        } else {
+            $penilaian->rekomendasi = 'tidak_lulus';
+        }
+    }
+    
+    log_message('debug', 'Processed rekomendasi: ' . $penilaian->rekomendasi . ' (nilai: ' . $penilaian->nilai_akhir . ')');
+    
+    return $penilaian;
+}
+
+        
+/**
+ * ✅ FIXED: Get published penilaian data with complete relations
+ */
+private function _get_penilaian_published($seminar_id)
+{
+    try {
+        // ✅ OPSI 1: Gunakan view database (RECOMMENDED jika tersedia)
+        if ($this->_check_view_exists('penilaian_seminar_skripsi_v')) {
             $this->db->select('*');
-            $this->db->from('penilaian_seminar_skripsi');
+            $this->db->from('penilaian_seminar_skripsi_v');
             $this->db->where('seminar_skripsi_id', $seminar_id);
             $this->db->where('status_penilaian', 'published');
             $this->db->where('published_at IS NOT NULL');
             
-            return $this->db->get()->row();
-        } catch (Exception $e) {
-            log_message('error', 'Get penilaian published error: ' . $e->getMessage());
-            return null;
+            $result = $this->db->get()->row();
+            
+            if ($result) {
+                log_message('debug', 'Penilaian data from view: ' . json_encode($result));
+                return $result;
+            }
         }
+        
+        // ✅ OPSI 2: Manual JOIN (FALLBACK jika view tidak ada)
+        log_message('info', 'Using manual JOIN for penilaian data');
+        
+        $this->db->select('
+            pss.*,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            m.email as email_mahasiswa,
+            pm.judul,
+            pm.judul as judul_skripsi,
+            pr.nama as nama_prodi,
+            ssk.tanggal_seminar,
+            ssk.jam_seminar,
+            ssk.tempat_seminar,
+            d.nama as nama_pembimbing,
+            d1.nama as nama_penguji1,
+            d2.nama as nama_penguji2
+        ');
+        $this->db->from('penilaian_seminar_skripsi pss');
+        $this->db->join('seminar_skripsi_mahasiswa ssk', 'pss.seminar_skripsi_id = ssk.id');
+        $this->db->join('proposal_mahasiswa pm', 'pss.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'pss.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'left');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->join('dosen d1', 'ssk.dosen_penguji1_id = d1.id', 'left');
+        $this->db->join('dosen d2', 'ssk.dosen_penguji2_id = d2.id', 'left');
+        
+        $this->db->where('pss.seminar_skripsi_id', $seminar_id);
+        $this->db->where('pss.status_penilaian', 'published');
+        $this->db->where('pss.published_at IS NOT NULL');
+        
+        $result = $this->db->get()->row();
+        
+        if ($result) {
+            log_message('debug', 'Penilaian data from manual JOIN: ' . json_encode($result));
+        }
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Get penilaian published error: ' . $e->getMessage());
+        return null;
     }
+}
     
     /**
      * ✅ NEW: Check if penilaian exists and published
@@ -1124,6 +1242,20 @@ class Seminar_skripsi extends CI_Controller {
             return 100;
         } else {
             return 95;
+        }
+    }
+    
+    /**
+     * ✅ NEW: Check if database view exists
+     */
+    private function _check_view_exists($view_name)
+    {
+        try {
+            $query = $this->db->query("SHOW TABLES LIKE '{$view_name}'");
+            return $query->num_rows() > 0;
+        } catch (Exception $e) {
+            log_message('debug', 'Check view exists error: ' . $e->getMessage());
+            return false;
         }
     }
 }

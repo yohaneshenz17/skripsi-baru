@@ -831,16 +831,16 @@ private function _get_pengajuan_perlu_review($dosen_id) {
                 // Update status seminar skripsi ke completed
                 $this->db->where('id', $seminar_id);
                 $this->db->update('seminar_skripsi_mahasiswa', [
-                    'status' => 'completed',
-                    'updated_at' => date('Y-m-d H:i:s')
+                    'status' => 'completed'
+                    // Hapus updated_at jika kolom tidak ada di tabel ini juga
                 ]);
                 
-                // Update workflow status proposal ke publikasi
+                // ✅ Update workflow status proposal ke publikasi (SESUAI STRUKTUR TABEL AKTUAL)
                 $this->db->where('id', $seminar->proposal_id);
                 $this->db->update('proposal_mahasiswa', [
-                    'workflow_status' => 'publikasi',
-                    'status_seminar_skripsi' => 'completed',
-                    'updated_at' => date('Y-m-d H:i:s')
+                    'workflow_status' => 'publikasi',                        // ✅ Enum valid
+                    'status_seminar_skripsi' => '1',                        // ✅ '1' = disetujui
+                    'tanggal_review_seminar_skripsi' => date('Y-m-d H:i:s') // ✅ Kolom ada, untuk timestamp
                 ]);
                 
                 // ENHANCEMENT: Send email notification ke mahasiswa saat penilaian dipublikasi

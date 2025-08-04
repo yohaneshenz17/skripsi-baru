@@ -188,31 +188,31 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="rekomendasi" value="diterima_tanpa_revisi" 
-                                               id="diterima_tanpa_revisi" <?= (isset($penilaian->rekomendasi) && $penilaian->rekomendasi == 'diterima_tanpa_revisi') ? 'checked' : '' ?>>
-                                        <label class="form-check-label text-success" for="diterima_tanpa_revisi">
-                                            <i class="fas fa-check-circle mr-1"></i> Diterima tanpa revisi
+                                        <input class="form-check-input" type="radio" name="rekomendasi" value="lulus_tanpa_revisi" 
+                                               id="lulus_tanpa_revisi" <?= (isset($penilaian->rekomendasi) && $penilaian->rekomendasi == 'lulus_tanpa_revisi') ? 'checked' : '' ?>>
+                                        <label class="form-check-label text-success" for="lulus_tanpa_revisi">
+                                            <i class="fas fa-check-circle mr-1"></i> Lulus tanpa revisi
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="rekomendasi" value="revisi_minor" 
-                                               id="revisi_minor" <?= (isset($penilaian->rekomendasi) && $penilaian->rekomendasi == 'revisi_minor') ? 'checked' : '' ?>>
-                                        <label class="form-check-label text-info" for="revisi_minor">
-                                            <i class="fas fa-edit mr-1"></i> Diterima dengan revisi minor
+                                        <input class="form-check-input" type="radio" name="rekomendasi" value="lulus_dengan_revisi_minor" 
+                                               id="lulus_dengan_revisi_minor" <?= (isset($penilaian->rekomendasi) && $penilaian->rekomendasi == 'lulus_dengan_revisi_minor') ? 'checked' : '' ?>>
+                                        <label class="form-check-label text-info" for="lulus_dengan_revisi_minor">
+                                            <i class="fas fa-edit mr-1"></i> Lulus dengan revisi minor
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="rekomendasi" value="revisi_mayor" 
-                                               id="revisi_mayor" <?= (isset($penilaian->rekomendasi) && $penilaian->rekomendasi == 'revisi_mayor') ? 'checked' : '' ?>>
-                                        <label class="form-check-label text-warning" for="revisi_mayor">
-                                            <i class="fas fa-exclamation-triangle mr-1"></i> Diterima dengan revisi mayor
+                                        <input class="form-check-input" type="radio" name="rekomendasi" value="lulus_dengan_revisi_mayor" 
+                                               id="lulus_dengan_revisi_mayor" <?= (isset($penilaian->rekomendasi) && $penilaian->rekomendasi == 'lulus_dengan_revisi_mayor') ? 'checked' : '' ?>>
+                                        <label class="form-check-label text-warning" for="lulus_dengan_revisi_mayor">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i> Lulus dengan revisi mayor
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="rekomendasi" value="ditolak" 
-                                               id="ditolak" <?= (isset($penilaian->rekomendasi) && $penilaian->rekomendasi == 'ditolak') ? 'checked' : '' ?>>
-                                        <label class="form-check-label text-danger" for="ditolak">
-                                            <i class="fas fa-times-circle mr-1"></i> Ditolak
+                                        <input class="form-check-input" type="radio" name="rekomendasi" value="tidak_lulus" 
+                                               id="tidak_lulus" <?= (isset($penilaian->rekomendasi) && $penilaian->rekomendasi == 'tidak_lulus') ? 'checked' : '' ?>>
+                                        <label class="form-check-label text-danger" for="tidak_lulus">
+                                            <i class="fas fa-times-circle mr-1"></i> Tidak lulus
                                         </label>
                                     </div>
                                 </div>

@@ -1,479 +1,546 @@
 <?php
 /**
- * MINIMAL FIX - Hanya Tambah Tombol Penjadwalan
+ * PERBAIKAN VIEW - Index Seminar Skripsi Kaprodi
  * File: application/views/kaprodi/seminar_skripsi/index.php
  * 
- * PERUBAHAN MINIMAL:
- * - Tambah tombol "Jadwalkan" untuk status_kaprodi = 'approved' dan tanggal_seminar IS NULL
- * - Semua struktur existing tetap sama
+ * PERBAIKAN:
+ * - Modal info jadwal menampilkan data lengkap (pembimbing, penguji 1 & 2)
+ * - Memperbaiki JavaScript untuk mengambil data dosen dari list
  */
-
-// ✅ Helper function untuk word limiter dengan fallback
-if (!function_exists('safe_word_limiter')) {
-    function safe_word_limiter($str, $limit = 8, $end_char = '...') {
-        if (empty($str)) return '-';
-        
-        if (function_exists('word_limiter')) {
-            return word_limiter($str, $limit, $end_char);
-        }
-        
-        // Fallback manual jika text helper tidak tersedia
-        $words = explode(' ', trim($str));
-        if (count($words) > $limit) {
-            return implode(' ', array_slice($words, 0, $limit)) . $end_char;
-        }
-        return $str;
-    }
-}
-
-// Helper function untuk status badge
-function get_status_badge($status_kaprodi, $status_pembimbing = null) {
-    switch ($status_kaprodi) {
-        case 'pending':
-            return '<span class="badge badge-warning">Menunggu Review</span>';
-        case 'approved':
-            return '<span class="badge badge-success">Disetujui</span>';
-        case 'rejected':
-            return '<span class="badge badge-danger">Ditolak</span>';
-        default:
-            return '<span class="badge badge-secondary">Draft</span>';
-    }
-}
-
-// Pastikan data tersedia
-$seminar_skripsi = isset($seminar_skripsi) ? $seminar_skripsi : [];
-$stats = isset($stats) ? $stats : [];
 ?>
 
-<!-- Flash Messages -->
-<?php if($this->session->flashdata('success')): ?>
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <span class="alert-icon"><i class="fas fa-check-circle"></i></span>
-    <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
-    <button type="button" class="close" data-dismiss="alert">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-<?php endif; ?>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="fas fa-graduation-cap text-primary mr-2"></i>
+                        Kelola Seminar Skripsi
+                    </h1>
+                    <p class="mb-0 text-muted">Validasi dan penjadwalan seminar skripsi mahasiswa</p>
+                </div>
+                <div class="text-right">
+                    <button class="btn btn-outline-primary" onclick="location.reload()">
+                        <i class="fas fa-sync-alt mr-1"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<?php if($this->session->flashdata('error')): ?>
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <span class="alert-icon"><i class="fas fa-exclamation-triangle"></i></span>
-    <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
-    <button type="button" class="close" data-dismiss="alert">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-<?php endif; ?>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Review
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <?= $stats['pending_review'] ?? 0 ?>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- Statistics Cards -->
-<div class="row">
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Perlu Review</h5>
-                        <span class="h2 font-weight-bold mb-0 text-warning"><?= isset($stats['pending_review']) ? $stats['pending_review'] : 0 ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
-                            <i class="fas fa-clock"></i>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Disetujui Bulan Ini
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <?= $stats['approved_month'] ?? 0 ?>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-warning mr-2"><i class="fas fa-arrow-up"></i></span>
-                    <span class="text-nowrap">Menunggu validasi</span>
-                </p>
             </div>
         </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Disetujui</h5>
-                        <span class="h2 font-weight-bold mb-0 text-success"><?= isset($stats['approved_month']) ? $stats['approved_month'] : 0 ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-success text-white rounded-circle shadow">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-success mr-2"><i class="fas fa-arrow-up"></i></span>
-                    <span class="text-nowrap">Bulan ini</span>
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Ditolak</h5>
-                        <span class="h2 font-weight-bold mb-0 text-danger"><?= isset($stats['rejected_month']) ? $stats['rejected_month'] : 0 ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
-                            <i class="fas fa-times-circle"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-danger mr-2"><i class="fas fa-arrow-down"></i></span>
-                    <span class="text-nowrap">Bulan ini</span>
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Terjadwal</h5>
-                        <span class="h2 font-weight-bold mb-0 text-info"><?= isset($stats['scheduled']) ? $stats['scheduled'] : 0 ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-info text-white rounded-circle shadow">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-3 mb-0 text-sm">
-                    <span class="text-info mr-2"><i class="fas fa-calendar"></i></span>
-                    <span class="text-nowrap">Sudah dijadwalkan</span>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Main Content -->
-<div class="row mt-4">
-    <div class="col">
-        <div class="card shadow">
-            <div class="card-header border-0">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="mb-0">
-                            <i class="fas fa-book mr-2"></i>
-                            Daftar Seminar Skripsi
-                        </h3>
-                    </div>
-                    <div class="col text-right">
-                        <span class="text-muted">
-                            <i class="fas fa-list mr-1"></i>
-                            <?= is_array($seminar_skripsi) ? count($seminar_skripsi) : 0 ?> pengajuan
-                        </span>
-                        <button type="button" class="btn btn-primary btn-sm ml-2" onclick="location.reload()">
-                            <i class="fas fa-sync-alt mr-1"></i> Refresh
-                        </button>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Ditolak Bulan Ini
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <?= $stats['rejected_month'] ?? 0 ?>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times fa-2x text-gray-300"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="card-body">
-                <!-- Tabel Data -->
-                <div class="table-responsive">
-                    <table class="table align-items-center table-flush" id="datatable-seminar-skripsi">
-                        <thead class="thead-light">
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Terjadwal
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <?= $stats['scheduled'] ?? 0 ?>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <?php if($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <span class="alert-icon"><i class="fas fa-check-circle"></i></span>
+        <span class="alert-text"><?= $this->session->flashdata('success') ?></span>
+        <button type="button" class="close" data-dismiss="alert">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <?php endif; ?>
+
+    <?php if($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span class="alert-icon"><i class="fas fa-exclamation-triangle"></i></span>
+        <span class="alert-text"><?= $this->session->flashdata('error') ?></span>
+        <button type="button" class="close" data-dismiss="alert">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <?php endif; ?>
+
+    <!-- Main Data Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list mr-2"></i>
+                Daftar Seminar Skripsi 
+                <span class="badge badge-primary ml-2"><?= count($seminar_skripsi) ?> pengajuan</span>
+            </h6>
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                    <div class="dropdown-header">Aksi:</div>
+                    <a class="dropdown-item" href="#" onclick="location.reload()">
+                        <i class="fas fa-sync-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Refresh Data
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="5%">No</th>
+                            <th width="15%">Mahasiswa</th>
+                            <th width="20%">Judul</th>
+                            <th width="12%">Pembimbing</th>
+                            <th width="8%">Plagiarisme</th>
+                            <th width="10%">Status</th>
+                            <th width="10%">Tanggal Pengajuan</th>
+                            <th width="20%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($seminar_skripsi)): ?>
+                            <?php $no = 1; foreach ($seminar_skripsi as $seminar): ?>
                             <tr>
-                                <th scope="col" class="sort" data-sort="number">No</th>
-                                <th scope="col" class="sort" data-sort="mahasiswa">Mahasiswa</th>
-                                <th scope="col" class="sort" data-sort="judul">Judul Skripsi</th>
-                                <th scope="col" class="sort" data-sort="pembimbing">Pembimbing</th>
-                                <th scope="col" class="sort" data-sort="status">Status</th>
-                                <th scope="col" class="sort" data-sort="plagiarism">Plagiarisme</th>
-                                <th scope="col" class="sort" data-sort="tanggal">Tanggal Pengajuan</th>
-                                <th scope="col">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if(empty($seminar_skripsi)): ?>
-                                <tr>
-                                    <td colspan="8" class="text-center py-5">
-                                        <div class="text-muted">
-                                            <i class="fas fa-graduation-cap fa-3x mb-3 text-muted"></i><br>
-                                            <h5 class="text-muted">Tidak ada data seminar skripsi</h5>
-                                            <p class="text-muted mb-0">Belum ada mahasiswa yang mengajukan seminar skripsi</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach($seminar_skripsi as $key => $item): ?>
-                                    <tr>
-                                        <td>
-                                            <span class="badge badge-soft-primary"><?= $key + 1 ?></span>
-                                        </td>
-                                        <td>
-                                            <div class="media align-items-center">
-                                                <div class="media-body">
-                                                    <span class="name font-weight-bold mb-0">
-                                                        <?= htmlspecialchars($item->nama_mahasiswa ?? 'N/A') ?>
-                                                    </span><br>
-                                                    <small class="text-muted">
-                                                        <?= htmlspecialchars($item->nim ?? 'N/A') ?>
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="text-sm" title="<?= htmlspecialchars($item->judul_skripsi ?? $item->judul_proposal ?? 'N/A') ?>">
-                                                <?= safe_word_limiter($item->judul_skripsi ?? $item->judul_proposal ?? 'N/A', 8) ?>
-                                            </span>
-                                            <?php if(!empty($item->file_skripsi)): ?>
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-file-pdf mr-1"></i>File tersedia
-                                                </small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <span class="text-sm">
-                                                <?= htmlspecialchars($item->nama_pembimbing ?? 'Belum ditentukan') ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <?= get_status_badge($item->status_kaprodi ?? 'pending', $item->status_pembimbing ?? null) ?>
-                                            <?php if($item->status_pembimbing == 'approved' && $item->status_kaprodi == 'pending'): ?>
-                                                <br><small class="text-info mt-1">
-                                                    <i class="fas fa-user-check mr-1"></i>Direkomendasikan pembimbing
-                                                </small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if(!empty($item->plagiarism_percentage)): ?>
-                                                <?php 
-                                                $plagiarism = floatval($item->plagiarism_percentage);
-                                                $badge_class = $plagiarism <= 30 ? 'success' : 'danger';
-                                                ?>
-                                                <span class="badge badge-<?= $badge_class ?>">
-                                                    <?= number_format($plagiarism, 1) ?>%
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="text-muted">-</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <span class="text-sm">
-                                                <?= $item->created_at ? date('d/m/Y', strtotime($item->created_at)) : '-' ?>
-                                            </span>
-                                            <?php if($item->created_at): ?>
-                                                <br><small class="text-muted">
-                                                    <?= date('H:i', strtotime($item->created_at)) ?>
-                                                </small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <!-- ✅ TOMBOL DETAIL (existing) -->
-                                            <a href="<?= base_url('kaprodi/seminar_skripsi/detail/' . $item->id) ?>" 
-                                               class="btn btn-sm btn-outline-primary" 
-                                               title="Lihat Detail & Validasi">
-                                                <i class="fas fa-eye"></i>
+                                <td class="text-center"><?= $no++ ?></td>
+                                <td>
+                                    <strong><?= htmlspecialchars($seminar->nama_mahasiswa ?? 'N/A') ?></strong><br>
+                                    <small class="text-muted"><?= htmlspecialchars($seminar->nim ?? 'N/A') ?></small>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 200px;" title="<?= htmlspecialchars($seminar->judul_skripsi ?? $seminar->judul ?? 'N/A') ?>">
+                                        <?= htmlspecialchars($seminar->judul_skripsi ?? $seminar->judul ?? 'N/A') ?>
+                                    </div>
+                                </td>
+                                <td>
+                                    <small><?= htmlspecialchars($seminar->nama_pembimbing ?? 'N/A') ?></small>
+                                </td>
+                                <td class="text-center">
+                                    <?php if (!empty($seminar->plagiarism_percentage)): ?>
+                                        <?php 
+                                        $plag_class = 'badge-success';
+                                        if ($seminar->plagiarism_percentage > 30) $plag_class = 'badge-danger';
+                                        elseif ($seminar->plagiarism_percentage > 20) $plag_class = 'badge-warning';
+                                        ?>
+                                        <span class="badge <?= $plag_class ?>">
+                                            <?= number_format($seminar->plagiarism_percentage, 1) ?>%
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php
+                                    $status_class = 'secondary';
+                                    $status_text = 'Unknown';
+                                    $status_icon = 'question';
+                                    
+                                    switch ($seminar->status_kaprodi ?? 'pending') {
+                                        case 'pending':
+                                            $status_class = 'warning';
+                                            $status_text = 'Menunggu Review';
+                                            $status_icon = 'clock';
+                                            break;
+                                        case 'approved':
+                                            if (!empty($seminar->tanggal_seminar)) {
+                                                $status_class = 'info';
+                                                $status_text = 'Terjadwal';
+                                                $status_icon = 'calendar-check';
+                                            } else {
+                                                $status_class = 'success';
+                                                $status_text = 'Disetujui';
+                                                $status_icon = 'check';
+                                            }
+                                            break;
+                                        case 'rejected':
+                                            $status_class = 'danger';
+                                            $status_text = 'Ditolak';
+                                            $status_icon = 'times';
+                                            break;
+                                    }
+                                    ?>
+                                    <span class="badge badge-<?= $status_class ?>">
+                                        <i class="fas fa-<?= $status_icon ?> mr-1"></i>
+                                        <?= $status_text ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small>
+                                        <?= date('d/m/Y', strtotime($seminar->created_at ?? 'now')) ?><br>
+                                        <span class="text-muted"><?= date('H:i', strtotime($seminar->created_at ?? 'now')) ?></span>
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <!-- Detail Button -->
+                                        <a href="<?= base_url('kaprodi/seminar_skripsi/detail/' . $seminar->id) ?>" 
+                                           class="btn btn-info btn-sm" 
+                                           title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <!-- Action Buttons Based on Status -->
+                                        <?php if (($seminar->status_kaprodi ?? 'pending') === 'approved' && empty($seminar->tanggal_seminar)): ?>
+                                            <!-- Penjadwalan Button -->
+                                            <a href="<?= base_url('kaprodi/seminar_skripsi/penjadwalan/' . $seminar->id) ?>" 
+                                               class="btn btn-success btn-sm" 
+                                               title="Jadwalkan Seminar">
+                                                <i class="fas fa-calendar-plus"></i>
                                             </a>
-                                            
-                                            <!-- ✅ TAMBAHAN BARU: TOMBOL JADWALKAN -->
-                                            <?php if(($item->status_kaprodi ?? '') == 'approved' && empty($item->tanggal_seminar)): ?>
-                                                <a href="<?= base_url('kaprodi/seminar_skripsi/penjadwalan/' . $item->id) ?>" 
-                                                   class="btn btn-sm btn-success ml-1" 
-                                                   title="Jadwalkan Seminar"
-                                                   onclick="return confirm('Apakah Anda akan menjadwalkan seminar skripsi untuk <?= htmlspecialchars($item->nama_mahasiswa) ?>?')">
-                                                    <i class="fas fa-calendar-plus"></i> Jadwalkan
-                                                </a>
-                                            <?php endif; ?>
-                                            
-                                            <!-- ✅ TOMBOL INFO JADWAL (existing - jika sudah ada jadwal) -->
-                                            <?php if(!empty($item->tanggal_seminar)): ?>
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-outline-info ml-1" 
-                                                        onclick="showJadwalInfo('<?= $item->tanggal_seminar ?>', '<?= $item->jam_seminar ?>', '<?= htmlspecialchars($item->tempat_seminar) ?>')"
-                                                        title="Info Jadwal">
-                                                    <i class="fas fa-calendar-check"></i>
-                                                </button>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                        <?php endif; ?>
+                                        
+                                        <?php if (!empty($seminar->tanggal_seminar)): ?>
+                                            <!-- Info Jadwal Button -->
+                                            <button type="button" 
+                                                    class="btn btn-primary btn-sm" 
+                                                    title="Info Jadwal"
+                                                    onclick="showJadwalInfo(<?= htmlspecialchars(json_encode([
+                                                        'tanggal_seminar' => $seminar->tanggal_seminar,
+                                                        'jam_seminar' => $seminar->jam_seminar,
+                                                        'tempat_seminar' => $seminar->tempat_seminar,
+                                                        'nama_mahasiswa' => $seminar->nama_mahasiswa,
+                                                        'nim' => $seminar->nim,
+                                                        'judul' => $seminar->judul_skripsi ?? $seminar->judul ?? 'N/A',
+                                                        'nama_pembimbing' => $seminar->nama_pembimbing ?? 'N/A',
+                                                        'nama_penguji1' => $seminar->nama_penguji1 ?? 'N/A',
+                                                        'nama_penguji2' => $seminar->nama_penguji2 ?? 'N/A'
+                                                    ]), ENT_QUOTES) ?>)">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <h6>Belum ada pengajuan seminar skripsi</h6>
+                                        <p class="mb-0">Data akan muncul setelah mahasiswa mengajukan seminar skripsi</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Quick Actions Tips -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card bg-gradient-info">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h5 class="text-white mb-1">
-                            <i class="fas fa-lightbulb mr-2"></i>
-                            Tips Validasi Seminar Skripsi
-                        </h5>
-                        <p class="text-white mb-0 opacity-8">
-                            • Pastikan persentase plagiarisme ≤ 30% untuk approval
-                            • Review rekomendasi dari dosen pembimbing
-                            • Jadwalkan dengan mempertimbangkan ketersediaan dosen penguji
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <a href="<?= base_url('kaprodi/seminar_skripsi/bantuan') ?>" 
-                           class="btn btn-sm btn-white">
-                            <i class="fas fa-question-circle mr-1"></i>
-                            Bantuan
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Info Jadwal (tetap dipertahankan untuk info) -->
-<div class="modal fade" id="jadwalModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<!-- ✅ PERBAIKAN: Modal Info Jadwal dengan Data Lengkap -->
+<div class="modal fade" id="modalJadwalInfo" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-calendar-check mr-2"></i>Informasi Jadwal Seminar
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    Informasi Jadwal Seminar
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <strong>Tanggal:</strong>
+                <!-- Info Mahasiswa -->
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-user-graduate mr-2"></i>
+                            Informasi Mahasiswa
+                        </h6>
                     </div>
-                    <div class="col-md-8" id="jadwal_tanggal"></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Nama:</strong>
+                                <p id="info-nama-mahasiswa" class="mb-2">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>NIM:</strong>
+                                <p id="info-nim" class="mb-2">-</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <strong>Judul Skripsi:</strong>
+                                <p id="info-judul" class="mb-0">-</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="row mt-2">
-                    <div class="col-md-4">
-                        <strong>Waktu:</strong>
+
+                <!-- Info Jadwal -->
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-calendar-check mr-2"></i>
+                            Jadwal Seminar
+                        </h6>
                     </div>
-                    <div class="col-md-8" id="jadwal_waktu"></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Tanggal:</strong>
+                                <p id="info-tanggal" class="mb-2">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Waktu:</strong>
+                                <p id="info-waktu" class="mb-2">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Tempat:</strong>
+                                <p id="info-tempat" class="mb-2">-</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="row mt-2">
-                    <div class="col-md-4">
-                        <strong>Tempat:</strong>
+
+                <!-- ✅ PERBAIKAN: Info Tim Penguji Lengkap -->
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="fas fa-users mr-2"></i>
+                            Tim Penguji
+                        </h6>
                     </div>
-                    <div class="col-md-8" id="jadwal_tempat"></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="text-center p-3 border rounded">
+                                    <i class="fas fa-user-tie fa-2x text-primary mb-2"></i>
+                                    <h6 class="font-weight-bold">Dosen Pembimbing</h6>
+                                    <p id="info-pembimbing" class="mb-0 small">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="text-center p-3 border rounded">
+                                    <i class="fas fa-user-graduate fa-2x text-success mb-2"></i>
+                                    <h6 class="font-weight-bold">Penguji 1</h6>
+                                    <p id="info-penguji1" class="mb-0 small">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="text-center p-3 border rounded">
+                                    <i class="fas fa-user-graduate fa-2x text-info mb-2"></i>
+                                    <h6 class="font-weight-bold">Penguji 2</h6>
+                                    <p id="info-penguji2" class="mb-0 small">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Catatan:</strong> Semua anggota tim penguji akan menerima notifikasi email mengenai jadwal seminar ini.
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i> Tutup
+                </button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- CSS Styling -->
 <style>
-.card-stats {
-    border: none;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.card-stats:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-.table th {
-    border-top: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
 .table td {
-    border-top: 1px solid #e9ecef;
     vertical-align: middle;
 }
 
 .badge {
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.75em;
     padding: 0.375rem 0.75rem;
 }
 
-.btn-sm {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
+.btn-group-sm > .btn, .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.775rem;
 }
 
-.media-body {
-    flex: 1 1 auto;
-    min-width: 0;
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
 }
 
-.icon-shape {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    vertical-align: middle;
+.modal-header {
+    border-radius: 0.5rem 0.5rem 0 0;
 }
 
-.bg-gradient-info {
-    background: linear-gradient(135deg, #11cdef 0%, #1171ef 100%);
+.alert {
+    border-left: 4px solid;
+    border-radius: 0.5rem;
 }
 
-.opacity-8 {
-    opacity: 0.8;
+.alert-success { border-left-color: #28a745; }
+.alert-danger { border-left-color: #dc3545; }
+.alert-warning { border-left-color: #ffc107; }
+.alert-info { border-left-color: #17a2b8; }
+
+@media (max-width: 768px) {
+    .btn-group-sm {
+        flex-direction: column;
+    }
+    .btn-group-sm > .btn {
+        margin-bottom: 0.25rem;
+    }
 }
 </style>
 
-<!-- JavaScript -->
+<!-- ✅ PERBAIKAN: JavaScript dengan Data Lengkap -->
 <script>
 $(document).ready(function() {
-    // Initialize DataTable jika tersedia
-    if (typeof $.fn.DataTable !== 'undefined') {
-        $('#datatable-seminar-skripsi').DataTable({
-            "pageLength": 25,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false,
-            "responsive": true,
-            "language": {
-                "paginate": {
-                    "previous": "<i class='fas fa-angle-left'></i>",
-                    "next": "<i class='fas fa-angle-right'></i>"
-                }
-            }
-        });
-    }
-    
-    // Initialize tooltips
-    $('[title]').tooltip();
+    // Initialize DataTable
+    $('#dataTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json"
+        },
+        "order": [[6, "desc"]], // Sort by date (newest first)
+        "pageLength": 25,
+        "responsive": true,
+        "columnDefs": [
+            { "orderable": false, "targets": [7] } // Disable sorting on Action column
+        ]
+    });
+
+    // Auto dismiss alerts
+    setTimeout(function() {
+        $('.alert-dismissible').fadeOut('slow');
+    }, 5000);
 });
 
-function showJadwalInfo(tanggal, jam, tempat) {
-    const formatTanggal = new Date(tanggal).toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    
-    $('#jadwal_tanggal').text(formatTanggal);
-    $('#jadwal_waktu').text(jam);
-    $('#jadwal_tempat').text(tempat);
-    $('#jadwalModal').modal('show');
+// ✅ PERBAIKAN: Function showJadwalInfo dengan Data Lengkap
+function showJadwalInfo(jadwalData) {
+    try {
+        // ✅ Populate modal dengan data lengkap
+        $('#info-nama-mahasiswa').text(jadwalData.nama_mahasiswa || '-');
+        $('#info-nim').text(jadwalData.nim || '-');
+        $('#info-judul').text(jadwalData.judul || '-');
+        
+        // Format tanggal
+        if (jadwalData.tanggal_seminar) {
+            const tanggal = new Date(jadwalData.tanggal_seminar);
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            $('#info-tanggal').text(tanggal.toLocaleDateString('id-ID', options));
+        } else {
+            $('#info-tanggal').text('-');
+        }
+        
+        // Format waktu
+        if (jadwalData.jam_seminar) {
+            $('#info-waktu').text(jadwalData.jam_seminar + ' WIB');
+        } else {
+            $('#info-waktu').text('-');
+        }
+        
+        $('#info-tempat').text(jadwalData.tempat_seminar || '-');
+        
+        // ✅ PERBAIKAN: Populate data tim penguji
+        $('#info-pembimbing').text(jadwalData.nama_pembimbing || 'Belum ditentukan');
+        $('#info-penguji1').text(jadwalData.nama_penguji1 || 'Belum ditentukan');
+        $('#info-penguji2').text(jadwalData.nama_penguji2 || 'Belum ditentukan');
+        
+        // Show modal
+        $('#modalJadwalInfo').modal('show');
+        
+    } catch (error) {
+        console.error('Error showing jadwal info:', error);
+        alert('Terjadi kesalahan saat menampilkan informasi jadwal');
+    }
+}
+
+// Function to refresh data
+function refreshData() {
+    location.reload();
+}
+
+// Confirm before navigation
+function confirmAction(message, url) {
+    if (confirm(message)) {
+        window.location.href = url;
+    }
 }
 </script>

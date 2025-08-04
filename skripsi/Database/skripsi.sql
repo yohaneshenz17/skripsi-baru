@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 04, 2025 at 10:04 AM
+-- Generation Time: Aug 04, 2025 at 10:45 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1994,7 +1994,7 @@ CREATE TABLE `seminar_skripsi_mahasiswa` (
 INSERT INTO `seminar_skripsi_mahasiswa` (`id`, `proposal_id`, `mahasiswa_id`, `status`, `current_step`, `file_skripsi`, `keterangan_mahasiswa`, `judul_skripsi`, `surat_keterangan_penelitian`, `status_pembimbing`, `komentar_pembimbing`, `tanggal_review_pembimbing`, `reviewed_by_pembimbing`, `status_kaprodi`, `komentar_kaprodi`, `tanggal_review_kaprodi`, `reviewed_by_kaprodi`, `file_turnitin`, `plagiarism_percentage`, `tanggal_seminar`, `jam_seminar`, `tempat_seminar`, `dosen_penguji1_id`, `dosen_penguji2_id`, `status_penguji1`, `komentar_penguji1`, `tanggal_respon_penguji1`, `status_penguji2`, `komentar_penguji2`, `tanggal_respon_penguji2`, `created_at`, `updated_at`, `created_by`) VALUES
 (11, 44, 44, 'submitted', 'mahasiswa', '1fba172d0cb18a5a282f585a2d8d781d.pdf', 'Perbaikan pengajuan', 'Perbaikan Pengaruh Pembelajaran Aktif terhadap Hasil Belajar Kognitif Mahasiswa Sekolah Tinggi Katolik Santo Yakobus Merauke Tahun Akademik 2024/2025', '0cabd8645f96a6b4a58e9e0f6f3bdf89.pdf', 'pending', NULL, '2025-08-03 17:30:13', 25, 'pending', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 06:30:48', '2025-08-04 07:21:34', NULL),
 (12, 46, 46, 'approved', 'staf', 'df6c327d48141b9b85fcbcc07203c423.pdf', 'INI LATIHAN SAJA', NULL, NULL, 'approved', '', '2025-08-03 12:16:41', 25, 'approved', 'Lanjutkan', '2025-08-04 08:58:24', 10, 'turnitin_12_20250804085824.pdf', 30.00, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-03 09:17:54', '2025-08-04 08:58:24', NULL),
-(13, 45, 45, 'approved', 'staf', '89c73059d00948a3b5823c220e3e5143.pdf', 'Ini perbaikan terbaru pak', 'BARU PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', '9d612499540f8b2a590f85f313c005b9.pdf', 'approved', 'Disetujui', '2025-08-04 10:02:55', 25, 'approved', 'Ok bagus', '2025-08-04 10:03:24', 10, 'turnitin_13_20250804085624.pdf', 24.00, NULL, NULL, NULL, NULL, NULL, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-04 07:22:46', '2025-08-04 10:03:24', NULL);
+(13, 45, 45, 'scheduled', 'staf', '89c73059d00948a3b5823c220e3e5143.pdf', 'Ini perbaikan terbaru pak', 'BARU PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', '9d612499540f8b2a590f85f313c005b9.pdf', 'approved', 'Disetujui', '2025-08-04 10:02:55', 25, 'approved', 'Siap Seminar', '2025-08-04 10:03:24', 10, 'turnitin_13_20250804085624.pdf', 24.00, '2025-08-06', '12:38:00', 'Ruang Ujian', 26, 16, 'approved', NULL, NULL, 'approved', NULL, NULL, '2025-08-04 07:22:46', '2025-08-04 10:38:58', NULL);
 
 --
 -- Triggers `seminar_skripsi_mahasiswa`

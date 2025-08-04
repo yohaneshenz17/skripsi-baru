@@ -642,7 +642,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * NEW: Enhanced resubmit with multiple files and judul support
+     * ✅ REPLACE method _handle_enhanced_resubmit() yang ada dengan ini:
      */
     private function _handle_enhanced_resubmit($seminar_id, $mahasiswa_id)
     {
@@ -662,7 +662,7 @@ class Seminar_skripsi extends CI_Controller {
             if (!$current_seminar) {
                 throw new Exception('Data seminar tidak ditemukan');
             }
-
+    
             $update_data = [
                 'keterangan_mahasiswa' => trim($this->input->post('keterangan')),
                 'status' => 'submitted',
@@ -672,23 +672,23 @@ class Seminar_skripsi extends CI_Controller {
                 'komentar_kaprodi' => null,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
-
+    
             // NEW: Update judul if provided
             $judul_baru = trim($this->input->post('judul_skripsi'));
             if (!empty($judul_baru) && strlen($judul_baru) >= 10) {
                 $update_data['judul_skripsi'] = $judul_baru;
             }
-
+    
             // NEW: Handle file uploads (optional for resubmit)
             $files_to_cleanup = [];
-
+    
             // Handle file skripsi update (optional)
             if (!empty($_FILES['file_skripsi']['name'])) {
                 $skripsi_result = $this->_upload_single_file('file_skripsi', 'skripsi_files', [
                     'allowed_types' => 'pdf|doc|docx',
                     'max_size' => 5120
                 ]);
-
+    
                 if ($skripsi_result['success']) {
                     $files_to_cleanup[] = ['filename' => $current_seminar->file_skripsi, 'subfolder' => 'skripsi_files'];
                     $update_data['file_skripsi'] = $skripsi_result['filename'];
@@ -696,14 +696,14 @@ class Seminar_skripsi extends CI_Controller {
                     throw new Exception('Error upload file skripsi: ' . $skripsi_result['message']);
                 }
             }
-
+    
             // Handle surat penelitian update (optional)
             if (!empty($_FILES['surat_penelitian']['name'])) {
                 $surat_result = $this->_upload_single_file('surat_penelitian', 'surat_penelitian', [
                     'allowed_types' => 'pdf|jpg|jpeg|png',
                     'max_size' => 3072
                 ]);
-
+    
                 if ($surat_result['success']) {
                     $files_to_cleanup[] = ['filename' => $current_seminar->surat_keterangan_penelitian, 'subfolder' => 'surat_penelitian'];
                     $update_data['surat_keterangan_penelitian'] = $surat_result['filename'];
@@ -711,18 +711,21 @@ class Seminar_skripsi extends CI_Controller {
                     throw new Exception('Error upload surat penelitian: ' . $surat_result['message']);
                 }
             }
-
+    
             // Update database
             $this->db->where('id', $seminar_id)
                     ->where('mahasiswa_id', $mahasiswa_id)
                     ->update('seminar_skripsi_mahasiswa', $update_data);
-
+    
             // Cleanup old files
             foreach ($files_to_cleanup as $file_info) {
                 if (!empty($file_info['filename'])) {
                     $this->_delete_uploaded_file($file_info['filename'], $file_info['subfolder']);
                 }
             }
+            
+            // ✅ NEW: KIRIM NOTIFIKASI RESUBMIT KE DOSEN PEMBIMBING
+            $this->_send_resubmit_notification($current_seminar->proposal_id, $seminar_id, $update_data);
             
             $this->session->set_flashdata('success', 'Pengajuan ulang berhasil dikirim!');
             
@@ -827,7 +830,7 @@ class Seminar_skripsi extends CI_Controller {
     }
 
     /**
-     * OLD: Handle resubmit process (DEPRECATED - kept for backward compatibility)
+     * ✅ REPLACE method _handle_resubmit() yang ada dengan ini:
      */
     private function _handle_resubmit($seminar_id, $mahasiswa_id)
     {
@@ -840,6 +843,12 @@ class Seminar_skripsi extends CI_Controller {
         }
         
         try {
+            // Get current seminar data untuk notifikasi
+            $current_seminar = $this->_get_seminar_by_id($seminar_id, $mahasiswa_id);
+            if (!$current_seminar) {
+                throw new Exception('Data seminar tidak ditemukan');
+            }
+            
             $update_data = [
                 'keterangan_mahasiswa' => $this->input->post('keterangan'),
                 'status' => 'submitted',
@@ -862,6 +871,9 @@ class Seminar_skripsi extends CI_Controller {
                     ->where('mahasiswa_id', $mahasiswa_id)
                     ->update('seminar_skripsi_mahasiswa', $update_data);
             
+            // ✅ NEW: KIRIM NOTIFIKASI RESUBMIT KE DOSEN PEMBIMBING
+            $this->_send_resubmit_notification($current_seminar->proposal_id, $seminar_id, $update_data);
+            
             $this->session->set_flashdata('success', 'Pengajuan ulang berhasil dikirim!');
             
         } catch (Exception $e) {
@@ -870,6 +882,139 @@ class Seminar_skripsi extends CI_Controller {
         }
         
         redirect('mahasiswa/seminar_skripsi');
+    }
+    
+    /**
+     * ✅ NEW: Send resubmit notification ke dosen pembimbing
+     * TAMBAHKAN METHOD INI di bagian akhir controller (sebelum closing brace)
+     */
+    private function _send_resubmit_notification($proposal_id, $seminar_id, $update_data)
+    {
+        try {
+            // Get data mahasiswa dan dosen
+            $data = $this->db->select('
+                    pm.judul as judul_proposal,
+                    ssm.judul_skripsi,
+                    ssm.keterangan_mahasiswa,
+                    m.nama as nama_mahasiswa,
+                    m.nim,
+                    d.email as email_pembimbing,
+                    d.nama as nama_pembimbing
+                ')
+                ->from('proposal_mahasiswa pm')
+                ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
+                ->join('dosen d', 'pm.dosen_id = d.id')
+                ->join('seminar_skripsi_mahasiswa ssm', 'ssm.proposal_id = pm.id')
+                ->where('pm.id', $proposal_id)
+                ->where('ssm.id', $seminar_id)
+                ->get()->row();
+                
+            if (!$data || !$data->email_pembimbing) {
+                log_message('info', 'Resubmit notification skipped: no dosen email found');
+                return false;
+            }
+            
+            // Email config (sama seperti submit pertama)
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
+            
+            $this->email->initialize($config);
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM TA STK Santo Yakobus');
+            $this->email->to($data->email_pembimbing);
+            $this->email->subject('🔄 Pengajuan Ulang Seminar Skripsi - ' . $data->nama_mahasiswa);
+            
+            // Tentukan judul yang digunakan
+            $judul_display = !empty($data->judul_skripsi) ? $data->judul_skripsi : $data->judul_proposal;
+            $judul_berubah = !empty($data->judul_skripsi) && ($data->judul_skripsi !== $data->judul_proposal);
+            
+            // Template email khusus untuk resubmit
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>🔄 Pengajuan Ulang Seminar Skripsi</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$data->nama_pembimbing}</strong>,</p>
+                    
+                    <p>Mahasiswa bimbingan Anda telah melakukan <strong>PENGAJUAN ULANG</strong> seminar skripsi setelah perbaikan:</p>
+                    
+                    <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #17a2b8;'>
+                        <h4 style='color: #0c5460; margin: 0 0 10px 0;'>👨‍🎓 Data Mahasiswa:</h4>
+                        <ul style='color: #0c5460; margin: 0;'>
+                            <li><strong>Nama:</strong> {$data->nama_mahasiswa}</li>
+                            <li><strong>NIM:</strong> {$data->nim}</li>
+                            <li><strong>Judul:</strong> {$judul_display}</li>
+                        </ul>
+                    </div>";
+            
+            // Tampilkan info jika judul berubah
+            if ($judul_berubah) {
+                $message .= "
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>📝 Perubahan Judul:</h4>
+                        <p style='color: #856404; margin: 0;'>
+                            <strong>Judul Proposal:</strong> {$data->judul_proposal}<br>
+                            <strong>Judul Skripsi Baru:</strong> {$data->judul_skripsi}
+                        </p>
+                    </div>";
+            }
+            
+            $message .= "
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>💬 Keterangan Perbaikan:</h4>
+                        <p style='color: #155724; margin: 0;'>" . nl2br(htmlspecialchars($data->keterangan_mahasiswa)) . "</p>
+                    </div>
+                    
+                    <div style='background-color: #cce5ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>⏭️ Tindak Lanjut:</h4>
+                        <p style='color: #004085; margin: 0;'>
+                            Silakan review kembali pengajuan ulang ini dan berikan rekomendasi untuk tahap selanjutnya.
+                        </p>
+                    </div>
+                    
+                    <p style='text-align: center; margin-top: 20px;'>
+                        <a href='" . base_url('dosen/seminar_skripsi') . "' 
+                           style='background-color: #17a2b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
+                            📋 Review Pengajuan Ulang
+                        </a>
+                    </p>
+                    
+                    <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                        Status: Menunggu review ulang dari dosen pembimbing
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if ($result) {
+                log_message('info', 'Resubmit notification sent successfully to: ' . $data->email_pembimbing);
+            } else {
+                log_message('error', 'Failed to send resubmit notification: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Resubmit notification error: ' . $e->getMessage());
+            return false;
+        }
     }
 }
 

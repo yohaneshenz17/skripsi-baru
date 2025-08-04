@@ -280,7 +280,7 @@ public function detail($seminar_id) {
             $this->session->set_flashdata('success', $success_msg);
     
             // ✅ SEND NOTIFICATIONS (Optional - bisa dimatikan dulu untuk testing)
-            // $this->_send_validation_notifications($seminar_id, $decision, $plagiarism_score);
+            $this->_send_validation_notifications($seminar_id, $decision, $plagiarism_score);
     
             // ✅ LOG FOR AUDIT TRAIL
             log_message('info', sprintf(
@@ -1132,6 +1132,355 @@ public function detail($seminar_id) {
                 </div>
             </div>
         </div>";
+    }
+    
+    /**
+     * ✅ Main method untuk kirim notifikasi validasi
+     */
+    private function _send_validation_notifications($seminar_id, $decision, $plagiarism_score) {
+        try {
+            // Get fresh seminar data untuk email
+            $seminar = $this->_get_seminar_detail($seminar_id);
+            if (!$seminar) {
+                log_message('error', 'Cannot send notifications: seminar data not found');
+                return false;
+            }
+            
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'smtp_crypto' => 'tls'
+            ];
+            
+            $this->email->initialize($config);
+            
+            if ($decision === 'approved') {
+                // Kirim email disetujui ke mahasiswa dan dosen
+                $this->_kirim_email_skripsi_disetujui($seminar, $plagiarism_score);
+            } else {
+                // Kirim email ditolak ke mahasiswa dan dosen  
+                $this->_kirim_email_skripsi_ditolak($seminar, $plagiarism_score);
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending validation notifications: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ Kirim email ke mahasiswa saat skripsi disetujui
+     */
+    private function _kirim_email_skripsi_disetujui($seminar, $plagiarism_score) {
+        try {
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('✅ Seminar Skripsi Disetujui Kaprodi - ' . $seminar->nama_mahasiswa);
+            
+            // ✅ PERBAIKAN: Gunakan variable lokal untuk judul (sesuai catatan chat sebelumnya)
+            $judul_seminar = $seminar->judul_current ?? $seminar->judul_skripsi ?? $seminar->judul_proposal_original ?? 'Judul Skripsi';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Seminar Skripsi Disetujui</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Selamat <strong>{$seminar->nama_mahasiswa}</strong>!</p>
+                    
+                    <p>Pengajuan seminar skripsi Anda telah <strong>DISETUJUI</strong> oleh Kaprodi setelah melalui validasi plagiarisme.</p>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>📚 Detail Seminar:</h4>
+                        <ul style='color: #155724; margin: 0;'>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
+                            <li><strong>Persentase Plagiarisme:</strong> " . number_format($plagiarism_score, 1) . "% (Memenuhi syarat)</li>
+                            <li><strong>Status:</strong> Disetujui untuk dijadwalkan</li>
+                            <li><strong>Tanggal Persetujuan:</strong> " . date('d/m/Y H:i') . "</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>⏭️ Tahap Selanjutnya:</h4>
+                        <p style='color: #856404; margin: 0;'>
+                            Penjadwalan seminar akan diatur oleh Kaprodi. Anda akan mendapat notifikasi lebih lanjut.
+                        </p>
+                    </div>
+                    
+                    <p style='text-align: center; margin-top: 20px;'>
+                        <a href='" . base_url('mahasiswa/seminar_skripsi') . "' 
+                           style='background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📱 Cek Status di SIM-TA
+                        </a>
+                    </p>
+                    
+                    <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                        Mohon segera persiapkan presentasi dan dokumen yang diperlukan untuk seminar skripsi.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result_mahasiswa = $this->email->send();
+            
+            if (!$result_mahasiswa) {
+                log_message('error', 'Failed to send approval email to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            // ✅ Kirim juga ke dosen pembimbing
+            $this->_kirim_email_skripsi_disetujui_dosen($seminar, $plagiarism_score);
+            
+            return $result_mahasiswa;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending skripsi approval email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ Kirim email ke dosen saat skripsi disetujui
+     */
+    private function _kirim_email_skripsi_disetujui_dosen($seminar, $plagiarism_score) {
+        try {
+            // Skip jika tidak ada email dosen
+            if (empty($seminar->email_pembimbing)) {
+                log_message('info', 'Skipping dosen notification: no email found');
+                return true;
+            }
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_pembimbing);
+            $this->email->subject('✅ Seminar Skripsi Mahasiswa Bimbingan Disetujui - ' . $seminar->nama_mahasiswa);
+            
+            // ✅ PERBAIKAN: Gunakan variable lokal untuk judul
+            $judul_seminar = $seminar->judul_current ?? $seminar->judul_skripsi ?? $seminar->judul_proposal_original ?? 'Judul Skripsi';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Seminar Skripsi Mahasiswa Bimbingan Disetujui</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_pembimbing}</strong>,</p>
+                    
+                    <p>Pengajuan seminar skripsi mahasiswa bimbingan Anda telah <strong>DISETUJUI</strong> oleh Kaprodi.</p>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>👨‍🎓 Data Mahasiswa:</h4>
+                        <ul style='color: #155724; margin: 0;'>
+                            <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
+                            <li><strong>NIM:</strong> {$seminar->nim}</li>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
+                            <li><strong>Plagiarisme:</strong> " . number_format($plagiarism_score, 1) . "%</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>⏭️ Informasi:</h4>
+                        <p style='color: #856404; margin: 0;'>
+                            Seminar akan dijadwalkan oleh Kaprodi. Anda akan mendapat pemberitahuan jadwal lebih lanjut.
+                        </p>
+                    </div>
+                    
+                    <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                        Mohon bantu persiapan mahasiswa untuk seminar skripsi.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send approval email to dosen: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending skripsi approval email to dosen: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ Kirim email ke mahasiswa saat skripsi ditolak
+     */
+    private function _kirim_email_skripsi_ditolak($seminar, $plagiarism_score) {
+        try {
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('⚠️ Seminar Skripsi Perlu Perbaikan - ' . $seminar->nama_mahasiswa);
+            
+            // ✅ PERBAIKAN: Gunakan variable lokal untuk judul
+            $judul_seminar = $seminar->judul_current ?? $seminar->judul_skripsi ?? $seminar->judul_proposal_original ?? 'Judul Skripsi';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>⚠️ Seminar Skripsi Perlu Perbaikan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Mohon maaf, pengajuan seminar skripsi Anda <strong>PERLU DIPERBAIKI</strong> berdasarkan hasil validasi Kaprodi.</p>
+                    
+                    <div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #dc3545;'>
+                        <h4 style='color: #721c24; margin: 0 0 10px 0;'>📚 Detail Seminar:</h4>
+                        <ul style='color: #721c24; margin: 0;'>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
+                            <li><strong>Persentase Plagiarisme:</strong> " . number_format($plagiarism_score, 1) . "%</li>
+                            <li><strong>Tanggal Review:</strong> " . date('d/m/Y H:i') . "</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>💬 Catatan Kaprodi:</h4>
+                        <p style='color: #856404; margin: 0;'>" . nl2br(htmlspecialchars($seminar->komentar_kaprodi ?? 'Silakan lakukan perbaikan sesuai standar plagiarisme yang ditetapkan.')) . "</p>
+                    </div>
+                    
+                    <div style='background-color: #cce5ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>⏭️ Tindak Lanjut:</h4>
+                        <ol style='color: #004085; margin: 0;'>
+                            <li>Lakukan perbaikan sesuai catatan Kaprodi</li>
+                            <li>Konsultasi dengan dosen pembimbing</li>
+                            <li>Ajukan ulang setelah perbaikan selesai</li>
+                        </ol>
+                    </div>
+                    
+                    <p style='text-align: center; margin-top: 20px;'>
+                        <a href='" . base_url('mahasiswa/seminar_skripsi') . "' 
+                           style='background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📱 Lihat Detail di SIM-TA
+                        </a>
+                    </p>
+                    
+                    <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                        Jangan menyerah! Lakukan perbaikan dan ajukan kembali.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result_mahasiswa = $this->email->send();
+            
+            if (!$result_mahasiswa) {
+                log_message('error', 'Failed to send rejection email to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            // ✅ Kirim juga ke dosen pembimbing
+            $this->_kirim_email_skripsi_ditolak_dosen($seminar, $plagiarism_score);
+            
+            return $result_mahasiswa;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending skripsi rejection email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ Kirim email ke dosen saat skripsi ditolak
+     */
+    private function _kirim_email_skripsi_ditolak_dosen($seminar, $plagiarism_score) {
+        try {
+            // Skip jika tidak ada email dosen
+            if (empty($seminar->email_pembimbing)) {
+                log_message('info', 'Skipping dosen notification: no email found');
+                return true;
+            }
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_pembimbing);
+            $this->email->subject('⚠️ Seminar Skripsi Mahasiswa Bimbingan Ditolak - ' . $seminar->nama_mahasiswa);
+            
+            // ✅ PERBAIKAN: Gunakan variable lokal untuk judul
+            $judul_seminar = $seminar->judul_current ?? $seminar->judul_skripsi ?? $seminar->judul_proposal_original ?? 'Judul Skripsi';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>⚠️ Seminar Skripsi Mahasiswa Bimbingan Ditolak</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_pembimbing}</strong>,</p>
+                    
+                    <p>Pengajuan seminar skripsi mahasiswa bimbingan Anda <strong>DITOLAK</strong> oleh Kaprodi.</p>
+                    
+                    <div style='background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #dc3545;'>
+                        <h4 style='color: #721c24; margin: 0 0 10px 0;'>👨‍🎓 Data Mahasiswa:</h4>
+                        <ul style='color: #721c24; margin: 0;'>
+                            <li><strong>Nama:</strong> {$seminar->nama_mahasiswa}</li>
+                            <li><strong>NIM:</strong> {$seminar->nim}</li>
+                            <li><strong>Judul:</strong> {$judul_seminar}</li>
+                            <li><strong>Plagiarisme:</strong> " . number_format($plagiarism_score, 1) . "%</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;'>
+                        <h4 style='color: #856404; margin: 0 0 10px 0;'>💬 Catatan Kaprodi:</h4>
+                        <p style='color: #856404; margin: 0;'>" . nl2br(htmlspecialchars($seminar->komentar_kaprodi ?? 'Silakan bantu mahasiswa melakukan perbaikan sesuai standar yang ditetapkan.')) . "</p>
+                    </div>
+                    
+                    <div style='background-color: #cce5ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #004085; margin: 0 0 10px 0;'>⏭️ Harap Bantu:</h4>
+                        <p style='color: #004085; margin: 0;'>
+                            Mohon bantu mahasiswa melakukan perbaikan sesuai catatan Kaprodi agar dapat mengajukan ulang.
+                        </p>
+                    </div>
+                    
+                    <p style='font-size: 14px; color: #6c757d; text-align: center; margin-top: 20px;'>
+                        Terima kasih atas bimbingannya.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send rejection email to dosen: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending skripsi rejection email to dosen: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**

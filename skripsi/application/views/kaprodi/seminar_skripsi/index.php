@@ -1,12 +1,11 @@
 <?php
 /**
- * FINAL FIXED - Seminar Skripsi Index (Data Muncul + Header Benar)
+ * MINIMAL FIX - Hanya Tambah Tombol Penjadwalan
  * File: application/views/kaprodi/seminar_skripsi/index.php
  * 
- * MENGGABUNGKAN:
- * 1. STRUKTUR HEADER dari file baru (tidak double)
- * 2. LOGIC DATA dari file lama (data muncul)
- * 3. MENGHILANGKAN tombol checklist validasi
+ * PERUBAHAN MINIMAL:
+ * - Tambah tombol "Jadwalkan" untuk status_kaprodi = 'approved' dan tanggal_seminar IS NULL
+ * - Semua struktur existing tetap sama
  */
 
 // ✅ Helper function untuk word limiter dengan fallback
@@ -274,14 +273,24 @@ $stats = isset($stats) ? $stats : [];
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <!-- FIXED: HANYA TOMBOL DETAIL -->
+                                            <!-- ✅ TOMBOL DETAIL (existing) -->
                                             <a href="<?= base_url('kaprodi/seminar_skripsi/detail/' . $item->id) ?>" 
                                                class="btn btn-sm btn-outline-primary" 
                                                title="Lihat Detail & Validasi">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             
-                                            <!-- Info tambahan untuk jadwal jika sudah ada -->
+                                            <!-- ✅ TAMBAHAN BARU: TOMBOL JADWALKAN -->
+                                            <?php if(($item->status_kaprodi ?? '') == 'approved' && empty($item->tanggal_seminar)): ?>
+                                                <a href="<?= base_url('kaprodi/seminar_skripsi/penjadwalan/' . $item->id) ?>" 
+                                                   class="btn btn-sm btn-success ml-1" 
+                                                   title="Jadwalkan Seminar"
+                                                   onclick="return confirm('Apakah Anda akan menjadwalkan seminar skripsi untuk <?= htmlspecialchars($item->nama_mahasiswa) ?>?')">
+                                                    <i class="fas fa-calendar-plus"></i> Jadwalkan
+                                                </a>
+                                            <?php endif; ?>
+                                            
+                                            <!-- ✅ TOMBOL INFO JADWAL (existing - jika sudah ada jadwal) -->
                                             <?php if(!empty($item->tanggal_seminar)): ?>
                                                 <button type="button" 
                                                         class="btn btn-sm btn-outline-info ml-1" 

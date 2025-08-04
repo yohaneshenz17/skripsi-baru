@@ -739,11 +739,40 @@ if ($seminar->status_pembimbing == 'rejected') {
                         </a>
                     <?php endif; ?>
                     
-                    <?php if ($has_penilaian): ?>
-                        <a href="<?= base_url('mahasiswa/seminar_skripsi/penilaian/' . $seminar->id) ?>" 
+                    <?php 
+                    // ✅ NEW: Cek apakah penilaian sudah dipublikasikan
+                    $has_published_penilaian = false;
+                    $penilaian_published = null;
+                    
+                    if ($seminar->status == 'completed') {
+                        $CI = &get_instance();
+                        $CI->db->select('id, published_at');
+                        $CI->db->from('penilaian_seminar_skripsi');
+                        $CI->db->where('seminar_skripsi_id', $seminar->id);
+                        $CI->db->where('status_penilaian', 'published');
+                        $CI->db->where('published_at IS NOT NULL');
+                        $penilaian_published = $CI->db->get()->row();
+                        $has_published_penilaian = !empty($penilaian_published);
+                    }
+                    ?>
+                    
+                    <?php if ($has_published_penilaian): ?>
+                        <a href="<?= base_url('mahasiswa/seminar_skripsi/view_penilaian/' . $seminar->id) ?>" 
                            class="btn btn-success btn-block btn-block-spacing">
                             <i class="fas fa-star mr-2"></i>Lihat Hasil Penilaian
                         </a>
+                        <small class="text-muted d-block mb-3 text-center">
+                            <i class="fas fa-check-circle text-success mr-1"></i>
+                            Dipublikasi: <?= date('d/m/Y H:i', strtotime($penilaian_published->published_at)) ?>
+                        </small>
+                    <?php elseif ($seminar->status == 'completed'): ?>
+                        <button class="btn btn-outline-secondary btn-block btn-block-spacing" disabled>
+                            <i class="fas fa-clock mr-2"></i>Menunggu Publikasi Nilai
+                        </button>
+                        <small class="text-muted d-block mb-3 text-center">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Nilai akan segera dipublikasikan
+                        </small>
                     <?php endif; ?>
                     
                     <?php if ($can_edit): ?>

@@ -392,9 +392,9 @@ class Seminar_skripsi extends CI_Controller {
                 'progress' => 90
             ],
             'completed' => [
-                'text' => 'Seminar Selesai',
-                'class' => 'success',
-                'progress' => 100
+                'text' => $this->_get_completed_status_text($seminar),
+                'class' => $this->_get_completed_status_class($seminar),
+                'progress' => $this->_get_completed_progress($seminar)
             ],
             'rejected' => [
                 'text' => 'Ditolak - Perlu Perbaikan',
@@ -1014,6 +1014,116 @@ class Seminar_skripsi extends CI_Controller {
         } catch (Exception $e) {
             log_message('error', 'Resubmit notification error: ' . $e->getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * ✅ NEW: View hasil penilaian seminar skripsi
+     */
+    public function view_penilaian($seminar_id = null)
+    {
+        if (!$seminar_id) {
+            redirect('mahasiswa/seminar_skripsi');
+            return;
+        }
+        
+        $mahasiswa_id = $this->session->userdata('id');
+        
+        // Validasi akses mahasiswa
+        $seminar = $this->_get_seminar_by_id($seminar_id, $mahasiswa_id);
+        if (!$seminar) {
+            show_404();
+            return;
+        }
+        
+        // Get penilaian data yang sudah published
+        $penilaian = $this->_get_penilaian_published($seminar_id);
+        if (!$penilaian) {
+            $this->session->set_flashdata('error', 'Penilaian belum tersedia atau belum dipublikasikan');
+            redirect('mahasiswa/seminar_skripsi');
+            return;
+        }
+        
+        $data = [
+            'title' => 'Hasil Penilaian Seminar Skripsi',
+            'seminar' => $seminar,
+            'penilaian' => $penilaian
+        ];
+        
+        $this->load->view('template/mahasiswa', [
+            'title' => 'Hasil Penilaian Seminar Skripsi',
+            'content' => $this->load->view('mahasiswa/seminar_skripsi/view_penilaian', $data, TRUE)
+        ]);
+    }
+    
+    /**
+     * ✅ NEW: Get published penilaian data
+     */
+    private function _get_penilaian_published($seminar_id)
+    {
+        try {
+            $this->db->select('*');
+            $this->db->from('penilaian_seminar_skripsi');
+            $this->db->where('seminar_skripsi_id', $seminar_id);
+            $this->db->where('status_penilaian', 'published');
+            $this->db->where('published_at IS NOT NULL');
+            
+            return $this->db->get()->row();
+        } catch (Exception $e) {
+            log_message('error', 'Get penilaian published error: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * ✅ NEW: Check if penilaian exists and published
+     */
+    private function _has_published_penilaian($seminar_id)
+    {
+        try {
+            $count = $this->db->where('seminar_skripsi_id', $seminar_id)
+                             ->where('status_penilaian', 'published')
+                             ->where('published_at IS NOT NULL')
+                             ->count_all_results('penilaian_seminar_skripsi');
+            return $count > 0;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ NEW: Get completed status text based on penilaian availability
+     */
+    private function _get_completed_status_text($seminar)
+    {
+        if ($this->_has_published_penilaian($seminar->id)) {
+            return 'Seminar Selesai - Nilai Tersedia';
+        } else {
+            return 'Seminar Selesai - Menunggu Nilai';
+        }
+    }
+    
+    /**
+     * ✅ NEW: Get completed status class based on penilaian availability
+     */
+    private function _get_completed_status_class($seminar)
+    {
+        if ($this->_has_published_penilaian($seminar->id)) {
+            return 'success';
+        } else {
+            return 'info';
+        }
+    }
+    
+    /**
+     * ✅ NEW: Get completed progress based on penilaian availability
+     */
+    private function _get_completed_progress($seminar)
+    {
+        if ($this->_has_published_penilaian($seminar->id)) {
+            return 100;
+        } else {
+            return 95;
         }
     }
 }

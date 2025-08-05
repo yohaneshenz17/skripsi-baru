@@ -106,12 +106,11 @@ class Publikasi extends CI_Controller {
     }
 
 /**
- * Input repository link dengan flexible column handling
- * REPLACE method input_repository yang sudah ada dengan kode ini
+ * REPLACE method input_repository() di line ~450-500 dengan kode ini:
  */
 public function input_repository($publikasi_id) {
     try {
-        // Validasi ID publikasi (gunakan logic yang sudah ada)
+        // Validasi ID publikasi
         $publikasi = $this->_get_publikasi_detail_safe($publikasi_id);
         
         if (!$publikasi) {
@@ -120,54 +119,68 @@ public function input_repository($publikasi_id) {
             return;
         }
         
-        // ===== PERBAIKAN: HANDLE POST REQUEST DENGAN PROPER VALIDATION =====
+        // HANDLE POST REQUEST
         if ($this->input->post()) {
-            // Set validation rules yang proper
+            // Validation rules
             $this->form_validation->set_rules('link_repository', 'Link Repository', 
                 'required|valid_url|max_length[500]');
             $this->form_validation->set_rules('catatan_staf', 'Catatan Staf', 
                 'max_length[1000]');
             
             if ($this->form_validation->run()) {
-                // Prepare update data (gunakan struktur yang sudah ada)
+                
+                // ===== DEBUG: CEK SESSION USER_ID =====
+                $user_id = $this->session->userdata('id');
+                log_message('debug', 'Session user_id: ' . ($user_id ? $user_id : 'NULL'));
+                
+                if (empty($user_id)) {
+                    $this->session->set_flashdata('error', 'Session tidak valid. Silakan login ulang.');
+                    redirect('auth/login');
+                    return;
+                }
+                
+                // ===== DIRECT FIX: LANGSUNG SET user_id TANPA CEK KOLOM =====
                 $update_data = [
                     'link_repository' => $this->input->post('link_repository'),
-                    'updated_at' => date('Y-m-d H:i:s')
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'user_id' => $user_id  // <<<< DIRECT SET - NO CONDITIONS
                 ];
                 
-                // ===== PERBAIKAN: TAMBAH CATATAN STAF JIKA ADA =====
+                // Tambah catatan staf jika ada
                 $catatan_staf = $this->input->post('catatan_staf');
-                if (!empty($catatan_staf) && $this->_column_exists('catatan_staf')) {
+                if (!empty($catatan_staf)) {
                     $update_data['catatan_staf'] = $catatan_staf;
                 }
                 
-                // Tambahan kolom jika tersedia (logic yang sudah ada)
-                if ($this->_column_exists('tanggal_input_repository')) {
-                    $update_data['tanggal_input_repository'] = date('Y-m-d H:i:s');
-                }
+                // ===== DEBUG: LOG UPDATE DATA =====
+                log_message('debug', 'Update data for publikasi_id ' . $publikasi_id . ': ' . json_encode($update_data));
                 
-                // ===== PERBAIKAN: UPDATE DAN PROPER RESPONSE =====
-                if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
+                // ===== DIRECT UPDATE TANPA HELPER METHOD =====
+                $this->db->where('id', $publikasi_id);
+                $result = $this->db->update('publikasi_tugas_akhir', $update_data);
+                
+                // ===== DEBUG: LOG QUERY =====
+                log_message('debug', 'Last query: ' . $this->db->last_query());
+                
+                if ($result) {
                     $action = empty($publikasi->link_repository) ? 'disimpan' : 'diperbarui';
                     $this->session->set_flashdata('success', "Link repository berhasil {$action}.");
-                    
-                    // ===== PERBAIKAN: PROPER REDIRECT =====
                     redirect('staf/publikasi/detail/' . $publikasi_id);
                     return;
                 } else {
-                    $this->session->set_flashdata('error', 'Gagal menyimpan data. Silakan coba lagi.');
+                    $error = $this->db->error();
+                    log_message('error', 'Database error: ' . json_encode($error));
+                    $this->session->set_flashdata('error', 'Gagal menyimpan data. Error: ' . $error['message']);
                 }
             } else {
-                // ===== PERBAIKAN: PROPER VALIDATION ERROR HANDLING =====
                 $this->session->set_flashdata('error', 'Data tidak valid. ' . validation_errors(' ', ' '));
             }
             
-            // Redirect kembali ke form jika ada error
             redirect('staf/publikasi/input_repository/' . $publikasi_id);
             return;
         }
         
-        // ===== GET REQUEST - TAMPILKAN FORM (logic yang sudah ada) =====
+        // GET REQUEST - TAMPILKAN FORM
         $view_data = [
             'publikasi' => $publikasi,
             'title' => 'Input Repository - ' . substr($publikasi->judul, 0, 50)
@@ -181,9 +194,84 @@ public function input_repository($publikasi_id) {
         ]);
         
     } catch (Exception $e) {
-        // Error handling yang sudah ada
+        log_message('error', 'input_repository exception: ' . $e->getMessage());
         $this->session->set_flashdata('error', 'Error: ' . $e->getMessage());
         redirect('staf/publikasi');
+    }
+}
+
+/**
+ * TAMBAHAN: Method untuk debug session (temporary)
+ * TAMBAHKAN method ini ke dalam class untuk troubleshooting
+ */
+public function debug_session() {
+    if (ENVIRONMENT !== 'development') {
+        show_404();
+        return;
+    }
+    
+    echo "<h3>🔍 DEBUG INFORMASI</h3>";
+    
+    echo "<h4>1. Session Data:</h4>";
+    echo "<pre>";
+    print_r($this->session->userdata());
+    echo "</pre>";
+    
+    echo "<h4>2. Database User Check:</h4>";
+    $user_id = $this->session->userdata('id');
+    if ($user_id) {
+        $user = $this->db->get_where('dosen', ['id' => $user_id])->row();
+        echo "<pre>";
+        print_r($user);
+        echo "</pre>";
+    } else {
+        echo "<p style='color:red'>❌ Session user_id is EMPTY!</p>";
+    }
+    
+    echo "<h4>3. Tabel publikasi_tugas_akhir Structure:</h4>";
+    $fields = $this->db->list_fields('publikasi_tugas_akhir');
+    echo "<pre>";
+    print_r($fields);
+    echo "</pre>";
+    
+    echo "<h4>4. Sample Data publikasi_id=3:</h4>";
+    $sample = $this->db->get_where('publikasi_tugas_akhir', ['id' => 3])->row();
+    echo "<pre>";
+    print_r($sample);
+    echo "</pre>";
+}
+
+/**
+ * ALTERNATIF: Jika masalah di constraint database
+ * TAMBAHKAN method ini sebagai fallback
+ */
+public function force_update_repository($publikasi_id) {
+    if (ENVIRONMENT !== 'development') {
+        show_404();
+        return;
+    }
+    
+    $link = $this->input->get('link');
+    $user_id = $this->session->userdata('id');
+    
+    if (empty($link) || empty($user_id)) {
+        echo "Usage: /staf/publikasi/force_update_repository/3?link=https://example.com";
+        return;
+    }
+    
+    // BYPASS semua helper method - direct SQL
+    $sql = "UPDATE publikasi_tugas_akhir 
+            SET link_repository = ?, 
+                user_id = ?, 
+                updated_at = NOW() 
+            WHERE id = ?";
+    
+    $result = $this->db->query($sql, [$link, $user_id, $publikasi_id]);
+    
+    if ($result) {
+        echo "✅ SUCCESS: Repository updated directly";
+    } else {
+        echo "❌ FAILED: " . json_encode($this->db->error());
     }
 }
 
@@ -445,29 +533,55 @@ public function input_repository($publikasi_id) {
         }
     }
 
-    /**
-     * Update publikasi dengan safe handling
-     */
-    private function _update_publikasi_safe($publikasi_id, $data) {
-        try {
-            $main_table = $this->table_info['main_table'] ?? 'proposal_mahasiswa';
-            
-            // Filter data untuk kolom yang tersedia saja
-            $filtered_data = [];
-            foreach ($data as $key => $value) {
-                if ($this->_column_exists($key)) {
-                    $filtered_data[$key] = $value;
-                }
+/**
+ * OPTIONAL: Perbaiki method _update_publikasi_safe jika masih error
+ * HANYA JIKA MASIH ADA MASALAH SETELAH PERBAIKAN DI ATAS
+ */
+private function _update_publikasi_safe($publikasi_id, $data) {
+    try {
+        $main_table = $this->table_info['main_table'] ?? 'publikasi_tugas_akhir';
+        
+        // PASTIKAN USER_ID ADA (fallback)
+        if (!isset($data['user_id']) && $this->_column_exists('user_id')) {
+            $user_id = $this->session->userdata('id');
+            if ($user_id) {
+                $data['user_id'] = $user_id;
+            } else {
+                log_message('error', 'Session user_id is empty for update publikasi_id: ' . $publikasi_id);
+                return false;
             }
-            
-            return $this->db->where('id', $publikasi_id)
-                           ->update($main_table, $filtered_data);
-                           
-        } catch (Exception $e) {
-            log_message('error', 'Update failed: ' . $e->getMessage());
+        }
+        
+        // Filter data untuk kolom yang tersedia saja
+        $filtered_data = [];
+        foreach ($data as $key => $value) {
+            if ($this->_column_exists($key)) {
+                $filtered_data[$key] = $value;
+            }
+        }
+        
+        if (empty($filtered_data)) {
+            log_message('error', 'No valid data to update for publikasi_id: ' . $publikasi_id);
             return false;
         }
+        
+        // Log untuk debugging
+        log_message('debug', 'Updating publikasi_id ' . $publikasi_id . ' with data: ' . json_encode($filtered_data));
+        
+        $result = $this->db->where('id', $publikasi_id)
+                          ->update($main_table, $filtered_data);
+        
+        if (!$result) {
+            log_message('error', 'Database update failed. Last query: ' . $this->db->last_query());
+        }
+        
+        return $result;
+                           
+    } catch (Exception $e) {
+        log_message('error', 'Update failed: ' . $e->getMessage());
+        return false;
     }
+}
 
     /**
      * Prepare validation data based on available columns

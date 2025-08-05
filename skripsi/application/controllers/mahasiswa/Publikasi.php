@@ -41,11 +41,11 @@ class Publikasi extends CI_Controller {
             redirect('auth/login');
         }
         
-        if($this->session->userdata('level') != 'mahasiswa') {
+        if($this->session->userdata('level') != '3') {
             show_error('Akses ditolak. Halaman khusus mahasiswa.', 403);
         }
         
-        $this->mahasiswa_id = $this->session->userdata('user_id');
+        $this->mahasiswa_id = $this->session->userdata('id');
     }
 
     /**

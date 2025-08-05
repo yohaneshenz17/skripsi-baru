@@ -1,6 +1,12 @@
 <!-- 
-PUBLIKASI TUGAS AKHIR - MAHASISWA DASHBOARD - FIXED UI KONSISTEN
+PUBLIKASI TUGAS AKHIR - MAHASISWA DASHBOARD - WORKFLOW FIXED
 File: application/views/mahasiswa/publikasi/index.php
+
+✅ PERBAIKAN WORKFLOW STEP 2→3:
+- Perbaikan status draft dengan tombol yang tepat
+- Menampilkan instruksi yang jelas untuk workflow
+- Tombol "Lengkapi & Kirim Ajuan" untuk draft
+- Status yang lebih informatif
 
 MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANGKAH:
 1. Mahasiswa Memenuhi Syarat (16+ jurnal)
@@ -229,73 +235,102 @@ MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANG
                                     </div>
                                 </div>
                                 
-                                <!-- Status Detail -->
+                                <!-- ✅ PERBAIKAN UTAMA: Status Detail dengan Action yang Tepat -->
                                 <div class="alert alert-<?= $publikasi->status == 'completed' ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : 'info') ?>">
                                     <?php if ($publikasi->status === 'draft'): ?>
                                         <h6><i class="fas fa-edit"></i> Step 2: Form Pengajuan Masih Draft</h6>
-                                        <p>Anda telah memulai pengisian form publikasi. Silakan lengkapi dan lanjut ke Step 3 (Kirim Ajuan).</p>
+                                        <p class="mb-2">Anda telah memulai pengisian form publikasi tetapi belum mengirim ajuan ke dosen pembimbing.</p>
+                                        <p class="mb-3"><strong>Yang sudah dilakukan:</strong> ✅ Form publikasi tersimpan sebagai draft</p>
+                                        <p class="mb-3"><strong>Langkah selanjutnya:</strong> Lengkapi form dan pilih "Kirim Ajuan ke Dosen" untuk melanjutkan ke Step 3.</p>
+                                        
+                                        <!-- Action Buttons untuk Draft -->
+                                        <div class="action-buttons mt-3">
+                                            <a href="<?= base_url('mahasiswa/publikasi/edit/' . $publikasi->id) ?>" 
+                                               class="btn btn-warning mr-2">
+                                                <i class="fas fa-edit"></i> Lengkapi & Kirim Ajuan (Step 2→3)
+                                            </a>
+                                            <a href="<?= base_url('mahasiswa/publikasi/tracking/' . $publikasi->id) ?>" 
+                                               class="btn btn-info">
+                                                <i class="fas fa-route"></i> Lihat Detail Progress
+                                            </a>
+                                        </div>
                                         
                                     <?php elseif ($publikasi->status === 'submitted' || $publikasi->status === 'review_pembimbing'): ?>
                                         <h6><i class="fas fa-clock"></i> Step 4-6: Menunggu Review Dosen Pembimbing</h6>
-                                        <p>✅ Step 2 & 3 selesai. Pengajuan Anda sedang menunggu review dari dosen pembimbing.</p>
-                                        <small class="text-muted">Disubmit pada: <?= date('d F Y H:i', strtotime($publikasi->tanggal_pengajuan)) ?></small>
+                                        <p class="mb-2">✅ Step 2 & 3 selesai. Pengajuan Anda sedang menunggu review dari dosen pembimbing.</p>
+                                        <p class="mb-3"><strong>Status:</strong> Dosen pembimbing telah mendapat notifikasi email dan akan melakukan review.</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> Disubmit pada: <?= date('d F Y H:i', strtotime($publikasi->tanggal_pengajuan)) ?>
+                                            <br><i class="fas fa-envelope"></i> Email notifikasi telah dikirim ke: <?= $proposal->nama_pembimbing ?? 'Dosen Pembimbing' ?>
+                                        </small>
                                         
                                     <?php elseif ($publikasi->status === 'approved_pembimbing' || $publikasi->status === 'review_staf'): ?>
                                         <h6><i class="fas fa-user-tie"></i> Step 7: Review Staf</h6>
-                                        <p>✅ Step 4-6 selesai. Dosen pembimbing telah menyetujui. Sedang menunggu validasi staf.</p>
-                                        <?php if ($publikasi->komentar_pembimbing): ?>
-                                            <div class="mt-2">
-                                                <strong>Komentar Dosen:</strong><br>
-                                                <em>"<?= $publikasi->komentar_pembimbing ?>"</em>
+                                        <p class="mb-2">✅ Step 4-6 selesai. Dosen pembimbing telah menyetujui. Sedang menunggu validasi staf untuk input repository.</p>
+                                        <?php if (!empty($publikasi->komentar_pembimbing)): ?>
+                                            <div class="mt-2 p-2 bg-light border-left border-success">
+                                                <small class="font-weight-bold text-success">💬 Komentar Dosen Pembimbing:</small>
+                                                <p class="mb-0 mt-1"><?= nl2br(htmlspecialchars($publikasi->komentar_pembimbing)) ?></p>
                                             </div>
                                         <?php endif; ?>
                                         
                                     <?php elseif ($publikasi->status === 'completed'): ?>
                                         <h6><i class="fas fa-check-circle"></i> Step 8-9: Publikasi Selesai! 🎉</h6>
-                                        <p><strong>Selamat!</strong> Semua 9 langkah workflow telah selesai. Publikasi tugas akhir Anda telah berhasil diproses.</p>
-                                        <?php if ($publikasi->link_repository): ?>
-                                            <div class="mt-2">
-                                                <strong>Link Repository:</strong><br>
-                                                <a href="<?= $publikasi->link_repository ?>" target="_blank" class="btn btn-outline-info btn-sm">
-                                                    <i class="fas fa-external-link-alt"></i> Lihat Publikasi
+                                        <p class="mb-2"><strong>Selamat!</strong> Semua 9 langkah workflow telah selesai. Publikasi tugas akhir Anda telah berhasil diproses.</p>
+                                        
+                                        <?php if (!empty($publikasi->link_repository)): ?>
+                                            <div class="mt-3 p-3 bg-success text-white rounded">
+                                                <h6 class="mb-2"><i class="fas fa-link"></i> Link Repository Final:</h6>
+                                                <a href="<?= $publikasi->link_repository ?>" target="_blank" 
+                                                   class="btn btn-light btn-sm">
+                                                    <i class="fas fa-external-link-alt"></i> Lihat Publikasi Online
                                                 </a>
                                             </div>
                                         <?php endif; ?>
                                         
+                                        <!-- Download Action -->
+                                        <div class="action-buttons mt-3">
+                                            <a href="<?= base_url('mahasiswa/publikasi/download_surat/' . $publikasi->id) ?>" 
+                                               class="btn btn-success" target="_blank">
+                                                <i class="fas fa-download"></i> Step 8: Download Surat Keterangan Publikasi
+                                            </a>
+                                        </div>
+                                        
                                     <?php elseif ($publikasi->status === 'rejected'): ?>
-                                        <h6><i class="fas fa-times-circle"></i> Step 6: Pengajuan Ditolak Dosen</h6>
-                                        <p>Pengajuan ditolak dan perlu diperbaiki. Silakan perbaiki sesuai komentar dan kembali ke Step 2.</p>
-                                        <?php if ($publikasi->komentar_pembimbing): ?>
-                                            <div class="mt-2">
-                                                <strong>Alasan Penolakan:</strong><br>
-                                                <em>"<?= $publikasi->komentar_pembimbing ?>"</em>
+                                        <h6><i class="fas fa-times-circle"></i> Pengajuan Ditolak - Perlu Perbaikan</h6>
+                                        <p class="mb-2">Pengajuan publikasi Anda ditolak oleh dosen pembimbing dan perlu diperbaiki.</p>
+                                        
+                                        <?php if (!empty($publikasi->komentar_pembimbing)): ?>
+                                            <div class="mt-2 p-3 bg-warning-light border-left border-warning">
+                                                <h6 class="text-warning"><i class="fas fa-exclamation-triangle"></i> Alasan Penolakan:</h6>
+                                                <p class="mb-0"><?= nl2br(htmlspecialchars($publikasi->komentar_pembimbing)) ?></p>
                                             </div>
                                         <?php endif; ?>
+                                        
+                                        <p class="mt-3 mb-3"><strong>Langkah selanjutnya:</strong> Perbaiki dokumen sesuai catatan dosen dan ajukan ulang.</p>
+                                        
+                                        <!-- Action Buttons untuk Rejected -->
+                                        <div class="action-buttons mt-3">
+                                            <a href="<?= base_url('mahasiswa/publikasi/edit/' . $publikasi->id) ?>" 
+                                               class="btn btn-warning mr-2">
+                                                <i class="fas fa-edit"></i> Perbaiki & Ajukan Ulang (Kembali ke Step 2)
+                                            </a>
+                                            <a href="<?= base_url('mahasiswa/publikasi/tracking/' . $publikasi->id) ?>" 
+                                               class="btn btn-info">
+                                                <i class="fas fa-history"></i> Lihat Riwayat Lengkap
+                                            </a>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                                 
-                                <!-- Action Buttons -->
+                                <!-- Action Buttons Default (jika belum ada di atas) -->
+                                <?php if (!in_array($publikasi->status, ['draft', 'rejected', 'completed'])): ?>
                                 <div class="action-buttons mt-3">
-                                    <?php if ($publikasi->status === 'draft'): ?>
-                                        <a href="<?= base_url('mahasiswa/publikasi/edit/' . $publikasi->id) ?>" class="btn btn-warning">
-                                            <i class="fas fa-edit"></i> Lengkapi Form (Step 2)
-                                        </a>
-                                        
-                                    <?php elseif ($publikasi->status === 'rejected'): ?>
-                                        <a href="<?= base_url('mahasiswa/publikasi/edit/' . $publikasi->id) ?>" class="btn btn-warning">
-                                            <i class="fas fa-edit"></i> Perbaiki & Ajukan Ulang (Kembali ke Step 2)
-                                        </a>
-                                        
-                                    <?php elseif ($publikasi->status === 'completed'): ?>
-                                        <a href="<?= base_url('mahasiswa/publikasi/download_surat/' . $publikasi->id) ?>" class="btn btn-success" target="_blank">
-                                            <i class="fas fa-download"></i> Step 8: Download Surat Keterangan
-                                        </a>
-                                    <?php endif; ?>
-                                    
                                     <a href="<?= base_url('mahasiswa/publikasi/tracking/' . $publikasi->id) ?>" class="btn btn-info">
                                         <i class="fas fa-route"></i> Lihat Detail Workflow 9 Langkah
                                     </a>
                                 </div>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
                         
@@ -311,6 +346,12 @@ MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANG
                                 <?php endif; ?>
                             </ul>
                             <p><strong>Yang harus dilakukan:</strong> Lanjutkan bimbingan hingga mencapai minimal 16 jurnal yang tervalidasi dosen.</p>
+                            
+                            <div class="mt-3">
+                                <a href="<?= base_url('mahasiswa/bimbingan') ?>" class="btn btn-primary">
+                                    <i class="fas fa-users"></i> Lanjutkan Bimbingan
+                                </a>
+                            </div>
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
@@ -410,10 +451,42 @@ MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANG
                 </div>
             </div>
         </div>
+
+        <!-- ✅ PERBAIKAN: Tambah Card Tips Workflow -->
+        <?php if ($publikasi && $publikasi->status === 'draft'): ?>
+        <div class="card card-warning card-outline">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Tips: Form Draft
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="tips-list">
+                    <div class="tip-item">
+                        <i class="fas fa-edit text-warning"></i>
+                        <span>Form Anda tersimpan sebagai draft</span>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-paper-plane text-success"></i>
+                        <span>Klik "Lengkapi & Kirim Ajuan" untuk lanjut ke Step 3</span>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-envelope text-info"></i>
+                        <span>Dosen akan dapat email notifikasi setelah Anda submit</span>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-clock text-muted"></i>
+                        <span>Setelah submit, Anda tidak bisa edit lagi</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
-<!-- Custom CSS untuk Workflow -->
+<!-- Custom CSS untuk Workflow - TIDAK DIUBAH -->
 <style>
 /* Progress Steps Horizontal */
 .progress-wrapper {
@@ -633,11 +706,31 @@ MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANG
     width: 16px;
 }
 
+/* ✅ PERBAIKAN: Tips List */
+.tips-list .tip-item,
+.tips-list .dokumen-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.tips-list .tip-item i,
+.tips-list .dokumen-item i {
+    margin-right: 10px;
+    width: 16px;
+}
+
 /* Action Buttons */
 .action-buttons {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+/* ✅ PERBAIKAN: Background untuk warning light */
+.bg-warning-light {
+    background-color: #fff3cd !important;
 }
 
 /* Responsive */
@@ -680,5 +773,33 @@ $(document).ready(function() {
     $('.step-icon, .step-number, .mini-step').each(function(index) {
         $(this).delay(index * 100).fadeIn(300);
     });
+    
+    // ✅ PERBAIKAN: Highlight tombol aksi utama
+    $('.action-buttons .btn-warning').addClass('btn-pulse');
+});
+
+// ✅ PERBAIKAN: Custom pulse animation for main action button
+$('.btn-pulse').hover(function() {
+    $(this).addClass('animated pulse');
+}, function() {
+    $(this).removeClass('animated pulse');
 });
 </script>
+
+<style>
+/* ✅ PERBAIKAN: Animation untuk tombol utama */
+.btn-pulse {
+    animation: subtle-pulse 3s infinite;
+}
+
+@keyframes subtle-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.btn-pulse:hover {
+    animation: none;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+</style>

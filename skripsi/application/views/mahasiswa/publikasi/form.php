@@ -1,6 +1,12 @@
 <!-- 
-FORM PENGAJUAN PUBLIKASI - STEP 2 WORKFLOW (10 FIELD)
+FORM PENGAJUAN PUBLIKASI - STEP 2 WORKFLOW (10 FIELD) - WORKFLOW FIXED
 File: application/views/mahasiswa/publikasi/form.php
+
+✅ PERBAIKAN WORKFLOW STEP 2→3:
+- Tambah tombol dengan submit_type untuk handling yang benar
+- Tombol "Kirim Ajuan ke Dosen" untuk langsung ke Step 3
+- Tombol "Simpan sebagai Draft" untuk tetap di Step 2
+- Logika tombol berbeda untuk mode ajukan vs edit
 
 SESUAI WORKFLOW STEP 2 DENGAN 10 FIELD:
 1. Nama Lengkap (auto)
@@ -247,24 +253,56 @@ SESUAI WORKFLOW STEP 2 DENGAN 10 FIELD:
 
         </div>
         
+        <!-- ✅ PERBAIKAN UTAMA: Card Footer dengan Tombol yang Benar -->
         <div class="card-footer">
             <div class="row">
-                <div class="col-md-6">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-paper-plane"></i> 
-                        <?= $action == 'ajukan' ? 'Lanjut ke Step 3: Kirim Ajuan' : 'Update Data Publikasi' ?>
-                    </button>
+                <div class="col-md-8">
+                    <?php if ($action == 'ajukan'): ?>
+                        <!-- TOMBOL UNTUK PENGAJUAN BARU -->
+                        <button type="submit" name="submit_type" value="submit" class="btn btn-success btn-lg mr-2">
+                            <i class="fas fa-paper-plane"></i> 
+                            Kirim Ajuan ke Dosen (Step 3)
+                        </button>
+                        <button type="submit" name="submit_type" value="draft" class="btn btn-warning btn-lg">
+                            <i class="fas fa-save"></i> 
+                            Simpan sebagai Draft
+                        </button>
+                    <?php else: ?>
+                        <!-- TOMBOL UNTUK EDIT -->
+                        <button type="submit" name="submit_type" value="update" class="btn btn-primary btn-lg mr-2">
+                            <i class="fas fa-save"></i> 
+                            Update Data Publikasi
+                        </button>
+                        <?php if (isset($publikasi) && $publikasi->status == 'draft'): ?>
+                        <button type="submit" name="submit_type" value="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-paper-plane"></i> 
+                            Kirim Ajuan ke Dosen
+                        </button>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
-                <div class="col-md-6 text-right">
+                <div class="col-md-4 text-right">
                     <a href="<?= base_url('mahasiswa/publikasi') ?>" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
                     </a>
-                    <?php if ($action == 'ajukan'): ?>
-                        <button type="submit" name="save_draft" value="1" class="btn btn-warning">
-                            <i class="fas fa-save"></i> Simpan sebagai Draft
-                        </button>
-                    <?php endif; ?>
                 </div>
+            </div>
+            
+            <!-- Informasi Step -->
+            <div class="mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    <?php if ($action == 'ajukan'): ?>
+                        <strong>Petunjuk:</strong> Pilih "Simpan sebagai Draft" untuk menyimpan sementara (Step 2), atau "Kirim Ajuan ke Dosen" untuk langsung melanjutkan ke Step 3.
+                    <?php else: ?>
+                        <strong>Status:</strong> <?= ucfirst($publikasi->status ?? 'draft') ?> - 
+                        <?php if (isset($publikasi) && $publikasi->status == 'draft'): ?>
+                            Anda bisa mengedit data atau langsung kirim ajuan ke dosen.
+                        <?php else: ?>
+                            Data hanya bisa diupdate, tidak bisa diajukan ulang.
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </small>
             </div>
         </div>
     </form>
@@ -324,6 +362,7 @@ SESUAI WORKFLOW STEP 2 DENGAN 10 FIELD:
     </div>
 </div>
 
+<!-- ✅ PERBAIKAN: JavaScript dengan Konfirmasi yang Sesuai -->
 <script>
 $(document).ready(function() {
     // Validasi file size
@@ -357,7 +396,7 @@ $(document).ready(function() {
         }
     });
     
-    // Validasi form sebelum submit
+    // ✅ PERBAIKAN: Validasi form dengan konfirmasi berdasarkan submit_type
     $('#formPublikasi').submit(function(e) {
         let isValid = true;
         let errors = [];
@@ -400,14 +439,20 @@ $(document).ready(function() {
             return false;
         }
         
-        // Konfirmasi submit
-        const action = '<?= $action ?>';
-        const isDraft = $(e.target).find('button[name="save_draft"]:focus').length > 0;
+        // ✅ PERBAIKAN: Konfirmasi submit berdasarkan submit_type
+        const submitType = e.originalEvent.submitter.value;
         
-        if (isDraft) {
-            return confirm('Simpan sebagai draft?\n\nData akan disimpan tapi belum dikirim ke dosen pembimbing. Anda masih bisa mengedit nanti.');
+        if (submitType === 'draft') {
+            return confirm('💾 Simpan sebagai draft?\n\nData akan disimpan tetapi belum dikirim ke dosen pembimbing. Anda masih bisa mengedit nanti dan melanjutkan ke Step 3.');
+            
+        } else if (submitType === 'submit') {
+            return confirm('📧 Kirim ajuan ke dosen pembimbing?\n\n✅ Step 2 → Step 3\n\nSetelah dikirim, ajuan akan masuk ke Step 4-6 untuk review dosen pembimbing. Dosen akan mendapat notifikasi email.\n\nPastikan semua data sudah benar karena setelah ini Anda tidak bisa mengedit lagi.');
+            
+        } else if (submitType === 'update') {
+            return confirm('💾 Update data publikasi?\n\nData akan diperbarui sesuai perubahan yang Anda buat.');
+            
         } else {
-            return confirm('Lanjut ke Step 3: Kirim Ajuan?\n\nSetelah dikirim, ajuan akan masuk ke Step 4-6 untuk review dosen pembimbing. Pastikan semua data sudah benar.');
+            return confirm('Yakin ingin melanjutkan? Pastikan semua data sudah benar.');
         }
     });
     
@@ -443,11 +488,29 @@ $(document).ready(function() {
             counter.removeClass('text-warning').addClass('text-success');
         }
     }).trigger('input');
+    
+    // ✅ PERBAIKAN: Visual feedback untuk tombol
+    $('button[type="submit"]').click(function() {
+        const button = $(this);
+        const submitType = button.val();
+        
+        // Reset all buttons
+        $('button[type="submit"]').removeClass('btn-outline-success btn-outline-warning btn-outline-primary');
+        
+        // Highlight clicked button
+        if (submitType === 'submit') {
+            button.addClass('btn-outline-success');
+        } else if (submitType === 'draft') {
+            button.addClass('btn-outline-warning');
+        } else if (submitType === 'update') {
+            button.addClass('btn-outline-primary');
+        }
+    });
 });
 </script>
 
 <style>
-/* Custom styling untuk form */
+/* Custom styling untuk form - TIDAK DIUBAH */
 .form-group label strong {
     color: #495057;
 }
@@ -503,10 +566,35 @@ h5 i {
     margin-top: 5px;
 }
 
-/* Loading animation */
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+/* ✅ PERBAIKAN: Styling untuk tombol yang aktif */
+.btn.btn-outline-success {
+    animation: pulse-success 1s infinite;
+}
+
+.btn.btn-outline-warning {
+    animation: pulse-warning 1s infinite;
+}
+
+.btn.btn-outline-primary {
+    animation: pulse-primary 1s infinite;
+}
+
+@keyframes pulse-success {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+@keyframes pulse-warning {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+@keyframes pulse-primary {
+    0% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
 }
 
 /* Success indicators */

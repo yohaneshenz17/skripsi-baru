@@ -140,6 +140,9 @@ $route['mahasiswa/publikasi/tracking/(:num)'] = 'mahasiswa/publikasi/tracking/$1
 // Download Surat Keterangan
 $route['mahasiswa/publikasi/download_surat/(:num)'] = 'mahasiswa/publikasi/download_surat/$1';
 
+// Submit Operations  
+$route['mahasiswa/publikasi/submit/(:num)'] = 'mahasiswa/publikasi/submit/$1';
+
 // File Operations
 $route['mahasiswa/publikasi/download_file/(:any)/(:num)'] = 'mahasiswa/publikasi/download_file/$1/$2';
 

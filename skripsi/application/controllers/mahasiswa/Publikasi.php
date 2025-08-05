@@ -119,14 +119,14 @@ class Publikasi extends CI_Controller {
         
         if (!$publikasi || $publikasi->mahasiswa_id != $this->mahasiswa_id) {
             $this->session->set_flashdata('error', 'Data tidak ditemukan.');
-            redirect('mahasiswa/publikasi');
+            redirect('mahasiswa/publikasi/tracking/' . $publikasi_id);
             return;
         }
         
         // Hanya bisa edit jika status draft atau rejected - LOGIC TIDAK DIUBAH
         if (!in_array($publikasi->status, ['draft', 'rejected'])) {
             $this->session->set_flashdata('error', 'Tidak dapat mengedit. Status: ' . $publikasi->status);
-            redirect('mahasiswa/publikasi');
+            redirect('mahasiswa/publikasi/tracking/' . $publikasi_id);
             return;
         }
         
@@ -141,11 +141,11 @@ class Publikasi extends CI_Controller {
      * Detail/Tracking publikasi - TIDAK DIUBAH
      */
     public function tracking($publikasi_id) {
-        // LOGIC BISNIS TIDAK DIUBAH
-        $publikasi = $this->publikasi->get_by_id($publikasi_id, $this->mahasiswa_id);
+        // ✅ FIX: Gunakan method yang melakukan JOIN dengan tabel dosen
+        $publikasi = $this->_get_publikasi_detail($publikasi_id, $this->mahasiswa_id);
         
-        if (!$publikasi || $publikasi->mahasiswa_id != $this->mahasiswa_id) {
-            $this->session->set_flashdata('error', 'Data tidak ditemukan.');
+        if (!$publikasi) {
+            $this->session->set_flashdata('error', 'Data publikasi tidak ditemukan.');
             redirect('mahasiswa/publikasi');
             return;
         }
@@ -156,8 +156,30 @@ class Publikasi extends CI_Controller {
             'timeline' => $this->_get_publikasi_timeline($publikasi_id)
         ];
         
-        // Load template dengan pattern konsisten - TIDAK DIUBAH
         $this->_load_template('mahasiswa/publikasi/tracking', $view_data, 'Tracking Publikasi - ' . $publikasi->nama_mahasiswa);
+    }
+
+    /**
+     * ✅ TAMBAH: Method detail() yang hilang
+     * Letakkan setelah method tracking()
+     */
+    public function detail($publikasi_id) {
+        $publikasi = $this->_get_publikasi_detail($publikasi_id, $this->mahasiswa_id);
+        
+        if (!$publikasi) {
+            $this->session->set_flashdata('error', 'Data publikasi tidak ditemukan.');
+            redirect('mahasiswa/publikasi');
+            return;
+        }
+        
+        // Prepare data untuk view detail
+        $view_data = [
+            'publikasi' => $publikasi,
+            'timeline' => $this->_get_publikasi_timeline($publikasi_id)
+        ];
+        
+        // Load template detail publikasi
+        $this->_load_template('mahasiswa/publikasi/detail', $view_data, 'Detail Publikasi - ' . $publikasi->nama_mahasiswa);
     }
 
     /**
@@ -168,13 +190,13 @@ class Publikasi extends CI_Controller {
         
         if (!$publikasi || $publikasi->mahasiswa_id != $this->mahasiswa_id) {
             $this->session->set_flashdata('error', 'Data tidak ditemukan.');
-            redirect('mahasiswa/publikasi');
+            redirect('mahasiswa/publikasi/tracking/' . $publikasi_id);
             return;
         }
         
         if ($publikasi->status !== 'draft') {
             $this->session->set_flashdata('error', 'Pengajuan sudah disubmit sebelumnya.');
-            redirect('mahasiswa/publikasi');
+            redirect('mahasiswa/publikasi/tracking/' . $publikasi_id);
             return;
         }
         
@@ -190,7 +212,7 @@ class Publikasi extends CI_Controller {
             $this->session->set_flashdata('error', $result['message']);
         }
         
-        redirect('mahasiswa/publikasi');
+        redirect('mahasiswa/publikasi/tracking/' . $publikasi_id);;
     }
 
     /**
@@ -297,6 +319,47 @@ class Publikasi extends CI_Controller {
         // Load template mahasiswa dengan pattern konsisten
         $this->load->view('template/mahasiswa', $template_data);
     }
+
+/**
+ * ✅ FIX: Method untuk get publikasi dengan JOIN lengkap - NAMA TABEL DIPERBAIKI
+ * Letakkan setelah method _get_publikasi_timeline()
+ */
+private function _get_publikasi_detail($publikasi_id, $mahasiswa_id = null) {
+    try {
+        // ✅ PERBAIKAN: Gunakan nama tabel yang benar 'publikasi_tugas_akhir'
+        $this->db->select('
+            pta.*,
+            pm.judul as judul_proposal,
+            pm.dosen_id as pembimbing_id,
+            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+            pr.nama as nama_prodi,
+            d.nama as nama_pembimbing, d.email as email_pembimbing
+        ');
+        $this->db->from('publikasi_tugas_akhir pta');  // ← PERBAIKAN: nama tabel yang benar
+        $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->where('pta.id', $publikasi_id);
+        
+        if ($mahasiswa_id) {
+            $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+        }
+        
+        $result = $this->db->get()->row();
+        
+        // Fallback untuk nama_pembimbing jika null
+        if ($result && empty($result->nama_pembimbing)) {
+            $result->nama_pembimbing = 'Belum Ditetapkan';
+        }
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error getting publikasi detail: ' . $e->getMessage());
+        return null;
+    }
+}
 
     /**
      * Get proposal by ID - TIDAK DIUBAH
@@ -558,14 +621,13 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * ✅ REPLACE: Method utama untuk kirim notifikasi publikasi
-     * Ganti method _send_notification_to_dosen() yang lama
+     * ✅ REPLACE: Method utama untuk kirim notifikasi publikasi - NAMA TABEL DIPERBAIKI
      */
     private function _send_notification_to_dosen($publikasi) {
         try {
-            // Get data lengkap untuk notifikasi
+            // Get data lengkap untuk notifikasi - GUNAKAN NAMA TABEL YANG BENAR
             $data = $this->db->select('
-                    p.*, 
+                    pta.*, 
                     pm.judul as judul_proposal,
                     pm.dosen_id as pembimbing_id,
                     m.nama as nama_mahasiswa,
@@ -574,11 +636,11 @@ class Publikasi extends CI_Controller {
                     d.email as email_pembimbing,
                     d.nama as nama_pembimbing
                 ')
-                ->from('publikasi_mahasiswa p')
-                ->join('proposal_mahasiswa pm', 'p.proposal_id = pm.id')
+                ->from('publikasi_tugas_akhir pta')  // ← PERBAIKAN: nama tabel yang benar
+                ->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id')
                 ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
                 ->join('dosen d', 'pm.dosen_id = d.id')
-                ->where('p.id', $publikasi->id)
+                ->where('pta.id', $publikasi->id)
                 ->get()->row();
                 
             if (!$data || !$data->email_pembimbing) {
@@ -587,7 +649,7 @@ class Publikasi extends CI_Controller {
             }
             
             // Tentukan apakah ini pengajuan baru atau pengajuan ulang
-            $is_resubmission = $this->_is_resubmission_publikasi($publikasi->proposal_id);
+            $is_resubmission = $this->_is_resubmission_publikasi($publikasi->proposal_mahasiswa_id);
             
             // Kirim email ke dosen pembimbing
             $this->_kirim_email_publikasi_ke_dosen($data, $is_resubmission);
@@ -595,7 +657,7 @@ class Publikasi extends CI_Controller {
             // Kirim email konfirmasi ke mahasiswa
             $this->_kirim_email_konfirmasi_publikasi_mahasiswa($data, $is_resubmission);
             
-            log_message('info', "Publikasi notification sent - ID: {$publikasi->id}, Proposal: {$publikasi->proposal_id}");
+            log_message('info', "Publikasi notification sent - ID: {$publikasi->id}, Proposal: {$publikasi->proposal_mahasiswa_id}");
             
             return true;
             
@@ -771,13 +833,13 @@ class Publikasi extends CI_Controller {
     }
     
     /**
-     * ✅ BARU: Helper method untuk cek apakah ini pengajuan ulang
+     * ✅ TAMBAH: Helper untuk cek pengajuan ulang - NAMA TABEL DIPERBAIKI
      */
-    private function _is_resubmission_publikasi($proposal_id) {
+    private function _is_resubmission_publikasi($proposal_mahasiswa_id) {
         try {
-            $count = $this->db->where('proposal_id', $proposal_id)
+            $count = $this->db->where('proposal_mahasiswa_id', $proposal_mahasiswa_id)  // ← kolom yang benar
                              ->where('status !=', 'draft')
-                             ->count_all_results('publikasi_mahasiswa');
+                             ->count_all_results('publikasi_tugas_akhir');  // ← nama tabel yang benar
             return $count > 1;
         } catch (Exception $e) {
             log_message('error', 'Error checking resubmission: ' . $e->getMessage());

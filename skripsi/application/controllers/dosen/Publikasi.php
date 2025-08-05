@@ -637,19 +637,41 @@ class Publikasi extends CI_Controller {
         return $this->db->get('publikasi_tugas_akhir')->result();
     }
     
+    /**
+     * ALTERNATIF: Minimal logging dengan field wajib saja
+     * Gunakan ini jika masih ada field yang error
+     */
     private function _log_review_activity($publikasi_id, $action, $komentar) {
-        $data = [
-            'publikasi_id' => $publikasi_id,
-            'user_id' => $this->dosen_id,
-            'user_type' => 'dosen',
-            'action' => $action,
-            'description' => "Review publikasi: {$action}. Komentar: {$komentar}",
-            'created_at' => date('Y-m-d H:i:s')
-        ];
-        
-        // Insert to log table if exists
-        if ($this->db->table_exists('log_publikasi')) {
-            $this->db->insert('log_publikasi', $data);
+        try {
+            // Data minimal yang pasti ada di tabel
+            $data = [
+                'publikasi_id' => $publikasi_id,
+                'user_id' => $this->dosen_id,
+                'user_role' => 'dosen',
+                'aktivitas' => $action,
+                'deskripsi' => "Review publikasi: {$action}. Komentar: " . substr($komentar, 0, 200)
+            ];
+            
+            // Tambah field optional dengan safe check
+            if (!empty($this->session->userdata('nama'))) {
+                $data['user_name'] = $this->session->userdata('nama');
+            }
+            
+            if (method_exists($this->input, 'ip_address')) {
+                $data['ip_address'] = $this->input->ip_address();
+            }
+            
+            $result = $this->db->insert('log_publikasi', $data);
+            
+            if ($result) {
+                log_message('info', "✅ Review activity logged untuk publikasi ID: {$publikasi_id}");
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', "❌ Error logging: " . $e->getMessage());
+            return false;
         }
     }
     

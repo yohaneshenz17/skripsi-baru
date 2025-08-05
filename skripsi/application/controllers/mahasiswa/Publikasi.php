@@ -160,29 +160,6 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * ✅ TAMBAH: Method detail() yang hilang
-     * Letakkan setelah method tracking()
-     */
-    public function detail($publikasi_id) {
-        $publikasi = $this->_get_publikasi_detail($publikasi_id, $this->mahasiswa_id);
-        
-        if (!$publikasi) {
-            $this->session->set_flashdata('error', 'Data publikasi tidak ditemukan.');
-            redirect('mahasiswa/publikasi');
-            return;
-        }
-        
-        // Prepare data untuk view detail
-        $view_data = [
-            'publikasi' => $publikasi,
-            'timeline' => $this->_get_publikasi_timeline($publikasi_id)
-        ];
-        
-        // Load template detail publikasi
-        $this->_load_template('mahasiswa/publikasi/detail', $view_data, 'Detail Publikasi - ' . $publikasi->nama_mahasiswa);
-    }
-
-    /**
      * Submit pengajuan ke dosen pembimbing - FIXED VERSION
      */
     public function submit($publikasi_id) {
@@ -491,7 +468,7 @@ private function _get_publikasi_detail($publikasi_id, $mahasiswa_id = null) {
         
         if ($result['success']) {
             $this->session->set_flashdata('success', 'Pengajuan publikasi berhasil disimpan sebagai draft.');
-            redirect('mahasiswa/publikasi/detail/' . $result['id']);
+            redirect('mahasiswa/publikasi/tracking/' . $result['id']);
         } else {
             $this->session->set_flashdata('error', $result['message']);
             $this->_show_form_pengajuan($proposal);
@@ -542,7 +519,7 @@ private function _get_publikasi_detail($publikasi_id, $mahasiswa_id = null) {
         
         if ($result['success']) {
             $this->session->set_flashdata('success', 'Data publikasi berhasil diperbarui.');
-            redirect('mahasiswa/publikasi/detail/' . $publikasi->id);
+            redirect('mahasiswa/publikasi/tracking/' . $publikasi->id);
         } else {
             $this->session->set_flashdata('error', $result['message']);
             $this->_show_form_edit($publikasi);

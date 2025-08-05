@@ -1,355 +1,418 @@
-// ===========================================
-// 5. PUBLIKASI INDEX VIEW
-// File: application/views/staf/publikasi/index.php
-// ===========================================
-
-ob_start();
+<?php
+/**
+ * View Index Publikasi untuk Staf
+ * File: application/views/staf/publikasi/index.php
+ */
 ?>
 
-<div class="row">
-    <!-- Statistics Cards -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Total Publikasi</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= $stats['total_publikasi'] ?></span>
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Validasi Publikasi Tugas Akhir</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="<?= base_url('staf/dashboard') ?>">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Publikasi</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3><?= $stats['menunggu_validasi'] ?></h3>
+                        <p>Menunggu Validasi</p>
                     </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-primary text-white rounded-circle shadow">
-                            <i class="fas fa-globe"></i>
+                    <div class="icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <a href="#pengajuan-section" class="small-box-footer">
+                        Lihat Detail <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3><?= $stats['sudah_divalidasi'] ?></h3>
+                        <p>Sudah Divalidasi</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <a href="#riwayat-section" class="small-box-footer">
+                        Lihat Riwayat <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3><?= $stats['publikasi_selesai'] ?></h3>
+                        <p>Publikasi Selesai</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="small-box-footer">
+                        Total Keseluruhan
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3><?= $stats['total_bulan_ini'] ?></h3>
+                        <p>Validasi Bulan Ini</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="small-box-footer">
+                        <?= date('F Y') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Info Card -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-info card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle"></i>
+                            Workflow Publikasi - Tugas Staf
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="workflow-steps">
+                            <div class="step">
+                                <div class="step-number bg-secondary">1-2</div>
+                                <div class="step-content">
+                                    <strong>Mahasiswa & Dosen</strong>
+                                    <small>Mahasiswa ajukan → Dosen approve</small>
+                                </div>
+                            </div>
+                            <div class="step current">
+                                <div class="step-number bg-warning">3</div>
+                                <div class="step-content">
+                                    <strong>Input Repository</strong>
+                                    <small>Staf input link repository skripsi</small>
+                                </div>
+                            </div>
+                            <div class="step current">
+                                <div class="step-number bg-warning">4</div>
+                                <div class="step-content">
+                                    <strong>Validasi Final</strong>
+                                    <small>Staf validasi & kirim notifikasi</small>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number bg-success">5-6</div>
+                                <div class="step-content">
+                                    <strong>Selesai</strong>
+                                    <small>Mahasiswa download surat</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Pending Staf</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= $stats['pending_staf'] ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-warning text-white rounded-circle shadow">
+
+        <!-- Pengajuan Perlu Validasi -->
+        <div class="row" id="pengajuan-section">
+            <div class="col-12">
+                <div class="card card-warning card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
                             <i class="fas fa-clock"></i>
+                            Pengajuan Perlu Validasi (<?= count($pengajuan_validasi) ?>)
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Validated Staf</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= $stats['validated_staf'] ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-success text-white rounded-circle shadow">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Selesai</h5>
-                        <span class="h2 font-weight-bold mb-0"><?= $stats['selesai'] ?></span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-success text-white rounded-circle shadow">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col">
-        <div class="card">
-            <div class="card-header border-0">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="mb-0">Daftar Publikasi Tugas Akhir</h3>
-                    </div>
-                    <div class="col text-right">
-                        <button class="btn btn-sm btn-success" onclick="bulkValidasi('1')">
-                            <i class="fas fa-check"></i> Bulk Setuju
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="bulkValidasi('2')">
-                            <i class="fas fa-times"></i> Bulk Tolak
-                        </button>
-                        <a href="<?= base_url('staf/publikasi/export_laporan') ?>" class="btn btn-sm btn-info" target="_blank">
-                            <i class="fas fa-download"></i> Export Laporan
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Filter -->
-            <div class="card-header border-0 pb-0">
-                <form method="GET" class="form-inline">
-                    <select name="prodi_id" class="form-control form-control-sm mr-2">
-                        <option value="">Semua Prodi</option>
-                        <?php foreach($prodi_list as $prodi): ?>
-                            <option value="<?= $prodi->id ?>" <?= $filters['prodi_id'] == $prodi->id ? 'selected' : '' ?>>
-                                <?= $prodi->nama ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <select name="status" class="form-control form-control-sm mr-2">
-                        <option value="">Semua Status</option>
-                        <option value="pending" <?= $filters['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-                        <option value="diajukan" <?= $filters['status'] == 'diajukan' ? 'selected' : '' ?>>Diajukan</option>
-                        <option value="validated" <?= $filters['status'] == 'validated' ? 'selected' : '' ?>>Validated Staf</option>
-                        <option value="approved" <?= $filters['status'] == 'approved' ? 'selected' : '' ?>>Approved</option>
-                    </select>
-                    <input type="month" name="periode" class="form-control form-control-sm mr-2" value="<?= $filters['periode'] ?>">
-                    <input type="text" name="search" class="form-control form-control-sm mr-2" 
-                           placeholder="Cari mahasiswa/repository..." value="<?= $filters['search'] ?>">
-                    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
-                    <a href="<?= base_url('staf/publikasi') ?>" class="btn btn-sm btn-secondary ml-2">Reset</a>
-                </form>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table align-items-center table-flush">
-                    <thead class="thead-light">
-                        <tr>
-                            <th scope="col">
-                                <input type="checkbox" id="selectAll">
-                            </th>
-                            <th scope="col">Mahasiswa</th>
-                            <th scope="col">Prodi</th>
-                            <th scope="col">Judul</th>
-                            <th scope="col">Link Repository</th>
-                            <th scope="col">Tanggal Publikasi</th>
-                            <th scope="col">Status Staf</th>
-                            <th scope="col">Status Kaprodi</th>
-                            <th scope="col">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if(!empty($publikasi)): ?>
-                            <?php foreach($publikasi as $pub): ?>
-                                <tr>
-                                    <td>
-                                        <?php if($pub->status_publikasi == '1' && (!$pub->validasi_staf_publikasi || $pub->validasi_staf_publikasi == '0')): ?>
-                                            <input type="checkbox" class="select-item" value="<?= $pub->id ?>">
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <div class="media align-items-center">
-                                            <div class="media-body">
-                                                <span class="mb-0 text-sm font-weight-bold"><?= $pub->nama_mahasiswa ?></span><br>
-                                                <small class="text-muted"><?= $pub->nim ?></small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><?= $pub->nama_prodi ?></td>
-                                    <td class="text-wrap" style="max-width: 200px;">
-                                        <?= character_limiter($pub->judul, 50) ?>
-                                    </td>
-                                    <td>
-                                        <?php if($pub->link_repository): ?>
-                                            <a href="<?= $pub->link_repository ?>" target="_blank" class="text-primary">
-                                                <i class="fas fa-external-link-alt"></i> Lihat Repository
-                                            </a>
-                                        <?php else: ?>
-                                            <span class="text-muted">Belum ada link</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?= $pub->tanggal_publikasi ? date('d/m/Y', strtotime($pub->tanggal_publikasi)) : '-' ?>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        switch($pub->validasi_staf_publikasi) {
-                                            case '1':
-                                                echo '<span class="badge badge-success">Disetujui</span>';
-                                                break;
-                                            case '2':
-                                                echo '<span class="badge badge-danger">Ditolak</span>';
-                                                break;
-                                            default:
-                                                if($pub->status_publikasi == '1') {
-                                                    echo '<span class="badge badge-warning">Pending</span>';
-                                                } else {
-                                                    echo '<span class="badge badge-secondary">Belum Diajukan</span>';
-                                                }
-                                        }
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        switch($pub->validasi_kaprodi_publikasi) {
-                                            case '1':
-                                                echo '<span class="badge badge-success">Approved</span>';
-                                                break;
-                                            case '2':
-                                                echo '<span class="badge badge-danger">Rejected</span>';
-                                                break;
-                                            default:
-                                                if($pub->validasi_staf_publikasi == '1') {
-                                                    echo '<span class="badge badge-warning">Pending</span>';
-                                                } else {
-                                                    echo '<span class="badge badge-secondary">-</span>';
-                                                }
-                                        }
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                <a class="dropdown-item" href="<?= base_url('staf/publikasi/detail/' . $pub->id) ?>">
-                                                    <i class="fas fa-eye"></i> Detail
-                                                </a>
-                                                <?php if(!$pub->link_repository): ?>
-                                                    <a class="dropdown-item" href="<?= base_url('staf/publikasi/input_repository?proposal_id=' . $pub->id) ?>">
-                                                        <i class="fas fa-plus"></i> Input Repository
-                                                    </a>
+                    <div class="card-body">
+                        <?php if (!empty($pengajuan_validasi)): ?>
+                            <div class="table-responsive">
+                                <table id="pengajuanTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Mahasiswa</th>
+                                            <th>Judul Skripsi</th>
+                                            <th>Dosen Pembimbing</th>
+                                            <th>Tgl Approve Dosen</th>
+                                            <th>Status Repository</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($pengajuan_validasi as $index => $pub): ?>
+                                        <tr>
+                                            <td><?= $index + 1 ?></td>
+                                            <td>
+                                                <strong><?= esc($pub->nama_mahasiswa) ?></strong><br>
+                                                <small class="text-muted"><?= esc($pub->nim) ?></small><br>
+                                                <small class="text-info"><?= esc($pub->program_studi) ?></small>
+                                            </td>
+                                            <td>
+                                                <span class="text-wrap" style="max-width: 300px;">
+                                                    <?= esc(word_limiter($pub->judul_skripsi_final, 8)) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong><?= esc($pub->nama_dosen_pembimbing) ?></strong>
+                                            </td>
+                                            <td>
+                                                <?php if ($pub->tanggal_review_pembimbing): ?>
+                                                    <small><?= date('d/m/Y H:i', strtotime($pub->tanggal_review_pembimbing)) ?></small>
+                                                <?php else: ?>
+                                                    <span class="badge badge-secondary">-</span>
                                                 <?php endif; ?>
-                                                <?php if($pub->status_publikasi == '1' && (!$pub->validasi_staf_publikasi || $pub->validasi_staf_publikasi == '0')): ?>
-                                                    <a class="dropdown-item" href="javascript:void(0)" onclick="validasiSingle(<?= $pub->id ?>, '1')">
-                                                        <i class="fas fa-check text-success"></i> Setujui
-                                                    </a>
-                                                    <a class="dropdown-item" href="javascript:void(0)" onclick="validasiSingle(<?= $pub->id ?>, '2')">
-                                                        <i class="fas fa-times text-danger"></i> Tolak
-                                                    </a>
+                                            </td>
+                                            <td>
+                                                <?php if (!empty($pub->link_repository)): ?>
+                                                    <span class="badge badge-success">
+                                                        <i class="fas fa-link"></i> Sudah Input
+                                                    </span>
+                                                    <br><small class="text-muted">Siap validasi</small>
+                                                <?php else: ?>
+                                                    <span class="badge badge-warning">
+                                                        <i class="fas fa-exclamation-triangle"></i> Belum Input
+                                                    </span>
+                                                    <br><small class="text-muted">Perlu input link</small>
                                                 <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="<?= base_url('staf/publikasi/detail/' . $pub->id) ?>" 
+                                                       class="btn btn-sm btn-info" title="Detail">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    <?php if (empty($pub->link_repository)): ?>
+                                                        <a href="<?= base_url('staf/publikasi/input_repository/' . $pub->id) ?>" 
+                                                           class="btn btn-sm btn-warning" title="Input Repository">
+                                                            <i class="fas fa-plus"></i>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <a href="<?= base_url('staf/publikasi/validasi/' . $pub->id) ?>" 
+                                                           class="btn btn-sm btn-success" title="Validasi Final">
+                                                            <i class="fas fa-check"></i>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         <?php else: ?>
-                            <tr>
-                                <td colspan="9" class="text-center">Tidak ada data publikasi</td>
-                            </tr>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                Tidak ada pengajuan yang perlu divalidasi saat ini.
+                            </div>
                         <?php endif; ?>
-                    </tbody>
-                </table>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Riwayat Validasi -->
+        <div class="row" id="riwayat-section">
+            <div class="col-12">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-history"></i>
+                            Riwayat Validasi Terakhir (10 Data)
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <?php if (!empty($riwayat_validasi)): ?>
+                            <div class="table-responsive">
+                                <table id="riwayatTable" class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Mahasiswa</th>
+                                            <th>Judul Skripsi</th>
+                                            <th>Tgl Validasi</th>
+                                            <th>Status</th>
+                                            <th>Repository Link</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($riwayat_validasi as $riwayat): ?>
+                                        <tr>
+                                            <td>
+                                                <strong><?= esc($riwayat->nama_mahasiswa) ?></strong><br>
+                                                <small class="text-muted"><?= esc($riwayat->nim) ?></small>
+                                            </td>
+                                            <td>
+                                                <span class="text-wrap" style="max-width: 250px;">
+                                                    <?= esc(word_limiter($riwayat->judul_skripsi_final, 6)) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small><?= date('d/m/Y H:i', strtotime($riwayat->tanggal_validasi_staf)) ?></small>
+                                            </td>
+                                            <td>
+                                                <?php if ($riwayat->status_staf === 'approved'): ?>
+                                                    <span class="badge badge-success">
+                                                        <i class="fas fa-check"></i> Disetujui
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-danger">
+                                                        <i class="fas fa-times"></i> Ditolak
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if (!empty($riwayat->link_repository)): ?>
+                                                    <a href="<?= esc($riwayat->link_repository) ?>" 
+                                                       target="_blank" class="btn btn-xs btn-outline-primary">
+                                                        <i class="fas fa-external-link-alt"></i> Lihat
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <a href="<?= base_url('staf/publikasi/detail/' . $riwayat->id) ?>" 
+                                                   class="btn btn-xs btn-info" title="Detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                Belum ada riwayat validasi.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-</div>
+</section>
 
-<script>
-// Select all checkbox functionality
-document.getElementById('selectAll').addEventListener('change', function() {
-    const checkboxes = document.querySelectorAll('.select-item');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = this.checked;
-    });
-});
+<style>
+/* Workflow Steps */
+.workflow-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
 
-// Bulk validasi function
-function bulkValidasi(status) {
-    const selected = [];
-    document.querySelectorAll('.select-item:checked').forEach(checkbox => {
-        selected.push(checkbox.value);
-    });
-    
-    if (selected.length === 0) {
-        alert('Pilih minimal satu publikasi untuk divalidasi');
-        return;
+.step {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    margin: 10px;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+}
+
+.step.current {
+    background: #fff3cd;
+    border-color: #ffc107;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.step-content strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.step-content small {
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+    .workflow-steps {
+        flex-direction: column;
     }
     
-    const statusText = status === '1' ? 'menyetujui' : 'menolak';
-    const keterangan = prompt(`Masukkan keterangan untuk ${statusText} publikasi:`);
-    
-    if (keterangan === null) return; // User cancelled
-    
-    // Create form and submit
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?= base_url("staf/publikasi/bulk_validasi") ?>';
-    
-    selected.forEach(id => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'proposal_ids[]';
-        input.value = id;
-        form.appendChild(input);
-    });
-    
-    const statusInput = document.createElement('input');
-    statusInput.type = 'hidden';
-    statusInput.name = 'status_validasi';
-    statusInput.value = status;
-    form.appendChild(statusInput);
-    
-    const keteranganInput = document.createElement('input');
-    keteranganInput.type = 'hidden';
-    keteranganInput.name = 'keterangan';
-    keteranganInput.value = keterangan;
-    form.appendChild(keteranganInput);
-    
-    document.body.appendChild(form);
-    form.submit();
+    .step {
+        width: 100%;
+        margin: 5px 0;
+    }
 }
 
-// Single validasi function
-function validasiSingle(proposalId, status) {
-    const statusText = status === '1' ? 'menyetujui' : 'menolak';
-    const keterangan = prompt(`Masukkan keterangan untuk ${statusText} publikasi:`);
-    
-    if (keterangan === null) return; // User cancelled
-    
-    // Create form and submit
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?= base_url("staf/publikasi/validasi") ?>';
-    
-    const proposalInput = document.createElement('input');
-    proposalInput.type = 'hidden';
-    proposalInput.name = 'proposal_id';
-    proposalInput.value = proposalId;
-    form.appendChild(proposalInput);
-    
-    const statusInput = document.createElement('input');
-    statusInput.type = 'hidden';
-    statusInput.name = 'status_validasi';
-    statusInput.value = status;
-    form.appendChild(statusInput);
-    
-    const keteranganInput = document.createElement('input');
-    keteranganInput.type = 'hidden';
-    keteranganInput.name = 'keterangan';
-    keteranganInput.value = keterangan;
-    form.appendChild(keteranganInput);
-    
-    document.body.appendChild(form);
-    form.submit();
+/* Table responsiveness */
+.table-responsive {
+    border-radius: 8px;
 }
-</script>
 
-<?php 
-$content = ob_get_clean();
-$this->load->view('template/staf', [
-    'title' => 'Manajemen Publikasi',
-    'content' => $content,
-    'css' => '',
-    'script' => ''
-]);
-?>
+.table th {
+    border-top: none;
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+/* Badge improvements */
+.badge {
+    font-size: 11px;
+    padding: 4px 8px;
+}
+
+/* Button group improvements */
+.btn-group .btn {
+    margin-right: 2px;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+</style>

@@ -1,7 +1,16 @@
-<?php
-// KONSISTEN UI UNTUK: application/views/mahasiswa/publikasi/index.php
-// Mengikuti pattern template mahasiswa.php yang sudah ada di phase 1-5
-?>
+<!-- 
+PUBLIKASI TUGAS AKHIR - MAHASISWA DASHBOARD - FIXED UI KONSISTEN
+File: application/views/mahasiswa/publikasi/index.php
+
+MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANGKAH:
+1. Mahasiswa Memenuhi Syarat (16+ jurnal)
+2. Isi Form Pengajuan
+3. Kirim Ajuan  
+4-6. Dosen Review
+7. Staf Validasi
+8. Download Surat
+9. Format Surat Template Kampus
+-->
 
 <!-- Flash Messages -->
 <?php if ($this->session->flashdata('success')): ?>
@@ -18,18 +27,18 @@
 </div>
 <?php endif; ?>
 
-<!-- Header Section -->
+<!-- Progress Workflow Header -->
 <div class="row">
     <div class="col-12">
         <div class="card card-primary card-outline">
             <div class="card-header">
                 <h3 class="card-title">
-                    <i class="fas fa-globe mr-2"></i>
+                    <i class="fas fa-route mr-2"></i>
                     Progress Workflow Tugas Akhir
                 </h3>
             </div>
             <div class="card-body">
-                <!-- Progress Steps -->
+                <!-- Progress Steps Horizontal -->
                 <div class="progress-wrapper">
                     <div class="step-progress">
                         <div class="step completed">
@@ -117,11 +126,11 @@
                     </div>
                     
                 <?php else: ?>
-                    <!-- Data Proposal -->
+                    <!-- Step 1: Informasi Proposal -->
                     <div class="info-section mb-4">
                         <h5 class="mb-3">
                             <i class="fas fa-file-alt text-primary"></i> 
-                            Informasi Proposal
+                            Informasi Proposal Anda
                         </h5>
                         <div class="row">
                             <div class="col-md-6">
@@ -136,15 +145,15 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="info-item">
-                                    <div class="info-label">Status Proposal</div>
+                                    <div class="info-label">Status Seminar Skripsi</div>
                                     <div class="info-value">
                                         <span class="badge badge-success">
-                                            <i class="fas fa-check"></i> Disetujui
+                                            <i class="fas fa-check"></i> Selesai
                                         </span>
                                     </div>
                                 </div>
                                 <div class="info-item">
-                                    <div class="info-label">Jurnal Bimbingan</div>
+                                    <div class="info-label">Jurnal Bimbingan Tervalidasi</div>
                                     <div class="info-value">
                                         <?php if ($jurnal_count >= 16): ?>
                                             <span class="badge badge-success">
@@ -161,51 +170,89 @@
                         </div>
                     </div>
 
-                    <!-- Status Publikasi -->
+                    <!-- Status Workflow Publikasi -->
                     <?php if ($eligible): ?>
                         <?php if (!$publikasi): ?>
-                            <!-- Belum Ada Pengajuan -->
+                            <!-- Step 1 Completed: Ready untuk Step 2 -->
                             <div class="alert alert-success">
-                                <h5><i class="icon fas fa-trophy"></i> Selamat! Anda Eligible untuk Publikasi</h5>
-                                <p>Semua syarat publikasi telah terpenuhi. Anda dapat mengajukan publikasi tugas akhir sekarang.</p>
+                                <h5><i class="icon fas fa-trophy"></i> ✅ Step 1 Selesai: Anda Memenuhi Syarat Publikasi!</h5>
+                                <p><strong>Syarat terpenuhi:</strong></p>
+                                <ul class="mb-3">
+                                    <li>✅ Minimal 16 Jurnal Bimbingan Tervalidasi (<?= $jurnal_count ?>/16)</li>
+                                    <li>✅ Seminar Skripsi telah selesai dan disetujui</li>
+                                </ul>
+                                <p class="mb-3"><strong>Lanjut ke Step 2:</strong> Isi Form Pengajuan Publikasi dengan 9 field yang diperlukan.</p>
                                 <div class="mt-3">
                                     <a href="<?= base_url('mahasiswa/publikasi/ajukan/' . $proposal->id) ?>" class="btn btn-success btn-lg">
-                                        <i class="fas fa-paper-plane"></i> Ajukan Publikasi Sekarang
+                                        <i class="fas fa-arrow-right"></i> Lanjut ke Step 2: Isi Form Pengajuan
                                     </a>
                                 </div>
                             </div>
                             
                         <?php else: ?>
-                            <!-- Ada Pengajuan -->
+                            <!-- Step 2-9: Ada Pengajuan, Tampilkan Progress -->
                             <div class="status-section">
                                 <h5 class="mb-3">
                                     <i class="fas fa-clipboard-check text-success"></i>
-                                    Status Pengajuan Publikasi
+                                    Progress Publikasi Anda (9 Langkah Workflow)
                                 </h5>
                                 
+                                <!-- Progress Visual -->
+                                <div class="workflow-progress mb-4">
+                                    <?php
+                                    // Tentukan step saat ini berdasarkan status
+                                    $current_step = 2; // Default step 2 (form filled)
+                                    
+                                    if (isset($publikasi->status)) {
+                                        switch($publikasi->status) {
+                                            case 'draft': $current_step = 2; break;
+                                            case 'submitted': case 'review_pembimbing': $current_step = 4; break;
+                                            case 'approved_pembimbing': case 'review_staf': $current_step = 7; break;
+                                            case 'completed': $current_step = 9; break;
+                                            case 'rejected': $current_step = 6; break;
+                                        }
+                                    }
+                                    ?>
+                                    
+                                    <div class="mini-progress">
+                                        <?php for($i = 1; $i <= 9; $i++): ?>
+                                            <div class="mini-step <?= $i <= $current_step ? 'completed' : ($i == $current_step + 1 ? 'current' : '') ?>">
+                                                <span><?= $i ?></span>
+                                            </div>
+                                            <?php if($i < 9): ?>
+                                                <div class="mini-line <?= $i < $current_step ? 'completed' : '' ?>"></div>
+                                            <?php endif; ?>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <div class="step-info">
+                                        <small class="text-muted">Step <?= $current_step ?> dari 9 langkah workflow</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Status Detail -->
                                 <div class="alert alert-<?= $publikasi->status == 'completed' ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : 'info') ?>">
                                     <?php if ($publikasi->status === 'draft'): ?>
-                                        <h6><i class="fas fa-edit"></i> Status: Draft</h6>
-                                        <p>Pengajuan masih dalam tahap draft. Silakan lengkapi dan submit pengajuan Anda.</p>
+                                        <h6><i class="fas fa-edit"></i> Step 2: Form Pengajuan Masih Draft</h6>
+                                        <p>Anda telah memulai pengisian form publikasi. Silakan lengkapi dan lanjut ke Step 3 (Kirim Ajuan).</p>
                                         
                                     <?php elseif ($publikasi->status === 'submitted' || $publikasi->status === 'review_pembimbing'): ?>
-                                        <h6><i class="fas fa-clock"></i> Status: Menunggu Review Dosen</h6>
-                                        <p>Pengajuan Anda sedang menunggu review dari dosen pembimbing.</p>
+                                        <h6><i class="fas fa-clock"></i> Step 4-6: Menunggu Review Dosen Pembimbing</h6>
+                                        <p>✅ Step 2 & 3 selesai. Pengajuan Anda sedang menunggu review dari dosen pembimbing.</p>
                                         <small class="text-muted">Disubmit pada: <?= date('d F Y H:i', strtotime($publikasi->tanggal_pengajuan)) ?></small>
                                         
-                                    <?php elseif ($publikasi->status === 'review_staf'): ?>
-                                        <h6><i class="fas fa-user-tie"></i> Status: Review Staf</h6>
-                                        <p>Pengajuan telah disetujui dosen pembimbing dan sedang menunggu validasi staf.</p>
+                                    <?php elseif ($publikasi->status === 'approved_pembimbing' || $publikasi->status === 'review_staf'): ?>
+                                        <h6><i class="fas fa-user-tie"></i> Step 7: Review Staf</h6>
+                                        <p>✅ Step 4-6 selesai. Dosen pembimbing telah menyetujui. Sedang menunggu validasi staf.</p>
                                         <?php if ($publikasi->komentar_pembimbing): ?>
                                             <div class="mt-2">
                                                 <strong>Komentar Dosen:</strong><br>
-                                                <em><?= $publikasi->komentar_pembimbing ?></em>
+                                                <em>"<?= $publikasi->komentar_pembimbing ?>"</em>
                                             </div>
                                         <?php endif; ?>
                                         
                                     <?php elseif ($publikasi->status === 'completed'): ?>
-                                        <h6><i class="fas fa-check-circle"></i> Status: Publikasi Selesai</h6>
-                                        <p>🎉 Selamat! Publikasi tugas akhir Anda telah selesai diproses.</p>
+                                        <h6><i class="fas fa-check-circle"></i> Step 8-9: Publikasi Selesai! 🎉</h6>
+                                        <p><strong>Selamat!</strong> Semua 9 langkah workflow telah selesai. Publikasi tugas akhir Anda telah berhasil diproses.</p>
                                         <?php if ($publikasi->link_repository): ?>
                                             <div class="mt-2">
                                                 <strong>Link Repository:</strong><br>
@@ -216,12 +263,12 @@
                                         <?php endif; ?>
                                         
                                     <?php elseif ($publikasi->status === 'rejected'): ?>
-                                        <h6><i class="fas fa-times-circle"></i> Status: Ditolak</h6>
-                                        <p>Pengajuan ditolak dan perlu diperbaiki. Silakan perbaiki sesuai komentar dan ajukan kembali.</p>
+                                        <h6><i class="fas fa-times-circle"></i> Step 6: Pengajuan Ditolak Dosen</h6>
+                                        <p>Pengajuan ditolak dan perlu diperbaiki. Silakan perbaiki sesuai komentar dan kembali ke Step 2.</p>
                                         <?php if ($publikasi->komentar_pembimbing): ?>
                                             <div class="mt-2">
-                                                <strong>Komentar Dosen:</strong><br>
-                                                <em><?= $publikasi->komentar_pembimbing ?></em>
+                                                <strong>Alasan Penolakan:</strong><br>
+                                                <em>"<?= $publikasi->komentar_pembimbing ?>"</em>
                                             </div>
                                         <?php endif; ?>
                                     <?php endif; ?>
@@ -231,37 +278,39 @@
                                 <div class="action-buttons mt-3">
                                     <?php if ($publikasi->status === 'draft'): ?>
                                         <a href="<?= base_url('mahasiswa/publikasi/edit/' . $publikasi->id) ?>" class="btn btn-warning">
-                                            <i class="fas fa-edit"></i> Lengkapi Pengajuan
+                                            <i class="fas fa-edit"></i> Lengkapi Form (Step 2)
                                         </a>
                                         
                                     <?php elseif ($publikasi->status === 'rejected'): ?>
                                         <a href="<?= base_url('mahasiswa/publikasi/edit/' . $publikasi->id) ?>" class="btn btn-warning">
-                                            <i class="fas fa-edit"></i> Perbaiki Pengajuan
+                                            <i class="fas fa-edit"></i> Perbaiki & Ajukan Ulang (Kembali ke Step 2)
                                         </a>
                                         
                                     <?php elseif ($publikasi->status === 'completed'): ?>
                                         <a href="<?= base_url('mahasiswa/publikasi/download_surat/' . $publikasi->id) ?>" class="btn btn-success" target="_blank">
-                                            <i class="fas fa-download"></i> Download Surat Keterangan
+                                            <i class="fas fa-download"></i> Step 8: Download Surat Keterangan
                                         </a>
                                     <?php endif; ?>
                                     
                                     <a href="<?= base_url('mahasiswa/publikasi/tracking/' . $publikasi->id) ?>" class="btn btn-info">
-                                        <i class="fas fa-eye"></i> Tracking Progress
+                                        <i class="fas fa-route"></i> Lihat Detail Workflow 9 Langkah
                                     </a>
                                 </div>
                             </div>
                         <?php endif; ?>
                         
                     <?php else: ?>
-                        <!-- Belum Eligible -->
+                        <!-- Step 1 Belum Selesai: Belum Eligible -->
                         <div class="alert alert-warning">
-                            <h5><i class="icon fas fa-exclamation-triangle"></i> Belum Memenuhi Syarat</h5>
-                            <p>Anda belum dapat mengajukan publikasi karena syarat berikut belum terpenuhi:</p>
-                            <ul class="mb-0">
+                            <h5><i class="icon fas fa-exclamation-triangle"></i> ❌ Step 1: Belum Memenuhi Syarat</h5>
+                            <p>Anda belum dapat lanjut ke Step 2 karena syarat Step 1 belum terpenuhi:</p>
+                            <ul class="mb-3">
                                 <?php if ($jurnal_count < 16): ?>
-                                    <li>Minimal 16 jurnal bimbingan tervalidasi (saat ini: <?= $jurnal_count ?>)</li>
+                                    <li>❌ Minimal 16 jurnal bimbingan tervalidasi (saat ini: <?= $jurnal_count ?>/16)</li>
+                                    <li class="text-muted">Silakan lanjutkan bimbingan dengan dosen pembimbing</li>
                                 <?php endif; ?>
                             </ul>
+                            <p><strong>Yang harus dilakukan:</strong> Lanjutkan bimbingan hingga mencapai minimal 16 jurnal yang tervalidasi dosen.</p>
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
@@ -269,104 +318,90 @@
         </div>
     </div>
 
-    <!-- Sidebar -->
+    <!-- Sidebar Kanan -->
     <div class="col-lg-4">
-        <!-- Syarat Publikasi -->
-        <div class="card card-success card-outline">
+        <!-- 9 Langkah Workflow -->
+        <div class="card card-info card-outline">
             <div class="card-header">
                 <h3 class="card-title">
-                    <i class="fas fa-list-check"></i>
-                    Syarat Publikasi
+                    <i class="fas fa-list-ol"></i>
+                    9 Langkah Workflow Publikasi
                 </h3>
             </div>
             <div class="card-body">
-                <div class="syarat-list">
-                    <div class="syarat-item">
-                        <div class="syarat-check">
-                            <?php if ($jurnal_count >= 16): ?>
-                                <i class="fas fa-check-circle text-success"></i>
-                            <?php else: ?>
-                                <i class="fas fa-times-circle text-danger"></i>
-                            <?php endif; ?>
-                        </div>
-                        <div class="syarat-text">
-                            <div class="syarat-title">Minimal 16 jurnal bimbingan tervalidasi</div>
-                            <div class="syarat-status">
-                                <?= $jurnal_count ?>/16
-                            </div>
+                <div class="workflow-steps">
+                    <div class="workflow-step">
+                        <div class="step-number <?= $eligible ? 'completed' : 'current' ?>">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Mahasiswa Memenuhi Syarat</div>
+                            <div class="step-desc">16+ Jurnal Bimbingan Tervalidasi</div>
                         </div>
                     </div>
                     
-                    <div class="syarat-item">
-                        <div class="syarat-check">
-                            <?php if ($proposal): ?>
-                                <i class="fas fa-check-circle text-success"></i>
-                            <?php else: ?>
-                                <i class="fas fa-times-circle text-danger"></i>
-                            <?php endif; ?>
+                    <div class="workflow-step">
+                        <div class="step-number <?= $publikasi && in_array($publikasi->status, ['submitted', 'review_pembimbing', 'approved_pembimbing', 'review_staf', 'completed']) ? 'completed' : ($eligible && !$publikasi ? 'current' : '') ?>">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Isi Form Pengajuan</div>
+                            <div class="step-desc">9 field data publikasi</div>
                         </div>
-                        <div class="syarat-text">
-                            <div class="syarat-title">Proposal telah disetujui</div>
-                            <div class="syarat-status">
-                                <?= $proposal ? 'Disetujui' : 'Belum disetujui' ?>
-                            </div>
+                    </div>
+                    
+                    <div class="workflow-step">
+                        <div class="step-number <?= $publikasi && in_array($publikasi->status, ['submitted', 'review_pembimbing', 'approved_pembimbing', 'review_staf', 'completed']) ? 'completed' : '' ?>">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Kirim Ajuan</div>
+                            <div class="step-desc">Submit ke dosen pembimbing</div> 
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step">
+                        <div class="step-number <?= $publikasi && in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) ? 'completed' : ($publikasi && $publikasi->status == 'review_pembimbing' ? 'current' : '') ?>">4-6</div>
+                        <div class="step-content">
+                            <div class="step-title">Review Dosen</div>
+                            <div class="step-desc">Approve/Reject pembimbing</div>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step">
+                        <div class="step-number <?= $publikasi && $publikasi->status == 'completed' ? 'completed' : ($publikasi && $publikasi->status == 'review_staf' ? 'current' : '') ?>">7</div>
+                        <div class="step-content">
+                            <div class="step-title">Validasi Staf</div>
+                            <div class="step-desc">Input repository & validasi</div>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step">
+                        <div class="step-number <?= $publikasi && $publikasi->status == 'completed' ? 'completed' : '' ?>">8-9</div>
+                        <div class="step-content">
+                            <div class="step-title">Selesai & Download</div>
+                            <div class="step-desc">Surat keterangan publikasi</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Dokumen yang Diperlukan -->
-        <div class="card card-info card-outline">
+        <!-- Syarat & Dokumen -->
+        <div class="card card-success card-outline">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-file-pdf"></i>
-                    Dokumen yang Diperlukan
+                    Dokumen yang Diperlukan (Step 2)
                 </h3>
             </div>
             <div class="card-body">
                 <div class="dokumen-list">
                     <div class="dokumen-item">
                         <i class="fas fa-file-pdf text-danger"></i>
-                        <span>Surat Keterangan Revisi (PDF, max 1MB)</span>
+                        <span>Surat Perpustakaan (PDF, max 1MB)</span>
                     </div>
                     <div class="dokumen-item">
                         <i class="fas fa-file-pdf text-danger"></i>
                         <span>File Skripsi Final (PDF, max 5MB)</span>
                     </div>
                     <div class="dokumen-item">
-                        <i class="fas fa-file-pdf text-danger"></i>
-                        <span>Surat Perpustakaan (PDF, max 1MB)</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Alur Proses -->
-        <div class="card card-warning card-outline">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-route"></i>
-                    Alur Proses
-                </h3>
-            </div>
-            <div class="card-body">
-                <div class="alur-list">
-                    <div class="alur-item">
-                        <div class="alur-number">1</div>
-                        <div class="alur-text">Mahasiswa mengajukan</div>
-                    </div>
-                    <div class="alur-item">
-                        <div class="alur-number">2</div>
-                        <div class="alur-text">Review dosen pembimbing</div>
-                    </div>
-                    <div class="alur-item">
-                        <div class="alur-number">3</div>
-                        <div class="alur-text">Validasi staf</div>
-                    </div>
-                    <div class="alur-item">
-                        <div class="alur-number">4</div>
-                        <div class="alur-text">Publikasi selesai</div>
+                        <i class="fas fa-link text-info"></i>
+                        <span>Link Repository (Opsional)</span>
                     </div>
                 </div>
             </div>
@@ -374,9 +409,9 @@
     </div>
 </div>
 
-<!-- Custom CSS -->
+<!-- Custom CSS untuk Workflow -->
 <style>
-/* Progress Steps */
+/* Progress Steps Horizontal */
 .progress-wrapper {
     padding: 20px 0;
 }
@@ -443,15 +478,54 @@
 }
 
 @keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
-    }
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+/* Mini Progress untuk Status */
+.workflow-progress {
+    text-align: center;
+}
+
+.mini-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.mini-step {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #6c757d;
+}
+
+.mini-step.completed {
+    background: #28a745;
+    color: white;
+}
+
+.mini-step.current {
+    background: #ffc107;
+    color: white;
+}
+
+.mini-line {
+    width: 20px;
+    height: 2px;
+    background: #e9ecef;
+}
+
+.mini-line.completed {
+    background: #28a745;
 }
 
 /* Info Section */
@@ -476,39 +550,68 @@
     color: #495057;
 }
 
-/* Syarat List */
-.syarat-item {
+/* Workflow Steps Sidebar */
+.workflow-steps {
+    position: relative;
+}
+
+.workflow-steps::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.workflow-step {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #f8f9fa;
+    margin-bottom: 20px;
+    position: relative;
 }
 
-.syarat-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 15px;
+    position: relative;
+    z-index: 2;
 }
 
-.syarat-check {
-    margin-right: 12px;
-    font-size: 18px;
-    margin-top: 2px;
+.step-number.completed {
+    background: #28a745;
+    color: white;
 }
 
-.syarat-text {
+.step-number.current {
+    background: #ffc107;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.step-content {
     flex: 1;
+    padding-top: 2px;
 }
 
-.syarat-title {
-    font-size: 14px;
+.step-title {
     font-weight: 600;
+    font-size: 14px;
     color: #495057;
     margin-bottom: 2px;
 }
 
-.syarat-status {
+.step-desc {
     font-size: 12px;
     color: #6c757d;
 }
@@ -526,43 +629,11 @@
     width: 16px;
 }
 
-/* Alur List */
-.alur-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.alur-number {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #007bff;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
-    margin-right: 12px;
-}
-
-.alur-text {
-    font-size: 14px;
-    color: #495057;
-}
-
 /* Action Buttons */
 .action-buttons {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-}
-
-/* Status Section */
-.status-section {
-    border-left: 4px solid #28a745;
-    padding-left: 15px;
 }
 
 /* Responsive */
@@ -584,6 +655,10 @@
     .action-buttons .btn {
         width: 100%;
     }
+    
+    .mini-progress {
+        flex-wrap: wrap;
+    }
 }
 </style>
 
@@ -596,5 +671,10 @@ $(document).ready(function() {
     
     // Tooltip initialization
     $('[data-toggle="tooltip"]').tooltip();
+    
+    // Progress animation
+    $('.step-icon, .step-number, .mini-step').each(function(index) {
+        $(this).delay(index * 100).fadeIn(300);
+    });
 });
 </script>

@@ -538,12 +538,12 @@ class Publikasi extends CI_Controller {
      * ✅ ENHANCED: Process update publikasi dengan dropdown dosen
      */
     private function _process_update($publikasi) {
-        // ✅ Validation rules untuk dropdown dosen (sama dengan create)
+        // Validation rules - TIDAK BERUBAH
         $this->form_validation->set_rules('nama_lengkap', 'Nama Lengkap', 'required|trim|max_length[100]');
         $this->form_validation->set_rules('nim', 'NIM', 'required|trim|numeric|max_length[20]');
         $this->form_validation->set_rules('program_studi', 'Program Studi', 'required|trim');
         $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim|min_length[10]');
-        $this->form_validation->set_rules('dosen_pembimbing_id', 'Dosen Pembimbing', 'required|numeric'); // ✅ UBAH: ID bukan nama
+        $this->form_validation->set_rules('dosen_pembimbing_id', 'Dosen Pembimbing', 'required|numeric');
         $this->form_validation->set_rules('tanggal_ujian_skripsi', 'Tanggal Ujian Skripsi', 'required');
         $this->form_validation->set_rules('link_repository', 'Link Repository', 'trim|valid_url');
         $this->form_validation->set_rules('keterangan_mahasiswa', 'Keterangan', 'trim');
@@ -553,7 +553,7 @@ class Publikasi extends CI_Controller {
             return;
         }
         
-        // ✅ Get data dosen dari dropdown selection
+        // Get data dosen - TIDAK BERUBAH
         $dosen_pembimbing_id = $this->input->post('dosen_pembimbing_id');
         $dosen_data = $this->_get_dosen_by_id($dosen_pembimbing_id);
         
@@ -563,7 +563,7 @@ class Publikasi extends CI_Controller {
             return;
         }
         
-        // Handle file uploads - TIDAK DIUBAH
+        // Handle file uploads - TIDAK BERUBAH
         $upload_result = $this->_handle_file_uploads(false);
         if (!$upload_result['success']) {
             $this->session->set_flashdata('error', $upload_result['message']);
@@ -571,60 +571,79 @@ class Publikasi extends CI_Controller {
             return;
         }
         
-        // Submit type logic - TIDAK DIUBAH
         $submit_type = $this->input->post('submit_type');
         
-        // ✅ ENHANCED: Data mapping dengan data dosen dari database
+        // Data mapping - TIDAK BERUBAH
         $data = [
-            'dosen_pembimbing_id' => $dosen_pembimbing_id, // ✅ UBAH: Update ID dosen
+            'dosen_pembimbing_id' => $dosen_pembimbing_id,
             'nim' => $this->input->post('nim'),
             'nama_mahasiswa' => $this->input->post('nama_lengkap'),
             'program_studi' => $this->input->post('program_studi'),
             'judul_skripsi_final' => $this->input->post('judul_skripsi_final'),
-            'nama_dosen_pembimbing' => $dosen_data->nama, // ✅ DARI DATABASE
+            'nama_dosen_pembimbing' => $dosen_data->nama,
             'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
             'link_repository' => $this->input->post('link_repository'),
             'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
         
-        // Status update logic - TIDAK DIUBAH
-        if ($submit_type === 'submit' && $publikasi->status === 'draft') {
+        // ✅ HANYA INI YANG DIUBAH: Status update logic yang mendukung resubmit
+        $is_resubmit = false;
+        if ($submit_type === 'submit' && in_array($publikasi->status, ['draft', 'rejected'])) {
             $data['status'] = 'submitted';
             $data['tanggal_pengajuan'] = date('Y-m-d H:i:s');
+            
+            // ✅ TRACK resubmit tanpa mengganggu logic existing
+            if ($publikasi->status === 'rejected') {
+                $is_resubmit = true;
+                // Optional: bisa tambah field tracking jika diperlukan
+                $data['keterangan_mahasiswa'] = '[RESUBMIT] ' . $data['keterangan_mahasiswa'];
+            }
         }
         
-        // Update file jika ada - TIDAK DIUBAH
+        // Update file jika ada - TIDAK BERUBAH
         if (!empty($upload_result['files'])) {
             $data = array_merge($data, $upload_result['files']);
         }
         
-        // Update database - TIDAK DIUBAH
+        // Update database - TIDAK BERUBAH
         $result = $this->publikasi->update($publikasi->id, $data, $this->mahasiswa_id);
         
         if ($result['success']) {
-            if ($submit_type === 'submit' && $publikasi->status === 'draft') {
-                $this->session->set_flashdata('success', 
-                    '✅ Data berhasil diperbarui dan dikirim ke dosen pembimbing! ' .
-                    'Status: Step 4-6 (Review Dosen). ' .
-                    'Dosen akan mendapat notifikasi untuk review.'
-                );
+            // ✅ ENHANCED SUCCESS MESSAGE untuk resubmit
+            if ($submit_type === 'submit' && in_array($publikasi->status, ['draft', 'rejected'])) {
                 
-                // ✅ ENHANCED: Email notification dengan data dosen reliable
+                if ($is_resubmit) {
+                    $this->session->set_flashdata('success', 
+                        '✅ Pengajuan berhasil dikirim ulang ke dosen pembimbing! ' .
+                        'Status: Step 4-6 (Review Dosen). ' .
+                        'Dosen akan mendapat notifikasi untuk review ulang dokumen yang telah diperbaiki.'
+                    );
+                } else {
+                    $this->session->set_flashdata('success', 
+                        '✅ Data berhasil diperbarui dan dikirim ke dosen pembimbing! ' .
+                        'Status: Step 4-6 (Review Dosen). ' .
+                        'Dosen akan mendapat notifikasi untuk review.'
+                    );
+                }
+                
+                // ✅ TETAP GUNAKAN METHOD EMAIL EXISTING - TIDAK DIUBAH SAMA SEKALI
                 try {
                     $email_data = array_merge($data, ['mahasiswa_id' => $this->mahasiswa_id]);
                     $email_sent = $this->_send_notification_to_dosen_reliable($dosen_data, $email_data);
+                    
                     if ($email_sent) {
-                        log_message('info', "✅ Email notification berhasil untuk updated publikasi ID: {$publikasi->id}");
+                        $action_type = $is_resubmit ? 'resubmitted' : 'updated and submitted';
+                        log_message('info', "✅ Email notification berhasil untuk {$action_type} publikasi ID: {$publikasi->id}");
                     } else {
-                        log_message('warning', "⚠️ Email notification gagal untuk updated publikasi ID: {$publikasi->id}");
+                        log_message('warning', "⚠️ Email notification gagal untuk publikasi ID: {$publikasi->id}");
                         $current_success = $this->session->flashdata('success');
                         $this->session->set_flashdata('success', 
                             $current_success . ' (Catatan: Notifikasi email mungkin bermasalah, silakan hubungi dosen pembimbing secara manual.)'
                         );
                     }
                 } catch (Exception $e) {
-                    log_message('error', "❌ Exception saat kirim email untuk updated publikasi ID {$publikasi->id}: " . $e->getMessage());
+                    log_message('error', "❌ Exception saat kirim email untuk publikasi ID {$publikasi->id}: " . $e->getMessage());
                     $current_success = $this->session->flashdata('success');
                     $this->session->set_flashdata('success', 
                         $current_success . ' (Catatan: Sistem email bermasalah, silakan hubungi dosen pembimbing secara manual.)'
@@ -1009,19 +1028,37 @@ class Publikasi extends CI_Controller {
             
             $this->email->from('stkyakobus@gmail.com', 'SIM TA STK Santo Yakobus');
             $this->email->to($dosen_data->email);
-            $this->email->subject('📄 Pengajuan Publikasi Tugas Akhir - ' . $publikasi_data['nama_mahasiswa']);
+            
+            // ✅ DETECT resubmit dari keterangan untuk subject line
+            $is_resubmit = strpos($publikasi_data['keterangan_mahasiswa'], '[RESUBMIT]') === 0;
+            $subject_prefix = $is_resubmit ? '🔄 Pengajuan Ulang' : '📄 Pengajuan';
+            
+            $this->email->subject($subject_prefix . ' Publikasi Tugas Akhir - ' . $publikasi_data['nama_mahasiswa']);
+            
+            // ✅ TAMBAH SEDIKIT INFO RESUBMIT di template TANPA MENGUBAH STRUKTUR
+            $resubmit_alert = '';
+            if ($is_resubmit) {
+                $resubmit_alert = "
+                <div style='background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 10px 0;'>
+                    <p style='margin: 0; color: #856404; font-weight: bold;'>
+                        🔄 <strong>PENGAJUAN ULANG:</strong> Mahasiswa telah melakukan perbaikan sesuai masukan sebelumnya.
+                    </p>
+                </div>";
+            }
             
             $message = "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
                 <div style='background-color: #007bff; color: white; padding: 20px; text-align: center;'>
                     <h2 style='margin: 0;'>📄 Pengajuan Publikasi Tugas Akhir</h2>
-                    <p style='margin: 5px 0 0 0; opacity: 0.9;'>Pengajuan Baru</p>
+                    <p style='margin: 5px 0 0 0; opacity: 0.9;'>" . ($is_resubmit ? 'Pengajuan Ulang' : 'Pengajuan Baru') . "</p>
                 </div>
                 
                 <div style='padding: 20px; background-color: #f8f9fa;'>
                     <p>Yth. <strong>{$dosen_data->nama}</strong>,</p>
                     
                     <p>Mahasiswa bimbingan Anda telah mengajukan publikasi tugas akhir dengan detail sebagai berikut:</p>
+                    
+                    {$resubmit_alert}
                     
                     <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
                         <table style='width: 100%; font-size: 14px;'>

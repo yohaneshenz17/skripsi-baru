@@ -383,30 +383,30 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Show form pengajuan dengan template wrapper - TIDAK DIUBAH
+     * ✅ UBAH: Show form pengajuan dengan dosen list
      */
     private function _show_form_pengajuan($proposal) {
         $view_data = [
             'title' => 'Ajukan Publikasi Tugas Akhir',
             'proposal' => $proposal,
-            'action' => 'ajukan'
+            'action' => 'ajukan',
+            'dosen_list' => $this->_get_dosen_list() // ✅ TAMBAH: Load dosen list
         ];
         
-        // Gunakan template wrapper
         $this->_load_template('mahasiswa/publikasi/form', $view_data, 'Ajukan Publikasi Tugas Akhir', $this->_get_form_script());
     }
 
     /**
-     * Show form edit dengan template wrapper - TIDAK DIUBAH
+     * ✅ UBAH: Show form edit dengan dosen list
      */
     private function _show_form_edit($publikasi) {
         $view_data = [
             'title' => 'Edit Publikasi Tugas Akhir',
             'publikasi' => $publikasi,
-            'action' => 'edit'
+            'action' => 'edit',
+            'dosen_list' => $this->_get_dosen_list() // ✅ TAMBAH: Load dosen list
         ];
         
-        // Gunakan template wrapper
         $this->_load_template('mahasiswa/publikasi/form', $view_data, 'Edit Publikasi Tugas Akhir', $this->_get_form_script());
     }
 
@@ -415,16 +415,30 @@ class Publikasi extends CI_Controller {
     // =================================================================
 
     /**
-     * ✅ PERBAIKAN UTAMA: Process form publikasi - TAMBAH SUBMIT_TYPE HANDLING
-     * Fixed: Tambah logic untuk langsung submit atau simpan draft
+     * ✅ ENHANCED: Process form publikasi dengan dropdown dosen
      */
     private function _process_form_publikasi($proposal) {
-        // Set validation rules - TIDAK DIUBAH
-        $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim');
+        // ✅ Validation rules untuk dropdown dosen
+        $this->form_validation->set_rules('nama_lengkap', 'Nama Lengkap', 'required|trim|max_length[100]');
+        $this->form_validation->set_rules('nim', 'NIM', 'required|trim|numeric|max_length[20]');
+        $this->form_validation->set_rules('program_studi', 'Program Studi', 'required|trim');
+        $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim|min_length[10]');
+        $this->form_validation->set_rules('dosen_pembimbing_id', 'Dosen Pembimbing', 'required|numeric'); // ✅ UBAH: ID bukan nama
         $this->form_validation->set_rules('tanggal_ujian_skripsi', 'Tanggal Ujian Skripsi', 'required');
+        $this->form_validation->set_rules('link_repository', 'Link Repository', 'trim|valid_url');
         $this->form_validation->set_rules('keterangan_mahasiswa', 'Keterangan', 'trim');
         
         if ($this->form_validation->run() === FALSE) {
+            $this->_show_form_pengajuan($proposal);
+            return;
+        }
+        
+        // ✅ Get data dosen dari dropdown selection
+        $dosen_pembimbing_id = $this->input->post('dosen_pembimbing_id');
+        $dosen_data = $this->_get_dosen_by_id($dosen_pembimbing_id);
+        
+        if (!$dosen_data) {
+            $this->session->set_flashdata('error', 'Data dosen pembimbing tidak ditemukan. Silakan pilih dosen lain.');
             $this->_show_form_pengajuan($proposal);
             return;
         }
@@ -437,71 +451,68 @@ class Publikasi extends CI_Controller {
             return;
         }
         
-        // ✅ PERBAIKAN UTAMA: Tentukan tipe submit berdasarkan tombol yang diklik
-        $submit_type = $this->input->post('submit_type'); // 'draft' atau 'submit'
-        $save_draft = $this->input->post('save_draft'); // Backward compatibility
+        // Submit type logic - TIDAK DIUBAH
+        $submit_type = $this->input->post('submit_type');
+        $save_draft = $this->input->post('save_draft');
         
-        // Determine status - LOGIC BARU
         if ($save_draft || $submit_type === 'draft') {
             $status = 'draft';
             $workflow_step = 'Step 2 (Draft)';
         } else {
-            $status = 'submitted'; // Langsung submit ke dosen
+            $status = 'submitted';
             $workflow_step = 'Step 4-6 (Review Dosen)';
         }
         
-        // Prepare data untuk insert - MAPPING TIDAK DIUBAH
+        // ✅ ENHANCED: Data mapping dengan data dosen dari database
         $data = [
-            'proposal_mahasiswa_id' => $proposal->id,
+            'proposal_mahasiswa_id' => $proposal ? $proposal->id : null,
             'mahasiswa_id' => $this->mahasiswa_id,
-            'dosen_pembimbing_id' => $proposal->dosen_id,
-            'nim' => $proposal->nim,
-            'nama_mahasiswa' => $proposal->nama_mahasiswa,
-            'program_studi' => $proposal->nama_prodi,
+            'dosen_pembimbing_id' => $dosen_pembimbing_id, // ✅ UBAH: Simpan ID dosen
+            
+            // Manual input data
+            'nim' => $this->input->post('nim'),
+            'nama_mahasiswa' => $this->input->post('nama_lengkap'),
+            'program_studi' => $this->input->post('program_studi'),
             'judul_skripsi_final' => $this->input->post('judul_skripsi_final'),
-            'nama_dosen_pembimbing' => isset($proposal->nama_pembimbing) ? $proposal->nama_pembimbing : 'Belum ditetapkan',
+            'nama_dosen_pembimbing' => $dosen_data->nama, // ✅ DARI DATABASE
             'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
-            'file_surat_revisi' => $upload_result['files']['file_surat_revisi'],
-            'file_skripsi_final' => $upload_result['files']['file_skripsi_final'],
-            'file_surat_perpustakaan' => $upload_result['files']['file_surat_perpustakaan'],
+            
+            // File uploads - TIDAK DIUBAH
+            'file_surat_revisi' => $upload_result['files']['file_surat_revisi'] ?? null,
+            'file_skripsi_final' => $upload_result['files']['file_skripsi_final'] ?? null,
+            'file_surat_perpustakaan' => $upload_result['files']['file_surat_perpustakaan'] ?? null,
             'link_repository' => $this->input->post('link_repository'),
             'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
-            'status' => $status, // ✅ DYNAMIC STATUS
+            'status' => $status,
             'tanggal_pengajuan' => date('Y-m-d H:i:s'),
             'created_at' => date('Y-m-d H:i:s')
         ];
         
-        // Insert ke database menggunakan model - TIDAK DIUBAH
+        // Insert ke database - TIDAK DIUBAH
         $result = $this->publikasi->create($data);
         
         if ($result['success']) {
-            // ✅ PERBAIKAN: Handle berdasarkan status
             if ($status === 'submitted') {
-                // LANGSUNG SUBMIT - STEP 3 SELESAI
                 $this->session->set_flashdata('success', 
                     '✅ Pengajuan berhasil dikirim ke dosen pembimbing! ' .
                     'Status: Step 4-6 (Review Dosen). ' .
                     'Dosen akan mendapat notifikasi untuk review.'
                 );
                 
-                // ✅ Send notification dengan pola stable (tidak break workflow jika gagal)
+                // ✅ ENHANCED: Email notification dengan data dosen reliable
                 try {
-                    $email_sent = $this->_send_notification_to_dosen($proposal);
+                    $email_sent = $this->_send_notification_to_dosen_reliable($dosen_data, $data);
                     if ($email_sent) {
                         log_message('info', "✅ Email notification berhasil untuk publikasi ID: {$result['id']}");
                     } else {
-                        log_message('warning', "⚠️ Email notification gagal tapi workflow tetap lanjut untuk publikasi ID: {$result['id']}");
-                        
-                        // Tambahkan info ke session bahwa email mungkin bermasalah
+                        log_message('warning', "⚠️ Email notification gagal tapi workflow tetap lanjut");
                         $current_success = $this->session->flashdata('success');
                         $this->session->set_flashdata('success', 
                             $current_success . ' (Catatan: Notifikasi email mungkin bermasalah, silakan hubungi dosen pembimbing secara manual.)'
                         );
                     }
                 } catch (Exception $e) {
-                    log_message('error', "❌ Exception saat kirim email untuk publikasi ID {$result['id']}: " . $e->getMessage());
-                    
-                    // Tetap lanjutkan workflow meski email gagal
+                    log_message('error', "❌ Exception saat kirim email: " . $e->getMessage());
                     $current_success = $this->session->flashdata('success');
                     $this->session->set_flashdata('success', 
                         $current_success . ' (Catatan: Sistem email bermasalah, silakan hubungi dosen pembimbing secara manual.)'
@@ -509,7 +520,6 @@ class Publikasi extends CI_Controller {
                 }
                 
             } else {
-                // SIMPAN DRAFT - MASIH STEP 2
                 $this->session->set_flashdata('success', 
                     '💾 Pengajuan publikasi berhasil disimpan sebagai draft. ' .
                     'Status: Step 2 (Draft). ' .
@@ -525,13 +535,17 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * ✅ PERBAIKAN UTAMA: Process update publikasi - TAMBAH SUBMIT_TYPE HANDLING
-     * Fixed: Tambah logic untuk submit dari mode edit
+     * ✅ ENHANCED: Process update publikasi dengan dropdown dosen
      */
     private function _process_update($publikasi) {
-        // Set validation rules - TIDAK DIUBAH
-        $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim');
+        // ✅ Validation rules untuk dropdown dosen (sama dengan create)
+        $this->form_validation->set_rules('nama_lengkap', 'Nama Lengkap', 'required|trim|max_length[100]');
+        $this->form_validation->set_rules('nim', 'NIM', 'required|trim|numeric|max_length[20]');
+        $this->form_validation->set_rules('program_studi', 'Program Studi', 'required|trim');
+        $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim|min_length[10]');
+        $this->form_validation->set_rules('dosen_pembimbing_id', 'Dosen Pembimbing', 'required|numeric'); // ✅ UBAH: ID bukan nama
         $this->form_validation->set_rules('tanggal_ujian_skripsi', 'Tanggal Ujian Skripsi', 'required');
+        $this->form_validation->set_rules('link_repository', 'Link Repository', 'trim|valid_url');
         $this->form_validation->set_rules('keterangan_mahasiswa', 'Keterangan', 'trim');
         
         if ($this->form_validation->run() === FALSE) {
@@ -539,7 +553,17 @@ class Publikasi extends CI_Controller {
             return;
         }
         
-        // Handle file uploads (optional untuk update) - TIDAK DIUBAH
+        // ✅ Get data dosen dari dropdown selection
+        $dosen_pembimbing_id = $this->input->post('dosen_pembimbing_id');
+        $dosen_data = $this->_get_dosen_by_id($dosen_pembimbing_id);
+        
+        if (!$dosen_data) {
+            $this->session->set_flashdata('error', 'Data dosen pembimbing tidak ditemukan. Silakan pilih dosen lain.');
+            $this->_show_form_edit($publikasi);
+            return;
+        }
+        
+        // Handle file uploads - TIDAK DIUBAH
         $upload_result = $this->_handle_file_uploads(false);
         if (!$upload_result['success']) {
             $this->session->set_flashdata('error', $upload_result['message']);
@@ -547,70 +571,66 @@ class Publikasi extends CI_Controller {
             return;
         }
         
-        // ✅ PERBAIKAN UTAMA: Tentukan tipe submit
-        $submit_type = $this->input->post('submit_type'); // 'update' atau 'submit'
+        // Submit type logic - TIDAK DIUBAH
+        $submit_type = $this->input->post('submit_type');
         
-        // Prepare data untuk update - MAPPING TIDAK DIUBAH
+        // ✅ ENHANCED: Data mapping dengan data dosen dari database
         $data = [
+            'dosen_pembimbing_id' => $dosen_pembimbing_id, // ✅ UBAH: Update ID dosen
+            'nim' => $this->input->post('nim'),
+            'nama_mahasiswa' => $this->input->post('nama_lengkap'),
+            'program_studi' => $this->input->post('program_studi'),
             'judul_skripsi_final' => $this->input->post('judul_skripsi_final'),
+            'nama_dosen_pembimbing' => $dosen_data->nama, // ✅ DARI DATABASE
             'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
             'link_repository' => $this->input->post('link_repository'),
             'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
         
-        // ✅ PERBAIKAN: Update status jika submit ke dosen
+        // Status update logic - TIDAK DIUBAH
         if ($submit_type === 'submit' && $publikasi->status === 'draft') {
             $data['status'] = 'submitted';
             $data['tanggal_pengajuan'] = date('Y-m-d H:i:s');
         }
         
-        // Update file jika ada yang diupload - TIDAK DIUBAH
+        // Update file jika ada - TIDAK DIUBAH
         if (!empty($upload_result['files'])) {
             $data = array_merge($data, $upload_result['files']);
         }
         
-        // Update database menggunakan model - TIDAK DIUBAH
+        // Update database - TIDAK DIUBAH
         $result = $this->publikasi->update($publikasi->id, $data, $this->mahasiswa_id);
         
         if ($result['success']) {
-            // ✅ PERBAIKAN: Handle berdasarkan tipe submit
             if ($submit_type === 'submit' && $publikasi->status === 'draft') {
-                // SUBMIT KE DOSEN SETELAH UPDATE
                 $this->session->set_flashdata('success', 
                     '✅ Data berhasil diperbarui dan dikirim ke dosen pembimbing! ' .
                     'Status: Step 4-6 (Review Dosen). ' .
                     'Dosen akan mendapat notifikasi untuk review.'
                 );
                 
-                // ✅ Send notification dengan pola stable
+                // ✅ ENHANCED: Email notification dengan data dosen reliable
                 try {
-                    $proposal = $this->_get_proposal_by_id($publikasi->proposal_mahasiswa_id);
-                    if ($proposal) {
-                        $email_sent = $this->_send_notification_to_dosen($proposal);
-                        if ($email_sent) {
-                            log_message('info', "✅ Email notification berhasil untuk updated publikasi ID: {$publikasi->id}");
-                        } else {
-                            log_message('warning', "⚠️ Email notification gagal untuk updated publikasi ID: {$publikasi->id}");
-                            
-                            $current_success = $this->session->flashdata('success');
-                            $this->session->set_flashdata('success', 
-                                $current_success . ' (Catatan: Notifikasi email mungkin bermasalah, silakan hubungi dosen pembimbing secara manual.)'
-                            );
-                        }
+                    $email_data = array_merge($data, ['mahasiswa_id' => $this->mahasiswa_id]);
+                    $email_sent = $this->_send_notification_to_dosen_reliable($dosen_data, $email_data);
+                    if ($email_sent) {
+                        log_message('info', "✅ Email notification berhasil untuk updated publikasi ID: {$publikasi->id}");
                     } else {
-                        log_message('error', "❌ Data proposal tidak ditemukan untuk publikasi ID: {$publikasi->id}");
+                        log_message('warning', "⚠️ Email notification gagal untuk updated publikasi ID: {$publikasi->id}");
+                        $current_success = $this->session->flashdata('success');
+                        $this->session->set_flashdata('success', 
+                            $current_success . ' (Catatan: Notifikasi email mungkin bermasalah, silakan hubungi dosen pembimbing secara manual.)'
+                        );
                     }
                 } catch (Exception $e) {
                     log_message('error', "❌ Exception saat kirim email untuk updated publikasi ID {$publikasi->id}: " . $e->getMessage());
-                    
                     $current_success = $this->session->flashdata('success');
                     $this->session->set_flashdata('success', 
                         $current_success . ' (Catatan: Sistem email bermasalah, silakan hubungi dosen pembimbing secara manual.)'
                     );
                 }
             } else {
-                // UPDATE BIASA
                 $this->session->set_flashdata('success', '💾 Data publikasi berhasil diperbarui.');
             }
             
@@ -898,6 +918,258 @@ class Publikasi extends CI_Controller {
     private function _get_publikasi_timeline($publikasi_id) {
         // Get timeline/log untuk publikasi
         return [];
+    }
+
+    /**
+     * ✅ TAMBAH: Get dosen list untuk dropdown
+     */
+    private function _get_dosen_list() {
+        try {
+            $this->db->select('id, nama, nip, email');
+            $this->db->from('dosen');
+            $this->db->where('level', '2'); // ✅ CONFIRMED: Dosen hanya level 2
+            $this->db->where('email !=', ''); // Pastikan ada email
+            $this->db->order_by('nama', 'ASC');
+            
+            $result = $this->db->get()->result();
+            
+            if (empty($result)) {
+                log_message('warning', 'No dosen found for dropdown');
+                return [];
+            }
+            
+            log_message('info', 'Loaded ' . count($result) . ' dosen for dropdown');
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error loading dosen list: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    // =================================================================
+    // ✅ PERBAIKAN 4: Reliable email notification
+    // =================================================================
+    
+    /**
+     * ✅ ENHANCED: Reliable email notification dengan data dosen dari DB
+     */
+    private function _send_notification_to_dosen_reliable($dosen_data, $publikasi_data) {
+        try {
+            // ✅ Data sudah pasti ada karena dari dropdown DB
+            if (!$dosen_data || empty($dosen_data->email)) {
+                log_message('error', "Invalid dosen data for email notification");
+                return false;
+            }
+            
+            $mahasiswa_email = $this->session->userdata('email');
+            
+            // Load email library
+            $this->load->library('email');
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $result_dosen = false;
+            $result_mahasiswa = false;
+            
+            // ✅ Send ke dosen pembimbing
+            $result_dosen = $this->_kirim_email_publikasi_ke_dosen_reliable($dosen_data, $publikasi_data);
+            
+            // ✅ Send konfirmasi ke mahasiswa
+            if ($mahasiswa_email) {
+                $result_mahasiswa = $this->_kirim_email_konfirmasi_mahasiswa_reliable($dosen_data, $publikasi_data, $mahasiswa_email);
+            }
+            
+            // Log hasil
+            if ($result_dosen) {
+                log_message('info', "✅ Email publikasi berhasil dikirim ke dosen: {$dosen_data->email}");
+            }
+            
+            if ($result_mahasiswa) {
+                log_message('info', "✅ Email konfirmasi berhasil dikirim ke mahasiswa: {$mahasiswa_email}");
+            }
+            
+            // Return true jika minimal 1 email berhasil
+            return ($result_dosen || $result_mahasiswa);
+            
+        } catch (Exception $e) {
+            log_message('error', "❌ Exception dalam reliable email notification: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ ENHANCED: Email ke dosen dengan data reliable dari DB
+     */
+    private function _kirim_email_publikasi_ke_dosen_reliable($dosen_data, $publikasi_data) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            $this->email->clear();
+            
+            $this->email->from('stkyakobus@gmail.com', 'SIM TA STK Santo Yakobus');
+            $this->email->to($dosen_data->email);
+            $this->email->subject('📄 Pengajuan Publikasi Tugas Akhir - ' . $publikasi_data['nama_mahasiswa']);
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #007bff; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📄 Pengajuan Publikasi Tugas Akhir</h2>
+                    <p style='margin: 5px 0 0 0; opacity: 0.9;'>Pengajuan Baru</p>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. <strong>{$dosen_data->nama}</strong>,</p>
+                    
+                    <p>Mahasiswa bimbingan Anda telah mengajukan publikasi tugas akhir dengan detail sebagai berikut:</p>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td style='padding: 5px 0;'><strong>Nama:</strong></td><td>{$publikasi_data['nama_mahasiswa']}</td></tr>
+                            <tr><td style='padding: 5px 0;'><strong>NIM:</strong></td><td>{$publikasi_data['nim']}</td></tr>
+                            <tr><td style='padding: 5px 0;'><strong>Program Studi:</strong></td><td>{$publikasi_data['program_studi']}</td></tr>
+                            <tr><td style='padding: 5px 0;'><strong>Judul:</strong></td><td>{$publikasi_data['judul_skripsi_final']}</td></tr>
+                            <tr><td style='padding: 5px 0;'><strong>Tanggal Ujian:</strong></td><td>{$publikasi_data['tanggal_ujian_skripsi']}</td></tr>
+                            <tr><td style='padding: 5px 0;'><strong>Tanggal Ajukan:</strong></td><td>" . date('d F Y H:i') . "</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #495057; margin-top: 0;'>📋 Tindakan Diperlukan:</h4>
+                        <p style='margin: 5px 0;'>• Review kelengkapan dokumen publikasi</p>
+                        <p style='margin: 5px 0;'>• Verifikasi kesesuaian dengan hasil seminar skripsi</p>
+                        <p style='margin: 5px 0;'>• Berikan rekomendasi (Setujui/Revisi)</p>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('dosen/publikasi') . "' style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📄 Buka Menu Publikasi
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem untuk koordinasi proses publikasi tugas akhir.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', "Email publikasi reliable sent to dosen: {$dosen_data->email}");
+                return true;
+            } else {
+                log_message('error', 'Failed to send reliable email to dosen: ' . $this->email->print_debugger());
+                return false;
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending reliable email to dosen: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ ENHANCED: Email konfirmasi ke mahasiswa dengan data reliable
+     */
+    private function _kirim_email_konfirmasi_mahasiswa_reliable($dosen_data, $publikasi_data, $mahasiswa_email) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            $this->email->clear();
+            
+            $this->email->from('stkyakobus@gmail.com', 'SIM TA STK Santo Yakobus');
+            $this->email->to($mahasiswa_email);
+            $this->email->subject('✅ Pengajuan Publikasi Berhasil Dikirim');
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #28a745; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Publikasi Berhasil Diajukan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. <strong>{$publikasi_data['nama_mahasiswa']}</strong>,</p>
+                    
+                    <p>Terima kasih! Pengajuan publikasi tugas akhir Anda telah berhasil dikirim kepada dosen pembimbing untuk review.</p>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #28a745; margin-top: 0;'>Detail Pengajuan:</h4>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td><strong>Judul:</strong></td><td>{$publikasi_data['judul_skripsi_final']}</td></tr>
+                            <tr><td><strong>Pembimbing:</strong></td><td>{$dosen_data->nama}</td></tr>
+                            <tr><td><strong>Email Dosen:</strong></td><td>{$dosen_data->email}</td></tr>
+                            <tr><td><strong>Waktu Submit:</strong></td><td>" . date('d F Y H:i') . "</td></tr>
+                            <tr><td><strong>Status:</strong></td><td><span style='color: #ffc107;'>⏳ Menunggu Review Dosen</span></td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #bee5eb; margin: 15px 0;'>
+                        <h4 style='color: #0c5460; margin-top: 0;'>📋 Langkah Selanjutnya:</h4>
+                        <p style='margin: 5px 0; color: #0c5460;'>• Dosen pembimbing akan melakukan review</p>
+                        <p style='margin: 5px 0; color: #0c5460;'>• Anda akan mendapat notifikasi hasil review</p>
+                        <p style='margin: 5px 0; color: #0c5460;'>• Jika disetujui, akan diteruskan ke staf untuk validasi</p>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('mahasiswa/publikasi') . "' style='background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📊 Lihat Status Publikasi
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px;'>
+                        Anda dapat memantau progress publikasi melalui dashboard mahasiswa.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', "Email konfirmasi reliable sent to mahasiswa: {$mahasiswa_email}");
+                return true;
+            } else {
+                log_message('error', 'Failed to send reliable confirmation email to mahasiswa: ' . $this->email->print_debugger());
+                return false;
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending reliable confirmation email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * ✅ TAMBAH: Get dosen by ID
+     */
+    private function _get_dosen_by_id($dosen_id) {
+        try {
+            $this->db->select('id, nama, nip, email');
+            $this->db->from('dosen');
+            $this->db->where('id', $dosen_id);
+            
+            $result = $this->db->get()->row();
+            
+            if ($result) {
+                log_message('info', "Dosen found: {$result->nama} ({$result->email})");
+            } else {
+                log_message('warning', "Dosen not found for ID: {$dosen_id}");
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting dosen by ID: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**

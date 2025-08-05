@@ -1,444 +1,415 @@
-<?php
+// =====================================================
+// 3. STAF CONTROLLER
+// File: application/controllers/staf/Publikasi.php
+// =====================================================
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Controller Staf - Menu Publikasi
- * Mengelola upload link repository dan validasi publikasi tugas akhir
+ * Controller Publikasi untuk Staf
+ * Handle input repository link dan validasi final
  */
 class Publikasi extends CI_Controller {
 
+    private $staf_id;
+
     public function __construct() {
         parent::__construct();
-        $this->load->database();
-        $this->load->library('session');
-        $this->load->helper(['url', 'date', 'file']);
-        $this->load->library(['pdf', 'upload', 'form_validation']);
         
-        // Cek login dan level staf
-        if (!$this->session->userdata('logged_in') || $this->session->userdata('level') != '5') {
+        // Load dependencies
+        $this->load->database();
+        $this->load->library(['session', 'form_validation']);
+        $this->load->helper(['url', 'date', 'text']);
+        $this->load->model('Publikasi_model', 'publikasi');
+        
+        // Auth check untuk staf
+        if(!$this->session->userdata('logged_in')) {
             redirect('auth/login');
         }
+        
+        if($this->session->userdata('level') != '5') { // Level 5 = Staf
+            show_error('Akses ditolak. Halaman khusus staf.', 403);
+        }
+        
+        $this->staf_id = $this->session->userdata('user_id');
     }
 
     /**
-     * Halaman utama menu publikasi
+     * Dashboard publikasi untuk staf
      */
     public function index() {
-        // Filter
-        $prodi_id = $this->input->get('prodi_id');
-        $status = $this->input->get('status');
-        $periode = $this->input->get('periode');
-        $search = $this->input->get('search');
-        
-        // Base query
-        $this->db->select('
-            pm.*,
-            m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
-            p.nama as nama_prodi,
-            d1.nama as nama_pembimbing
-        ');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
-        
-        // Filter hanya yang sudah tahap publikasi atau selesai
-        $this->db->where_in('pm.workflow_status', ['publikasi', 'selesai']);
-        
-        // Apply filters
-        if ($prodi_id) {
-            $this->db->where('m.prodi_id', $prodi_id);
-        }
-        
-        if ($status !== '') {
-            if ($status == 'pending') {
-                $this->db->where('pm.status_publikasi', '0');
-            } elseif ($status == 'diajukan') {
-                $this->db->where('pm.status_publikasi', '1');
-                $this->db->where('(pm.validasi_staf_publikasi = "0" OR pm.validasi_staf_publikasi IS NULL)');
-            } elseif ($status == 'validated') {
-                $this->db->where('pm.validasi_staf_publikasi', '1');
-                $this->db->where('(pm.validasi_kaprodi_publikasi = "0" OR pm.validasi_kaprodi_publikasi IS NULL)');
-            } elseif ($status == 'approved') {
-                $this->db->where('pm.validasi_kaprodi_publikasi', '1');
-                $this->db->where('pm.workflow_status', 'selesai');
-            }
-        }
-        
-        if ($periode) {
-            $this->db->where('DATE_FORMAT(pm.tanggal_publikasi, "%Y-%m")', $periode);
-        }
-        
-        if ($search) {
-            $this->db->group_start();
-            $this->db->like('m.nama', $search);
-            $this->db->or_like('m.nim', $search);
-            $this->db->or_like('pm.judul', $search);
-            $this->db->or_like('pm.link_repository', $search);
-            $this->db->group_end();
-        }
-        
-        $this->db->order_by('pm.tanggal_publikasi', 'DESC');
-        
-        $data['publikasi'] = $this->db->get()->result();
-        
-        // Data untuk filter
-        $data['prodi_list'] = $this->db->get('prodi')->result();
-        
-        $data['filters'] = [
-            'prodi_id' => $prodi_id,
-            'status' => $status,
-            'periode' => $periode,
-            'search' => $search
+        $data = [
+            'title' => 'Validasi Publikasi Tugas Akhir',
+            'pengajuan_validasi' => $this->_get_pengajuan_perlu_validasi(),
+            'riwayat_validasi' => $this->_get_riwayat_validasi(),
+            'statistik' => $this->_get_statistik_staf()
         ];
-        
-        // Statistik
-        $data['stats'] = $this->_get_publikasi_stats();
         
         $this->load->view('staf/publikasi/index', $data);
     }
 
     /**
-     * Detail publikasi mahasiswa
+     * Detail dan validasi pengajuan publikasi
      */
-    public function detail($proposal_id) {
-        if (!$proposal_id) {
-            show_404();
+    public function validasi($publikasi_id) {
+        $publikasi = $this->_get_publikasi_detail($publikasi_id);
+        
+        if (!$publikasi) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan.');
+            redirect('staf/publikasi');
         }
         
-        // Ambil data lengkap publikasi
-        $this->db->select('
-            pm.*,
-            m.nim, m.nama as nama_mahasiswa, m.email, m.nomor_telepon,
-            p.nama as nama_prodi,
-            d1.nama as nama_pembimbing, d1.email as email_pembimbing
-        ');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
-        $this->db->where('pm.id', $proposal_id);
-        
-        $data['proposal'] = $this->db->get()->row();
-        
-        if (!$data['proposal']) {
-            show_404();
+        // Hanya bisa validasi yang sudah disetujui dosen
+        if ($publikasi->status_pembimbing !== 'approved') {
+            $this->session->set_flashdata('error', 'Pengajuan belum disetujui dosen pembimbing.');
+            redirect('staf/publikasi');
         }
         
-        // Ambil log aktivitas publikasi
-        $this->db->select('sa.*, d.nama as nama_staf');
-        $this->db->from('staf_aktivitas sa');
-        $this->db->join('dosen d', 'sa.staf_id = d.id');
-        $this->db->where('sa.proposal_id', $proposal_id);
-        $this->db->where_in('sa.aktivitas', ['input_repository', 'validasi_publikasi']);
-        $this->db->order_by('sa.tanggal_aktivitas', 'DESC');
-        
-        $data['log_aktivitas'] = $this->db->get()->result();
-        
-        $this->load->view('staf/publikasi/detail', $data);
+        if ($this->input->method() === 'post') {
+            $this->_process_validasi($publikasi);
+        } else {
+            $this->_show_validasi_form($publikasi);
+        }
     }
 
     /**
-     * Input link repository oleh staf
+     * Input link repository dan selesaikan publikasi
      */
-    public function input_repository() {
-        if ($this->input->method() == 'post') {
-            $proposal_id = $this->input->post('proposal_id');
-            $link_repository = $this->input->post('link_repository');
-            $keterangan = $this->input->post('keterangan');
-            
-            // Validasi
-            $this->form_validation->set_rules('proposal_id', 'Proposal ID', 'required|numeric');
-            $this->form_validation->set_rules('link_repository', 'Link Repository', 'required|valid_url');
-            
-            if ($this->form_validation->run() == FALSE) {
-                $this->session->set_flashdata('error', validation_errors());
-                redirect('staf/publikasi/detail/' . $proposal_id);
-            }
-            
-            // Cek apakah proposal ada dan valid
-            $this->db->where('id', $proposal_id);
-            $this->db->where_in('workflow_status', ['publikasi', 'selesai']);
-            $proposal = $this->db->get('proposal_mahasiswa')->row();
-            
-            if (!$proposal) {
-                $this->session->set_flashdata('error', 'Proposal tidak ditemukan atau belum pada tahap publikasi');
-                redirect('staf/publikasi');
-            }
-            
-            // Update link repository
-            $update_data = [
-                'link_repository' => $link_repository,
-                'tanggal_repository' => date('Y-m-d H:i:s'),
-                'validasi_staf_publikasi' => '1',
-                'keterangan_staf_publikasi' => $keterangan,
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->db->where('id', $proposal_id);
-            $update = $this->db->update('proposal_mahasiswa', $update_data);
-            
-            if ($update) {
-                // Log aktivitas
-                $this->_log_aktivitas('input_repository', $proposal->mahasiswa_id, $proposal_id, 
-                                     "Input link repository: {$link_repository}");
-                
-                $this->session->set_flashdata('success', 'Link repository berhasil disimpan dan divalidasi');
-            } else {
-                $this->session->set_flashdata('error', 'Gagal menyimpan link repository');
-            }
-            
-            redirect('staf/publikasi/detail/' . $proposal_id);
-        }
+    public function selesaikan($publikasi_id) {
+        $publikasi = $this->_get_publikasi_detail($publikasi_id);
         
-        // Jika GET request, tampilkan form
-        $proposal_id = $this->input->get('proposal_id');
-        
-        if (!$proposal_id) {
+        if (!$publikasi) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan.');
             redirect('staf/publikasi');
         }
         
-        // Ambil data proposal
-        $this->db->select('
-            pm.*,
-            m.nim, m.nama as nama_mahasiswa,
-            p.nama as nama_prodi
-        ');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->where('pm.id', $proposal_id);
-        $this->db->where_in('pm.workflow_status', ['publikasi', 'selesai']);
-        
-        $data['proposal'] = $this->db->get()->row();
-        
-        if (!$data['proposal']) {
-            $this->session->set_flashdata('error', 'Proposal tidak ditemukan');
+        if ($publikasi->status_pembimbing !== 'approved') {
+            $this->session->set_flashdata('error', 'Pengajuan belum disetujui dosen pembimbing.');
             redirect('staf/publikasi');
         }
         
-        $this->load->view('staf/publikasi/form_repository', $data);
-    }
-
-    /**
-     * Validasi publikasi oleh staf
-     */
-    public function validasi() {
-        if ($this->input->method() != 'post') {
-            redirect('staf/publikasi');
+        $this->form_validation->set_rules('link_repository', 'Link Repository', 'required|valid_url|trim');
+        $this->form_validation->set_rules('komentar_staf', 'Komentar', 'trim');
+        
+        if (!$this->form_validation->run()) {
+            $this->_show_validasi_form($publikasi);
+            return;
         }
         
-        $proposal_id = $this->input->post('proposal_id');
-        $status_validasi = $this->input->post('status_validasi'); // 1 = setuju, 2 = tolak
-        $keterangan = $this->input->post('keterangan');
-        
-        // Validasi input
-        if (!$proposal_id || !in_array($status_validasi, ['1', '2'])) {
-            $this->session->set_flashdata('error', 'Data tidak valid');
-            redirect('staf/publikasi');
-        }
-        
-        // Cek proposal
-        $this->db->where('id', $proposal_id);
-        $this->db->where('status_publikasi', '1'); // Harus sudah diajukan mahasiswa
-        $proposal = $this->db->get('proposal_mahasiswa')->row();
-        
-        if (!$proposal) {
-            $this->session->set_flashdata('error', 'Proposal tidak ditemukan atau belum diajukan untuk publikasi');
-            redirect('staf/publikasi');
-        }
-        
-        // Update validasi staf
-        $update_data = [
-            'validasi_staf_publikasi' => $status_validasi,
-            'keterangan_staf_publikasi' => $keterangan,
-            'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
+        $data = [
+            'link_repository' => $this->input->post('link_repository'),
+            'komentar_staf' => $this->input->post('komentar_staf'),
+            'validated_by_staf_id' => $this->staf_id,
+            'validated_by_staf_name' => $this->session->userdata('nama')
         ];
         
-        $this->db->where('id', $proposal_id);
-        $update = $this->db->update('proposal_mahasiswa', $update_data);
+        $result = $this->publikasi->complete_by_staf($publikasi_id, $data);
         
-        if ($update) {
-            $status_text = ($status_validasi == '1') ? 'disetujui' : 'ditolak';
+        if ($result['success']) {
+            $this->session->set_flashdata('success', 'Publikasi berhasil diselesaikan. Mahasiswa dapat download surat keterangan.');
             
-            // Log aktivitas
-            $this->_log_aktivitas('validasi_publikasi', $proposal->mahasiswa_id, $proposal_id, 
-                                 "Publikasi {$status_text}: {$keterangan}");
-            
-            $this->session->set_flashdata('success', "Publikasi berhasil {$status_text}");
+            // Send notification ke mahasiswa
+            $this->_send_notification_to_mahasiswa($publikasi, 'completed');
         } else {
-            $this->session->set_flashdata('error', 'Gagal memproses validasi');
-        }
-        
-        redirect('staf/publikasi/detail/' . $proposal_id);
-    }
-
-    /**
-     * Export laporan publikasi
-     */
-    public function export_laporan() {
-        // Filter data
-        $prodi_id = $this->input->get('prodi_id');
-        $periode_start = $this->input->get('periode_start');
-        $periode_end = $this->input->get('periode_end');
-        
-        // Query data publikasi
-        $this->db->select('
-            pm.*,
-            m.nim, m.nama as nama_mahasiswa,
-            p.nama as nama_prodi,
-            d1.nama as nama_pembimbing
-        ');
-        $this->db->from('proposal_mahasiswa pm');
-        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
-        $this->db->join('prodi p', 'm.prodi_id = p.id');
-        $this->db->join('dosen d1', 'pm.dosen_id = d1.id', 'left');
-        $this->db->where_in('pm.workflow_status', ['publikasi', 'selesai']);
-        
-        if ($prodi_id) {
-            $this->db->where('m.prodi_id', $prodi_id);
-        }
-        
-        if ($periode_start && $periode_end) {
-            $this->db->where('pm.tanggal_publikasi >=', $periode_start);
-            $this->db->where('pm.tanggal_publikasi <=', $periode_end);
-        }
-        
-        $this->db->order_by('pm.tanggal_publikasi', 'DESC');
-        
-        $data['publikasi'] = $this->db->get()->result();
-        $data['periode_start'] = $periode_start;
-        $data['periode_end'] = $periode_end;
-        $data['prodi_filter'] = $prodi_id;
-        
-        // Generate PDF
-        $this->pdf->filename = 'Laporan_Publikasi_' . date('Y-m-d') . '.pdf';
-        
-        $html = $this->load->view('staf/publikasi/pdf_laporan', [
-            'publikasi' => $data['publikasi'],
-            'periode_start' => $periode_start,
-            'periode_end' => $periode_end,
-            'generated_by' => $this->session->userdata('nama'),
-            'generated_at' => date('d/m/Y H:i:s')
-        ], true);
-        
-        $this->pdf->load_html($html);
-        $this->pdf->render();
-        
-        // Log aktivitas
-        $this->_log_aktivitas('export_laporan_publikasi', null, null, 
-                             "Export laporan publikasi periode {$periode_start} - {$periode_end}");
-        
-        $this->pdf->stream($this->pdf->filename, array("Attachment" => false));
-    }
-
-    /**
-     * Bulk validasi publikasi
-     */
-    public function bulk_validasi() {
-        if ($this->input->method() != 'post') {
-            redirect('staf/publikasi');
-        }
-        
-        $proposal_ids = $this->input->post('proposal_ids');
-        $status_validasi = $this->input->post('status_validasi');
-        $keterangan = $this->input->post('keterangan');
-        
-        if (empty($proposal_ids) || !in_array($status_validasi, ['1', '2'])) {
-            $this->session->set_flashdata('error', 'Pilih minimal satu publikasi dan status validasi');
-            redirect('staf/publikasi');
-        }
-        
-        $success_count = 0;
-        $status_text = ($status_validasi == '1') ? 'disetujui' : 'ditolak';
-        
-        foreach ($proposal_ids as $proposal_id) {
-            // Update validasi
-            $update_data = [
-                'validasi_staf_publikasi' => $status_validasi,
-                'keterangan_staf_publikasi' => $keterangan,
-                'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->db->where('id', $proposal_id);
-            $this->db->where('status_publikasi', '1');
-            $update = $this->db->update('proposal_mahasiswa', $update_data);
-            
-            if ($update) {
-                $success_count++;
-                
-                // Get mahasiswa info for log
-                $this->db->select('mahasiswa_id');
-                $this->db->where('id', $proposal_id);
-                $proposal = $this->db->get('proposal_mahasiswa')->row();
-                
-                if ($proposal) {
-                    $this->_log_aktivitas('validasi_publikasi', $proposal->mahasiswa_id, $proposal_id, 
-                                         "Bulk validasi: {$status_text}");
-                }
-            }
-        }
-        
-        if ($success_count > 0) {
-            $this->session->set_flashdata('success', "{$success_count} publikasi berhasil {$status_text}");
-        } else {
-            $this->session->set_flashdata('error', 'Gagal memproses validasi');
+            $this->session->set_flashdata('error', $result['message']);
         }
         
         redirect('staf/publikasi');
     }
 
     /**
-     * Statistik publikasi
+     * Download laporan publikasi
      */
-    private function _get_publikasi_stats() {
-        $stats = [];
+    public function laporan() {
+        $filter = [
+            'tanggal_mulai' => $this->input->get('tanggal_mulai'),
+            'tanggal_selesai' => $this->input->get('tanggal_selesai'),
+            'prodi_id' => $this->input->get('prodi_id'),
+            'status' => $this->input->get('status')
+        ];
         
-        // Total publikasi
-        $this->db->where_in('workflow_status', ['publikasi', 'selesai']);
-        $stats['total_publikasi'] = $this->db->count_all_results('proposal_mahasiswa');
+        $data = [
+            'title' => 'Laporan Publikasi Tugas Akhir',
+            'publikasi_list' => $this->_get_laporan_publikasi($filter),
+            'filter' => $filter,
+            'prodi_list' => $this->_get_prodi_list()
+        ];
         
-        // Yang diajukan mahasiswa
-        $this->db->where('status_publikasi', '1');
-        $stats['diajukan'] = $this->db->count_all_results('proposal_mahasiswa');
+        if ($this->input->get('export') === 'excel') {
+            $this->_export_excel($data);
+        } else {
+            $this->load->view('staf/publikasi/laporan', $data);
+        }
+    }
+
+    /**
+     * Download file publikasi untuk validasi
+     */
+    public function download($publikasi_id, $file_type) {
+        $publikasi = $this->_get_publikasi_detail($publikasi_id);
         
-        // Yang sudah divalidasi staf
-        $this->db->where('validasi_staf_publikasi', '1');
-        $stats['validated_staf'] = $this->db->count_all_results('proposal_mahasiswa');
+        if (!$publikasi) {
+            show_404();
+        }
         
-        // Yang sudah selesai (approved kaprodi)
-        $this->db->where('validasi_kaprodi_publikasi', '1');
-        $this->db->where('workflow_status', 'selesai');
-        $stats['selesai'] = $this->db->count_all_results('proposal_mahasiswa');
+        $this->_download_file($publikasi, $file_type);
+    }
+
+    // =================================================================
+    // PRIVATE METHODS
+    // =================================================================
+
+    /**
+     * Get pengajuan yang perlu divalidasi staf
+     */
+    private function _get_pengajuan_perlu_validasi() {
+        $this->db->select('
+            pta.*,
+            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+            pr.nama as nama_prodi,
+            d.nama as nama_pembimbing
+        ');
+        $this->db->from('publikasi_tugas_akhir pta');
+        $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+        $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id');
+        $this->db->where('pta.status_pembimbing', 'approved');
+        $this->db->where('pta.status_staf', 'pending');
+        $this->db->where_in('pta.status', ['review_staf']);
+        $this->db->order_by('pta.tanggal_review_pembimbing', 'ASC');
         
-        // Yang pending validasi staf
-        $this->db->where('status_publikasi', '1');
-        $this->db->where('(validasi_staf_publikasi = "0" OR validasi_staf_publikasi IS NULL)');
-        $stats['pending_staf'] = $this->db->count_all_results('proposal_mahasiswa');
+        return $this->db->get()->result();
+    }
+
+    /**
+     * Get riwayat validasi yang sudah dilakukan
+     */
+    private function _get_riwayat_validasi() {
+        $this->db->select('
+            pta.*,
+            m.nim, m.nama as nama_mahasiswa,
+            pr.nama as nama_prodi
+        ');
+        $this->db->from('publikasi_tugas_akhir pta');
+        $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+        $this->db->where('pta.validated_by_staf_id', $this->staf_id);
+        $this->db->where('pta.status_staf !=', 'pending');
+        $this->db->order_by('pta.tanggal_validasi_staf', 'DESC');
+        $this->db->limit(15);
         
-        // Publikasi bulan ini
-        $this->db->where('MONTH(tanggal_publikasi)', date('m'));
-        $this->db->where('YEAR(tanggal_publikasi)', date('Y'));
-        $stats['publikasi_bulan_ini'] = $this->db->count_all_results('proposal_mahasiswa');
+        return $this->db->get()->result();
+    }
+
+    /**
+     * Get detail publikasi
+     */
+    private function _get_publikasi_detail($publikasi_id) {
+        $this->db->select('
+            pta.*,
+            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+            m.nomor_telepon,
+            pr.nama as nama_prodi,
+            d.nama as nama_pembimbing,
+            pm.judul as judul_proposal
+        ');
+        $this->db->from('publikasi_tugas_akhir pta');
+        $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+        $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id');
+        $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id');
+        $this->db->where('pta.id', $publikasi_id);
+        
+        return $this->db->get()->row();
+    }
+
+    /**
+     * Get statistik untuk dashboard staf
+     */
+    private function _get_statistik_staf() {
+        $stats = [
+            'pending_validasi' => 0,
+            'sudah_divalidasi' => 0,
+            'publikasi_selesai' => 0,
+            'total_bulan_ini' => 0
+        ];
+        
+        // Pending validasi
+        $stats['pending_validasi'] = $this->db->where('status_pembimbing', 'approved')
+                                            ->where('status_staf', 'pending')
+                                            ->count_all_results('publikasi_tugas_akhir');
+        
+        // Sudah divalidasi
+        $stats['sudah_divalidasi'] = $this->db->where('validated_by_staf_id', $this->staf_id)
+                                            ->where('status_staf !=', 'pending')
+                                            ->count_all_results('publikasi_tugas_akhir');
+        
+        // Publikasi selesai
+        $stats['publikasi_selesai'] = $this->db->where('status', 'completed')
+                                             ->count_all_results('publikasi_tugas_akhir');
+        
+        // Total bulan ini
+        $stats['total_bulan_ini'] = $this->db->where('MONTH(tanggal_validasi_staf)', date('n'))
+                                           ->where('YEAR(tanggal_validasi_staf)', date('Y'))
+                                           ->count_all_results('publikasi_tugas_akhir');
         
         return $stats;
     }
 
     /**
-     * Log aktivitas staf
+     * Process validasi from staf
      */
-    private function _log_aktivitas($aktivitas, $mahasiswa_id = null, $proposal_id = null, $keterangan = '') {
+    private function _process_validasi($publikasi) {
+        $this->form_validation->set_rules('link_repository', 'Link Repository', 'required|valid_url|trim');
+        $this->form_validation->set_rules('komentar_staf', 'Komentar', 'trim');
+        
+        if (!$this->form_validation->run()) {
+            $this->_show_validasi_form($publikasi);
+            return;
+        }
+        
         $data = [
-            'staf_id' => $this->session->userdata('id'),
-            'aktivitas' => $aktivitas,
-            'mahasiswa_id' => $mahasiswa_id,
-            'proposal_id' => $proposal_id,
-            'keterangan' => $keterangan,
-            'tanggal_aktivitas' => date('Y-m-d H:i:s')
+            'link_repository' => $this->input->post('link_repository'),
+            'komentar_staf' => $this->input->post('komentar_staf'),
+            'validated_by_staf_id' => $this->staf_id,
+            'validated_by_staf_name' => $this->session->userdata('nama')
         ];
         
-        $this->db->insert('staf_aktivitas', $data);
+        $result = $this->publikasi->complete_by_staf($publikasi->id, $data);
+        
+        if ($result['success']) {
+            $this->session->set_flashdata('success', 'Publikasi berhasil diselesaikan.');
+        } else {
+            $this->session->set_flashdata('error', $result['message']);
+        }
+        
+        redirect('staf/publikasi');
+    }
+
+    /**
+     * Show validasi form
+     */
+    private function _show_validasi_form($publikasi) {
+        $data = [
+            'title' => 'Validasi Publikasi Tugas Akhir',
+            'publikasi' => $publikasi
+        ];
+        $this->load->view('staf/publikasi/validasi', $data);
+    }
+
+    /**
+     * Get list prodi untuk filter
+     */
+    private function _get_prodi_list() {
+        $this->db->select('id, nama');
+        $this->db->from('prodi');
+        $this->db->order_by('nama', 'ASC');
+        
+        return $this->db->get()->result();
+    }
+
+    /**
+     * Get laporan publikasi dengan filter
+     */
+    private function _get_laporan_publikasi($filter) {
+        $this->db->select('
+            pta.*,
+            m.nim, m.nama as nama_mahasiswa,
+            pr.nama as nama_prodi,
+            d.nama as nama_pembimbing
+        ');
+        $this->db->from('publikasi_tugas_akhir pta');
+        $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+        $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id');
+        
+        if (!empty($filter['tanggal_mulai'])) {
+            $this->db->where('DATE(pta.tanggal_pengajuan) >=', $filter['tanggal_mulai']);
+        }
+        
+        if (!empty($filter['tanggal_selesai'])) {
+            $this->db->where('DATE(pta.tanggal_selesai) <=', $filter['tanggal_selesai']);
+        }
+        
+        if (!empty($filter['prodi_id'])) {
+            $this->db->where('pr.id', $filter['prodi_id']);
+        }
+        
+        if (!empty($filter['status'])) {
+            $this->db->where('pta.status', $filter['status']);
+        }
+        
+        $this->db->order_by('pta.tanggal_pengajuan', 'DESC');
+        
+        return $this->db->get()->result();
+    }
+
+    /**
+     * Download file dari publikasi
+     */
+    private function _download_file($publikasi, $file_type) {
+        $file_mapping = [
+            'surat_revisi' => $publikasi->file_surat_revisi,
+            'skripsi_final' => $publikasi->file_skripsi_final,
+            'surat_perpustakaan' => $publikasi->file_surat_perpustakaan
+        ];
+        
+        if (!isset($file_mapping[$file_type])) {
+            show_404();
+        }
+        
+        $filename = $file_mapping[$file_type];
+        $file_path = "./uploads/publikasi/{$file_type}/{$filename}";
+        
+        if (!file_exists($file_path)) {
+            show_404();
+        }
+        
+        $this->load->helper('download');
+        force_download($filename, file_get_contents($file_path));
+    }
+
+    /**
+     * Export to Excel
+     */
+    private function _export_excel($data) {
+        // TODO: Implement Excel export using PhpSpreadsheet
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="Laporan_Publikasi_' . date('Y-m-d') . '.xls"');
+        
+        echo "<table border='1'>";
+        echo "<tr>";
+        echo "<th>NIM</th>";
+        echo "<th>Nama Mahasiswa</th>";
+        echo "<th>Program Studi</th>";
+        echo "<th>Judul Skripsi</th>";
+        echo "<th>Dosen Pembimbing</th>";
+        echo "<th>Tanggal Pengajuan</th>";
+        echo "<th>Status</th>";
+        echo "<th>Link Repository</th>";
+        echo "</tr>";
+        
+        foreach ($data['publikasi_list'] as $item) {
+            echo "<tr>";
+            echo "<td>{$item->nim}</td>";
+            echo "<td>{$item->nama_mahasiswa}</td>";
+            echo "<td>{$item->nama_prodi}</td>";
+            echo "<td>{$item->judul_skripsi_final}</td>";
+            echo "<td>{$item->nama_pembimbing}</td>";
+            echo "<td>{$item->tanggal_pengajuan}</td>";
+            echo "<td>{$item->status}</td>";
+            echo "<td>{$item->link_repository}</td>";
+            echo "</tr>";
+        }
+        
+        echo "</table>";
+    }
+
+    /**
+     * Send notification to mahasiswa
+     */
+    private function _send_notification_to_mahasiswa($publikasi, $status) {
+        // TODO: Implement notification system
+        log_message('info', "Notification sent to mahasiswa_id: {$publikasi->mahasiswa_id} with status: {$status}");
     }
 }

@@ -48,25 +48,26 @@ class Publikasi extends CI_Controller {
 
     /**
      * Dashboard publikasi untuk staf
-     * Menggunakan template existing staf.php
+     * Menggunakan template staf.php yang benar
      */
     public function index() {
-        // Prepare data untuk view
+        // Prepare data untuk view content
         $view_data = [
             'pengajuan_validasi' => $this->_get_pengajuan_perlu_validasi(),
             'riwayat_validasi' => $this->_get_riwayat_validasi(), 
             'stats' => $this->_get_statistik_staf()
         ];
         
-        // Template data untuk staf.php
-        $data = [
-            'title' => 'Validasi Publikasi Tugas Akhir',
-            'content' => $this->load->view('staf/publikasi/index', $view_data, TRUE),
-            'script' => $this->_get_index_script()
-        ];
+        // Render content view
+        $content = $this->load->view('staf/publikasi/index', $view_data, TRUE);
         
-        // Load template existing
-        $this->load->view('template/staf', $data);
+        // Load template staf.php dengan structure yang benar
+        $this->load->view('template/staf', [
+            'title' => 'Validasi Publikasi Tugas Akhir',
+            'content' => $content,
+            'css' => $this->_get_index_css(),
+            'script' => $this->_get_index_script()
+        ]);
     }
 
     /**
@@ -86,20 +87,23 @@ class Publikasi extends CI_Controller {
             redirect('staf/publikasi');
         }
         
-        // Template data
+        // Prepare data untuk view content
         $view_data = [
             'publikasi' => $publikasi,
             'allow_input_repository' => ($publikasi->status_staf === 'pending'),
             'show_files' => true
         ];
         
-        $data = [
-            'title' => 'Detail Publikasi - ' . $publikasi->nama_mahasiswa,
-            'content' => $this->load->view('staf/publikasi/detail', $view_data, TRUE),
-            'script' => $this->_get_detail_script()
-        ];
+        // Render content view
+        $content = $this->load->view('staf/publikasi/detail', $view_data, TRUE);
         
-        $this->load->view('template/staf', $data);
+        // Load template staf.php
+        $this->load->view('template/staf', [
+            'title' => 'Detail Publikasi - ' . $publikasi->nama_mahasiswa,
+            'content' => $content,
+            'css' => $this->_get_detail_css(),
+            'script' => $this->_get_detail_script()
+        ]);
     }
 
     /**
@@ -527,13 +531,16 @@ class Publikasi extends CI_Controller {
             'form_action' => 'input_repository'
         ];
         
-        $data = [
-            'title' => 'Input Repository - ' . $publikasi->nama_mahasiswa,
-            'content' => $this->load->view('staf/publikasi/input_repository', $view_data, TRUE),
-            'script' => ''
-        ];
+        // Render content view
+        $content = $this->load->view('staf/publikasi/input_repository', $view_data, TRUE);
         
-        $this->load->view('template/staf', $data);
+        // Load template staf.php
+        $this->load->view('template/staf', [
+            'title' => 'Input Repository - ' . $publikasi->nama_mahasiswa,
+            'content' => $content,
+            'css' => $this->_get_form_css(),
+            'script' => $this->_get_form_script()
+        ]);
     }
 
     /**
@@ -545,13 +552,16 @@ class Publikasi extends CI_Controller {
             'form_action' => 'validasi'
         ];
         
-        $data = [
-            'title' => 'Validasi Final Publikasi - ' . $publikasi->nama_mahasiswa,
-            'content' => $this->load->view('staf/publikasi/validasi', $view_data, TRUE),
-            'script' => $this->_get_validasi_script()
-        ];
+        // Render content view
+        $content = $this->load->view('staf/publikasi/validasi', $view_data, TRUE);
         
-        $this->load->view('template/staf', $data);
+        // Load template staf.php
+        $this->load->view('template/staf', [
+            'title' => 'Validasi Final Publikasi - ' . $publikasi->nama_mahasiswa,
+            'content' => $content,
+            'css' => $this->_get_validasi_css(),
+            'script' => $this->_get_validasi_script()
+        ]);
     }
 
     /**
@@ -683,29 +693,146 @@ class Publikasi extends CI_Controller {
      */
     private function _get_index_script() {
         return "
+        <!-- DataTables CSS -->
+        <link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css\">
+        
+        <!-- DataTables JS -->
+        <script src=\"https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js\"></script>
+        <script src=\"https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js\"></script>
+        
         <script>
         $(document).ready(function() {
             // DataTable untuk pengajuan
-            $('#pengajuanTable').DataTable({
-                'pageLength': 10,
-                'ordering': true,
-                'searching': true,
-                'language': {
-                    'url': '//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json'
-                }
-            });
+            if ($('#pengajuanTable').length) {
+                $('#pengajuanTable').DataTable({
+                    'pageLength': 10,
+                    'ordering': true,
+                    'searching': true,
+                    'language': {
+                        'url': '//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json'
+                    }
+                });
+            }
             
             // DataTable untuk riwayat
-            $('#riwayatTable').DataTable({
-                'pageLength': 5,
-                'ordering': true,
-                'searching': false,
-                'language': {
-                    'url': '//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json'
-                }
-            });
+            if ($('#riwayatTable').length) {
+                $('#riwayatTable').DataTable({
+                    'pageLength': 5,
+                    'ordering': true,
+                    'searching': false,
+                    'language': {
+                        'url': '//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json'
+                    }
+                });
+            }
         });
         </script>
+        ";
+    }
+
+    /**
+     * Get index CSS
+     */
+    private function _get_index_css() {
+        return "
+        <style>
+        /* Workflow Steps */
+        .workflow-container {
+            background: #f8f9fe;
+            border-radius: 12px;
+            padding: 30px 20px;
+        }
+
+        .workflow-step {
+            text-align: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .workflow-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #dee2e6;
+            z-index: 1;
+        }
+
+        .workflow-step.current:not(:last-child)::after {
+            background: linear-gradient(to right, #ffc107 50%, #dee2e6 50%);
+        }
+
+        .workflow-step.completed:not(:last-child)::after {
+            background: #28a745;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .step-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #32325d;
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 0;
+            line-height: 1.4;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 40px 20px;
+        }
+
+        /* Badge improvements */
+        .badge-soft-info {
+            color: #2dce89;
+            background-color: rgba(45, 206, 137, 0.1);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .workflow-step:not(:last-child)::after {
+                display: none;
+            }
+            
+            .step-number {
+                width: 40px;
+                height: 40px;
+                font-size: 12px;
+            }
+            
+            .step-title {
+                font-size: 14px;
+            }
+            
+            .step-desc {
+                font-size: 12px;
+            }
+            
+            .workflow-container {
+                padding: 20px 15px;
+            }
+        }
+        </style>
         ";
     }
 
@@ -725,6 +852,172 @@ class Publikasi extends CI_Controller {
             return confirm('Pastikan link repository sudah benar. Lanjutkan?');
         }
         </script>
+        ";
+    }
+
+    /**
+     * Get detail CSS
+     */
+    private function _get_detail_css() {
+        return "
+        <style>
+        /* Timeline Styles */
+        .timeline-container {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .timeline-item {
+            position: relative;  
+            margin-bottom: 30px;
+            padding-left: 80px;
+        }
+
+        .timeline-item.completed .timeline-marker {
+            background-color: #28a745 !important;
+        }
+
+        .timeline-item.current .timeline-marker {
+            background-color: #ffc107 !important;
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-item.rejected .timeline-marker {
+            background-color: #dc3545 !important;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 15px;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            z-index: 1;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .timeline-content {
+            background: #f8f9fe;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 3px solid #5e72e4;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin: 0 0 5px 0;
+            color: #32325d;
+        }
+
+        .timeline-status {
+            margin: 10px 0;
+        }
+
+        .timeline-desc {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 0 0 0 rgba(255, 193, 7, 0.7); }
+            70% { box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 0 0 10px rgba(255, 193, 7, 0); }
+            100% { box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 0 0 0 rgba(255, 193, 7, 0); }
+        }
+
+        /* File Cards */
+        .file-card {
+            text-align: center;
+            padding: 25px 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            background: #f8f9fe;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .file-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .file-title {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #32325d;
+        }
+
+        /* Comments */
+        .comment-section {
+            margin-bottom: 30px;
+        }
+
+        .comment-box {
+            background: #f8f9fe;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #525f7f;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .timeline-container::before {
+                left: 20px;
+            }
+            
+            .timeline-item {
+                padding-left: 60px;
+            }
+            
+            .timeline-marker {
+                left: 5px;
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            
+            .timeline-header {
+                flex-direction: column;
+            }
+            
+            .file-card {
+                margin-bottom: 15px;
+                padding: 20px 15px;
+            }
+        }
+        </style>
         ";
     }
 
@@ -766,7 +1059,389 @@ class Publikasi extends CI_Controller {
                 $('#submitBtn').prop('disabled', false);
             }
         });
+        
+        function downloadFile(type, id) {
+            window.open('" . base_url('staf/publikasi/download_file/') . "' + type + '/' + id, '_blank');
+        }
         </script>
+        ";
+    }
+
+    /**
+     * Get form CSS untuk input repository
+     */
+    private function _get_form_css() {
+        return "
+        <style>
+        /* Form styling */
+        .form-control-label {
+            font-weight: 600;
+            color: #32325d;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        /* Alert styling */
+        .alert {
+            border: none;
+            border-radius: 12px;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .alert-icon {
+            float: left;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+
+        .alert-content {
+            overflow: hidden;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .alert ul {
+            padding-left: 20px;
+        }
+
+        .alert li {
+            margin-bottom: 8px;
+        }
+
+        /* Verification checklist */
+        .verification-checklist {
+            background: #f8f9fe;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 15px;
+        }
+
+        .verification-checklist .custom-control {
+            margin-bottom: 15px;
+        }
+
+        .verification-checklist .custom-control:last-child {
+            margin-bottom: 0;
+        }
+
+        .custom-control-label {
+            font-weight: 500;
+            color: #525f7f;
+            cursor: pointer;
+            padding-left: 8px;
+        }
+
+        .custom-control-label::before {
+            border-radius: 6px;
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::before {
+            background-color: #5e72e4;
+            border-color: #5e72e4;
+        }
+
+        /* Input group */
+        .input-group-text {
+            background-color: #5e72e4;
+            color: white;
+            border-color: #5e72e4;
+            font-weight: 600;
+        }
+
+        /* Repository preview */
+        .repository-preview {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            background: #f8f9fe;
+            transition: all 0.3s ease;
+        }
+
+        .repository-preview.loaded {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .repository-preview.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        /* Button styling */
+        .btn {
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            border-radius: 8px;
+            padding: 0.625rem 1.25rem;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            border: none;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 216, 155, 0.4);
+        }
+        </style>
+        ";
+    }
+
+    /**
+     * Get form script untuk input repository
+     */
+    private function _get_form_script() {
+        return "
+        <script>
+        $(document).ready(function() {
+            // Enable submit button only when all checkboxes are checked
+            $('.verification-checklist input[type=\"checkbox\"]').change(function() {
+                const allChecked = $('.verification-checklist input[type=\"checkbox\"]:checked').length === 3;
+                const hasUrl = $('#link_repository').val().trim() !== '';
+                $('#submitBtn').prop('disabled', !(allChecked && hasUrl));
+            });
+            
+            // Check URL input
+            $('#link_repository').on('input', function() {
+                const allChecked = $('.verification-checklist input[type=\"checkbox\"]:checked').length === 3;
+                const hasUrl = $(this).val().trim() !== '';
+                $('#submitBtn').prop('disabled', !(allChecked && hasUrl));
+                
+                // Update preview
+                updateRepositoryPreview($(this).val());
+            });
+        });
+
+        function testRepositoryLink() {
+            const url = $('#link_repository').val().trim();
+            if (!url) {
+                alert('Masukkan link repository terlebih dahulu');
+                return;
+            }
+            
+            if (!isValidUrl(url)) {
+                alert('Format URL tidak valid');
+                return;
+            }
+            
+            window.open(url, '_blank');
+        }
+
+        function updateRepositoryPreview(url) {
+            const preview = $('#repositoryPreview');
+            
+            if (!url || url.trim() === '') {
+                preview.html('<div class=\"text-center text-muted py-4\"><i class=\"fas fa-info-circle fa-2x mb-3\"></i><p>Masukkan link repository terlebih dahulu untuk melihat preview</p></div>').removeClass('loaded error');
+                return;
+            }
+            
+            if (!isValidUrl(url)) {
+                preview.html('<div class=\"text-center text-danger py-4\"><i class=\"fas fa-exclamation-triangle fa-2x mb-3\"></i><p>Format URL tidak valid</p></div>').removeClass('loaded').addClass('error');
+                return;
+            }
+            
+            let repoInfo = '', iconClass = '';
+            
+            if (url.includes('github.com')) {
+                repoInfo = 'GitHub Repository';
+                iconClass = 'fab fa-github';
+            } else if (url.includes('drive.google.com')) {
+                repoInfo = 'Google Drive';
+                iconClass = 'fab fa-google-drive';
+            } else if (url.includes('gitlab.com')) {
+                repoInfo = 'GitLab Repository';
+                iconClass = 'fab fa-gitlab';
+            } else {
+                repoInfo = 'Repository Link';
+                iconClass = 'fas fa-link';
+            }
+            
+            preview.html('<div class=\"text-center py-4\"><i class=\"' + iconClass + ' fa-3x text-success mb-3\"></i><h5 class=\"text-success\">' + repoInfo + '</h5><p class=\"text-muted mb-3\">' + url + '</p><button type=\"button\" class=\"btn btn-sm btn-outline-primary\" onclick=\"window.open(\'' + url + '\', \'_blank\')\"><i class=\"fas fa-external-link-alt mr-1\"></i> Buka Repository</button></div>').removeClass('error').addClass('loaded');
+        }
+
+        function isValidUrl(string) {
+            try {
+                const url = new URL(string);
+                return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function confirmInputRepository() {
+            const url = $('#link_repository').val().trim();
+            return confirm('Yakin ingin menyimpan repository link?\\n\\n' + url + '\\n\\nSetelah disimpan, Anda akan dialihkan ke halaman validasi final.');
+        }
+
+        function downloadFile(type, id) {
+            window.open('" . base_url('staf/publikasi/download_file/') . "' + type + '/' + id, '_blank');
+        }
+        </script>
+        ";
+    }
+
+    /**
+     * Get validasi CSS
+     */
+    private function _get_validasi_css() {
+        return "
+        <style>
+        /* Alert styling */
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .alert-icon {
+            float: left;
+            font-size: 1.8rem;
+            margin-right: 20px;
+            margin-top: 5px;
+        }
+
+        .alert-content {
+            overflow: hidden;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .alert ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        .alert li {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        /* Decision options */
+        .decision-options {
+            background: #f8f9fe;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 15px;
+        }
+
+        .decision-label {
+            cursor: pointer;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 0;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .decision-label:hover {
+            border-color: #5e72e4;
+            box-shadow: 0 4px 12px rgba(94, 114, 228, 0.15);
+        }
+
+        .custom-control-input:checked + .approve-label {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .custom-control-input:checked + .reject-label {  
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .decision-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .decision-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .decision-text strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .decision-text small {
+            color: #6c757d;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Email preview */
+        .email-preview {
+            background: #f8f9fe;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 25px;
+            min-height: 120px;
+        }
+
+        /* Form controls */
+        .form-control-label {
+            font-weight: 600;
+            color: #32325d;
+            margin-bottom: 10px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #cad1d7;
+            padding: 0.75rem 1rem;
+        }
+
+        .form-control:focus {
+            border-color: #5e72e4;
+            box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.1);
+        }
+
+        /* Button styling */
+        .btn {
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        </style>
         ";
     }
 }

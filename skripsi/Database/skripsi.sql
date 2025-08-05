@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 05, 2025 at 12:59 PM
+-- Generation Time: Aug 05, 2025 at 03:31 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -543,7 +543,9 @@ INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bi
 (78, 45, 13, '2025-08-04', 'Tes saja', '', 'Tes saja', NULL, NULL, '1', '2025-08-04 05:26:17', 25, 'mahasiswa', '2025-08-04 05:25:44', '2025-08-04 05:26:17'),
 (79, 45, 14, '2025-08-04', 'Tes saja', '', 'Tes saja', NULL, NULL, '1', '2025-08-04 05:26:11', 25, 'mahasiswa', '2025-08-04 05:25:53', '2025-08-04 05:26:11'),
 (80, 45, 15, '2025-08-05', 'tes saja', 'tes saja', 'tes saja', NULL, NULL, '1', '2025-08-05 09:58:29', 25, 'dosen', '2025-08-05 09:58:29', '2025-08-05 09:58:29'),
-(81, 45, 16, '2025-08-05', 'tes saja', 'tes saja', 'tes saja', NULL, NULL, '1', '2025-08-05 10:02:21', 25, 'dosen', '2025-08-05 10:02:21', '2025-08-05 10:02:21');
+(81, 45, 16, '2025-08-05', 'tes saja', 'tes saja', 'tes saja', NULL, NULL, '1', '2025-08-05 10:02:21', 25, 'dosen', '2025-08-05 10:02:21', '2025-08-05 10:02:21'),
+(82, 46, 15, '2025-08-05', 'Tes saja', 'Tes saja', 'Tes saja', NULL, NULL, '1', '2025-08-05 13:08:42', 25, 'dosen', '2025-08-05 13:08:42', '2025-08-05 13:08:42'),
+(83, 46, 16, '2025-08-05', 'Tes saja', 'Tes saja', 'Tes saja', NULL, NULL, '1', '2025-08-05 13:08:52', 25, 'dosen', '2025-08-05 13:08:52', '2025-08-05 13:08:52');
 
 -- --------------------------------------------------------
 
@@ -730,7 +732,15 @@ INSERT INTO `log_publikasi` (`id`, `publikasi_id`, `user_id`, `user_role`, `user
 (8, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 12:37:49'),
 (9, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 12:48:43'),
 (10, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 12:50:49'),
-(11, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 12:58:12');
+(11, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 12:58:12'),
+(12, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 13:01:17'),
+(13, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 13:03:41'),
+(14, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 13:05:37'),
+(15, 3, 46, 'mahasiswa', 'Mahasiswa Contoh 3', 'create_pengajuan', 'Mahasiswa membuat pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 13:09:52'),
+(16, 3, 46, '', 'System Auto', 'status_changed', 'Status berubah dari draft ke submitted', NULL, NULL, NULL, NULL, '2025-08-05 13:25:37'),
+(17, 3, 46, 'mahasiswa', 'Mahasiswa Contoh 3', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 13:25:37'),
+(18, 2, 45, '', 'System Auto', 'status_changed', 'Status berubah dari draft ke submitted', NULL, NULL, NULL, NULL, '2025-08-05 14:50:29'),
+(19, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '2404:c0:47f4::1ba9:4893', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 14:50:29');
 
 -- --------------------------------------------------------
 
@@ -1891,7 +1901,8 @@ CREATE TABLE `publikasi_tugas_akhir` (
 --
 
 INSERT INTO `publikasi_tugas_akhir` (`id`, `proposal_mahasiswa_id`, `mahasiswa_id`, `nama_mahasiswa`, `nim`, `program_studi`, `judul_skripsi_final`, `dosen_pembimbing_id`, `nama_dosen_pembimbing`, `tanggal_ujian_skripsi`, `file_surat_revisi`, `file_skripsi_final`, `file_surat_perpustakaan`, `link_repository`, `status`, `status_pembimbing`, `status_staf`, `keterangan_mahasiswa`, `komentar_pembimbing`, `komentar_staf`, `tanggal_pengajuan`, `tanggal_review_pembimbing`, `tanggal_validasi_staf`, `tanggal_selesai`, `validated_by_staf_id`, `validated_by_staf_name`, `created_at`, `updated_at`) VALUES
-(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-2017.pdf', 'draft', 'pending', 'pending', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', NULL, NULL, '2025-08-05 11:16:50', NULL, NULL, NULL, NULL, NULL, '2025-08-05 11:16:50', '2025-08-05 12:58:12');
+(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-2017.pdf', 'submitted', 'pending', 'pending', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', NULL, NULL, '2025-08-05 14:50:29', NULL, NULL, NULL, NULL, NULL, '2025-08-05 11:16:50', '2025-08-05 14:50:29'),
+(3, 46, 46, 'Mahasiswa Contoh 3', '12345677', 'Pendidikan Keagamaan Katolik', 'PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805130952_46_6891a0307cdc4.pdf', 'SKRIPSI_FINAL_20250805130952_46_6891a0307cf34.pdf', 'SURAT_PERPUS_20250805130952_46_6891a0307c980.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-2017.pdf', 'submitted', 'pending', 'pending', 'tes saja', NULL, NULL, '2025-08-05 13:25:37', NULL, NULL, NULL, NULL, NULL, '2025-08-05 13:09:52', '2025-08-05 13:25:37');
 
 --
 -- Triggers `publikasi_tugas_akhir`
@@ -3006,7 +3017,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`
@@ -3024,7 +3035,7 @@ ALTER TABLE `log_penelitian`
 -- AUTO_INCREMENT for table `log_publikasi`
 --
 ALTER TABLE `log_publikasi`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `mahasiswa`
@@ -3096,7 +3107,7 @@ ALTER TABLE `proposal_workflow`
 -- AUTO_INCREMENT for table `publikasi_tugas_akhir`
 --
 ALTER TABLE `publikasi_tugas_akhir`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `seminar`

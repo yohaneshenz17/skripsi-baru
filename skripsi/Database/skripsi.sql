@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 05, 2025 at 07:00 AM
+-- Generation Time: Aug 05, 2025 at 10:24 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -541,7 +541,9 @@ INSERT INTO `jurnal_bimbingan` (`id`, `proposal_id`, `pertemuan_ke`, `tanggal_bi
 (76, 45, 11, '2025-08-04', 'Tes saja', '', 'Tes saja', NULL, NULL, '1', '2025-08-04 05:26:31', 25, 'mahasiswa', '2025-08-04 05:25:26', '2025-08-04 05:26:31'),
 (77, 45, 12, '2025-08-04', 'Tes saja', '', 'Tes saja', NULL, NULL, '1', '2025-08-04 05:26:24', 25, 'mahasiswa', '2025-08-04 05:25:35', '2025-08-04 05:26:24'),
 (78, 45, 13, '2025-08-04', 'Tes saja', '', 'Tes saja', NULL, NULL, '1', '2025-08-04 05:26:17', 25, 'mahasiswa', '2025-08-04 05:25:44', '2025-08-04 05:26:17'),
-(79, 45, 14, '2025-08-04', 'Tes saja', '', 'Tes saja', NULL, NULL, '1', '2025-08-04 05:26:11', 25, 'mahasiswa', '2025-08-04 05:25:53', '2025-08-04 05:26:11');
+(79, 45, 14, '2025-08-04', 'Tes saja', '', 'Tes saja', NULL, NULL, '1', '2025-08-04 05:26:11', 25, 'mahasiswa', '2025-08-04 05:25:53', '2025-08-04 05:26:11'),
+(80, 45, 15, '2025-08-05', 'tes saja', 'tes saja', 'tes saja', NULL, NULL, '1', '2025-08-05 09:58:29', 25, 'dosen', '2025-08-05 09:58:29', '2025-08-05 09:58:29'),
+(81, 45, 16, '2025-08-05', 'tes saja', 'tes saja', 'tes saja', NULL, NULL, '1', '2025-08-05 10:02:21', 25, 'dosen', '2025-08-05 10:02:21', '2025-08-05 10:02:21');
 
 -- --------------------------------------------------------
 
@@ -2980,7 +2982,7 @@ ALTER TABLE `home_template`
 -- AUTO_INCREMENT for table `jurnal_bimbingan`
 --
 ALTER TABLE `jurnal_bimbingan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `konsultasi`

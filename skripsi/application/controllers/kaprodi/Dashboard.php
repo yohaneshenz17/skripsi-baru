@@ -162,12 +162,14 @@ class Dashboard extends CI_Controller
             // Publikasi (simulasi data - akan diisi dari tabel nyata jika ada)
             $data['publikasi_pending'] = [];
             if ($this->db->table_exists('publikasi_tugas_akhir')) {
-                $this->db->select('pub.id, pm.judul, m.nim, m.nama as nama_mahasiswa, pub.created_at');
+                $this->db->select('pub.id, pm.judul, m.nim, m.nama as nama_mahasiswa, pub.created_at, pub.status');
                 $this->db->from('publikasi_tugas_akhir pub');
-                $this->db->join('proposal_mahasiswa pm', 'pub.proposal_id = pm.id');
+                $this->db->join('proposal_mahasiswa pm', 'pub.proposal_mahasiswa_id = pm.id');  // ✅ FK yang benar
                 $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
                 $this->db->where('m.prodi_id', $prodi_id);
-                $this->db->where('pub.status_kaprodi', 'pending');
+                // ✅ Menggunakan status yang ada di database
+                $this->db->where_in('pub.status', ['submitted', 'review_pembimbing', 'review_staf']); 
+                $this->db->order_by('pub.created_at', 'DESC');
                 $this->db->limit(3);
                 $data['publikasi_pending'] = $this->db->get()->result();
             }

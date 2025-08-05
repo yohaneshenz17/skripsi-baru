@@ -1,5 +1,15 @@
 <?php
 /**
+ * ====================================================================
+ * FILE 2: application/views/staf/publikasi/detail.php - SCRIPT LENGKAP
+ * ====================================================================
+ * 
+ * PERBAIKAN: Action buttons di header yang lebih tepat
+ */
+?>
+
+<?php
+/**
  * View Detail Publikasi untuk Staf
  * File: application/views/staf/publikasi/detail.php
  * 
@@ -48,54 +58,57 @@ ob_start();
             </div>
         </div>
     </div>
-        <div class="col-lg-4 text-right">
-            <div class="btn-group" role="group">
-                <a href="<?= base_url('staf/publikasi') ?>" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left mr-1"></i> Kembali
-                </a>
+    
+    <!-- ===== BAGIAN YANG DIPERBAIKI: ACTION BUTTONS DI HEADER ===== -->
+    <div class="col-lg-4 text-right">
+        <div class="btn-group" role="group">
+            <a href="<?= base_url('staf/publikasi') ?>" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
+            </a>
+            
+            <?php if (isset($publikasi) && $publikasi): ?>
+                <?php 
+                $link_repository = isset($publikasi->link_repository) ? $publikasi->link_repository : '';
+                $status_pembimbing = isset($publikasi->status_pembimbing) ? $publikasi->status_pembimbing : '';
+                $status_staf = isset($publikasi->status_staf) ? $publikasi->status_staf : 
+                              (isset($publikasi->validasi_staf_publikasi) ? $publikasi->validasi_staf_publikasi : '0');
                 
-                <?php if (isset($publikasi) && $publikasi): ?>
-                    <?php 
-                    $link_repository = isset($publikasi->link_repository) ? $publikasi->link_repository : '';
-                    $status_pembimbing = isset($publikasi->status_pembimbing) ? $publikasi->status_pembimbing : '';
-                    $status_staf = isset($publikasi->status_staf) ? $publikasi->status_staf : 
-                                  (isset($publikasi->validasi_staf_publikasi) ? $publikasi->validasi_staf_publikasi : '0');
+                $dosen_approved = ($status_pembimbing === 'approved' || $status_pembimbing === '1');
+                $is_final_validated = ($status_staf === '1' || $status_staf === 'approved');
+                ?>
+                
+                <?php if ($dosen_approved && !$is_final_validated): ?>
+                    <!-- Tombol Input/Edit Repository - SELALU TERSEDIA -->
+                    <a href="<?= base_url('staf/publikasi/input_repository/' . $publikasi->id) ?>" 
+                       class="btn btn-warning">
+                        <i class="fas fa-<?= empty($link_repository) ? 'plus' : 'edit' ?> mr-1"></i> 
+                        <?= empty($link_repository) ? 'Input Repository' : 'Edit Repository' ?>
+                    </a>
                     
-                    $dosen_approved = ($status_pembimbing === 'approved' || $status_pembimbing === '1');
-                    $is_final_validated = ($status_staf === '1' || $status_staf === 'approved');
-                    ?>
-                    
-                    <?php if ($dosen_approved && !$is_final_validated): ?>
-                        <!-- Tombol Input/Edit Repository - SELALU TERSEDIA -->
-                        <a href="<?= base_url('staf/publikasi/input_repository/' . $publikasi->id) ?>" 
-                           class="btn btn-warning">
-                            <i class="fas fa-<?= empty($link_repository) ? 'plus' : 'edit' ?> mr-1"></i> 
-                            <?= empty($link_repository) ? 'Input Repository' : 'Edit Repository' ?>
+                    <!-- Tombol Validasi - hanya jika repository sudah ada -->
+                    <?php if (!empty($link_repository)): ?>
+                        <a href="<?= base_url('staf/publikasi/validasi/' . $publikasi->id) ?>" 
+                           class="btn btn-success">
+                            <i class="fas fa-check mr-1"></i> Validasi Final
                         </a>
-                        
-                        <!-- Tombol Validasi - hanya jika repository sudah ada -->
-                        <?php if (!empty($link_repository)): ?>
-                            <a href="<?= base_url('staf/publikasi/validasi/' . $publikasi->id) ?>" 
-                               class="btn btn-success">
-                                <i class="fas fa-check mr-1"></i> Validasi Final
-                            </a>
-                        <?php endif; ?>
-                        
-                    <?php elseif ($is_final_validated): ?>
-                        <!-- Jika sudah divalidasi final -->
-                        <span class="btn btn-outline-success disabled">
-                            <i class="fas fa-check-circle mr-1"></i> Publikasi Selesai
-                        </span>
-                        
-                    <?php elseif (!$dosen_approved): ?>
-                        <!-- Jika belum disetujui dosen -->
-                        <span class="btn btn-outline-secondary disabled">
-                            <i class="fas fa-hourglass-half mr-1"></i> Menunggu Persetujuan Dosen
-                        </span>
                     <?php endif; ?>
+                    
+                <?php elseif ($is_final_validated): ?>
+                    <!-- Jika sudah divalidasi final -->
+                    <span class="btn btn-outline-success disabled">
+                        <i class="fas fa-check-circle mr-1"></i> Publikasi Selesai
+                    </span>
+                    
+                <?php elseif (!$dosen_approved): ?>
+                    <!-- Jika belum disetujui dosen -->
+                    <span class="btn btn-outline-secondary disabled">
+                        <i class="fas fa-hourglass-half mr-1"></i> Menunggu Persetujuan Dosen
+                    </span>
                 <?php endif; ?>
-            </div>
+            <?php endif; ?>
         </div>
+    </div>
+    <!-- ===== END BAGIAN YANG DIPERBAIKI ===== -->
 </div>
 
 <!-- Flash Messages -->

@@ -1,5 +1,15 @@
 <?php
 /**
+ * ====================================================================
+ * FILE 3: application/views/staf/publikasi/validasi.php - SCRIPT LENGKAP
+ * ====================================================================
+ * 
+ * PERBAIKAN: Tombol edit repository di form validasi
+ */
+?>
+
+<?php
+/**
  * View Validasi Publikasi untuk Staf
  * File: application/views/staf/publikasi/validasi.php
  * 
@@ -138,27 +148,54 @@ ob_start();
                     </p>
                 </div>
                 
+                <!-- ===== BAGIAN YANG DIPERBAIKI: LINK REPOSITORY DENGAN TOMBOL EDIT ===== -->
                 <div class="form-group mb-0">
                     <label class="form-control-label text-sm font-weight-bold">Link Repository</label>
-                    <p class="form-control-plaintext">
-                        <?php $link_repository = isset($publikasi->link_repository) ? $publikasi->link_repository : ''; ?>
-                        <?php if (!empty($link_repository)): ?>
-                            <a href="<?= htmlspecialchars($link_repository) ?>" 
-                               target="_blank" 
-                               class="text-primary d-inline-flex align-items-center">
-                                <i class="fas fa-external-link-alt mr-2"></i>
-                                <?= htmlspecialchars($link_repository) ?>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <?php $link_repository = isset($publikasi->link_repository) ? $publikasi->link_repository : ''; ?>
+                            <?php if (!empty($link_repository)): ?>
+                                <a href="<?= htmlspecialchars($link_repository) ?>" 
+                                   target="_blank" 
+                                   class="text-primary d-inline-flex align-items-center">
+                                    <i class="fas fa-external-link-alt mr-2"></i>
+                                    <?= htmlspecialchars($link_repository) ?>
+                                </a>
+                            <?php else: ?>
+                                <span class="text-warning">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Repository belum diinput
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <!-- Tombol Edit Repository - SELALU TERSEDIA saat validasi -->
+                        <div class="ml-3">
+                            <a href="<?= base_url('staf/publikasi/input_repository/' . $publikasi->id) ?>" 
+                               class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-edit mr-1"></i>
+                                <?= empty($link_repository) ? 'Input Repository' : 'Edit Repository' ?>
                             </a>
-                            <button type="button" 
-                                    class="btn btn-sm btn-outline-info ml-2" 
-                                    id="btn-preview-repo">
-                                <i class="fas fa-eye"></i> Preview
-                            </button>
-                        <?php else: ?>
-                            <span class="text-muted">Repository belum diinput</span>
-                        <?php endif; ?>
-                    </p>
+                            
+                            <?php if (!empty($link_repository)): ?>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-info ml-1" 
+                                        id="btn-preview-repo">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <?php if (empty($link_repository)): ?>
+                        <div class="alert alert-warning mt-2">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Perhatian:</strong> Repository belum diinput. 
+                            Silakan input repository terlebih dahulu sebelum melakukan validasi.
+                        </div>
+                    <?php endif; ?>
                 </div>
+                <!-- ===== END BAGIAN YANG DIPERBAIKI ===== -->
             </div>
         </div>
 

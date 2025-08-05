@@ -105,58 +105,87 @@ class Publikasi extends CI_Controller {
         }
     }
 
-    /**
-     * Input repository link dengan flexible column handling
-     */
-    public function input_repository($publikasi_id) {
-        try {
-            $publikasi = $this->_get_publikasi_detail_safe($publikasi_id);
-            
-            if (!$publikasi) {
-                $this->session->set_flashdata('error', 'Data tidak ditemukan.');
-                redirect('staf/publikasi');
-            }
-            
-            if ($this->input->post()) {
-                $this->form_validation->set_rules('link_repository', 'Link Repository', 'required|valid_url');
-                
-                if ($this->form_validation->run()) {
-                    $update_data = [
-                        'link_repository' => $this->input->post('link_repository'),
-                        'updated_at' => date('Y-m-d H:i:s')
-                    ];
-                    
-                    // Tambahan kolom jika tersedia
-                    if ($this->_column_exists('tanggal_input_repository')) {
-                        $update_data['tanggal_input_repository'] = date('Y-m-d H:i:s');
-                    }
-                    
-                    if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
-                        $this->session->set_flashdata('success', 'Link repository berhasil disimpan.');
-                        redirect('staf/publikasi/detail/' . $publikasi_id);
-                    } else {
-                        $this->session->set_flashdata('error', 'Gagal menyimpan data.');
-                    }
-                }
-            }
-            
-            $view_data = [
-                'publikasi' => $publikasi,
-                'title' => 'Input Repository - ' . substr($publikasi->judul, 0, 50)
-            ];
-            
-            $content = $this->load->view('staf/publikasi/input_repository', $view_data, TRUE);
-            
-            $this->load->view('template/staf', [
-                'title' => 'Input Repository',
-                'content' => $content
-            ]);
-            
-        } catch (Exception $e) {
-            $this->session->set_flashdata('error', 'Error: ' . $e->getMessage());
+/**
+ * Input repository link dengan flexible column handling
+ * REPLACE method input_repository yang sudah ada dengan kode ini
+ */
+public function input_repository($publikasi_id) {
+    try {
+        // Validasi ID publikasi (gunakan logic yang sudah ada)
+        $publikasi = $this->_get_publikasi_detail_safe($publikasi_id);
+        
+        if (!$publikasi) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan.');
             redirect('staf/publikasi');
+            return;
         }
+        
+        // ===== PERBAIKAN: HANDLE POST REQUEST DENGAN PROPER VALIDATION =====
+        if ($this->input->post()) {
+            // Set validation rules yang proper
+            $this->form_validation->set_rules('link_repository', 'Link Repository', 
+                'required|valid_url|max_length[500]');
+            $this->form_validation->set_rules('catatan_staf', 'Catatan Staf', 
+                'max_length[1000]');
+            
+            if ($this->form_validation->run()) {
+                // Prepare update data (gunakan struktur yang sudah ada)
+                $update_data = [
+                    'link_repository' => $this->input->post('link_repository'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                
+                // ===== PERBAIKAN: TAMBAH CATATAN STAF JIKA ADA =====
+                $catatan_staf = $this->input->post('catatan_staf');
+                if (!empty($catatan_staf) && $this->_column_exists('catatan_staf')) {
+                    $update_data['catatan_staf'] = $catatan_staf;
+                }
+                
+                // Tambahan kolom jika tersedia (logic yang sudah ada)
+                if ($this->_column_exists('tanggal_input_repository')) {
+                    $update_data['tanggal_input_repository'] = date('Y-m-d H:i:s');
+                }
+                
+                // ===== PERBAIKAN: UPDATE DAN PROPER RESPONSE =====
+                if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
+                    $action = empty($publikasi->link_repository) ? 'disimpan' : 'diperbarui';
+                    $this->session->set_flashdata('success', "Link repository berhasil {$action}.");
+                    
+                    // ===== PERBAIKAN: PROPER REDIRECT =====
+                    redirect('staf/publikasi/detail/' . $publikasi_id);
+                    return;
+                } else {
+                    $this->session->set_flashdata('error', 'Gagal menyimpan data. Silakan coba lagi.');
+                }
+            } else {
+                // ===== PERBAIKAN: PROPER VALIDATION ERROR HANDLING =====
+                $this->session->set_flashdata('error', 'Data tidak valid. ' . validation_errors(' ', ' '));
+            }
+            
+            // Redirect kembali ke form jika ada error
+            redirect('staf/publikasi/input_repository/' . $publikasi_id);
+            return;
+        }
+        
+        // ===== GET REQUEST - TAMPILKAN FORM (logic yang sudah ada) =====
+        $view_data = [
+            'publikasi' => $publikasi,
+            'title' => 'Input Repository - ' . substr($publikasi->judul, 0, 50)
+        ];
+        
+        $content = $this->load->view('staf/publikasi/input_repository', $view_data, TRUE);
+        
+        $this->load->view('template/staf', [
+            'title' => 'Input Repository',
+            'content' => $content
+        ]);
+        
+    } catch (Exception $e) {
+        // Error handling yang sudah ada
+        $this->session->set_flashdata('error', 'Error: ' . $e->getMessage());
+        redirect('staf/publikasi');
     }
+}
 
     /**
      * Validasi final dengan flexible status handling

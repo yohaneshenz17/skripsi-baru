@@ -1,5 +1,19 @@
 <?php
 /**
+ * ====================================================================
+ * application/views/staf/publikasi/input_repository.php - SCRIPT LENGKAP
+ * ====================================================================
+ * 
+ * PERBAIKAN:
+ * - Tombol Test dan Simpan Link Repository berfungsi
+ * - Pre-populate form dengan data yang sudah ada
+ * - Form validation yang proper
+ * - Controller integration yang benar
+ */
+?>
+
+<?php
+/**
  * View Input Repository untuk Staf
  * File: application/views/staf/publikasi/input_repository.php
  * 
@@ -29,7 +43,9 @@ ob_start();
                         Detail
                     </a>
                 </li>
-                <li class="breadcrumb-item active">Input Repository</li>
+                <li class="breadcrumb-item active">
+                    <?= empty($publikasi->link_repository) ? 'Input Repository' : 'Edit Repository' ?>
+                </li>
             </ol>
         </nav>
     </div>
@@ -41,10 +57,12 @@ ob_start();
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h2 class="h3 mb-0">
-                    <i class="fas fa-link text-warning mr-2"></i>
-                    Input Link Repository
+                    <i class="fas fa-<?= empty($publikasi->link_repository) ? 'plus' : 'edit' ?> text-warning mr-2"></i>
+                    <?= empty($publikasi->link_repository) ? 'Input Link Repository' : 'Edit Link Repository' ?>
                 </h2>
-                <p class="text-muted mb-0">Masukkan link repository perpustakaan digital untuk publikasi tugas akhir</p>
+                <p class="text-muted mb-0">
+                    <?= empty($publikasi->link_repository) ? 'Masukkan' : 'Perbarui' ?> link repository perpustakaan digital untuk publikasi tugas akhir
+                </p>
             </div>
             <a href="<?= base_url('staf/publikasi/detail/' . (isset($publikasi->id) ? $publikasi->id : '')) ?>" 
                class="btn btn-secondary">
@@ -131,6 +149,25 @@ ob_start();
                         <?= isset($publikasi->judul) ? htmlspecialchars($publikasi->judul) : 'N/A' ?>
                     </p>
                 </div>
+                
+                <!-- Status Link Repository Saat Ini -->
+                <?php if (!empty($publikasi->link_repository)): ?>
+                <div class="alert alert-info">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Repository Saat Ini
+                    </h6>
+                    <p class="mb-0">
+                        <a href="<?= htmlspecialchars($publikasi->link_repository) ?>" 
+                           target="_blank" 
+                           class="text-primary">
+                            <i class="fas fa-external-link-alt mr-1"></i>
+                            <?= htmlspecialchars($publikasi->link_repository) ?>
+                        </a>
+                    </p>
+                    <small class="text-muted">Anda dapat memperbarui link repository di bawah ini.</small>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -139,13 +176,15 @@ ob_start();
             <div class="card-header">
                 <h4 class="card-title mb-0">
                     <i class="fas fa-cloud-upload-alt text-warning mr-2"></i>
-                    Form Input Repository
+                    Form <?= empty($publikasi->link_repository) ? 'Input' : 'Edit' ?> Repository
                 </h4>
             </div>
             <div class="card-body">
+                <!-- ===== FORM DENGAN ACTION DAN METHOD YANG BENAR ===== -->
                 <?= form_open('staf/publikasi/input_repository/' . $publikasi->id, [
                     'id' => 'form-repository',
                     'class' => 'needs-validation',
+                    'method' => 'POST',
                     'novalidate' => true
                 ]) ?>
                 
@@ -160,14 +199,17 @@ ob_start();
                                 <i class="fas fa-link"></i>
                             </span>
                         </div>
+                        
+                        <!-- ===== PRE-POPULATE DENGAN DATA YANG SUDAH ADA ===== -->
                         <input type="url" 
                                class="form-control" 
                                id="link_repository" 
                                name="link_repository" 
                                placeholder="https://repository.stkyakobus.ac.id/handle/..." 
-                               value="<?= set_value('link_repository') ?>"
+                               value="<?= set_value('link_repository', isset($publikasi->link_repository) ? $publikasi->link_repository : '') ?>"
                                required
                                autocomplete="off">
+                               
                         <div class="input-group-append">
                             <button type="button" class="btn btn-outline-info" id="btn-test-link">
                                 <i class="fas fa-external-link-alt"></i> Test
@@ -209,23 +251,33 @@ ob_start();
                               id="catatan_staf" 
                               name="catatan_staf" 
                               rows="3"
-                              placeholder="Catatan atau keterangan tambahan untuk mahasiswa..."><?= set_value('catatan_staf') ?></textarea>
+                              placeholder="Catatan atau keterangan tambahan untuk mahasiswa..."><?= set_value('catatan_staf', isset($publikasi->catatan_staf) ? $publikasi->catatan_staf : '') ?></textarea>
                     <small class="form-text text-muted">
                         Catatan ini akan disimpan dalam sistem untuk referensi mahasiswa.
                     </small>
                 </div>
                 
-                <div class="form-group mb-0">
+                <!-- ===== CHECKBOX KONFIRMASI DAN SUBMIT BUTTON ===== -->
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="confirm-check" required>
+                        <label class="custom-control-label" for="confirm-check">
+                            Saya sudah memverifikasi bahwa link repository dapat diakses dan berisi file yang sesuai
+                        </label>
+                    </div>
+                    
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="confirm-check" required>
-                            <label class="custom-control-label" for="confirm-check">
-                                Saya sudah memverifikasi bahwa link repository dapat diakses dan berisi file yang sesuai
-                            </label>
+                        <div class="text-muted">
+                            <small>
+                                <i class="fas fa-info-circle mr-1"></i>
+                                <?= empty($publikasi->link_repository) ? 'Link repository akan disimpan' : 'Link repository akan diperbarui' ?> dalam sistem
+                            </small>
                         </div>
-                        <button type="submit" class="btn btn-warning" id="btn-submit" disabled>
+                        
+                        <!-- ===== TOMBOL SUBMIT YANG DIPERBAIKI ===== -->
+                        <button type="submit" class="btn btn-warning btn-lg" id="btn-submit">
                             <i class="fas fa-save mr-2"></i>
-                            Simpan Link Repository
+                            <?= empty($publikasi->link_repository) ? 'Simpan' : 'Update' ?> Link Repository
                         </button>
                     </div>
                 </div>
@@ -237,12 +289,42 @@ ob_start();
     
     <!-- Right Column - Panduan -->
     <div class="col-lg-4">
+        <!-- Status Current -->
+        <div class="card mb-4">
+            <div class="card-header bg-gradient-primary">
+                <h5 class="text-white mb-0">
+                    <i class="fas fa-info mr-2"></i>
+                    Status Repository
+                </h5>
+            </div>
+            <div class="card-body">
+                <?php if (empty($publikasi->link_repository)): ?>
+                    <div class="text-center py-3">
+                        <i class="fas fa-plus-circle fa-3x text-warning mb-2"></i>
+                        <h6 class="text-warning">Belum Ada Repository</h6>
+                        <p class="text-muted small mb-0">
+                            Silakan input link repository perpustakaan digital untuk publikasi tugas akhir mahasiswa.
+                        </p>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-3">
+                        <i class="fas fa-edit fa-3x text-info mb-2"></i>
+                        <h6 class="text-info">Mode Edit Repository</h6>
+                        <p class="text-muted small mb-0">
+                            Anda sedang mengedit link repository yang sudah ada. 
+                            Link baru akan menggantikan yang lama.
+                        </p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        
         <!-- Panduan Input Repository -->
         <div class="card mb-4">
             <div class="card-header bg-gradient-info">
                 <h5 class="text-white mb-0">
                     <i class="fas fa-lightbulb mr-2"></i>
-                    Panduan Input Repository
+                    Panduan <?= empty($publikasi->link_repository) ? 'Input' : 'Edit' ?> Repository
                 </h5>
             </div>
             <div class="card-body">
@@ -416,6 +498,37 @@ echo $content;
     background-color: #f8f9fa;
 }
 
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Loading state */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 @media (max-width: 768px) {
     .timeline {
         padding-left: 20px;
@@ -426,15 +539,19 @@ echo $content;
         width: 10px;
         height: 10px;
     }
-}
-
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-lg {
+        width: 100%;
+    }
 }
 </style>
 
-<!-- JavaScript untuk Form Validation dan Interaktivitas -->
+<!-- ===== JAVASCRIPT YANG DIPERBAIKI ===== -->
 <script>
 $(document).ready(function() {
     const form = $('#form-repository');
@@ -452,27 +569,43 @@ $(document).ready(function() {
         $('.alert').fadeOut('slow');
     }, 5000);
 
-    // Link input change handler
+    // ===== INITIALIZE FORM STATE =====
+    function initializeForm() {
+        // Trigger validation on page load if there's existing value
+        if (linkInput.val()) {
+            linkInput.trigger('input');
+        }
+        
+        // Update submit button state
+        updateSubmitButton();
+    }
+
+    // ===== REAL-TIME VALIDATION =====
     linkInput.on('input', function() {
         const url = $(this).val().trim();
         
         if (url && isValidUrl(url)) {
             showPreview(url);
             $(this).removeClass('is-invalid').addClass('is-valid');
+            linkStatus.html('<span class="badge badge-success"><i class="fas fa-check"></i> Valid URL</span>');
         } else {
             hidePreview();
             if (url) {
                 $(this).removeClass('is-valid').addClass('is-invalid');
+                linkStatus.html('<span class="badge badge-danger"><i class="fas fa-times"></i> Invalid URL</span>');
             } else {
                 $(this).removeClass('is-valid is-invalid');
+                linkStatus.empty();
             }
         }
         
         updateSubmitButton();
     });
 
-    // Test link button
-    testBtn.on('click', function() {
+    // ===== TEST LINK BUTTON - DIPERBAIKI =====
+    testBtn.on('click', function(e) {
+        e.preventDefault();
+        
         const url = linkInput.val().trim();
         
         if (!url) {
@@ -487,29 +620,47 @@ $(document).ready(function() {
             return;
         }
         
-        // Test link accessibility
+        // Show loading state
+        const originalText = testBtn.html();
         testBtn.html('<i class="fas fa-spinner fa-spin"></i> Testing...');
         testBtn.prop('disabled', true);
         
-        // Simulate test (in real implementation, you might want to do server-side check)
+        // Test link accessibility (simulate server check)
         setTimeout(function() {
-            testBtn.html('<i class="fas fa-external-link-alt"></i> Test');
+            // Reset button
+            testBtn.html(originalText);
             testBtn.prop('disabled', false);
             
             // Open link in new tab for manual verification
-            window.open(url, '_blank');
+            const testWindow = window.open(url, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
             
-            // Update status
-            linkStatus.html('<span class="badge badge-success"><i class="fas fa-check"></i> Tested</span>');
-        }, 1500);
+            if (testWindow) {
+                // Update status
+                linkStatus.html('<span class="badge badge-info"><i class="fas fa-external-link-alt"></i> Opened for Testing</span>');
+                
+                // Show success message
+                setTimeout(function() {
+                    if (confirm('Apakah link repository dapat diakses dengan baik?\n\nKlik OK jika ya, Cancel jika ada masalah.')) {
+                        linkStatus.html('<span class="badge badge-success"><i class="fas fa-check-double"></i> Verified</span>');
+                        confirmCheck.prop('checked', true);
+                        updateSubmitButton();
+                    } else {
+                        linkStatus.html('<span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Needs Review</span>');
+                    }
+                }, 2000);
+            } else {
+                linkStatus.html('<span class="badge badge-danger"><i class="fas fa-times"></i> Popup Blocked</span>');
+                alert('Popup diblokir. Silakan copy URL dan buka di tab baru secara manual:\n\n' + url);
+            }
+        }, 1000);
     });
 
-    // Confirm checkbox handler
+    // ===== CONFIRM CHECKBOX HANDLER =====
     confirmCheck.on('change', function() {
         updateSubmitButton();
     });
 
-    // Form submission
+    // ===== FORM SUBMISSION - DIPERBAIKI =====
     form.on('submit', function(e) {
         e.preventDefault();
         
@@ -517,18 +668,59 @@ $(document).ready(function() {
             return false;
         }
         
+        const url = linkInput.val().trim();
+        const isEdit = '<?= !empty($publikasi->link_repository) ? "true" : "false" ?>' === 'true';
+        const action = isEdit ? 'memperbarui' : 'menyimpan';
+        
         // Show confirmation
-        if (confirm('Yakin ingin menyimpan link repository ini?\n\nPastikan link sudah diverifikasi dan dapat diakses dengan baik.')) {
+        const confirmText = `Yakin ingin ${action} link repository ini?\n\nURL: ${url}\n\nPastikan link sudah diverifikasi dan dapat diakses dengan baik.`;
+        
+        if (confirm(confirmText)) {
             // Show loading
+            const originalText = submitBtn.html();
             submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...');
             submitBtn.prop('disabled', true);
             
-            // Submit form
-            this.submit();
+            // Submit form normally (will be handled by CodeIgniter)
+            setTimeout(() => {
+                // Create a temporary form with all data to ensure proper submission
+                const tempForm = $('<form>', {
+                    'method': 'POST',
+                    'action': form.attr('action')
+                });
+                
+                // Add CSRF token if exists
+                if ($('input[name="csrf_token"]').length) {
+                    tempForm.append($('<input>', {
+                        'type': 'hidden',
+                        'name': 'csrf_token',
+                        'value': $('input[name="csrf_token"]').val()
+                    }));
+                }
+                
+                // Add form data
+                tempForm.append($('<input>', {
+                    'type': 'hidden',
+                    'name': 'link_repository',
+                    'value': linkInput.val()
+                }));
+                
+                tempForm.append($('<input>', {
+                    'type': 'hidden',
+                    'name': 'catatan_staf',
+                    'value': $('#catatan_staf').val()
+                }));
+                
+                // Submit temporary form
+                tempForm.appendTo('body').submit();
+            }, 500);
+        } else {
+            // Reset button if user cancels
+            updateSubmitButton();
         }
     });
 
-    // Helper functions
+    // ===== HELPER FUNCTIONS =====
     function isValidUrl(string) {
         try {
             const url = new URL(string);
@@ -541,19 +733,22 @@ $(document).ready(function() {
     function showPreview(url) {
         previewLink.attr('href', url);
         previewText.text(url);
-        previewDiv.show('fast');
+        previewDiv.slideDown('fast');
     }
 
     function hidePreview() {
-        previewDiv.hide('fast');
-        linkStatus.empty();
+        previewDiv.slideUp('fast');
     }
 
     function updateSubmitButton() {
-        const urlValid = linkInput.hasClass('is-valid');
+        const urlValid = linkInput.hasClass('is-valid') && linkInput.val().trim() !== '';
         const confirmed = confirmCheck.is(':checked');
         
-        submitBtn.prop('disabled', !(urlValid && confirmed));
+        if (urlValid && confirmed) {
+            submitBtn.prop('disabled', false).removeClass('btn-secondary').addClass('btn-warning');
+        } else {
+            submitBtn.prop('disabled', true).removeClass('btn-warning').addClass('btn-secondary');
+        }
     }
 
     function validateForm() {
@@ -563,11 +758,14 @@ $(document).ready(function() {
         const url = linkInput.val().trim();
         if (!url || !isValidUrl(url)) {
             linkInput.addClass('is-invalid');
+            linkInput.focus();
+            alert('Silakan masukkan URL repository yang valid.');
             isValid = false;
         }
         
         // Validate confirmation
         if (!confirmCheck.is(':checked')) {
+            confirmCheck.focus();
             alert('Silakan centang konfirmasi bahwa Anda sudah memverifikasi link repository.');
             isValid = false;
         }
@@ -575,17 +773,71 @@ $(document).ready(function() {
         return isValid;
     }
 
-    // Initialize
-    linkInput.trigger('input');
+    // ===== ENTER KEY HANDLER =====
+    linkInput.on('keypress', function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            testBtn.click();
+        }
+    });
+
+    // ===== INITIALIZE =====
+    initializeForm();
     
-    console.log('Input Repository Form Loaded');
+    console.log('Input Repository Form Loaded Successfully');
+    console.log('Form Action:', form.attr('action'));
+    console.log('Initial URL:', linkInput.val());
 });
 
-// Prevent form submission on Enter key in URL field
-$(document).on('keypress', '#link_repository', function(e) {
-    if (e.which === 13) {
+// ===== PREVENT ACCIDENTAL PAGE LEAVE =====
+window.addEventListener('beforeunload', function(e) {
+    const url = $('#link_repository').val().trim();
+    const originalUrl = '<?= isset($publikasi->link_repository) ? addslashes($publikasi->link_repository) : "" ?>';
+    
+    // Only warn if there are unsaved changes
+    if (url && url !== originalUrl) {
         e.preventDefault();
-        $('#btn-test-link').click();
+        e.returnValue = 'Anda memiliki perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?';
+        return e.returnValue;
     }
 });
 </script>
+
+<?php
+/**
+ * ====================================================================
+ * CATATAN UNTUK CONTROLLER
+ * ====================================================================
+ * 
+ * Pastikan controller memiliki method berikut:
+ * 
+ * public function input_repository($id = null) {
+ *     // GET: Tampilkan form
+ *     if ($this->input->method() === 'get') {
+ *         $data['publikasi'] = $this->get_publikasi_by_id($id);
+ *         $this->load->view('staf/publikasi/input_repository', $data);
+ *     }
+ *     
+ *     // POST: Proses simpan
+ *     if ($this->input->method() === 'post') {
+ *         $this->form_validation->set_rules('link_repository', 'Link Repository', 'required|valid_url');
+ *         
+ *         if ($this->form_validation->run()) {
+ *             $update_data = [
+ *                 'link_repository' => $this->input->post('link_repository'),
+ *                 'catatan_staf' => $this->input->post('catatan_staf'),
+ *                 'updated_at' => date('Y-m-d H:i:s')
+ *             ];
+ *             
+ *             if ($this->update_publikasi($id, $update_data)) {
+ *                 $this->session->set_flashdata('success', 'Link repository berhasil disimpan.');
+ *             } else {
+ *                 $this->session->set_flashdata('error', 'Gagal menyimpan link repository.');
+ *             }
+ *         }
+ *         
+ *         redirect('staf/publikasi/detail/' . $id);
+ *     }
+ * }
+ */
+?>

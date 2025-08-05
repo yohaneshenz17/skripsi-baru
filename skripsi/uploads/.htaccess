@@ -1,0 +1,10 @@
+# skripsi/uploads/.htaccess
+<Files "*">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<FilesMatch "\.(pdf|jpg|jpeg|png|gif|doc|docx)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>

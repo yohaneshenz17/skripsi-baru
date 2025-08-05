@@ -1,5 +1,15 @@
 <?php
 /**
+ * ====================================================================
+ * FILE 1: application/views/staf/publikasi/index.php - SCRIPT LENGKAP
+ * ====================================================================
+ * 
+ * PERBAIKAN: Tombol Input/Edit Repository selalu muncul setelah dosen approve
+ */
+?>
+
+<?php
+/**
  * View Index Publikasi untuk Staf - ROBUST ERROR HANDLING VERSION
  * File: application/views/staf/publikasi/index.php
  * 
@@ -400,37 +410,60 @@ ob_start();
                                         <?= date('d/m/Y', strtotime($created_at)) ?>
                                     </span>
                                 </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <?php if ($id > 0): ?>
-                                                <a href="<?= base_url('staf/publikasi/detail/' . $id) ?>" 
-                                                   class="btn btn-sm btn-outline-primary" title="Lihat Detail">
-                                                    <i class="fas fa-eye"></i>
+                                
+                                <!-- ===== BAGIAN YANG DIPERBAIKI: KOLOM AKSI ===== -->
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <?php if ($id > 0): ?>
+                                            <!-- Tombol Detail selalu ada -->
+                                            <a href="<?= base_url('staf/publikasi/detail/' . $id) ?>" 
+                                               class="btn btn-outline-primary" title="Lihat Detail">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            
+                                            <?php
+                                            // Tentukan status publikasi untuk menampilkan tombol yang tepat
+                                            $dosen_approved = isset($item->status_pembimbing) ? 
+                                                             ($item->status_pembimbing === 'approved' || $item->status_pembimbing === '1') : false;
+                                            $status_staf_check = isset($item->status_staf) ? $item->status_staf : 
+                                                              (isset($item->validasi_staf_publikasi) ? $item->validasi_staf_publikasi : '0');
+                                            $is_final_validated = ($status_staf_check === '1' || $status_staf_check === 'approved');
+                                            ?>
+                                            
+                                            <?php if ($dosen_approved && !$is_final_validated): ?>
+                                                <!-- Tombol Input/Edit Repository - SELALU TERSEDIA setelah dosen approve -->
+                                                <a href="<?= base_url('staf/publikasi/input_repository/' . $id) ?>" 
+                                                   class="btn btn-warning" title="<?= empty($link_repository) ? 'Input Repository' : 'Edit Repository' ?>">
+                                                    <i class="fas fa-<?= empty($link_repository) ? 'plus' : 'edit' ?>"></i>
                                                 </a>
                                                 
-                                                <?php
-                                                $dosen_approved = isset($item->status_pembimbing) ? $item->status_pembimbing === 'approved' : false;
-                                                $is_final_validated = ($status_staf === '1' || $status_staf === 'approved');
-                                                ?>
-                                                
-                                                <?php if ($dosen_approved && !$is_final_validated): ?>
-                                                    <!-- SELALU TERSEDIA setelah dosen approve -->
-                                                    <a href="<?= base_url('staf/publikasi/input_repository/' . $id) ?>" 
-                                                       class="btn btn-sm btn-warning" title="<?= empty($link_repository) ? 'Input Repository' : 'Edit Repository' ?>">
-                                                        <i class="fas fa-<?= empty($link_repository) ? 'plus' : 'edit' ?>"></i>
-                                                        <?= empty($link_repository) ? 'Input' : 'Edit' ?>
+                                                <!-- Tombol Validasi - hanya jika repository sudah ada -->
+                                                <?php if (!empty($link_repository)): ?>
+                                                    <a href="<?= base_url('staf/publikasi/validasi/' . $id) ?>" 
+                                                       class="btn btn-success btn-validasi" title="Validasi Final">
+                                                        <i class="fas fa-check"></i>
                                                     </a>
-                                                    
-                                                    <?php if (!empty($link_repository)): ?>
-                                                        <a href="<?= base_url('staf/publikasi/validasi/' . $id) ?>" 
-                                                           class="btn btn-sm btn-success btn-validasi" title="Validasi Final">
-                                                            <i class="fas fa-check"></i> Validasi
-                                                        </a>
-                                                    <?php endif; ?>
                                                 <?php endif; ?>
+                                                
+                                            <?php elseif ($is_final_validated): ?>
+                                                <!-- Jika sudah divalidasi final, tampilkan status -->
+                                                <span class="badge badge-success">
+                                                    <i class="fas fa-check-circle"></i> Selesai
+                                                </span>
+                                                
+                                            <?php elseif (!$dosen_approved): ?>
+                                                <!-- Jika belum disetujui dosen -->
+                                                <small class="text-muted">
+                                                    <i class="fas fa-hourglass-half"></i> Menunggu Dosen
+                                                </small>
                                             <?php endif; ?>
-                                        </div>
-                                    </td>
+                                            
+                                        <?php else: ?>
+                                            <small class="text-muted">No action available</small>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <!-- ===== END BAGIAN YANG DIPERBAIKI ===== -->
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -615,45 +648,3 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
     return false;
 };
 </script>
-
-<?php
-// =============================================================================
-// ERROR PAGE VIEW (Optional - Create separate file)
-// File: application/views/staf/publikasi/error.php
-// =============================================================================
-?>
-
-<!-- ERROR PAGE CONTENT (untuk file terpisah) -->
-<!--
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
-                <h3>Terjadi Kesalahan</h3>
-                <p class="text-muted"><?= isset($error_message) ? $error_message : 'Kesalahan tidak diketahui' ?></p>
-                
-                <?php if (ENVIRONMENT === 'development' && isset($debug_info)): ?>
-                <div class="mt-4">
-                    <button class="btn btn-outline-info debug-toggle">
-                        <i class="fas fa-bug"></i> Show Debug Info
-                    </button>
-                    <div class="debug-info mt-3" style="display: none;">
-                        <pre><?= json_encode($debug_info, JSON_PRETTY_PRINT) ?></pre>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <div class="mt-4">
-                    <a href="<?= base_url('staf/publikasi') ?>" class="btn btn-primary">
-                        <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
-                    </a>
-                    <a href="<?= base_url('staf/dashboard') ?>" class="btn btn-secondary">
-                        <i class="fas fa-home mr-2"></i>Dashboard Utama
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
--->

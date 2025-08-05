@@ -438,6 +438,8 @@ $route['dosen/publikasi/index'] = 'dosen/publikasi/index';
 // Review dan Detail
 $route['dosen/publikasi/review/(:num)'] = 'dosen/publikasi/review/$1';
 $route['dosen/publikasi/detail/(:num)'] = 'dosen/publikasi/detail/$1';
+$route['dosen/publikasi/riwayat/(:num)'] = 'dosen/publikasi/riwayat/$1';
+$route['dosen/publikasi/quick_approve/(:num)'] = 'dosen/publikasi/quick_approve/$1';
 
 // Action Approve/Reject
 $route['dosen/publikasi/approve/(:num)'] = 'dosen/publikasi/approve/$1';

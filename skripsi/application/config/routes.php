@@ -578,6 +578,7 @@ $route['staf/publikasi/export'] = 'staf/publikasi/export';
 $route['staf/publikasi/selesaikan/(:num)'] = 'staf/publikasi/selesaikan/$1';
 $route['staf/publikasi/input_repository/(:num)'] = 'staf/publikasi/input_repository/$1';
 $route['staf/publikasi/download_file/(:any)/(:num)'] = 'staf/publikasi/download_file/$1/$2';
+$route['staf/publikasi/validasi/(:num)'] = 'staf/publikasi/validasi/$1';
 
 // =====================================================
 //      MENU STAF - MANAJEMEN DATA

@@ -400,6 +400,10 @@ MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANG
                         <span>File Skripsi Final (PDF, max 5MB)</span>
                     </div>
                     <div class="dokumen-item">
+                        <i class="fas fa-file-pdf text-danger"></i>
+                        <span>Surat Keterangan Revisi Skripsi (PDF, max 1MB)</span>
+                    </div>
+                    <div class="dokumen-item">
                         <i class="fas fa-link text-info"></i>
                         <span>Link Repository (Opsional)</span>
                     </div>

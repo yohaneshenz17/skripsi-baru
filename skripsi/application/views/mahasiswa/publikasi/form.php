@@ -1,8 +1,8 @@
 <!-- 
-FORM PENGAJUAN PUBLIKASI - STEP 2 WORKFLOW (9 FIELD)
+FORM PENGAJUAN PUBLIKASI - STEP 2 WORKFLOW (10 FIELD)
 File: application/views/mahasiswa/publikasi/form.php
 
-SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
+SESUAI WORKFLOW STEP 2 DENGAN 10 FIELD:
 1. Nama Lengkap (auto)
 2. NIM (auto) 
 3. Program Studi (auto)
@@ -10,8 +10,9 @@ SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
 5. Dosen Pembimbing (auto)
 6. Tanggal Ujian Skripsi (auto)
 7. Surat Perpustakaan (upload)
-8. File Skripsi Final (upload)
-9. Link Repository (opsional)
+8. Surat Revisi (upload) - BARU
+9. File Skripsi Final (upload)
+10. Link Repository (opsional)
 -->
 
 <!-- Flash Messages -->
@@ -38,7 +39,7 @@ SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
                     <i class="fas fa-edit text-warning"></i>
                     <strong>STEP 2 dari 9 Langkah Workflow:</strong> Isi Form Pengajuan Publikasi
                 </h5>
-                <p class="mb-0 text-muted">Lengkapi 9 field data yang diperlukan untuk publikasi tugas akhir Anda</p>
+                <p class="mb-0 text-muted">Lengkapi 10 field data yang diperlukan untuk publikasi tugas akhir Anda</p>
             </div>
         </div>
     </div>
@@ -68,8 +69,8 @@ SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
             <!-- Informasi Workflow -->
             <div class="alert alert-info">
                 <h6><i class="fas fa-info-circle"></i> Informasi Workflow Step 2</h6>
-                <p class="mb-2">Anda sedang mengisi form publikasi dengan 9 field data yang diperlukan. Field 1-3, 5-6 akan terisi otomatis dari profil dan data proposal Anda.</p>
-                <p class="mb-0"><strong>Yang perlu Anda isi manual:</strong> Field 4 (Judul Final), Field 7-8 (Upload File), Field 9 (Link Repository)</p>
+                <p class="mb-2">Anda sedang mengisi form publikasi dengan 10 field data yang diperlukan. Field 1-3, 5-6 akan terisi otomatis dari profil dan data proposal Anda.</p>
+                <p class="mb-0"><strong>Yang perlu Anda isi manual:</strong> Field 4 (Judul Final), Field 7-9 (Upload File), Field 10 (Link Repository)</p>
             </div>
 
             <!-- FIELD 1-3: Data Mahasiswa (Auto-filled) -->
@@ -138,7 +139,7 @@ SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
 
             <hr>
 
-            <!-- FIELD 7-8: Upload Dokumen (Manual) -->
+            <!-- FIELD 7-9: Upload Dokumen (Manual) -->
             <h5 class="mb-3"><i class="fas fa-upload text-danger"></i> Upload Dokumen Wajib</h5>
             
             <div class="row">
@@ -169,7 +170,35 @@ SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
                 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label><strong>8. File Skripsi Final (Full PDF)</strong> <span class="text-danger">*</span></label>
+                        <label><strong>8. Surat Keterangan Revisi Skripsi</strong> <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control-file" name="file_surat_revisi" accept=".pdf" 
+                               <?= $action == 'ajukan' ? 'required' : '' ?>>
+                        <small class="text-muted">
+                            Format PDF, maksimal 1 MB. 
+                            <a href="<?= base_url('assets/templates/template_surat_revisi.pdf') ?>" target="_blank" class="text-info">
+                                <i class="fas fa-download"></i> Download Template
+                            </a>
+                        </small>
+                        
+                        <?php if (isset($publikasi->file_surat_revisi) && $publikasi->file_surat_revisi): ?>
+                            <div class="mt-2">
+                                <small class="text-success">
+                                    <i class="fas fa-check"></i> File sudah diupload: 
+                                    <a href="<?= base_url('uploads/publikasi/surat_revisi/' . $publikasi->file_surat_revisi) ?>" target="_blank" class="text-success">
+                                        <i class="fas fa-file-pdf"></i> Lihat File
+                                    </a>
+                                </small>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field 9: File Skripsi Final (Row baru) -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label><strong>9. File Skripsi Final (Full PDF)</strong> <span class="text-danger">*</span></label>
                         <input type="file" class="form-control-file" name="file_skripsi_final" accept=".pdf" 
                                <?= $action == 'ajukan' ? 'required' : '' ?>>
                         <small class="text-muted">Format PDF, maksimal 5 MB. File skripsi lengkap dan final</small>
@@ -190,11 +219,11 @@ SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
 
             <hr>
 
-            <!-- FIELD 9: Link Repository (Opsional) -->
+            <!-- FIELD 10: Link Repository (Opsional) -->
             <h5 class="mb-3"><i class="fas fa-link text-info"></i> Repository Online (Opsional)</h5>
             
             <div class="form-group">
-                <label><strong>9. Link Repository/Publikasi Tugas Akhir</strong> <span class="badge badge-info">Opsional</span></label>
+                <label><strong>10. Link Repository/Publikasi Tugas Akhir</strong> <span class="badge badge-info">Opsional</span></label>
                 <input type="url" class="form-control" name="link_repository" 
                        value="<?= isset($publikasi->link_repository) ? $publikasi->link_repository : '' ?>"
                        placeholder="https://repository.stkyakobus.ac.id/skripsi/...">
@@ -255,7 +284,7 @@ SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
                 <h6><i class="fas fa-file-upload text-primary"></i> Tips Upload File:</h6>
                 <ul class="list-unstyled">
                     <li>• Pastikan file dalam format PDF</li>
-                    <li>• Surat perpustakaan max 1 MB</li>
+                    <li>• Surat perpustakaan & revisi max 1 MB</li>
                     <li>• File skripsi final max 5 MB</li>
                     <li>• Gunakan nama file yang jelas</li>
                 </ul>
@@ -270,6 +299,28 @@ SESUAI WORKFLOW STEP 2 DENGAN 9 FIELD:
                 </ul>
             </div>
         </div>
+        
+        <hr>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <h6><i class="fas fa-info-circle text-info"></i> Informasi File yang Dibutuhkan:</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Surat Perpustakaan:</strong><br>
+                        <small class="text-muted">Surat keterangan bahwa skripsi sudah diserahkan ke perpustakaan STK Santo Yakobus</small>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Surat Revisi:</strong><br>
+                        <small class="text-muted">Surat keterangan bahwa revisi skripsi sesuai hasil ujian sudah selesai</small>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>File Skripsi Final:</strong><br>
+                        <small class="text-muted">File PDF skripsi lengkap yang sudah final dan telah direvisi</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -279,7 +330,14 @@ $(document).ready(function() {
     $('input[type="file"]').change(function() {
         const fileInput = this;
         const file = fileInput.files[0];
-        const maxSize = fileInput.name === 'file_skripsi_final' ? 5 * 1024 * 1024 : 1 * 1024 * 1024; // 5MB untuk skripsi, 1MB untuk surat
+        let maxSize;
+        
+        // Tentukan max size berdasarkan nama field
+        if (fileInput.name === 'file_skripsi_final') {
+            maxSize = 5 * 1024 * 1024; // 5MB untuk skripsi
+        } else {
+            maxSize = 1 * 1024 * 1024; // 1MB untuk surat-surat
+        }
         
         if (file && file.size > maxSize) {
             alert('Ukuran file terlalu besar!\n\n' +
@@ -315,6 +373,11 @@ $(document).ready(function() {
         <?php if ($action == 'ajukan'): ?>
         if (!$('input[name="file_surat_perpustakaan"]')[0].files.length) {
             errors.push('File surat perpustakaan wajib diupload');
+            isValid = false;
+        }
+        
+        if (!$('input[name="file_surat_revisi"]')[0].files.length) {
+            errors.push('File surat revisi wajib diupload');
             isValid = false;
         }
         

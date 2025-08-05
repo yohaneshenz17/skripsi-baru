@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 05, 2025 at 10:24 AM
+-- Generation Time: Aug 05, 2025 at 11:43 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -714,6 +714,14 @@ CREATE TABLE `log_publikasi` (
   `user_agent` text DEFAULT NULL COMMENT 'Browser user agent',
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log aktivitas publikasi tugas akhir';
+
+--
+-- Dumping data for table `log_publikasi`
+--
+
+INSERT INTO `log_publikasi` (`id`, `publikasi_id`, `user_id`, `user_role`, `user_name`, `aktivitas`, `deskripsi`, `data_before`, `data_after`, `ip_address`, `user_agent`, `created_at`) VALUES
+(1, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'create_pengajuan', 'Mahasiswa membuat pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 11:16:50'),
+(2, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 11:18:45');
 
 -- --------------------------------------------------------
 
@@ -1870,6 +1878,13 @@ CREATE TABLE `publikasi_tugas_akhir` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tabel untuk mengelola publikasi tugas akhir mahasiswa';
 
 --
+-- Dumping data for table `publikasi_tugas_akhir`
+--
+
+INSERT INTO `publikasi_tugas_akhir` (`id`, `proposal_mahasiswa_id`, `mahasiswa_id`, `nama_mahasiswa`, `nim`, `program_studi`, `judul_skripsi_final`, `dosen_pembimbing_id`, `nama_dosen_pembimbing`, `tanggal_ujian_skripsi`, `file_surat_revisi`, `file_skripsi_final`, `file_surat_perpustakaan`, `link_repository`, `status`, `status_pembimbing`, `status_staf`, `keterangan_mahasiswa`, `komentar_pembimbing`, `komentar_staf`, `tanggal_pengajuan`, `tanggal_review_pembimbing`, `tanggal_validasi_staf`, `tanggal_selesai`, `validated_by_staf_id`, `validated_by_staf_name`, `created_at`, `updated_at`) VALUES
+(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-2017.pdf', 'draft', 'pending', 'pending', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', NULL, NULL, '2025-08-05 11:16:50', NULL, NULL, NULL, NULL, NULL, '2025-08-05 11:16:50', '2025-08-05 11:18:45');
+
+--
 -- Triggers `publikasi_tugas_akhir`
 --
 DELIMITER $$
@@ -3000,7 +3015,7 @@ ALTER TABLE `log_penelitian`
 -- AUTO_INCREMENT for table `log_publikasi`
 --
 ALTER TABLE `log_publikasi`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `mahasiswa`
@@ -3072,7 +3087,7 @@ ALTER TABLE `proposal_workflow`
 -- AUTO_INCREMENT for table `publikasi_tugas_akhir`
 --
 ALTER TABLE `publikasi_tugas_akhir`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `seminar`

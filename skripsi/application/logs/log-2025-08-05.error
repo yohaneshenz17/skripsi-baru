@@ -1,1 +1,36 @@
 ERROR - 2025-08-05 06:05:09 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-05 06:06:26 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-08-05 09:49:47 --> Query error: No tables used - Invalid query: SELECT *
+ERROR - 2025-08-05 09:49:47 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/Debug_publikasi.php:12) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-05 09:50:13 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-05 09:50:20 --> Query error: Unknown column 'pub.rekomendasi_pembimbing' in 'where clause' - Invalid query: SELECT COUNT(*) as total
+FROM `publikasi_tugas_akhir` `pub`
+JOIN `proposal_mahasiswa` `pm` ON `pub`.`proposal_id` = `pm`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pub`.`rekomendasi_pembimbing` IS NULL
+ERROR - 2025-08-05 09:50:27 --> Query error: Unknown column 'pub.rekomendasi_pembimbing' in 'where clause' - Invalid query: SELECT COUNT(*) as total
+FROM `publikasi_tugas_akhir` `pub`
+JOIN `proposal_mahasiswa` `pm` ON `pub`.`proposal_id` = `pm`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pub`.`rekomendasi_pembimbing` IS NULL
+ERROR - 2025-08-05 09:56:38 --> Query error: Unknown column 'pub.proposal_id' in 'on clause' - Invalid query: SELECT COUNT(*) as total
+FROM `publikasi_tugas_akhir` `pub`
+JOIN `proposal_mahasiswa` `pm` ON `pub`.`proposal_id` = `pm`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pub`.`status` = 'submitted'
+ERROR - 2025-08-05 09:58:00 --> 404 Page Not Found: dosen/Publikasi/index
+ERROR - 2025-08-05 09:58:00 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/dosen/Publikasi.php:1) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-05 10:09:35 --> Severity: error --> Exception: Call to undefined method Publikasi::_get_latest_proposal() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 47
+ERROR - 2025-08-05 10:10:12 --> Severity: error --> Exception: Call to undefined method Publikasi::_get_latest_proposal() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 47
+ERROR - 2025-08-05 10:10:40 --> Severity: error --> Exception: Call to undefined method Publikasi::_get_latest_proposal() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 47
+ERROR - 2025-08-05 10:12:12 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php:341) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-05 10:12:12 --> Severity: Compile Error --> Cannot redeclare Publikasi::_check_syarat_publikasi() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 341
+ERROR - 2025-08-05 10:17:52 --> 404 Page Not Found: Assets/templates
+ERROR - 2025-08-05 10:40:18 --> 404 Page Not Found: Assets/templates
+ERROR - 2025-08-05 10:40:22 --> 404 Page Not Found: Assets/templates
+ERROR - 2025-08-05 11:06:07 --> Query error: Unknown column 'judul_skripsi' in 'field list' - Invalid query: INSERT INTO `publikasi_tugas_akhir` (`proposal_mahasiswa_id`, `mahasiswa_id`, `dosen_pembimbing_id`, `nim`, `nama_mahasiswa`, `program_studi`, `judul_skripsi`, `tanggal_ujian_skripsi`, `file_surat_revisi`, `file_skripsi_final`, `file_surat_perpustakaan`, `keterangan_mahasiswa`, `status`, `tanggal_pengajuan`, `created_at`, `updated_at`) VALUES ('45', '45', '25', '12345679', 'Mahasiswa Contoh 2', 'Pendidikan Keagamaan Katolik', 'PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', '2025-08-05', 'SURAT_REVISI_20250805110607_45_6891832f483cd.pdf', 'SKRIPSI_FINAL_20250805110607_45_6891832f485d2.pdf', 'SURAT_PERPUS_20250805110607_45_6891832f47f28.pdf', 'TES SAJA YA UNTUK PUBLISH', 'draft', '2025-08-05 11:06:07', '2025-08-05 11:06:07', '2025-08-05 11:06:07')
+ERROR - 2025-08-05 11:15:02 --> Query error: Unknown column 'user_type' in 'field list' - Invalid query: INSERT INTO `log_publikasi` (`publikasi_id`, `user_id`, `user_type`, `action`, `description`, `created_at`) VALUES (1, '45', 'mahasiswa', 'create_pengajuan', 'Mahasiswa membuat pengajuan publikasi', '2025-08-05 11:15:02')
+ERROR - 2025-08-05 11:16:50 --> 404 Page Not Found: mahasiswa/Publikasi/detail
+ERROR - 2025-08-05 11:18:01 --> 404 Page Not Found: mahasiswa/Publikasi/detail
+ERROR - 2025-08-05 11:18:28 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/tracking.php 490
+ERROR - 2025-08-05 11:18:45 --> 404 Page Not Found: mahasiswa/Publikasi/detail

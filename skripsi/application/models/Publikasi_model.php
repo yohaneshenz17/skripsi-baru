@@ -51,36 +51,51 @@ class Publikasi_model extends CI_Model {
                 ];
             }
             
-            // Insert data publikasi
+            // ✅ FIXED: Pastikan data array langsung dipass tanpa mapping ulang
+            // Tidak perlu mapping manual karena data sudah sesuai dari controller
+            
+            // Set timestamp
             $data['created_at'] = date('Y-m-d H:i:s');
             $data['updated_at'] = date('Y-m-d H:i:s');
             
+            // Insert data publikasi - LANGSUNG GUNAKAN DATA DARI CONTROLLER
             $this->db->insert($this->table, $data);
             $publikasi_id = $this->db->insert_id();
             
+            // Check if insert was successful
+            if (!$publikasi_id) {
+                throw new Exception('Failed to insert publikasi data');
+            }
+            
             // Log aktivitas
-            $this->_log_activity($publikasi_id, $data['mahasiswa_id'], 'mahasiswa', 'create_pengajuan', 'Mahasiswa membuat pengajuan publikasi');
+            if (method_exists($this, '_log_activity')) {
+                $this->_log_activity($publikasi_id, $data['mahasiswa_id'], 'mahasiswa', 'create_pengajuan', 'Mahasiswa membuat pengajuan publikasi');
+            }
             
             $this->db->trans_complete();
             
             if ($this->db->trans_status() === FALSE) {
                 return [
                     'success' => false,
-                    'message' => 'Gagal menyimpan data publikasi.'
+                    'message' => 'Gagal menyimpan data publikasi: ' . $this->db->last_query()
                 ];
             }
             
             return [
                 'success' => true,
                 'message' => 'Pengajuan publikasi berhasil disimpan.',
-                'id' => $publikasi_id
+                'publikasi_id' => $publikasi_id,
+                'id' => $publikasi_id // Alias untuk backward compatibility
             ];
             
         } catch (Exception $e) {
+            $this->db->trans_rollback();
             log_message('error', 'Error creating publikasi: ' . $e->getMessage());
+            log_message('error', 'Last query: ' . $this->db->last_query());
+            
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem.'
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
             ];
         }
     }
@@ -93,11 +108,11 @@ class Publikasi_model extends CI_Model {
      * @param int $user_id ID user yang melakukan update
      * @return array Result
      */
-    public function update($publikasi_id, $data, $user_id) {
+    public function update($publikasi_id, $data, $user_id = null) {
         try {
             $this->db->trans_start();
             
-            // Get data lama untuk log
+            // Get data lama untuk validasi
             $old_data = $this->get_by_id($publikasi_id);
             if (!$old_data) {
                 return [
@@ -106,20 +121,29 @@ class Publikasi_model extends CI_Model {
                 ];
             }
             
-            // Update data
+            // Set timestamp
             $data['updated_at'] = date('Y-m-d H:i:s');
+            
+            // Update data - LANGSUNG GUNAKAN DATA DARI CONTROLLER
             $this->db->where('id', $publikasi_id)
                    ->update($this->table, $data);
             
-            // Log aktivitas
-            $this->_log_activity($publikasi_id, $user_id, 'mahasiswa', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi');
+            // Check if update affected any rows
+            if ($this->db->affected_rows() === 0) {
+                log_message('warning', 'Update publikasi tidak mempengaruhi row apapun. ID: ' . $publikasi_id);
+            }
+            
+            // Log aktivitas jika user_id tersedia
+            if ($user_id && method_exists($this, '_log_activity')) {
+                $this->_log_activity($publikasi_id, $user_id, 'mahasiswa', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi');
+            }
             
             $this->db->trans_complete();
             
             if ($this->db->trans_status() === FALSE) {
                 return [
                     'success' => false,
-                    'message' => 'Gagal mengupdate data publikasi.'
+                    'message' => 'Gagal mengupdate data publikasi: ' . $this->db->last_query()
                 ];
             }
             
@@ -129,10 +153,13 @@ class Publikasi_model extends CI_Model {
             ];
             
         } catch (Exception $e) {
+            $this->db->trans_rollback();
             log_message('error', 'Error updating publikasi: ' . $e->getMessage());
+            log_message('error', 'Last query: ' . $this->db->last_query());
+            
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem.'
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
             ];
         }
     }
@@ -394,6 +421,31 @@ class Publikasi_model extends CI_Model {
         $this->db->select('*');
         $this->db->from($this->table);
         $this->db->where('proposal_mahasiswa_id', $proposal_id);
+        
+        return $this->db->get()->row();
+    }
+
+    /**
+     * Get publikasi dengan join data lengkap
+     * 
+     * @param int $publikasi_id
+     * @return object|null
+     */
+    public function get_detail($publikasi_id) {
+        $this->db->select('
+            p.*,
+            m.email as email_mahasiswa,
+            m.nomor_telepon,
+            pm.workflow_status,
+            pm.judul as judul_proposal_awal,
+            d.nama as nama_pembimbing_lengkap,
+            d.email as email_pembimbing
+        ');
+        $this->db->from('publikasi_tugas_akhir p');
+        $this->db->join('mahasiswa m', 'p.mahasiswa_id = m.id');
+        $this->db->join('proposal_mahasiswa pm', 'p.proposal_mahasiswa_id = pm.id');
+        $this->db->join('dosen d', 'p.dosen_pembimbing_id = d.id', 'left');
+        $this->db->where('p.id', $publikasi_id);
         
         return $this->db->get()->row();
     }

@@ -304,13 +304,14 @@ class Dashboard extends CI_Controller {
             
             // 8. Publikasi yang butuh rekomendasi (jika tabel ada)
             if ($this->db->table_exists('publikasi_tugas_akhir')) {
+                // Total publikasi dari mahasiswa bimbingan
                 $this->db->select('COUNT(*) as total');
                 $this->db->from('publikasi_tugas_akhir pub');
-                $this->db->join('proposal_mahasiswa pm', 'pub.proposal_id = pm.id');
+                $this->db->join('proposal_mahasiswa pm', 'pub.proposal_mahasiswa_id = pm.id'); // ✅ BENAR
                 $this->db->where('pm.dosen_id', $dosen_id);
-                $this->db->where('pub.rekomendasi_pembimbing IS NULL');
+                $this->db->where('pub.status', 'submitted');
                 $result = $this->db->get()->row();
-                $stats['publikasi_pending'] = $result ? $result->total : 0;
+                $stats['publikasi_info'] = $result ? $result->total : 0;
             }
             
         } catch (Exception $e) {

@@ -104,6 +104,7 @@ class Auth extends CI_Controller {
                     'id'        => $user_mahasiswa->id,
                     'nama'      => $user_mahasiswa->nama,
                     'email'     => $user_mahasiswa->email,
+                    'nim'       => $user_mahasiswa->nim,  // ← TAMBAHKAN BARIS INI
                     'foto'      => $user_mahasiswa->foto,
                     'level'     => '3',
                     'logged_in' => TRUE

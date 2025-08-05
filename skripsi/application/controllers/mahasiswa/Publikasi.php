@@ -360,10 +360,12 @@ class Publikasi extends CI_Controller {
     // =================================================================
 
     /**
-     * Process form publikasi - TIDAK DIUBAH
+     * Process form publikasi - DIPERBAIKI MAPPING KOLOM
+     * Fixed: Sesuaikan nama kolom dengan database schema
      */
     private function _process_form_publikasi($proposal) {
         // Set validation rules
+        $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim');
         $this->form_validation->set_rules('tanggal_ujian_skripsi', 'Tanggal Ujian Skripsi', 'required');
         $this->form_validation->set_rules('keterangan_mahasiswa', 'Keterangan', 'trim');
         
@@ -380,7 +382,7 @@ class Publikasi extends CI_Controller {
             return;
         }
         
-        // Prepare data untuk insert
+        // Prepare data untuk insert - FIXED COLUMN MAPPING
         $data = [
             'proposal_mahasiswa_id' => $proposal->id,
             'mahasiswa_id' => $this->mahasiswa_id,
@@ -388,23 +390,30 @@ class Publikasi extends CI_Controller {
             'nim' => $proposal->nim,
             'nama_mahasiswa' => $proposal->nama_mahasiswa,
             'program_studi' => $proposal->nama_prodi,
-            'judul_skripsi' => $proposal->judul,
+            
+            // ✅ FIXED: Ganti 'judul_skripsi' menjadi 'judul_skripsi_final'
+            'judul_skripsi_final' => $this->input->post('judul_skripsi_final'),
+            
+            // ✅ FIXED: Pastikan nama dosen diambil dengan benar
+            'nama_dosen_pembimbing' => isset($proposal->nama_pembimbing) ? $proposal->nama_pembimbing : 'Belum ditetapkan',
+            
             'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
             'file_surat_revisi' => $upload_result['files']['file_surat_revisi'],
             'file_skripsi_final' => $upload_result['files']['file_skripsi_final'],
             'file_surat_perpustakaan' => $upload_result['files']['file_surat_perpustakaan'],
+            'link_repository' => $this->input->post('link_repository'),
             'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
             'status' => 'draft',
             'tanggal_pengajuan' => date('Y-m-d H:i:s'),
             'created_at' => date('Y-m-d H:i:s')
         ];
         
-        // Insert ke database
+        // Insert ke database menggunakan model
         $result = $this->publikasi->create($data);
         
         if ($result['success']) {
             $this->session->set_flashdata('success', 'Pengajuan publikasi berhasil disimpan sebagai draft.');
-            redirect('mahasiswa/publikasi/tracking/' . $result['publikasi_id']);
+            redirect('mahasiswa/publikasi/detail/' . $result['id']);
         } else {
             $this->session->set_flashdata('error', $result['message']);
             $this->_show_form_pengajuan($proposal);
@@ -412,10 +421,12 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Process update publikasi - TIDAK DIUBAH
+     * Process update publikasi - DIPERBAIKI MAPPING KOLOM
+     * Fixed: Sesuaikan nama kolom dengan database schema
      */
     private function _process_update($publikasi) {
         // Set validation rules
+        $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim');
         $this->form_validation->set_rules('tanggal_ujian_skripsi', 'Tanggal Ujian Skripsi', 'required');
         $this->form_validation->set_rules('keterangan_mahasiswa', 'Keterangan', 'trim');
         
@@ -432,9 +443,13 @@ class Publikasi extends CI_Controller {
             return;
         }
         
-        // Prepare data untuk update
+        // Prepare data untuk update - FIXED COLUMN MAPPING
         $data = [
+            // ✅ FIXED: Ganti 'judul_skripsi' menjadi 'judul_skripsi_final'
+            'judul_skripsi_final' => $this->input->post('judul_skripsi_final'),
+            
             'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
+            'link_repository' => $this->input->post('link_repository'),
             'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
@@ -444,12 +459,12 @@ class Publikasi extends CI_Controller {
             $data = array_merge($data, $upload_result['files']);
         }
         
-        // Update database
-        $result = $this->publikasi->update($publikasi->id, $data);
+        // Update database menggunakan model
+        $result = $this->publikasi->update($publikasi->id, $data, $this->mahasiswa_id);
         
         if ($result['success']) {
             $this->session->set_flashdata('success', 'Data publikasi berhasil diperbarui.');
-            redirect('mahasiswa/publikasi/tracking/' . $publikasi->id);
+            redirect('mahasiswa/publikasi/detail/' . $publikasi->id);
         } else {
             $this->session->set_flashdata('error', $result['message']);
             $this->_show_form_edit($publikasi);
@@ -457,33 +472,66 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Handle file uploads - TIDAK DIUBAH
+     * Handle file uploads - DIPERBAIKI UNTUK MULTIPLE SUBFOLDERS
+     * Fixed: Setiap file type upload ke folder yang berbeda sesuai requirement
      */
     private function _handle_file_uploads($required = true) {
-        $config = [
-            'upload_path' => './uploads/publikasi/',
-            'allowed_types' => 'pdf',
-            'max_size' => 5120, // 5MB
-            'encrypt_name' => false
+        // Definisi mapping file ke subfolder masing-masing
+        $file_config = [
+            'file_surat_perpustakaan' => [
+                'path' => './uploads/publikasi/surat_perpustakaan/',
+                'max_size' => 1024, // 1MB
+                'prefix' => 'SURAT_PERPUS'
+            ],
+            'file_surat_revisi' => [
+                'path' => './uploads/publikasi/surat_revisi/',
+                'max_size' => 1024, // 1MB  
+                'prefix' => 'SURAT_REVISI'
+            ],
+            'file_skripsi_final' => [
+                'path' => './uploads/publikasi/skripsi_final/',
+                'max_size' => 5120, // 5MB
+                'prefix' => 'SKRIPSI_FINAL'
+            ]
         ];
         
-        $this->load->library('upload', $config);
-        
-        $files = ['file_surat_revisi', 'file_skripsi_final', 'file_surat_perpustakaan'];
         $uploaded_files = [];
         $errors = [];
         
-        foreach ($files as $field) {
+        // Loop setiap file dengan config masing-masing
+        foreach ($file_config as $field => $config) {
             if (!empty($_FILES[$field]['name'])) {
-                // Set custom filename
-                $config['file_name'] = $this->_generate_filename($field);
-                $this->upload->initialize($config);
+                
+                // Buat direktori jika belum ada
+                if (!is_dir($config['path'])) {
+                    mkdir($config['path'], 0755, true);
+                }
+                
+                // Set upload config untuk file ini
+                $upload_config = [
+                    'upload_path' => $config['path'],
+                    'allowed_types' => 'pdf',
+                    'max_size' => $config['max_size'],
+                    'encrypt_name' => false,
+                    'file_name' => $this->_generate_filename($config['prefix'])
+                ];
+                
+                $this->upload->initialize($upload_config);
                 
                 if ($this->upload->do_upload($field)) {
                     $uploaded_files[$field] = $this->upload->data('file_name');
+                    
+                    // Log successful upload
+                    log_message('info', "File uploaded: {$field} -> {$uploaded_files[$field]}");
+                    
                 } else {
-                    $errors[] = $field . ': ' . $this->upload->display_errors('', '');
+                    $upload_error = $this->upload->display_errors('', '');
+                    $errors[] = $field . ': ' . $upload_error;
+                    
+                    // Log upload error
+                    log_message('error', "Upload failed for {$field}: {$upload_error}");
                 }
+                
             } elseif ($required) {
                 $errors[] = $field . ': File wajib diupload';
             }
@@ -505,8 +553,8 @@ class Publikasi extends CI_Controller {
     /**
      * Generate filename untuk upload - TIDAK DIUBAH
      */
-    private function _generate_filename($type) {
-        return 'PUBLIKASI_' . date('YmdHis') . '_' . $this->mahasiswa_id . '_' . uniqid();
+    private function _generate_filename($prefix = 'PUBLIKASI') {
+        return $prefix . '_' . date('YmdHis') . '_' . $this->mahasiswa_id . '_' . uniqid();
     }
 
     /**

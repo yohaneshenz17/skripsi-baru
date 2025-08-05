@@ -1,0 +1,519 @@
+ERROR - 2025-08-03 05:50:21 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-03 05:55:02 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-03 05:55:10 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-03 05:56:07 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-03 05:56:07 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'latihan', 'submitted', 'pembimbing', 'skripsi_1754175367_688e9787a1539.pdf', '2025-08-03 05:56:07', '2025-08-03 05:56:07')
+ERROR - 2025-08-03 05:57:10 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-03 05:57:25 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-03 05:57:27 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-03 05:58:22 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-03 06:02:40 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-03 06:03:06 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-03 06:10:24 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'Ini yang terbaru ya', 'submitted', 'pembimbing', 'skripsi_1754176224_688e9ae068ae6.pdf', '2025-08-03 06:10:24', '2025-08-03 06:10:24')
+ERROR - 2025-08-03 06:10:29 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'Ini yang terbaru ya', 'submitted', 'pembimbing', 'skripsi_1754176229_688e9ae57669f.pdf', '2025-08-03 06:10:29', '2025-08-03 06:10:29')
+ERROR - 2025-08-03 06:10:44 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'Tesssssss', 'submitted', 'pembimbing', 'skripsi_1754176243_688e9af3b0747.pdf', '2025-08-03 06:10:43', '2025-08-03 06:10:43')
+ERROR - 2025-08-03 06:30:51 --> Query error: View 'stkp7133_skripsi.seminar_skripsi_mahasiswa_v' references invalid table(s) or column(s) or function(s) or definer/invoker of view lack rights to use them - Invalid query: SELECT *
+FROM `seminar_skripsi_mahasiswa_v`
+WHERE `mahasiswa_id` = '44'
+ORDER BY `created_at` DESC
+ERROR - 2025-08-03 06:46:01 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_existing_seminar_by_mahasiswa() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 222
+ERROR - 2025-08-03 06:46:06 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_existing_seminar_by_mahasiswa() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 222
+ERROR - 2025-08-03 06:52:23 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:404) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 06:52:23 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_prepare_dashboard_data() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 404
+ERROR - 2025-08-03 06:59:50 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_status_text() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 235
+ERROR - 2025-08-03 07:03:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-03 07:03:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-03 07:04:35 --> Severity: Warning --> Undefined property: stdClass::$email_mahasiswa /home/stkp7133/public_html/skripsi/application/controllers/dosen/Penelitian.php 358
+ERROR - 2025-08-03 07:04:36 --> Failed to send approval email to mahasiswa: 220 smtp.gmail.com ESMTP 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+<br /><pre>hello: 250-smtp.gmail.com at your service, [203.175.8.56]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+</pre><pre>starttls: 220 2.0.0 Ready to start TLS
+</pre><pre>hello: 250-smtp.gmail.com at your service, [203.175.8.56]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+</pre><pre>from: 250 2.1.0 OK 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+</pre><pre>to: 555-5.5.2 Syntax error, cannot decode response. For more information, go to
+555-5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321
+555 5.5.2 specifications. 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+</pre>The following SMTP error was encountered: 555-5.5.2 Syntax error, cannot decode response. For more information, go to
+555-5.5.2  https://support.google.com/a/answer/3221692 and review RFC 5321
+555 5.5.2 specifications. 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+<br /><pre>quit: 221 2.0.0 closing connection 98e67ed59e1d1-3207eca6d3asm8074459a91.23 - gsmtp
+</pre>Unable to send email using PHP SMTP. Your server might not be configured to send mail using this method.<br /><pre>User-Agent: CodeIgniter
+Date: Sun, 3 Aug 2025 07:04:35 +0700
+From: &quot;SIM-TA STK Santo Yakobus&quot; &lt;noreply.stkyakobus@gmail.com&gt;
+Return-Path: &lt;noreply.stkyakobus@gmail.com&gt;
+Subject: =?UTF-8?Q?Permohonan=20Izin=20Penelitian=20Disetujui=20-=20MAHASISWA=20C?= =?UTF-8?Q?ONTOH=203?=
+Reply-To: &lt;noreply.stkyakobus@gmail.com&gt;
+X-Sender: noreply.stkyakobus@gmail.com
+X-Mailer: CodeIgniter
+X-Priority: 3 (Normal)
+Message-ID: &lt;688ea79313108@gmail.com&gt;
+Mime-Version: 1.0
+
+
+Content-Type: multipart/alternative; boundary=&quot;B_ALT_688ea79313128&quot;
+
+This is a multi-part message in MIME format.
+Your email application may not support this format.
+
+--B_ALT_688ea79313128
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+✅ Permohonan Izin Penelitian Disetujui
+
+
+
+ Yth. MAHASISWA CONTOH 3,
+
+ Selamat! Dosen pembimbing telah menyetujui permohonan izin penelitian Anda.
+
+
+ Detail Penelitian:
+
+ Judul:PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN
+PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE
+ Tempat:SMP Mikael
+ Periode:2025-08-27 s/d 2025-09-17
+
+
+
+ Catatan Dosen:
+ Lanjutkan
+
+
+ Langkah Selanjutnya:
+ Staf akademik akan segera memproses surat izin penelitian Anda. Anda akan
+mendapat notifikasi lanjutan ketika surat sudah siap.
+
+
+
+
+ SIM Tugas Akhir STK Santo Yakobus
+
+
+--B_ALT_688ea79313128
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+=0A            &lt;div style=3D'font-family: Arial, sans-serif; max-width: 600=
+px; margin: 0 auto;'&gt;=0A                &lt;div style=3D'background-color: #28=
+a745; color: white; padding: 20px; text-align: center;'&gt;=0A                =
+    &lt;h2 style=3D'margin: 0;'&gt;=E2=9C=85 Permohonan Izin Penelitian Disetujui=
+&lt;/h2&gt;=0A                &lt;/div&gt;=0A                =0A                &lt;div st=
+yle=3D'padding: 20px; background-color: #f8f9fa;'&gt;=0A                    &lt;p=
+&gt;Yth. &lt;strong&gt;MAHASISWA CONTOH 3&lt;/strong&gt;,&lt;/p&gt;=0A                    =0A   =
+                 &lt;p&gt;Selamat! Dosen pembimbing telah menyetujui permohonan i=
+zin penelitian Anda.&lt;/p&gt;=0A                    =0A                    &lt;div =
+style=3D'background-color: white; padding: 15px; border-radius: 5px; margin=
+: 15px 0;'&gt;=0A                        &lt;h4 style=3D'color: #28a745; margin-t=
+op: 0;'&gt;Detail Penelitian:&lt;/h4&gt;=0A                        &lt;table style=3D'w=
+idth: 100%; font-size: 14px;'&gt;=0A                            &lt;tr&gt;&lt;td&gt;&lt;stron=
+g&gt;Judul:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF=
+ PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA =
+SMPN 2 MERAUKE&lt;/td&gt;&lt;/tr&gt;=0A                            &lt;tr&gt;&lt;td&gt;&lt;strong&gt;Temp=
+at:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;SMP Mikael&lt;/td&gt;&lt;/tr&gt;=0A                            &lt;tr=
+&gt;&lt;td&gt;&lt;strong&gt;Periode:&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;2025-08-27 s/d 2025-09-17&lt;/td&gt;&lt;/tr&gt;=
+=0A                        &lt;/table&gt;=0A                    &lt;/div&gt;=0A        =
+            &lt;div style=3D'background-color: #e3f2fd; padding: 15px; border-=
+left: 4px solid #2196f3; margin: 15px 0;'&gt;=0A                        &lt;h4 st=
+yle=3D'color: #1976d2; margin-top: 0;'&gt;Catatan Dosen:&lt;/h4&gt;=0A              =
+          &lt;p style=3D'margin: 0;'&gt;Lanjutkan&lt;/p&gt;=0A                    &lt;/div=
+&gt;=0A                    &lt;div style=3D'background-color: #fff3cd; padding: 1=
+5px; border-radius: 5px; border-left: 4px solid #ffc107;'&gt;=0A              =
+          &lt;p style=3D'margin: 0; color: #856404;'&gt;&lt;strong&gt;Langkah Selanjutn=
+ya:&lt;/strong&gt;&lt;/p&gt;=0A                        &lt;p style=3D'margin: 5px 0 0 0; c=
+olor: #856404;'&gt;Staf akademik akan segera memproses surat izin penelitian A=
+nda. Anda akan mendapat notifikasi lanjutan ketika surat sudah siap.&lt;/p&gt;=0A=
+                    &lt;/div&gt;=0A                &lt;/div&gt;=0A                =0A  =
+              &lt;div style=3D'background-color: #6c757d; color: white; paddin=
+g: 15px; text-align: center; font-size: 12px;'&gt;=0A                    &lt;p st=
+yle=3D'margin: 0;'&gt;SIM Tugas Akhir STK Santo Yakobus&lt;/p&gt;=0A                =
+&lt;/div&gt;=0A            &lt;/div&gt;
+
+--B_ALT_688ea79313128--</pre>
+ERROR - 2025-08-03 07:04:54 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-03 08:00:17 --> Severity: error --> Exception: syntax error, unexpected token "catch" /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_proposal.php 263
+ERROR - 2025-08-03 08:14:32 --> Query error: Unknown column 'status_staf' in 'field list' - Invalid query: SELECT `id`, `status`, `status_pembimbing`, `status_staf`
+FROM `permohonan_izin_penelitian`
+WHERE `proposal_mahasiswa_id` = '47'
+ERROR - 2025-08-03 08:14:32 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:16:06 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:16:06 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:16:09 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:16:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:16:29 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:16:29 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:16:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:16:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:16:49 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-03 08:17:12 --> Query error: Unknown column 'status_staf' in 'field list' - Invalid query: SELECT `id`, `status`, `status_pembimbing`, `status_staf`
+FROM `permohonan_izin_penelitian`
+WHERE `proposal_mahasiswa_id` = '47'
+ERROR - 2025-08-03 08:17:12 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:18:12 --> Severity: Warning --> Undefined variable $p /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 697
+ERROR - 2025-08-03 08:18:12 --> Severity: Warning --> Attempt to read property "id" on null /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 697
+ERROR - 2025-08-03 08:18:45 --> Query error: Unknown column 'status_staf' in 'field list' - Invalid query: SELECT `id`, `status`, `status_pembimbing`, `status_staf`
+FROM `permohonan_izin_penelitian`
+WHERE `proposal_mahasiswa_id` = '47'
+ERROR - 2025-08-03 08:18:45 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:20:13 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi_model::check_eligibility() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 769
+ERROR - 2025-08-03 08:20:13 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:20:55 --> Query error: Unknown column 'status_staf' in 'field list' - Invalid query: SELECT `id`, `status`, `status_pembimbing`, `status_staf`
+FROM `permohonan_izin_penelitian`
+WHERE `proposal_mahasiswa_id` = '47'
+ERROR - 2025-08-03 08:20:55 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:683) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 08:28:55 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/test_model_fixed
+ERROR - 2025-08-03 08:32:11 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_check_simplified_eligibility() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 177
+ERROR - 2025-08-03 08:39:13 --> Severity: Warning --> Undefined variable $is_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 15
+ERROR - 2025-08-03 08:41:16 --> Severity: Warning --> Undefined variable $is_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 15
+ERROR - 2025-08-03 08:43:04 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-03 08:43:04 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-03 08:44:18 --> Severity: Warning --> Undefined variable $is_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 15
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $can_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 134
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 186
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 186
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 208
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 208
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 282
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $can_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 454
+ERROR - 2025-08-03 09:18:45 --> Severity: Warning --> Undefined variable $can_resubmit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 468
+ERROR - 2025-08-03 09:18:54 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/view_file
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $can_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 134
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 186
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 186
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> foreach() argument must be of type array|object, null given /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 193
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 208
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 208
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 282
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $can_edit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 454
+ERROR - 2025-08-03 09:21:51 --> Severity: Warning --> Undefined variable $can_resubmit /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/detail.php 468
+ERROR - 2025-08-03 09:29:09 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:1078) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:29:09 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_get_seminar_detail() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1078
+ERROR - 2025-08-03 09:32:12 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:487) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:32:12 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 487
+ERROR - 2025-08-03 09:32:37 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:487) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:32:37 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 487
+ERROR - 2025-08-03 09:32:39 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:487) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:32:39 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 487
+ERROR - 2025-08-03 09:33:49 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php:487) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 09:33:49 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 487
+ERROR - 2025-08-03 09:35:28 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/view_file
+ERROR - 2025-08-03 09:35:33 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 103
+ERROR - 2025-08-03 09:36:28 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/view_file
+ERROR - 2025-08-03 09:38:17 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 103
+ERROR - 2025-08-03 09:38:36 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 103
+ERROR - 2025-08-03 09:44:52 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_safe_build_progress() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 178
+ERROR - 2025-08-03 09:45:09 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 103
+ERROR - 2025-08-03 10:24:05 --> Query error: Unknown column 'CASE WHEN ssm.status_pembimbing = "approved" THEN "Disetujui" WHEN ssm.status_pembimbing = "rejected" THEN "Ditolak" ELSE "Pending" END' in 'field list' - Invalid query: SELECT `ssm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `pm`.`judul`, `CASE WHEN ssm`.`status_pembimbing = "approved" THEN "Disetujui" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak" ELSE "Pending" END` as `status_rekomendasi`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+LEFT JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `ssm`.`reviewed_by_pembimbing` IS NOT NULL
+ORDER BY `ssm`.`tanggal_review_pembimbing` DESC
+ LIMIT 5
+ERROR - 2025-08-03 10:25:53 --> Query error: Unknown column 'CASE WHEN ssm.status_pembimbing = "approved" THEN "Disetujui" WHEN ssm.status_pembimbing = "rejected" THEN "Ditolak" ELSE "Pending" END' in 'field list' - Invalid query: SELECT `ssm`.*, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `pm`.`judul`, `CASE WHEN ssm`.`status_pembimbing = "approved" THEN "Disetujui" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak" ELSE "Pending" END` as `status_rekomendasi`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+LEFT JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `ssm`.`reviewed_by_pembimbing` IS NOT NULL
+ORDER BY `ssm`.`tanggal_review_pembimbing` DESC
+ LIMIT 5
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 10:47:26 --> Severity: Warning --> Undefined property: stdClass::$topik_bimbingan /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 402
+ERROR - 2025-08-03 11:46:35 --> Severity: error --> Exception: Call to undefined method CI_Loader::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 83
+ERROR - 2025-08-03 11:47:18 --> Severity: error --> Exception: Call to undefined method CI_Loader::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 83
+ERROR - 2025-08-03 11:47:20 --> Severity: error --> Exception: Call to undefined method CI_Loader::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 83
+ERROR - 2025-08-03 11:48:26 --> Severity: error --> Exception: Call to undefined method CI_Loader::_build_simple_progress() /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 83
+ERROR - 2025-08-03 12:12:51 --> Query error: Table 'stkp7133_skripsi.users' doesn't exist - Invalid query: SELECT `d`.*, `u`.`email`
+FROM `dosen` `d`
+LEFT JOIN `users` `u` ON `d`.`user_id` = `u`.`id`
+WHERE `u`.`level` = '3'
+ LIMIT 1
+ERROR - 2025-08-03 12:45:59 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php:991) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 12:45:59 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php 991
+ERROR - 2025-08-03 12:47:15 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php:991) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 12:47:15 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php 991
+ERROR - 2025-08-03 12:47:19 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php:991) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 12:47:19 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php 991
+ERROR - 2025-08-03 13:13:43 --> Query error: Unknown column 'pm.prodi_id' in 'where clause' - Invalid query: 
+                SELECT 
+                    ss.id,
+                    ss.proposal_id,
+                    ss.mahasiswa_id,
+                    ss.status,
+                    ss.current_step,
+                    ss.judul_skripsi,
+                    ss.file_skripsi,
+                    ss.status_pembimbing,
+                    ss.status_kaprodi,
+                    ss.tanggal_seminar,
+                    ss.jam_seminar,
+                    ss.tempat_seminar,
+                    ss.plagiarism_percentage,
+                    ss.created_at,
+                    m.nim,
+                    m.nama as nama_mahasiswa,
+                    m.email as email_mahasiswa,
+                    pm.judul as judul_proposal,
+                    pm.dosen_id as pembimbing_id,
+                    d.nama as nama_pembimbing,
+                    d.email as email_pembimbing,
+                    d1.nama as nama_penguji1,
+                    d2.nama as nama_penguji2
+                FROM seminar_skripsi_mahasiswa ss
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
+                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN dosen d ON pm.dosen_id = d.id
+                LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
+                LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
+                WHERE (pm.prodi_id = '10' OR pm.prodi_id IS NULL)
+                ORDER BY ss.created_at DESC
+                LIMIT 100
+            
+ERROR - 2025-08-03 13:15:26 --> Query error: Unknown column 'pm.prodi_id' in 'where clause' - Invalid query: 
+                SELECT 
+                    ss.id,
+                    ss.proposal_id,
+                    ss.mahasiswa_id,
+                    ss.status,
+                    ss.current_step,
+                    ss.judul_skripsi,
+                    ss.file_skripsi,
+                    ss.status_pembimbing,
+                    ss.status_kaprodi,
+                    ss.tanggal_seminar,
+                    ss.jam_seminar,
+                    ss.tempat_seminar,
+                    ss.plagiarism_percentage,
+                    ss.created_at,
+                    m.nim,
+                    m.nama as nama_mahasiswa,
+                    m.email as email_mahasiswa,
+                    pm.judul as judul_proposal,
+                    pm.dosen_id as pembimbing_id,
+                    d.nama as nama_pembimbing,
+                    d.email as email_pembimbing,
+                    d1.nama as nama_penguji1,
+                    d2.nama as nama_penguji2
+                FROM seminar_skripsi_mahasiswa ss
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
+                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN dosen d ON pm.dosen_id = d.id
+                LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
+                LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
+                WHERE (pm.prodi_id = '10' OR pm.prodi_id IS NULL)
+                ORDER BY ss.created_at DESC
+                LIMIT 100
+            
+ERROR - 2025-08-03 13:16:26 --> Query error: Unknown column 'pm.prodi_id' in 'where clause' - Invalid query: 
+                SELECT 
+                    ss.id,
+                    ss.proposal_id,
+                    ss.mahasiswa_id,
+                    ss.status,
+                    ss.current_step,
+                    ss.judul_skripsi,
+                    ss.file_skripsi,
+                    ss.status_pembimbing,
+                    ss.status_kaprodi,
+                    ss.tanggal_seminar,
+                    ss.jam_seminar,
+                    ss.tempat_seminar,
+                    ss.plagiarism_percentage,
+                    ss.created_at,
+                    m.nim,
+                    m.nama as nama_mahasiswa,
+                    m.email as email_mahasiswa,
+                    pm.judul as judul_proposal,
+                    pm.dosen_id as pembimbing_id,
+                    d.nama as nama_pembimbing,
+                    d.email as email_pembimbing,
+                    d1.nama as nama_penguji1,
+                    d2.nama as nama_penguji2
+                FROM seminar_skripsi_mahasiswa ss
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
+                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN dosen d ON pm.dosen_id = d.id
+                LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
+                LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
+                WHERE (pm.prodi_id = '10' OR pm.prodi_id IS NULL)
+                ORDER BY ss.created_at DESC
+                LIMIT 100
+            
+ERROR - 2025-08-03 13:19:09 --> Query error: Unknown column 'pm.prodi_id' in 'where clause' - Invalid query: 
+                SELECT 
+                    ss.id,
+                    ss.proposal_id,
+                    ss.mahasiswa_id,
+                    ss.status,
+                    ss.current_step,
+                    ss.judul_skripsi,
+                    ss.file_skripsi,
+                    ss.status_pembimbing,
+                    ss.status_kaprodi,
+                    ss.tanggal_seminar,
+                    ss.jam_seminar,
+                    ss.tempat_seminar,
+                    ss.plagiarism_percentage,
+                    ss.created_at,
+                    m.nim,
+                    m.nama as nama_mahasiswa,
+                    m.email as email_mahasiswa,
+                    pm.judul as judul_proposal,
+                    pm.dosen_id as pembimbing_id,
+                    d.nama as nama_pembimbing,
+                    d.email as email_pembimbing,
+                    d1.nama as nama_penguji1,
+                    d2.nama as nama_penguji2
+                FROM seminar_skripsi_mahasiswa ss
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
+                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN dosen d ON pm.dosen_id = d.id
+                LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
+                LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
+                WHERE (pm.prodi_id = '10' OR pm.prodi_id IS NULL)
+                ORDER BY ss.created_at DESC
+                LIMIT 100
+            
+ERROR - 2025-08-03 13:45:00 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "M...' at line 1 - Invalid query: SELECT `ssm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `d`.`nama` as `nama_pembimbing`, `CASE WHEN ssm`.`status_pembimbing = "pending" AND ssm`.`current_step = "pembimbing" THEN "Menunggu Review Dosen" WHEN ssm`.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "Menunggu Review Kaprodi" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NULL THEN "Menunggu Penjadwalan" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NOT NULL THEN "Terjadwal" WHEN ssm`.`status_kaprodi = "rejected" THEN "Ditolak" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak Dosen" ELSE "Status Tidak Dikenal" END` as `status_text`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+ORDER BY `ssm`.`created_at` DESC
+ LIMIT 20
+ERROR - 2025-08-03 13:59:03 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "M...' at line 1 - Invalid query: SELECT `ssm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `d`.`nama` as `nama_pembimbing`, `CASE WHEN ssm`.`status_pembimbing = "pending" AND ssm`.`current_step = "pembimbing" THEN "Menunggu Review Dosen" WHEN ssm`.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "Menunggu Review Kaprodi" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NULL THEN "Menunggu Penjadwalan" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NOT NULL THEN "Terjadwal" WHEN ssm`.`status_kaprodi = "rejected" THEN "Ditolak" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak Dosen" ELSE "Status Tidak Dikenal" END` as `status_text`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+ORDER BY `ssm`.`created_at` DESC
+ LIMIT 20
+ERROR - 2025-08-03 14:00:16 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "M...' at line 1 - Invalid query: SELECT `ssm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `d`.`nama` as `nama_pembimbing`, `CASE WHEN ssm`.`status_pembimbing = "pending" AND ssm`.`current_step = "pembimbing" THEN "Menunggu Review Dosen" WHEN ssm`.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "Menunggu Review Kaprodi" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NULL THEN "Menunggu Penjadwalan" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NOT NULL THEN "Terjadwal" WHEN ssm`.`status_kaprodi = "rejected" THEN "Ditolak" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak Dosen" ELSE "Status Tidak Dikenal" END` as `status_text`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+ORDER BY `ssm`.`created_at` DESC
+ LIMIT 20
+ERROR - 2025-08-03 14:04:40 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "M...' at line 1 - Invalid query: SELECT `ssm`.*, `pm`.`judul`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `d`.`nama` as `nama_pembimbing`, `CASE WHEN ssm`.`status_pembimbing = "pending" AND ssm`.`current_step = "pembimbing" THEN "Menunggu Review Dosen" WHEN ssm`.`status_pembimbing = "approved" AND ssm`.`status_kaprodi = "pending" THEN "Menunggu Review Kaprodi" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NULL THEN "Menunggu Penjadwalan" WHEN ssm`.`status_kaprodi = "approved" AND ssm`.`tanggal_seminar IS NOT NULL THEN "Terjadwal" WHEN ssm`.`status_kaprodi = "rejected" THEN "Ditolak" WHEN ssm`.`status_pembimbing = "rejected" THEN "Ditolak Dosen" ELSE "Status Tidak Dikenal" END` as `status_text`
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `m`.`prodi_id` = '10'
+ORDER BY `ssm`.`created_at` DESC
+ LIMIT 20
+ERROR - 2025-08-03 14:05:02 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_statistics_simple() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 70
+ERROR - 2025-08-03 14:05:29 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_statistics_simple() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 70
+ERROR - 2025-08-03 14:05:57 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_statistics_simple() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 70
+ERROR - 2025-08-03 14:36:08 --> Severity: error --> Exception: syntax error, unexpected token "*", expecting "function" or "const" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 536
+ERROR - 2025-08-03 14:36:20 --> Severity: error --> Exception: syntax error, unexpected token "*", expecting "function" or "const" /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 536
+ERROR - 2025-08-03 14:42:43 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:1152) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 14:42:43 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_get_pengajuan_perlu_review() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 1152
+ERROR - 2025-08-03 14:56:33 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_pengajuan_perlu_review_enhanced() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 72
+ERROR - 2025-08-03 15:18:12 --> Query error: Unknown column 'pm.prodi_id' in 'where clause' - Invalid query: 
+                SELECT 
+                    ss.id,
+                    ss.proposal_id,
+                    ss.mahasiswa_id,
+                    ss.status,
+                    ss.current_step,
+                    ss.judul_skripsi,
+                    ss.file_skripsi,
+                    ss.status_pembimbing,
+                    ss.status_kaprodi,
+                    ss.tanggal_seminar,
+                    ss.jam_seminar,
+                    ss.tempat_seminar,
+                    ss.plagiarism_percentage,
+                    ss.created_at,
+                    m.nim,
+                    m.nama as nama_mahasiswa,
+                    m.email as email_mahasiswa,
+                    pm.judul as judul_proposal,
+                    pm.dosen_id as pembimbing_id,
+                    d.nama as nama_pembimbing,
+                    d.email as email_pembimbing,
+                    d1.nama as nama_penguji1,
+                    d2.nama as nama_penguji2
+                FROM seminar_skripsi_mahasiswa ss
+                LEFT JOIN mahasiswa m ON ss.mahasiswa_id = m.id
+                LEFT JOIN proposal_mahasiswa pm ON ss.proposal_id = pm.id
+                LEFT JOIN dosen d ON pm.dosen_id = d.id
+                LEFT JOIN dosen d1 ON ss.dosen_penguji1_id = d1.id
+                LEFT JOIN dosen d2 ON ss.dosen_penguji2_id = d2.id
+                WHERE (pm.prodi_id = '10' OR pm.prodi_id IS NULL)
+                ORDER BY ss.created_at DESC
+                LIMIT 100
+            
+ERROR - 2025-08-03 15:19:04 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:19:40 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:19:55 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:19:56 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:20:16 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:26:24 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:29:08 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:34:23 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-03 15:46:54 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:66) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 15:46:54 --> Severity: Compile Error --> Cannot use try without catch or finally /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 66
+ERROR - 2025-08-03 15:48:07 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:66) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 15:48:07 --> Severity: Compile Error --> Cannot use try without catch or finally /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 66
+ERROR - 2025-08-03 16:45:10 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php:66) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-03 16:45:10 --> Severity: Compile Error --> Cannot use try without catch or finally /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 66
+ERROR - 2025-08-03 16:45:36 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_index_script() /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 92
+ERROR - 2025-08-03 17:24:43 --> 404 Page Not Found: kaprodi/Seminar_skripsi/download_file
+ERROR - 2025-08-03 17:24:49 --> 404 Page Not Found: kaprodi/Seminar_skripsi/view_file
+ERROR - 2025-08-03 17:45:46 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-08-03 18:00:46 --> Severity: error --> Exception: syntax error, unexpected token "private", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 11
+ERROR - 2025-08-03 18:00:57 --> Severity: error --> Exception: syntax error, unexpected token "private", expecting end of file /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 11

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 05, 2025 at 03:36 PM
+-- Generation Time: Aug 05, 2025 at 04:04 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -741,7 +741,10 @@ INSERT INTO `log_publikasi` (`id`, `publikasi_id`, `user_id`, `user_role`, `user
 (17, 3, 46, 'mahasiswa', 'Mahasiswa Contoh 3', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '36.90.146.211', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 13:25:37'),
 (18, 2, 45, '', 'System Auto', 'status_changed', 'Status berubah dari draft ke submitted', NULL, NULL, NULL, NULL, '2025-08-05 14:50:29'),
 (19, 2, 45, 'mahasiswa', 'Mahasiswa Contoh 2', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi', NULL, NULL, '2404:c0:47f4::1ba9:4893', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '2025-08-05 14:50:29'),
-(20, 3, 46, '', 'System Auto', 'status_changed', 'Status berubah dari submitted ke review_staf', NULL, NULL, NULL, NULL, '2025-08-05 15:34:13');
+(20, 3, 46, '', 'System Auto', 'status_changed', 'Status berubah dari submitted ke review_staf', NULL, NULL, NULL, NULL, '2025-08-05 15:34:13'),
+(21, 3, 25, 'dosen', 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', 'approved', 'Review publikasi: approved. Komentar: Saya merekomendasikan publikasi ini untuk latihan saja ya', NULL, NULL, '2404:c0:47f4::1bc1:78ac', NULL, '2025-08-05 15:43:01'),
+(22, 2, 45, '', 'System Auto', 'status_changed', 'Status berubah dari submitted ke review_staf', NULL, NULL, NULL, NULL, '2025-08-05 15:59:49'),
+(23, 2, 25, 'dosen', 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', 'approved', 'Review publikasi: approved. Komentar: Quick approve', NULL, NULL, '2404:c0:47f4::1bc1:78ac', NULL, '2025-08-05 15:59:55');
 
 -- --------------------------------------------------------
 
@@ -1902,8 +1905,8 @@ CREATE TABLE `publikasi_tugas_akhir` (
 --
 
 INSERT INTO `publikasi_tugas_akhir` (`id`, `proposal_mahasiswa_id`, `mahasiswa_id`, `nama_mahasiswa`, `nim`, `program_studi`, `judul_skripsi_final`, `dosen_pembimbing_id`, `nama_dosen_pembimbing`, `tanggal_ujian_skripsi`, `file_surat_revisi`, `file_skripsi_final`, `file_surat_perpustakaan`, `link_repository`, `status`, `status_pembimbing`, `status_staf`, `keterangan_mahasiswa`, `komentar_pembimbing`, `komentar_staf`, `tanggal_pengajuan`, `tanggal_review_pembimbing`, `tanggal_validasi_staf`, `tanggal_selesai`, `validated_by_staf_id`, `validated_by_staf_name`, `created_at`, `updated_at`) VALUES
-(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-2017.pdf', 'submitted', 'pending', 'pending', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', NULL, NULL, '2025-08-05 14:50:29', NULL, NULL, NULL, NULL, NULL, '2025-08-05 11:16:50', '2025-08-05 14:50:29'),
-(3, 46, 46, 'Mahasiswa Contoh 3', '12345677', 'Pendidikan Keagamaan Katolik', 'PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805130952_46_6891a0307cdc4.pdf', 'SKRIPSI_FINAL_20250805130952_46_6891a0307cf34.pdf', 'SURAT_PERPUS_20250805130952_46_6891a0307c980.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-2017.pdf', 'review_staf', 'approved', 'pending', 'tes saja', 'Saya merekomendasikan publikasi ini untuk latihan saja ya', NULL, '2025-08-05 13:25:37', '2025-08-05 15:34:13', NULL, NULL, NULL, NULL, '2025-08-05 13:09:52', '2025-08-05 15:34:13');
+(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-2017.pdf', 'review_staf', 'approved', 'pending', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Disetujui melalui quick approve', NULL, '2025-08-05 14:50:29', '2025-08-05 15:59:49', NULL, NULL, NULL, NULL, '2025-08-05 11:16:50', '2025-08-05 15:59:49'),
+(3, 46, 46, 'Mahasiswa Contoh 3', '12345677', 'Pendidikan Keagamaan Katolik', 'PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805130952_46_6891a0307cdc4.pdf', 'SKRIPSI_FINAL_20250805130952_46_6891a0307cf34.pdf', 'SURAT_PERPUS_20250805130952_46_6891a0307c980.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-2017.pdf', 'review_staf', 'approved', 'pending', 'tes saja', 'Saya merekomendasikan publikasi ini untuk latihan saja ya', NULL, '2025-08-05 13:25:37', '2025-08-05 15:42:50', NULL, NULL, NULL, NULL, '2025-08-05 13:09:52', '2025-08-05 15:42:50');
 
 --
 -- Triggers `publikasi_tugas_akhir`
@@ -2458,7 +2461,8 @@ INSERT INTO `staf_aktivitas` (`id`, `staf_id`, `aktivitas`, `mahasiswa_id`, `pro
 (30, 30, '', NULL, 44, 'Cetak surat izin penelitian untuk Mahasiswa Contoh', NULL, '2025-08-01 15:41:00'),
 (31, 30, '', NULL, 44, 'Upload surat izin penelitian untuk Mahasiswa Contoh', NULL, '2025-08-01 16:07:27'),
 (32, 30, '', NULL, 44, 'Cetak surat izin penelitian untuk Mahasiswa Contoh', NULL, '2025-08-01 16:07:35'),
-(33, 29, '', NULL, 47, 'Upload surat izin penelitian untuk Agus Bumagi', NULL, '2025-08-03 08:16:40');
+(33, 29, '', NULL, 47, 'Upload surat izin penelitian untuk Agus Bumagi', NULL, '2025-08-03 08:16:40'),
+(34, 29, '', 47, 47, 'Melihat detail bimbingan mahasiswa Agus Bumagi', NULL, '2025-08-05 16:01:14');
 
 -- --------------------------------------------------------
 
@@ -3036,7 +3040,7 @@ ALTER TABLE `log_penelitian`
 -- AUTO_INCREMENT for table `log_publikasi`
 --
 ALTER TABLE `log_publikasi`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `mahasiswa`
@@ -3138,7 +3142,7 @@ ALTER TABLE `skripsi`
 -- AUTO_INCREMENT for table `staf_aktivitas`
 --
 ALTER TABLE `staf_aktivitas`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- Constraints for dumped tables

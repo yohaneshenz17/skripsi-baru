@@ -96,28 +96,43 @@ class Publikasi extends CI_Controller {
      * Riwayat detail review pengajuan mahasiswa
      */
     public function riwayat($mahasiswa_id = null) {
+        // Debug logging untuk troubleshooting
+        log_message('debug', 'Riwayat method called - mahasiswa_id: ' . $mahasiswa_id . ', dosen_id: ' . $this->dosen_id);
+        
         if (!$mahasiswa_id) {
+            $this->session->set_flashdata('error', 'ID mahasiswa tidak valid.');
             redirect('dosen/publikasi');
+            return;
         }
         
-        // Validasi bahwa mahasiswa adalah bimbingan dosen
-        $is_bimbingan = $this->_is_mahasiswa_bimbingan($mahasiswa_id);
+        // ✅ FIX: Validasi ownership berdasarkan publikasi, bukan proposal
+        $is_bimbingan = $this->_is_mahasiswa_bimbingan_publikasi($mahasiswa_id);
         
         if (!$is_bimbingan) {
-            $this->session->set_flashdata('error', 'Mahasiswa bukan bimbingan Anda.');
+            log_message('error', 'Ownership validation failed - mahasiswa_id: ' . $mahasiswa_id . ', dosen_id: ' . $this->dosen_id);
+            $this->session->set_flashdata('error', 'Mahasiswa bukan bimbingan Anda atau tidak ada publikasi.');
             redirect('dosen/publikasi');
+            return;
+        }
+        
+        // Get data mahasiswa
+        $mahasiswa = $this->_get_mahasiswa_data($mahasiswa_id);
+        if (!$mahasiswa) {
+            $this->session->set_flashdata('error', 'Data mahasiswa tidak ditemukan.');
+            redirect('dosen/publikasi');
+            return;
         }
         
         // Get riwayat lengkap publikasi mahasiswa
         $view_data = [
-            'mahasiswa' => $this->_get_mahasiswa_data($mahasiswa_id),
+            'mahasiswa' => $mahasiswa,
             'riwayat_publikasi' => $this->_get_riwayat_publikasi_mahasiswa($mahasiswa_id),
             'detail_reviews' => $this->_get_detail_reviews($mahasiswa_id)
         ];
         
         // Template data untuk dosen.php
         $data = [
-            'title' => 'Riwayat Review Publikasi - ' . $view_data['mahasiswa']->nama,
+            'title' => 'Riwayat Review Publikasi - ' . $mahasiswa->nama,
             'content' => $this->load->view('dosen/publikasi/riwayat', $view_data, TRUE),
             'script' => ''
         ];
@@ -226,6 +241,28 @@ class Publikasi extends CI_Controller {
         }
     }
     
+    /**
+     * ✅ NEW METHOD: Validasi ownership berdasarkan tabel publikasi_tugas_akhir
+     * Lebih tepat karena langsung cek di tabel publikasi
+     */
+    private function _is_mahasiswa_bimbingan_publikasi($mahasiswa_id) {
+        try {
+            // Cek apakah mahasiswa memiliki publikasi dengan dosen ini sebagai pembimbing
+            $this->db->where('mahasiswa_id', $mahasiswa_id);
+            $this->db->where('dosen_pembimbing_id', $this->dosen_id);
+            $count = $this->db->count_all_results('publikasi_tugas_akhir');
+            
+            log_message('debug', 'Ownership check - Count publikasi: ' . $count);
+            
+            return $count > 0;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error checking ownership publikasi: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
     /**
      * Get statistik untuk dashboard dosen
      */
@@ -742,5 +779,51 @@ class Publikasi extends CI_Controller {
             });
         });
         </script>';
+    }
+    
+    // ================================================================
+    // BONUS: METHOD UNTUK CEK LOG AKTIVITAS (Optional)
+    // ================================================================
+    
+    /**
+     * BONUS: Method untuk get log aktivitas publikasi
+     * Bisa digunakan untuk menampilkan riwayat aktivitas di view
+     */
+    private function _get_publikasi_logs($publikasi_id) {
+        try {
+            $this->db->select('*');
+            $this->db->from('log_publikasi');
+            $this->db->where('publikasi_id', $publikasi_id);
+            $this->db->order_by('created_at', 'DESC');
+            
+            return $this->db->get()->result();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting publikasi logs: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * BONUS: Method untuk get aktivitas dosen
+     * Bisa digunakan untuk dashboard atau laporan
+     */
+    private function _get_dosen_activities($dosen_id, $limit = 10) {
+        try {
+            $this->db->select('lp.*, pta.status, m.nama as nama_mahasiswa, m.nim');
+            $this->db->from('log_publikasi lp');
+            $this->db->join('publikasi_tugas_akhir pta', 'lp.publikasi_id = pta.id');
+            $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id');
+            $this->db->where('lp.user_id', $dosen_id);
+            $this->db->where('lp.user_role', 'dosen');
+            $this->db->order_by('lp.created_at', 'DESC');
+            $this->db->limit($limit);
+            
+            return $this->db->get()->result();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting dosen activities: ' . $e->getMessage());
+            return [];
+        }
     }
 }

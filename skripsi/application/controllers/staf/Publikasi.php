@@ -196,12 +196,23 @@ class Publikasi extends CI_Controller {
      */
     private function _get_pengajuan_perlu_validasi() {
         try {
-            // Query menggunakan view publikasi_mahasiswa_v
-            $this->db->select('*');
-            $this->db->from('publikasi_mahasiswa_v');
-            $this->db->where('status_pembimbing', 'approved');
-            $this->db->where('status_staf', 'pending');
-            $this->db->order_by('tanggal_review_pembimbing', 'ASC');
+            // Query dengan join manual untuk compatibility dengan database structure
+            $this->db->select('
+                pta.*,
+                m.email as email_mahasiswa,
+                m.nomor_telepon,
+                pm.workflow_status,
+                pm.judul as judul_proposal_awal,
+                d.nama as nama_pembimbing_lengkap,
+                d.email as email_pembimbing
+            ');
+            $this->db->from('publikasi_tugas_akhir pta');
+            $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id', 'left');
+            $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id', 'left');
+            $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id', 'left');
+            $this->db->where('pta.status_pembimbing', 'approved');
+            $this->db->where('pta.status_staf', 'pending');
+            $this->db->order_by('pta.tanggal_review_pembimbing', 'ASC');
             
             return $this->db->get()->result();
             
@@ -216,11 +227,23 @@ class Publikasi extends CI_Controller {
      */
     private function _get_riwayat_validasi() {
         try {
-            $this->db->select('*');
-            $this->db->from('publikasi_mahasiswa_v');
-            $this->db->where('validated_by_staf_id', $this->staf_id);
-            $this->db->where('status_staf !=', 'pending');
-            $this->db->order_by('tanggal_validasi_staf', 'DESC');
+            // Query langsung ke tabel publikasi_tugas_akhir karena view tidak include validated_by_staf_id
+            $this->db->select('
+                pta.*,
+                m.email as email_mahasiswa,
+                m.nomor_telepon,
+                pm.workflow_status,
+                pm.judul as judul_proposal_awal,
+                d.nama as nama_pembimbing_lengkap,
+                d.email as email_pembimbing
+            ');
+            $this->db->from('publikasi_tugas_akhir pta');
+            $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id', 'left');
+            $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id', 'left');
+            $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id', 'left');
+            $this->db->where('pta.validated_by_staf_id', $this->staf_id);
+            $this->db->where('pta.status_staf !=', 'pending');
+            $this->db->order_by('pta.tanggal_validasi_staf', 'DESC');
             $this->db->limit(10);
             
             return $this->db->get()->result();
@@ -243,24 +266,37 @@ class Publikasi extends CI_Controller {
         ];
         
         try {
-            // Menunggu validasi
+            // Menunggu validasi - menggunakan tabel publikasi_tugas_akhir langsung
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('publikasi_tugas_akhir');
             $this->db->where('status_pembimbing', 'approved');
             $this->db->where('status_staf', 'pending');
-            $stats['menunggu_validasi'] = $this->db->count_all_results('publikasi_tugas_akhir');
+            $result = $this->db->get()->row();
+            $stats['menunggu_validasi'] = $result ? $result->total : 0;
             
             // Sudah divalidasi oleh staf ini
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('publikasi_tugas_akhir');
             $this->db->where('validated_by_staf_id', $this->staf_id);
             $this->db->where('status_staf !=', 'pending');
-            $stats['sudah_divalidasi'] = $this->db->count_all_results('publikasi_tugas_akhir');
+            $result = $this->db->get()->row();
+            $stats['sudah_divalidasi'] = $result ? $result->total : 0;
             
             // Publikasi selesai
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('publikasi_tugas_akhir');
             $this->db->where('status', 'completed');
-            $stats['publikasi_selesai'] = $this->db->count_all_results('publikasi_tugas_akhir');
+            $result = $this->db->get()->row();
+            $stats['publikasi_selesai'] = $result ? $result->total : 0;
             
-            // Total bulan ini
+            // Total bulan ini - yang divalidasi oleh staf ini
+            $this->db->select('COUNT(*) as total');
+            $this->db->from('publikasi_tugas_akhir');
+            $this->db->where('validated_by_staf_id', $this->staf_id);
             $this->db->where('MONTH(tanggal_validasi_staf)', date('n'));
             $this->db->where('YEAR(tanggal_validasi_staf)', date('Y'));
-            $stats['total_bulan_ini'] = $this->db->count_all_results('publikasi_tugas_akhir');
+            $result = $this->db->get()->row();
+            $stats['total_bulan_ini'] = $result ? $result->total : 0;
             
         } catch (Exception $e) {
             log_message('error', 'Error getting statistik staf: ' . $e->getMessage());
@@ -274,9 +310,38 @@ class Publikasi extends CI_Controller {
      */
     private function _get_publikasi_detail($publikasi_id) {
         try {
-            $this->db->select('*');
-            $this->db->from('publikasi_mahasiswa_v');
-            $this->db->where('id', $publikasi_id);
+            // Query dengan join manual untuk memastikan semua field tersedia
+            $this->db->select('
+                pta.*,
+                m.email as email_mahasiswa,
+                m.nomor_telepon,
+                pm.workflow_status,
+                pm.judul as judul_proposal_awal,
+                d.nama as nama_pembimbing_lengkap,
+                d.email as email_pembimbing,
+                CASE pta.status 
+                    WHEN "draft" THEN "Draft - Belum disubmit"
+                    WHEN "submitted" THEN "Menunggu review pembimbing" 
+                    WHEN "review_pembimbing" THEN "Sedang direview pembimbing"
+                    WHEN "review_staf" THEN "Menunggu validasi staf"
+                    WHEN "completed" THEN "Publikasi selesai"
+                    WHEN "rejected" THEN "Ditolak"
+                    ELSE "Status tidak dikenali"
+                END as status_description,
+                CASE 
+                    WHEN pta.status = "completed" THEN 100
+                    WHEN pta.status = "review_staf" THEN 80 
+                    WHEN pta.status = "review_pembimbing" THEN 60
+                    WHEN pta.status = "submitted" THEN 40
+                    WHEN pta.status = "draft" THEN 20
+                    ELSE 0 
+                END as progress_percentage
+            ');
+            $this->db->from('publikasi_tugas_akhir pta');
+            $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id', 'left');
+            $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id', 'left'); 
+            $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id', 'left');
+            $this->db->where('pta.id', $publikasi_id);
             
             return $this->db->get()->row();
             

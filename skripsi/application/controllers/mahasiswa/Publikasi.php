@@ -183,36 +183,51 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Submit pengajuan ke dosen pembimbing - LOGIC TIDAK DIUBAH
+     * Submit pengajuan ke dosen pembimbing - FIXED VERSION
      */
     public function submit($publikasi_id) {
         $publikasi = $this->publikasi->get_by_id($publikasi_id, $this->mahasiswa_id);
         
         if (!$publikasi || $publikasi->mahasiswa_id != $this->mahasiswa_id) {
             $this->session->set_flashdata('error', 'Data tidak ditemukan.');
-            redirect('mahasiswa/publikasi/tracking/' . $publikasi_id);
+            redirect('mahasiswa/publikasi'); // FIX: Redirect ke index, bukan tracking
             return;
         }
         
         if ($publikasi->status !== 'draft') {
             $this->session->set_flashdata('error', 'Pengajuan sudah disubmit sebelumnya.');
-            redirect('mahasiswa/publikasi/tracking/' . $publikasi_id);
+            redirect('mahasiswa/publikasi'); // FIX: Redirect ke index
             return;
         }
         
-        // Update status ke submitted - LOGIC TIDAK DIUBAH
+        // Update status ke submitted
         $result = $this->publikasi->submit_pengajuan($publikasi_id);
         
         if ($result['success']) {
-            $this->session->set_flashdata('success', 'Pengajuan berhasil disubmit ke dosen pembimbing.');
+            // FIX: Set flashdata dengan info workflow step
+            $this->session->set_flashdata('success', 
+                'Pengajuan berhasil disubmit ke dosen pembimbing. ' .
+                'Status: Menunggu review dosen (Step 5/9).'
+            );
             
-            // Send notification ke dosen pembimbing
-            $this->_send_notification_to_dosen($publikasi);
+            // FIX: Send notification ke dosen pembimbing dengan error handling
+            try {
+                $this->_send_notification_to_dosen($publikasi);
+                log_message('info', "Email notification sent for publikasi ID: {$publikasi_id}");
+            } catch (Exception $e) {
+                log_message('error', "Failed to send email notification: " . $e->getMessage());
+                // Jangan gagalkan proses jika email gagal
+            }
+            
+            // FIX: Log activity untuk tracking
+            $this->_log_publikasi_activity($publikasi_id, 'submit_pengajuan', 'Mahasiswa submit pengajuan publikasi');
+            
         } else {
             $this->session->set_flashdata('error', $result['message']);
         }
         
-        redirect('mahasiswa/publikasi/tracking/' . $publikasi_id);;
+        // FIX: Redirect ke dashboard publikasi (index) dengan progress workflow
+        redirect('mahasiswa/publikasi');
     }
 
     /**
@@ -621,48 +636,85 @@ private function _get_publikasi_detail($publikasi_id, $mahasiswa_id = null) {
     }
 
     /**
-     * ✅ REPLACE: Method utama untuk kirim notifikasi publikasi - NAMA TABEL DIPERBAIKI
+     * FIX: Method untuk send notification dengan error handling yang lebih baik
      */
     private function _send_notification_to_dosen($publikasi) {
-        try {
-            // Get data lengkap untuk notifikasi - GUNAKAN NAMA TABEL YANG BENAR
-            $data = $this->db->select('
-                    pta.*, 
-                    pm.judul as judul_proposal,
-                    pm.dosen_id as pembimbing_id,
-                    m.nama as nama_mahasiswa,
-                    m.nim,
-                    m.email as email_mahasiswa,
-                    d.email as email_pembimbing,
-                    d.nama as nama_pembimbing
-                ')
-                ->from('publikasi_tugas_akhir pta')  // ← PERBAIKAN: nama tabel yang benar
-                ->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id')
-                ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
-                ->join('dosen d', 'pm.dosen_id = d.id')
-                ->where('pta.id', $publikasi->id)
-                ->get()->row();
-                
-            if (!$data || !$data->email_pembimbing) {
-                log_message('error', 'Data publikasi atau email dosen tidak ditemukan untuk notifikasi');
-                return false;
-            }
+        // Load email library
+        $this->load->library('email');
+        
+        // Get dosen email
+        $this->load->model('dosen_model');
+        $dosen = $this->dosen_model->get_by_id($publikasi->dosen_pembimbing_id);
+        
+        if (!$dosen || !$dosen->email) {
+            log_message('error', "Dosen email not found for publikasi ID: {$publikasi->id}");
+            return false;
+        }
+        
+        // Configure email
+        $config = array(
+            'protocol' => 'smtp',
+            'smtp_host' => 'ssl://smtp.gmail.com', // Sesuaikan dengan server email Anda
+            'smtp_port' => 465,
+            'smtp_user' => $this->config->item('smtp_user'), // Set di config
+            'smtp_pass' => $this->config->item('smtp_pass'), // Set di config
+            'mailtype' => 'html',
+            'charset' => 'utf-8'
+        );
+        
+        $this->email->initialize($config);
+        
+        // Email content
+        $subject = "[SIM-TA] Pengajuan Publikasi Baru - {$publikasi->nama_mahasiswa}";
+        
+        $message = "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <h2 style='color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>
+                📋 Pengajuan Publikasi Tugas Akhir
+            </h2>
             
-            // Tentukan apakah ini pengajuan baru atau pengajuan ulang
-            $is_resubmission = $this->_is_resubmission_publikasi($publikasi->proposal_mahasiswa_id);
+            <div style='background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;'>
+                <h3>Detail Mahasiswa:</h3>
+                <table style='width: 100%; border-collapse: collapse;'>
+                    <tr><td><strong>Nama:</strong></td><td>{$publikasi->nama_mahasiswa}</td></tr>
+                    <tr><td><strong>NIM:</strong></td><td>{$publikasi->nim}</td></tr>
+                    <tr><td><strong>Program Studi:</strong></td><td>{$publikasi->program_studi}</td></tr>
+                    <tr><td><strong>Judul Skripsi:</strong></td><td>{$publikasi->judul_skripsi_final}</td></tr>
+                    <tr><td><strong>Tanggal Ujian:</strong></td><td>" . date('d/m/Y', strtotime($publikasi->tanggal_ujian_skripsi)) . "</td></tr>
+                </table>
+            </div>
             
-            // Kirim email ke dosen pembimbing
-            $this->_kirim_email_publikasi_ke_dosen($data, $is_resubmission);
+            <div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                <p><strong>📌 Action Required:</strong></p>
+                <p>Silakan login ke sistem untuk melakukan review dan validasi pengajuan publikasi mahasiswa.</p>
+            </div>
             
-            // Kirim email konfirmasi ke mahasiswa
-            $this->_kirim_email_konfirmasi_publikasi_mahasiswa($data, $is_resubmission);
+            <div style='text-align: center; margin: 30px 0;'>
+                <a href='" . base_url('dosen/publikasi') . "' 
+                   style='background-color: #3498db; color: white; padding: 12px 25px; 
+                          text-decoration: none; border-radius: 5px; display: inline-block;'>
+                    🔗 Login ke Sistem SIM-TA
+                </a>
+            </div>
             
-            log_message('info', "Publikasi notification sent - ID: {$publikasi->id}, Proposal: {$publikasi->proposal_mahasiswa_id}");
-            
+            <hr style='margin: 30px 0;'>
+            <p style='font-size: 12px; color: #7f8c8d; text-align: center;'>
+                Email ini dikirim otomatis dari Sistem Informasi Manajemen Tugas Akhir<br>
+                STK Santo Yakobus. Mohon tidak membalas email ini.
+            </p>
+        </div>";
+        
+        $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
+        $this->email->to($dosen->email);
+        $this->email->subject($subject);
+        $this->email->message($message);
+        
+        // Send email with error handling
+        if ($this->email->send()) {
+            log_message('info', "Email sent successfully to: {$dosen->email}");
             return true;
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error sending publikasi notification: ' . $e->getMessage());
+        } else {
+            log_message('error', "Email send failed: " . $this->email->print_debugger());
             return false;
         }
     }
@@ -879,6 +931,23 @@ private function _get_publikasi_detail($publikasi_id, $mahasiswa_id = null) {
     private function _get_mahasiswa_data() {
         // Get data mahasiswa untuk surat
         return $this->db->get_where('mahasiswa', ['id' => $this->mahasiswa_id])->row();
+    }
+
+    /**
+     * FIX: Method untuk log activity
+     */
+    private function _log_publikasi_activity($publikasi_id, $action, $description) {
+        $data = [
+            'publikasi_id' => $publikasi_id,
+            'user_id' => $this->mahasiswa_id,
+            'user_type' => 'mahasiswa',
+            'action' => $action,
+            'description' => $description,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Insert ke tabel log_publikasi
+        $this->db->insert('log_publikasi', $data);
     }
 
     /**

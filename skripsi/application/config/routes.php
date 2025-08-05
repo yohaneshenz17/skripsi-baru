@@ -134,7 +134,6 @@ $route['mahasiswa/publikasi/ajukan/(:num)'] = 'mahasiswa/publikasi/ajukan/$1';
 $route['mahasiswa/publikasi/edit/(:num)'] = 'mahasiswa/publikasi/edit/$1';
 
 // Detail dan Tracking
-$route['mahasiswa/publikasi/detail/(:num)'] = 'mahasiswa/publikasi/detail/$1';
 $route['mahasiswa/publikasi/tracking/(:num)'] = 'mahasiswa/publikasi/tracking/$1';
 
 // Download Surat Keterangan

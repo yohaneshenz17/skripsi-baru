@@ -24,6 +24,13 @@ $route['admin'] = 'admin/dashboard';
 $route['lihat-selengkapnya/(:num)'] = 'admin/dosen/lihat_selengkapnya/$1';
 $route['admin/(:any)'] = 'admin/$1';
 
+// Admin Publikasi Routes
+$route['admin/publikasi'] = 'admin/publikasi/index';
+$route['admin/publikasi/detail/(:num)'] = 'admin/publikasi/detail/$1';
+$route['admin/publikasi/override/(:num)'] = 'admin/publikasi/override/$1';
+$route['admin/publikasi/analytics'] = 'admin/publikasi/analytics';
+$route['admin/publikasi/laporan'] = 'admin/publikasi/laporan';
+
 // Dosen routes
 $route['dosen'] = 'dosen/dashboard';
 $route['dosen/(:any)'] = 'dosen/$1';
@@ -110,6 +117,37 @@ $route['mahasiswa/skripsi'] = 'mahasiswa/seminar_skripsi/index';
 $route['mahasiswa/skripsi/index'] = 'mahasiswa/seminar_skripsi/index';
 $route['mahasiswa/skripsi/detail/(:num)'] = 'mahasiswa/seminar_skripsi/detail/$1';
 $route['mahasiswa/skripsi/ajukan/(:num)'] = 'mahasiswa/seminar_skripsi/ajukan/$1';
+
+// =================================================================
+// MAHASISWA ROUTES - Phase 6: PUBLIKASI (TAMBAHAN BARU)
+// =================================================================
+
+// Dashboard Publikasi
+$route['mahasiswa/publikasi'] = 'mahasiswa/publikasi/index';
+$route['mahasiswa/publikasi/index'] = 'mahasiswa/publikasi/index';
+
+// Form Pengajuan
+$route['mahasiswa/publikasi/ajukan'] = 'mahasiswa/publikasi/ajukan';
+$route['mahasiswa/publikasi/ajukan/(:num)'] = 'mahasiswa/publikasi/ajukan/$1';
+
+// Edit Pengajuan (untuk yang ditolak)
+$route['mahasiswa/publikasi/edit/(:num)'] = 'mahasiswa/publikasi/edit/$1';
+
+// Detail dan Tracking
+$route['mahasiswa/publikasi/detail/(:num)'] = 'mahasiswa/publikasi/detail/$1';
+$route['mahasiswa/publikasi/tracking/(:num)'] = 'mahasiswa/publikasi/tracking/$1';
+
+// Download Surat Keterangan
+$route['mahasiswa/publikasi/download_surat/(:num)'] = 'mahasiswa/publikasi/download_surat/$1';
+
+// File Operations
+$route['mahasiswa/publikasi/download_file/(:any)/(:num)'] = 'mahasiswa/publikasi/download_file/$1/$2';
+
+// AJAX Validation
+$route['mahasiswa/publikasi/check_syarat/(:num)'] = 'mahasiswa/publikasi/check_syarat/$1';
+
+// Alias konsistensi URL
+$route['mahasiswa/publikasi-tugas-akhir'] = 'mahasiswa/publikasi/index';
 
 // =====================================================
 //      GENERIC ROUTING (HARUS DI BAWAH ROUTING SPESIFIK)
@@ -212,6 +250,11 @@ $route['kaprodi/publikasi/(:any)'] = 'kaprodi/publikasi/$1';
 $route['kaprodi/publikasi/detail/(:num)'] = 'kaprodi/publikasi/detail/$1';
 $route['kaprodi/publikasi/validasi'] = 'kaprodi/publikasi/validasi';
 $route['kaprodi/publikasi/input_repository'] = 'kaprodi/publikasi/input_repository';
+// Tambahan routes kaprodi publikasi yang missing:
+$route['kaprodi/publikasi/laporan'] = 'kaprodi/publikasi/laporan';
+$route['kaprodi/publikasi/override/(:num)'] = 'kaprodi/publikasi/override/$1';
+$route['kaprodi/publikasi/statistik'] = 'kaprodi/publikasi/statistik';
+$route['kaprodi/publikasi/export_laporan'] = 'kaprodi/publikasi/export_laporan';
 
 // 7. Daftar Mahasiswa
 $route['kaprodi/mahasiswa'] = 'kaprodi/kaprodi/mahasiswa';                  // Daftar mahasiswa
@@ -382,14 +425,27 @@ $route['dosen/seminar_skripsi/berita_acara/(:num)'] = 'dosen/seminar_skripsi/ber
 $route['dosen/seminar_skripsi/view_surat_penelitian/(:num)'] = 'dosen/seminar_skripsi/view_surat_penelitian/$1';
 $route['dosen/seminar-skripsi/view-surat-penelitian/(:num)'] = 'dosen/seminar_skripsi/view_surat_penelitian/$1';
 
-// =====================================================
-//      PHASE 6: PUBLIKASI
-// =====================================================
+// =================================================================
+// DOSEN ROUTES - Phase 6: PUBLIKASI (PERBAIKAN)  
+// =================================================================
 
-// Publikasi Tugas Akhir
-$route['dosen/publikasi'] = 'dosen/publikasi';
+// Dashboard Review
+$route['dosen/publikasi'] = 'dosen/publikasi/index';
+$route['dosen/publikasi/index'] = 'dosen/publikasi/index';
+
+// Review dan Detail
+$route['dosen/publikasi/review/(:num)'] = 'dosen/publikasi/review/$1';
 $route['dosen/publikasi/detail/(:num)'] = 'dosen/publikasi/detail/$1';
-$route['dosen/publikasi/rekomendasi'] = 'dosen/publikasi/rekomendasi';
+
+// Action Approve/Reject
+$route['dosen/publikasi/approve/(:num)'] = 'dosen/publikasi/approve/$1';
+$route['dosen/publikasi/reject/(:num)'] = 'dosen/publikasi/reject/$1';
+
+// File Operations
+$route['dosen/publikasi/download_file/(:any)/(:num)'] = 'dosen/publikasi/download_file/$1/$2';
+
+// Laporan
+$route['dosen/publikasi/laporan'] = 'dosen/publikasi/laporan';
 
 // =====================================================
 //      PROFIL DAN UTILITAS
@@ -515,6 +571,9 @@ $route['staf/publikasi/detail/(:num)'] = 'staf/publikasi/detail/$1';
 $route['staf/publikasi/validasi'] = 'staf/publikasi/validasi';
 $route['staf/publikasi/input_repository'] = 'staf/publikasi/input_repository';
 $route['staf/publikasi/export'] = 'staf/publikasi/export';
+$route['staf/publikasi/selesaikan/(:num)'] = 'staf/publikasi/selesaikan/$1';
+$route['staf/publikasi/input_repository/(:num)'] = 'staf/publikasi/input_repository/$1';
+$route['staf/publikasi/download_file/(:any)/(:num)'] = 'staf/publikasi/download_file/$1/$2';
 
 // =====================================================
 //      MENU STAF - MANAJEMEN DATA
@@ -564,6 +623,13 @@ $route['api/staf/seminar_proposal'] = 'api/staf/seminar_proposal';
 $route['api/staf/seminar_skripsi'] = 'api/staf/seminar_skripsi';
 $route['api/staf/publikasi'] = 'api/staf/publikasi';
 $route['api/staf/statistik'] = 'api/staf/statistik';
+
+// API Publikasi Routes
+$route['api/mahasiswa/publikasi'] = 'api/mahasiswa/publikasi';
+$route['api/dosen/publikasi'] = 'api/dosen/publikasi';  
+$route['api/staf/publikasi'] = 'api/staf/publikasi';
+$route['api/publikasi/validate_file'] = 'api/publikasi/validate_file';
+$route['api/publikasi/check_progress/(:num)'] = 'api/publikasi/check_progress/$1';
 
 // =====================================================
 //      FALLBACK DAN COMPATIBILITY STAF

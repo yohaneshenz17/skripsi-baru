@@ -78,31 +78,33 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Form pengajuan publikasi
+     * Perbaikan method ajukan - remove validasi seminar skripsi
      */
-    public function ajukan($proposal_id) {
-        $proposal = $this->_get_proposal_by_id($proposal_id);
+    public function ajukan($proposal_id = null) {
+        if (!$proposal_id) {
+            $proposal = $this->_get_proposal_eligible();
+            if (!$proposal) {
+                $this->session->set_flashdata('error', 'Tidak ada proposal yang eligible.');
+                redirect('mahasiswa/publikasi');
+            }
+            $proposal_id = $proposal->id;
+        }
         
+        $proposal = $this->_get_proposal_by_id($proposal_id);
         if (!$proposal) {
             $this->session->set_flashdata('error', 'Proposal tidak ditemukan.');
             redirect('mahasiswa/publikasi');
         }
         
-        // Cek syarat
-        $syarat_status = $this->_check_syarat_publikasi($proposal_id);
-        if ($syarat_status !== 'ELIGIBLE') {
-            $this->session->set_flashdata('error', $syarat_status);
+        // Cek syarat dengan detail
+        $syarat_check = $this->_check_syarat_publikasi($proposal_id);
+        if ($syarat_check['status'] !== 'ELIGIBLE') {
+            $this->session->set_flashdata('error', $syarat_check['message']);
             redirect('mahasiswa/publikasi');
         }
         
-        // Cek apakah sudah ada pengajuan
-        $existing = $this->publikasi->get_by_proposal($proposal_id);
-        if ($existing) {
-            redirect('mahasiswa/publikasi/edit/' . $existing->id);
-        }
-        
         if ($this->input->method() === 'post') {
-            $this->_process_pengajuan($proposal);
+            $this->_process_form_publikasi($proposal);
         } else {
             $this->_show_form_pengajuan($proposal);
         }
@@ -164,22 +166,31 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Download surat keterangan publikasi
+     * Method untuk download surat keterangan publikasi
      */
     public function download_surat($publikasi_id) {
         $publikasi = $this->publikasi->get_by_id($publikasi_id, $this->mahasiswa_id);
         
-        if (!$publikasi || $publikasi->mahasiswa_id != $this->mahasiswa_id) {
-            show_404();
-        }
-        
-        if ($publikasi->status !== 'completed') {
-            $this->session->set_flashdata('error', 'Surat belum tersedia. Status: ' . $publikasi->status);
+        if (!$publikasi || $publikasi->status !== 'completed') {
+            $this->session->set_flashdata('error', 'Surat belum tersedia.');
             redirect('mahasiswa/publikasi');
         }
         
-        // Generate surat keterangan publikasi
-        $this->_generate_surat_publikasi($publikasi);
+        // Generate PDF surat keterangan
+        $this->load->library('pdf');
+        
+        $data = [
+            'publikasi' => $publikasi,
+            'mahasiswa' => $this->_get_mahasiswa_data(),
+            'tanggal_surat' => date('d F Y')
+        ];
+        
+        $html = $this->load->view('mahasiswa/publikasi/surat_keterangan', $data, TRUE);
+        
+        $this->pdf->filename = 'Surat_Keterangan_Publikasi_' . $publikasi->nim . '.pdf';
+        $this->pdf->load_html($html);
+        $this->pdf->render();
+        $this->pdf->stream($this->pdf->filename, ["Attachment" => false]);
     }
 
     // =================================================================
@@ -234,16 +245,28 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Cek syarat publikasi - hanya cek jurnal bimbingan
+     * Perbaikan method _check_syarat_publikasi
+     * Cukup validasi minimal 16 jurnal bimbingan tervalidasi
      */
     private function _check_syarat_publikasi($proposal_id) {
+        // Cek jurnal bimbingan minimal 16 tervalidasi
         $jurnal_count = $this->_count_jurnal_tervalidasi($proposal_id);
         
+        // Return status dengan detail
         if ($jurnal_count >= 16) {
-            return 'ELIGIBLE';
-        } else {
-            return "Jurnal bimbingan belum memenuhi syarat. Saat ini: {$jurnal_count}/16 tervalidasi";
+            return [
+                'status' => 'ELIGIBLE',
+                'jurnal_count' => $jurnal_count,
+                'message' => 'Anda memenuhi syarat untuk mengajukan publikasi'
+            ];
         }
+        
+        return [
+            'status' => 'NOT_ELIGIBLE', 
+            'jurnal_count' => $jurnal_count,
+            'missing' => ["Jurnal bimbingan: {$jurnal_count}/16"],
+            'message' => "Syarat belum terpenuhi: Jurnal bimbingan masih {$jurnal_count}/16"
+        ];
     }
 
     /**
@@ -454,5 +477,18 @@ class Publikasi extends CI_Controller {
     private function _generate_surat_publikasi($publikasi) {
         // TODO: Implement PDF generation
         echo "Generate surat publikasi untuk: " . $publikasi->nama_mahasiswa;
+    }
+    
+    /**
+     * Perbaikan template loading sesuai pattern project
+     */
+    private function _load_view($view_file, $data) {
+        $template_data = [
+            'title' => isset($data['title']) ? $data['title'] : 'Publikasi Tugas Akhir',
+            'content' => $this->load->view($view_file, $data, TRUE),
+            'script' => isset($data['script']) ? $data['script'] : ''
+        ];
+        
+        $this->load->view('template/mahasiswa', $template_data);
     }
 }

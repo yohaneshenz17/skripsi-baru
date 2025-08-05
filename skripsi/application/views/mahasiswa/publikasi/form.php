@@ -1,11 +1,8 @@
 <?php
-// =======================================================
-// 2. FORM PENGAJUAN/EDIT
-// File: application/views/mahasiswa/publikasi/form.php
-// =======================================================
+// PERBAIKAN UNTUK: application/views/mahasiswa/publikasi/form.php
+// Sesuai workflow step 2
 ?>
 
-<!-- FORM PENGAJUAN PUBLIKASI -->
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
@@ -17,7 +14,7 @@
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="<?= base_url('mahasiswa') ?>">Dashboard</a></li>
                         <li class="breadcrumb-item"><a href="<?= base_url('mahasiswa/publikasi') ?>">Publikasi</a></li>
-                        <li class="breadcrumb-item active"><?= $action === 'ajukan' ? 'Ajukan' : 'Edit' ?></li>
+                        <li class="breadcrumb-item active"><?= $action == 'ajukan' ? 'Ajukan' : 'Edit' ?></li>
                     </ol>
                 </div>
             </div>
@@ -27,15 +24,7 @@
     <section class="content">
         <div class="container-fluid">
             
-            <!-- Validation Errors -->
-            <?php if (validation_errors()): ?>
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <h5><i class="icon fas fa-ban"></i> Error!</h5>
-                <?= validation_errors() ?>
-            </div>
-            <?php endif; ?>
-
+            <!-- Flash Messages -->
             <?php if ($this->session->flashdata('error')): ?>
             <div class="alert alert-danger alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -43,226 +32,167 @@
             </div>
             <?php endif; ?>
 
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-upload"></i> <?= $action === 'ajukan' ? 'Form Pengajuan' : 'Edit Pengajuan' ?> Publikasi
-                            </h3>
-                        </div>
-                        
-                        <?php 
-                        $form_action = $action === 'ajukan' ? 
-                            base_url('mahasiswa/publikasi/ajukan/' . (isset($proposal) ? $proposal->id : '')) : 
-                            base_url('mahasiswa/publikasi/edit/' . (isset($publikasi) ? $publikasi->id : ''));
-                        ?>
-                        
-                        <form action="<?= $form_action ?>" method="post" enctype="multipart/form-data">
-                            <div class="card-body">
-                                
-                                <!-- Data Mahasiswa (Read Only) -->
-                                <h5><i class="fas fa-user"></i> Data Mahasiswa</h5>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Nama Lengkap</label>
-                                            <input type="text" class="form-control" readonly 
-                                                   value="<?= isset($proposal) ? $proposal->nama_mahasiswa : (isset($publikasi) ? $publikasi->nama_mahasiswa : '') ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>NIM</label>
-                                            <input type="text" class="form-control" readonly 
-                                                   value="<?= isset($proposal) ? $proposal->nim : (isset($publikasi) ? $publikasi->nim : '') ?>">
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Program Studi</label>
-                                            <input type="text" class="form-control" readonly 
-                                                   value="<?= isset($proposal) ? $proposal->nama_prodi : (isset($publikasi) ? $publikasi->program_studi : '') ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Dosen Pembimbing</label>
-                                            <input type="text" class="form-control" readonly 
-                                                   value="<?= isset($proposal) ? $proposal->nama_pembimbing : (isset($publikasi) ? $publikasi->nama_dosen_pembimbing : '') ?>">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <hr>
-
-                                <!-- Data Skripsi -->
-                                <h5><i class="fas fa-book"></i> Data Skripsi</h5>
-                                <div class="form-group">
-                                    <label for="judul_skripsi_final">Judul Skripsi Final <span class="text-danger">*</span></label>
-                                    <textarea name="judul_skripsi_final" id="judul_skripsi_final" 
-                                              class="form-control" rows="3" required 
-                                              placeholder="Masukkan judul skripsi final (boleh berbeda dari proposal)"><?= set_value('judul_skripsi_final', isset($publikasi) ? $publikasi->judul_skripsi_final : '') ?></textarea>
-                                    <small class="text-muted">Judul skripsi final yang akan dipublikasikan</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="tanggal_ujian_skripsi">Tanggal Ujian Skripsi <span class="text-danger">*</span></label>
-                                    <input type="date" name="tanggal_ujian_skripsi" id="tanggal_ujian_skripsi" 
-                                           class="form-control" required 
-                                           value="<?= set_value('tanggal_ujian_skripsi', isset($publikasi) ? $publikasi->tanggal_ujian_skripsi : '') ?>">
-                                    <small class="text-muted">Tanggal pelaksanaan ujian/seminar skripsi</small>
-                                </div>
-
-                                <hr>
-
-                                <!-- Upload Files -->
-                                <h5><i class="fas fa-upload"></i> Upload Dokumen</h5>
-                                <p class="text-muted mb-3">Semua file harus dalam format PDF</p>
-
-                                <div class="form-group">
-                                    <label for="surat_revisi">1. Surat Keterangan Revisi <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <div class="custom-file">
-                                            <input type="file" name="surat_revisi" id="surat_revisi" 
-                                                   class="custom-file-input" accept=".pdf" 
-                                                   <?= $action === 'ajukan' ? 'required' : '' ?>>
-                                            <label class="custom-file-label" for="surat_revisi">Choose file</label>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">Format: PDF, Maksimal: 1MB</small>
-                                    <?php if (isset($publikasi) && $publikasi->file_surat_revisi): ?>
-                                        <div class="mt-1">
-                                            <i class="fas fa-file-pdf text-danger"></i> 
-                                            <a href="<?= base_url('mahasiswa/publikasi/download/' . $publikasi->id . '/surat_revisi') ?>" target="_blank">
-                                                File saat ini: <?= $publikasi->file_surat_revisi ?>
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="skripsi_final">2. File Skripsi Final <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <div class="custom-file">
-                                            <input type="file" name="skripsi_final" id="skripsi_final" 
-                                                   class="custom-file-input" accept=".pdf" 
-                                                   <?= $action === 'ajukan' ? 'required' : '' ?>>
-                                            <label class="custom-file-label" for="skripsi_final">Choose file</label>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">Format: PDF, Maksimal: 5MB</small>
-                                    <?php if (isset($publikasi) && $publikasi->file_skripsi_final): ?>
-                                        <div class="mt-1">
-                                            <i class="fas fa-file-pdf text-danger"></i> 
-                                            <a href="<?= base_url('mahasiswa/publikasi/download/' . $publikasi->id . '/skripsi_final') ?>" target="_blank">
-                                                File saat ini: <?= $publikasi->file_skripsi_final ?>
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="surat_perpustakaan">3. Surat Keterangan Perpustakaan <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <div class="custom-file">
-                                            <input type="file" name="surat_perpustakaan" id="surat_perpustakaan" 
-                                                   class="custom-file-input" accept=".pdf" 
-                                                   <?= $action === 'ajukan' ? 'required' : '' ?>>
-                                            <label class="custom-file-label" for="surat_perpustakaan">Choose file</label>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">Format: PDF, Maksimal: 1MB</small>
-                                    <?php if (isset($publikasi) && $publikasi->file_surat_perpustakaan): ?>
-                                        <div class="mt-1">
-                                            <i class="fas fa-file-pdf text-danger"></i> 
-                                            <a href="<?= base_url('mahasiswa/publikasi/download/' . $publikasi->id . '/surat_perpustakaan') ?>" target="_blank">
-                                                File saat ini: <?= $publikasi->file_surat_perpustakaan ?>
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <hr>
-
-                                <!-- Keterangan -->
-                                <div class="form-group">
-                                    <label for="keterangan_mahasiswa">Keterangan Tambahan</label>
-                                    <textarea name="keterangan_mahasiswa" id="keterangan_mahasiswa" 
-                                              class="form-control" rows="3" 
-                                              placeholder="Keterangan atau catatan tambahan (opsional)"><?= set_value('keterangan_mahasiswa', isset($publikasi) ? $publikasi->keterangan_mahasiswa : '') ?></textarea>
-                                </div>
-                            </div>
-                            
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> <?= $action === 'ajukan' ? 'Simpan Pengajuan' : 'Update Pengajuan' ?>
-                                </button>
-                                <a href="<?= base_url('mahasiswa/publikasi') ?>" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Kembali
-                                </a>
-                            </div>
-                        </form>
-                    </div>
+            <!-- Form Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-file-upload"></i> 
+                        <?= $action == 'ajukan' ? 'Form Pengajuan' : 'Edit' ?> Publikasi Tugas Akhir
+                    </h3>
                 </div>
+                
+                <?php 
+                $form_action = $action == 'ajukan' ? 
+                    base_url('mahasiswa/publikasi/ajukan/' . $proposal->id) : 
+                    base_url('mahasiswa/publikasi/edit/' . $publikasi->id);
+                ?>
+                
+                <form action="<?= $form_action ?>" method="POST" enctype="multipart/form-data" id="formPublikasi">
+                    <div class="card-body">
+                        
+                        <!-- Data Mahasiswa (Auto-fill) -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>1. Nama Lengkap</label>
+                                    <input type="text" class="form-control" value="<?= $this->session->userdata('nama') ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>2. NIM</label>
+                                    <input type="text" class="form-control" value="<?= $this->session->userdata('nim') ?>" readonly>
+                                </div>
+                            </div>
+                        </div>
 
-                <!-- Sidebar Info -->
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-info-circle"></i> Panduan Upload</h3>
-                        </div>
-                        <div class="card-body">
-                            <h6><strong>Dokumen yang Diperlukan:</strong></h6>
-                            
-                            <div class="mb-3">
-                                <h6><i class="fas fa-file-pdf text-danger"></i> Surat Keterangan Revisi</h6>
-                                <small class="text-muted">
-                                    Surat yang menyatakan bahwa Anda telah menyelesaikan revisi berdasarkan hasil ujian skripsi.
-                                </small>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>3. Program Studi</label>
+                                    <input type="text" class="form-control" value="<?= $this->session->userdata('nama_prodi') ?>" readonly>
+                                </div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <h6><i class="fas fa-file-pdf text-danger"></i> File Skripsi Final</h6>
-                                <small class="text-muted">
-                                    File skripsi lengkap yang sudah final dan siap untuk dipublikasikan.
-                                </small>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <h6><i class="fas fa-file-pdf text-danger"></i> Surat Perpustakaan</h6>
-                                <small class="text-muted">
-                                    Surat keterangan dari perpustakaan yang menyatakan telah menyerahkan skripsi.
-                                </small>
-                            </div>
-                            
-                            <div class="alert alert-warning">
-                                <small>
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <strong>Penting:</strong> Pastikan semua file dalam format PDF dan ukuran sesuai ketentuan.
-                                </small>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>5. Dosen Pembimbing</label>
+                                    <input type="text" class="form-control" value="<?= isset($proposal->nama_pembimbing) ? $proposal->nama_pembimbing : '' ?>" readonly>
+                                </div>
                             </div>
                         </div>
+
+                        <div class="form-group">
+                            <label>4. Judul Skripsi Final <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="judul_skripsi_final" rows="3" required 
+                                      placeholder="Masukkan judul skripsi final"><?= isset($publikasi->judul_skripsi_final) ? $publikasi->judul_skripsi_final : (isset($proposal->judul) ? $proposal->judul : '') ?></textarea>
+                        </div>
+
+                        <!-- File Upload Section -->
+                        <hr>
+                        <h5><i class="fas fa-upload"></i> Upload Dokumen</h5>
+                        
+                        <div class="form-group">
+                            <label>6. Surat Keterangan Revisi Tugas Akhir <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control-file" name="file_surat_revisi" accept=".pdf" required>
+                            <small class="text-muted">Format PDF, maksimal 1 MB. <a href="<?= base_url('assets/templates/template_surat_revisi.pdf') ?>" target="_blank">Download Template</a></small>
+                            
+                            <?php if (isset($publikasi->file_surat_revisi) && $publikasi->file_surat_revisi): ?>
+                                <div class="mt-2">
+                                    <small class="text-success">
+                                        <i class="fas fa-check"></i> File sudah diupload: 
+                                        <a href="<?= base_url('uploads/publikasi/surat_revisi/' . $publikasi->file_surat_revisi) ?>" target="_blank">
+                                            <?= $publikasi->file_surat_revisi ?>
+                                        </a>
+                                    </small>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="form-group">
+                            <label>7. File Skripsi Final <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control-file" name="file_skripsi_final" accept=".pdf" required>
+                            <small class="text-muted">Format PDF, maksimal 5 MB</small>
+                            
+                            <?php if (isset($publikasi->file_skripsi_final) && $publikasi->file_skripsi_final): ?>
+                                <div class="mt-2">
+                                    <small class="text-success">
+                                        <i class="fas fa-check"></i> File sudah diupload: 
+                                        <a href="<?= base_url('uploads/publikasi/skripsi_final/' . $publikasi->file_skripsi_final) ?>" target="_blank">
+                                            <?= $publikasi->file_skripsi_final ?>
+                                        </a>
+                                    </small>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="form-group">
+                            <label>8. Surat Keterangan Penyerahan Skripsi dari Perpustakaan <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control-file" name="file_surat_perpustakaan" accept=".pdf" required>
+                            <small class="text-muted">Format PDF, maksimal 1 MB</small>
+                            
+                            <?php if (isset($publikasi->file_surat_perpustakaan) && $publikasi->file_surat_perpustakaan): ?>
+                                <div class="mt-2">
+                                    <small class="text-success">
+                                        <i class="fas fa-check"></i> File sudah diupload: 
+                                        <a href="<?= base_url('uploads/publikasi/surat_perpustakaan/' . $publikasi->file_surat_perpustakaan) ?>" target="_blank">
+                                            <?= $publikasi->file_surat_perpustakaan ?>
+                                        </a>
+                                    </small>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="form-group">
+                            <label>9. Link Repository/Publikasi Tugas Akhir (Opsional)</label>
+                            <input type="url" class="form-control" name="link_repository" 
+                                   value="<?= isset($publikasi->link_repository) ? $publikasi->link_repository : '' ?>"
+                                   placeholder="https://repository.example.com/skripsi/...">
+                            <small class="text-muted">Link ini dapat diinputkan oleh staf setelah validasi dosen</small>
+                        </div>
+
+                        <!-- Keterangan Tambahan -->
+                        <div class="form-group">
+                            <label>Keterangan Tambahan</label>
+                            <textarea class="form-control" name="keterangan_mahasiswa" rows="3" 
+                                      placeholder="Keterangan atau catatan tambahan (opsional)"><?= isset($publikasi->keterangan_mahasiswa) ? $publikasi->keterangan_mahasiswa : '' ?></textarea>
+                        </div>
+
                     </div>
-                </div>
+                    
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> 
+                            <?= $action == 'ajukan' ? 'Ajukan Publikasi' : 'Update Publikasi' ?>
+                        </button>
+                        <a href="<?= base_url('mahasiswa/publikasi') ?>" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </section>
 </div>
 
-<!-- JavaScript untuk Custom File Input -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Update custom file input labels
-    document.querySelectorAll('.custom-file-input').forEach(function(input) {
-        input.addEventListener('change', function(e) {
-            var fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file';
-            var label = e.target.nextElementSibling;
-            label.textContent = fileName;
-        });
+$(document).ready(function() {
+    // Validasi file size
+    $('input[type="file"]').change(function() {
+        const fileInput = this;
+        const file = fileInput.files[0];
+        const maxSize = fileInput.name === 'file_skripsi_final' ? 5 * 1024 * 1024 : 1 * 1024 * 1024; // 5MB untuk skripsi, 1MB untuk yang lain
+        
+        if (file && file.size > maxSize) {
+            alert('Ukuran file terlalu besar. Maksimal ' + (maxSize / 1024 / 1024) + ' MB');
+            fileInput.value = '';
+        }
+    });
+    
+    // Konfirmasi submit
+    $('#formPublikasi').submit(function(e) {
+        if (!confirm('Yakin ingin <?= $action == "ajukan" ? "mengajukan" : "mengupdate" ?> publikasi ini? Pastikan semua data sudah benar.')) {
+            e.preventDefault();
+        }
     });
 });
 </script>

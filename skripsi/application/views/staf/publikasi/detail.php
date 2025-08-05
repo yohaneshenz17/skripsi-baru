@@ -281,6 +281,54 @@ ob_start();
                     </p>
                 </div>
                 
+                <div class="form-group">
+                    <label class="form-control-label text-sm font-weight-bold">File Skripsi Final</label>
+                    <?php if (isset($publikasi->file_skripsi_final) && !empty($publikasi->file_skripsi_final)): ?>
+                        <p class="form-control-plaintext">
+                            <a href="<?= base_url('uploads/publikasi/skripsi_final/' . $publikasi->file_skripsi_final) ?>" 
+                               target="_blank" 
+                               class="text-primary">
+                                <i class="fas fa-file-pdf mr-1"></i>
+                                <?= htmlspecialchars($publikasi->file_skripsi_final) ?>
+                            </a>
+                        </p>
+                    <?php else: ?>
+                        <p class="form-control-plaintext text-muted">File belum diupload</p>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-control-label text-sm font-weight-bold">Surat Keterangan Perpustakaan</label>
+                    <?php if (isset($publikasi->file_surat_perpustakaan) && !empty($publikasi->file_surat_perpustakaan)): ?>
+                        <p class="form-control-plaintext">
+                            <a href="<?= base_url('uploads/publikasi/surat_perpustakaan/' . $publikasi->file_surat_perpustakaan) ?>" 
+                               target="_blank" 
+                               class="text-primary">
+                                <i class="fas fa-file-alt mr-1"></i>
+                                <?= htmlspecialchars($publikasi->file_surat_perpustakaan) ?>
+                            </a>
+                        </p>
+                    <?php else: ?>
+                        <p class="form-control-plaintext text-muted">File belum diupload</p>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-control-label text-sm font-weight-bold">Surat Keterangan Revisi</label>
+                    <?php if (isset($publikasi->file_surat_revisi) && !empty($publikasi->file_surat_revisi)): ?>
+                        <p class="form-control-plaintext">
+                            <a href="<?= base_url('uploads/publikasi/surat_revisi/' . $publikasi->file_surat_revisi) ?>" 
+                               target="_blank" 
+                               class="text-primary">
+                                <i class="fas fa-file-signature mr-1"></i>
+                                <?= htmlspecialchars($publikasi->file_surat_revisi) ?>
+                            </a>
+                        </p>
+                    <?php else: ?>
+                        <p class="form-control-plaintext text-muted">File belum diupload</p>
+                    <?php endif; ?>
+                </div>
+                
                 <?php if (!empty($link_repository)): ?>
                 <div class="form-group">
                     <label class="form-control-label text-sm font-weight-bold">Link Repository</label>

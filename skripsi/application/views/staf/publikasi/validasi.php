@@ -1,783 +1,711 @@
 <?php
 /**
- * View Validasi Final Publikasi untuk Staf
+ * View Validasi Publikasi untuk Staf
  * File: application/views/staf/publikasi/validasi.php
- * Menggunakan template Argon AdminLTE yang konsisten dengan sistem
+ * 
+ * FEATURES:
+ * - Form validasi final (approve/reject)
+ * - Preview publikasi dan repository
+ * - Checklist validasi
+ * - Email notification trigger
  */
+
+// Start output buffering
+ob_start();
 ?>
 
-<!-- Page content -->
-<div class="container-fluid mt--6">
-    <div class="row">
-        <div class="col">
-            
-            <!-- Warning Alert -->
-            <div class="row">
-                <div class="col">
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <div class="alert-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="alert-content">
-                            <h5 class="alert-title">Perhatian!</h5>
-                            <p class="mb-2">Ini adalah tahap validasi final publikasi. Setelah Anda menyetujui:</p>
-                            <ul class="mb-0">
-                                <li>Status publikasi akan menjadi <strong>"SELESAI"</strong></li>
-                                <li>Mahasiswa akan menerima notifikasi email</li>
-                                <li>Mahasiswa dapat mendownload Surat Keterangan Publikasi</li>
-                                <li>Proses tidak dapat dibatalkan</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Summary Data -->
-            <div class="row">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header border-0">
-                            <h3 class="mb-0">
-                                <i class="fas fa-clipboard-check text-info mr-2"></i>
-                                Ringkasan Data Publikasi
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="info-section">
-                                        <div class="info-item">
-                                            <div class="info-label">Nama Mahasiswa</div>
-                                            <div class="info-value"><?= esc($publikasi->nama_mahasiswa) ?></div>
-                                        </div>
-                                        <div class="info-item">
-                                            <div class="info-label">NIM</div>
-                                            <div class="info-value"><?= esc($publikasi->nim) ?></div>
-                                        </div>
-                                        <div class="info-item">
-                                            <div class="info-label">Program Studi</div>
-                                            <div class="info-value"><?= esc($publikasi->program_studi) ?></div>
-                                        </div>
-                                        <div class="info-item">
-                                            <div class="info-label">Email Mahasiswa</div>
-                                            <div class="info-value"><?= esc($publikasi->email_mahasiswa) ?></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-section">
-                                        <div class="info-item">
-                                            <div class="info-label">Dosen Pembimbing</div>
-                                            <div class="info-value"><?= esc($publikasi->nama_dosen_pembimbing) ?></div>
-                                        </div>
-                                        <div class="info-item">
-                                            <div class="info-label">Status Dosen</div>
-                                            <div class="info-value">
-                                                <span class="badge badge-success">Disetujui</span>
-                                            </div>
-                                        </div>
-                                        <div class="info-item">
-                                            <div class="info-label">Tanggal Ujian</div>
-                                            <div class="info-value"><?= $publikasi->tanggal_ujian_skripsi ? date('d/m/Y', strtotime($publikasi->tanggal_ujian_skripsi)) : '-' ?></div>
-                                        </div>
-                                        <div class="info-item">
-                                            <div class="info-label">Tanggal Pengajuan</div>
-                                            <div class="info-value"><?= date('d/m/Y H:i', strtotime($publikasi->tanggal_pengajuan)) ?></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <div class="judul-section">
-                                        <h6 class="section-title">Judul Skripsi:</h6>
-                                        <div class="alert alert-light mb-0">
-                                            <?= esc($publikasi->judul_skripsi_final) ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Repository Info -->
-            <div class="row mt-4">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header border-0">
-                            <h3 class="mb-0">
-                                <i class="fas fa-link text-success mr-2"></i>
-                                Repository yang Sudah Diinput
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="repository-display">
-                                <div class="d-flex align-items-center">
-                                    <div class="repo-icon mr-4">
-                                        <?php if (strpos($publikasi->link_repository, 'github.com') !== false): ?>
-                                            <i class="fab fa-github fa-3x text-dark"></i>
-                                        <?php elseif (strpos($publikasi->link_repository, 'drive.google.com') !== false): ?>
-                                            <i class="fab fa-google-drive fa-3x text-primary"></i>
-                                        <?php elseif (strpos($publikasi->link_repository, 'gitlab.com') !== false): ?>
-                                            <i class="fab fa-gitlab fa-3x text-warning"></i>
-                                        <?php else: ?>
-                                            <i class="fas fa-link fa-3x text-info"></i>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="repo-details flex-grow-1">
-                                        <h5 class="repo-title">Repository Skripsi</h5>
-                                        <p class="repo-url"><?= esc($publikasi->link_repository) ?></p>
-                                        <a href="<?= esc($publikasi->link_repository) ?>" target="_blank" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-external-link-alt mr-1"></i> Buka Repository
-                                        </a>
-                                    </div>
-                                </div>
-                                
-                                <?php if (!empty($publikasi->komentar_staf)): ?>
-                                <div class="mt-4">
-                                    <h6 class="section-title">Keterangan yang Sudah Diinput:</h6>
-                                    <div class="alert alert-info">
-                                        <?= nl2br(esc($publikasi->komentar_staf)) ?>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Final Validation Form -->
-            <div class="row mt-4">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header border-0">
-                            <h3 class="mb-0">
-                                <i class="fas fa-gavel text-warning mr-2"></i>
-                                Keputusan Validasi Final - Step 4
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            
-                            <!-- Validation Checklist -->
-                            <div class="validation-checklist mb-4">
-                                <h6 class="checklist-title">Checklist Validasi (Pastikan semua sudah sesuai):</h6>
-                                <div class="checklist-items">
-                                    <div class="checklist-item completed">
-                                        <i class="fas fa-check-circle text-success mr-2"></i>
-                                        Data mahasiswa dan skripsi sudah lengkap dan benar
-                                    </div>
-                                    <div class="checklist-item completed">
-                                        <i class="fas fa-check-circle text-success mr-2"></i>
-                                        Dosen pembimbing sudah memberikan persetujuan
-                                    </div>
-                                    <div class="checklist-item completed">
-                                        <i class="fas fa-check-circle text-success mr-2"></i>
-                                        Repository link sudah diinput dan dapat diakses
-                                    </div>
-                                    <div class="checklist-item completed">
-                                        <i class="fas fa-check-circle text-success mr-2"></i>
-                                        File skripsi final tersedia di repository
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Form -->
-                            <?= form_open('staf/publikasi/validasi/' . $publikasi->id, ['id' => 'formValidasiFinal']) ?>
-                                
-                                <div class="form-group">
-                                    <label class="form-control-label">
-                                        Keputusan Validasi <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="decision-options">
-                                        <div class="custom-control custom-radio mb-3">
-                                            <input type="radio" id="approve" name="action" value="approve" class="custom-control-input" required>
-                                            <label class="custom-control-label decision-label approve-label" for="approve">
-                                                <div class="decision-content">
-                                                    <div class="decision-icon">
-                                                        <i class="fas fa-check-circle text-success"></i>
-                                                    </div>
-                                                    <div class="decision-text">
-                                                        <strong>SETUJUI</strong>
-                                                        <small>Publikasi selesai dan mahasiswa dapat download surat keterangan</small>
-                                                    </div>
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" id="reject" name="action" value="reject" class="custom-control-input" required>
-                                            <label class="custom-control-label decision-label reject-label" for="reject">
-                                                <div class="decision-content">
-                                                    <div class="decision-icon">
-                                                        <i class="fas fa-times-circle text-danger"></i>
-                                                    </div>
-                                                    <div class="decision-text">
-                                                        <strong>TOLAK</strong>
-                                                        <small>Ada yang perlu diperbaiki, dikembalikan ke mahasiswa</small>
-                                                    </div>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-control-label" for="komentar_staf">
-                                        Komentar/Catatan Final
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="komentar_staf" 
-                                              name="komentar_staf" 
-                                              rows="5" 
-                                              placeholder="Masukkan komentar final Anda..."><?= set_value('komentar_staf') ?></textarea>
-                                    <small class="form-text text-muted">
-                                        <span id="komentarHelper">Komentar opsional untuk persetujuan, wajib diisi untuk penolakan</span>
-                                    </small>
-                                </div>
-
-                                <!-- Notification Preview -->
-                                <div class="form-group">
-                                    <label class="form-control-label">Preview Notifikasi Email</label>
-                                    <div id="emailPreview" class="email-preview">
-                                        <div class="text-center text-muted py-4">
-                                            <i class="fas fa-envelope fa-2x mb-3"></i>
-                                            <p>Pilih keputusan untuk melihat preview email yang akan dikirim</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group text-center">
-                                    <a href="<?= base_url('staf/publikasi/detail/' . $publikasi->id) ?>" 
-                                       class="btn btn-outline-secondary">
-                                        <i class="fas fa-arrow-left mr-2"></i> Kembali
-                                    </a>
-                                    <button type="submit" class="btn btn-success" id="submitBtn" disabled onclick="return confirmAction()">
-                                        <i class="fas fa-gavel mr-2"></i> <span id="submitText">Proses Validasi</span>
-                                    </button>
-                                </div>
-
-                            <?= form_close() ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Documents Reference -->
-            <div class="row mt-4">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header border-0">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <h3 class="mb-0">
-                                        <i class="fas fa-file-pdf text-danger mr-2"></i>
-                                        Dokumen untuk Referensi
-                                    </h3>
-                                </div>
-                                <div class="col-auto">
-                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#documentsCollapse">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse" id="documentsCollapse">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="doc-card">
-                                            <div class="doc-icon">
-                                                <i class="fas fa-file-pdf text-danger"></i>
-                                            </div>
-                                            <div class="doc-content">
-                                                <h6 class="doc-title">Surat Keterangan Revisi</h6>
-                                                <?php if (!empty($publikasi->file_surat_revisi)): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                            onclick="downloadFile('surat_revisi', <?= $publikasi->id ?>)">
-                                                        <i class="fas fa-download mr-1"></i> Download
-                                                    </button>
-                                                <?php else: ?>
-                                                    <span class="badge badge-warning">File tidak tersedia</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="doc-card">
-                                            <div class="doc-icon">
-                                                <i class="fas fa-file-pdf text-danger"></i>
-                                            </div>
-                                            <div class="doc-content">
-                                                <h6 class="doc-title">File Skripsi Final</h6>
-                                                <?php if (!empty($publikasi->file_skripsi_final)): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                            onclick="downloadFile('skripsi_final', <?= $publikasi->id ?>)">
-                                                        <i class="fas fa-download mr-1"></i> Download
-                                                    </button>
-                                                <?php else: ?>
-                                                    <span class="badge badge-warning">File tidak tersedia</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="doc-card">
-                                            <div class="doc-icon">
-                                                <i class="fas fa-file-pdf text-danger"></i>
-                                            </div>
-                                            <div class="doc-content">
-                                                <h6 class="doc-title">Surat Perpustakaan</h6>
-                                                <?php if (!empty($publikasi->file_surat_perpustakaan)): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                            onclick="downloadFile('surat_perpustakaan', <?= $publikasi->id ?>)">
-                                                        <i class="fas fa-download mr-1"></i> Download
-                                                    </button>
-                                                <?php else: ?>
-                                                    <span class="badge badge-warning">File tidak tersedia</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent mb-0 pb-0">
+                <li class="breadcrumb-item">
+                    <a href="<?= base_url('staf/publikasi') ?>" class="text-primary">
+                        <i class="fas fa-upload mr-1"></i>Publikasi
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="<?= base_url('staf/publikasi/detail/' . (isset($publikasi->id) ? $publikasi->id : '')) ?>" class="text-primary">
+                        Detail
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Validasi Final</li>
+            </ol>
+        </nav>
     </div>
-    
-    <!-- Footer spacer -->
-    <div class="row">
-        <div class="col">
-            <div style="height: 100px;"></div>
+</div>
+
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="h3 mb-0">
+                    <i class="fas fa-check-double text-success mr-2"></i>
+                    Validasi Final Publikasi
+                </h2>
+                <p class="text-muted mb-0">Review dan validasi publikasi tugas akhir mahasiswa</p>
+            </div>
+            <a href="<?= base_url('staf/publikasi/detail/' . (isset($publikasi->id) ? $publikasi->id : '')) ?>" 
+               class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
+            </a>
         </div>
     </div>
 </div>
 
+<!-- Flash Messages -->
+<?php if ($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle"></i> 
+        <strong>Berhasil!</strong> <?= $this->session->flashdata('success') ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php endif; ?>
+
+<?php if ($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle"></i> 
+        <strong>Error!</strong> <?= $this->session->flashdata('error') ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php endif; ?>
+
+<?php if (validation_errors()): ?>
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle"></i> 
+        <strong>Validation Error!</strong>
+        <?= validation_errors() ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($publikasi) && $publikasi): ?>
+
+<div class="row">
+    <!-- Left Column - Informasi & Form -->
+    <div class="col-lg-8">
+        <!-- Informasi Publikasi -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-info-circle text-primary mr-2"></i>
+                    Informasi Publikasi
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label text-sm font-weight-bold">Mahasiswa</label>
+                            <p class="form-control-plaintext">
+                                <?= isset($publikasi->nama_mahasiswa) ? htmlspecialchars($publikasi->nama_mahasiswa) : 'N/A' ?>
+                                <?php if (isset($publikasi->nim)): ?>
+                                    <small class="text-muted d-block"><?= htmlspecialchars($publikasi->nim) ?></small>
+                                <?php endif; ?>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-control-label text-sm font-weight-bold">Program Studi</label>
+                            <p class="form-control-plaintext">
+                                <?= isset($publikasi->nama_prodi) ? htmlspecialchars($publikasi->nama_prodi) : 'N/A' ?>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label text-sm font-weight-bold">Dosen Pembimbing</label>
+                            <p class="form-control-plaintext">
+                                <?= isset($publikasi->nama_dosen) ? htmlspecialchars($publikasi->nama_dosen) : 'N/A' ?>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-control-label text-sm font-weight-bold">Tanggal Pengajuan</label>
+                            <p class="form-control-plaintext">
+                                <?php 
+                                $created_at = isset($publikasi->created_at) ? $publikasi->created_at : null;
+                                echo $created_at ? date('d F Y, H:i', strtotime($created_at)) . ' WIB' : 'N/A';
+                                ?>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-control-label text-sm font-weight-bold">Judul Tugas Akhir</label>
+                    <p class="form-control-plaintext">
+                        <?= isset($publikasi->judul) ? htmlspecialchars($publikasi->judul) : 'N/A' ?>
+                    </p>
+                </div>
+                
+                <div class="form-group mb-0">
+                    <label class="form-control-label text-sm font-weight-bold">Link Repository</label>
+                    <p class="form-control-plaintext">
+                        <?php $link_repository = isset($publikasi->link_repository) ? $publikasi->link_repository : ''; ?>
+                        <?php if (!empty($link_repository)): ?>
+                            <a href="<?= htmlspecialchars($link_repository) ?>" 
+                               target="_blank" 
+                               class="text-primary d-inline-flex align-items-center">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                <?= htmlspecialchars($link_repository) ?>
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-info ml-2" 
+                                    id="btn-preview-repo">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                        <?php else: ?>
+                            <span class="text-muted">Repository belum diinput</span>
+                        <?php endif; ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Validasi -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-gavel text-success mr-2"></i>
+                    Form Validasi
+                </h4>
+            </div>
+            <div class="card-body">
+                <?= form_open('staf/publikasi/validasi/' . $publikasi->id, [
+                    'id' => 'form-validasi',
+                    'class' => 'needs-validation',
+                    'novalidate' => true
+                ]) ?>
+                
+                <!-- Keputusan Validasi -->
+                <div class="form-group">
+                    <label class="form-control-label">
+                        Keputusan Validasi 
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="mt-2">
+                        <div class="custom-control custom-radio mb-2">
+                            <input type="radio" 
+                                   id="approved" 
+                                   name="keputusan" 
+                                   value="approved" 
+                                   class="custom-control-input" 
+                                   required>
+                            <label class="custom-control-label" for="approved">
+                                <span class="text-success font-weight-bold">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Disetujui - Publikasi Valid
+                                </span>
+                                <small class="d-block text-muted">
+                                    Repository dapat diakses, format sesuai, dan memenuhi standar publikasi
+                                </small>
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" 
+                                   id="rejected" 
+                                   name="keputusan" 
+                                   value="rejected" 
+                                   class="custom-control-input" 
+                                   required>
+                            <label class="custom-control-label" for="rejected">
+                                <span class="text-danger font-weight-bold">
+                                    <i class="fas fa-times-circle mr-1"></i>
+                                    Ditolak - Perlu Perbaikan
+                                </span>
+                                <small class="d-block text-muted">
+                                    Ada masalah dengan repository atau format yang perlu diperbaiki
+                                </small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Catatan Validasi -->
+                <div class="form-group">
+                    <label for="catatan" class="form-control-label">
+                        Catatan Validasi 
+                        <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control" 
+                              id="catatan" 
+                              name="catatan" 
+                              rows="4"
+                              placeholder="Berikan catatan detail untuk mahasiswa dan dosen pembimbing..."
+                              required><?= set_value('catatan') ?></textarea>
+                    <div class="invalid-feedback">
+                        Catatan validasi wajib diisi.
+                    </div>
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Catatan ini akan dikirim via email ke mahasiswa dan dosen pembimbing.
+                        Berikan penjelasan yang jelas dan konstruktif.
+                    </small>
+                </div>
+
+                <!-- Template Catatan -->
+                <div class="form-group">
+                    <label class="form-control-label text-sm">Template Catatan Cepat</label>
+                    <div class="btn-group-toggle" data-toggle="buttons">
+                        <button type="button" class="btn btn-sm btn-outline-success template-btn" data-template="approved">
+                            <i class="fas fa-thumbs-up mr-1"></i> Disetujui
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning template-btn" data-template="format">
+                            <i class="fas fa-file-alt mr-1"></i> Format
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-info template-btn" data-template="metadata">
+                            <i class="fas fa-tags mr-1"></i> Metadata
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger template-btn" data-template="access">
+                            <i class="fas fa-lock mr-1"></i> Akses
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Konfirmasi -->
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="confirm-validation" required>
+                        <label class="custom-control-label" for="confirm-validation">
+                            Saya sudah mereview repository dengan teliti dan yakin dengan keputusan validasi ini
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="form-group mb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            <small>
+                                <i class="fas fa-envelope mr-1"></i>
+                                Notifikasi email akan dikirim otomatis setelah validasi
+                            </small>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg" id="btn-submit">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Kirim Validasi & Notifikasi Email
+                        </button>
+                    </div>
+                </div>
+                
+                <?= form_close() ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Checklist & Preview -->
+    <div class="col-lg-4">
+        <!-- Checklist Validasi -->
+        <div class="card mb-4">
+            <div class="card-header bg-gradient-success">
+                <h5 class="text-white mb-0">
+                    <i class="fas fa-clipboard-check mr-2"></i>
+                    Checklist Validasi
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="validation-checklist">
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="check-access">
+                        <label class="custom-control-label" for="check-access">
+                            <strong>Repository dapat diakses</strong>
+                            <small class="d-block text-muted">Link dapat dibuka dan tidak error</small>
+                        </label>
+                    </div>
+                    
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="check-pdf">
+                        <label class="custom-control-label" for="check-pdf">
+                            <strong>File PDF tersedia</strong>
+                            <small class="d-block text-muted">File skripsi dalam format PDF dapat didownload</small>
+                        </label>
+                    </div>
+                    
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="check-format">
+                        <label class="custom-control-label" for="check-format">
+                            <strong>Format sesuai template</strong>
+                            <small class="d-block text-muted">Struktur dan format mengikuti panduan kampus</small>
+                        </label>
+                    </div>
+                    
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="check-metadata">
+                        <label class="custom-control-label" for="check-metadata">
+                            <strong>Metadata lengkap</strong>
+                            <small class="d-block text-muted">Judul, author, abstract, dan keyword sesuai</small>
+                        </label>
+                    </div>
+                    
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="check-plagiarism">
+                        <label class="custom-control-label" for="check-plagiarism">
+                            <strong>Bebas plagiarisme</strong>
+                            <small class="d-block text-muted">Tidak ada indikasi plagiarisme yang signifikan</small>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Pastikan semua poin sudah dicek sebelum validasi
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools text-primary mr-2"></i>
+                    Aksi Cepat
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <?php if (!empty($link_repository)): ?>
+                        <a href="<?= htmlspecialchars($link_repository) ?>" 
+                           target="_blank" 
+                           class="btn btn-outline-primary btn-block">
+                            <i class="fas fa-external-link-alt mr-2"></i>
+                            Buka Repository
+                        </a>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($publikasi->email_mahasiswa) && !empty($publikasi->email_mahasiswa)): ?>
+                        <a href="mailto:<?= $publikasi->email_mahasiswa ?>?subject=Publikasi Tugas Akhir - <?= urlencode($publikasi->judul ?? '') ?>" 
+                           class="btn btn-outline-info btn-block">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Email Mahasiswa
+                        </a>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($publikasi->email_dosen) && !empty($publikasi->email_dosen)): ?>
+                        <a href="mailto:<?= $publikasi->email_dosen ?>?subject=Publikasi Tugas Akhir - <?= urlencode($publikasi->judul ?? '') ?>" 
+                           class="btn btn-outline-secondary btn-block">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Email Dosen
+                        </a>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>💡 Tips:</strong> 
+                        Buka repository di tab baru untuk review sambil mengisi form validasi.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php else: ?>
+<!-- Error State -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+                <h3>Data Tidak Ditemukan</h3>
+                <p class="text-muted">Data publikasi yang Anda cari tidak ditemukan atau repository belum diinput.</p>
+                <a href="<?= base_url('staf/publikasi') ?>" class="btn btn-primary">
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali ke Daftar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php
+$content = ob_get_clean();
+echo $content;
+?>
+
+<!-- CSS untuk Validasi Form -->
 <style>
-/* Alert styling */
-.alert {
+.form-control-plaintext {
+    padding-left: 0;
+    padding-right: 0;
     border: none;
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.alert-warning {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-}
-
-.alert-icon {
-    float: left;
-    font-size: 1.8rem;
-    margin-right: 20px;
-    margin-top: 5px;
-}
-
-.alert-content {
-    overflow: hidden;
-}
-
-.alert-title {
-    font-weight: 700;
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-}
-
-.alert ul {
-    padding-left: 20px;
-    margin-bottom: 0;
-}
-
-.alert li {
-    margin-bottom: 8px;
-    font-weight: 500;
-}
-
-/* Info sections */
-.info-section {
-    background: #f8f9fe;
-    border-radius: 12px;
-    padding: 25px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.info-item:last-child {
-    border-bottom: none;
-}
-
-.info-label {
-    font-weight: 600;
-    color: #32325d;
-    flex: 0 0 40%;
-}
-
-.info-value {
-    color: #525f7f;
-    flex: 1;
-    text-align: right;
-}
-
-.section-title {
-    font-weight: 700;
-    color: #32325d;
-    margin-bottom: 15px;
-}
-
-.judul-section {
-    background: #f8f9fe;
-    border-radius: 12px;
-    padding: 25px;
-}
-
-/* Repository display */
-.repository-display {
-    background: #f8f9fe;
-    border-radius: 12px;
-    padding: 30px;
-    border-left: 4px solid #28a745;
-}
-
-.repo-icon {
-    flex-shrink: 0;
-}
-
-.repo-title {
-    font-weight: 700;
-    color: #32325d;
-    margin-bottom: 10px;
-}
-
-.repo-url {
-    color: #6c757d;
-    font-size: 14px;
-    margin-bottom: 15px;
-    word-break: break-all;
-}
-
-/* Validation checklist */
-.validation-checklist {
-    background: #f8f9fe;
-    border: 1px solid #28a745;
-    border-radius: 12px;
-    padding: 25px;
-}
-
-.checklist-title {
-    font-weight: 700;
-    color: #32325d;
-    margin-bottom: 20px;
-}
-
-.checklist-items {
-    display: grid;
-    gap: 15px;
-}
-
-.checklist-item {
-    display: flex;
-    align-items: center;
+    background: none;
     font-weight: 500;
     color: #525f7f;
-    font-size: 14px;
 }
 
-.checklist-item.completed {
-    color: #28a745;
+.validation-checklist .custom-control {
+    position: relative;
+    padding-left: 1.5rem;
 }
 
-/* Decision options */
-.decision-options {
-    background: #f8f9fe;
-    border-radius: 12px;
-    padding: 25px;
-    margin-top: 15px;
-}
-
-.decision-label {
-    cursor: pointer;
-    border: 2px solid #dee2e6;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 0;
-    transition: all 0.3s ease;
-    background: white;
-}
-
-.decision-label:hover {
-    border-color: #5e72e4;
-    box-shadow: 0 4px 12px rgba(94, 114, 228, 0.15);
-}
-
-.custom-control-input:checked + .approve-label {
+.validation-checklist .custom-control-label::before {
     border-color: #28a745;
-    background: rgba(40, 167, 69, 0.1);
 }
 
-.custom-control-input:checked + .reject-label {  
-    border-color: #dc3545;
-    background: rgba(220, 53, 69, 0.1);
+.validation-checklist .custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #28a745;
+    border-color: #28a745;
 }
 
-.decision-content {
-    display: flex;
-    align-items: center;
+.template-btn {
+    margin: 2px;
+    transition: all 0.2s ease;
 }
 
-.decision-icon {
-    font-size: 1.5rem;
-    margin-right: 15px;
-    flex-shrink: 0;
-}
-
-.decision-text strong {
-    display: block;
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-.decision-text small {
-    color: #6c757d;
-    font-size: 13px;
-    line-height: 1.4;
-}
-
-/* Email preview */
-.email-preview {
-    background: #f8f9fe;
-    border: 1px solid #dee2e6;
-    border-radius: 12px;
-    padding: 25px;
-    min-height: 120px;
-}
-
-/* Document cards */
-.doc-card {
-    text-align: center;
-    padding: 25px;
-    border: 1px solid #dee2e6;
-    border-radius: 12px;
-    background: #f8f9fe;
-    transition: all 0.3s ease;
-    height: 100%;
-}
-
-.doc-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.doc-icon {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-}
-
-.doc-title {
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: #32325d;
-}
-
-/* Form controls */
-.form-control-label {
-    font-weight: 600;
-    color: #32325d;
-    margin-bottom: 10px;
-}
-
-.form-control {
-    border-radius: 8px;
-    border: 1px solid #cad1d7;
-    padding: 0.75rem 1rem;
-}
-
-.form-control:focus {
-    border-color: #5e72e4;
-    box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.1);
-}
-
-/* Button styling */
-.btn {
-    font-weight: 600;
-    letter-spacing: 0.025em;
-    border-radius: 8px;
-    padding: 0.75rem 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-}
-
-.btn-success:hover {
+.template-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* Responsive adjustments */
+.d-grid {
+    display: grid;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.custom-radio .custom-control-label {
+    cursor: pointer;
+    padding-left: 10px;
+}
+
+.custom-radio .custom-control-input:checked ~ .custom-control-label::before {
+    border-color: #007bff;
+    background-color: #007bff;
+}
+
+#catatan {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
 @media (max-width: 768px) {
-    .alert-icon {
-        float: none;
-        display: block;
-        text-align: center;
-        margin-bottom: 15px;
-        margin-right: 0;
-    }
-    
-    .repository-display .d-flex {
+    .d-flex.justify-content-between {
         flex-direction: column;
-        text-align: center;
+        gap: 1rem;
     }
     
-    .repo-icon {
-        margin-bottom: 20px;
+    .btn-lg {
+        width: 100%;
     }
-    
-    .info-item {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 15px 0;
-    }
-    
-    .info-value {
-        text-align: left;
-        margin-top: 5px;
-    }
-    
-    .decision-content {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .decision-icon {
-        margin-bottom: 15px;
-        margin-right: 0;
-    }
+}
+
+/* Loading state */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>
 
+<!-- JavaScript untuk Validasi dan Interaktivitas -->
 <script>
 $(document).ready(function() {
-    // Handle decision change
-    $('input[name="action"]').change(function() {
-        const action = $(this).val();
-        updateFormBasedOnAction(action);
-        updateEmailPreview(action);
-        
-        // Enable submit button
-        $('#submitBtn').prop('disabled', false);
-    });
+    const form = $('#form-validasi');
+    const catatanField = $('#catatan');
+    const submitBtn = $('#btn-submit');
+    const confirmCheck = $('#confirm-validation');
     
-    // Real-time validation for reject action
-    $('#komentar_staf').on('input', function() {
-        const action = $('input[name="action"]:checked').val();
-        if (action === 'reject') {
-            const komentar = $(this).val().trim();
-            $('#submitBtn').prop('disabled', komentar === '');
+    // Template catatan
+    const templates = {
+        approved: "Publikasi tugas akhir telah sesuai dengan standar yang ditetapkan. Repository dapat diakses dengan baik, format dokumen sesuai template, dan metadata lengkap. Publikasi disetujui untuk dipublikasikan.",
+        format: "Format dokumen perlu diperbaiki. Pastikan mengikuti template yang telah ditetapkan kampus, termasuk struktur bab, format sitasi, dan layout halaman.",
+        metadata: "Metadata pada repository perlu dilengkapi. Pastikan judul, nama author, abstract, keywords, dan informasi bibliografi sudah sesuai dan lengkap.",
+        access: "Repository tidak dapat diakses atau terdapat masalah akses. Pastikan link repository benar dan dapat diakses secara public sesuai kebijakan perpustakaan."
+    };
+
+    // Auto-hide alerts
+    setTimeout(function() {
+        $('.alert').fadeOut('slow');
+    }, 5000);
+
+    // Template button click handler
+    $('.template-btn').on('click', function() {
+        const templateKey = $(this).data('template');
+        const currentText = catatanField.val().trim();
+        const templateText = templates[templateKey];
+        
+        if (currentText && !confirm('Ini akan mengganti catatan yang sudah ada. Lanjutkan?')) {
+            return;
+        }
+        
+        catatanField.val(templateText);
+        catatanField.trigger('input');
+        
+        // Visual feedback
+        $(this).addClass('btn-success').removeClass('btn-outline-success btn-outline-warning btn-outline-info btn-outline-danger');
+        setTimeout(() => {
+            $(this).removeClass('btn-success').addClass('btn-outline-success btn-outline-warning btn-outline-info btn-outline-danger'.split(' ').find(cls => $(this).hasClass(cls.replace('btn-outline-', 'btn-outline-'))));
+        }, 1000);
+    });
+
+    // Real-time validation feedback
+    $('input[name="keputusan"]').on('change', function() {
+        const decision = $(this).val();
+        const placeholder = decision === 'approved' 
+            ? 'Publikasi sudah memenuhi standar dan dapat dipublikasikan...'
+            : 'Jelaskan masalah yang perlu diperbaiki dan saran perbaikan...';
+            
+        catatanField.attr('placeholder', placeholder);
+        
+        // Auto-suggest template
+        if (decision === 'approved') {
+            $('.template-btn[data-template="approved"]').addClass('btn-outline-success').removeClass('btn-outline-secondary');
+        } else {
+            $('.template-btn[data-template="approved"]').removeClass('btn-outline-success').addClass('btn-outline-secondary');
         }
     });
-});
 
-function updateFormBasedOnAction(action) {
-    const submitBtn = $('#submitBtn');
-    const submitText = $('#submitText');
-    const komentarHelper = $('#komentarHelper');
-    const komentarField = $('#komentar_staf');
-    
-    if (action === 'approve') {
-        submitBtn.removeClass('btn-danger').addClass('btn-success');
-        submitText.html('<i class="fas fa-check mr-2"></i>SETUJUI PUBLIKASI');
-        komentarHelper.text('Komentar opsional untuk persetujuan');
-        komentarField.attr('placeholder', 'Komentar tambahan (opsional)...');
-        komentarField.prop('required', false);
-    } else if (action === 'reject') {
-        submitBtn.removeClass('btn-success').addClass('btn-danger');
-        submitText.html('<i class="fas fa-times mr-2"></i>TOLAK PUBLIKASI');
-        komentarHelper.text('Komentar WAJIB diisi untuk penolakan - jelaskan alasan penolakan');
-        komentarField.attr('placeholder', 'Jelaskan alasan penolakan dengan detail...');
-        komentarField.prop('required', true);
+    // Character counter for catatan
+    catatanField.on('input', function() {
+        const length = $(this).val().length;
+        const minLength = 20;
         
-        // Check if comment is filled for reject
-        const komentar = komentarField.val().trim();
-        $('#submitBtn').prop('disabled', komentar === '');
-    }
-}
+        if (length < minLength) {
+            $(this).addClass('is-invalid').removeClass('is-valid');
+        } else {
+            $(this).addClass('is-valid').removeClass('is-invalid');
+        }
+    });
 
-function updateEmailPreview(action) {
-    const emailPreview = $('#emailPreview');
-    const mahasiswaName = '<?= esc($publikasi->nama_mahasiswa) ?>';
-    const judulSkripsi = '<?= esc($publikasi->judul_skripsi_final) ?>';
-    const repositoryLink = '<?= esc($publikasi->link_repository) ?>';
-    
-    let previewContent = '';
-    
-    if (action === 'approve') {
-        previewContent = `
-            <div class="alert alert-success mb-0">
-                <h6 class="alert-title"><i class="fas fa-envelope mr-2"></i>Email yang akan dikirim:</h6>
-                <div class="email-details">
-                    <p><strong>Kepada:</strong> ${mahasiswaName} (<?= esc($publikasi->email_mahasiswa) ?>)</p>
-                    <p><strong>Subject:</strong> [SIM-TA] Publikasi Tugas Akhir Selesai</p>
-                    <div class="email-body">
-                        <strong>Isi Email:</strong><br>
-                        <em>"Publikasi tugas akhir Anda telah selesai divalidasi dan disetujui oleh staf akademik.
-                        <br>Repository: ${repositoryLink}
-                        <br>Anda dapat mendownload Surat Keterangan Publikasi di dashboard mahasiswa."</em>
-                    </div>
-                </div>
-            </div>
-        `;
-    } else if (action === 'reject') {
-        previewContent = `
-            <div class="alert alert-danger mb-0">
-                <h6 class="alert-title"><i class="fas fa-envelope mr-2"></i>Email yang akan dikirim:</h6>
-                <div class="email-details">
-                    <p><strong>Kepada:</strong> ${mahasiswaName} (<?= esc($publikasi->email_mahasiswa) ?>)</p>
-                    <p><strong>Subject:</strong> [SIM-TA] Publikasi Tugas Akhir Ditolak</p>
-                    <div class="email-body">
-                        <strong>Isi Email:</strong><br>
-                        <em>"Publikasi tugas akhir Anda ditolak oleh staf akademik dengan alasan: [komentar Anda]
-                        <br>Silakan perbaiki sesuai komentar dan ajukan kembali."</em>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    emailPreview.html(previewContent);
-}
-
-function confirmAction() {
-    const action = $('input[name="action"]:checked').val();
-    const komentar = $('#komentar_staf').val().trim();
-    
-    if (action === 'approve') {
-        return confirm('Yakin ingin MENYETUJUI publikasi ini?\n\nSetelah disetujui:\n- Status menjadi SELESAI\n- Mahasiswa menerima notifikasi\n- Mahasiswa dapat download surat\n- Proses tidak dapat dibatalkan\n\nLanjutkan?');
-    } else if (action === 'reject') {
-        if (komentar === '') {
-            alert('Komentar penolakan harus diisi!');
+    // Form validation
+    form.on('submit', function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) {
             return false;
         }
-        return confirm('Yakin ingin MENOLAK publikasi ini?\n\nAlasan: ' + komentar + '\n\nPublikasi akan dikembalikan ke mahasiswa untuk diperbaiki.');
+        
+        const decision = $('input[name="keputusan"]:checked').val();
+        const catatan = catatanField.val().trim();
+        
+        const confirmText = decision === 'approved' 
+            ? `Yakin ingin MENYETUJUI publikasi ini?\n\nCatatan: ${catatan.substring(0, 100)}...\n\nNotifikasi email akan dikirim ke mahasiswa dan dosen pembimbing.`
+            : `Yakin ingin MENOLAK publikasi ini?\n\nCatatan: ${catatan.substring(0, 100)}...\n\nMahasiswa harus memperbaiki dan mengajukan ulang.`;
+            
+        if (!confirm(confirmText)) {
+            return false;
+        }
+        
+        // Show loading state
+        submitBtn.addClass('btn-loading').prop('disabled', true);
+        submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Memproses validasi...');
+        
+        // Submit form
+        setTimeout(() => {
+            this.submit();
+        }, 1000);
+    });
+
+    // Preview repository
+    $('#btn-preview-repo').on('click', function() {
+        const url = '<?= isset($publikasi->link_repository) ? $publikasi->link_repository : "" ?>';
+        if (url) {
+            window.open(url, '_blank', 'width=1200,height=800');
+        }
+    });
+
+    // Checklist progress tracking
+    $('.validation-checklist input[type="checkbox"]').on('change', function() {
+        const totalChecks = $('.validation-checklist input[type="checkbox"]').length;
+        const checkedCount = $('.validation-checklist input[type="checkbox"]:checked').length;
+        const progress = (checkedCount / totalChecks) * 100;
+        
+        // Update visual progress (you can add a progress bar here)
+        console.log(`Validation progress: ${progress}%`);
+        
+        // Enable form submission suggestion when all checked
+        if (progress === 100) {
+            confirmCheck.closest('.form-group').addClass('highlight-ready');
+        } else {
+            confirmCheck.closest('.form-group').removeClass('highlight-ready');
+        }
+    });
+
+    // Helper functions
+    function validateForm() {
+        let isValid = true;
+        
+        // Validate decision
+        if (!$('input[name="keputusan"]:checked').length) {
+            alert('Silakan pilih keputusan validasi (Disetujui atau Ditolak).');
+            $('input[name="keputusan"]').first().focus();
+            isValid = false;
+        }
+        
+        // Validate catatan
+        const catatan = catatanField.val().trim();
+        if (!catatan || catatan.length < 20) {
+            alert('Catatan validasi minimal 20 karakter. Berikan penjelasan yang detail.');
+            catatanField.focus();
+            isValid = false;
+        }
+        
+        // Validate confirmation
+        if (!confirmCheck.is(':checked')) {
+            alert('Silakan centang konfirmasi bahwa Anda sudah mereview dengan teliti.');
+            confirmCheck.focus();
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+
+    // Initialize
+    catatanField.trigger('input');
+    
+    // Auto-save draft (optional)
+    let saveTimeout;
+    catatanField.on('input', function() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(function() {
+            // Save to localStorage as draft
+            localStorage.setItem('validasi_draft_' + '<?= isset($publikasi->id) ? $publikasi->id : "" ?>', catatanField.val());
+        }, 2000);
+    });
+    
+    // Load draft on page load
+    const savedDraft = localStorage.getItem('validasi_draft_' + '<?= isset($publikasi->id) ? $publikasi->id : "" ?>');
+    if (savedDraft && !catatanField.val()) {
+        catatanField.val(savedDraft);
     }
     
-    return false;
-}
+    console.log('Validasi Form Loaded');
+});
 
-function downloadFile(type, id) {
-    window.open('<?= base_url('staf/publikasi/download_file/') ?>' + type + '/' + id, '_blank');
-}
+// Prevent accidental page leave
+window.addEventListener('beforeunload', function(e) {
+    const catatan = $('#catatan').val().trim();
+    if (catatan && catatan.length > 10) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
 </script>

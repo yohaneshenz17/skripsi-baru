@@ -2,611 +2,590 @@
 /**
  * View Input Repository untuk Staf
  * File: application/views/staf/publikasi/input_repository.php
- * Menggunakan template Argon AdminLTE yang konsisten dengan sistem
+ * 
+ * FEATURES:
+ * - Form input link repository perpustakaan
+ * - Validation dan preview
+ * - Panduan untuk staf
+ * - Error handling yang baik
  */
+
+// Start output buffering
+ob_start();
 ?>
 
-<!-- Page content -->
-<div class="container-fluid mt--6">
-    <div class="row">
-        <div class="col">
-            
-            <!-- Info Mahasiswa -->
-            <div class="row">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header border-0">
-                            <h3 class="mb-0">
-                                <i class="fas fa-info-circle text-info mr-2"></i>
-                                Informasi Mahasiswa
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="info-group">
-                                        <div class="row mb-2">
-                                            <div class="col-5">
-                                                <strong>Nama Mahasiswa</strong>
-                                            </div>
-                                            <div class="col-7">
-                                                : <?= esc($publikasi->nama_mahasiswa) ?>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-5">
-                                                <strong>NIM</strong>
-                                            </div>
-                                            <div class="col-7">
-                                                : <?= esc($publikasi->nim) ?>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-5">
-                                                <strong>Program Studi</strong>
-                                            </div>
-                                            <div class="col-7">
-                                                : <?= esc($publikasi->program_studi) ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="info-group">
-                                        <div class="row mb-2">
-                                            <div class="col-5">
-                                                <strong>Dosen Pembimbing</strong>
-                                            </div>
-                                            <div class="col-7">
-                                                : <?= esc($publikasi->nama_dosen_pembimbing) ?>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-5">
-                                                <strong>Status Dosen</strong>
-                                            </div>
-                                            <div class="col-7">
-                                                : <span class="badge badge-success">Disetujui</span>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-5">
-                                                <strong>Tanggal Approve</strong>
-                                            </div>
-                                            <div class="col-7">
-                                                : <?= date('d/m/Y H:i', strtotime($publikasi->tanggal_review_pembimbing)) ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <div class="judul-section">
-                                        <h6><strong>Judul Skripsi:</strong></h6>
-                                        <div class="alert alert-light mb-0">
-                                            <?= esc($publikasi->judul_skripsi_final) ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Input Repository -->
-            <div class="row mt-4">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header border-0">
-                            <h3 class="mb-0">
-                                <i class="fas fa-link text-warning mr-2"></i>
-                                Input Repository Link - Step 3
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            
-                            <!-- Instructions -->
-                            <div class="alert alert-info">
-                                <div class="alert-icon">
-                                    <i class="fas fa-info-circle"></i>
-                                </div>
-                                <div class="alert-content">
-                                    <h5 class="alert-title">Petunjuk Input Repository:</h5>
-                                    <ul class="mb-0">
-                                        <li>Pastikan link repository dapat diakses secara publik</li>
-                                        <li>Verifikasi bahwa repository berisi file skripsi final yang lengkap</li>
-                                        <li>Link harus berupa URL lengkap (dimulai dengan http:// atau https://)</li>
-                                        <li>Contoh format: https://github.com/username/repository-name atau https://drive.google.com/...</li>
-                                        <li>Setelah input repository, lanjutkan ke tahap validasi final</li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <!-- Form -->
-                            <?= form_open('staf/publikasi/input_repository/' . $publikasi->id, ['id' => 'formInputRepository']) ?>
-                                
-                                <div class="form-group">
-                                    <label class="form-control-label" for="link_repository">
-                                        Link Repository Skripsi <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">
-                                                <i class="fas fa-link"></i>
-                                            </span>
-                                        </div>
-                                        <input type="url" 
-                                               class="form-control <?= form_error('link_repository') ? 'is-invalid' : '' ?>" 
-                                               id="link_repository" 
-                                               name="link_repository" 
-                                               value="<?= set_value('link_repository', $publikasi->link_repository ?? '') ?>"
-                                               placeholder="https://github.com/username/repository-name atau https://drive.google.com/..."
-                                               required>
-                                        <div class="input-group-append">
-                                            <button type="button" class="btn btn-outline-secondary" onclick="testRepositoryLink()">
-                                                <i class="fas fa-external-link-alt"></i> Test Link
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <?php if (form_error('link_repository')): ?>
-                                        <div class="invalid-feedback d-block">
-                                            <?= form_error('link_repository') ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <small class="form-text text-muted">
-                                        Masukkan URL lengkap repository tempat file skripsi final disimpan
-                                    </small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-control-label" for="keterangan_staf">
-                                        Keterangan/Catatan (Opsional)
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="keterangan_staf" 
-                                              name="keterangan_staf" 
-                                              rows="4" 
-                                              placeholder="Tambahkan catatan atau keterangan terkait repository yang diinput..."><?= set_value('keterangan_staf', $publikasi->komentar_staf ?? '') ?></textarea>
-                                    <small class="form-text text-muted">
-                                        Opsional: Catatan mengenai repository atau hal-hal yang perlu diperhatikan
-                                    </small>
-                                </div>
-
-                                <!-- Verification Checklist -->
-                                <div class="form-group">
-                                    <label class="form-control-label">
-                                        Verifikasi Repository (Check semua sebelum submit):
-                                    </label>
-                                    <div class="verification-checklist">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="check1" required>
-                                            <label class="custom-control-label" for="check1">
-                                                Repository dapat diakses secara publik
-                                            </label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="check2" required>
-                                            <label class="custom-control-label" for="check2">
-                                                File skripsi final tersedia dan dapat dibuka
-                                            </label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="check3" required>
-                                            <label class="custom-control-label" for="check3">
-                                                Link repository sudah benar dan sesuai
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group text-center">
-                                    <a href="<?= base_url('staf/publikasi/detail/' . $publikasi->id) ?>" 
-                                       class="btn btn-outline-secondary">
-                                        <i class="fas fa-arrow-left mr-2"></i> Kembali
-                                    </a>
-                                    <button type="submit" class="btn btn-warning" id="submitBtn" disabled onclick="return confirmInputRepository()">
-                                        <i class="fas fa-save mr-2"></i> Simpan Repository Link
-                                    </button>
-                                </div>
-
-                            <?= form_close() ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Preview Repository Info -->
-            <div class="row mt-4">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header border-0">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <h3 class="mb-0">
-                                        <i class="fas fa-eye text-secondary mr-2"></i>
-                                        Preview Repository Info
-                                    </h3>
-                                </div>
-                                <div class="col-auto">
-                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#previewCollapse">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse" id="previewCollapse">
-                            <div class="card-body">
-                                <div id="repositoryPreview" class="repository-preview">
-                                    <div class="text-center text-muted py-4">
-                                        <i class="fas fa-info-circle fa-2x mb-3"></i>
-                                        <p>Masukkan link repository terlebih dahulu untuk melihat preview</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Data Skripsi untuk Referensi -->
-            <div class="row mt-4">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header border-0">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <h3 class="mb-0">
-                                        <i class="fas fa-book text-primary mr-2"></i>
-                                        Data Skripsi untuk Referensi
-                                    </h3>
-                                </div>
-                                <div class="col-auto">
-                                    <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#referensiCollapse">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse" id="referensiCollapse">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="row mb-3">
-                                            <div class="col-4">
-                                                <strong>Tanggal Ujian Skripsi</strong>
-                                            </div>
-                                            <div class="col-8">
-                                                : <?= $publikasi->tanggal_ujian_skripsi ? date('d/m/Y', strtotime($publikasi->tanggal_ujian_skripsi)) : '-' ?>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <strong>File Skripsi Final</strong>
-                                            </div>
-                                            <div class="col-8">
-                                                : 
-                                                <?php if (!empty($publikasi->file_skripsi_final)): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                            onclick="downloadFile('skripsi_final', <?= $publikasi->id ?>)">
-                                                        <i class="fas fa-download mr-1"></i> Download File Skripsi
-                                                    </button>
-                                                <?php else: ?>
-                                                    <span class="badge badge-warning">File tidak tersedia</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <?php if (!empty($publikasi->keterangan_mahasiswa)): ?>
-                                <div class="row mt-4">
-                                    <div class="col">
-                                        <h6><strong>Keterangan dari Mahasiswa:</strong></h6>
-                                        <div class="alert alert-light">
-                                            <?= nl2br(esc($publikasi->keterangan_mahasiswa)) ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
+<!-- Breadcrumb Navigation -->
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent mb-0 pb-0">
+                <li class="breadcrumb-item">
+                    <a href="<?= base_url('staf/publikasi') ?>" class="text-primary">
+                        <i class="fas fa-upload mr-1"></i>Publikasi
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="<?= base_url('staf/publikasi/detail/' . (isset($publikasi->id) ? $publikasi->id : '')) ?>" class="text-primary">
+                        Detail
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Input Repository</li>
+            </ol>
+        </nav>
     </div>
-    
-    <!-- Footer spacer -->
-    <div class="row">
-        <div class="col">
-            <div style="height: 100px;"></div>
+</div>
+
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="h3 mb-0">
+                    <i class="fas fa-link text-warning mr-2"></i>
+                    Input Link Repository
+                </h2>
+                <p class="text-muted mb-0">Masukkan link repository perpustakaan digital untuk publikasi tugas akhir</p>
+            </div>
+            <a href="<?= base_url('staf/publikasi/detail/' . (isset($publikasi->id) ? $publikasi->id : '')) ?>" 
+               class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
+            </a>
         </div>
     </div>
 </div>
 
+<!-- Flash Messages -->
+<?php if ($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle"></i> 
+        <strong>Berhasil!</strong> <?= $this->session->flashdata('success') ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php endif; ?>
+
+<?php if ($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle"></i> 
+        <strong>Error!</strong> <?= $this->session->flashdata('error') ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php endif; ?>
+
+<?php if (validation_errors()): ?>
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle"></i> 
+        <strong>Validation Error!</strong>
+        <?= validation_errors() ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($publikasi) && $publikasi): ?>
+
+<div class="row">
+    <!-- Left Column - Form -->
+    <div class="col-lg-8">
+        <!-- Informasi Mahasiswa -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-user-graduate text-primary mr-2"></i>
+                    Informasi Mahasiswa
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label text-sm font-weight-bold">Nama Mahasiswa</label>
+                            <p class="form-control-plaintext">
+                                <?= isset($publikasi->nama_mahasiswa) ? htmlspecialchars($publikasi->nama_mahasiswa) : 'N/A' ?>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-control-label text-sm font-weight-bold">NIM</label>
+                            <p class="form-control-plaintext">
+                                <?= isset($publikasi->nim) ? htmlspecialchars($publikasi->nim) : 'N/A' ?>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label text-sm font-weight-bold">Program Studi</label>
+                            <p class="form-control-plaintext">
+                                <?= isset($publikasi->nama_prodi) ? htmlspecialchars($publikasi->nama_prodi) : 'N/A' ?>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-control-label text-sm font-weight-bold">Dosen Pembimbing</label>
+                            <p class="form-control-plaintext">
+                                <?= isset($publikasi->nama_dosen) ? htmlspecialchars($publikasi->nama_dosen) : 'N/A' ?>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-control-label text-sm font-weight-bold">Judul Tugas Akhir</label>
+                    <p class="form-control-plaintext">
+                        <?= isset($publikasi->judul) ? htmlspecialchars($publikasi->judul) : 'N/A' ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Input Repository -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-cloud-upload-alt text-warning mr-2"></i>
+                    Form Input Repository
+                </h4>
+            </div>
+            <div class="card-body">
+                <?= form_open('staf/publikasi/input_repository/' . $publikasi->id, [
+                    'id' => 'form-repository',
+                    'class' => 'needs-validation',
+                    'novalidate' => true
+                ]) ?>
+                
+                <div class="form-group">
+                    <label for="link_repository" class="form-control-label">
+                        Link Repository Perpustakaan 
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fas fa-link"></i>
+                            </span>
+                        </div>
+                        <input type="url" 
+                               class="form-control" 
+                               id="link_repository" 
+                               name="link_repository" 
+                               placeholder="https://repository.stkyakobus.ac.id/handle/..." 
+                               value="<?= set_value('link_repository') ?>"
+                               required
+                               autocomplete="off">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-info" id="btn-test-link">
+                                <i class="fas fa-external-link-alt"></i> Test
+                            </button>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback">
+                        Silakan masukkan URL repository yang valid.
+                    </div>
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Masukkan URL lengkap ke repository perpustakaan digital kampus. 
+                        Contoh: https://repository.stkyakobus.ac.id/handle/123456789/123
+                    </small>
+                </div>
+                
+                <!-- URL Preview -->
+                <div id="url-preview" class="form-group" style="display: none;">
+                    <label class="form-control-label text-sm font-weight-bold">Preview Link</label>
+                    <div class="card bg-light">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-globe text-primary mr-2"></i>
+                                <a href="#" id="preview-link" target="_blank" class="text-primary">
+                                    <span id="preview-text"></span>
+                                </a>
+                                <span id="link-status" class="ml-auto"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="catatan_staf" class="form-control-label">
+                        Catatan Tambahan 
+                        <small class="text-muted">(Opsional)</small>
+                    </label>
+                    <textarea class="form-control" 
+                              id="catatan_staf" 
+                              name="catatan_staf" 
+                              rows="3"
+                              placeholder="Catatan atau keterangan tambahan untuk mahasiswa..."><?= set_value('catatan_staf') ?></textarea>
+                    <small class="form-text text-muted">
+                        Catatan ini akan disimpan dalam sistem untuk referensi mahasiswa.
+                    </small>
+                </div>
+                
+                <div class="form-group mb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="confirm-check" required>
+                            <label class="custom-control-label" for="confirm-check">
+                                Saya sudah memverifikasi bahwa link repository dapat diakses dan berisi file yang sesuai
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-warning" id="btn-submit" disabled>
+                            <i class="fas fa-save mr-2"></i>
+                            Simpan Link Repository
+                        </button>
+                    </div>
+                </div>
+                
+                <?= form_close() ?>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column - Panduan -->
+    <div class="col-lg-4">
+        <!-- Panduan Input Repository -->
+        <div class="card mb-4">
+            <div class="card-header bg-gradient-info">
+                <h5 class="text-white mb-0">
+                    <i class="fas fa-lightbulb mr-2"></i>
+                    Panduan Input Repository
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">1. Verifikasi Link</h6>
+                            <p class="timeline-text">Pastikan link repository dapat diakses dan menuju ke halaman yang benar.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">2. Check Format</h6>
+                            <p class="timeline-text">Link harus menggunakan format https:// dan menuju domain resmi kampus.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">3. Verifikasi Konten</h6>
+                            <p class="timeline-text">Pastikan repository berisi file PDF skripsi lengkap dan metadata yang sesuai.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips & Troubleshooting -->
+        <div class="card">
+            <div class="card-header bg-gradient-warning">
+                <h5 class="text-white mb-0">
+                    <i class="fas fa-tools mr-2"></i>
+                    Tips & Troubleshooting
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-dark"><i class="fas fa-check-circle text-success mr-1"></i> Format URL yang Benar:</h6>
+                    <small class="text-muted">
+                        • https://repository.stkyakobus.ac.id/handle/...<br>
+                        • https://repo.stkyakobus.ac.id/...<br>
+                        • Pastikan protokol https://
+                    </small>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-dark"><i class="fas fa-times-circle text-danger mr-1"></i> Hindari:</h6>
+                    <small class="text-muted">
+                        • Link yang tidak lengkap<br>
+                        • URL temporary atau redirect<br>
+                        • Link yang memerlukan login khusus
+                    </small>
+                </div>
+                
+                <div class="alert alert-info p-2">
+                    <small>
+                        <strong>💡 Pro Tip:</strong> 
+                        Gunakan tombol "Test" untuk memverifikasi link sebelum menyimpan.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php else: ?>
+<!-- Error State -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+                <h3>Data Tidak Ditemukan</h3>
+                <p class="text-muted">Data publikasi yang Anda cari tidak ditemukan.</p>
+                <a href="<?= base_url('staf/publikasi') ?>" class="btn btn-primary">
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali ke Daftar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php
+$content = ob_get_clean();
+echo $content;
+?>
+
+<!-- CSS untuk Timeline dan Form -->
 <style>
-/* Form styling */
-.form-control-label {
+.form-control-plaintext {
+    padding-left: 0;
+    padding-right: 0;
+    border: none;
+    background: none;
+    font-weight: 500;
+    color: #525f7f;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e3ebf0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e3ebf0;
+}
+
+.timeline-title {
+    font-size: 0.9rem;
     font-weight: 600;
+    margin-bottom: 5px;
     color: #32325d;
 }
 
-.form-group {
-    margin-bottom: 2rem;
-}
-
-/* Alert styling */
-.alert {
-    border: none;
-    border-radius: 12px;
-}
-
-.alert-info {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.alert-icon {
-    float: left;
-    font-size: 1.5rem;
-    margin-right: 15px;
-    margin-top: 5px;
-}
-
-.alert-content {
-    overflow: hidden;
-}
-
-.alert-title {
-    font-weight: 600;
-    margin-bottom: 15px;
-}
-
-.alert ul {
-    padding-left: 20px;
-}
-
-.alert li {
-    margin-bottom: 8px;
-}
-
-/* Verification checklist */
-.verification-checklist {
-    background: #f8f9fe;
-    border: 1px solid #dee2e6;
-    border-radius: 12px;
-    padding: 25px;
-    margin-top: 15px;
-}
-
-.verification-checklist .custom-control {
-    margin-bottom: 15px;
-}
-
-.verification-checklist .custom-control:last-child {
+.timeline-text {
+    font-size: 0.8rem;
+    color: #6c757d;
     margin-bottom: 0;
+    line-height: 1.4;
 }
 
-.custom-control-label {
-    font-weight: 500;
-    color: #525f7f;
-    cursor: pointer;
-    padding-left: 8px;
-}
-
-.custom-control-label::before {
-    border-radius: 6px;
-}
-
-.custom-control-input:checked ~ .custom-control-label::before {
-    background-color: #5e72e4;
-    border-color: #5e72e4;
-}
-
-/* Input group */
 .input-group-text {
-    background-color: #5e72e4;
-    color: white;
-    border-color: #5e72e4;
-    font-weight: 600;
+    background-color: #f6f9fc;
+    border-color: #e3ebf0;
 }
 
-/* Repository preview */
-.repository-preview {
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px dashed #dee2e6;
-    border-radius: 12px;
-    background: #f8f9fe;
+.was-validated .form-control:valid {
+    border-color: #28a745;
+    background-image: none;
+}
+
+.was-validated .form-control:invalid {
+    border-color: #dc3545;
+    background-image: none;
+}
+
+#url-preview .card {
+    border: 1px dashed #dee2e6;
     transition: all 0.3s ease;
 }
 
-.repository-preview.loaded {
-    border-color: #28a745;
-    background: #d4edda;
+#url-preview .card:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
 }
 
-.repository-preview.error {
-    border-color: #dc3545;
-    background: #f8d7da;
-}
-
-/* Info sections */
-.info-group {
-    background: #f8f9fe;
-    border-radius: 8px;
-    padding: 20px;
-}
-
-.judul-section {
-    background: #f8f9fe;
-    border-radius: 8px;
-    padding: 20px;
-}
-
-/* Button styling */
-.btn {
-    font-weight: 600;
-    letter-spacing: 0.025em;
-    border-radius: 8px;
-    padding: 0.625rem 1.25rem;
-}
-
-.btn-warning {
-    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-    border: none;
-}
-
-.btn-warning:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 216, 155, 0.4);
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
-    .verification-checklist {
-        padding: 20px 15px;
+    .timeline {
+        padding-left: 20px;
     }
     
-    .info-group {
-        margin-bottom: 20px;
-        padding: 15px;
+    .timeline-marker {
+        left: -17px;
+        width: 10px;
+        height: 10px;
     }
-    
-    .alert-icon {
-        float: none;
-        display: block;
-        text-align: center;
-        margin-bottom: 15px;
-        margin-right: 0;
-    }
-    
-    .alert-content {
-        text-align: left;
-    }
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 </style>
 
+<!-- JavaScript untuk Form Validation dan Interaktivitas -->
 <script>
 $(document).ready(function() {
-    // Enable submit button only when all checkboxes are checked
-    $('.verification-checklist input[type="checkbox"]').change(function() {
-        const allChecked = $('.verification-checklist input[type="checkbox"]:checked').length === 3;
-        const hasUrl = $('#link_repository').val().trim() !== '';
-        $('#submitBtn').prop('disabled', !(allChecked && hasUrl));
-    });
-    
-    // Check URL input
-    $('#link_repository').on('input', function() {
-        const allChecked = $('.verification-checklist input[type="checkbox"]:checked').length === 3;
-        const hasUrl = $(this).val().trim() !== '';
-        $('#submitBtn').prop('disabled', !(allChecked && hasUrl));
+    const form = $('#form-repository');
+    const linkInput = $('#link_repository');
+    const previewDiv = $('#url-preview');
+    const previewLink = $('#preview-link');
+    const previewText = $('#preview-text');
+    const linkStatus = $('#link-status');
+    const confirmCheck = $('#confirm-check');
+    const submitBtn = $('#btn-submit');
+    const testBtn = $('#btn-test-link');
+
+    // Auto-hide alerts
+    setTimeout(function() {
+        $('.alert').fadeOut('slow');
+    }, 5000);
+
+    // Link input change handler
+    linkInput.on('input', function() {
+        const url = $(this).val().trim();
         
-        // Update preview
-        updateRepositoryPreview($(this).val());
+        if (url && isValidUrl(url)) {
+            showPreview(url);
+            $(this).removeClass('is-invalid').addClass('is-valid');
+        } else {
+            hidePreview();
+            if (url) {
+                $(this).removeClass('is-valid').addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-valid is-invalid');
+            }
+        }
+        
+        updateSubmitButton();
     });
-    
-    // Form validation
-    $('#formInputRepository').on('submit', function(e) {
-        const url = $('#link_repository').val().trim();
+
+    // Test link button
+    testBtn.on('click', function() {
+        const url = linkInput.val().trim();
+        
+        if (!url) {
+            alert('Silakan masukkan URL terlebih dahulu.');
+            linkInput.focus();
+            return;
+        }
+        
         if (!isValidUrl(url)) {
-            e.preventDefault();
-            alert('Format URL tidak valid. Pastikan URL dimulai dengan http:// atau https://');
+            alert('Format URL tidak valid. Pastikan dimulai dengan http:// atau https://');
+            linkInput.focus();
+            return;
+        }
+        
+        // Test link accessibility
+        testBtn.html('<i class="fas fa-spinner fa-spin"></i> Testing...');
+        testBtn.prop('disabled', true);
+        
+        // Simulate test (in real implementation, you might want to do server-side check)
+        setTimeout(function() {
+            testBtn.html('<i class="fas fa-external-link-alt"></i> Test');
+            testBtn.prop('disabled', false);
+            
+            // Open link in new tab for manual verification
+            window.open(url, '_blank');
+            
+            // Update status
+            linkStatus.html('<span class="badge badge-success"><i class="fas fa-check"></i> Tested</span>');
+        }, 1500);
+    });
+
+    // Confirm checkbox handler
+    confirmCheck.on('change', function() {
+        updateSubmitButton();
+    });
+
+    // Form submission
+    form.on('submit', function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) {
             return false;
         }
+        
+        // Show confirmation
+        if (confirm('Yakin ingin menyimpan link repository ini?\n\nPastikan link sudah diverifikasi dan dapat diakses dengan baik.')) {
+            // Show loading
+            submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...');
+            submitBtn.prop('disabled', true);
+            
+            // Submit form
+            this.submit();
+        }
     });
+
+    // Helper functions
+    function isValidUrl(string) {
+        try {
+            const url = new URL(string);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function showPreview(url) {
+        previewLink.attr('href', url);
+        previewText.text(url);
+        previewDiv.show('fast');
+    }
+
+    function hidePreview() {
+        previewDiv.hide('fast');
+        linkStatus.empty();
+    }
+
+    function updateSubmitButton() {
+        const urlValid = linkInput.hasClass('is-valid');
+        const confirmed = confirmCheck.is(':checked');
+        
+        submitBtn.prop('disabled', !(urlValid && confirmed));
+    }
+
+    function validateForm() {
+        let isValid = true;
+        
+        // Validate URL
+        const url = linkInput.val().trim();
+        if (!url || !isValidUrl(url)) {
+            linkInput.addClass('is-invalid');
+            isValid = false;
+        }
+        
+        // Validate confirmation
+        if (!confirmCheck.is(':checked')) {
+            alert('Silakan centang konfirmasi bahwa Anda sudah memverifikasi link repository.');
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+
+    // Initialize
+    linkInput.trigger('input');
+    
+    console.log('Input Repository Form Loaded');
 });
 
-function testRepositoryLink() {
-    const url = $('#link_repository').val().trim();
-    if (!url) {
-        alert('Masukkan link repository terlebih dahulu');
-        return;
+// Prevent form submission on Enter key in URL field
+$(document).on('keypress', '#link_repository', function(e) {
+    if (e.which === 13) {
+        e.preventDefault();
+        $('#btn-test-link').click();
     }
-    
-    if (!isValidUrl(url)) {
-        alert('Format URL tidak valid');
-        return;
-    }
-    
-    // Open in new tab
-    window.open(url, '_blank');
-}
-
-function updateRepositoryPreview(url) {
-    const preview = $('#repositoryPreview');
-    
-    if (!url || url.trim() === '') {
-        preview.html(`
-            <div class="text-center text-muted py-4">
-                <i class="fas fa-info-circle fa-2x mb-3"></i>
-                <p>Masukkan link repository terlebih dahulu untuk melihat preview</p>
-            </div>
-        `).removeClass('loaded error');
-        return;
-    }
-    
-    if (!isValidUrl(url)) {
-        preview.html(`
-            <div class="text-center text-danger py-4">
-                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                <p>Format URL tidak valid</p>
-            </div>
-        `).removeClass('loaded').addClass('error');
-        return;
-    }
-    
-    // Show repository info
-    let repoInfo = '';
-    let iconClass = '';
-    
-    if (url.includes('github.com')) {
-        repoInfo = 'GitHub Repository';
-        iconClass = 'fab fa-github';
-    } else if (url.includes('drive.google.com')) {
-        repoInfo = 'Google Drive';
-        iconClass = 'fab fa-google-drive';
-    } else if (url.includes('gitlab.com')) {
-        repoInfo = 'GitLab Repository';
-        iconClass = 'fab fa-gitlab';
-    } else {
-        repoInfo = 'Repository Link';
-        iconClass = 'fas fa-link';
-    }
-    
-    preview.html(`
-        <div class="text-center py-4">
-            <i class="${iconClass} fa-3x text-success mb-3"></i>
-            <h5 class="text-success">${repoInfo}</h5>
-            <p class="text-muted mb-3">${url}</p>
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.open('${url}', '_blank')">
-                <i class="fas fa-external-link-alt mr-1"></i> Buka Repository
-            </button>
-        </div>
-    `).removeClass('error').addClass('loaded');
-}
-
-function isValidUrl(string) {
-    try {
-        const url = new URL(string);
-        return url.protocol === "http:" || url.protocol === "https:";
-    } catch (_) {
-        return false;
-    }
-}
-
-function confirmInputRepository() {
-    const url = $('#link_repository').val().trim();
-    return confirm(`Yakin ingin menyimpan repository link?\n\n${url}\n\nSetelah disimpan, Anda akan dialihkan ke halaman validasi final.`);
-}
-
-function downloadFile(type, id) {
-    window.open('<?= base_url('staf/publikasi/download_file/') ?>' + type + '/' + id, '_blank');
-}
+});
 </script>

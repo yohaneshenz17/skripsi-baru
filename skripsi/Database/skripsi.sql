@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 05, 2025 at 06:05 AM
+-- Generation Time: Aug 05, 2025 at 07:00 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -98,6 +98,33 @@ CREATE DEFINER=`stkp7133`@`localhost` FUNCTION `check_jurnal_requirement_seminar
     );
     
     RETURN v_result;
+END$$
+
+CREATE DEFINER=`stkp7133`@`localhost` FUNCTION `check_syarat_publikasi` (`proposal_id` BIGINT) RETURNS VARCHAR(500) CHARSET latin1 COLLATE latin1_swedish_ci DETERMINISTIC READS SQL DATA BEGIN
+    DECLARE jurnal_count INT DEFAULT 0;
+    DECLARE workflow_stat VARCHAR(50) DEFAULT '';
+    DECLARE result VARCHAR(500) DEFAULT '';
+    
+    -- Cek jumlah jurnal bimbingan tervalidasi
+    SELECT COUNT(*) INTO jurnal_count
+    FROM jurnal_bimbingan 
+    WHERE proposal_id = proposal_id AND status_validasi = '1';
+    
+    -- Cek workflow status dari proposal_mahasiswa
+    SELECT workflow_status INTO workflow_stat
+    FROM proposal_mahasiswa 
+    WHERE id = proposal_id;
+    
+    -- Validasi syarat
+    IF jurnal_count < 16 THEN
+        SET result = CONCAT('Jurnal bimbingan belum memenuhi syarat. Saat ini: ', jurnal_count, '/16 tervalidasi');
+    ELSEIF workflow_stat != 'seminar_skripsi' AND workflow_stat != 'publikasi' THEN
+        SET result = CONCAT('Workflow belum sampai tahap publikasi. Status saat ini: ', workflow_stat);
+    ELSE
+        SET result = 'ELIGIBLE';
+    END IF;
+    
+    RETURN result;
 END$$
 
 DELIMITER ;
@@ -664,6 +691,27 @@ INSERT INTO `log_penelitian` (`id`, `permohonan_id`, `user_id`, `user_role`, `ak
 (4, 4, 25, 'dosen', 'review_pembimbing', 'Dosen memberikan review: Disetujui', '2025-08-03 07:17:58'),
 (5, 5, 25, 'dosen', 'review_pembimbing', 'Dosen memberikan review: Disetujui', '2025-08-03 07:44:02'),
 (6, 6, 25, 'dosen', 'review_pembimbing', 'Dosen memberikan review: Disetujui', '2025-08-04 05:29:01');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `log_publikasi`
+--
+
+CREATE TABLE `log_publikasi` (
+  `id` bigint(20) NOT NULL,
+  `publikasi_id` bigint(20) NOT NULL COMMENT 'FK ke publikasi_tugas_akhir',
+  `user_id` bigint(20) NOT NULL COMMENT 'ID user yang melakukan aktivitas',
+  `user_role` enum('mahasiswa','dosen','staf','kaprodi','admin') NOT NULL COMMENT 'Role user',
+  `user_name` varchar(100) NOT NULL COMMENT 'Nama user',
+  `aktivitas` varchar(100) NOT NULL COMMENT 'Jenis aktivitas',
+  `deskripsi` text NOT NULL COMMENT 'Deskripsi detail aktivitas',
+  `data_before` text DEFAULT NULL COMMENT 'Data sebelum perubahan (JSON)',
+  `data_after` text DEFAULT NULL COMMENT 'Data setelah perubahan (JSON)',
+  `ip_address` varchar(45) DEFAULT NULL COMMENT 'IP address user',
+  `user_agent` text DEFAULT NULL COMMENT 'Browser user agent',
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log aktivitas publikasi tugas akhir';
 
 -- --------------------------------------------------------
 
@@ -1742,6 +1790,139 @@ INSERT INTO `proposal_workflow_backup_full_20250725_070204` (`id`, `proposal_id`
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `publikasi_mahasiswa_v`
+-- (See below for the actual view)
+--
+CREATE TABLE `publikasi_mahasiswa_v` (
+`id` bigint(20)
+,`proposal_mahasiswa_id` bigint(20)
+,`mahasiswa_id` bigint(20)
+,`nama_mahasiswa` varchar(100)
+,`nim` varchar(50)
+,`program_studi` enum('Pendidikan Keagamaan Katolik','Pendidikan Guru Sekolah Dasar')
+,`judul_skripsi_final` text
+,`nama_dosen_pembimbing` varchar(100)
+,`tanggal_ujian_skripsi` date
+,`status` enum('draft','submitted','review_pembimbing','review_staf','completed','rejected')
+,`status_pembimbing` enum('pending','approved','rejected')
+,`status_staf` enum('pending','approved','rejected')
+,`tanggal_pengajuan` datetime
+,`tanggal_review_pembimbing` datetime
+,`tanggal_validasi_staf` datetime
+,`tanggal_selesai` datetime
+,`link_repository` varchar(500)
+,`file_surat_revisi` varchar(255)
+,`file_skripsi_final` varchar(255)
+,`file_surat_perpustakaan` varchar(255)
+,`keterangan_mahasiswa` text
+,`komentar_pembimbing` text
+,`komentar_staf` text
+,`email_mahasiswa` varchar(100)
+,`nomor_telepon` varchar(30)
+,`workflow_status` enum('proposal','bimbingan','seminar_proposal','penelitian','seminar_skripsi','publikasi','selesai')
+,`judul_proposal_awal` varchar(250)
+,`nama_pembimbing_lengkap` varchar(100)
+,`email_pembimbing` varchar(100)
+,`status_description` varchar(26)
+,`progress_percentage` int(3)
+,`syarat_publikasi_status` varchar(500)
+,`created_at` datetime
+,`updated_at` datetime
+);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `publikasi_tugas_akhir`
+--
+
+CREATE TABLE `publikasi_tugas_akhir` (
+  `id` bigint(20) NOT NULL,
+  `proposal_mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke proposal_mahasiswa',
+  `mahasiswa_id` bigint(20) NOT NULL COMMENT 'FK ke mahasiswa untuk redundancy check',
+  `nama_mahasiswa` varchar(100) NOT NULL COMMENT 'Nama lengkap mahasiswa',
+  `nim` varchar(50) NOT NULL COMMENT 'NIM mahasiswa',
+  `program_studi` enum('Pendidikan Keagamaan Katolik','Pendidikan Guru Sekolah Dasar') NOT NULL,
+  `judul_skripsi_final` text NOT NULL COMMENT 'Judul skripsi final (input manual)',
+  `dosen_pembimbing_id` bigint(20) NOT NULL COMMENT 'FK ke dosen pembimbing',
+  `nama_dosen_pembimbing` varchar(100) NOT NULL COMMENT 'Nama dosen pembimbing',
+  `tanggal_ujian_skripsi` date NOT NULL COMMENT 'Tanggal ujian skripsi (auto dari seminar skripsi)',
+  `file_surat_revisi` varchar(255) NOT NULL COMMENT 'Surat keterangan telah melaksanakan revisi (PDF max 1MB)',
+  `file_skripsi_final` varchar(255) NOT NULL COMMENT 'File skripsi final (PDF max 5MB)',
+  `file_surat_perpustakaan` varchar(255) NOT NULL COMMENT 'Surat keterangan penyerahan skripsi dari perpustakaan (PDF max 1MB)',
+  `link_repository` varchar(500) DEFAULT NULL COMMENT 'Link repository/publikasi tugas akhir (opsional, diinput oleh staf)',
+  `status` enum('draft','submitted','review_pembimbing','review_staf','completed','rejected') DEFAULT 'draft' COMMENT 'Status pengajuan',
+  `status_pembimbing` enum('pending','approved','rejected') DEFAULT 'pending' COMMENT 'Status approval dosen pembimbing',
+  `status_staf` enum('pending','approved','rejected') DEFAULT 'pending' COMMENT 'Status validasi staf',
+  `keterangan_mahasiswa` text DEFAULT NULL COMMENT 'Catatan dari mahasiswa',
+  `komentar_pembimbing` text DEFAULT NULL COMMENT 'Komentar dari dosen pembimbing',
+  `komentar_staf` text DEFAULT NULL COMMENT 'Komentar dari staf',
+  `tanggal_pengajuan` datetime DEFAULT NULL COMMENT 'Tanggal mahasiswa submit pengajuan',
+  `tanggal_review_pembimbing` datetime DEFAULT NULL COMMENT 'Tanggal dosen memberikan review',
+  `tanggal_validasi_staf` datetime DEFAULT NULL COMMENT 'Tanggal staf validasi',
+  `tanggal_selesai` datetime DEFAULT NULL COMMENT 'Tanggal proses publikasi selesai',
+  `validated_by_staf_id` bigint(20) DEFAULT NULL COMMENT 'ID staf yang melakukan validasi',
+  `validated_by_staf_name` varchar(100) DEFAULT NULL COMMENT 'Nama staf yang validasi',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tabel untuk mengelola publikasi tugas akhir mahasiswa';
+
+--
+-- Triggers `publikasi_tugas_akhir`
+--
+DELIMITER $$
+CREATE TRIGGER `tr_publikasi_completed` AFTER UPDATE ON `publikasi_tugas_akhir` FOR EACH ROW BEGIN
+    -- Jika status berubah ke completed, update workflow_status di proposal_mahasiswa
+    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+        UPDATE proposal_mahasiswa 
+        SET workflow_status = 'selesai',
+            updated_at = NOW()
+        WHERE id = NEW.proposal_mahasiswa_id;
+        
+        -- Set tanggal_selesai
+        UPDATE publikasi_tugas_akhir 
+        SET tanggal_selesai = NOW()
+        WHERE id = NEW.id;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `tr_publikasi_log` AFTER UPDATE ON `publikasi_tugas_akhir` FOR EACH ROW BEGIN
+    -- Log perubahan status
+    IF NEW.status != OLD.status THEN
+        INSERT INTO log_publikasi (
+            publikasi_id, user_id, user_role, user_name, aktivitas, deskripsi
+        ) VALUES (
+            NEW.id, 
+            COALESCE(NEW.validated_by_staf_id, NEW.mahasiswa_id), 
+            CASE WHEN NEW.validated_by_staf_id IS NOT NULL THEN 'staf' ELSE 'system' END,
+            COALESCE(NEW.validated_by_staf_name, 'System Auto'),
+            'status_changed',
+            CONCAT('Status berubah dari ', OLD.status, ' ke ', NEW.status)
+        );
+    END IF;
+    
+    -- Log input link repository oleh staf
+    IF NEW.link_repository != OLD.link_repository AND NEW.link_repository IS NOT NULL THEN
+        INSERT INTO log_publikasi (
+            publikasi_id, user_id, user_role, user_name, aktivitas, deskripsi
+        ) VALUES (
+            NEW.id, 
+            NEW.validated_by_staf_id,
+            'staf',
+            NEW.validated_by_staf_name,
+            'input_repository',
+            CONCAT('Input link repository: ', NEW.link_repository)
+        );
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `seminar`
 --
 
@@ -2412,6 +2593,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER V
 -- --------------------------------------------------------
 
 --
+-- Structure for view `publikasi_mahasiswa_v`
+--
+DROP TABLE IF EXISTS `publikasi_mahasiswa_v`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`stkp7133`@`localhost` SQL SECURITY DEFINER VIEW `publikasi_mahasiswa_v`  AS SELECT `p`.`id` AS `id`, `p`.`proposal_mahasiswa_id` AS `proposal_mahasiswa_id`, `p`.`mahasiswa_id` AS `mahasiswa_id`, `p`.`nama_mahasiswa` AS `nama_mahasiswa`, `p`.`nim` AS `nim`, `p`.`program_studi` AS `program_studi`, `p`.`judul_skripsi_final` AS `judul_skripsi_final`, `p`.`nama_dosen_pembimbing` AS `nama_dosen_pembimbing`, `p`.`tanggal_ujian_skripsi` AS `tanggal_ujian_skripsi`, `p`.`status` AS `status`, `p`.`status_pembimbing` AS `status_pembimbing`, `p`.`status_staf` AS `status_staf`, `p`.`tanggal_pengajuan` AS `tanggal_pengajuan`, `p`.`tanggal_review_pembimbing` AS `tanggal_review_pembimbing`, `p`.`tanggal_validasi_staf` AS `tanggal_validasi_staf`, `p`.`tanggal_selesai` AS `tanggal_selesai`, `p`.`link_repository` AS `link_repository`, `p`.`file_surat_revisi` AS `file_surat_revisi`, `p`.`file_skripsi_final` AS `file_skripsi_final`, `p`.`file_surat_perpustakaan` AS `file_surat_perpustakaan`, `p`.`keterangan_mahasiswa` AS `keterangan_mahasiswa`, `p`.`komentar_pembimbing` AS `komentar_pembimbing`, `p`.`komentar_staf` AS `komentar_staf`, `m`.`email` AS `email_mahasiswa`, `m`.`nomor_telepon` AS `nomor_telepon`, `pm`.`workflow_status` AS `workflow_status`, `pm`.`judul` AS `judul_proposal_awal`, `d`.`nama` AS `nama_pembimbing_lengkap`, `d`.`email` AS `email_pembimbing`, CASE `p`.`status` WHEN 'draft' THEN 'Draft - Belum disubmit' WHEN 'submitted' THEN 'Menunggu review pembimbing' WHEN 'review_pembimbing' THEN 'Sedang direview pembimbing' WHEN 'review_staf' THEN 'Menunggu validasi staf' WHEN 'completed' THEN 'Publikasi selesai' WHEN 'rejected' THEN 'Ditolak' ELSE 'Status tidak dikenali' END AS `status_description`, CASE WHEN `p`.`status` = 'completed' THEN 100 WHEN `p`.`status` = 'review_staf' THEN 80 WHEN `p`.`status` = 'review_pembimbing' THEN 60 WHEN `p`.`status` = 'submitted' THEN 40 WHEN `p`.`status` = 'draft' THEN 20 ELSE 0 END AS `progress_percentage`, `check_syarat_publikasi`(`p`.`proposal_mahasiswa_id`) AS `syarat_publikasi_status`, `p`.`created_at` AS `created_at`, `p`.`updated_at` AS `updated_at` FROM (((`publikasi_tugas_akhir` `p` join `mahasiswa` `m` on(`p`.`mahasiswa_id` = `m`.`id`)) join `proposal_mahasiswa` `pm` on(`p`.`proposal_mahasiswa_id` = `pm`.`id`)) left join `dosen` `d` on(`p`.`dosen_pembimbing_id` = `d`.`id`)) ORDER BY `p`.`updated_at` DESC ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `seminar_proposal_mahasiswa_v`
 --
 DROP TABLE IF EXISTS `seminar_proposal_mahasiswa_v`;
@@ -2552,6 +2742,16 @@ ALTER TABLE `log_penelitian`
   ADD KEY `idx_aktivitas` (`aktivitas`);
 
 --
+-- Indexes for table `log_publikasi`
+--
+ALTER TABLE `log_publikasi`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_publikasi` (`publikasi_id`),
+  ADD KEY `idx_user` (`user_id`),
+  ADD KEY `idx_aktivitas` (`aktivitas`),
+  ADD KEY `idx_tanggal` (`created_at`);
+
+--
 -- Indexes for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
@@ -2660,6 +2860,18 @@ ALTER TABLE `proposal_workflow`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_proposal_id` (`proposal_id`),
   ADD KEY `idx_tahap` (`tahap`);
+
+--
+-- Indexes for table `publikasi_tugas_akhir`
+--
+ALTER TABLE `publikasi_tugas_akhir`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_proposal_publikasi` (`proposal_mahasiswa_id`),
+  ADD KEY `idx_mahasiswa` (`mahasiswa_id`),
+  ADD KEY `idx_pembimbing` (`dosen_pembimbing_id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_workflow` (`status_pembimbing`,`status_staf`),
+  ADD KEY `idx_tanggal` (`tanggal_pengajuan`,`tanggal_selesai`);
 
 --
 -- Indexes for table `seminar`
@@ -2783,6 +2995,12 @@ ALTER TABLE `log_penelitian`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `log_publikasi`
+--
+ALTER TABLE `log_publikasi`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
@@ -2847,6 +3065,12 @@ ALTER TABLE `proposal_mahasiswa`
 --
 ALTER TABLE `proposal_workflow`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `publikasi_tugas_akhir`
+--
+ALTER TABLE `publikasi_tugas_akhir`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `seminar`

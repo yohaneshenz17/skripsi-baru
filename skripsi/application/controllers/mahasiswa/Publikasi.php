@@ -558,11 +558,249 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Send notification ke dosen - TIDAK DIUBAH
+     * ✅ REPLACE: Method utama untuk kirim notifikasi publikasi
+     * Ganti method _send_notification_to_dosen() yang lama
      */
     private function _send_notification_to_dosen($publikasi) {
-        // Implementation tetap sama
-        log_message('info', "Notification sent to dosen_id: {$publikasi->dosen_pembimbing_id} for publikasi_id: {$publikasi->id}");
+        try {
+            // Get data lengkap untuk notifikasi
+            $data = $this->db->select('
+                    p.*, 
+                    pm.judul as judul_proposal,
+                    pm.dosen_id as pembimbing_id,
+                    m.nama as nama_mahasiswa,
+                    m.nim,
+                    m.email as email_mahasiswa,
+                    d.email as email_pembimbing,
+                    d.nama as nama_pembimbing
+                ')
+                ->from('publikasi_mahasiswa p')
+                ->join('proposal_mahasiswa pm', 'p.proposal_id = pm.id')
+                ->join('mahasiswa m', 'pm.mahasiswa_id = m.id')
+                ->join('dosen d', 'pm.dosen_id = d.id')
+                ->where('p.id', $publikasi->id)
+                ->get()->row();
+                
+            if (!$data || !$data->email_pembimbing) {
+                log_message('error', 'Data publikasi atau email dosen tidak ditemukan untuk notifikasi');
+                return false;
+            }
+            
+            // Tentukan apakah ini pengajuan baru atau pengajuan ulang
+            $is_resubmission = $this->_is_resubmission_publikasi($publikasi->proposal_id);
+            
+            // Kirim email ke dosen pembimbing
+            $this->_kirim_email_publikasi_ke_dosen($data, $is_resubmission);
+            
+            // Kirim email konfirmasi ke mahasiswa
+            $this->_kirim_email_konfirmasi_publikasi_mahasiswa($data, $is_resubmission);
+            
+            log_message('info', "Publikasi notification sent - ID: {$publikasi->id}, Proposal: {$publikasi->proposal_id}");
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending publikasi notification: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * ✅ BARU: Email ke dosen pembimbing ketika mahasiswa ajukan publikasi
+     */
+    private function _kirim_email_publikasi_ke_dosen($data, $is_resubmission = false) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM TA STK Santo Yakobus');
+            $this->email->to($data->email_pembimbing);
+            
+            $subject_prefix = $is_resubmission ? '🔄 Pengajuan Ulang' : '📄 Pengajuan Baru';
+            $this->email->subject($subject_prefix . ' Publikasi Tugas Akhir - ' . $data->nama_mahasiswa);
+            
+            $submission_text = $is_resubmission ? 
+                'telah mengajukan <strong>ULANG</strong> publikasi tugas akhir' : 
+                'telah mengajukan publikasi tugas akhir';
+                
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #007bff; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📄 Publikasi Tugas Akhir</h2>
+                    <p style='margin: 5px 0 0 0; opacity: 0.9;'>" . ($is_resubmission ? 'Pengajuan Ulang' : 'Pengajuan Baru') . "</p>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. <strong>{$data->nama_pembimbing}</strong>,</p>
+                    
+                    <p>Mahasiswa bimbingan Anda {$submission_text} dengan detail sebagai berikut:</p>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td style='padding: 5px 0;'><strong>Nama:</strong></td><td>{$data->nama_mahasiswa}</td></tr>
+                            <tr><td style='padding: 5px 0;'><strong>NIM:</strong></td><td>{$data->nim}</td></tr>
+                            <tr><td style='padding: 5px 0;'><strong>Judul:</strong></td><td>{$data->judul_proposal}</td></tr>
+                            <tr><td style='padding: 5px 0;'><strong>Tanggal Ajukan:</strong></td><td>" . date('d F Y H:i') . "</td></tr>
+                        </table>
+                    </div>";
+                    
+            if ($is_resubmission) {
+                $message .= "
+                    <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0;'>
+                        <h4 style='color: #856404; margin-top: 0;'>⚠️ Pengajuan Ulang</h4>
+                        <p style='margin: 0; color: #856404;'>Ini adalah pengajuan ulang setelah perbaikan berdasarkan feedback sebelumnya.</p>
+                    </div>";
+            }
+            
+            $message .= "
+                    <div style='background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #495057; margin-top: 0;'>📋 Tindakan Diperlukan:</h4>
+                        <p style='margin: 5px 0;'>• Review kelengkapan dokumen publikasi</p>
+                        <p style='margin: 5px 0;'>• Verifikasi kesesuaian dengan hasil seminar skripsi</p>
+                        <p style='margin: 5px 0;'>• Berikan rekomendasi (Setujui/Revisi)</p>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('dosen/publikasi') . "' style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📄 Buka Menu Publikasi
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem untuk koordinasi proses publikasi tugas akhir.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', "Email publikasi sent to dosen: {$data->email_pembimbing}");
+                return true;
+            } else {
+                log_message('error', 'Failed to send email to dosen: ' . $this->email->print_debugger());
+                return false;
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending email to dosen: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ BARU: Email konfirmasi ke mahasiswa setelah submit
+     */
+    private function _kirim_email_konfirmasi_publikasi_mahasiswa($data, $is_resubmission = false) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM TA STK Santo Yakobus');
+            $this->email->to($data->email_mahasiswa);
+            
+            $subject_prefix = $is_resubmission ? 'Pengajuan Ulang' : 'Pengajuan';
+            $this->email->subject('✅ ' . $subject_prefix . ' Publikasi Berhasil Dikirim');
+            
+            $submission_text = $is_resubmission ? 'pengajuan ulang' : 'pengajuan';
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <div style='background-color: #28a745; color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Publikasi Berhasil Diajukan</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Yth. <strong>{$data->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Terima kasih! {$submission_text} publikasi tugas akhir Anda telah berhasil dikirim kepada dosen pembimbing untuk review.</p>
+                    
+                    <div style='background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <h4 style='color: #28a745; margin-top: 0;'>Detail Pengajuan:</h4>
+                        <table style='width: 100%; font-size: 14px;'>
+                            <tr><td><strong>Judul:</strong></td><td>{$data->judul_proposal}</td></tr>
+                            <tr><td><strong>Pembimbing:</strong></td><td>{$data->nama_pembimbing}</td></tr>
+                            <tr><td><strong>Waktu Submit:</strong></td><td>" . date('d F Y H:i') . "</td></tr>
+                            <tr><td><strong>Status:</strong></td><td><span style='color: #ffc107;'>⏳ Menunggu Review Dosen</span></td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #bee5eb; margin: 15px 0;'>
+                        <h4 style='color: #0c5460; margin-top: 0;'>📋 Langkah Selanjutnya:</h4>
+                        <p style='margin: 5px 0; color: #0c5460;'>• Dosen pembimbing akan melakukan review</p>
+                        <p style='margin: 5px 0; color: #0c5460;'>• Anda akan mendapat notifikasi hasil review</p>
+                        <p style='margin: 5px 0; color: #0c5460;'>• Jika disetujui, akan diteruskan ke staf untuk validasi</p>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('mahasiswa/publikasi') . "' style='background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📊 Lihat Status Publikasi
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px;'>
+                        Anda dapat memantau progress publikasi melalui dashboard mahasiswa.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            
+            if ($this->email->send()) {
+                log_message('info', "Email konfirmasi publikasi sent to mahasiswa: {$data->email_mahasiswa}");
+                return true;
+            } else {
+                log_message('error', 'Failed to send confirmation email to mahasiswa: ' . $this->email->print_debugger());
+                return false;
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending confirmation email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ BARU: Helper method untuk cek apakah ini pengajuan ulang
+     */
+    private function _is_resubmission_publikasi($proposal_id) {
+        try {
+            $count = $this->db->where('proposal_id', $proposal_id)
+                             ->where('status !=', 'draft')
+                             ->count_all_results('publikasi_mahasiswa');
+            return $count > 1;
+        } catch (Exception $e) {
+            log_message('error', 'Error checking resubmission: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ BARU: Helper method untuk email config (sama seperti Seminar_skripsi.php)
+     */
+    private function _get_email_config() {
+        return [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug',
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls',
+            'smtp_timeout' => 30
+        ];
     }
 
     /**

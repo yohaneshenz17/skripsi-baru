@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 06, 2025 at 10:43 AM
+-- Generation Time: Aug 06, 2025 at 11:58 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1913,7 +1913,7 @@ CREATE TABLE `publikasi_tugas_akhir` (
 --
 
 INSERT INTO `publikasi_tugas_akhir` (`id`, `proposal_mahasiswa_id`, `mahasiswa_id`, `nama_mahasiswa`, `nim`, `program_studi`, `judul_skripsi_final`, `dosen_pembimbing_id`, `nama_dosen_pembimbing`, `tanggal_ujian_skripsi`, `file_surat_revisi`, `file_skripsi_final`, `file_surat_perpustakaan`, `link_repository`, `file_surat_keterangan`, `status`, `status_pembimbing`, `status_staf`, `keterangan_mahasiswa`, `komentar_pembimbing`, `komentar_staf`, `tanggal_pengajuan`, `tanggal_review_pembimbing`, `tanggal_validasi_staf`, `tanggal_selesai`, `validated_by_staf_id`, `validated_by_staf_name`, `created_at`, `updated_at`) VALUES
-(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/downloadphp.pdf', NULL, 'review_staf', 'approved', 'approved', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Disetujui melalui quick approve', 'tes', '2025-08-05 14:50:29', '2025-08-05 15:59:49', '2025-08-06 10:35:37', NULL, 29, 'Maria Karolina Itu', '2025-08-05 11:16:50', '2025-08-06 10:35:37'),
+(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/downloadphp.pdf', NULL, 'review_staf', 'approved', 'pending', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Disetujui melalui quick approve', NULL, '2025-08-05 14:50:29', '2025-08-05 15:59:49', NULL, NULL, 29, 'Maria Karolina Itu', '2025-08-05 11:16:50', '2025-08-06 11:58:32'),
 (3, 46, 46, 'Mahasiswa Contoh 3', '12345677', 'Pendidikan Keagamaan Katolik', 'PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805130952_46_6891a0307cdc4.pdf', 'SKRIPSI_FINAL_20250805130952_46_6891a0307cf34.pdf', 'SURAT_PERPUS_20250805130952_46_6891a0307c980.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2024/04/Formulir-PMB.pdf', NULL, 'review_staf', 'approved', 'approved', 'tes saja', 'Saya merekomendasikan publikasi ini untuk latihan saja ya', 'Sudah ok', '2025-08-05 13:25:37', '2025-08-05 15:42:50', '2025-08-06 06:52:27', NULL, 29, 'Maria Karolina Itu', '2025-08-05 13:09:52', '2025-08-06 06:52:27');
 
 --

@@ -337,17 +337,17 @@ class Publikasi_model extends CI_Model {
         try {
             $this->db->trans_start();
             
-            $update_data = [
+             $update_data = [
                 'status' => 'completed',
-                'current_step' => 'selesai',
+                // 'current_step' => 'selesai',        // ❌ SUDAH DIHAPUS
                 'status_staf' => 'approved',
                 'link_repository' => $data['link_repository'],
                 'komentar_staf' => $data['komentar_staf'] ?? null,
                 'validated_by_staf_id' => $data['validated_by_staf_id'],
                 'validated_by_staf_name' => $data['validated_by_staf_name'],
                 'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
-                'tanggal_selesai' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'tanggal_selesai' => date('Y-m-d H:i:s')
+                // 'updated_at' => date('Y-m-d H:i:s')  // ❌ HAPUS INI JUGA
             ];
             
             $this->db->where('id', $publikasi_id)
@@ -362,15 +362,15 @@ class Publikasi_model extends CI_Model {
                 ];
             }
             
-            // Update workflow_status di proposal_mahasiswa ke 'publikasi'
+            // ✅ PERBAIKAN: Ganti 'publikasi' jadi 'selesai'
             $publikasi = $this->get_by_id($publikasi_id);
             if ($publikasi) {
                 $this->db->where('id', $publikasi->proposal_mahasiswa_id)
-                       ->update('proposal_mahasiswa', ['workflow_status' => 'selesai']);
+                       ->update('proposal_mahasiswa', ['workflow_status' => 'selesai']); // ✅ 'selesai' bukan 'publikasi'
             }
             
-            // Log aktivitas
-            $this->_log_activity($publikasi_id, $data['validated_by_staf_id'], 'staf', 'complete_publikasi', 'Staf menyelesaikan validasi publikasi dan input repository: ' . $data['link_repository']);
+            // Log aktivitas (skip jika method tidak ada)
+            // $this->_log_activity($publikasi_id, $data['validated_by_staf_id'], 'staf', 'complete_publikasi', 'Staf menyelesaikan validasi publikasi dan input repository: ' . $data['link_repository']);
             
             $this->db->trans_complete();
             

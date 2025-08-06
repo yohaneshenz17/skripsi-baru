@@ -548,35 +548,326 @@ class Publikasi extends CI_Controller {
     }
 
     /**
-     * Send notification email with error handling
+     * 1. REPLACE method _send_notification_email_safe() yang sudah ada
      */
     private function _send_notification_email_safe($publikasi, $keputusan, $catatan) {
         try {
+            // Load email library dengan config yang proper
             $this->load->library('email');
+            $config = $this->_get_email_config(); // ← METHOD BARU
+            $this->email->initialize($config);
             
-            $subject = 'Notifikasi Validasi Publikasi Tugas Akhir';
             $status_text = $keputusan === 'approved' ? 'DISETUJUI' : 'DITOLAK';
+            $staf_nama = $this->session->userdata('nama') ?? 'Staf Akademik';
             
-            $message = "
-            <h3>Publikasi Tugas Akhir {$status_text}</h3>
-            <p><strong>Mahasiswa:</strong> {$publikasi->nama_mahasiswa}</p>
-            <p><strong>Judul:</strong> {$publikasi->judul}</p>
-            <p><strong>Status:</strong> {$status_text}</p>
-            <p><strong>Catatan:</strong> {$catatan}</p>
-            <p><strong>Tanggal:</strong> " . date('d F Y') . "</p>
-            ";
+            // Data untuk semua email
+            $email_data = [
+                'nama_mahasiswa' => $publikasi->nama_mahasiswa ?? 'Mahasiswa',
+                'nim' => $publikasi->nim ?? '',
+                'judul' => $publikasi->judul ?? '',
+                'nama_dosen' => $publikasi->nama_dosen ?? '',
+                'status_text' => $status_text,
+                'keputusan' => $keputusan,
+                'catatan' => $catatan,
+                'tanggal' => date('d F Y'),
+                'staf_nama' => $staf_nama,
+                'link_repository' => $publikasi->link_repository ?? ''
+            ];
             
-            // Kirim ke mahasiswa jika email tersedia
+            $success_count = 0;
+            
+            // 1. EMAIL KE MAHASISWA (Enhanced template)
             if (!empty($publikasi->email_mahasiswa)) {
-                $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
-                $this->email->to($publikasi->email_mahasiswa);
-                $this->email->subject($subject);
-                $this->email->message($message);
-                $this->email->send();
+                if ($this->_send_email_mahasiswa($publikasi->email_mahasiswa, $email_data)) {
+                    $success_count++;
+                    log_message('info', "✅ Email ke mahasiswa berhasil: {$publikasi->email_mahasiswa}");
+                }
             }
+            
+            // 2. EMAIL KE DOSEN PEMBIMBING (NEW)
+            if (!empty($publikasi->email_dosen)) {
+                if ($this->_send_email_dosen($publikasi->email_dosen, $email_data)) {
+                    $success_count++;
+                    log_message('info', "✅ Email ke dosen berhasil: {$publikasi->email_dosen}");
+                }
+            }
+            
+            // 3. EMAIL KE KAPRODI (NEW)
+            $kaprodi_email = $this->_get_kaprodi_email();
+            if ($kaprodi_email) {
+                if ($this->_send_email_kaprodi($kaprodi_email, $email_data)) {
+                    $success_count++;
+                    log_message('info', "✅ Email ke kaprodi berhasil: {$kaprodi_email}");
+                }
+            }
+            
+            // Log summary
+            log_message('info', "📧 Email notification summary - publikasi_id: {$publikasi->id}, success: {$success_count}/3");
+            return $success_count > 0;
             
         } catch (Exception $e) {
             log_message('error', 'Email notification failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 3. TAMBAH method untuk get email kaprodi
+     */
+    private function _get_kaprodi_email() {
+        try {
+            // Ambil kaprodi berdasarkan level 4
+            $kaprodi = $this->db->select('email, nama')
+                               ->where('level', '4')
+                               ->where('email IS NOT NULL')
+                               ->where('email !=', '')
+                               ->get('dosen')
+                               ->row();
+            
+            return $kaprodi ? $kaprodi->email : null;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting kaprodi email: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 4. TAMBAH method email ke mahasiswa dengan template menarik
+     */
+    private function _send_email_mahasiswa($email, $data) {
+        try {
+            $this->email->clear();
+            $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($email);
+            $this->email->subject('📢 Hasil Validasi Publikasi Tugas Akhir - ' . $data['status_text']);
+            
+            // Template HTML menarik untuk mahasiswa
+            $message = "
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='utf-8'>
+                <style>
+                    .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+                    .header { background: #007bff; color: white; padding: 20px; text-align: center; }
+                    .content { padding: 20px; background: #f8f9fa; }
+                    .status-approved { color: #28a745; font-weight: bold; }
+                    .status-rejected { color: #dc3545; font-weight: bold; }
+                    .info-box { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                    .footer { background: #343a40; color: white; padding: 15px; text-align: center; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h2>🎓 STK Santo Yakobus Merauke</h2>
+                        <h3>Sistem Informasi Tugas Akhir</h3>
+                    </div>
+                    
+                    <div class='content'>
+                        <h3>Hasil Validasi Publikasi Tugas Akhir</h3>
+                        
+                        <div class='info-box'>
+                            <p><strong>Mahasiswa:</strong> {$data['nama_mahasiswa']}</p>
+                            <p><strong>NIM:</strong> {$data['nim']}</p>
+                            <p><strong>Judul:</strong> {$data['judul']}</p>
+                        </div>
+                        
+                        <div class='info-box'>
+                            <p><strong>Status Validasi:</strong> 
+                            <span class='status-" . ($data['keputusan'] === 'approved' ? 'approved' : 'rejected') . "'>
+                                " . ($data['keputusan'] === 'approved' ? '✅ DISETUJUI' : '❌ DITOLAK') . "
+                            </span></p>
+                            <p><strong>Tanggal Validasi:</strong> {$data['tanggal']}</p>
+                            <p><strong>Validator:</strong> {$data['staf_nama']}</p>
+                        </div>
+                        
+                        <div class='info-box'>
+                            <p><strong>Catatan Validasi:</strong></p>
+                            <p style='background: #e9ecef; padding: 10px; border-radius: 3px;'>{$data['catatan']}</p>
+                        </div>";
+                        
+            if ($data['keputusan'] === 'approved') {
+                $message .= "
+                        <div class='info-box' style='border: 2px solid #28a745;'>
+                            <h4 style='color: #28a745;'>🎉 Selamat!</h4>
+                            <p>Publikasi tugas akhir Anda telah <strong>disetujui</strong> dan telah dipublikasikan di repository perpustakaan digital.</p>";
+                            
+                if (!empty($data['link_repository'])) {
+                    $message .= "<p><strong>Link Repository:</strong> <a href='{$data['link_repository']}' target='_blank'>{$data['link_repository']}</a></p>";
+                }
+                
+                $message .= "
+                            <p>Terima kasih telah menyelesaikan tugas akhir dengan baik!</p>
+                        </div>";
+            } else {
+                $message .= "
+                        <div class='info-box' style='border: 2px solid #dc3545;'>
+                            <h4 style='color: #dc3545;'>📝 Perlu Perbaikan</h4>
+                            <p>Publikasi tugas akhir Anda <strong>perlu diperbaiki</strong> sesuai catatan di atas.</p>
+                            <p>Silakan hubungi dosen pembimbing atau staf akademik untuk konsultasi lebih lanjut.</p>
+                        </div>";
+            }
+            
+            $message .= "
+                    </div>
+                    
+                    <div class='footer'>
+                        <p>Email ini dikirim otomatis oleh Sistem Informasi Tugas Akhir STK Santo Yakobus</p>
+                        <p>Jangan reply email ini. Untuk pertanyaan, hubungi staf akademik.</p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            
+            $this->email->message($message);
+            return $this->email->send();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 5. TAMBAH method email ke dosen pembimbing
+     */
+    private function _send_email_dosen($email, $data) {
+        try {
+            $this->email->clear();
+            $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($email);
+            $this->email->subject('📋 Notifikasi Validasi Publikasi Mahasiswa Bimbingan - ' . $data['status_text']);
+            
+            // Template untuk dosen
+            $message = "
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='utf-8'>
+                <style>
+                    .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+                    .header { background: #17a2b8; color: white; padding: 20px; text-align: center; }
+                    .content { padding: 20px; background: #f8f9fa; }
+                    .info-box { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                    .footer { background: #343a40; color: white; padding: 15px; text-align: center; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h2>📋 Notifikasi untuk Dosen Pembimbing</h2>
+                        <h3>Validasi Publikasi Tugas Akhir</h3>
+                    </div>
+                    
+                    <div class='content'>
+                        <p>Yth. <strong>{$data['nama_dosen']}</strong>,</p>
+                        
+                        <div class='info-box'>
+                            <p>Publikasi tugas akhir mahasiswa bimbingan Anda telah divalidasi oleh staf akademik.</p>
+                        </div>
+                        
+                        <div class='info-box'>
+                            <p><strong>Mahasiswa:</strong> {$data['nama_mahasiswa']} ({$data['nim']})</p>
+                            <p><strong>Judul:</strong> {$data['judul']}</p>
+                            <p><strong>Status Validasi:</strong> <strong>{$data['status_text']}</strong></p>
+                            <p><strong>Tanggal Validasi:</strong> {$data['tanggal']}</p>
+                            <p><strong>Validator:</strong> {$data['staf_nama']}</p>
+                        </div>
+                        
+                        <div class='info-box'>
+                            <p><strong>Catatan Validasi:</strong></p>
+                            <p style='background: #e9ecef; padding: 10px; border-radius: 3px;'>{$data['catatan']}</p>
+                        </div>
+                        
+                        <p>Terima kasih atas bimbingan yang telah diberikan kepada mahasiswa.</p>
+                    </div>
+                    
+                    <div class='footer'>
+                        <p>Email ini dikirim otomatis oleh Sistem Informasi Tugas Akhir STK Santo Yakobus</p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            
+            $this->email->message($message);
+            return $this->email->send();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending email to dosen: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 6. TAMBAH method email ke kaprodi
+     */
+    private function _send_email_kaprodi($email, $data) {
+        try {
+            $this->email->clear();
+            $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
+            $this->email->to($email);
+            $this->email->subject('📊 Laporan Validasi Publikasi Tugas Akhir - ' . $data['status_text']);
+            
+            // Template untuk kaprodi (summary style)
+            $message = "
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='utf-8'>
+                <style>
+                    .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+                    .header { background: #6f42c1; color: white; padding: 20px; text-align: center; }
+                    .content { padding: 20px; background: #f8f9fa; }
+                    .info-box { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                    .footer { background: #343a40; color: white; padding: 15px; text-align: center; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h2>📊 Laporan untuk Kaprodi</h2>
+                        <h3>Validasi Publikasi Tugas Akhir</h3>
+                    </div>
+                    
+                    <div class='content'>
+                        <p>Yth. Kaprodi,</p>
+                        
+                        <div class='info-box'>
+                            <p>Berikut laporan hasil validasi publikasi tugas akhir mahasiswa:</p>
+                        </div>
+                        
+                        <div class='info-box'>
+                            <p><strong>Mahasiswa:</strong> {$data['nama_mahasiswa']} ({$data['nim']})</p>
+                            <p><strong>Dosen Pembimbing:</strong> {$data['nama_dosen']}</p>
+                            <p><strong>Judul:</strong> {$data['judul']}</p>
+                            <p><strong>Status Validasi:</strong> <strong>{$data['status_text']}</strong></p>
+                            <p><strong>Validator:</strong> {$data['staf_nama']}</p>
+                            <p><strong>Tanggal:</strong> {$data['tanggal']}</p>
+                        </div>
+                        
+                        <div class='info-box'>
+                            <p><strong>Catatan Validasi:</strong></p>
+                            <p style='background: #e9ecef; padding: 10px; border-radius: 3px;'>{$data['catatan']}</p>
+                        </div>
+                        
+                        <p>Laporan ini untuk monitoring dan evaluasi program studi.</p>
+                    </div>
+                    
+                    <div class='footer'>
+                        <p>Email ini dikirim otomatis oleh Sistem Informasi Tugas Akhir STK Santo Yakobus</p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            
+            $this->email->message($message);
+            return $this->email->send();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending email to kaprodi: ' . $e->getMessage());
+            return false;
         }
     }
 

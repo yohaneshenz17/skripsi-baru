@@ -38,6 +38,72 @@ File: application/views/mahasiswa/publikasi/form.php
     </div>
 </div>
 
+<!-- Enhanced Alert untuk Status Rejected - Tambahkan setelah Step Indicator -->
+<?php if (isset($publikasi) && $publikasi->status === 'rejected'): ?>
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card card-danger card-outline">
+            <div class="card-header bg-danger">
+                <h5 class="card-title text-white mb-0">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Pengajuan Publikasi Ditolak - Perlu Perbaikan</strong>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="mb-2">
+                            <strong>Dosen pembimbing telah menolak pengajuan publikasi Anda.</strong> 
+                            Silakan lakukan perbaikan sesuai catatan yang diberikan.
+                        </p>
+                        
+                        <?php if (!empty($publikasi->komentar_pembimbing)): ?>
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-comment-dots"></i> Catatan Dosen Pembimbing:</h6>
+                            <p class="mb-0 font-italic">
+                                "<?= nl2br(htmlspecialchars($publikasi->komentar_pembimbing)) ?>"
+                            </p>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-tasks"></i> Langkah yang Harus Dilakukan:</h6>
+                            <ol class="mb-0">
+                                <li><strong>Perbaiki dokumen</strong> sesuai catatan dosen pembimbing</li>
+                                <li><strong>Update data</strong> di form di bawah ini</li>
+                                <li><strong>Klik "Kirim Ajuan Ulang ke Dosen"</strong> setelah perbaikan selesai</li>
+                                <li><strong>Tunggu review ulang</strong> dari dosen pembimbing</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-box bg-light">
+                            <span class="info-box-icon bg-warning">
+                                <i class="fas fa-redo-alt"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Status Workflow</span>
+                                <span class="info-box-number">Step 6</span>
+                                <span class="progress-description">
+                                    Kembali ke Mahasiswa
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <?php if (!empty($publikasi->tanggal_review_pembimbing)): ?>
+                        <small class="text-muted">
+                            <i class="fas fa-clock"></i>
+                            Review: <?= date('d/m/Y H:i', strtotime($publikasi->tanggal_review_pembimbing)) ?>
+                        </small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Form Card -->
 <div class="card card-primary card-outline">
     <div class="card-header">
@@ -265,57 +331,67 @@ File: application/views/mahasiswa/publikasi/form.php
 
         </div>
         
-        <!-- Card Footer dengan Tombol - TIDAK DIUBAH -->
-        <div class="card-footer">
-            <div class="row">
-                <div class="col-md-8">
-                    <?php if ($action == 'ajukan'): ?>
-                        <button type="submit" name="submit_type" value="submit" class="btn btn-success btn-lg mr-2">
-                            <i class="fas fa-paper-plane"></i> 
-                            Kirim Ajuan ke Dosen (Step 3)
-                        </button>
-                        <button type="submit" name="submit_type" value="draft" class="btn btn-warning btn-lg">
-                            <i class="fas fa-save"></i> 
-                            Simpan sebagai Draft
-                        </button>
+<!-- Card Footer dengan Tombol - FIXED VERSION -->
+<div class="card-footer">
+    <div class="row">
+        <div class="col-md-8">
+            <?php if ($action == 'ajukan'): ?>
+                <!-- New submission -->
+                <button type="submit" name="submit_type" value="submit" class="btn btn-success btn-lg mr-2">
+                    <i class="fas fa-paper-plane"></i> 
+                    Kirim Ajuan ke Dosen (Step 3)
+                </button>
+                <button type="submit" name="submit_type" value="draft" class="btn btn-warning btn-lg">
+                    <i class="fas fa-save"></i> 
+                    Simpan sebagai Draft
+                </button>
+            <?php else: ?>
+                <!-- Edit existing submission -->
+                <button type="submit" name="submit_type" value="update" class="btn btn-primary btn-lg mr-2">
+                    <i class="fas fa-save"></i> 
+                    Update Data Publikasi
+                </button>
+                
+                <?php if (isset($publikasi) && in_array($publikasi->status, ['draft', 'rejected'])): ?>
+                <!-- ✅ FIX: Allow resubmission for both draft AND rejected status -->
+                <button type="submit" name="submit_type" value="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-paper-plane"></i> 
+                    <?php if ($publikasi->status == 'rejected'): ?>
+                        Kirim Ajuan Ulang ke Dosen
                     <?php else: ?>
-                        <button type="submit" name="submit_type" value="update" class="btn btn-primary btn-lg mr-2">
-                            <i class="fas fa-save"></i> 
-                            Update Data Publikasi
-                        </button>
-                        <?php if (isset($publikasi) && $publikasi->status == 'draft'): ?>
-                        <button type="submit" name="submit_type" value="submit" class="btn btn-success btn-lg">
-                            <i class="fas fa-paper-plane"></i> 
-                            Kirim Ajuan ke Dosen
-                        </button>
-                        <?php endif; ?>
+                        Kirim Ajuan ke Dosen
                     <?php endif; ?>
-                </div>
-                <div class="col-md-4 text-right">
-                    <a href="<?= base_url('mahasiswa/publikasi') ?>" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Informasi Step -->
-            <div class="mt-3">
-                <small class="text-muted">
-                    <i class="fas fa-info-circle"></i>
-                    <?php if ($action == 'ajukan'): ?>
-                        <strong>Petunjuk:</strong> Pilih "Simpan sebagai Draft" untuk menyimpan sementara (Step 2), atau "Kirim Ajuan ke Dosen" untuk langsung melanjutkan ke Step 3.
-                    <?php else: ?>
-                        <strong>Status:</strong> <?= ucfirst($publikasi->status ?? 'draft') ?> - 
-                        <?php if (isset($publikasi) && $publikasi->status == 'draft'): ?>
-                            Anda bisa mengedit data atau langsung kirim ajuan ke dosen.
-                        <?php else: ?>
-                            Data hanya bisa diupdate, tidak bisa diajukan ulang.
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </small>
-            </div>
+                </button>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
-    </form>
+        <div class="col-md-4 text-right">
+            <a href="<?= base_url('mahasiswa/publikasi') ?>" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Informasi Step - ENHANCED -->
+    <div class="mt-3">
+        <small class="text-muted">
+            <i class="fas fa-info-circle"></i>
+            <?php if ($action == 'ajukan'): ?>
+                <strong>Petunjuk:</strong> Pilih "Simpan sebagai Draft" untuk menyimpan sementara (Step 2), atau "Kirim Ajuan ke Dosen" untuk langsung melanjutkan ke Step 3.
+            <?php else: ?>
+                <strong>Status:</strong> <?= ucfirst($publikasi->status ?? 'draft') ?> - 
+                <?php if (isset($publikasi) && in_array($publikasi->status, ['draft', 'rejected'])): ?>
+                    <?php if ($publikasi->status == 'rejected'): ?>
+                        ✅ Anda dapat memperbaiki data dan mengirim ajuan ulang ke dosen pembimbing.
+                    <?php else: ?>
+                        Anda bisa mengedit data atau langsung kirim ajuan ke dosen.
+                    <?php endif; ?>
+                <?php else: ?>
+                    Data dapat diupdate, pengajuan sedang dalam proses review.
+                <?php endif; ?>
+            <?php endif; ?>
+        </small>
+    </div>
 </div>
 
 <!-- Help Card - Enhanced -->

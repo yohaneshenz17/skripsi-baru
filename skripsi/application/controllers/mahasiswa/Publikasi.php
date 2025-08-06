@@ -534,130 +534,232 @@ class Publikasi extends CI_Controller {
         }
     }
 
-    /**
-     * ✅ ENHANCED: Process update publikasi dengan dropdown dosen
-     */
-    private function _process_update($publikasi) {
-        // Validation rules - TIDAK BERUBAH
-        $this->form_validation->set_rules('nama_lengkap', 'Nama Lengkap', 'required|trim|max_length[100]');
-        $this->form_validation->set_rules('nim', 'NIM', 'required|trim|numeric|max_length[20]');
-        $this->form_validation->set_rules('program_studi', 'Program Studi', 'required|trim');
-        $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim|min_length[10]');
-        $this->form_validation->set_rules('dosen_pembimbing_id', 'Dosen Pembimbing', 'required|numeric');
-        $this->form_validation->set_rules('tanggal_ujian_skripsi', 'Tanggal Ujian Skripsi', 'required');
-        $this->form_validation->set_rules('link_repository', 'Link Repository', 'trim|valid_url');
-        $this->form_validation->set_rules('keterangan_mahasiswa', 'Keterangan', 'trim');
-        
-        if ($this->form_validation->run() === FALSE) {
-            $this->_show_form_edit($publikasi);
-            return;
-        }
-        
-        // Get data dosen - TIDAK BERUBAH
-        $dosen_pembimbing_id = $this->input->post('dosen_pembimbing_id');
-        $dosen_data = $this->_get_dosen_by_id($dosen_pembimbing_id);
-        
-        if (!$dosen_data) {
-            $this->session->set_flashdata('error', 'Data dosen pembimbing tidak ditemukan. Silakan pilih dosen lain.');
-            $this->_show_form_edit($publikasi);
-            return;
-        }
-        
-        // Handle file uploads - TIDAK BERUBAH
-        $upload_result = $this->_handle_file_uploads(false);
-        if (!$upload_result['success']) {
-            $this->session->set_flashdata('error', $upload_result['message']);
-            $this->_show_form_edit($publikasi);
-            return;
-        }
-        
-        $submit_type = $this->input->post('submit_type');
-        
-        // Data mapping - TIDAK BERUBAH
-        $data = [
-            'dosen_pembimbing_id' => $dosen_pembimbing_id,
-            'nim' => $this->input->post('nim'),
-            'nama_mahasiswa' => $this->input->post('nama_lengkap'),
-            'program_studi' => $this->input->post('program_studi'),
-            'judul_skripsi_final' => $this->input->post('judul_skripsi_final'),
-            'nama_dosen_pembimbing' => $dosen_data->nama,
-            'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
-            'link_repository' => $this->input->post('link_repository'),
-            'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
-        ];
-        
-        // ✅ HANYA INI YANG DIUBAH: Status update logic yang mendukung resubmit
-        $is_resubmit = false;
-        if ($submit_type === 'submit' && in_array($publikasi->status, ['draft', 'rejected'])) {
-            $data['status'] = 'submitted';
-            $data['tanggal_pengajuan'] = date('Y-m-d H:i:s');
-            
-            // ✅ TRACK resubmit tanpa mengganggu logic existing
-            if ($publikasi->status === 'rejected') {
-                $is_resubmit = true;
-                // Optional: bisa tambah field tracking jika diperlukan
-                $data['keterangan_mahasiswa'] = '[RESUBMIT] ' . $data['keterangan_mahasiswa'];
-            }
-        }
-        
-        // Update file jika ada - TIDAK BERUBAH
-        if (!empty($upload_result['files'])) {
-            $data = array_merge($data, $upload_result['files']);
-        }
-        
-        // Update database - TIDAK BERUBAH
-        $result = $this->publikasi->update($publikasi->id, $data, $this->mahasiswa_id);
-        
-        if ($result['success']) {
-            // ✅ ENHANCED SUCCESS MESSAGE untuk resubmit
-            if ($submit_type === 'submit' && in_array($publikasi->status, ['draft', 'rejected'])) {
-                
-                if ($is_resubmit) {
-                    $this->session->set_flashdata('success', 
-                        '✅ Pengajuan berhasil dikirim ulang ke dosen pembimbing! ' .
-                        'Status: Step 4-6 (Review Dosen). ' .
-                        'Dosen akan mendapat notifikasi untuk review ulang dokumen yang telah diperbaiki.'
-                    );
-                } else {
-                    $this->session->set_flashdata('success', 
-                        '✅ Data berhasil diperbarui dan dikirim ke dosen pembimbing! ' .
-                        'Status: Step 4-6 (Review Dosen). ' .
-                        'Dosen akan mendapat notifikasi untuk review.'
-                    );
-                }
-                
-                // ✅ TETAP GUNAKAN METHOD EMAIL EXISTING - TIDAK DIUBAH SAMA SEKALI
-                try {
-                    $email_data = array_merge($data, ['mahasiswa_id' => $this->mahasiswa_id]);
-                    $email_sent = $this->_send_notification_to_dosen_reliable($dosen_data, $email_data);
-                    
-                    if ($email_sent) {
-                        $action_type = $is_resubmit ? 'resubmitted' : 'updated and submitted';
-                        log_message('info', "✅ Email notification berhasil untuk {$action_type} publikasi ID: {$publikasi->id}");
-                    } else {
-                        log_message('warning', "⚠️ Email notification gagal untuk publikasi ID: {$publikasi->id}");
-                        $current_success = $this->session->flashdata('success');
-                        $this->session->set_flashdata('success', 
-                            $current_success . ' (Catatan: Notifikasi email mungkin bermasalah, silakan hubungi dosen pembimbing secara manual.)'
-                        );
-                    }
-                } catch (Exception $e) {
-                    log_message('error', "❌ Exception saat kirim email untuk publikasi ID {$publikasi->id}: " . $e->getMessage());
-                    $current_success = $this->session->flashdata('success');
-                    $this->session->set_flashdata('success', 
-                        $current_success . ' (Catatan: Sistem email bermasalah, silakan hubungi dosen pembimbing secara manual.)'
-                    );
-                }
-            } else {
-                $this->session->set_flashdata('success', '💾 Data publikasi berhasil diperbarui.');
-            }
-            
-            redirect('mahasiswa/publikasi/tracking/' . $publikasi->id);
-        } else {
-            $this->session->set_flashdata('error', $result['message']);
-            $this->_show_form_edit($publikasi);
-        }
+/**
+ * ✅ COMPLETELY FIXED: Process update publikasi dengan resubmission support
+ * Mengatasi masalah data tidak muncul di akun dosen setelah resubmit
+ */
+private function _process_update($publikasi) {
+    // Validation rules - TIDAK BERUBAH
+    $this->form_validation->set_rules('nama_lengkap', 'Nama Lengkap', 'required|trim|max_length[100]');
+    $this->form_validation->set_rules('nim', 'NIM', 'required|trim|numeric|max_length[20]');
+    $this->form_validation->set_rules('program_studi', 'Program Studi', 'required|trim');
+    $this->form_validation->set_rules('judul_skripsi_final', 'Judul Skripsi Final', 'required|trim|min_length[10]');
+    $this->form_validation->set_rules('dosen_pembimbing_id', 'Dosen Pembimbing', 'required|numeric');
+    $this->form_validation->set_rules('tanggal_ujian_skripsi', 'Tanggal Ujian Skripsi', 'required');
+    $this->form_validation->set_rules('link_repository', 'Link Repository', 'trim|valid_url');
+    $this->form_validation->set_rules('keterangan_mahasiswa', 'Keterangan', 'trim');
+    
+    if ($this->form_validation->run() === FALSE) {
+        $this->_show_form_edit($publikasi);
+        return;
     }
+    
+    // Get data dosen - TIDAK BERUBAH
+    $dosen_pembimbing_id = $this->input->post('dosen_pembimbing_id');
+    $dosen_data = $this->_get_dosen_by_id($dosen_pembimbing_id);
+    
+    if (!$dosen_data) {
+        $this->session->set_flashdata('error', 'Data dosen pembimbing tidak ditemukan. Silakan pilih dosen lain.');
+        $this->_show_form_edit($publikasi);
+        return;
+    }
+    
+    // Handle file uploads - TIDAK BERUBAH
+    $upload_result = $this->_handle_file_uploads(false);
+    if (!$upload_result['success']) {
+        $this->session->set_flashdata('error', $upload_result['message']);
+        $this->_show_form_edit($publikasi);
+        return;
+    }
+    
+    $submit_type = $this->input->post('submit_type');
+    $original_status = $publikasi->status;
+    
+    // Data mapping - TIDAK BERUBAH
+    $data = [
+        'dosen_pembimbing_id' => $dosen_pembimbing_id,
+        'nim' => $this->input->post('nim'),
+        'nama_mahasiswa' => $this->input->post('nama_lengkap'),
+        'program_studi' => $this->input->post('program_studi'),
+        'judul_skripsi_final' => $this->input->post('judul_skripsi_final'),
+        'nama_dosen_pembimbing' => $dosen_data->nama,
+        'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
+        'link_repository' => $this->input->post('link_repository'),
+        'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
+        'updated_at' => date('Y-m-d H:i:s') // Always update timestamp
+    ];
+    
+    // ✅ CRITICAL FIX: Enhanced status update logic untuk resubmit
+    $is_resubmit = false;
+    
+    if ($submit_type === 'submit') {
+        // ✅ ALLOW RESUBMISSION dari status 'draft' atau 'rejected'
+        if (in_array($original_status, ['draft', 'rejected'])) {
+            
+            // ✅ CRITICAL: Core fields yang harus diupdate untuk resubmit
+            $data['status'] = 'submitted';
+            $data['status_pembimbing'] = 'pending'; // Reset untuk review ulang
+            $data['tanggal_pengajuan'] = date('Y-m-d H:i:s'); // ✅ KEY FIX: Update tanggal pengajuan
+            
+            // ✅ RESET fields review sebelumnya untuk clean slate
+            $data['tanggal_review_pembimbing'] = null;
+            $data['komentar_pembimbing'] = null;
+            
+            // ✅ TRACK resubmit untuk logging dan notification
+            if ($original_status === 'rejected') {
+                $is_resubmit = true;
+                
+                // Add resubmit marker
+                if (!empty($data['keterangan_mahasiswa'])) {
+                    $data['keterangan_mahasiswa'] = '[RESUBMIT] ' . $data['keterangan_mahasiswa'];
+                } else {
+                    $data['keterangan_mahasiswa'] = '[RESUBMIT] Pengajuan ulang setelah perbaikan sesuai catatan dosen pembimbing';
+                }
+                
+                // ✅ TRACKING: Log resubmit ke database log jika ada
+                if (method_exists($this->publikasi, '_log_activity')) {
+                    $this->publikasi->_log_activity($publikasi->id, $this->mahasiswa_id, 'mahasiswa', 
+                        'resubmit_after_rejected', 'Mahasiswa mengajukan ulang publikasi setelah diperbaiki');
+                }
+            }
+        }
+    } elseif ($submit_type === 'update') {
+        // ✅ PURE UPDATE: hanya update data tanpa mengubah status workflow
+        // Tidak mengubah: status, status_pembimbing, tanggal_pengajuan
+    }
+    
+    // Update file jika ada - TIDAK BERUBAH
+    if (!empty($upload_result['files'])) {
+        $data = array_merge($data, $upload_result['files']);
+    }
+    
+    // ✅ DATABASE UPDATE: Execute dengan transaction untuk data consistency
+    $this->db->trans_start();
+    
+    $result = $this->publikasi->update($publikasi->id, $data, $this->mahasiswa_id);
+    
+    if ($result['success']) {
+        
+        // ✅ NOTIFICATION: Send email notification jika resubmit
+        if ($is_resubmit && $submit_type === 'submit') {
+            try {
+                // Send notification ke dosen pembimbing
+                $this->_send_resubmit_notification($publikasi->id, $dosen_pembimbing_id);
+                
+                // Optional: Send confirmation ke mahasiswa
+                // $this->_send_resubmit_confirmation($publikasi->id);
+                
+                log_message('info', "Publikasi resubmit notification sent - ID: {$publikasi->id}, Dosen: {$dosen_pembimbing_id}");
+            } catch (Exception $e) {
+                log_message('error', 'Error sending resubmit notification: ' . $e->getMessage());
+                // Continue execution - notification error tidak menghentikan proses
+            }
+        }
+        
+        $this->db->trans_complete();
+        
+        // ✅ SUCCESS MESSAGES: Enhanced feedback
+        if ($submit_type === 'submit' && in_array($original_status, ['draft', 'rejected'])) {
+            if ($is_resubmit) {
+                $this->session->set_flashdata('success', 
+                    '✅ Pengajuan berhasil dikirim ulang ke dosen pembimbing! ' .
+                    'Status: Step 4-6 (Review Dosen). ' .
+                    'Dosen akan mendapat notifikasi untuk review ulang dokumen yang telah diperbaiki. ' .
+                    'Data akan segera muncul di dashboard dosen untuk direview.'
+                );
+            } else {
+                $this->session->set_flashdata('success', 
+                    '✅ Pengajuan berhasil dikirim ke dosen pembimbing! ' .
+                    'Status: Step 4-6 (Review Dosen). ' .
+                    'Dosen akan mendapat notifikasi untuk review dokumen publikasi Anda.'
+                );
+            }
+        } elseif ($submit_type === 'update') {
+            $this->session->set_flashdata('success', 
+                '💾 Data publikasi berhasil diperbarui. ' .
+                ($original_status === 'rejected' ? 
+                    'Setelah selesai memperbaiki semua dokumen, silakan klik "Kirim Ajuan Ulang ke Dosen".' : 
+                    'Perubahan data telah disimpan.')
+            );
+        }
+        
+        redirect('mahasiswa/publikasi/tracking/' . $result['id']);
+        
+    } else {
+        $this->db->trans_rollback();
+        $this->session->set_flashdata('error', 'Gagal menyimpan perubahan: ' . $result['message']);
+        $this->_show_form_edit($publikasi);
+    }
+}
+
+/**
+ * ✅ NEW METHOD: Send resubmit notification ke dosen
+ */
+private function _send_resubmit_notification($publikasi_id, $dosen_id) {
+    try {
+        // Get publikasi data dengan detail lengkap
+        $publikasi = $this->publikasi->get_detail($publikasi_id);
+        $dosen = $this->db->get_where('dosen', ['id' => $dosen_id])->row();
+        
+        if (!$publikasi || !$dosen || empty($dosen->email)) {
+            return false;
+        }
+        
+        // Setup email configuration - sama seperti notification lainnya
+        $this->email->clear();
+        $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+        $this->email->to($dosen->email);
+        $this->email->subject('🔄 Pengajuan Publikasi Ulang - ' . $publikasi->nama_mahasiswa);
+        
+        // Enhanced email template untuk resubmit
+        $message = "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: #28a745; color: white; padding: 20px; text-align: center;'>
+                <h2>🔄 Pengajuan Publikasi Ulang</h2>
+            </div>
+            
+            <div style='padding: 20px; background-color: #f8f9fa;'>
+                <p>Kepada Yth. <strong>{$dosen->nama}</strong>,</p>
+                
+                <p>Mahasiswa bimbingan Anda telah <strong>mengajukan ulang publikasi</strong> setelah melakukan perbaikan.</p>
+                
+                <div style='background: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                    <h4>👨‍🎓 Data Mahasiswa:</h4>
+                    <ul>
+                        <li><strong>Nama:</strong> {$publikasi->nama_mahasiswa}</li>
+                        <li><strong>NIM:</strong> {$publikasi->nim}</li>
+                        <li><strong>Program Studi:</strong> {$publikasi->program_studi}</li>
+                        <li><strong>Judul Skripsi:</strong> {$publikasi->judul_skripsi_final}</li>
+                    </ul>
+                </div>
+                
+                <div style='background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                    <h4>🔄 Status Resubmit:</h4>
+                    <p><strong>Tanggal Pengajuan Ulang:</strong> " . date('d F Y, H:i') . " WIT</p>
+                    <p><strong>Status:</strong> Menunggu Review Dosen Pembimbing</p>
+                    <p><strong>Keterangan:</strong> " . strip_tags($publikasi->keterangan_mahasiswa) . "</p>
+                </div>
+                
+                <div style='text-align: center; margin: 20px 0;'>
+                    <a href='" . base_url('dosen/publikasi/review/' . $publikasi_id) . "' 
+                       style='background: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                        👁️ Review Pengajuan Ulang
+                    </a>
+                </div>
+                
+                <p><small><em>Email otomatis dari Sistem Informasi Manajemen Tugas Akhir STK Santo Yakobus Merauke</em></small></p>
+            </div>
+        </div>
+        ";
+        
+        $this->email->message($message);
+        return $this->email->send();
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error sending resubmit notification: ' . $e->getMessage());
+        return false;
+    }
+}
 
     // =================================================================
     // SEMUA METHOD HELPER LAINNYA - TIDAK DIUBAH

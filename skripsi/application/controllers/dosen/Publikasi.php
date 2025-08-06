@@ -167,6 +167,177 @@ class Publikasi extends CI_Controller {
         echo json_encode($result);
     }
 
+/**
+ * ✅ DEBUG METHOD: Untuk troubleshoot masalah publikasi tidak muncul di dosen
+ * Tambahkan method ini ke controller dosen publikasi untuk debugging
+ */
+public function debug_publikasi($mahasiswa_id = null) {
+    // ✅ SECURITY: Hanya untuk development/admin
+    if (ENVIRONMENT !== 'development') {
+        show_404();
+        return;
+    }
+    
+    header('Content-Type: text/plain');
+    echo "=== PUBLIKASI DEBUG REPORT ===\n";
+    echo "Timestamp: " . date('Y-m-d H:i:s') . "\n";
+    echo "Dosen ID: " . $this->dosen_id . "\n\n";
+    
+    // 1. Check data publikasi di database
+    echo "1. PUBLIKASI TUGAS AKHIR TABLE:\n";
+    
+    $query = "SELECT id, mahasiswa_id, dosen_pembimbing_id, status, status_pembimbing, 
+              tanggal_pengajuan, tanggal_review_pembimbing, created_at, updated_at 
+              FROM publikasi_tugas_akhir";
+    
+    if ($mahasiswa_id) {
+        $query .= " WHERE mahasiswa_id = " . intval($mahasiswa_id);
+    } else {
+        $query .= " WHERE dosen_pembimbing_id = " . intval($this->dosen_id);
+    }
+    
+    $query .= " ORDER BY updated_at DESC LIMIT 10";
+    
+    $results = $this->db->query($query)->result_array();
+    
+    if (empty($results)) {
+        echo "   >>> TIDAK ADA DATA PUBLIKASI DITEMUKAN!\n\n";
+    } else {
+        foreach ($results as $row) {
+            echo "   ID: {$row['id']}\n";
+            echo "   Mahasiswa ID: {$row['mahasiswa_id']}\n";
+            echo "   Dosen Pembimbing ID: {$row['dosen_pembimbing_id']}\n";
+            echo "   Status: {$row['status']}\n";
+            echo "   Status Pembimbing: {$row['status_pembimbing']}\n";
+            echo "   Tanggal Pengajuan: {$row['tanggal_pengajuan']}\n";
+            echo "   Tanggal Review: {$row['tanggal_review_pembimbing']}\n";
+            echo "   Created: {$row['created_at']}\n";
+            echo "   Updated: {$row['updated_at']}\n";
+            echo "   ---\n";
+        }
+    }
+    
+    // 2. Test query method dari model
+    echo "2. MODEL METHOD get_pending_dosen_review():\n";
+    
+    $pending = $this->publikasi->get_pending_dosen_review($this->dosen_id);
+    
+    if (empty($pending)) {
+        echo "   >>> TIDAK ADA DATA PENDING REVIEW!\n";
+        
+        // Debug query model
+        echo "   >>> DEBUGGING QUERY CONDITIONS:\n";
+        echo "   >>> SELECT * FROM publikasi_tugas_akhir \n";
+        echo "   >>> WHERE dosen_pembimbing_id = {$this->dosen_id}\n";
+        echo "   >>> AND status_pembimbing = 'pending'\n";
+        echo "   >>> AND status IN ('submitted', 'review_pembimbing')\n\n";
+        
+        // Check each condition separately
+        $total = $this->db->where('dosen_pembimbing_id', $this->dosen_id)->count_all_results('publikasi_tugas_akhir');
+        echo "   >>> Total publikasi dengan dosen_pembimbing_id {$this->dosen_id}: {$total}\n";
+        
+        $this->db->reset_query();
+        $pending_status = $this->db->where('dosen_pembimbing_id', $this->dosen_id)
+                                  ->where('status_pembimbing', 'pending')
+                                  ->count_all_results('publikasi_tugas_akhir');
+        echo "   >>> Total dengan status_pembimbing = 'pending': {$pending_status}\n";
+        
+        $this->db->reset_query();
+        $submitted = $this->db->where('dosen_pembimbing_id', $this->dosen_id)
+                             ->where('status_pembimbing', 'pending')
+                             ->where_in('status', ['submitted', 'review_pembimbing'])
+                             ->count_all_results('publikasi_tugas_akhir');
+        echo "   >>> Total yang memenuhi semua kondisi: {$submitted}\n\n";
+        
+    } else {
+        echo "   >>> DITEMUKAN " . count($pending) . " DATA PENDING:\n";
+        foreach ($pending as $pub) {
+            echo "   ID: {$pub->id} - {$pub->nama_mahasiswa} - Status: {$pub->status}\n";
+        }
+        echo "\n";
+    }
+    
+    // 3. Check recent database changes
+    echo "3. RECENT UPDATES (Last 24 hours):\n";
+    
+    $recent = $this->db->select('id, mahasiswa_id, status, status_pembimbing, updated_at')
+                      ->where('dosen_pembimbing_id', $this->dosen_id)
+                      ->where('updated_at >', date('Y-m-d H:i:s', strtotime('-24 hours')))
+                      ->order_by('updated_at', 'DESC')
+                      ->get('publikasi_tugas_akhir')
+                      ->result_array();
+    
+    if (empty($recent)) {
+        echo "   >>> Tidak ada update dalam 24 jam terakhir\n\n";
+    } else {
+        foreach ($recent as $update) {
+            echo "   ID: {$update['id']} - Status: {$update['status']} - Status Pembimbing: {$update['status_pembimbing']} - Updated: {$update['updated_at']}\n";
+        }
+        echo "\n";
+    }
+    
+    // 4. Check controller method result
+    echo "4. CONTROLLER METHOD _get_pengajuan_perlu_review():\n";
+    
+    $controller_result = $this->_get_pengajuan_perlu_review();
+    
+    if (empty($controller_result)) {
+        echo "   >>> CONTROLLER METHOD MENGEMBALIKAN ARRAY KOSONG!\n";
+        echo "   >>> Periksa method _get_pengajuan_perlu_review() di controller\n\n";
+    } else {
+        echo "   >>> CONTROLLER METHOD MENGEMBALIKAN " . count($controller_result) . " ITEM:\n";
+        foreach ($controller_result as $item) {
+            echo "   ID: {$item->id} - {$item->nama_mahasiswa} - Status: {$item->status}\n";
+        }
+    }
+    
+    // 5. Database connection test
+    echo "5. DATABASE CONNECTION TEST:\n";
+    echo "   Database: " . $this->db->database . "\n";
+    echo "   Last Query: " . $this->db->last_query() . "\n";
+    echo "   Connection ID: " . $this->db->conn_id . "\n\n";
+    
+    echo "=== END DEBUG REPORT ===\n";
+}
+
+/**
+ * ✅ QUICK FIX: Method untuk force refresh data publikasi
+ */
+public function force_refresh_publikasi($publikasi_id) {
+    // Security check
+    if (ENVIRONMENT !== 'development') {
+        show_404();
+        return;
+    }
+    
+    $publikasi = $this->db->get_where('publikasi_tugas_akhir', ['id' => $publikasi_id])->row();
+    
+    if (!$publikasi) {
+        echo "Publikasi ID {$publikasi_id} tidak ditemukan";
+        return;
+    }
+    
+    // Force update tanggal_pengajuan jika status submitted tapi tanggal_pengajuan kosong/lama
+    if ($publikasi->status === 'submitted' && $publikasi->status_pembimbing === 'pending') {
+        
+        $update_data = [
+            'tanggal_pengajuan' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('id', $publikasi_id)
+                 ->update('publikasi_tugas_akhir', $update_data);
+        
+        echo "✅ Publikasi ID {$publikasi_id} berhasil di-refresh.\n";
+        echo "Tanggal pengajuan diupdate ke: " . date('Y-m-d H:i:s') . "\n";
+        echo "Sekarang data akan muncul di dashboard dosen.\n";
+    } else {
+        echo "❌ Publikasi ID {$publikasi_id} tidak perlu di-refresh.\n";
+        echo "Status: {$publikasi->status}\n";
+        echo "Status Pembimbing: {$publikasi->status_pembimbing}\n";
+    }
+}
+
     // ================================================================
     // PRIVATE METHODS
     // ================================================================

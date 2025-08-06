@@ -306,6 +306,21 @@ foreach ($dataUser as $du) {
                             </div>
                         </div>
                     </a>
+                    
+                   <!-- TAMBAHAN BARU: Tombol Download Panduan Skripsi -->
+                    <a href="https://stkyakobus.ac.id/wp-content/uploads/2020/10/PANDUAN-PENULISAN-SKRIPSI-2018.pdf" 
+                       target="_blank" 
+                       class="btn btn-outline-warning btn-block">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <i class="ni ni-archive-2"></i>
+                            </div>
+                            <div class="col text-left">
+                                <span class="font-weight-bold">Download Panduan Skripsi</span><br>
+                                <small class="opacity-8">Panduan penulisan skripsi</small>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
 

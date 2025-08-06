@@ -24,7 +24,7 @@ class Publikasi extends CI_Controller {
         
         // Load dependencies
         $this->load->database();
-        $this->load->library(['session', 'upload', 'form_validation']);
+        $this->load->library(['session', 'upload', 'email', 'form_validation']);
         $this->load->helper(['url', 'file', 'date', 'text']);
         $this->load->model('Publikasi_model', 'publikasi');
         
@@ -712,23 +712,58 @@ private function _process_update($publikasi) {
     }
 }
 
-/**
- * ✅ ENHANCED: Send submission notification dengan type differentiation
- */
+// 2. ✅ PERBAIKAN METHOD _send_submission_notification (Line 730 error)
 private function _send_submission_notification($publikasi_id, $dosen_id, $is_resubmit = false) {
     try {
+        // ✅ CRITICAL: Pastikan email library sudah di-load
+        if (!isset($this->email)) {
+            $this->load->library('email');
+        }
+        
         // Get publikasi data dengan detail lengkap
         $publikasi = $this->publikasi->get_detail($publikasi_id);
-        $dosen = $this->db->get_where('dosen', ['id' => $dosen_id])->row();
+        if (!$publikasi) {
+            log_message('error', "Publikasi not found: ID {$publikasi_id}");
+            return false;
+        }
         
-        if (!$publikasi || !$dosen || empty($dosen->email)) {
-            log_message('warning', 'Cannot send notification: missing data or email');
+        // ✅ CRITICAL: Enhanced dosen query dengan email validation
+        $dosen = $this->db->select('id, nama, email')
+                         ->where('id', $dosen_id)
+                         ->where('email IS NOT NULL')
+                         ->where('email !=', '')
+                         ->get('dosen')
+                         ->row();
+        
+        // ✅ FIX: Validasi dosen dan email sebelum akses property
+        if (!$dosen || empty($dosen->email)) {
+            log_message('warning', "Cannot send notification: Dosen ID {$dosen_id} - missing/empty email");
+            return false;
+        }
+        
+        // ✅ CRITICAL: Validate email format
+        if (!filter_var($dosen->email, FILTER_VALIDATE_EMAIL)) {
+            log_message('warning', "Invalid email format for dosen ID {$dosen_id}: {$dosen->email}");
             return false;
         }
         
         // Setup email configuration
-        $this->email->clear();
-        $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+        $config = [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug',
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls'
+        ];
+        
+        $this->email->initialize($config);
+        $this->email->clear();  // ✅ NOW SAFE: Email library sudah ter-load
+        
+        $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
         $this->email->to($dosen->email);
         
         // ✅ DIFFERENTIATE: Email content berdasarkan type
@@ -791,6 +826,8 @@ private function _send_submission_notification($publikasi_id, $dosen_id, $is_res
         
         if (!$send_result) {
             log_message('error', 'Failed to send email: ' . $this->email->print_debugger());
+        } else {
+            log_message('info', "Email notification sent successfully to {$dosen->email} for publikasi ID: {$publikasi_id}");
         }
         
         return $send_result;

@@ -1,5 +1,5 @@
 <!-- 
-TRACKING PUBLIKASI - 9 LANGKAH WORKFLOW DETAIL
+TRACKING PUBLIKASI - 9 LANGKAH WORKFLOW DETAIL (FIXED)
 File: application/views/mahasiswa/publikasi/tracking.php
 
 MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
@@ -12,6 +12,13 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
 7. Staf Validasi
 8. Selesai
 9. Download Surat
+
+✅ PERBAIKAN:
+- Fix progress calculation untuk 9 steps
+- Handle status stuck di step 7
+- Auto-refresh untuk update real-time
+- Download surat keterangan yang robust
+- Enhanced user experience
 -->
 
 <!-- Page Header -->
@@ -23,7 +30,15 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                     <i class="fas fa-route text-info"></i>
                     <strong>Tracking Publikasi:</strong> 9 Langkah Workflow Tugas Akhir
                 </h4>
-                <p class="mb-0 text-muted">Pantau progress publikasi Anda dari Step 1 hingga Step 9</p>
+                <p class="mb-0 text-muted">
+                    <?php if ($publikasi->status == 'completed'): ?>
+                        🎉 <strong>Selamat!</strong> Semua tahap publikasi telah selesai. Anda dapat mendownload surat keterangan publikasi di Step 9.
+                    <?php elseif ($publikasi->status == 'review_staf' && isset($publikasi->status_staf) && $publikasi->status_staf === 'approved'): ?>
+                        ⚡ <strong>Update:</strong> Staf sudah validasi publikasi Anda. Sistem sedang memproses completion workflow...
+                    <?php else: ?>
+                        Pantau progress publikasi Anda dari Step 1 hingga Step 9. Saat ini Anda berada di <strong>Step <?= $step_current ?? 1 ?></strong> dari 9 langkah total.
+                    <?php endif; ?>
+                </p>
             </div>
         </div>
     </div>
@@ -45,7 +60,7 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                     $progress_percentage = 11; // Default step 1 (11% per step)
                     $step_current = 1;
                     
-                    // Tentukan progress berdasarkan status
+                    // ✅ PERBAIKAN: Progress calculation berdasarkan status yang benar
                     if (isset($publikasi->status)) {
                         switch($publikasi->status) {
                             case 'draft': 
@@ -61,21 +76,32 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                                 $step_current = 4;
                                 break;
                             case 'approved_pembimbing': 
-                                $progress_percentage = 66; 
+                                $progress_percentage = 67; 
                                 $step_current = 6;
                                 break;
                             case 'rejected': 
-                                $progress_percentage = 55; 
+                                $progress_percentage = 56; 
                                 $step_current = 5;
                                 break;
                             case 'review_staf': 
-                                $progress_percentage = 77; 
+                                $progress_percentage = 78; 
                                 $step_current = 7;
                                 break;
                             case 'completed': 
                                 $progress_percentage = 100; 
                                 $step_current = 9;
                                 break;
+                        }
+                        
+                        // ✅ PERBAIKAN: Handle status_pembimbing = 'approved' untuk step 6
+                        if (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved') {
+                            if ($publikasi->status === 'review_staf') {
+                                $progress_percentage = 78; 
+                                $step_current = 7;
+                            } elseif ($publikasi->status !== 'completed') {
+                                $progress_percentage = 67; 
+                                $step_current = 6;
+                            }
                         }
                     }
                     ?>
@@ -94,7 +120,7 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                         <strong>Step 3:</strong> Ajuan telah dikirim dan menunggu masuk ke tahap review dosen.
                     <?php elseif ($publikasi->status === 'review_pembimbing'): ?>
                         <strong>Step 4:</strong> Sedang dalam tahap review oleh dosen pembimbing.
-                    <?php elseif ($publikasi->status === 'approved_pembimbing'): ?>
+                    <?php elseif ($publikasi->status === 'approved_pembimbing' || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved')): ?>
                         <strong>Step 6:</strong> Disetujui dosen pembimbing, menunggu validasi staf.
                     <?php elseif ($publikasi->status === 'rejected'): ?>
                         <strong>Step 5:</strong> Ditolak dosen pembimbing, kembali ke mahasiswa untuk perbaikan.
@@ -222,11 +248,11 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
 
                     <!-- STEP 4: Dosen Review -->
                     <div class="time-label">
-                        <span class="bg-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : ($publikasi->status == 'review_pembimbing' ? 'warning' : 'secondary')) ?>">STEP 4</span>
+                        <span class="bg-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved') ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : ($publikasi->status == 'review_pembimbing' ? 'warning' : 'secondary')) ?>">STEP 4</span>
                     </div>
                     <div>
-                        <i class="fas fa-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) ? 'check' : ($publikasi->status == 'rejected' ? 'times' : ($publikasi->status == 'review_pembimbing' ? 'clock' : 'clock')) ?> 
-                           bg-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : ($publikasi->status == 'review_pembimbing' ? 'warning' : 'secondary')) ?>"></i>
+                        <i class="fas fa-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved') ? 'check' : ($publikasi->status == 'rejected' ? 'times' : ($publikasi->status == 'review_pembimbing' ? 'clock' : 'clock')) ?> 
+                           bg-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved') ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : ($publikasi->status == 'review_pembimbing' ? 'warning' : 'secondary')) ?>"></i>
                         <div class="timeline-item">
                             <span class="time">
                                 <i class="far fa-clock"></i> 
@@ -240,7 +266,7 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                                     </div>
                                     <p>Harap menunggu. Dosen akan melakukan evaluasi terhadap dokumen dan data yang Anda submit.</p>
                                     
-                                <?php elseif (in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed'])): ?>
+                                <?php elseif (in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved')): ?>
                                     <div class="alert alert-success">
                                         <i class="fas fa-check"></i> <strong>Selesai:</strong> Dosen pembimbing telah selesai melakukan review.
                                     </div>
@@ -261,11 +287,11 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
 
                     <!-- STEP 5: Hasil Review Dosen -->
                     <div class="time-label">
-                        <span class="bg-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : 'secondary') ?>">STEP 5</span>
+                        <span class="bg-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved') ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : 'secondary') ?>">STEP 5</span>
                     </div>
                     <div>
-                        <i class="fas fa-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) ? 'thumbs-up' : ($publikasi->status == 'rejected' ? 'thumbs-down' : 'clock') ?> 
-                           bg-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : 'secondary') ?>"></i>
+                        <i class="fas fa-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved') ? 'thumbs-up' : ($publikasi->status == 'rejected' ? 'thumbs-down' : 'clock') ?> 
+                           bg-<?= in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved') ? 'success' : ($publikasi->status == 'rejected' ? 'danger' : 'secondary') ?>"></i>
                         <div class="timeline-item">
                             <span class="time">
                                 <i class="far fa-clock"></i> 
@@ -273,7 +299,7 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                             </span>
                             <h3 class="timeline-header">Keputusan Dosen Pembimbing</h3>
                             <div class="timeline-body">
-                                <?php if (in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed'])): ?>
+                                <?php if (in_array($publikasi->status, ['approved_pembimbing', 'review_staf', 'completed']) || (isset($publikasi->status_pembimbing) && $publikasi->status_pembimbing === 'approved')): ?>
                                     <div class="alert alert-success">
                                         <i class="fas fa-thumbs-up"></i> <strong>✅ DISETUJUI:</strong> Dosen pembimbing menyetujui publikasi Anda.
                                     </div>
@@ -344,15 +370,26 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                             <h3 class="timeline-header">Staf Input Repository dan Validasi</h3>
                             <div class="timeline-body">
                                 <?php if ($publikasi->status == 'review_staf'): ?>
-                                    <div class="alert alert-warning">
-                                        <i class="fas fa-cog fa-spin"></i> <strong>Sedang Berlangsung:</strong> Staf sedang memproses validasi dan input repository.
-                                    </div>
-                                    <p><strong>Aktivitas staf meliputi:</strong></p>
-                                    <ul>
-                                        <li>Input/upload ke repository institusi</li>
-                                        <li>Validasi final dokumen</li>
-                                        <li>Persiapan surat keterangan</li>
-                                    </ul>
+                                    <?php if (isset($publikasi->status_staf) && $publikasi->status_staf === 'approved' && isset($publikasi->tanggal_validasi_staf)): ?>
+                                        <!-- ✅ PERBAIKAN: Staf sudah validasi tapi status belum completed -->
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check"></i> <strong>Selesai:</strong> Staf telah menyelesaikan validasi dan input repository.
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-sync-alt fa-spin"></i> <strong>Sedang Update:</strong> System sedang memproses completion workflow...
+                                        </div>
+                                        <p><em>Jika status tidak berubah dalam 5 menit, silakan refresh halaman atau hubungi admin.</em></p>
+                                    <?php else: ?>
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-cog fa-spin"></i> <strong>Sedang Berlangsung:</strong> Staf sedang memproses validasi dan input repository.
+                                        </div>
+                                        <p><strong>Aktivitas staf meliputi:</strong></p>
+                                        <ul>
+                                            <li>Input/upload ke repository institusi</li>
+                                            <li>Validasi final dokumen</li>
+                                            <li>Persiapan surat keterangan</li>
+                                        </ul>
+                                    <?php endif; ?>
                                     
                                 <?php elseif ($publikasi->status == 'completed'): ?>
                                     <div class="alert alert-success">
@@ -366,10 +403,10 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                                             </a>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if (isset($publikasi->catatan_staf) && $publikasi->catatan_staf): ?>
+                                    <?php if (isset($publikasi->komentar_staf) && $publikasi->komentar_staf): ?>
                                         <div class="mt-2">
                                             <strong>Catatan Staf:</strong><br>
-                                            <em>"<?= $publikasi->catatan_staf ?>"</em>
+                                            <em>"<?= $publikasi->komentar_staf ?>"</em>
                                         </div>
                                     <?php endif; ?>
                                     
@@ -428,23 +465,81 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                                     <div class="alert alert-success">
                                         <i class="fas fa-certificate"></i> <strong>Tersedia:</strong> Surat keterangan publikasi siap diunduh.
                                     </div>
-                                    <div class="mt-3">
-                                        <a href="<?= base_url('mahasiswa/publikasi/download_surat/' . $publikasi->id) ?>" 
-                                           class="btn btn-success btn-lg" target="_blank">
-                                            <i class="fas fa-download"></i> Download Surat Keterangan Publikasi
-                                        </a>
+                                    
+                                    <?php if (isset($publikasi->file_surat_keterangan) && $publikasi->file_surat_keterangan): ?>
+                                        <!-- ✅ PERBAIKAN: Surat keterangan sudah digenerate -->
+                                        <div class="mt-3">
+                                            <a href="<?= base_url('uploads/surat_keterangan/' . $publikasi->file_surat_keterangan) ?>" 
+                                               class="btn btn-success btn-lg" target="_blank">
+                                                <i class="fas fa-download"></i> Download Surat Keterangan Publikasi
+                                            </a>
+                                        </div>
+                                        <p class="mt-2 text-muted">
+                                            <small>
+                                                <i class="fas fa-info-circle"></i> 
+                                                Surat ini adalah bukti resmi bahwa tugas akhir Anda telah dipublikasikan sesuai dengan ketentuan institusi dan diperlukan untuk syarat yudisium.
+                                            </small>
+                                        </p>
+                                    <?php else: ?>
+                                        <!-- ✅ PERBAIKAN: Surat sedang diproses -->
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-sync-alt fa-spin"></i> <strong>Sedang Diproses:</strong> Surat keterangan sedang digenerate oleh sistem...
+                                        </div>
+                                        <div class="mt-3">
+                                            <button class="btn btn-warning btn-lg" disabled>
+                                                <i class="fas fa-hourglass-half"></i> Menunggu Generate Surat
+                                            </button>
+                                        </div>
+                                        <p class="mt-2 text-muted">
+                                            <small>
+                                                <i class="fas fa-clock"></i> 
+                                                Proses generate surat biasanya selesai dalam 1-2 menit. Silakan refresh halaman atau hubungi admin jika tidak tersedia dalam 24 jam.
+                                            </small>
+                                        </p>
+                                    <?php endif; ?>
+                                    
+                                    <!-- ✅ TAMBAHAN: Info publikasi -->
+                                    <div class="mt-4">
+                                        <h6><i class="fas fa-info-circle"></i> Informasi Publikasi:</h6>
+                                        <table class="table table-sm table-borderless">
+                                            <?php if (isset($publikasi->link_repository) && $publikasi->link_repository): ?>
+                                            <tr>
+                                                <td width="40%"><strong>Link Repository:</strong></td>
+                                                <td>
+                                                    <a href="<?= $publikasi->link_repository ?>" target="_blank" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-external-link-alt"></i> Lihat Publikasi Online
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <?php endif; ?>
+                                            <tr>
+                                                <td><strong>Tanggal Validasi:</strong></td>
+                                                <td><?= isset($publikasi->tanggal_validasi_staf) ? date('d/m/Y H:i', strtotime($publikasi->tanggal_validasi_staf)) : '-' ?></td>
+                                            </tr>
+                                            <?php if (isset($publikasi->komentar_staf) && $publikasi->komentar_staf): ?>
+                                            <tr>
+                                                <td><strong>Catatan Staf:</strong></td>
+                                                <td><em>"<?= $publikasi->komentar_staf ?>"</em></td>
+                                            </tr>
+                                            <?php endif; ?>
+                                        </table>
                                     </div>
-                                    <p class="mt-2 text-muted">
-                                        <small>
-                                            <i class="fas fa-info-circle"></i> 
-                                            Surat ini adalah bukti resmi bahwa tugas akhir Anda telah dipublikasikan sesuai dengan ketentuan institusi.
-                                        </small>
-                                    </p>
                                     
                                 <?php else: ?>
                                     <div class="alert alert-secondary">
                                         <i class="fas fa-clock"></i> <strong>Belum Tersedia:</strong> Surat keterangan akan tersedia setelah Step 8 selesai.
                                     </div>
+                                    <div class="mt-3">
+                                        <button class="btn btn-secondary btn-lg" disabled>
+                                            <i class="fas fa-lock"></i> Download Surat Keterangan
+                                        </button>
+                                    </div>
+                                    <p class="mt-2 text-muted">
+                                        <small>
+                                            <i class="fas fa-info-circle"></i> 
+                                            Surat keterangan akan otomatis digenerate setelah staf menyelesaikan validasi publikasi (Step 7).
+                                        </small>
+                                    </p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -535,9 +630,23 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
                             <i class="fas fa-edit"></i> Perbaiki Pengajuan
                         </a>
                     <?php elseif ($publikasi->status == 'completed'): ?>
-                        <a href="<?= base_url('mahasiswa/publikasi/download_surat/' . $publikasi->id) ?>" class="btn btn-success mb-2" target="_blank">
-                            <i class="fas fa-download"></i> Download Surat
-                        </a>
+                        <?php if (isset($publikasi->file_surat_keterangan) && $publikasi->file_surat_keterangan): ?>
+                            <!-- ✅ PERBAIKAN: Download surat jika sudah ada file -->
+                            <a href="<?= base_url('uploads/surat_keterangan/' . $publikasi->file_surat_keterangan) ?>" class="btn btn-success mb-2" target="_blank">
+                                <i class="fas fa-download"></i> Download Surat Keterangan
+                            </a>
+                        <?php else: ?>
+                            <!-- ✅ PERBAIKAN: Surat sedang diproses -->
+                            <button class="btn btn-warning mb-2" disabled>
+                                <i class="fas fa-hourglass-half"></i> Surat Sedang Diproses
+                            </button>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($publikasi->link_repository) && $publikasi->link_repository): ?>
+                            <a href="<?= $publikasi->link_repository ?>" class="btn btn-info mb-2" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Lihat Publikasi Online
+                            </a>
+                        <?php endif; ?>
                     <?php endif; ?>
                     
                     <button type="button" class="btn btn-info" onclick="window.print()">
@@ -737,6 +846,23 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
     border-radius: 12px;
 }
 
+/* ✅ TAMBAHAN: Notification styles */
+.notification-custom {
+    border-radius: 8px;
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
 /* Print styles */
 @media print {
     .card-header,
@@ -748,6 +874,10 @@ MENAMPILKAN PROGRESS DETAIL SEMUA 9 LANGKAH:
     
     .timeline:before {
         background: #000 !important;
+    }
+    
+    .notification-custom {
+        display: none !important;
     }
 }
 
@@ -794,15 +924,141 @@ $(document).ready(function() {
         }, 1000);
     }
     
-    // Auto refresh setiap 30 detik jika masih dalam proses
-    <?php if (!in_array($publikasi->status, ['completed', 'rejected'])): ?>
-    setInterval(function() {
-        // Auto refresh halaman untuk update status terbaru
-        // location.reload(); // Uncomment jika ingin auto refresh
-    }, 30000);
+    // ✅ PERBAIKAN: Auto refresh untuk kasus tertentu
+    <?php if ($publikasi->status == 'review_staf' && isset($publikasi->status_staf) && $publikasi->status_staf === 'approved'): ?>
+        // Auto refresh setiap 10 detik jika staf sudah approve tapi belum completed
+        let refreshCount = 0;
+        const maxRefresh = 30; // Maximum 5 menit (30 x 10 detik)
+        
+        const autoRefresh = setInterval(function() {
+            refreshCount++;
+            
+            // Update countdown di UI
+            const remaining = maxRefresh - refreshCount;
+            const minutes = Math.floor(remaining * 10 / 60);
+            const seconds = (remaining * 10) % 60;
+            
+            if (refreshCount <= maxRefresh) {
+                console.log('Auto-refresh dalam ' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds);
+                
+                // Refresh halaman untuk check status terbaru
+                if (refreshCount % 3 === 0) { // Setiap 30 detik
+                    location.reload();
+                }
+            } else {
+                clearInterval(autoRefresh);
+                
+                // Show notification jika masih belum completed setelah 5 menit
+                showNotification('warning', 'Status belum berubah setelah 5 menit. Silakan hubungi admin jika publikasi tidak selesai dalam 24 jam.');
+            }
+        }, 10000); // 10 detik
+        
+        // Show initial notification
+        showNotification('info', 'Staf sudah validasi publikasi Anda. Sistem sedang memproses completion workflow...');
+        
+    <?php elseif ($publikasi->status == 'completed' && (!isset($publikasi->file_surat_keterangan) || !$publikasi->file_surat_keterangan)): ?>
+        // Auto refresh setiap 15 detik jika completed tapi surat belum ada
+        let suratRefreshCount = 0;
+        const maxSuratRefresh = 20; // Maximum 5 menit (20 x 15 detik)
+        
+        const suratAutoRefresh = setInterval(function() {
+            suratRefreshCount++;
+            
+            if (suratRefreshCount <= maxSuratRefresh) {
+                console.log('Checking surat keterangan... (' + suratRefreshCount + '/' + maxSuratRefresh + ')');
+                
+                // Refresh setiap 3 kali check (45 detik)
+                if (suratRefreshCount % 3 === 0) {
+                    location.reload();
+                }
+            } else {
+                clearInterval(suratAutoRefresh);
+                showNotification('warning', 'Surat keterangan belum digenerate. Silakan hubungi admin.');
+            }
+        }, 15000); // 15 detik
+        
+        showNotification('info', 'Publikasi selesai! Surat keterangan sedang digenerate...');
+        
+    <?php elseif (!in_array($publikasi->status, ['completed', 'rejected'])): ?>
+        // Auto refresh setiap 60 detik untuk status lainnya
+        setInterval(function() {
+            // Silent refresh untuk update progress
+            console.log('Checking for status updates...');
+            // location.reload(); // Uncomment jika ingin auto refresh
+        }, 60000); // 60 detik
     <?php endif; ?>
     
     // Tooltip untuk semua elemen dengan data-toggle
     $('[data-toggle="tooltip"]').tooltip();
+    
+    // ✅ TAMBAHAN: Function untuk show notification
+    function showNotification(type, message) {
+        // Remove existing notifications
+        $('.notification-custom').remove();
+        
+        const alertClass = type === 'success' ? 'alert-success' : 
+                          type === 'warning' ? 'alert-warning' : 
+                          type === 'danger' ? 'alert-danger' : 'alert-info';
+        
+        const icon = type === 'success' ? 'fas fa-check-circle' : 
+                    type === 'warning' ? 'fas fa-exclamation-triangle' : 
+                    type === 'danger' ? 'fas fa-times-circle' : 'fas fa-info-circle';
+        
+        const notification = $(`
+            <div class="alert ${alertClass} notification-custom" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                <i class="${icon}"></i> ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `);
+        
+        $('body').append(notification);
+        
+        // Auto remove after 10 seconds
+        setTimeout(function() {
+            notification.fadeOut(500, function() {
+                $(this).remove();
+            });
+        }, 10000);
+    }
+    
+    // ✅ TAMBAHAN: Handle error case
+    <?php if ($publikasi->status == 'review_staf' && isset($publikasi->tanggal_validasi_staf)): ?>
+        <?php 
+        $validation_time = strtotime($publikasi->tanggal_validasi_staf);
+        $now = time();
+        $hours_passed = ($now - $validation_time) / 3600;
+        ?>
+        
+        <?php if ($hours_passed > 24): ?>
+            // Show error if more than 24 hours passed since validation
+            showNotification('danger', 'Publikasi sudah divalidasi lebih dari 24 jam yang lalu namun status belum completed. Silakan hubungi admin segera.');
+        <?php elseif ($hours_passed > 1): ?>
+            // Show warning if more than 1 hour passed
+            showNotification('warning', 'Publikasi sudah divalidasi <?= round($hours_passed, 1) ?> jam yang lalu. Jika status tidak berubah dalam 1 jam lagi, silakan hubungi admin.');
+        <?php endif; ?>
+    <?php endif; ?>
 });
+
+// ✅ TAMBAHAN: Manual refresh button dengan loading state
+function manualRefresh() {
+    const btn = $('#refresh-btn');
+    btn.html('<i class="fas fa-spinner fa-spin"></i> Refreshing...').prop('disabled', true);
+    
+    setTimeout(function() {
+        location.reload();
+    }, 1000);
+}
+
+// ✅ TAMBAHAN: Add manual refresh button jika diperlukan
+<?php if ($publikasi->status == 'review_staf' || ($publikasi->status == 'completed' && (!isset($publikasi->file_surat_keterangan) || !$publikasi->file_surat_keterangan))): ?>
+$(document).ready(function() {
+    $('.btn-group-vertical').prepend(`
+        <button type="button" id="refresh-btn" class="btn btn-outline-primary mb-2" onclick="manualRefresh()">
+            <i class="fas fa-sync-alt"></i> Refresh Status
+        </button>
+    `);
+});
+<?php endif; ?>
 </script>

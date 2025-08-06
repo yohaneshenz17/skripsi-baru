@@ -337,17 +337,17 @@ class Publikasi_model extends CI_Model {
         try {
             $this->db->trans_start();
             
-             $update_data = [
+            $update_data = [
                 'status' => 'completed',
-                // 'current_step' => 'selesai',        // ❌ SUDAH DIHAPUS
+                'current_step' => 'selesai',
                 'status_staf' => 'approved',
                 'link_repository' => $data['link_repository'],
                 'komentar_staf' => $data['komentar_staf'] ?? null,
                 'validated_by_staf_id' => $data['validated_by_staf_id'],
                 'validated_by_staf_name' => $data['validated_by_staf_name'],
                 'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
-                'tanggal_selesai' => date('Y-m-d H:i:s')
-                // 'updated_at' => date('Y-m-d H:i:s')  // ❌ HAPUS INI JUGA
+                'tanggal_selesai' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
             ];
             
             $this->db->where('id', $publikasi_id)
@@ -362,15 +362,15 @@ class Publikasi_model extends CI_Model {
                 ];
             }
             
-            // ✅ PERBAIKAN: Ganti 'publikasi' jadi 'selesai'
+            // Update workflow_status di proposal_mahasiswa ke 'publikasi'
             $publikasi = $this->get_by_id($publikasi_id);
             if ($publikasi) {
                 $this->db->where('id', $publikasi->proposal_mahasiswa_id)
-                       ->update('proposal_mahasiswa', ['workflow_status' => 'selesai']); // ✅ 'selesai' bukan 'publikasi'
+                       ->update('proposal_mahasiswa', ['workflow_status' => 'publikasi']);
             }
             
-            // Log aktivitas (skip jika method tidak ada)
-            // $this->_log_activity($publikasi_id, $data['validated_by_staf_id'], 'staf', 'complete_publikasi', 'Staf menyelesaikan validasi publikasi dan input repository: ' . $data['link_repository']);
+            // Log aktivitas
+            $this->_log_activity($publikasi_id, $data['validated_by_staf_id'], 'staf', 'complete_publikasi', 'Staf menyelesaikan validasi publikasi dan input repository: ' . $data['link_repository']);
             
             $this->db->trans_complete();
             
@@ -993,41 +993,6 @@ class Publikasi_model extends CI_Model {
         $this->db->order_by('pta.tanggal_pengajuan', 'DESC');
         
         return $this->db->get()->result();
-    }
-
-    /**
-     * ✅ TAMBAHAN: Update file surat keterangan setelah generate
-     */
-    public function update_surat_keterangan($publikasi_id, $filename) {
-        return $this->db->where('id', $publikasi_id)
-                      ->update('publikasi_tugas_akhir', [
-                          'file_surat_keterangan' => $filename,
-                          'updated_at' => date('Y-m-d H:i:s')
-                      ]);
-    }
-    
-    /**
-     * ✅ TAMBAHAN: Get publikasi dengan data lengkap untuk surat keterangan
-     */
-    public function get_publikasi_with_mahasiswa($publikasi_id) {
-        $this->db->select('
-            p.*,
-            m.nama as nama_mahasiswa,
-            m.nim,
-            pm.judul as judul_skripsi_final,
-            pm.tanggal_seminar_skripsi as tanggal_ujian_skripsi,
-            d.nama as nama_dosen_pembimbing,
-            pr.nama_prodi as program_studi
-        ');
-        $this->db->from('publikasi_tugas_akhir p');
-        $this->db->join('mahasiswa m', 'p.mahasiswa_id = m.id', 'left');
-        $this->db->join('proposal_mahasiswa pm', 'p.proposal_mahasiswa_id = pm.id', 'left');
-        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
-        $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'left');
-        $this->db->where('p.id', $publikasi_id);
-        
-        $query = $this->db->get();
-        return $query->row();
     }
 
     // =================================================================

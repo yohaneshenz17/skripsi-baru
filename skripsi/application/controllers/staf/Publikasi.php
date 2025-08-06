@@ -201,6 +201,10 @@ class Publikasi extends CI_Controller {
     /**
      * Validasi final dengan flexible status handling
      */
+    /**
+     * Validasi final publikasi oleh staf
+     * PERBAIKAN: Otomatis complete setelah approve
+     */
     public function validasi($publikasi_id) {
         try {
             $publikasi = $this->_get_publikasi_detail_safe($publikasi_id);
@@ -208,6 +212,7 @@ class Publikasi extends CI_Controller {
             if (!$publikasi || empty($publikasi->link_repository)) {
                 $this->session->set_flashdata('error', 'Repository link belum diinput.');
                 redirect('staf/publikasi');
+                return;
             }
             
             if ($this->input->post()) {
@@ -215,37 +220,79 @@ class Publikasi extends CI_Controller {
                 $catatan = $this->input->post('catatan');
                 
                 $this->form_validation->set_rules('keputusan', 'Keputusan', 'required|in_list[approved,rejected]');
-                $this->form_validation->set_rules('catatan', 'Catatan', 'required');
                 
                 if ($this->form_validation->run()) {
-                    $update_data = $this->_prepare_validation_data($keputusan, $catatan);
                     
-                    if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
-                        // Send notification email
-                        $this->_send_notification_email_safe($publikasi, $keputusan, $catatan);
+                    if ($keputusan === 'approved') {
+                        // ✅ PERBAIKAN: Gunakan method complete_by_staf untuk auto-complete
+                        $staf_data = [
+                            'link_repository' => $publikasi->link_repository,
+                            'komentar_staf' => $catatan ?: 'Publikasi disetujui oleh staf.',
+                            'validated_by_staf_id' => $this->session->userdata('user_id'),
+                            'validated_by_staf_name' => $this->session->userdata('nama')
+                        ];
                         
-                        $message = $keputusan === 'approved' ? 'Publikasi berhasil divalidasi.' : 'Publikasi ditolak.';
-                        $this->session->set_flashdata('success', $message);
-                        redirect('staf/publikasi');
+                        // Load model dan complete publikasi
+                        $this->load->model('Publikasi_model');
+                        $result = $this->Publikasi_model->complete_by_staf($publikasi_id, $staf_data);
+                        
+                        if ($result['success']) {
+                            // ✅ PERBAIKAN: Update workflow_status ke 'selesai' (BUKAN 'publikasi')
+                            $this->db->where('id', $publikasi->proposal_mahasiswa_id)
+                                   ->update('proposal_mahasiswa', [
+                                       'workflow_status' => 'selesai',
+                                       'updated_at' => date('Y-m-d H:i:s')
+                                   ]);
+                            
+                            // ✅ PERBAIKAN: Generate surat keterangan publikasi otomatis
+                            $this->_generate_surat_keterangan_publikasi($publikasi_id);
+                            
+                            // Send notification email
+                            $this->_send_notification_email_safe($publikasi, 'approved', $catatan);
+                            
+                            $this->session->set_flashdata('success', 'Publikasi berhasil divalidasi dan diselesaikan. Surat keterangan publikasi telah digenerate.');
+                            redirect('staf/publikasi');
+                            return;
+                        } else {
+                            $this->session->set_flashdata('error', $result['message']);
+                        }
+                        
                     } else {
-                        $this->session->set_flashdata('error', 'Gagal menyimpan validasi.');
+                        // Jika ditolak, kembalikan ke mahasiswa untuk perbaikan
+                        $update_data = [
+                            'status' => 'rejected',
+                            'status_staf' => 'rejected',
+                            'komentar_staf' => $catatan,
+                            'validated_by_staf_id' => $this->session->userdata('user_id'),
+                            'validated_by_staf_name' => $this->session->userdata('nama'),
+                            'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ];
+                        
+                        if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
+                            $this->_send_notification_email_safe($publikasi, 'rejected', $catatan);
+                            $this->session->set_flashdata('warning', 'Publikasi ditolak dan dikembalikan ke mahasiswa.');
+                            redirect('staf/publikasi');
+                            return;
+                        }
                     }
                 }
             }
             
+            // Load view
             $view_data = [
                 'publikasi' => $publikasi,
                 'title' => 'Validasi Publikasi - ' . substr($publikasi->judul, 0, 50)
             ];
             
             $content = $this->load->view('staf/publikasi/validasi', $view_data, TRUE);
-            
             $this->load->view('template/staf', [
                 'title' => 'Validasi Publikasi',
                 'content' => $content
             ]);
             
         } catch (Exception $e) {
+            log_message('error', 'validasi exception: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Error: ' . $e->getMessage());
             redirect('staf/publikasi');
         }
@@ -1081,6 +1128,200 @@ class Publikasi extends CI_Controller {
             log_message('error', 'Error sending email to kaprodi: ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * ✅ PERBAIKAN: Generate surat keterangan publikasi otomatis
+     */
+    private function _generate_surat_keterangan_publikasi($publikasi_id) {
+        try {
+            $this->load->library('pdf');
+            $this->load->model('Publikasi_model');
+            
+            // Get data publikasi lengkap
+            $publikasi = $this->Publikasi_model->get_publikasi_with_mahasiswa($publikasi_id);
+            
+            if (!$publikasi) {
+                log_message('error', 'Data publikasi tidak ditemukan untuk ID: ' . $publikasi_id);
+                return false;
+            }
+            
+            // Data untuk surat
+            $data = [
+                'nama_mahasiswa' => $publikasi->nama_mahasiswa,
+                'nim' => $publikasi->nim,
+                'program_studi' => $publikasi->program_studi,
+                'judul_skripsi' => $publikasi->judul_skripsi_final,
+                'tanggal_ujian' => $publikasi->tanggal_ujian_skripsi ? date('d/m/Y', strtotime($publikasi->tanggal_ujian_skripsi)) : 'Tidak tersedia',
+                'dosen_pembimbing' => $publikasi->nama_dosen_pembimbing,
+                'link_repository' => $publikasi->link_repository,
+                'tanggal_validasi' => date('d/m/Y'),
+                'nomor_surat' => $this->_generate_nomor_surat($publikasi_id)
+            ];
+            
+            // Generate PDF
+            $filename = 'SURAT_KETERANGAN_PUBLIKASI_' . date('Ymd_His') . '_' . $publikasi->nim;
+            $file_path = FCPATH . 'uploads/surat_keterangan/' . $filename . '.pdf';
+            
+            // Ensure directory exists
+            if (!is_dir(dirname($file_path))) {
+                mkdir(dirname($file_path), 0755, true);
+            }
+            
+            $this->_create_surat_keterangan_pdf($data, $file_path);
+            
+            // Update database dengan file path
+            $this->db->where('id', $publikasi_id)
+                   ->update('publikasi_tugas_akhir', [
+                       'file_surat_keterangan' => $filename . '.pdf',
+                       'updated_at' => date('Y-m-d H:i:s')
+                   ]);
+            
+            log_message('info', 'Surat keterangan publikasi berhasil digenerate: ' . $filename);
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error generating surat keterangan: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Generate nomor surat otomatis
+     */
+    private function _generate_nomor_surat($publikasi_id) {
+        $tahun = date('Y');
+        $bulan = date('m');
+        
+        // Format: XXX/STK-TA/MM/YYYY
+        $nomor = sprintf('%03d/STK-TA/%02d/%d', $publikasi_id, $bulan, $tahun);
+        return $nomor;
+    }
+    
+    /**
+     * Create PDF surat keterangan publikasi
+     */
+    private function _create_surat_keterangan_pdf($data, $file_path) {
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        
+        // Set document information
+        $pdf->SetCreator('STK Santo Yakobus Merauke');
+        $pdf->SetAuthor('STK Santo Yakobus Merauke');
+        $pdf->SetTitle('Surat Keterangan Publikasi Tugas Akhir');
+        $pdf->SetSubject('Surat Keterangan Publikasi');
+        
+        // Remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        
+        // Set margins
+        $pdf->SetMargins(20, 20, 20);
+        $pdf->SetAutoPageBreak(TRUE, 20);
+        
+        // Add a page
+        $pdf->AddPage();
+        
+        // Set font
+        $pdf->SetFont('helvetica', '', 12);
+        
+        // Content
+        $html = $this->_get_surat_keterangan_html($data);
+        $pdf->writeHTML($html, true, false, true, false, '');
+        
+        // Output file
+        $pdf->Output($file_path, 'F');
+    }
+
+    /**
+     * Template HTML surat keterangan publikasi
+     */
+    private function _get_surat_keterangan_html($data) {
+        $html = '
+        <style>
+            .header { text-align: center; margin-bottom: 30px; }
+            .title { font-size: 14pt; font-weight: bold; margin: 20px 0; }
+            .content { line-height: 1.6; }
+            .signature { margin-top: 50px; }
+            .data-table { margin: 20px 0; }
+            .data-table td { padding: 5px; }
+        </style>
+        
+        <div class="header">
+            <h2>SEKOLAH TINGGI KATOLIK SANTO YAKOBUS MERAUKE</h2>
+            <p>Jl. Raya Mandala KM. 15, Merauke 99615, Papua Selatan</p>
+            <p>Telp: (0971) 325020 | Email: info@stkyakobus.ac.id</p>
+            <hr style="border: 1px solid #000; margin: 20px 0;">
+        </div>
+        
+        <div class="title" style="text-align: center;">
+            <strong>SURAT KETERANGAN PUBLIKASI TUGAS AKHIR</strong><br>
+            <small>Nomor: ' . $data['nomor_surat'] . '</small>
+        </div>
+        
+        <div class="content">
+            <p>Yang bertanda tangan di bawah ini, Ketua Program Studi ' . $data['program_studi'] . ' 
+            Sekolah Tinggi Katolik Santo Yakobus Merauke, dengan ini menerangkan bahwa:</p>
+            
+            <table class="data-table" cellpadding="5">
+                <tr>
+                    <td width="150">Nama</td>
+                    <td width="20">:</td>
+                    <td><strong>' . $data['nama_mahasiswa'] . '</strong></td>
+                </tr>
+                <tr>
+                    <td>NIM</td>
+                    <td>:</td>
+                    <td>' . $data['nim'] . '</td>
+                </tr>
+                <tr>
+                    <td>Program Studi</td>
+                    <td>:</td>
+                    <td>' . $data['program_studi'] . '</td>
+                </tr>
+                <tr>
+                    <td>Judul Skripsi</td>
+                    <td>:</td>
+                    <td>' . $data['judul_skripsi'] . '</td>
+                </tr>
+                <tr>
+                    <td>Tanggal Ujian Skripsi</td>
+                    <td>:</td>
+                    <td>' . $data['tanggal_ujian'] . '</td>
+                </tr>
+                <tr>
+                    <td>Dosen Pembimbing</td>
+                    <td>:</td>
+                    <td>' . $data['dosen_pembimbing'] . '</td>
+                </tr>
+                <tr>
+                    <td>Link Repository</td>
+                    <td>:</td>
+                    <td>' . $data['link_repository'] . '</td>
+                </tr>
+            </table>
+            
+            <p>Telah melaksanakan <strong>publikasi tugas akhir</strong> pada tanggal ' . $data['tanggal_validasi'] . ' 
+            melalui repository digital institusi sebagai syarat untuk mengikuti yudisium.</p>
+            
+            <p>Demikian surat keterangan ini dibuat untuk dapat dipergunakan sebagaimana mestinya.</p>
+        </div>
+        
+        <div class="signature">
+            <table width="100%">
+                <tr>
+                    <td width="50%"></td>
+                    <td width="50%" style="text-align: center;">
+                        <p>Merauke, ' . $data['tanggal_validasi'] . '</p>
+                        <p><strong>Ketua Program Studi</strong><br>' . $data['program_studi'] . '</p>
+                        <br><br><br>
+                        <p><strong>_________________________</strong></p>
+                        <p><small>NIP: </small></p>
+                    </td>
+                </tr>
+            </table>
+        </div>';
+        
+        return $html;
     }
 
     /**

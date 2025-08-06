@@ -146,18 +146,17 @@ public function update($publikasi_id, $data, $user_id = null) {
 }
 
 /**
- * ✅ FIXED: Method submit_pengajuan() - REPLACE method yang existing
- * Hapus redundant updated_at dan current_step
+ * ✅ FINAL FIX: Method submit_pengajuan() - REPLACE Yang Existing  
  */
 public function submit_pengajuan($publikasi_id) {
     try {
         $this->db->trans_start();
         
-        // ✅ FIXED: Clean data tanpa redundant fields
+        // ✅ CLEAN: Tanpa current_step dan updated_at
         $data = [
             'status' => 'submitted',
             'tanggal_pengajuan' => date('Y-m-d H:i:s')
-            // ✅ HAPUS: 'updated_at' dan 'current_step'
+            // ✅ HAPUS: 'updated_at', 'current_step'
         ];
         
         $this->db->where('id', $publikasi_id)
@@ -194,26 +193,24 @@ public function submit_pengajuan($publikasi_id) {
     }
 }
 
-
     // =================================================================
     // DOSEN OPERATIONS
     // =================================================================
 
 /**
- * ✅ FIXED: Method approve_by_dosen() - REPLACE method yang existing
- * Hapus redundant updated_at dan current_step
+ * ✅ FINAL FIX: Method approve_by_dosen() - REPLACE Yang Existing
  */
 public function approve_by_dosen($publikasi_id, $dosen_id, $komentar = null) {
     try {
         $this->db->trans_start();
         
-        // ✅ FIXED: Clean data tanpa redundant fields
+        // ✅ CLEAN: Tanpa current_step dan updated_at
         $data = [
             'status' => 'review_staf',
             'status_pembimbing' => 'approved',
             'komentar_pembimbing' => $komentar,
             'tanggal_review_pembimbing' => date('Y-m-d H:i:s')
-            // ✅ HAPUS: 'updated_at' dan 'current_step'
+            // ✅ HAPUS: 'updated_at', 'current_step'
         ];
         
         $this->db->where('id', $publikasi_id)
@@ -249,20 +246,19 @@ public function approve_by_dosen($publikasi_id, $dosen_id, $komentar = null) {
 }
 
 /**
- * ✅ FIXED: Method reject_by_dosen() - REPLACE method yang existing
- * Hapus redundant updated_at dan current_step
+ * ✅ FINAL FIX: Method reject_by_dosen() - REPLACE Yang Existing
  */
 public function reject_by_dosen($publikasi_id, $dosen_id, $komentar) {
     try {
         $this->db->trans_start();
         
-        // ✅ FIXED: Clean data tanpa redundant fields
+        // ✅ CLEAN: Tanpa current_step dan updated_at
         $data = [
             'status' => 'rejected',
             'status_pembimbing' => 'rejected',
             'komentar_pembimbing' => $komentar,
             'tanggal_review_pembimbing' => date('Y-m-d H:i:s')
-            // ✅ HAPUS: 'updated_at' dan 'current_step'
+            // ✅ HAPUS: 'updated_at', 'current_step'
         ];
         
         $this->db->where('id', $publikasi_id)
@@ -297,20 +293,19 @@ public function reject_by_dosen($publikasi_id, $dosen_id, $komentar) {
     }
 }
 
-
     // =================================================================
     // STAF OPERATIONS
     // =================================================================
 
 /**
- * ✅ FIXED: Method complete_by_staf() - REPLACE method yang existing
- * Hapus redundant current_step dan updated_at manual
+ * ✅ FINAL FIX: Method complete_by_staf() - REPLACE Yang Existing
+ * Pastikan versi ini yang digunakan di model
  */
 public function complete_by_staf($publikasi_id, $data) {
     try {
         $this->db->trans_start();
         
-        // ✅ FIXED: Clean update data tanpa redundant fields
+        // ✅ CLEAN: Tanpa redundant current_step dan updated_at
         $update_data = [
             'status' => 'completed',
             'status_staf' => 'approved',
@@ -319,8 +314,8 @@ public function complete_by_staf($publikasi_id, $data) {
             'validated_by_staf_id' => $data['validated_by_staf_id'],
             'validated_by_staf_name' => $data['validated_by_staf_name'],
             'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
-            'tanggal_selesai' => date('Y-m-d H:i:s') // ✅ CRITICAL
-            // ✅ HAPUS: 'updated_at' dan 'current_step' - tidak dipakai/redundant
+            'tanggal_selesai' => date('Y-m-d H:i:s')
+            // ✅ HAPUS: 'updated_at', 'current_step'
         ];
         
         $this->db->where('id', $publikasi_id)
@@ -335,8 +330,7 @@ public function complete_by_staf($publikasi_id, $data) {
             ];
         }
         
-        // ✅ WORKFLOW UPDATE: Trigger akan handle workflow_status otomatis
-        // Tidak perlu manual update proposal_mahasiswa lagi
+        // ✅ WORKFLOW: Trigger database akan handle proposal_mahasiswa.workflow_status
         
         // Log aktivitas
         $this->_log_activity($publikasi_id, $data['validated_by_staf_id'], 'staf', 

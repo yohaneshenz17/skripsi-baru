@@ -366,7 +366,7 @@ class Publikasi_model extends CI_Model {
             $publikasi = $this->get_by_id($publikasi_id);
             if ($publikasi) {
                 $this->db->where('id', $publikasi->proposal_mahasiswa_id)
-                       ->update('proposal_mahasiswa', ['workflow_status' => 'publikasi']);
+                       ->update('proposal_mahasiswa', ['workflow_status' => 'selesai']);
             }
             
             // Log aktivitas
@@ -993,6 +993,41 @@ class Publikasi_model extends CI_Model {
         $this->db->order_by('pta.tanggal_pengajuan', 'DESC');
         
         return $this->db->get()->result();
+    }
+
+    /**
+     * ✅ TAMBAHAN: Update file surat keterangan setelah generate
+     */
+    public function update_surat_keterangan($publikasi_id, $filename) {
+        return $this->db->where('id', $publikasi_id)
+                      ->update('publikasi_tugas_akhir', [
+                          'file_surat_keterangan' => $filename,
+                          'updated_at' => date('Y-m-d H:i:s')
+                      ]);
+    }
+    
+    /**
+     * ✅ TAMBAHAN: Get publikasi dengan data lengkap untuk surat keterangan
+     */
+    public function get_publikasi_with_mahasiswa($publikasi_id) {
+        $this->db->select('
+            p.*,
+            m.nama as nama_mahasiswa,
+            m.nim,
+            pm.judul as judul_skripsi_final,
+            pm.tanggal_seminar_skripsi as tanggal_ujian_skripsi,
+            d.nama as nama_dosen_pembimbing,
+            pr.nama_prodi as program_studi
+        ');
+        $this->db->from('publikasi_tugas_akhir p');
+        $this->db->join('mahasiswa m', 'p.mahasiswa_id = m.id', 'left');
+        $this->db->join('proposal_mahasiswa pm', 'p.proposal_mahasiswa_id = pm.id', 'left');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'left');
+        $this->db->where('p.id', $publikasi_id);
+        
+        $query = $this->db->get();
+        return $query->row();
     }
 
     // =================================================================

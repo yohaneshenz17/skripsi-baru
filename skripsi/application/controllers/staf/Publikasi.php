@@ -499,7 +499,7 @@ private function _update_publikasi_safe($publikasi_id, $data) {
 private function _process_staf_validation($publikasi_id, $publikasi) {
     // Form validation
     $this->form_validation->set_rules('keputusan', 'Keputusan', 'required|in_list[approved,rejected]');
-    $this->form_validation->set_rules('komentar_staf', 'Komentar', 'trim|required');
+    $this->form_validation->set_rules('komentar_staf', 'Komentar', 'trim|required'); // ✅ FIX: Sesuaikan dengan view
     
     if (!$this->form_validation->run()) {
         $this->_show_validation_form($publikasi);
@@ -507,7 +507,7 @@ private function _process_staf_validation($publikasi_id, $publikasi) {
     }
     
     $keputusan = $this->input->post('keputusan');
-    $komentar = trim($this->input->post('komentar_staf'));
+    $komentar = trim($this->input->post('komentar_staf')); // ✅ FIX: Sesuaikan dengan view
     
     try {
         $this->db->trans_start();
@@ -521,14 +521,13 @@ private function _process_staf_validation($publikasi_id, $publikasi) {
             'tanggal_validasi_staf' => $timestamp_now,
             'validated_by_staf_id' => $this->session->userdata('user_id'),
             'validated_by_staf_name' => $this->session->userdata('nama_lengkap')
-            // ✅ TIDAK SET updated_at - biar MySQL auto-handle
         ];
         
         // ✅ WORKFLOW LOGIC: Set status dan tanggal_selesai yang benar
         if ($keputusan === 'approved') {
             // ✅ CRITICAL: Set status completed DAN tanggal_selesai
             $update_data['status'] = 'completed';
-            $update_data['tanggal_selesai'] = $timestamp_now; // ✅ INI YANG PENTING!
+            $update_data['tanggal_selesai'] = $timestamp_now;
             
         } else {
             // ✅ WORKFLOW: Jika rejected, kembalikan ke review_pembimbing untuk dosen review ulang
@@ -553,8 +552,10 @@ private function _process_staf_validation($publikasi_id, $publikasi) {
             throw new Exception('Database transaction failed');
         }
         
-        // ✅ Send notifications sesuai keputusan
-        $this->_send_validation_notifications($publikasi, $keputusan, $komentar);
+        // ✅ FIX: GANTI method call yang salah
+        // BEFORE: $this->_send_validation_notifications($publikasi, $keputusan, $komentar);
+        // AFTER:
+        $this->_send_notification_email_safe($publikasi, $keputusan, $komentar);
         
         // Success message
         if ($keputusan === 'approved') {
@@ -574,6 +575,7 @@ private function _process_staf_validation($publikasi_id, $publikasi) {
         $this->_show_validation_form($publikasi);
     }
 }
+
 
     /**
      * Prepare validation data based on available columns

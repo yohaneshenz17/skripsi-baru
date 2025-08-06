@@ -75,7 +75,7 @@ class Seminar_skripsi extends CI_Controller {
         
         // Get detail seminar dengan validasi ownership
         $seminar = $this->_get_seminar_detail($seminar_id, $dosen_id);
-        
+        if (!isset($seminar->progress_mahasiswa)) $seminar->progress_mahasiswa = (object)['percentage' => 50];
         if (!$seminar) {
             $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau bukan bimbingan Anda!');
             redirect('dosen/seminar_skripsi');
@@ -854,22 +854,29 @@ public function handle_resubmission($seminar_id) {
      * Safe get jurnal bimbingan
      * STABLE - TIDAK DIUBAH
      */
-    private function _safe_get_jurnal_bimbingan($proposal_id) {
-        try {
-            $this->db->select('*');
-            $this->db->from('jurnal_bimbingan');
-            $this->db->where('proposal_id', $proposal_id);
-            $this->db->where('status_validasi', '1');
-            $this->db->order_by('created_at', 'DESC');
-            $this->db->limit(5);
-            
-            return $this->db->get()->result();
-        } catch (Exception $e) {
-            log_message('error', 'Error getting jurnal bimbingan: ' . $e->getMessage());
-            return [];
+ private function _safe_get_jurnal_bimbingan($proposal_id) {
+    try {
+        $this->db->select('*');
+        $this->db->from('jurnal_bimbingan');
+        $this->db->where('proposal_id', $proposal_id);
+        $this->db->where('status_validasi', '1');
+        $this->db->order_by('created_at', 'DESC');
+        $this->db->limit(5);
+        
+        $result = $this->db->get()->result();
+        
+        // ✅ TAMBAH INI - Set default progress_mahasiswa untuk setiap jurnal
+        foreach($result as $jurnal) {
+            $jurnal->progress_mahasiswa = '0';
         }
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error getting jurnal bimbingan: ' . $e->getMessage());
+        return [];
     }
-
+}
     /**
      * Get existing penilaian - simple query sesuai struktur DB real
      */

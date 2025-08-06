@@ -1,0 +1,625 @@
+ERROR - 2025-08-06 06:06:53 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-06 06:06:55 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:06:55 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:06:59 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:06:59 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:07:03 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:07:03 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:07:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:07:08 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:09:27 --> Query error: Column 'user_id' cannot be null - Invalid query: UPDATE `publikasi_tugas_akhir` SET `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2020/10/Statuta-Revisi-rr2017.pdf', `updated_at` = '2025-08-06 06:09:27'
+WHERE `id` = '3'
+ERROR - 2025-08-06 06:25:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:25:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:25:10 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-06 06:25:22 --> Query error: Column 'user_id' cannot be null - Invalid query: UPDATE `publikasi_tugas_akhir` SET `link_repository` = 'https://stkyakobus.ac.id', `updated_at` = '2025-08-06 06:25:22'
+WHERE `id` = '3'
+ERROR - 2025-08-06 06:25:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:25:58 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:26:06 --> Query error: Column 'user_id' cannot be null - Invalid query: UPDATE `publikasi_tugas_akhir` SET `link_repository` = 'https://stkyakobus.ac.id', `updated_at` = '2025-08-06 06:26:06'
+WHERE `id` = '3'
+ERROR - 2025-08-06 06:29:39 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:29:39 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:29:47 --> Query error: Unknown column 'user_id' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `link_repository` = 'https://stkyakobus.ac.id/', `updated_at` = '2025-08-06 06:29:47', `user_id` = '29', `catatan_staf` = 'tidak ada'
+WHERE `id` = '3'
+ERROR - 2025-08-06 06:34:59 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:34:59 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:35:00 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:35:00 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:35:03 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:35:03 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:35:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:35:08 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:35:27 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:35:27 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:35:38 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:35:38 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:36:07 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:36:07 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:36:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:36:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:36:25 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:36:25 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:36:28 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:36:28 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:36:32 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:36:32 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:36:51 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:36:51 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:37:39 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-06 06:40:35 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:40:35 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:49:36 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:49:36 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:49:39 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:49:39 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:50:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:50:47 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:50:59 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:50:59 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:51:21 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:51:21 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:52:05 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:52:05 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:52:31 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:52:31 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 06:52:45 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 06:52:45 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:06:24 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:06:24 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:06:27 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:06:27 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:06:31 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:06:31 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:07:01 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:07:01 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:07:06 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:07:06 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:07:34 --> Severity: error --> Exception: Call to undefined method Publikasi::_get_email_config() /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 557
+ERROR - 2025-08-06 07:08:06 --> Severity: error --> Exception: Call to undefined method Publikasi::_get_email_config() /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 557
+ERROR - 2025-08-06 07:13:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:13:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:15:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:15:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:15:23 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:15:23 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:54:56 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:54:56 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:55:20 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:55:20 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 07:55:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 07:55:47 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 08:17:37 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 08:17:37 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 08:17:38 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-06 08:17:40 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 08:17:40 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 08:21:06 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 08:21:06 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 08:58:02 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 08:58:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 08:58:07 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 08:58:07 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 08:58:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 08:58:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 08:58:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 08:58:13 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:00:20 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:00:20 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 09:24:29 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:24:29 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 09:25:01 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:25:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 09:25:09 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:25:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 09:25:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 09:25:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:25:19 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:25:19 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 09:25:31 --> Query error: Unknown column 'current_step' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `current_step` = 'selesai', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:25:31', `tanggal_selesai` = '2025-08-06 09:25:31', `updated_at` = '2025-08-06 09:25:31'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:27:59 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:27:59', `tanggal_selesai` = '2025-08-06 09:27:59'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:29:35 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:29:35', `tanggal_selesai` = '2025-08-06 09:29:35'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:30:13 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:30:13', `tanggal_selesai` = '2025-08-06 09:30:13'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:30:22 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:30:22', `tanggal_selesai` = '2025-08-06 09:30:22'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:33:13 --> Query error: Unknown column 'current_step' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `current_step` = 'selesai', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:33:13', `tanggal_selesai` = '2025-08-06 09:33:13', `updated_at` = '2025-08-06 09:33:13'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:33:51 --> Query error: Unknown column 'current_step' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `current_step` = 'selesai', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:33:51', `tanggal_selesai` = '2025-08-06 09:33:51', `updated_at` = '2025-08-06 09:33:51'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:34:18 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:34:18', `tanggal_selesai` = '2025-08-06 09:34:18'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:52:49 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/wp-content/uploads/2019/10/SK-Ketua-No.-33-Tahun-2017-tentang-Pengangkatan-Kepala-LPMI.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 09:52:49', `tanggal_selesai` = '2025-08-06 09:52:49'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 09:53:44 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:53:44 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 09:53:53 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:53:53 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 09:57:57 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:58:12 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:58:34 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:58:46 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:58:54 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:59:20 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:59:23 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:59:24 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:59:25 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:59:28 --> Severity: error --> Exception: Class "CI_Model" not found /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 18
+ERROR - 2025-08-06 09:59:56 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 09:59:56 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:00:28 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:00:28 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:00:34 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:00:34 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:00:38 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:00:38 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:00:45 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:00:45 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:01:02 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:01:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:01:12 --> Query error: Unknown column 'current_step' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `current_step` = 'selesai', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/download', `komentar_staf` = 'Bagus', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 10:01:12', `tanggal_selesai` = '2025-08-06 10:01:12', `updated_at` = '2025-08-06 10:01:12'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 10:19:06 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:19:06 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:19:11 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:19:11 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:19:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:19:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:19:21 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:19:21 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:19:25 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:19:25 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:19:36 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/download.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 10:19:36', `tanggal_selesai` = '2025-08-06 10:19:36', `updated_at` = '2025-08-06 10:19:36'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 10:23:41 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/download.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 10:23:41', `tanggal_selesai` = '2025-08-06 10:23:41'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 10:24:53 --> Query error: Unknown column 'current_step' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `current_step` = 'selesai', `status_staf` = 'approved', `link_repository` = 'https://stkyakobus.ac.id/download.pdf', `komentar_staf` = 'Disetujui', `validated_by_staf_id` = NULL, `validated_by_staf_name` = 'Maria Karolina Itu', `tanggal_validasi_staf` = '2025-08-06 10:24:53', `tanggal_selesai` = '2025-08-06 10:24:53', `updated_at` = '2025-08-06 10:24:53'
+WHERE `id` = '2'
+AND `status_pembimbing` = 'approved'
+AND `status_staf` = 'pending'
+ERROR - 2025-08-06 10:29:30 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:29:30 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:29:35 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:29:35 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:29:37 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:29:37 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:29:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:29:47 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:32:22 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:32:22 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:35:11 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:35:11 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:35:18 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:35:18 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:35:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:35:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:35:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:35:47 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 10:53:44 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 10:53:44 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:02:36 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:02:36 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:02:40 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:02:40 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:02:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:02:42 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:03:07 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:03:07 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:19:13 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:19:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:19:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:19:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:19:27 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:19:28 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:19:30 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:19:30 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:19:33 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:19:33 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:19:46 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `updated_at` = '2025-08-06 11:19:46', `status_staf` = 'approved', `komentar_staf` = 'Bagus bro', `tanggal_validasi_staf` = '2025-08-06 11:19:46', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:19:46'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:22:24 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'Bagus bro', `tanggal_validasi_staf` = '2025-08-06 11:22:24', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:22:24'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:22:27 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'Bagus bro', `tanggal_validasi_staf` = '2025-08-06 11:22:27', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:22:27'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:24:15 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'Bagus bro', `tanggal_validasi_staf` = '2025-08-06 11:24:15', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:24:15'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:25:49 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'Bagus bro', `tanggal_validasi_staf` = '2025-08-06 11:25:49', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:25:49'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:25:51 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'Bagus bro', `tanggal_validasi_staf` = '2025-08-06 11:25:51', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:25:51'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:25:54 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'Bagus bro', `tanggal_validasi_staf` = '2025-08-06 11:25:54', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:25:54'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:26:48 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:26:48 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:30:39 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:30:39 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:30:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:30:42 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:33:01 --> Severity: error --> Exception: syntax error, unexpected token "catch", expecting "function" or "const" /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 257
+ERROR - 2025-08-06 11:33:24 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:33:24 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:33:43 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `updated_at` = '2025-08-06 11:33:43', `status_staf` = 'approved', `komentar_staf` = 'Bagus', `tanggal_validasi_staf` = '2025-08-06 11:33:43', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:33:43'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:34:25 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `updated_at` = '2025-08-06 11:34:25', `status_staf` = 'approved', `komentar_staf` = 'Bagus', `tanggal_validasi_staf` = '2025-08-06 11:34:25', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:34:25'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:35:44 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `updated_at` = '2025-08-06 11:35:44', `status_staf` = 'approved', `komentar_staf` = 'Bagus', `tanggal_validasi_staf` = '2025-08-06 11:35:44', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:35:44'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:37:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:37:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:37:59 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:37:59 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:40:19 --> Severity: error --> Exception: syntax error, unexpected token "catch", expecting "function" or "const" /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 257
+ERROR - 2025-08-06 11:40:35 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:40:35 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:40:38 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:40:38 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:40:48 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'Bagus', `tanggal_validasi_staf` = '2025-08-06 11:40:48', `status` = 'completed', `tanggal_selesai` = '2025-08-06 11:40:48'
+WHERE `id` = '2'
+ERROR - 2025-08-06 11:42:17 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:42:17 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:58:23 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:58:23 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:59:52 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:59:52 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 11:59:55 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 11:59:55 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:00:01 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:00:01 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:00:17 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:00:17 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:06:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:06:08 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:06:12 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:06:12 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:06:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:06:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:10:29 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:10:29 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:10:41 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'tessss', `tanggal_validasi_staf` = '2025-08-06 12:10:41', `updated_at` = '2025-08-06 12:10:41', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:10:41'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:15:03 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'tessss', `tanggal_validasi_staf` = '2025-08-06 12:15:03', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:15:03'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:17:03 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'tessss', `tanggal_validasi_staf` = '2025-08-06 12:17:03', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:17:03'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:19:02 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'tessss', `tanggal_validasi_staf` = '2025-08-06 12:19:02', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:19:02'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:20:00 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'tessss', `tanggal_validasi_staf` = '2025-08-06 12:20:00', `updated_at` = '2025-08-06 12:20:00', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:20:00'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:20:23 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `updated_at` = '2025-08-06 12:20:23', `status_staf` = 'approved', `komentar_staf` = 'tessss', `tanggal_validasi_staf` = '2025-08-06 12:20:23', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:20:23'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:21:02 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:21:02 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:23:56 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:23:56 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:23:59 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:23:59 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:24:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:24:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:24:41 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'amannnnn', `tanggal_validasi_staf` = '2025-08-06 12:24:41', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:24:41'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:26:53 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'amannnnn', `tanggal_validasi_staf` = '2025-08-06 12:26:53', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:26:53'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:29:10 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'amannnnn',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = '2'
+ERROR - 2025-08-06 12:29:25 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'amannnnn',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = '2'
+ERROR - 2025-08-06 12:34:50 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'amannnnn',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = 2
+ERROR - 2025-08-06 12:34:53 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'amannnnn',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = 2
+ERROR - 2025-08-06 12:35:06 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'amannnnn', `tanggal_validasi_staf` = '2025-08-06 12:35:06', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:35:06'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:35:28 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:35:28 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:37:32 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:37:32 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:37:55 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:37:55 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:38:00 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:38:00 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:38:06 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'hjfghfgh',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = '2'
+ERROR - 2025-08-06 12:42:03 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:42:03 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:42:14 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'amannnnn', `tanggal_validasi_staf` = '2025-08-06 12:42:14', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:42:14'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:42:56 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'amannnnn',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = '2'
+ERROR - 2025-08-06 12:43:36 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'amannnnn',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = '2'
+ERROR - 2025-08-06 12:43:44 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'amannnnn',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = '2'
+ERROR - 2025-08-06 12:44:16 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status = 'completed',
+                               status_staf = 'approved',
+                               komentar_staf = 'amannnnn',
+                               tanggal_validasi_staf = NOW(),
+                               tanggal_selesai = NOW()
+                           WHERE id = '2'
+ERROR - 2025-08-06 12:46:15 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:46:15 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:48:40 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:48:40 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:48:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:48:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:52:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:52:47 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:52:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:52:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:53:07 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status_staf` = 'approved', `komentar_staf` = 'God bless us', `tanggal_validasi_staf` = '2025-08-06 12:53:07', `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:53:07'
+WHERE `id` = '2'
+ERROR - 2025-08-06 12:54:58 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir 
+                           SET status_staf = 'approved',
+                               komentar_staf = 'God bless us',
+                               tanggal_validasi_staf = NOW(),
+                               status = 'completed',
+                               tanggal_selesai = NOW()
+                           WHERE id = '2'
+ERROR - 2025-08-06 12:55:37 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:55:37 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 12:57:38 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 12:57:38 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 13:07:58 --> Query error: Unknown column 'current_step' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `current_step` = 'selesai', `tanggal_selesai` = '2025-08-06 12:55:18', `updated_at` = '2025-08-06 13:07:58'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:10:18 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:55:18', `updated_at` = '2025-08-06 13:10:18'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:12:35 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:55:18', `updated_at` = '2025-08-06 13:12:35'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:12:36 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:55:18', `updated_at` = '2025-08-06 13:12:36'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:12:37 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed', `tanggal_selesai` = '2025-08-06 12:55:18', `updated_at` = '2025-08-06 13:12:37'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:13:11 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:13:24 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:15:10 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:16:59 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:17:00 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `publikasi_tugas_akhir` SET `status` = 'completed'
+WHERE `id` = '2'
+ERROR - 2025-08-06 13:17:57 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir SET status = 'completed' WHERE id = '2'
+ERROR - 2025-08-06 13:20:48 --> 404 Page Not Found: mahasiswa/Publikasi/ajax_fix_status
+ERROR - 2025-08-06 13:20:56 --> 404 Page Not Found: staf/Publikasi/complete
+ERROR - 2025-08-06 13:57:03 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir SET status = 'completed' WHERE id = '2'
+ERROR - 2025-08-06 13:57:08 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir SET status = 'completed' WHERE id = '2'
+ERROR - 2025-08-06 13:57:37 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir SET status = 'completed' WHERE id = '2'
+ERROR - 2025-08-06 13:57:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 13:57:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 14:00:39 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir SET status = 'completed' WHERE id = '2' AND status = 'review_staf' AND status_staf = 'approved'
+ERROR - 2025-08-06 14:00:52 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir SET status = 'completed' WHERE id = '2' AND status = 'review_staf' AND status_staf = 'approved'
+ERROR - 2025-08-06 14:01:00 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir SET status = 'completed' WHERE id = '2' AND status = 'review_staf' AND status_staf = 'approved'
+ERROR - 2025-08-06 14:01:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 14:01:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 14:01:15 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE publikasi_tugas_akhir SET status = 'completed' WHERE id = '2' AND status = 'review_staf' AND status_staf = 'approved'
+ERROR - 2025-08-06 14:35:17 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 130
+ERROR - 2025-08-06 14:35:17 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 150
+ERROR - 2025-08-06 14:35:17 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 160
+ERROR - 2025-08-06 14:35:17 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 191
+ERROR - 2025-08-06 14:35:17 --> Severity: error --> Exception: Call to undefined method Pdf::render() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 235
+ERROR - 2025-08-06 14:36:08 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 14:36:09 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 14:43:58 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 14:43:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 14:45:00 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-06 14:45:41 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 14:45:41 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 14:50:44 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 14:50:44 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 14:55:45 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 14:55:45 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 15:00:46 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 15:00:46 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 15:05:52 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 15:05:52 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 15:10:53 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 15:10:53 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 15:15:54 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 15:15:54 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 15:20:56 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 15:20:56 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 15:25:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 15:25:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 15:27:21 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 15:27:21 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 16:29:43 --> Severity: error --> Exception: Object of class mysqli could not be converted to string /home/stkp7133/public_html/skripsi/application/controllers/dosen/Publikasi.php 298
+ERROR - 2025-08-06 16:29:43 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/dosen/Publikasi.php:182) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-06 16:52:53 --> Severity: Warning --> Undefined property: Publikasi::$email /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 730
+ERROR - 2025-08-06 16:52:53 --> Severity: error --> Exception: Call to a member function clear() on null /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 730
+ERROR - 2025-08-06 16:52:53 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-06 17:09:16 --> Severity: Warning --> Undefined array key "id" /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 705
+ERROR - 2025-08-06 17:09:16 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-06 17:09:41 --> Severity: Warning --> Undefined array key "id" /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 705
+ERROR - 2025-08-06 17:09:41 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-06 17:12:36 --> Severity: Warning --> Undefined array key "id" /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 705
+ERROR - 2025-08-06 17:12:36 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-06 17:15:44 --> Severity: Warning --> Undefined variable $data /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 136
+ERROR - 2025-08-06 17:15:44 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-06 17:25:18 --> Severity: Warning --> Undefined variable $is_resubmit /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 140
+ERROR - 2025-08-06 17:25:18 --> Severity: Warning --> Undefined variable $is_new_submit /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 142
+ERROR - 2025-08-06 17:25:18 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-06 17:32:31 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:32:31 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:32:31 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:38:36 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:38:36 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:38:36 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:39:47 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 17:39:47 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 17:39:55 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:39:55 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:39:55 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-06 17:39:56 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 17:39:56 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 17:47:54 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:47:54 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:47:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:47:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:48:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:48:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:48:18 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:48:18 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:48:25 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:48:25 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:48:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:48:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:48:54 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:48:54 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:49:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:49:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:49:28 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:49:29 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:49:41 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:49:41 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:50:33 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:50:33 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 17:51:00 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 17:51:01 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-06 17:59:58 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 17:59:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:00:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:00:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:00:33 --> Severity: error --> Exception: Call to undefined method Publikasi::_send_validation_notifications() /home/stkp7133/public_html/skripsi/application/controllers/staf/Publikasi.php 557
+ERROR - 2025-08-06 18:06:38 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:06:38 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:06:42 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:06:43 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:06:47 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:06:47 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:07:05 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:07:05 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:07:11 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:07:11 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:07:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:07:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:07:37 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:07:37 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:07:49 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:07:49 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:08:27 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 130
+ERROR - 2025-08-06 18:08:27 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 150
+ERROR - 2025-08-06 18:08:27 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 160
+ERROR - 2025-08-06 18:08:27 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 191
+ERROR - 2025-08-06 18:08:27 --> Severity: error --> Exception: Call to undefined method Pdf::render() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 235
+ERROR - 2025-08-06 18:09:31 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:09:31 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:09:55 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:09:55 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:09:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:09:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:10:18 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-06 18:10:18 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-06 18:24:41 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 255
+ERROR - 2025-08-06 18:24:41 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 275
+ERROR - 2025-08-06 18:24:41 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 285
+ERROR - 2025-08-06 18:24:41 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 330
+ERROR - 2025-08-06 18:24:41 --> Severity: error --> Exception: Call to undefined method Pdf::render() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 235
+ERROR - 2025-08-06 18:25:32 --> Severity: Warning --> Undefined property: Publikasi::$Publikasi_model /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 223
+ERROR - 2025-08-06 18:25:32 --> Severity: error --> Exception: Call to a member function get_publikasi_with_mahasiswa() on null /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 223
+ERROR - 2025-08-06 18:25:32 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-06 18:25:56 --> Severity: Warning --> Undefined property: Publikasi::$Publikasi_model /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 223
+ERROR - 2025-08-06 18:25:56 --> Severity: error --> Exception: Call to a member function get_publikasi_with_mahasiswa() on null /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 223
+ERROR - 2025-08-06 18:25:56 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-06 18:26:53 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 255
+ERROR - 2025-08-06 18:26:53 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 275
+ERROR - 2025-08-06 18:26:53 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 285
+ERROR - 2025-08-06 18:26:53 --> Severity: Warning --> Undefined property: stdClass::$nama_prodi /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/surat_keterangan.php 330
+ERROR - 2025-08-06 18:26:53 --> Severity: error --> Exception: Call to undefined method Pdf::render() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 235
+ERROR - 2025-08-06 18:30:59 --> Severity: error --> Exception: Call to undefined method Publikasi::_get_publikasi_with_validation() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 223
+ERROR - 2025-08-06 18:32:55 --> Query error: Unknown column 'k.gelar_depan' in 'field list' - Invalid query: SELECT `pta`.*, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `m`.`email` as `email_mahasiswa`, `pr`.`nama` as `nama_prodi`, `d`.`nama` as `nama_pembimbing`, `d`.`nip` as `nip_pembimbing`, `pm`.`judul` as `judul_skripsi_final`, CONCAT(k.gelar_depan, " ", `k`.`nama`, " ", k.gelar_belakang) as nama_kaprodi, `k`.`nip` as `nip_kaprodi`
+FROM `publikasi_tugas_akhir` `pta`
+JOIN `mahasiswa` `m` ON `pta`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d` ON `pta`.`dosen_pembimbing_id` = `d`.`id`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `pta`.`proposal_mahasiswa_id` = `pm`.`id`
+LEFT JOIN `dosen` `k` ON `pr`.`kaprodi_id` = `k`.`id`
+WHERE `pta`.`id` = '5'
+AND `pta`.`mahasiswa_id` = '47'
+ERROR - 2025-08-06 18:37:13 --> Query error: Unknown column 'k.gelar_depan' in 'field list' - Invalid query: SELECT `pta`.*, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `pr`.`nama` as `nama_prodi`, `d`.`nama` as `nama_pembimbing`, `pm`.`judul` as `judul_skripsi_final`, CONCAT(IFNULL(k.gelar_depan, ""), " ", `k`.`nama`, " ", IFNULL(k.gelar_belakang, "")) as nama_kaprodi, `k`.`nip` as `nip_kaprodi`
+FROM `publikasi_tugas_akhir` `pta`
+JOIN `mahasiswa` `m` ON `pta`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d` ON `pta`.`dosen_pembimbing_id` = `d`.`id`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `pta`.`proposal_mahasiswa_id` = `pm`.`id`
+LEFT JOIN `dosen` `k` ON `pr`.`kaprodi_id` = `k`.`id`
+WHERE `pta`.`id` = '5'
+AND `pta`.`mahasiswa_id` = '47'
+ERROR - 2025-08-06 18:38:09 --> Query error: Unknown column 'pr.kaprodi_id' in 'on clause' - Invalid query: SELECT `pta`.*, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `pr`.`nama` as `nama_prodi`, `d`.`nama` as `nama_pembimbing`, `pm`.`judul` as `judul_skripsi_final`, `k`.`nama` as `nama_kaprodi`, `k`.`nip` as `nip_kaprodi`
+FROM `publikasi_tugas_akhir` `pta`
+JOIN `mahasiswa` `m` ON `pta`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d` ON `pta`.`dosen_pembimbing_id` = `d`.`id`
+LEFT JOIN `proposal_mahasiswa` `pm` ON `pta`.`proposal_mahasiswa_id` = `pm`.`id`
+LEFT JOIN `dosen` `k` ON `pr`.`kaprodi_id` = `k`.`id`
+WHERE `pta`.`id` = '5'
+AND `pta`.`mahasiswa_id` = '47'
+ERROR - 2025-08-06 18:39:27 --> Severity: error --> Exception: Call to undefined method Pdf::render() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php 261
+ERROR - 2025-08-06 19:20:11 --> 404 Page Not Found: Cdn/img

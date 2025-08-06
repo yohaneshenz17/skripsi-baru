@@ -25,7 +25,7 @@ class Publikasi extends CI_Controller {
         // Load dependencies
         $this->load->database();
         $this->load->library(['session', 'upload', 'email', 'form_validation']);
-        $this->load->helper(['url', 'file', 'date', 'text']);
+        $this->load->helper(['url', 'file', 'date', 'text', 'download']);
         $this->load->model('Publikasi_model', 'publikasi');
         
         // Auth check untuk mahasiswa
@@ -207,34 +207,59 @@ class Publikasi extends CI_Controller {
         redirect('mahasiswa/publikasi');
     }
 
-    /**
-     * Download surat keterangan publikasi - TIDAK DIUBAH
-     */
-    public function download_surat($publikasi_id) {
-        $publikasi = $this->publikasi->get_by_id($publikasi_id, $this->mahasiswa_id);
-        
-        if (!$publikasi || $publikasi->status !== 'completed') {
-            $this->session->set_flashdata('error', 'Surat belum tersedia.');
-            redirect('mahasiswa/publikasi');
-            return;
-        }
-        
-        // Generate PDF surat keterangan - LOGIC TIDAK DIUBAH
-        $this->load->library('pdf');
-        
-        $data = [
-            'publikasi' => $publikasi,
-            'mahasiswa' => $this->_get_mahasiswa_data(),
-            'tanggal_surat' => date('d F Y')
-        ];
-        
-        $html = $this->load->view('mahasiswa/publikasi/surat_keterangan', $data, TRUE);
-        
-        $this->pdf->filename = 'Surat_Keterangan_Publikasi_' . $publikasi->nim . '.pdf';
-        $this->pdf->load_html($html);
-        $this->pdf->render();
-        $this->pdf->stream($this->pdf->filename, ["Attachment" => false]);
+public function download_surat($publikasi_id = null) {
+    if (!$publikasi_id) {
+        show_404();
+        return;
     }
+    
+    $mahasiswa_id = $this->session->userdata('id');
+    
+    // Query dengan join kaprodi dari tabel dosen level 4
+    $this->db->select('
+        pta.*,
+        m.nama as nama_mahasiswa,
+        m.nim,
+        pr.nama as nama_prodi,
+        d.nama as nama_pembimbing,
+        pm.judul as judul_skripsi_final,
+        k.nama as nama_kaprodi,
+        k.nip as nip_kaprodi
+    ');
+    $this->db->from('publikasi_tugas_akhir pta');
+    $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id');
+    $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+    $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id', 'left');
+    $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id', 'left');
+    $this->db->join('dosen k', 'k.prodi_id = m.prodi_id AND k.level = 4', 'left'); // Kaprodi dari dosen level 4
+    $this->db->where('pta.id', $publikasi_id);
+    $this->db->where('pta.mahasiswa_id', $mahasiswa_id); // Security check
+    
+    $publikasi = $this->db->get()->row();
+    
+    if (!$publikasi) {
+        show_error('Data publikasi tidak ditemukan atau tidak memiliki akses.');
+        return;
+    }
+    
+    if ($publikasi->status !== 'completed') {
+        show_error('Surat keterangan hanya dapat diunduh setelah publikasi selesai.');
+        return;
+    }
+    
+    // Load library PDF yang sudah terinstall
+    $this->load->library('pdf');
+    
+    // Load view surat_keterangan.php yang sudah ada
+    $data['publikasi'] = $publikasi;
+    $html = $this->load->view('mahasiswa/publikasi/surat_keterangan', $data, true);
+    
+    // Generate PDF - SIMPLIFIED tanpa render()
+    $filename = 'Surat_Keterangan_Publikasi_' . $publikasi->nim . '_' . date('Ymd') . '.pdf';
+    
+    $this->pdf->load_html($html);
+    $this->pdf->stream($filename, array("Attachment" => true));
+}
 
     // =================================================================
     // ✅ ROBUST PRIVATE METHODS - HANYA 2 METHOD INI YANG DIUBAH

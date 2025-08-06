@@ -319,11 +319,11 @@ ob_start();
                         <span class="text-danger">*</span>
                     </label>
                     <textarea class="form-control" 
-                              id="catatan" 
-                              name="catatan" 
+                              id="komentar_staf"
+                              name="komentar_staf" 
                               rows="4"
                               placeholder="Berikan catatan detail untuk mahasiswa dan dosen pembimbing..."
-                              required><?= set_value('catatan') ?></textarea>
+                              required><?= set_value('komentar_staf') ?></textarea>
                     <div class="invalid-feedback">
                         Catatan validasi wajib diisi.
                     </div>

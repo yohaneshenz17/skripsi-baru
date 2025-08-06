@@ -29,373 +29,336 @@ class Publikasi_model extends CI_Model {
     // CREATE & UPDATE OPERATIONS
     // =================================================================
 
-    /**
-     * Create pengajuan publikasi baru
-     * 
-     * @param array $data Data publikasi
-     * @return array Result with success status and message
-     */
-    public function create($data) {
-        try {
-            $this->db->trans_start();
-            
-            // Cek apakah sudah ada pengajuan untuk proposal ini
-            $existing = $this->db->where('proposal_mahasiswa_id', $data['proposal_mahasiswa_id'])
-                               ->get($this->table)
-                               ->row();
-            
-            if ($existing) {
-                return [
-                    'success' => false,
-                    'message' => 'Pengajuan publikasi untuk proposal ini sudah ada.'
-                ];
-            }
-            
-            // ✅ FIXED: Pastikan data array langsung dipass tanpa mapping ulang
-            // Tidak perlu mapping manual karena data sudah sesuai dari controller
-            
-            // Set timestamp
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $data['updated_at'] = date('Y-m-d H:i:s');
-            
-            // Insert data publikasi - LANGSUNG GUNAKAN DATA DARI CONTROLLER
-            $this->db->insert($this->table, $data);
-            $publikasi_id = $this->db->insert_id();
-            
-            // Check if insert was successful
-            if (!$publikasi_id) {
-                throw new Exception('Failed to insert publikasi data');
-            }
-            
-            // Log aktivitas
-            if (method_exists($this, '_log_activity')) {
-                $this->_log_activity($publikasi_id, $data['mahasiswa_id'], 'mahasiswa', 'create_pengajuan', 'Mahasiswa membuat pengajuan publikasi');
-            }
-            
-            $this->db->trans_complete();
-            
-            if ($this->db->trans_status() === FALSE) {
-                return [
-                    'success' => false,
-                    'message' => 'Gagal menyimpan data publikasi: ' . $this->db->last_query()
-                ];
-            }
-            
-            return [
-                'success' => true,
-                'message' => 'Pengajuan publikasi berhasil disimpan.',
-                'publikasi_id' => $publikasi_id,
-                'id' => $publikasi_id // Alias untuk backward compatibility
-            ];
-            
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            log_message('error', 'Error creating publikasi: ' . $e->getMessage());
-            log_message('error', 'Last query: ' . $this->db->last_query());
-            
+/**
+ * ✅ FIXED: Method create() - REPLACE method yang existing
+ * Hapus redundant timestamp manual setting
+ */
+public function create($data) {
+    try {
+        $this->db->trans_start();
+        
+        // Cek duplikasi
+        $existing = $this->db->where('proposal_mahasiswa_id', $data['proposal_mahasiswa_id'])
+                           ->get($this->table)
+                           ->row();
+        
+        if ($existing) {
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+                'message' => 'Pengajuan publikasi untuk proposal ini sudah ada.'
             ];
         }
+        
+        // ✅ FIXED: Hapus manual timestamp - MySQL auto-handle dengan DEFAULT dan ON UPDATE
+        // Data array langsung digunakan tanpa tambahan created_at/updated_at
+        
+        $this->db->insert($this->table, $data);
+        $publikasi_id = $this->db->insert_id();
+        
+        if (!$publikasi_id) {
+            throw new Exception('Failed to insert publikasi data');
+        }
+        
+        // Log aktivitas
+        if (method_exists($this, '_log_activity')) {
+            $this->_log_activity($publikasi_id, $data['mahasiswa_id'], 'mahasiswa', 
+                'create_pengajuan', 'Mahasiswa membuat pengajuan publikasi');
+        }
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            return [
+                'success' => false,
+                'message' => 'Gagal menyimpan data publikasi.'
+            ];
+        }
+        
+        return [
+            'success' => true,
+            'message' => 'Pengajuan publikasi berhasil disimpan.',
+            'publikasi_id' => $publikasi_id,
+            'id' => $publikasi_id
+        ];
+        
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        log_message('error', 'Error creating publikasi: ' . $e->getMessage());
+        
+        return [
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+        ];
     }
+}
 
-    /**
-     * Update pengajuan publikasi
-     * 
-     * @param int $publikasi_id ID publikasi
-     * @param array $data Data yang akan diupdate
-     * @param int $user_id ID user yang melakukan update
-     * @return array Result
-     */
-    public function update($publikasi_id, $data, $user_id = null) {
-        try {
-            $this->db->trans_start();
-            
-            // Get data lama untuk validasi
-            $old_data = $this->get_by_id($publikasi_id);
-            if (!$old_data) {
-                return [
-                    'success' => false,
-                    'message' => 'Data publikasi tidak ditemukan.'
-                ];
-            }
-            
-            // Set timestamp
-            $data['updated_at'] = date('Y-m-d H:i:s');
-            
-            // Update data - LANGSUNG GUNAKAN DATA DARI CONTROLLER
-            $this->db->where('id', $publikasi_id)
-                   ->update($this->table, $data);
-            
-            // Check if update affected any rows
-            if ($this->db->affected_rows() === 0) {
-                log_message('warning', 'Update publikasi tidak mempengaruhi row apapun. ID: ' . $publikasi_id);
-            }
-            
-            // Log aktivitas jika user_id tersedia
-            if ($user_id && method_exists($this, '_log_activity')) {
-                $this->_log_activity($publikasi_id, $user_id, 'mahasiswa', 'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi');
-            }
-            
-            $this->db->trans_complete();
-            
-            if ($this->db->trans_status() === FALSE) {
-                return [
-                    'success' => false,
-                    'message' => 'Gagal mengupdate data publikasi: ' . $this->db->last_query()
-                ];
-            }
-            
-            return [
-                'success' => true,
-                'message' => 'Data publikasi berhasil diupdate.'
-            ];
-            
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            log_message('error', 'Error updating publikasi: ' . $e->getMessage());
-            log_message('error', 'Last query: ' . $this->db->last_query());
-            
+/**
+ * ✅ FIXED: Method update() - REPLACE method yang existing  
+ * Hapus redundant updated_at manual
+ */
+public function update($publikasi_id, $data, $user_id = null) {
+    try {
+        $this->db->trans_start();
+        
+        // Validasi data exists
+        $old_data = $this->get_by_id($publikasi_id);
+        if (!$old_data) {
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+                'message' => 'Data publikasi tidak ditemukan.'
             ];
         }
+        
+        // ✅ FIXED: Hapus manual updated_at - MySQL auto-handle
+        
+        $this->db->where('id', $publikasi_id)
+               ->update($this->table, $data);
+        
+        // Log aktivitas jika ada user_id
+        if ($user_id && method_exists($this, '_log_activity')) {
+            $this->_log_activity($publikasi_id, $user_id, 'mahasiswa', 
+                'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi');
+        }
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            return [
+                'success' => false,
+                'message' => 'Gagal mengupdate data publikasi.'
+            ];
+        }
+        
+        return [
+            'success' => true,
+            'message' => 'Data publikasi berhasil diupdate.'
+        ];
+        
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        log_message('error', 'Error updating publikasi: ' . $e->getMessage());
+        
+        return [
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+        ];
     }
+}
 
-    /**
-     * Submit pengajuan ke dosen pembimbing
-     * 
-     * @param int $publikasi_id ID publikasi
-     * @return array Result
-     */
-    public function submit_pengajuan($publikasi_id) {
-        try {
-            $this->db->trans_start();
-            
-            $data = [
-                'status' => 'submitted',
-                'current_step' => 'pembimbing',
-                'tanggal_pengajuan' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->db->where('id', $publikasi_id)
-                   ->where('status', 'draft') // Hanya bisa submit dari draft
-                   ->update($this->table, $data);
-            
-            if ($this->db->affected_rows() === 0) {
-                return [
-                    'success' => false,
-                    'message' => 'Tidak dapat submit. Periksa status pengajuan.'
-                ];
-            }
-            
-            // Get data untuk log
-            $publikasi = $this->get_by_id($publikasi_id);
-            
-            // Log aktivitas
-            $this->_log_activity($publikasi_id, $publikasi->mahasiswa_id, 'mahasiswa', 'submit_pengajuan', 'Mahasiswa submit pengajuan ke dosen pembimbing');
-            
-            $this->db->trans_complete();
-            
-            return [
-                'success' => true,
-                'message' => 'Pengajuan berhasil disubmit ke dosen pembimbing.'
-            ];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error submitting publikasi: ' . $e->getMessage());
+/**
+ * ✅ FIXED: Method submit_pengajuan() - REPLACE method yang existing
+ * Hapus redundant updated_at dan current_step
+ */
+public function submit_pengajuan($publikasi_id) {
+    try {
+        $this->db->trans_start();
+        
+        // ✅ FIXED: Clean data tanpa redundant fields
+        $data = [
+            'status' => 'submitted',
+            'tanggal_pengajuan' => date('Y-m-d H:i:s')
+            // ✅ HAPUS: 'updated_at' dan 'current_step'
+        ];
+        
+        $this->db->where('id', $publikasi_id)
+               ->where('status', 'draft')
+               ->update($this->table, $data);
+        
+        if ($this->db->affected_rows() === 0) {
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem.'
+                'message' => 'Tidak dapat submit. Periksa status pengajuan.'
             ];
         }
+        
+        // Get data untuk log
+        $publikasi = $this->get_by_id($publikasi_id);
+        
+        // Log aktivitas
+        $this->_log_activity($publikasi_id, $publikasi->mahasiswa_id, 'mahasiswa', 
+            'submit_pengajuan', 'Mahasiswa submit pengajuan ke dosen pembimbing');
+        
+        $this->db->trans_complete();
+        
+        return [
+            'success' => true,
+            'message' => 'Pengajuan berhasil disubmit ke dosen pembimbing.'
+        ];
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error submitting publikasi: ' . $e->getMessage());
+        return [
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem.'
+        ];
     }
+}
+
 
     // =================================================================
     // DOSEN OPERATIONS
     // =================================================================
 
-    /**
-     * Approve pengajuan oleh dosen pembimbing
-     * 
-     * @param int $publikasi_id ID publikasi
-     * @param int $dosen_id ID dosen
-     * @param string $komentar Komentar dosen (optional)
-     * @return array Result
-     */
-    public function approve_by_dosen($publikasi_id, $dosen_id, $komentar = null) {
-        try {
-            $this->db->trans_start();
-            
-            $data = [
-                'status' => 'review_staf',
-                'current_step' => 'staf',
-                'status_pembimbing' => 'approved',
-                'komentar_pembimbing' => $komentar,
-                'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->db->where('id', $publikasi_id)
-                   ->where('dosen_pembimbing_id', $dosen_id)
-                   ->where('status_pembimbing', 'pending')
-                   ->update($this->table, $data);
-            
-            if ($this->db->affected_rows() === 0) {
-                return [
-                    'success' => false,
-                    'message' => 'Tidak dapat approve. Periksa status atau kepemilikan data.'
-                ];
-            }
-            
-            // Log aktivitas
-            $this->_log_activity($publikasi_id, $dosen_id, 'dosen', 'approve_pembimbing', 'Dosen pembimbing menyetujui pengajuan publikasi');
-            
-            $this->db->trans_complete();
-            
-            return [
-                'success' => true,
-                'message' => 'Pengajuan berhasil disetujui dan diteruskan ke staf.'
-            ];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error approving publikasi by dosen: ' . $e->getMessage());
+/**
+ * ✅ FIXED: Method approve_by_dosen() - REPLACE method yang existing
+ * Hapus redundant updated_at dan current_step
+ */
+public function approve_by_dosen($publikasi_id, $dosen_id, $komentar = null) {
+    try {
+        $this->db->trans_start();
+        
+        // ✅ FIXED: Clean data tanpa redundant fields
+        $data = [
+            'status' => 'review_staf',
+            'status_pembimbing' => 'approved',
+            'komentar_pembimbing' => $komentar,
+            'tanggal_review_pembimbing' => date('Y-m-d H:i:s')
+            // ✅ HAPUS: 'updated_at' dan 'current_step'
+        ];
+        
+        $this->db->where('id', $publikasi_id)
+               ->where('dosen_pembimbing_id', $dosen_id)
+               ->where('status_pembimbing', 'pending')
+               ->update($this->table, $data);
+        
+        if ($this->db->affected_rows() === 0) {
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem.'
+                'message' => 'Tidak dapat approve. Periksa status atau kepemilikan data.'
             ];
         }
+        
+        // Log aktivitas
+        $this->_log_activity($publikasi_id, $dosen_id, 'dosen', 'approve_pembimbing', 
+            'Dosen pembimbing menyetujui pengajuan publikasi');
+        
+        $this->db->trans_complete();
+        
+        return [
+            'success' => true,
+            'message' => 'Pengajuan berhasil disetujui dan diteruskan ke staf.'
+        ];
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error approving publikasi by dosen: ' . $e->getMessage());
+        return [
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem.'
+        ];
     }
+}
 
-    /**
-     * Reject pengajuan oleh dosen pembimbing
-     * 
-     * @param int $publikasi_id ID publikasi
-     * @param int $dosen_id ID dosen
-     * @param string $komentar Komentar penolakan
-     * @return array Result
-     */
-    public function reject_by_dosen($publikasi_id, $dosen_id, $komentar) {
-        try {
-            $this->db->trans_start();
-            
-            $data = [
-                'status' => 'rejected',
-                'current_step' => 'mahasiswa',
-                'status_pembimbing' => 'rejected',
-                'komentar_pembimbing' => $komentar,
-                'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->db->where('id', $publikasi_id)
-                   ->where('dosen_pembimbing_id', $dosen_id)
-                   ->where('status_pembimbing', 'pending')
-                   ->update($this->table, $data);
-            
-            if ($this->db->affected_rows() === 0) {
-                return [
-                    'success' => false,
-                    'message' => 'Tidak dapat reject. Periksa status atau kepemilikan data.'
-                ];
-            }
-            
-            // Log aktivitas
-            $this->_log_activity($publikasi_id, $dosen_id, 'dosen', 'reject_pembimbing', 'Dosen pembimbing menolak pengajuan publikasi: ' . $komentar);
-            
-            $this->db->trans_complete();
-            
-            return [
-                'success' => true,
-                'message' => 'Pengajuan ditolak dan dikembalikan ke mahasiswa.'
-            ];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error rejecting publikasi by dosen: ' . $e->getMessage());
+/**
+ * ✅ FIXED: Method reject_by_dosen() - REPLACE method yang existing
+ * Hapus redundant updated_at dan current_step
+ */
+public function reject_by_dosen($publikasi_id, $dosen_id, $komentar) {
+    try {
+        $this->db->trans_start();
+        
+        // ✅ FIXED: Clean data tanpa redundant fields
+        $data = [
+            'status' => 'rejected',
+            'status_pembimbing' => 'rejected',
+            'komentar_pembimbing' => $komentar,
+            'tanggal_review_pembimbing' => date('Y-m-d H:i:s')
+            // ✅ HAPUS: 'updated_at' dan 'current_step'
+        ];
+        
+        $this->db->where('id', $publikasi_id)
+               ->where('dosen_pembimbing_id', $dosen_id)
+               ->where('status_pembimbing', 'pending')
+               ->update($this->table, $data);
+        
+        if ($this->db->affected_rows() === 0) {
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem.'
+                'message' => 'Tidak dapat reject. Periksa status atau kepemilikan data.'
             ];
         }
+        
+        // Log aktivitas
+        $this->_log_activity($publikasi_id, $dosen_id, 'dosen', 'reject_pembimbing', 
+            'Dosen pembimbing menolak pengajuan publikasi: ' . $komentar);
+        
+        $this->db->trans_complete();
+        
+        return [
+            'success' => true,
+            'message' => 'Pengajuan ditolak dan dikembalikan ke mahasiswa.'
+        ];
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error rejecting publikasi by dosen: ' . $e->getMessage());
+        return [
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem.'
+        ];
     }
+}
+
 
     // =================================================================
     // STAF OPERATIONS
     // =================================================================
 
-    /**
-     * Complete publikasi oleh staf (input repository & validasi final)
-     * 
-     * @param int $publikasi_id ID publikasi
-     * @param array $data Data dari staf (link_repository, komentar, dll)
-     * @return array Result
-     */
-    public function complete_by_staf($publikasi_id, $data) {
-        try {
-            $this->db->trans_start();
-            
-            $update_data = [
-                'status' => 'completed',
-                'current_step' => 'selesai',
-                'status_staf' => 'approved',
-                'link_repository' => $data['link_repository'],
-                'komentar_staf' => $data['komentar_staf'] ?? null,
-                'validated_by_staf_id' => $data['validated_by_staf_id'],
-                'validated_by_staf_name' => $data['validated_by_staf_name'],
-                'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
-                'tanggal_selesai' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->db->where('id', $publikasi_id)
-                   ->where('status_pembimbing', 'approved')
-                   ->where('status_staf', 'pending') // Atau bisa dihapus kondisi ini
-                   ->update($this->table, $update_data);
-            
-            if ($this->db->affected_rows() === 0) {
-                return [
-                    'success' => false,
-                    'message' => 'Tidak dapat menyelesaikan publikasi. Periksa status pengajuan.'
-                ];
-            }
-            
-             // ✅ TAMBAHAN: Handle jika status_staf sudah approved
-    if ($this->db->affected_rows() === 0) {
-        // Coba update untuk data yang sudah approved
+/**
+ * ✅ FIXED: Method complete_by_staf() - REPLACE method yang existing
+ * Hapus redundant current_step dan updated_at manual
+ */
+public function complete_by_staf($publikasi_id, $data) {
+    try {
+        $this->db->trans_start();
+        
+        // ✅ FIXED: Clean update data tanpa redundant fields
+        $update_data = [
+            'status' => 'completed',
+            'status_staf' => 'approved',
+            'link_repository' => $data['link_repository'],
+            'komentar_staf' => $data['komentar_staf'] ?? null,
+            'validated_by_staf_id' => $data['validated_by_staf_id'],
+            'validated_by_staf_name' => $data['validated_by_staf_name'],
+            'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
+            'tanggal_selesai' => date('Y-m-d H:i:s') // ✅ CRITICAL
+            // ✅ HAPUS: 'updated_at' dan 'current_step' - tidak dipakai/redundant
+        ];
+        
         $this->db->where('id', $publikasi_id)
-               ->where('status', 'review_staf')  
-               ->where('status_staf', 'approved')
-               ->update($this->table, ['status' => 'completed']);
-    }
-            
-            // Update workflow_status di proposal_mahasiswa ke 'publikasi'
-            $publikasi = $this->get_by_id($publikasi_id);
-            if ($publikasi) {
-                $this->db->where('id', $publikasi->proposal_mahasiswa_id)
-                       ->update('proposal_mahasiswa', ['workflow_status' => 'publikasi']);
-            }
-            
-            // Log aktivitas
-            $this->_log_activity($publikasi_id, $data['validated_by_staf_id'], 'staf', 'complete_publikasi', 'Staf menyelesaikan validasi publikasi dan input repository: ' . $data['link_repository']);
-            
-            $this->db->trans_complete();
-            
-            return [
-                'success' => true,
-                'message' => 'Publikasi berhasil diselesaikan. Mahasiswa dapat download surat keterangan.'
-            ];
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error completing publikasi by staf: ' . $e->getMessage());
+               ->where('status_pembimbing', 'approved')
+               ->where('status_staf', 'pending')
+               ->update($this->table, $update_data);
+        
+        if ($this->db->affected_rows() === 0) {
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem.'
+                'message' => 'Tidak dapat menyelesaikan publikasi. Periksa status pengajuan.'
             ];
         }
+        
+        // ✅ WORKFLOW UPDATE: Trigger akan handle workflow_status otomatis
+        // Tidak perlu manual update proposal_mahasiswa lagi
+        
+        // Log aktivitas
+        $this->_log_activity($publikasi_id, $data['validated_by_staf_id'], 'staf', 
+            'complete_publikasi', 'Staf menyelesaikan validasi publikasi dan input repository: ' . $data['link_repository']);
+        
+        $this->db->trans_complete();
+        
+        return [
+            'success' => true,
+            'message' => 'Publikasi berhasil diselesaikan. Mahasiswa dapat download surat keterangan.'
+        ];
+        
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        log_message('error', 'Error completing publikasi by staf: ' . $e->getMessage());
+        
+        return [
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem.'
+        ];
     }
+}
 
 public function fix_stuck_publikasi($publikasi_id) {
     try {

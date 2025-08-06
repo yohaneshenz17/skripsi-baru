@@ -198,58 +198,49 @@ public function input_repository($publikasi_id) {
 }
 
 
-    /**
-     * Validasi final dengan flexible status handling
-     */
-    public function validasi($publikasi_id) {
-        try {
-            $publikasi = $this->_get_publikasi_detail_safe($publikasi_id);
-            
-            if (!$publikasi || empty($publikasi->link_repository)) {
-                $this->session->set_flashdata('error', 'Repository link belum diinput.');
-                redirect('staf/publikasi');
-            }
-            
-            if ($this->input->post()) {
-                $keputusan = $this->input->post('keputusan'); // 'approved' atau 'rejected'
-                $catatan = $this->input->post('catatan');
-                
-                $this->form_validation->set_rules('keputusan', 'Keputusan', 'required|in_list[approved,rejected]');
-                $this->form_validation->set_rules('catatan', 'Catatan', 'required');
-                
-                if ($this->form_validation->run()) {
-                    $update_data = $this->_prepare_validation_data($keputusan, $catatan);
-                    
-                    if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
-                        // Send notification email
-                        $this->_send_notification_email_safe($publikasi, $keputusan, $catatan);
-                        
-                        $message = $keputusan === 'approved' ? 'Publikasi berhasil divalidasi.' : 'Publikasi ditolak.';
-                        $this->session->set_flashdata('success', $message);
-                        redirect('staf/publikasi');
-                    } else {
-                        $this->session->set_flashdata('error', 'Gagal menyimpan validasi.');
-                    }
-                }
-            }
-            
-            $view_data = [
-                'publikasi' => $publikasi,
-                'title' => 'Validasi Publikasi - ' . substr($publikasi->judul, 0, 50)
-            ];
-            
-            $content = $this->load->view('staf/publikasi/validasi', $view_data, TRUE);
-            
-            $this->load->view('template/staf', [
-                'title' => 'Validasi Publikasi',
-                'content' => $content
-            ]);
-            
-        } catch (Exception $e) {
-            $this->session->set_flashdata('error', 'Error: ' . $e->getMessage());
+/**
+ * ✅ FIXED: Validasi publikasi dengan proper tanggal_selesai dan workflow
+ * REPLACE method validasi() yang existing dengan ini
+ */
+public function validasi($publikasi_id) {
+    try {
+        // Get publikasi data dengan safety check
+        $publikasi = $this->_get_publikasi_detail_safe($publikasi_id);
+        
+        if (!$publikasi) {
+            $this->session->set_flashdata('error', 'Data publikasi tidak ditemukan.');
             redirect('staf/publikasi');
+            return;
         }
+        
+        // Validate business rules
+        if ($publikasi->status_pembimbing !== 'approved') {
+            $this->session->set_flashdata('error', 'Publikasi belum disetujui dosen pembimbing.');
+            redirect('staf/publikasi');
+            return;
+        }
+        
+        if (empty($publikasi->link_repository)) {
+            $this->session->set_flashdata('error', 'Repository link belum diinput. Input repository terlebih dahulu.');
+            redirect('staf/publikasi');
+            return;
+        }
+        
+        // Process POST request
+        if ($this->input->post()) {
+            $this->_process_staf_validation($publikasi_id, $publikasi);
+            return;
+        }
+        
+        // Show validation form
+        $this->_show_validation_form($publikasi);
+        
+    } catch (Exception $e) {
+        log_message('error', 'Staf validasi error: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        redirect('staf/publikasi');
     }
+}
     
     
     /**
@@ -498,6 +489,89 @@ private function _update_publikasi_safe($publikasi_id, $data) {
     } catch (Exception $e) {
         log_message('error', 'Update failed: ' . $e->getMessage());
         return false;
+    }
+}
+
+/**
+ * ✅ NEW: Process staf validation dengan proper workflow
+ * TAMBAHKAN method ini
+ */
+private function _process_staf_validation($publikasi_id, $publikasi) {
+    // Form validation
+    $this->form_validation->set_rules('keputusan', 'Keputusan', 'required|in_list[approved,rejected]');
+    $this->form_validation->set_rules('komentar_staf', 'Komentar', 'trim|required');
+    
+    if (!$this->form_validation->run()) {
+        $this->_show_validation_form($publikasi);
+        return;
+    }
+    
+    $keputusan = $this->input->post('keputusan');
+    $komentar = trim($this->input->post('komentar_staf'));
+    
+    try {
+        $this->db->trans_start();
+        
+        $timestamp_now = date('Y-m-d H:i:s');
+        
+        // ✅ CRITICAL: Prepare data sesuai workflow yang benar
+        $update_data = [
+            'status_staf' => $keputusan,
+            'komentar_staf' => $komentar,
+            'tanggal_validasi_staf' => $timestamp_now,
+            'validated_by_staf_id' => $this->session->userdata('user_id'),
+            'validated_by_staf_name' => $this->session->userdata('nama_lengkap')
+            // ✅ TIDAK SET updated_at - biar MySQL auto-handle
+        ];
+        
+        // ✅ WORKFLOW LOGIC: Set status dan tanggal_selesai yang benar
+        if ($keputusan === 'approved') {
+            // ✅ CRITICAL: Set status completed DAN tanggal_selesai
+            $update_data['status'] = 'completed';
+            $update_data['tanggal_selesai'] = $timestamp_now; // ✅ INI YANG PENTING!
+            
+        } else {
+            // ✅ WORKFLOW: Jika rejected, kembalikan ke review_pembimbing untuk dosen review ulang
+            $update_data['status'] = 'review_pembimbing';
+            // Reset status_pembimbing agar dosen bisa review ulang
+            $update_data['status_pembimbing'] = 'pending';
+        }
+        
+        // Execute update dengan proper WHERE conditions
+        $this->db->where('id', $publikasi_id)
+                ->where('status_pembimbing', 'approved') // Safety: hanya yang sudah approved dosen
+                ->where('status !=', 'completed')        // Safety: belum completed sebelumnya
+                ->update('publikasi_tugas_akhir', $update_data);
+        
+        if ($this->db->affected_rows() === 0) {
+            throw new Exception('Tidak dapat memproses validasi. Mungkin sudah diproses sebelumnya atau kondisi tidak sesuai.');
+        }
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            throw new Exception('Database transaction failed');
+        }
+        
+        // ✅ Send notifications sesuai keputusan
+        $this->_send_validation_notifications($publikasi, $keputusan, $komentar);
+        
+        // Success message
+        if ($keputusan === 'approved') {
+            $message = 'Publikasi berhasil disetujui dan diselesaikan! Mahasiswa dapat download surat keterangan.';
+            $this->session->set_flashdata('success', $message);
+        } else {
+            $message = 'Publikasi ditolak dan dikembalikan ke dosen pembimbing untuk review ulang.';
+            $this->session->set_flashdata('warning', $message);
+        }
+        
+        redirect('staf/publikasi');
+        
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        log_message('error', 'Error processing staf validation: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Gagal memproses validasi: ' . $e->getMessage());
+        $this->_show_validation_form($publikasi);
     }
 }
 
@@ -854,6 +928,25 @@ private function _update_publikasi_safe($publikasi_id, $data) {
             'content' => $content
         ]);
     }
+
+/**
+ * ✅ NEW: Show validation form - consistent dengan controller lain
+ * TAMBAHKAN method ini jika belum ada
+ */
+private function _show_validation_form($publikasi) {
+    $view_data = [
+        'publikasi' => $publikasi,
+        'title' => 'Validasi Publikasi - ' . substr($publikasi->judul_skripsi_final ?? 'Unknown', 0, 50)
+    ];
+    
+    $content = $this->load->view('staf/publikasi/validasi', $view_data, TRUE);
+    
+    $this->load->view('template/staf', [
+        'title' => 'Validasi Publikasi',
+        'content' => $content
+    ]);
+}
+
 
 /**
  * ✅ TAMBAHAN: Update workflow status ke selesai

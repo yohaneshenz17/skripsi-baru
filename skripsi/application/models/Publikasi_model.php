@@ -352,7 +352,7 @@ class Publikasi_model extends CI_Model {
             
             $this->db->where('id', $publikasi_id)
                    ->where('status_pembimbing', 'approved')
-                   ->where('status_staf', 'pending')
+                   ->where('status_staf', 'pending') // Atau bisa dihapus kondisi ini
                    ->update($this->table, $update_data);
             
             if ($this->db->affected_rows() === 0) {
@@ -361,6 +361,15 @@ class Publikasi_model extends CI_Model {
                     'message' => 'Tidak dapat menyelesaikan publikasi. Periksa status pengajuan.'
                 ];
             }
+            
+             // ✅ TAMBAHAN: Handle jika status_staf sudah approved
+    if ($this->db->affected_rows() === 0) {
+        // Coba update untuk data yang sudah approved
+        $this->db->where('id', $publikasi_id)
+               ->where('status', 'review_staf')  
+               ->where('status_staf', 'approved')
+               ->update($this->table, ['status' => 'completed']);
+    }
             
             // Update workflow_status di proposal_mahasiswa ke 'publikasi'
             $publikasi = $this->get_by_id($publikasi_id);
@@ -387,6 +396,45 @@ class Publikasi_model extends CI_Model {
             ];
         }
     }
+
+public function fix_stuck_publikasi($publikasi_id) {
+    try {
+        $this->db->trans_start();
+        
+        // Update publikasi ke completed
+        $update_data = [
+            'status' => 'completed',
+            'current_step' => 'selesai', 
+            'tanggal_selesai' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Kondisi untuk data yang stuck
+        $this->db->where('id', $publikasi_id)
+               ->where('status', 'review_staf')
+               ->where('status_staf', 'approved')
+               ->where('status_pembimbing', 'approved')
+               ->update($this->table, $update_data);
+        
+        if ($this->db->affected_rows() > 0) {
+            // Update workflow_status di proposal_mahasiswa
+            $publikasi = $this->get_by_id($publikasi_id);
+            if ($publikasi) {
+                $this->db->where('id', $publikasi->proposal_mahasiswa_id)
+                       ->update('proposal_mahasiswa', ['workflow_status' => 'selesai']);
+                
+                // Generate surat keterangan jika belum ada
+                $this->_generate_surat_keterangan($publikasi_id);
+            }
+        }
+        
+        $this->db->trans_complete();
+        return ['success' => true, 'message' => 'Publikasi berhasil diperbaiki'];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+    }
+}
 
     // =================================================================
     // READ OPERATIONS

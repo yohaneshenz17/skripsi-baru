@@ -1061,4 +1061,20 @@ $(document).ready(function() {
     `);
 });
 <?php endif; ?>
+
+<?php if ($publikasi->status === 'review_staf' && 
+          isset($publikasi->status_staf) && 
+          $publikasi->status_staf === 'approved'): ?>
+    <!-- Status stuck - perlu perbaikan -->
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i> 
+        <strong>Sistem Deteksi:</strong> Validasi sudah selesai tapi status belum terupdate.
+        <div class="mt-2">
+            <a href="<?= base_url('staf/publikasi/fix_stuck_data/' . $publikasi->id) ?>" 
+               class="btn btn-warning btn-sm">
+                <i class="fas fa-wrench"></i> Perbaiki Status
+            </a>
+        </div>
+    </div>
+<?php endif; ?>
 </script>

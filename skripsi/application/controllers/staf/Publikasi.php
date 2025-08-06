@@ -105,105 +105,102 @@ class Publikasi extends CI_Controller {
         }
     }
 
-    /**
-     * REPLACE method input_repository() dengan kode ini:
-     */
-    public function input_repository($publikasi_id) {
-        try {
-            // Validasi ID publikasi
-            $publikasi = $this->_get_publikasi_detail_safe($publikasi_id);
+/**
+ * REPLACE method input_repository() dengan kode ini:
+ */
+public function input_repository($publikasi_id) {
+    try {
+        // Validasi ID publikasi
+        $publikasi = $this->_get_publikasi_detail_safe($publikasi_id);
+        
+        if (!$publikasi) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan.');
+            redirect('staf/publikasi');
+            return;
+        }
+        
+        // HANDLE POST REQUEST
+        if ($this->input->post()) {
+            // Validation rules
+            $this->form_validation->set_rules('link_repository', 'Link Repository', 
+                'required|valid_url|max_length[500]');
+            $this->form_validation->set_rules('catatan_staf', 'Catatan Staf', 
+                'max_length[1000]');
             
-            if (!$publikasi) {
-                $this->session->set_flashdata('error', 'Data tidak ditemukan.');
-                redirect('staf/publikasi');
-                return;
-            }
-            
-            // HANDLE POST REQUEST
-            if ($this->input->post()) {
-                // Validation rules
-                $this->form_validation->set_rules('link_repository', 'Link Repository', 
-                    'required|valid_url|max_length[500]');
-                $this->form_validation->set_rules('catatan_staf', 'Catatan Staf', 
-                    'max_length[1000]');
+            if ($this->form_validation->run()) {
                 
-                if ($this->form_validation->run()) {
-                    
-                    // Get session data
-                    $user_id = $this->session->userdata('id');
-                    $user_name = $this->session->userdata('nama');
-                    
-                    if (empty($user_id)) {
-                        $this->session->set_flashdata('error', 'Session tidak valid. Silakan login ulang.');
-                        redirect('auth/login');
-                        return;
-                    }
-                    
-                    // ===== FINAL FIX: GUNAKAN KOLOM YANG BENAR =====
-                    $update_data = [
-                        'link_repository' => $this->input->post('link_repository'),
-                        'updated_at' => date('Y-m-d H:i:s'),
-                        'validated_by_staf_id' => $user_id,      // ✅ KOLOM INI ADA
-                        'validated_by_staf_name' => $user_name   // ✅ KOLOM INI ADA
-                    ];
-                    
-                    // Tambah catatan staf jika ada
-                    $catatan_staf = $this->input->post('catatan_staf');
-                    if (!empty($catatan_staf)) {
-                        $update_data['komentar_staf'] = $catatan_staf;  // ✅ KOLOM INI ADA
-                    }
-                    
-                    // Tambah timestamp validasi
-                    $update_data['tanggal_validasi_staf'] = date('Y-m-d H:i:s');  // ✅ KOLOM INI ADA
-                    
-                    // DIRECT UPDATE ke tabel
-                    $this->db->where('id', $publikasi_id);
-                    $result = $this->db->update('publikasi_tugas_akhir', $update_data);
-                    
-                    if ($result) {
-                        $action = empty($publikasi->link_repository) ? 'disimpan' : 'diperbarui';
-                        $this->session->set_flashdata('success', "Link repository berhasil {$action}.");
-                        redirect('staf/publikasi/detail/' . $publikasi_id);
-                        return;
-                    } else {
-                        $error = $this->db->error();
-                        log_message('error', 'Database error: ' . json_encode($error));
-                        $this->session->set_flashdata('error', 'Gagal menyimpan data. Error: ' . $error['message']);
-                    }
-                } else {
-                    $this->session->set_flashdata('error', 'Data tidak valid. ' . validation_errors(' ', ' '));
+                // Get session data
+                $user_id = $this->session->userdata('id');
+                $user_name = $this->session->userdata('nama');
+                
+                if (empty($user_id)) {
+                    $this->session->set_flashdata('error', 'Session tidak valid. Silakan login ulang.');
+                    redirect('auth/login');
+                    return;
                 }
                 
-                redirect('staf/publikasi/input_repository/' . $publikasi_id);
-                return;
+                // ===== FINAL FIX: GUNAKAN KOLOM YANG BENAR =====
+                $update_data = [
+                    'link_repository' => $this->input->post('link_repository'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'validated_by_staf_id' => $user_id,      // ✅ KOLOM INI ADA
+                    'validated_by_staf_name' => $user_name   // ✅ KOLOM INI ADA
+                ];
+                
+                // Tambah catatan staf jika ada
+                $catatan_staf = $this->input->post('catatan_staf');
+                if (!empty($catatan_staf)) {
+                    $update_data['komentar_staf'] = $catatan_staf;  // ✅ KOLOM INI ADA
+                }
+                
+                // Tambah timestamp validasi
+                $update_data['tanggal_validasi_staf'] = date('Y-m-d H:i:s');  // ✅ KOLOM INI ADA
+                
+                // DIRECT UPDATE ke tabel
+                $this->db->where('id', $publikasi_id);
+                $result = $this->db->update('publikasi_tugas_akhir', $update_data);
+                
+                if ($result) {
+                    $action = empty($publikasi->link_repository) ? 'disimpan' : 'diperbarui';
+                    $this->session->set_flashdata('success', "Link repository berhasil {$action}.");
+                    redirect('staf/publikasi/detail/' . $publikasi_id);
+                    return;
+                } else {
+                    $error = $this->db->error();
+                    log_message('error', 'Database error: ' . json_encode($error));
+                    $this->session->set_flashdata('error', 'Gagal menyimpan data. Error: ' . $error['message']);
+                }
+            } else {
+                $this->session->set_flashdata('error', 'Data tidak valid. ' . validation_errors(' ', ' '));
             }
             
-            // GET REQUEST - TAMPILKAN FORM
-            $view_data = [
-                'publikasi' => $publikasi,
-                'title' => 'Input Repository - ' . substr($publikasi->judul, 0, 50)
-            ];
-            
-            $content = $this->load->view('staf/publikasi/input_repository', $view_data, TRUE);
-            
-            $this->load->view('template/staf', [
-                'title' => 'Input Repository',
-                'content' => $content
-            ]);
-            
-        } catch (Exception $e) {
-            log_message('error', 'input_repository exception: ' . $e->getMessage());
-            $this->session->set_flashdata('error', 'Error: ' . $e->getMessage());
-            redirect('staf/publikasi');
+            redirect('staf/publikasi/input_repository/' . $publikasi_id);
+            return;
         }
+        
+        // GET REQUEST - TAMPILKAN FORM
+        $view_data = [
+            'publikasi' => $publikasi,
+            'title' => 'Input Repository - ' . substr($publikasi->judul, 0, 50)
+        ];
+        
+        $content = $this->load->view('staf/publikasi/input_repository', $view_data, TRUE);
+        
+        $this->load->view('template/staf', [
+            'title' => 'Input Repository',
+            'content' => $content
+        ]);
+        
+    } catch (Exception $e) {
+        log_message('error', 'input_repository exception: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Error: ' . $e->getMessage());
+        redirect('staf/publikasi');
     }
+}
+
 
     /**
      * Validasi final dengan flexible status handling
-     */
-    /**
-     * Validasi final publikasi oleh staf
-     * PERBAIKAN: Otomatis complete setelah approve
      */
     public function validasi($publikasi_id) {
         try {
@@ -212,7 +209,6 @@ class Publikasi extends CI_Controller {
             if (!$publikasi || empty($publikasi->link_repository)) {
                 $this->session->set_flashdata('error', 'Repository link belum diinput.');
                 redirect('staf/publikasi');
-                return;
             }
             
             if ($this->input->post()) {
@@ -220,83 +216,67 @@ class Publikasi extends CI_Controller {
                 $catatan = $this->input->post('catatan');
                 
                 $this->form_validation->set_rules('keputusan', 'Keputusan', 'required|in_list[approved,rejected]');
+                $this->form_validation->set_rules('catatan', 'Catatan', 'required');
                 
                 if ($this->form_validation->run()) {
+                    $update_data = $this->_prepare_validation_data($keputusan, $catatan);
                     
-                    if ($keputusan === 'approved') {
-                        // ✅ PERBAIKAN: Gunakan method complete_by_staf untuk auto-complete
-                        $staf_data = [
-                            'link_repository' => $publikasi->link_repository,
-                            'komentar_staf' => $catatan ?: 'Publikasi disetujui oleh staf.',
-                            'validated_by_staf_id' => $this->session->userdata('user_id'),
-                            'validated_by_staf_name' => $this->session->userdata('nama')
-                        ];
+                    if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
+                        // Send notification email
+                        $this->_send_notification_email_safe($publikasi, $keputusan, $catatan);
                         
-                        // Load model dan complete publikasi
-                        $this->load->model('Publikasi_model');
-                        $result = $this->Publikasi_model->complete_by_staf($publikasi_id, $staf_data);
-                        
-                        if ($result['success']) {
-                            // ✅ PERBAIKAN: Update workflow_status ke 'selesai' (BUKAN 'publikasi')
-                            $this->db->where('id', $publikasi->proposal_mahasiswa_id)
-                                   ->update('proposal_mahasiswa', [
-                                       'workflow_status' => 'selesai',
-                                       'updated_at' => date('Y-m-d H:i:s')
-                                   ]);
-                            
-                            // ✅ PERBAIKAN: Generate surat keterangan publikasi otomatis
-                            $this->_generate_surat_keterangan_publikasi($publikasi_id);
-                            
-                            // Send notification email
-                            $this->_send_notification_email_safe($publikasi, 'approved', $catatan);
-                            
-                            $this->session->set_flashdata('success', 'Publikasi berhasil divalidasi dan diselesaikan. Surat keterangan publikasi telah digenerate.');
-                            redirect('staf/publikasi');
-                            return;
-                        } else {
-                            $this->session->set_flashdata('error', $result['message']);
-                        }
-                        
+                        $message = $keputusan === 'approved' ? 'Publikasi berhasil divalidasi.' : 'Publikasi ditolak.';
+                        $this->session->set_flashdata('success', $message);
+                        redirect('staf/publikasi');
                     } else {
-                        // Jika ditolak, kembalikan ke mahasiswa untuk perbaikan
-                        $update_data = [
-                            'status' => 'rejected',
-                            'status_staf' => 'rejected',
-                            'komentar_staf' => $catatan,
-                            'validated_by_staf_id' => $this->session->userdata('user_id'),
-                            'validated_by_staf_name' => $this->session->userdata('nama'),
-                            'tanggal_validasi_staf' => date('Y-m-d H:i:s'),
-                            'updated_at' => date('Y-m-d H:i:s')
-                        ];
-                        
-                        if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
-                            $this->_send_notification_email_safe($publikasi, 'rejected', $catatan);
-                            $this->session->set_flashdata('warning', 'Publikasi ditolak dan dikembalikan ke mahasiswa.');
-                            redirect('staf/publikasi');
-                            return;
-                        }
+                        $this->session->set_flashdata('error', 'Gagal menyimpan validasi.');
                     }
                 }
             }
             
-            // Load view
             $view_data = [
                 'publikasi' => $publikasi,
                 'title' => 'Validasi Publikasi - ' . substr($publikasi->judul, 0, 50)
             ];
             
             $content = $this->load->view('staf/publikasi/validasi', $view_data, TRUE);
+            
             $this->load->view('template/staf', [
                 'title' => 'Validasi Publikasi',
                 'content' => $content
             ]);
             
         } catch (Exception $e) {
-            log_message('error', 'validasi exception: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Error: ' . $e->getMessage());
             redirect('staf/publikasi');
         }
     }
+
+public function fix_stuck_data($publikasi_id) {
+    $this->load->model('Publikasi_model');
+    
+    // Validasi data
+    $publikasi = $this->Publikasi_model->get_by_id($publikasi_id);
+    if (!$publikasi) {
+        show_404();
+    }
+    
+    // Cek apakah memang stuck
+    if ($publikasi->status === 'review_staf' && 
+        $publikasi->status_staf === 'approved' && 
+        $publikasi->status_pembimbing === 'approved') {
+        
+        $result = $this->Publikasi_model->fix_stuck_publikasi($publikasi_id);
+        
+        if ($result['success']) {
+            $this->session->set_flashdata('success', 'Data publikasi berhasil diperbaiki dan workflow diselesaikan.');
+        } else {
+            $this->session->set_flashdata('error', $result['message']);
+        }
+    }
+    
+    redirect('staf/publikasi');
+}
 
     /**
      * Export dengan pesan info
@@ -503,49 +483,49 @@ class Publikasi extends CI_Controller {
         }
     }
 
-    /**
-     * PERBAIKAN JUGA: Method _update_publikasi_safe()
-     * REPLACE method ini juga untuk konsistensi
-     */
-    private function _update_publikasi_safe($publikasi_id, $data) {
-        try {
-            $main_table = $this->table_info['main_table'] ?? 'publikasi_tugas_akhir';
-            
-            // ✅ HAPUS LOGIC user_id - TIDAK ADA KOLOM INI
-            // Tidak perlu cek user_id lagi karena kolom tidak ada
-            
-            // Filter data untuk kolom yang tersedia saja
-            $filtered_data = [];
-            foreach ($data as $key => $value) {
-                if ($this->_column_exists($key)) {
-                    $filtered_data[$key] = $value;
-                }
+/**
+ * PERBAIKAN JUGA: Method _update_publikasi_safe()
+ * REPLACE method ini juga untuk konsistensi
+ */
+private function _update_publikasi_safe($publikasi_id, $data) {
+    try {
+        $main_table = $this->table_info['main_table'] ?? 'publikasi_tugas_akhir';
+        
+        // ✅ HAPUS LOGIC user_id - TIDAK ADA KOLOM INI
+        // Tidak perlu cek user_id lagi karena kolom tidak ada
+        
+        // Filter data untuk kolom yang tersedia saja
+        $filtered_data = [];
+        foreach ($data as $key => $value) {
+            if ($this->_column_exists($key)) {
+                $filtered_data[$key] = $value;
             }
-            
-            // ✅ FALLBACK: Jika method _column_exists() bermasalah, langsung set
-            if (empty($filtered_data)) {
-                $filtered_data = $data; // Gunakan data langsung
-            }
-            
-            if (empty($filtered_data)) {
-                log_message('error', 'No valid data to update for publikasi_id: ' . $publikasi_id);
-                return false;
-            }
-            
-            $result = $this->db->where('id', $publikasi_id)
-                              ->update($main_table, $filtered_data);
-            
-            if (!$result) {
-                log_message('error', 'Database update failed. Last query: ' . $this->db->last_query());
-            }
-            
-            return $result;
-                               
-        } catch (Exception $e) {
-            log_message('error', 'Update failed: ' . $e->getMessage());
+        }
+        
+        // ✅ FALLBACK: Jika method _column_exists() bermasalah, langsung set
+        if (empty($filtered_data)) {
+            $filtered_data = $data; // Gunakan data langsung
+        }
+        
+        if (empty($filtered_data)) {
+            log_message('error', 'No valid data to update for publikasi_id: ' . $publikasi_id);
             return false;
         }
+        
+        $result = $this->db->where('id', $publikasi_id)
+                          ->update($main_table, $filtered_data);
+        
+        if (!$result) {
+            log_message('error', 'Database update failed. Last query: ' . $this->db->last_query());
+        }
+        
+        return $result;
+                           
+    } catch (Exception $e) {
+        log_message('error', 'Update failed: ' . $e->getMessage());
+        return false;
     }
+}
 
     /**
      * Prepare validation data based on available columns
@@ -868,460 +848,6 @@ class Publikasi extends CI_Controller {
             log_message('error', 'Email notification failed: ' . $e->getMessage());
             return false;
         }
-    }
-
-    /**
-     * 3. TAMBAH method untuk get email kaprodi
-     */
-    private function _get_kaprodi_email() {
-        try {
-            // Ambil kaprodi berdasarkan level 4
-            $kaprodi = $this->db->select('email, nama')
-                               ->where('level', '4')
-                               ->where('email IS NOT NULL')
-                               ->where('email !=', '')
-                               ->get('dosen')
-                               ->row();
-            
-            return $kaprodi ? $kaprodi->email : null;
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting kaprodi email: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * 4. TAMBAH method email ke mahasiswa dengan template menarik
-     */
-    private function _send_email_mahasiswa($email, $data) {
-        try {
-            $this->email->clear();
-            $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($email);
-            $this->email->subject('📢 Hasil Validasi Publikasi Tugas Akhir - ' . $data['status_text']);
-            
-            // Template HTML menarik untuk mahasiswa
-            $message = "
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset='utf-8'>
-                <style>
-                    .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
-                    .header { background: #007bff; color: white; padding: 20px; text-align: center; }
-                    .content { padding: 20px; background: #f8f9fa; }
-                    .status-approved { color: #28a745; font-weight: bold; }
-                    .status-rejected { color: #dc3545; font-weight: bold; }
-                    .info-box { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
-                    .footer { background: #343a40; color: white; padding: 15px; text-align: center; font-size: 12px; }
-                </style>
-            </head>
-            <body>
-                <div class='container'>
-                    <div class='header'>
-                        <h2>🎓 STK Santo Yakobus Merauke</h2>
-                        <h3>Sistem Informasi Tugas Akhir</h3>
-                    </div>
-                    
-                    <div class='content'>
-                        <h3>Hasil Validasi Publikasi Tugas Akhir</h3>
-                        
-                        <div class='info-box'>
-                            <p><strong>Mahasiswa:</strong> {$data['nama_mahasiswa']}</p>
-                            <p><strong>NIM:</strong> {$data['nim']}</p>
-                            <p><strong>Judul:</strong> {$data['judul']}</p>
-                        </div>
-                        
-                        <div class='info-box'>
-                            <p><strong>Status Validasi:</strong> 
-                            <span class='status-" . ($data['keputusan'] === 'approved' ? 'approved' : 'rejected') . "'>
-                                " . ($data['keputusan'] === 'approved' ? '✅ DISETUJUI' : '❌ DITOLAK') . "
-                            </span></p>
-                            <p><strong>Tanggal Validasi:</strong> {$data['tanggal']}</p>
-                            <p><strong>Validator:</strong> {$data['staf_nama']}</p>
-                        </div>
-                        
-                        <div class='info-box'>
-                            <p><strong>Catatan Validasi:</strong></p>
-                            <p style='background: #e9ecef; padding: 10px; border-radius: 3px;'>{$data['catatan']}</p>
-                        </div>";
-                        
-            if ($data['keputusan'] === 'approved') {
-                $message .= "
-                        <div class='info-box' style='border: 2px solid #28a745;'>
-                            <h4 style='color: #28a745;'>🎉 Selamat!</h4>
-                            <p>Publikasi tugas akhir Anda telah <strong>disetujui</strong> dan telah dipublikasikan di repository perpustakaan digital.</p>";
-                            
-                if (!empty($data['link_repository'])) {
-                    $message .= "<p><strong>Link Repository:</strong> <a href='{$data['link_repository']}' target='_blank'>{$data['link_repository']}</a></p>";
-                }
-                
-                $message .= "
-                            <p>Terima kasih telah menyelesaikan tugas akhir dengan baik!</p>
-                        </div>";
-            } else {
-                $message .= "
-                        <div class='info-box' style='border: 2px solid #dc3545;'>
-                            <h4 style='color: #dc3545;'>📝 Perlu Perbaikan</h4>
-                            <p>Publikasi tugas akhir Anda <strong>perlu diperbaiki</strong> sesuai catatan di atas.</p>
-                            <p>Silakan hubungi dosen pembimbing atau staf akademik untuk konsultasi lebih lanjut.</p>
-                        </div>";
-            }
-            
-            $message .= "
-                    </div>
-                    
-                    <div class='footer'>
-                        <p>Email ini dikirim otomatis oleh Sistem Informasi Tugas Akhir STK Santo Yakobus</p>
-                        <p>Jangan reply email ini. Untuk pertanyaan, hubungi staf akademik.</p>
-                    </div>
-                </div>
-            </body>
-            </html>";
-            
-            $this->email->message($message);
-            return $this->email->send();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error sending email to mahasiswa: ' . $e->getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * 5. TAMBAH method email ke dosen pembimbing
-     */
-    private function _send_email_dosen($email, $data) {
-        try {
-            $this->email->clear();
-            $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($email);
-            $this->email->subject('📋 Notifikasi Validasi Publikasi Mahasiswa Bimbingan - ' . $data['status_text']);
-            
-            // Template untuk dosen
-            $message = "
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset='utf-8'>
-                <style>
-                    .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
-                    .header { background: #17a2b8; color: white; padding: 20px; text-align: center; }
-                    .content { padding: 20px; background: #f8f9fa; }
-                    .info-box { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
-                    .footer { background: #343a40; color: white; padding: 15px; text-align: center; font-size: 12px; }
-                </style>
-            </head>
-            <body>
-                <div class='container'>
-                    <div class='header'>
-                        <h2>📋 Notifikasi untuk Dosen Pembimbing</h2>
-                        <h3>Validasi Publikasi Tugas Akhir</h3>
-                    </div>
-                    
-                    <div class='content'>
-                        <p>Yth. <strong>{$data['nama_dosen']}</strong>,</p>
-                        
-                        <div class='info-box'>
-                            <p>Publikasi tugas akhir mahasiswa bimbingan Anda telah divalidasi oleh staf akademik.</p>
-                        </div>
-                        
-                        <div class='info-box'>
-                            <p><strong>Mahasiswa:</strong> {$data['nama_mahasiswa']} ({$data['nim']})</p>
-                            <p><strong>Judul:</strong> {$data['judul']}</p>
-                            <p><strong>Status Validasi:</strong> <strong>{$data['status_text']}</strong></p>
-                            <p><strong>Tanggal Validasi:</strong> {$data['tanggal']}</p>
-                            <p><strong>Validator:</strong> {$data['staf_nama']}</p>
-                        </div>
-                        
-                        <div class='info-box'>
-                            <p><strong>Catatan Validasi:</strong></p>
-                            <p style='background: #e9ecef; padding: 10px; border-radius: 3px;'>{$data['catatan']}</p>
-                        </div>
-                        
-                        <p>Terima kasih atas bimbingan yang telah diberikan kepada mahasiswa.</p>
-                    </div>
-                    
-                    <div class='footer'>
-                        <p>Email ini dikirim otomatis oleh Sistem Informasi Tugas Akhir STK Santo Yakobus</p>
-                    </div>
-                </div>
-            </body>
-            </html>";
-            
-            $this->email->message($message);
-            return $this->email->send();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error sending email to dosen: ' . $e->getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * 6. TAMBAH method email ke kaprodi
-     */
-    private function _send_email_kaprodi($email, $data) {
-        try {
-            $this->email->clear();
-            $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($email);
-            $this->email->subject('📊 Laporan Validasi Publikasi Tugas Akhir - ' . $data['status_text']);
-            
-            // Template untuk kaprodi (summary style)
-            $message = "
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset='utf-8'>
-                <style>
-                    .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
-                    .header { background: #6f42c1; color: white; padding: 20px; text-align: center; }
-                    .content { padding: 20px; background: #f8f9fa; }
-                    .info-box { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
-                    .footer { background: #343a40; color: white; padding: 15px; text-align: center; font-size: 12px; }
-                </style>
-            </head>
-            <body>
-                <div class='container'>
-                    <div class='header'>
-                        <h2>📊 Laporan untuk Kaprodi</h2>
-                        <h3>Validasi Publikasi Tugas Akhir</h3>
-                    </div>
-                    
-                    <div class='content'>
-                        <p>Yth. Kaprodi,</p>
-                        
-                        <div class='info-box'>
-                            <p>Berikut laporan hasil validasi publikasi tugas akhir mahasiswa:</p>
-                        </div>
-                        
-                        <div class='info-box'>
-                            <p><strong>Mahasiswa:</strong> {$data['nama_mahasiswa']} ({$data['nim']})</p>
-                            <p><strong>Dosen Pembimbing:</strong> {$data['nama_dosen']}</p>
-                            <p><strong>Judul:</strong> {$data['judul']}</p>
-                            <p><strong>Status Validasi:</strong> <strong>{$data['status_text']}</strong></p>
-                            <p><strong>Validator:</strong> {$data['staf_nama']}</p>
-                            <p><strong>Tanggal:</strong> {$data['tanggal']}</p>
-                        </div>
-                        
-                        <div class='info-box'>
-                            <p><strong>Catatan Validasi:</strong></p>
-                            <p style='background: #e9ecef; padding: 10px; border-radius: 3px;'>{$data['catatan']}</p>
-                        </div>
-                        
-                        <p>Laporan ini untuk monitoring dan evaluasi program studi.</p>
-                    </div>
-                    
-                    <div class='footer'>
-                        <p>Email ini dikirim otomatis oleh Sistem Informasi Tugas Akhir STK Santo Yakobus</p>
-                    </div>
-                </div>
-            </body>
-            </html>";
-            
-            $this->email->message($message);
-            return $this->email->send();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error sending email to kaprodi: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * ✅ PERBAIKAN: Generate surat keterangan publikasi otomatis
-     */
-    private function _generate_surat_keterangan_publikasi($publikasi_id) {
-        try {
-            $this->load->library('pdf');
-            $this->load->model('Publikasi_model');
-            
-            // Get data publikasi lengkap
-            $publikasi = $this->Publikasi_model->get_publikasi_with_mahasiswa($publikasi_id);
-            
-            if (!$publikasi) {
-                log_message('error', 'Data publikasi tidak ditemukan untuk ID: ' . $publikasi_id);
-                return false;
-            }
-            
-            // Data untuk surat
-            $data = [
-                'nama_mahasiswa' => $publikasi->nama_mahasiswa,
-                'nim' => $publikasi->nim,
-                'program_studi' => $publikasi->program_studi,
-                'judul_skripsi' => $publikasi->judul_skripsi_final,
-                'tanggal_ujian' => $publikasi->tanggal_ujian_skripsi ? date('d/m/Y', strtotime($publikasi->tanggal_ujian_skripsi)) : 'Tidak tersedia',
-                'dosen_pembimbing' => $publikasi->nama_dosen_pembimbing,
-                'link_repository' => $publikasi->link_repository,
-                'tanggal_validasi' => date('d/m/Y'),
-                'nomor_surat' => $this->_generate_nomor_surat($publikasi_id)
-            ];
-            
-            // Generate PDF
-            $filename = 'SURAT_KETERANGAN_PUBLIKASI_' . date('Ymd_His') . '_' . $publikasi->nim;
-            $file_path = FCPATH . 'uploads/surat_keterangan/' . $filename . '.pdf';
-            
-            // Ensure directory exists
-            if (!is_dir(dirname($file_path))) {
-                mkdir(dirname($file_path), 0755, true);
-            }
-            
-            $this->_create_surat_keterangan_pdf($data, $file_path);
-            
-            // Update database dengan file path
-            $this->db->where('id', $publikasi_id)
-                   ->update('publikasi_tugas_akhir', [
-                       'file_surat_keterangan' => $filename . '.pdf',
-                       'updated_at' => date('Y-m-d H:i:s')
-                   ]);
-            
-            log_message('info', 'Surat keterangan publikasi berhasil digenerate: ' . $filename);
-            return true;
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error generating surat keterangan: ' . $e->getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * Generate nomor surat otomatis
-     */
-    private function _generate_nomor_surat($publikasi_id) {
-        $tahun = date('Y');
-        $bulan = date('m');
-        
-        // Format: XXX/STK-TA/MM/YYYY
-        $nomor = sprintf('%03d/STK-TA/%02d/%d', $publikasi_id, $bulan, $tahun);
-        return $nomor;
-    }
-    
-    /**
-     * Create PDF surat keterangan publikasi
-     */
-    private function _create_surat_keterangan_pdf($data, $file_path) {
-        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-        
-        // Set document information
-        $pdf->SetCreator('STK Santo Yakobus Merauke');
-        $pdf->SetAuthor('STK Santo Yakobus Merauke');
-        $pdf->SetTitle('Surat Keterangan Publikasi Tugas Akhir');
-        $pdf->SetSubject('Surat Keterangan Publikasi');
-        
-        // Remove default header/footer
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);
-        
-        // Set margins
-        $pdf->SetMargins(20, 20, 20);
-        $pdf->SetAutoPageBreak(TRUE, 20);
-        
-        // Add a page
-        $pdf->AddPage();
-        
-        // Set font
-        $pdf->SetFont('helvetica', '', 12);
-        
-        // Content
-        $html = $this->_get_surat_keterangan_html($data);
-        $pdf->writeHTML($html, true, false, true, false, '');
-        
-        // Output file
-        $pdf->Output($file_path, 'F');
-    }
-
-    /**
-     * Template HTML surat keterangan publikasi
-     */
-    private function _get_surat_keterangan_html($data) {
-        $html = '
-        <style>
-            .header { text-align: center; margin-bottom: 30px; }
-            .title { font-size: 14pt; font-weight: bold; margin: 20px 0; }
-            .content { line-height: 1.6; }
-            .signature { margin-top: 50px; }
-            .data-table { margin: 20px 0; }
-            .data-table td { padding: 5px; }
-        </style>
-        
-        <div class="header">
-            <h2>SEKOLAH TINGGI KATOLIK SANTO YAKOBUS MERAUKE</h2>
-            <p>Jl. Raya Mandala KM. 15, Merauke 99615, Papua Selatan</p>
-            <p>Telp: (0971) 325020 | Email: info@stkyakobus.ac.id</p>
-            <hr style="border: 1px solid #000; margin: 20px 0;">
-        </div>
-        
-        <div class="title" style="text-align: center;">
-            <strong>SURAT KETERANGAN PUBLIKASI TUGAS AKHIR</strong><br>
-            <small>Nomor: ' . $data['nomor_surat'] . '</small>
-        </div>
-        
-        <div class="content">
-            <p>Yang bertanda tangan di bawah ini, Ketua Program Studi ' . $data['program_studi'] . ' 
-            Sekolah Tinggi Katolik Santo Yakobus Merauke, dengan ini menerangkan bahwa:</p>
-            
-            <table class="data-table" cellpadding="5">
-                <tr>
-                    <td width="150">Nama</td>
-                    <td width="20">:</td>
-                    <td><strong>' . $data['nama_mahasiswa'] . '</strong></td>
-                </tr>
-                <tr>
-                    <td>NIM</td>
-                    <td>:</td>
-                    <td>' . $data['nim'] . '</td>
-                </tr>
-                <tr>
-                    <td>Program Studi</td>
-                    <td>:</td>
-                    <td>' . $data['program_studi'] . '</td>
-                </tr>
-                <tr>
-                    <td>Judul Skripsi</td>
-                    <td>:</td>
-                    <td>' . $data['judul_skripsi'] . '</td>
-                </tr>
-                <tr>
-                    <td>Tanggal Ujian Skripsi</td>
-                    <td>:</td>
-                    <td>' . $data['tanggal_ujian'] . '</td>
-                </tr>
-                <tr>
-                    <td>Dosen Pembimbing</td>
-                    <td>:</td>
-                    <td>' . $data['dosen_pembimbing'] . '</td>
-                </tr>
-                <tr>
-                    <td>Link Repository</td>
-                    <td>:</td>
-                    <td>' . $data['link_repository'] . '</td>
-                </tr>
-            </table>
-            
-            <p>Telah melaksanakan <strong>publikasi tugas akhir</strong> pada tanggal ' . $data['tanggal_validasi'] . ' 
-            melalui repository digital institusi sebagai syarat untuk mengikuti yudisium.</p>
-            
-            <p>Demikian surat keterangan ini dibuat untuk dapat dipergunakan sebagaimana mestinya.</p>
-        </div>
-        
-        <div class="signature">
-            <table width="100%">
-                <tr>
-                    <td width="50%"></td>
-                    <td width="50%" style="text-align: center;">
-                        <p>Merauke, ' . $data['tanggal_validasi'] . '</p>
-                        <p><strong>Ketua Program Studi</strong><br>' . $data['program_studi'] . '</p>
-                        <br><br><br>
-                        <p><strong>_________________________</strong></p>
-                        <p><small>NIP: </small></p>
-                    </td>
-                </tr>
-            </table>
-        </div>';
-        
-        return $html;
     }
 
     /**

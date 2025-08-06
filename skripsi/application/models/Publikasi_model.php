@@ -107,16 +107,14 @@ public function update($publikasi_id, $data, $user_id = null) {
             ];
         }
         
-        // ✅ FIXED: Hapus manual updated_at - MySQL auto-handle
+        // Set timestamp
+        $data['updated_at'] = date('Y-m-d H:i:s');
         
-        $this->db->where('id', $publikasi_id)
-               ->update($this->table, $data);
+        // ✅ METHOD CHAIN - Paling Aman untuk CodeIgniter Lama
+        $this->db->where('id', $publikasi_id);
+        $this->db->update($this->table, $data);
         
-        // Log aktivitas jika ada user_id
-        if ($user_id && method_exists($this, '_log_activity')) {
-            $this->_log_activity($publikasi_id, $user_id, 'mahasiswa', 
-                'update_pengajuan', 'Mahasiswa mengupdate pengajuan publikasi');
-        }
+        // Rest of the method stays the same...
         
         $this->db->trans_complete();
         
@@ -129,7 +127,8 @@ public function update($publikasi_id, $data, $user_id = null) {
         
         return [
             'success' => true,
-            'message' => 'Data publikasi berhasil diupdate.'
+            'message' => 'Data publikasi berhasil diupdate.',
+            'id' => $publikasi_id  // ✅ Return ID untuk fix redirect
         ];
         
     } catch (Exception $e) {

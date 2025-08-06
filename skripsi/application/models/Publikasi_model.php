@@ -30,8 +30,7 @@ class Publikasi_model extends CI_Model {
     // =================================================================
 
 /**
- * ✅ FIXED: Method create() - REPLACE method yang existing
- * Hapus redundant timestamp manual setting
+ * ✅ FIXED VERSION:
  */
 public function create($data) {
     try {
@@ -49,8 +48,8 @@ public function create($data) {
             ];
         }
         
-        // ✅ FIXED: Hapus manual timestamp - MySQL auto-handle dengan DEFAULT dan ON UPDATE
-        // Data array langsung digunakan tanpa tambahan created_at/updated_at
+        // ✅ FIX: Hapus manual timestamp - MySQL auto-handle dengan DEFAULT dan ON UPDATE
+        // Data array langsung insert tanpa tambahan timestamp
         
         $this->db->insert($this->table, $data);
         $publikasi_id = $this->db->insert_id();
@@ -198,7 +197,7 @@ public function submit_pengajuan($publikasi_id) {
     // =================================================================
 
 /**
- * ✅ FINAL FIX: Method approve_by_dosen() - REPLACE Yang Existing
+ * ✅ FIXED VERSION:
  */
 public function approve_by_dosen($publikasi_id, $dosen_id, $komentar = null) {
     try {
@@ -246,7 +245,7 @@ public function approve_by_dosen($publikasi_id, $dosen_id, $komentar = null) {
 }
 
 /**
- * ✅ FINAL FIX: Method reject_by_dosen() - REPLACE Yang Existing
+ * ✅ FIXED VERSION:
  */
 public function reject_by_dosen($publikasi_id, $dosen_id, $komentar) {
     try {

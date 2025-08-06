@@ -2,11 +2,10 @@
 PUBLIKASI TUGAS AKHIR - MAHASISWA DASHBOARD - WORKFLOW FIXED
 File: application/views/mahasiswa/publikasi/index.php
 
-✅ PERBAIKAN WORKFLOW STEP 2→3:
-- Perbaikan status draft dengan tombol yang tepat
-- Menampilkan instruksi yang jelas untuk workflow
-- Tombol "Lengkapi & Kirim Ajuan" untuk draft
-- Status yang lebih informatif
+✅ PERBAIKAN WORKFLOW SYNC:
+- Dynamic workflow progress berdasarkan status publikasi dari database
+- Sinkronisasi antara workflow header dengan status publikasi detail
+- Tidak mengubah struktur, CSS, atau logic lainnya
 
 MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANGKAH:
 1. Mahasiswa Memenuhi Syarat (16+ jurnal)
@@ -17,6 +16,36 @@ MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANG
 8. Download Surat
 9. Format Surat Template Kampus
 -->
+
+<?php
+// ✅ PERBAIKAN: Dynamic workflow status check untuk sinkronisasi
+$workflow_sync = [
+    'publikasi_completed' => false,
+    'selesai_completed' => false,
+    'publikasi_current' => false
+];
+
+// Cek status publikasi untuk sinkronisasi workflow
+if (isset($publikasi) && $publikasi) {
+    // Jika publikasi ada dan bukan draft, publikasi step completed
+    if (in_array($publikasi->status, ['submitted', 'review_pembimbing', 'approved_pembimbing', 'review_staf', 'completed'])) {
+        $workflow_sync['publikasi_completed'] = true;
+    }
+    
+    // Jika publikasi completed, selesai step juga completed
+    if ($publikasi->status === 'completed') {
+        $workflow_sync['selesai_completed'] = true;
+    }
+    
+    // Jika publikasi sedang proses (bukan completed), publikasi current
+    if (in_array($publikasi->status, ['submitted', 'review_pembimbing', 'approved_pembimbing', 'review_staf'])) {
+        $workflow_sync['publikasi_current'] = true;
+    }
+} else if (isset($eligible) && $eligible && !$publikasi) {
+    // Jika eligible tapi belum ada publikasi, publikasi step current
+    $workflow_sync['publikasi_current'] = true;
+}
+?>
 
 <!-- Flash Messages -->
 <?php if ($this->session->flashdata('success')): ?>
@@ -33,7 +62,7 @@ MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANG
 </div>
 <?php endif; ?>
 
-<!-- Progress Workflow Header -->
+<!-- ✅ PERBAIKAN: Progress Workflow Header - DINAMIS -->
 <div class="row">
     <div class="col-12">
         <div class="card card-primary card-outline">
@@ -85,19 +114,21 @@ MENGGUNAKAN TEMPLATE ADMINLTE YANG SUDAH ADA, DISESUAIKAN DENGAN WORKFLOW 9 LANG
                             </div>
                             <div class="step-label">Seminar Skripsi</div>
                         </div>
-                        <div class="step-line active"></div>
+                        <div class="step-line <?= $workflow_sync['publikasi_completed'] ? 'completed' : 'active' ?>"></div>
                         
-                        <div class="step active">
+                        <!-- ✅ PERBAIKAN: Step Publikasi - Dinamis berdasarkan status database -->
+                        <div class="step <?= $workflow_sync['publikasi_completed'] ? 'completed' : ($workflow_sync['publikasi_current'] ? 'active' : '') ?>">
                             <div class="step-icon">
-                                <i class="fas fa-globe"></i>
+                                <i class="fas <?= $workflow_sync['publikasi_completed'] ? 'fa-check' : 'fa-globe' ?>"></i>
                             </div>
                             <div class="step-label">Publikasi</div>
                         </div>
-                        <div class="step-line"></div>
+                        <div class="step-line <?= $workflow_sync['selesai_completed'] ? 'completed' : '' ?>"></div>
                         
-                        <div class="step">
+                        <!-- ✅ PERBAIKAN: Step Selesai - Dinamis berdasarkan status completed -->
+                        <div class="step <?= $workflow_sync['selesai_completed'] ? 'completed' : '' ?>">
                             <div class="step-icon">
-                                <i class="fas fa-trophy"></i>
+                                <i class="fas <?= $workflow_sync['selesai_completed'] ? 'fa-check' : 'fa-trophy' ?>"></i>
                             </div>
                             <div class="step-label">Selesai</div>
                         </div>

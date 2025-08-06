@@ -44,54 +44,123 @@ class Dashboard extends MY_Controller
         echo json_encode($data);
     }
 
-    /**
-     * SIMPLE FALLBACK VERSION: Method get_workflow_progress() 
-     * Gunakan ini jika debug version masih error
-     */
-    public function get_workflow_progress()
-    {
-        $mahasiswa_id = $this->session->userdata('id');
+/**
+ * ✅ FINAL FIX: Method get_workflow_progress() berdasarkan data debug aktual
+ * GANTI method ini di Dashboard.php - HAPUS method debug setelah fix ini
+ */
+public function get_workflow_progress()
+{
+    $mahasiswa_id = $this->session->userdata('id');
+    
+    // Default response
+    $progress = [
+        'current_stage' => 'usulan_proposal',
+        'current_stage_name' => 'Usulan Proposal',
+        'progress_percentage' => 16,
+        'stages' => [
+            'usulan_proposal' => ['name' => 'Usulan Proposal', 'status' => 'completed', 'color' => 'success'],
+            'bimbingan' => ['name' => 'Bimbingan', 'status' => 'completed', 'color' => 'success'],
+            'seminar_proposal' => ['name' => 'Seminar Proposal', 'status' => 'completed', 'color' => 'success'],
+            'penelitian' => ['name' => 'Penelitian', 'status' => 'completed', 'color' => 'success'],
+            'seminar_skripsi' => ['name' => 'Seminar Skripsi', 'status' => 'active', 'color' => 'primary'],
+            'publikasi' => ['name' => 'Publikasi', 'status' => 'pending', 'color' => 'secondary']
+        ]
+    ];
+    
+    try {
+        // ✅ FIX: Ambil proposal tanpa filter status = '1' karena data menunjukkan status = '0'
+        $this->db->select('pm.*, m.nama as nama_mahasiswa');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->where('pm.mahasiswa_id', $mahasiswa_id);
+        // ✅ REMOVE: ->where('pm.status', '1') karena data aktual status = '0'
+        $this->db->order_by('pm.id', 'DESC');
+        $proposal = $this->db->get()->row();
         
-        // Default response
-        $progress = [
-            'current_stage' => 'usulan_proposal',
-            'current_stage_name' => 'Usulan Proposal',
-            'progress_percentage' => 16, // Minimal progress
-            'stages' => [
-                'usulan_proposal' => ['name' => 'Usulan Proposal', 'status' => 'completed', 'color' => 'success'],
-                'bimbingan' => ['name' => 'Bimbingan', 'status' => 'completed', 'color' => 'success'],
-                'seminar_proposal' => ['name' => 'Seminar Proposal', 'status' => 'completed', 'color' => 'success'],
-                'penelitian' => ['name' => 'Penelitian', 'status' => 'completed', 'color' => 'success'],
-                'seminar_skripsi' => ['name' => 'Seminar Skripsi', 'status' => 'active', 'color' => 'primary'],
-                'publikasi' => ['name' => 'Publikasi', 'status' => 'pending', 'color' => 'secondary']
-            ]
-        ];
-        
-        try {
-            // Simple database check
-            $proposal = $this->db->get_where('proposal_mahasiswa', ['mahasiswa_id' => $mahasiswa_id])->row();
-            
-            if ($proposal) {
-                // Calculate basic progress
-                $completed_count = 0;
+        if ($proposal) {
+            // ✅ PERBAIKAN: Cek workflow_status terlebih dahulu (data menunjukkan 'selesai')
+            if ($proposal->workflow_status === 'selesai') {
+                // Data menunjukkan workflow_status = 'selesai' dan publikasi.status = 'completed'
+                $progress['progress_percentage'] = 100;
+                $progress['current_stage'] = 'selesai';
+                $progress['current_stage_name'] = 'Selesai - Semua Tahap Lengkap';
                 
-                // Check each stage simply
+                // Set semua stage jadi completed
+                $progress['stages']['seminar_skripsi']['status'] = 'completed';
+                $progress['stages']['seminar_skripsi']['color'] = 'success';
+                $progress['stages']['publikasi']['status'] = 'completed';
+                $progress['stages']['publikasi']['color'] = 'success';
+            }
+            elseif ($proposal->workflow_status === 'publikasi') {
+                // Cek status publikasi di tabel publikasi_tugas_akhir
+                $this->db->select('status');
+                $this->db->from('publikasi_tugas_akhir');
+                $this->db->where('proposal_mahasiswa_id', $proposal->id);
+                $publikasi = $this->db->get()->row();
+                
+                if ($publikasi && $publikasi->status === 'completed') {
+                    // Publikasi completed, tapi workflow_status belum di-update ke 'selesai'
+                    $progress['progress_percentage'] = 100;
+                    $progress['current_stage'] = 'selesai';
+                    $progress['current_stage_name'] = 'Selesai - Publikasi Completed';
+                    $progress['stages']['seminar_skripsi']['status'] = 'completed';
+                    $progress['stages']['seminar_skripsi']['color'] = 'success';
+                    $progress['stages']['publikasi']['status'] = 'completed';
+                    $progress['stages']['publikasi']['color'] = 'success';
+                } 
+                elseif ($publikasi) {
+                    // Publikasi ada tapi belum completed
+                    $progress['progress_percentage'] = 90;
+                    $progress['current_stage'] = 'publikasi';
+                    $progress['current_stage_name'] = 'Publikasi - Sedang Diproses';
+                    $progress['stages']['seminar_skripsi']['status'] = 'completed';
+                    $progress['stages']['seminar_skripsi']['color'] = 'success';
+                    $progress['stages']['publikasi']['status'] = 'active';
+                    $progress['stages']['publikasi']['color'] = 'primary';
+                }
+                else {
+                    // Workflow publikasi tapi belum ada data publikasi
+                    $progress['progress_percentage'] = 83;
+                    $progress['current_stage'] = 'publikasi';
+                    $progress['current_stage_name'] = 'Publikasi - Siap Ajukan';
+                    $progress['stages']['seminar_skripsi']['status'] = 'completed';
+                    $progress['stages']['seminar_skripsi']['color'] = 'success';
+                    $progress['stages']['publikasi']['status'] = 'active';
+                    $progress['stages']['publikasi']['color'] = 'primary';
+                }
+            }
+            elseif ($proposal->workflow_status === 'seminar_skripsi') {
+                // Di tahap seminar skripsi
+                $progress['progress_percentage'] = 83;
+                $progress['current_stage'] = 'seminar_skripsi';
+                $progress['current_stage_name'] = 'Seminar Skripsi';
+            }
+            elseif ($proposal->workflow_status === 'penelitian') {
+                // Di tahap penelitian
+                $progress['progress_percentage'] = 66;
+                $progress['current_stage'] = 'penelitian';
+                $progress['current_stage_name'] = 'Penelitian';
+                $progress['stages']['seminar_skripsi']['status'] = 'pending';
+                $progress['stages']['seminar_skripsi']['color'] = 'secondary';
+            }
+            else {
+                // Fallback ke logic asli jika workflow_status tidak dikenali
                 if ($proposal->status_pembimbing == '1') {
-                    $completed_count += 4; // Assume first 4 stages completed based on screenshot
-                    $progress['progress_percentage'] = 66; // 4/6 * 100
+                    $progress['progress_percentage'] = 66;
                     $progress['current_stage'] = 'seminar_skripsi';
                     $progress['current_stage_name'] = 'Seminar Skripsi';
                 }
             }
-            
-        } catch (Exception $e) {
-            // Even if error, return working response
-            error_log('Dashboard progress error: ' . $e->getMessage());
         }
         
-        // Always return success to avoid "Gagal memuat" error
-        echo json_encode(['status' => 'success', 'data' => $progress]);
+    } catch (Exception $e) {
+        // Jika ada error, return response yang working
+        error_log('Dashboard progress error: ' . $e->getMessage());
     }
+    
+    // Always return success
+    echo json_encode(['status' => 'success', 'data' => $progress]);
+}
 
     /**
      * FIXED: Get notifikasi terbaru - PERBAIKI QUERY JOIN

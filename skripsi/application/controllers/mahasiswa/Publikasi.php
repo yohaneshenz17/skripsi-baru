@@ -535,8 +535,8 @@ class Publikasi extends CI_Controller {
     }
 
 /**
- * ✅ COMPLETELY FIXED: Process update publikasi dengan resubmission support
- * Mengatasi masalah data tidak muncul di akun dosen setelah resubmit
+ * ✅ COMPLETELY FIXED: Process update publikasi untuk proper resubmit
+ * Mengatasi masalah status_pembimbing tidak direset saat resubmit
  */
 private function _process_update($publikasi) {
     // Validation rules - TIDAK BERUBAH
@@ -574,8 +574,9 @@ private function _process_update($publikasi) {
     
     $submit_type = $this->input->post('submit_type');
     $original_status = $publikasi->status;
+    $original_status_pembimbing = $publikasi->status_pembimbing;
     
-    // Data mapping - TIDAK BERUBAH
+    // ✅ CRITICAL: Data mapping dengan explicit field handling
     $data = [
         'dosen_pembimbing_id' => $dosen_pembimbing_id,
         'nim' => $this->input->post('nim'),
@@ -586,46 +587,49 @@ private function _process_update($publikasi) {
         'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
         'link_repository' => $this->input->post('link_repository'),
         'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
-        'updated_at' => date('Y-m-d H:i:s') // Always update timestamp
+        'updated_at' => date('Y-m-d H:i:s')
     ];
     
-    // ✅ CRITICAL FIX: Enhanced status update logic untuk resubmit
+    // ✅ CRITICAL FIX: Enhanced status update logic
     $is_resubmit = false;
+    $is_new_submit = false;
     
     if ($submit_type === 'submit') {
-        // ✅ ALLOW RESUBMISSION dari status 'draft' atau 'rejected'
+        // ✅ Handle both draft dan rejected status untuk submission
         if (in_array($original_status, ['draft', 'rejected'])) {
             
-            // ✅ CRITICAL: Core fields yang harus diupdate untuk resubmit
+            // ✅ CORE RESUBMIT LOGIC: Update semua field yang diperlukan
             $data['status'] = 'submitted';
-            $data['status_pembimbing'] = 'pending'; // Reset untuk review ulang
-            $data['tanggal_pengajuan'] = date('Y-m-d H:i:s'); // ✅ KEY FIX: Update tanggal pengajuan
+            $data['status_pembimbing'] = 'pending'; // ⚠️ CRITICAL: Reset ke pending
+            $data['tanggal_pengajuan'] = date('Y-m-d H:i:s'); // ⚠️ CRITICAL: New timestamp
             
-            // ✅ RESET fields review sebelumnya untuk clean slate
+            // ✅ CLEAN SLATE: Reset previous review data
             $data['tanggal_review_pembimbing'] = null;
             $data['komentar_pembimbing'] = null;
             
-            // ✅ TRACK resubmit untuk logging dan notification
+            // ✅ TRACK type of submission
             if ($original_status === 'rejected') {
                 $is_resubmit = true;
                 
-                // Add resubmit marker
-                if (!empty($data['keterangan_mahasiswa'])) {
-                    $data['keterangan_mahasiswa'] = '[RESUBMIT] ' . $data['keterangan_mahasiswa'];
+                // Add resubmit marker untuk tracking
+                $original_keterangan = $data['keterangan_mahasiswa'];
+                if (!empty($original_keterangan)) {
+                    $data['keterangan_mahasiswa'] = '[RESUBMIT] ' . $original_keterangan;
                 } else {
                     $data['keterangan_mahasiswa'] = '[RESUBMIT] Pengajuan ulang setelah perbaikan sesuai catatan dosen pembimbing';
                 }
                 
-                // ✅ TRACKING: Log resubmit ke database log jika ada
-                if (method_exists($this->publikasi, '_log_activity')) {
-                    $this->publikasi->_log_activity($publikasi->id, $this->mahasiswa_id, 'mahasiswa', 
-                        'resubmit_after_rejected', 'Mahasiswa mengajukan ulang publikasi setelah diperbaiki');
-                }
+                log_message('info', "Publikasi resubmit: ID {$publikasi->id}, Mahasiswa: {$this->mahasiswa_id}");
+                
+            } else {
+                $is_new_submit = true;
+                log_message('info', "Publikasi new submit: ID {$publikasi->id}, Mahasiswa: {$this->mahasiswa_id}");
             }
         }
     } elseif ($submit_type === 'update') {
-        // ✅ PURE UPDATE: hanya update data tanpa mengubah status workflow
-        // Tidak mengubah: status, status_pembimbing, tanggal_pengajuan
+        // ✅ PURE UPDATE: hanya update data tanpa mengubah workflow status
+        // Tidak mengubah: status, status_pembimbing, tanggal_pengajuan, dll
+        log_message('info', "Publikasi data update: ID {$publikasi->id}, Mahasiswa: {$this->mahasiswa_id}");
     }
     
     // Update file jika ada - TIDAK BERUBAH
@@ -633,38 +637,51 @@ private function _process_update($publikasi) {
         $data = array_merge($data, $upload_result['files']);
     }
     
-    // ✅ DATABASE UPDATE: Execute dengan transaction untuk data consistency
+    // ✅ DATABASE TRANSACTION: Ensure data consistency
     $this->db->trans_start();
     
-    $result = $this->publikasi->update($publikasi->id, $data, $this->mahasiswa_id);
-    
-    if ($result['success']) {
+    try {
+        // ✅ EXECUTE update dengan proper validation
+        $result = $this->publikasi->update($publikasi->id, $data, $this->mahasiswa_id);
         
-        // ✅ NOTIFICATION: Send email notification jika resubmit
+        if (!$result['success']) {
+            throw new Exception($result['message']);
+        }
+        
+        // ✅ VERIFICATION: Check if update actually happened
+        $updated_publikasi = $this->publikasi->get_by_id($publikasi->id, $this->mahasiswa_id);
+        
         if ($is_resubmit && $submit_type === 'submit') {
+            // ✅ VERIFY critical fields updated correctly
+            if ($updated_publikasi->status !== 'submitted' || 
+                $updated_publikasi->status_pembimbing !== 'pending') {
+                
+                throw new Exception("Resubmit verification failed: status={$updated_publikasi->status}, status_pembimbing={$updated_publikasi->status_pembimbing}");
+            }
+            
+            log_message('info', "Resubmit verification successful: ID {$publikasi->id}");
+        }
+        
+        // ✅ NOTIFICATION: Send email untuk resubmit/new submit
+        if (($is_resubmit || $is_new_submit) && $submit_type === 'submit') {
             try {
-                // Send notification ke dosen pembimbing
-                $this->_send_resubmit_notification($publikasi->id, $dosen_pembimbing_id);
-                
-                // Optional: Send confirmation ke mahasiswa
-                // $this->_send_resubmit_confirmation($publikasi->id);
-                
-                log_message('info', "Publikasi resubmit notification sent - ID: {$publikasi->id}, Dosen: {$dosen_pembimbing_id}");
+                $this->_send_submission_notification($publikasi->id, $dosen_pembimbing_id, $is_resubmit);
+                log_message('info', "Submission notification sent - Publikasi ID: {$publikasi->id}, Type: " . ($is_resubmit ? 'resubmit' : 'new'));
             } catch (Exception $e) {
-                log_message('error', 'Error sending resubmit notification: ' . $e->getMessage());
-                // Continue execution - notification error tidak menghentikan proses
+                log_message('error', 'Error sending submission notification: ' . $e->getMessage());
+                // Continue - notification error tidak menghentikan proses
             }
         }
         
         $this->db->trans_complete();
         
-        // ✅ SUCCESS MESSAGES: Enhanced feedback
+        // ✅ SUCCESS MESSAGES: Enhanced berdasarkan action type
         if ($submit_type === 'submit' && in_array($original_status, ['draft', 'rejected'])) {
             if ($is_resubmit) {
                 $this->session->set_flashdata('success', 
                     '✅ Pengajuan berhasil dikirim ulang ke dosen pembimbing! ' .
-                    'Status: Step 4-6 (Review Dosen). ' .
-                    'Dosen akan mendapat notifikasi untuk review ulang dokumen yang telah diperbaiki. ' .
+                    'Status berubah dari "rejected" ke "submitted". ' .
+                    'Dosen akan menerima notifikasi untuk review ulang dokumen yang telah diperbaiki. ' .
                     'Data akan segera muncul di dashboard dosen untuk direview.'
                 );
             } else {
@@ -675,20 +692,112 @@ private function _process_update($publikasi) {
                 );
             }
         } elseif ($submit_type === 'update') {
-            $this->session->set_flashdata('success', 
-                '💾 Data publikasi berhasil diperbarui. ' .
-                ($original_status === 'rejected' ? 
-                    'Setelah selesai memperbaiki semua dokumen, silakan klik "Kirim Ajuan Ulang ke Dosen".' : 
-                    'Perubahan data telah disimpan.')
-            );
+            if ($original_status === 'rejected') {
+                $this->session->set_flashdata('success', 
+                    '💾 Data publikasi berhasil diperbarui. ' .
+                    'Setelah selesai memperbaiki semua dokumen, jangan lupa klik tombol "Kirim Ajuan Ulang ke Dosen" untuk mengirim ke dosen pembimbing.'
+                );
+            } else {
+                $this->session->set_flashdata('success', '💾 Data publikasi berhasil diperbarui.');
+            }
         }
         
         redirect('mahasiswa/publikasi/tracking/' . $result['id']);
         
-    } else {
+    } catch (Exception $e) {
         $this->db->trans_rollback();
-        $this->session->set_flashdata('error', 'Gagal menyimpan perubahan: ' . $result['message']);
+        log_message('error', 'Failed to update publikasi: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Gagal menyimpan perubahan: ' . $e->getMessage());
         $this->_show_form_edit($publikasi);
+    }
+}
+
+/**
+ * ✅ ENHANCED: Send submission notification dengan type differentiation
+ */
+private function _send_submission_notification($publikasi_id, $dosen_id, $is_resubmit = false) {
+    try {
+        // Get publikasi data dengan detail lengkap
+        $publikasi = $this->publikasi->get_detail($publikasi_id);
+        $dosen = $this->db->get_where('dosen', ['id' => $dosen_id])->row();
+        
+        if (!$publikasi || !$dosen || empty($dosen->email)) {
+            log_message('warning', 'Cannot send notification: missing data or email');
+            return false;
+        }
+        
+        // Setup email configuration
+        $this->email->clear();
+        $this->email->from('noreply@stkyakobus.ac.id', 'SIM Tugas Akhir STK Santo Yakobus');
+        $this->email->to($dosen->email);
+        
+        // ✅ DIFFERENTIATE: Email content berdasarkan type
+        if ($is_resubmit) {
+            $this->email->subject('🔄 Pengajuan Publikasi Ulang - ' . $publikasi->nama_mahasiswa);
+            $title = '🔄 Pengajuan Publikasi Ulang';
+            $message_intro = 'Mahasiswa bimbingan Anda telah <strong>mengajukan ulang publikasi</strong> setelah melakukan perbaikan sesuai catatan Anda sebelumnya.';
+            $bg_color = '#28a745'; // Green untuk resubmit
+        } else {
+            $this->email->subject('📝 Pengajuan Publikasi Baru - ' . $publikasi->nama_mahasiswa);
+            $title = '📝 Pengajuan Publikasi Baru';
+            $message_intro = 'Mahasiswa bimbingan Anda telah <strong>mengajukan publikasi tugas akhir</strong> dan memerlukan review dari Anda.';
+            $bg_color = '#007bff'; // Blue untuk new submission
+        }
+        
+        // Enhanced email template
+        $message = "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: {$bg_color}; color: white; padding: 20px; text-align: center;'>
+                <h2>{$title}</h2>
+            </div>
+            
+            <div style='padding: 20px; background-color: #f8f9fa;'>
+                <p>Kepada Yth. <strong>{$dosen->nama}</strong>,</p>
+                
+                <p>{$message_intro}</p>
+                
+                <div style='background: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                    <h4>👨‍🎓 Data Mahasiswa:</h4>
+                    <ul>
+                        <li><strong>Nama:</strong> {$publikasi->nama_mahasiswa}</li>
+                        <li><strong>NIM:</strong> {$publikasi->nim}</li>
+                        <li><strong>Program Studi:</strong> {$publikasi->program_studi}</li>
+                        <li><strong>Judul Skripsi:</strong> {$publikasi->judul_skripsi_final}</li>
+                    </ul>
+                </div>
+                
+                <div style='background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                    <h4>📋 Detail Pengajuan:</h4>
+                    <p><strong>Tanggal Pengajuan:</strong> " . date('d F Y, H:i') . " WIT</p>
+                    <p><strong>Status:</strong> Menunggu Review Dosen Pembimbing</p>
+                    " . (!empty($publikasi->keterangan_mahasiswa) ? 
+                        "<p><strong>Keterangan:</strong> " . strip_tags($publikasi->keterangan_mahasiswa) . "</p>" : '') . "
+                </div>
+                
+                <div style='text-align: center; margin: 20px 0;'>
+                    <a href='" . base_url('dosen/publikasi/review/' . $publikasi_id) . "' 
+                       style='background: {$bg_color}; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                        👁️ " . ($is_resubmit ? 'Review Pengajuan Ulang' : 'Review Pengajuan') . "
+                    </a>
+                </div>
+                
+                <p><small><em>Email otomatis dari Sistem Informasi Manajemen Tugas Akhir STK Santo Yakobus Merauke</em></small></p>
+            </div>
+        </div>
+        ";
+        
+        $this->email->message($message);
+        $send_result = $this->email->send();
+        
+        if (!$send_result) {
+            log_message('error', 'Failed to send email: ' . $this->email->print_debugger());
+        }
+        
+        return $send_result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error sending submission notification: ' . $e->getMessage());
+        return false;
     }
 }
 

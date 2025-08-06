@@ -45,17 +45,28 @@ class Publikasi extends CI_Controller {
         $this->dosen_id = $this->session->userdata('id');
     }
 
-    /**
-     * Dashboard publikasi untuk dosen
-     * Menggunakan template existing dosen.php
-     */
-    public function index() {
-        // Prepare data untuk view
+/**
+ * ✅ ENHANCED: Index method dengan better error handling
+ */
+public function index() {
+    try {
+        // ✅ VALIDATE dosen session
+        if (empty($this->dosen_id)) {
+            $this->session->set_flashdata('error', 'Session dosen tidak valid. Silakan login ulang.');
+            redirect('auth/login');
+            return;
+        }
+        
+        // ✅ GET data dengan error handling individual
         $view_data = [
             'pengajuan_review' => $this->_get_pengajuan_perlu_review(),
             'riwayat_review' => $this->_get_riwayat_review(),
             'stats' => $this->_get_statistik_dosen()
         ];
+        
+        // ✅ LOG untuk debugging
+        log_message('debug', "Dosen publikasi index - Dosen ID: {$this->dosen_id}");
+        log_message('debug', "Pengajuan review count: " . count($view_data['pengajuan_review']));
         
         // Template data untuk dosen.php
         $data = [
@@ -66,7 +77,13 @@ class Publikasi extends CI_Controller {
         
         // Load template existing
         $this->load->view('template/dosen', $data);
+        
+    } catch (Exception $e) {
+        log_message('error', 'Fatal error in dosen publikasi index: ' . $e->getMessage());
+        $this->session->set_flashdata('error', 'Terjadi kesalahan sistem. Silakan coba lagi atau hubungi admin.');
+        redirect('dosen/dashboard');
     }
+}
 
     /**
      * Detail dan review pengajuan publikasi
@@ -342,40 +359,78 @@ public function force_refresh_publikasi($publikasi_id) {
     // PRIVATE METHODS
     // ================================================================
     
-    /**
-     * Get pengajuan yang perlu direview
-     */
-    private function _get_pengajuan_perlu_review() {
+/**
+ * ✅ FIXED: Get pengajuan yang perlu direview - dengan error handling
+ * Mengatasi error "Object of class mysqli could not be converted to string"
+ */
+private function _get_pengajuan_perlu_review() {
+    try {
+        // ✅ CLEAR any previous query state
+        $this->db->reset_query();
+        
+        // ✅ PROPER: Build query dengan explicit field selection
+        $this->db->select('
+            pta.id,
+            pta.proposal_mahasiswa_id,
+            pta.mahasiswa_id,
+            pta.status,
+            pta.status_pembimbing,
+            pta.tanggal_pengajuan,
+            pta.keterangan_mahasiswa,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            m.email as email_mahasiswa,
+            pm.judul as judul_skripsi,
+            pr.nama as nama_prodi
+        ');
+        $this->db->from('publikasi_tugas_akhir pta');
+        $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id', 'inner');
+        $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id', 'inner');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'inner');
+        
+        // ✅ PROPER: Use proper where conditions
+        $this->db->where('pta.dosen_pembimbing_id', (int)$this->dosen_id);
+        $this->db->where('pta.status_pembimbing', 'pending');
+        $this->db->where_in('pta.status', ['submitted', 'review_pembimbing']);
+        $this->db->order_by('pta.tanggal_pengajuan', 'ASC');
+        
+        // ✅ EXECUTE query dengan proper error handling
+        $query = $this->db->get();
+        
+        if (!$query) {
+            log_message('error', 'Database query failed in _get_pengajuan_perlu_review: ' . $this->db->error()['message']);
+            return [];
+        }
+        
+        $result = $query->result();
+        
+        // ✅ LOG untuk debugging
+        log_message('debug', "_get_pengajuan_perlu_review for dosen {$this->dosen_id}: Found " . count($result) . " items");
+        
+        return $result ?: [];
+        
+    } catch (Exception $e) {
+        log_message('error', 'Exception in _get_pengajuan_perlu_review: ' . $e->getMessage());
+        
+        // ✅ FALLBACK: Try simple query without joins
         try {
-            $this->db->select('
-                pta.id,
-                pta.proposal_mahasiswa_id,
-                pta.mahasiswa_id,
-                pta.status,
-                pta.status_pembimbing,
-                pta.tanggal_pengajuan,
-                pta.keterangan_mahasiswa,
-                m.nim,
-                m.nama as nama_mahasiswa,
-                m.email as email_mahasiswa,
-                pm.judul as judul_skripsi,
-                pr.nama as nama_prodi
-            ');
-            $this->db->from('publikasi_tugas_akhir pta');
-            $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id');
-            $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id');
-            $this->db->join('prodi pr', 'm.prodi_id = pr.id');
-            $this->db->where('pta.dosen_pembimbing_id', $this->dosen_id);
-            $this->db->where('pta.status_pembimbing', 'pending');
-            $this->db->where_in('pta.status', ['submitted', 'review_pembimbing']);
-            $this->db->order_by('pta.tanggal_pengajuan', 'ASC');
+            $this->db->reset_query();
+            $simple_result = $this->db->select('*')
+                                    ->where('dosen_pembimbing_id', (int)$this->dosen_id)
+                                    ->where('status_pembimbing', 'pending')
+                                    ->where_in('status', ['submitted', 'review_pembimbing'])
+                                    ->get('publikasi_tugas_akhir')
+                                    ->result();
             
-            return $this->db->get()->result();
-        } catch (Exception $e) {
-            log_message('error', 'Error getting pengajuan perlu review: ' . $e->getMessage());
+            log_message('info', 'Fallback query succeeded: ' . count($simple_result) . ' items found');
+            return $simple_result ?: [];
+            
+        } catch (Exception $e2) {
+            log_message('error', 'Fallback query also failed: ' . $e2->getMessage());
             return [];
         }
     }
+}
     
     /**
      * Get riwayat review yang sudah dilakukan
@@ -434,96 +489,125 @@ public function force_refresh_publikasi($publikasi_id) {
     }
 
 
-    /**
-     * Get statistik untuk dashboard dosen
-     */
-    private function _get_statistik_dosen() {
-        try {
-            $stats = [
-                'total_pengajuan' => 0,
-                'perlu_review' => 0,
-                'approved' => 0,
-                'rejected' => 0,
-                'completed' => 0
-            ];
-            
-            // Total pengajuan sebagai pembimbing
-            $this->db->where('dosen_pembimbing_id', $this->dosen_id);
-            $stats['total_pengajuan'] = $this->db->count_all_results('publikasi_tugas_akhir');
-            
-            // Perlu review
-            $this->db->where('dosen_pembimbing_id', $this->dosen_id);
-            $this->db->where('status_pembimbing', 'pending');
-            $this->db->where_in('status', ['submitted', 'review_pembimbing']);
-            $stats['perlu_review'] = $this->db->count_all_results('publikasi_tugas_akhir');
-            
-            // Approved
-            $this->db->where('dosen_pembimbing_id', $this->dosen_id);
-            $this->db->where('status_pembimbing', 'approved');
-            $stats['approved'] = $this->db->count_all_results('publikasi_tugas_akhir');
-            
-            // Rejected
-            $this->db->where('dosen_pembimbing_id', $this->dosen_id);
-            $this->db->where('status_pembimbing', 'rejected');
-            $stats['rejected'] = $this->db->count_all_results('publikasi_tugas_akhir');
-            
-            // Completed
-            $this->db->where('dosen_pembimbing_id', $this->dosen_id);
-            $this->db->where('status', 'completed');
-            $stats['completed'] = $this->db->count_all_results('publikasi_tugas_akhir');
-            
-            return $stats;
-        } catch (Exception $e) {
-            log_message('error', 'Error getting statistik dosen: ' . $e->getMessage());
-            return [
-                'total_pengajuan' => 0,
-                'perlu_review' => 0,
-                'approved' => 0,
-                'rejected' => 0,
-                'completed' => 0
-            ];
-        }
+/**
+ * ✅ FIXED: Get statistik dosen dengan proper error handling
+ */
+private function _get_statistik_dosen() {
+    try {
+        $stats = [
+            'total_pengajuan' => 0,
+            'perlu_review' => 0,
+            'approved' => 0,
+            'rejected' => 0,
+            'completed' => 0
+        ];
+        
+        // ✅ SAFE: Use individual queries dengan proper casting
+        $dosen_id = (int)$this->dosen_id;
+        
+        // Total pengajuan sebagai pembimbing
+        $this->db->reset_query();
+        $this->db->where('dosen_pembimbing_id', $dosen_id);
+        $stats['total_pengajuan'] = $this->db->count_all_results('publikasi_tugas_akhir');
+        
+        // Perlu review
+        $this->db->reset_query();
+        $this->db->where('dosen_pembimbing_id', $dosen_id);
+        $this->db->where('status_pembimbing', 'pending');
+        $this->db->where_in('status', ['submitted', 'review_pembimbing']);
+        $stats['perlu_review'] = $this->db->count_all_results('publikasi_tugas_akhir');
+        
+        // Approved
+        $this->db->reset_query();
+        $this->db->where('dosen_pembimbing_id', $dosen_id);
+        $this->db->where('status_pembimbing', 'approved');
+        $stats['approved'] = $this->db->count_all_results('publikasi_tugas_akhir');
+        
+        // Rejected
+        $this->db->reset_query();
+        $this->db->where('dosen_pembimbing_id', $dosen_id);
+        $this->db->where('status_pembimbing', 'rejected');
+        $stats['rejected'] = $this->db->count_all_results('publikasi_tugas_akhir');
+        
+        // Completed
+        $this->db->reset_query();
+        $this->db->where('dosen_pembimbing_id', $dosen_id);
+        $this->db->where('status', 'completed');
+        $stats['completed'] = $this->db->count_all_results('publikasi_tugas_akhir');
+        
+        log_message('debug', "Stats for dosen {$dosen_id}: " . json_encode($stats));
+        
+        return $stats;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error getting statistik dosen: ' . $e->getMessage());
+        return [
+            'total_pengajuan' => 0,
+            'perlu_review' => 0,
+            'approved' => 0,
+            'rejected' => 0,
+            'completed' => 0
+        ];
     }
+}
     
-    /**
-     * Get detail publikasi dengan validasi
-     */
-    private function _get_publikasi_detail($publikasi_id) {
-        try {
-            $this->db->select('
-                pta.*,
-                m.nim,
-                m.nama as nama_mahasiswa,
-                m.email as email_mahasiswa,
-                m.nomor_telepon,
-                pm.judul as judul_skripsi,
-                pm.id as proposal_id,
-                pr.nama as nama_prodi,
-                d.nama as nama_pembimbing,
-                d.email as email_pembimbing
-            ');
-            $this->db->from('publikasi_tugas_akhir pta');
-            $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id');
-            $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id');
-            $this->db->join('prodi pr', 'm.prodi_id = pr.id');
-            $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id', 'left');
-            $this->db->where('pta.id', $publikasi_id);
-            
-            $result = $this->db->get()->row();
-            
-            if ($result) {
-                // Add file paths
-                $result->file_skripsi_final_path = $this->_get_file_path($result->file_skripsi_final, 'skripsi_final');
-                $result->file_surat_revisi_path = $this->_get_file_path($result->file_surat_revisi, 'surat_revisi');
-                $result->file_surat_perpustakaan_path = $this->_get_file_path($result->file_surat_perpustakaan, 'surat_perpustakaan');
-            }
-            
-            return $result;
-        } catch (Exception $e) {
-            log_message('error', 'Error getting publikasi detail: ' . $e->getMessage());
+/**
+ * ✅ FIXED: Get publikasi detail dengan proper error handling
+ */
+private function _get_publikasi_detail($publikasi_id) {
+    try {
+        // ✅ VALIDATE input
+        $publikasi_id = (int)$publikasi_id;
+        if ($publikasi_id <= 0) {
             return null;
         }
+        
+        $this->db->reset_query();
+        $this->db->select('
+            pta.*,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            m.email as email_mahasiswa,
+            m.nomor_telepon,
+            pm.judul as judul_skripsi,
+            pm.id as proposal_id,
+            pr.nama as nama_prodi,
+            d.nama as nama_pembimbing,
+            d.email as email_pembimbing
+        ');
+        $this->db->from('publikasi_tugas_akhir pta');
+        $this->db->join('mahasiswa m', 'pta.mahasiswa_id = m.id', 'inner');
+        $this->db->join('proposal_mahasiswa pm', 'pta.proposal_mahasiswa_id = pm.id', 'inner');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id', 'inner');
+        $this->db->join('dosen d', 'pta.dosen_pembimbing_id = d.id', 'left');
+        $this->db->where('pta.id', $publikasi_id);
+        
+        $query = $this->db->get();
+        
+        if (!$query) {
+            log_message('error', 'Query failed in _get_publikasi_detail: ' . $this->db->error()['message']);
+            return null;
+        }
+        
+        $result = $query->row();
+        
+        if ($result) {
+            // ✅ SAFE: Add file paths dengan null checking
+            $result->file_skripsi_final_path = !empty($result->file_skripsi_final) ? 
+                $this->_get_file_path($result->file_skripsi_final, 'skripsi_final') : null;
+            $result->file_surat_revisi_path = !empty($result->file_surat_revisi) ? 
+                $this->_get_file_path($result->file_surat_revisi, 'surat_revisi') : null;
+            $result->file_surat_perpustakaan_path = !empty($result->file_surat_perpustakaan) ? 
+                $this->_get_file_path($result->file_surat_perpustakaan, 'surat_perpustakaan') : null;
+        }
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Exception in _get_publikasi_detail: ' . $e->getMessage());
+        return null;
     }
+}
     
     /**
      * Show review form
@@ -778,21 +862,24 @@ public function force_refresh_publikasi($publikasi_id) {
                        ->count_all_results('jurnal_bimbingan');
     }
     
-    private function _get_file_path($filename, $type) {
-        if (empty($filename)) return null;
-        
-        $base_path = base_url('uploads/publikasi/');
-        switch ($type) {
-            case 'skripsi_final':
-                return $base_path . 'skripsi_final/' . $filename;
-            case 'surat_revisi':
-                return $base_path . 'surat_revisi/' . $filename;
-            case 'surat_perpustakaan':
-                return $base_path . 'surat_perpustakaan/' . $filename;
-            default:
-                return $base_path . $filename;
-        }
+/**
+ * ✅ HELPER: Safe file path generator
+ */
+private function _get_file_path($filename, $type) {
+    if (empty($filename)) {
+        return null;
     }
+    
+    $base_path = 'uploads/publikasi/';
+    $type_paths = [
+        'skripsi_final' => 'skripsi_final/',
+        'surat_revisi' => 'surat_revisi/',
+        'surat_perpustakaan' => 'surat_perpustakaan/'
+    ];
+    
+    $folder = isset($type_paths[$type]) ? $type_paths[$type] : '';
+    return base_url($base_path . $folder . $filename);
+}
     
     private function _get_staf_emails() {
         $this->db->select('email');

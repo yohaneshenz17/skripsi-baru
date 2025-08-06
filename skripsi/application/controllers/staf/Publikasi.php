@@ -251,7 +251,8 @@ public function input_repository($publikasi_id) {
             redirect('staf/publikasi');
         }
     }
-
+    
+    
     /**
      * Export dengan pesan info
      */

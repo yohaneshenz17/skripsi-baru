@@ -218,10 +218,17 @@ public function input_repository($publikasi_id) {
                 $this->form_validation->set_rules('keputusan', 'Keputusan', 'required|in_list[approved,rejected]');
                 $this->form_validation->set_rules('catatan', 'Catatan', 'required');
                 
-                if ($this->form_validation->run()) {
+                 if ($this->form_validation->run()) {
                     $update_data = $this->_prepare_validation_data($keputusan, $catatan);
                     
                     if ($this->_update_publikasi_safe($publikasi_id, $update_data)) {
+                        
+                        // ✅ PERBAIKAN KRITIS: Update workflow_status jika approved
+                        if ($keputusan === 'approved') {
+                            $this->_update_workflow_status_to_selesai($publikasi_id);
+                            $this->_generate_surat_keterangan($publikasi_id);
+                        }
+                        
                         // Send notification email
                         $this->_send_notification_email_safe($publikasi, $keputusan, $catatan);
                         
@@ -527,52 +534,52 @@ private function _update_publikasi_safe($publikasi_id, $data) {
     }
 }
 
-    /**
-     * Prepare validation data based on available columns
-     */
-    private function _prepare_validation_data($keputusan, $catatan) {
-        $data = [
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-        
-        // Add columns based on availability
-        if ($this->_column_exists('status_staf')) {
-            $data['status_staf'] = $keputusan;
-        }
-        
-        if ($this->_column_exists('validasi_staf_publikasi')) {
-            $data['validasi_staf_publikasi'] = $keputusan === 'approved' ? '1' : '2';
-        }
-        
-        if ($this->_column_exists('catatan_staf')) {
-            $data['catatan_staf'] = $catatan;
-        }
-        
-        if ($this->_column_exists('komentar_staf')) {
-            $data['komentar_staf'] = $catatan;
-        }
-        
-        if ($this->_column_exists('staf_validator_id')) {
-            $data['staf_validator_id'] = $this->session->userdata('id');
-        }
-        
-        if ($this->_column_exists('tanggal_validasi_staf')) {
-            $data['tanggal_validasi_staf'] = date('Y-m-d H:i:s');
-        }
-        
-        // Jika approved, set status completed
-        if ($keputusan === 'approved') {
-            if ($this->_column_exists('status_publikasi')) {
-                $data['status_publikasi'] = 'completed';
-            }
-            
-            if ($this->_column_exists('tanggal_publikasi')) {
-                $data['tanggal_publikasi'] = date('Y-m-d H:i:s');
-            }
-        }
-        
-        return $data;
+/**
+ * Prepare validation data based on available columns
+ */
+private function _prepare_validation_data($keputusan, $catatan) {
+    $data = [];  // ✅ HAPUS updated_at dari sini
+    
+    // Add columns based on availability
+    if ($this->_column_exists('status_staf')) {
+        $data['status_staf'] = $keputusan;
     }
+    
+    if ($this->_column_exists('validasi_staf_publikasi')) {
+        $data['validasi_staf_publikasi'] = $keputusan === 'approved' ? '1' : '2';
+    }
+    
+    if ($this->_column_exists('catatan_staf')) {
+        $data['catatan_staf'] = $catatan;
+    }
+    
+    if ($this->_column_exists('komentar_staf')) {
+        $data['komentar_staf'] = $catatan;
+    }
+    
+    if ($this->_column_exists('staf_validator_id')) {
+        $data['staf_validator_id'] = $this->session->userdata('id');
+    }
+    
+    if ($this->_column_exists('tanggal_validasi_staf')) {
+        $data['tanggal_validasi_staf'] = date('Y-m-d H:i:s');
+    }
+    
+    // ✅ PERBAIKAN KRITIS: Update kolom yang benar
+    if ($keputusan === 'approved') {
+        // ✅ FIX: Update status utama
+        if ($this->_column_exists('status')) {
+            $data['status'] = 'completed';
+        }
+        
+        // ✅ TAMBAHAN: Set tanggal selesai
+        if ($this->_column_exists('tanggal_selesai')) {
+            $data['tanggal_selesai'] = date('Y-m-d H:i:s');
+        }
+    }
+    
+    return $data;
+}
 
     /**
      * REPLACE method _send_notification_email_safe() yang ada di line ~350-380
@@ -849,6 +856,71 @@ private function _update_publikasi_safe($publikasi_id, $data) {
             return false;
         }
     }
+
+/**
+ * Update workflow status ke selesai
+ */
+private function _update_workflow_status_to_selesai($publikasi_id) {
+    try {
+        // Get proposal_mahasiswa_id
+        $publikasi = $this->db->select('proposal_mahasiswa_id')
+                            ->from('publikasi_tugas_akhir')
+                            ->where('id', $publikasi_id)
+                            ->get()
+                            ->row();
+        
+        if ($publikasi) {
+            // ✅ HAPUS updated_at dari sini juga
+            $this->db->where('id', $publikasi->proposal_mahasiswa_id)
+                   ->update('proposal_mahasiswa', [
+                       'workflow_status' => 'selesai'
+                   ]);
+            
+            log_message('info', "✅ Workflow status updated to 'selesai' for proposal_id: " . $publikasi->proposal_mahasiswa_id);
+        }
+        
+        return true;
+    } catch (Exception $e) {
+        log_message('error', 'Error updating workflow status: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * ✅ TAMBAHAN: Generate surat keterangan publikasi
+ */
+private function _generate_surat_keterangan($publikasi_id) {
+    try {
+        // Generate filename
+        $filename = 'SURAT_KETERANGAN_' . date('Ymd_His') . '_' . $publikasi_id . '.pdf';
+        
+        // Create directory if not exists
+        if (!is_dir('./uploads/surat_keterangan/')) {
+            mkdir('./uploads/surat_keterangan/', 0755, true);
+        }
+        
+        // Simple dummy file for now (bisa dikembangkan jadi PDF generator nanti)
+        $content = "SURAT KETERANGAN PUBLIKASI TUGAS AKHIR\n";
+        $content .= "Generated: " . date('Y-m-d H:i:s') . "\n";
+        $content .= "Publikasi ID: " . $publikasi_id . "\n";
+        $content .= "Status: SELESAI - TERVALIDASI\n";
+        
+        file_put_contents('./uploads/surat_keterangan/' . $filename, $content);
+        
+        // Update database dengan filename
+        $this->db->where('id', $publikasi_id)
+               ->update('publikasi_tugas_akhir', [
+                   'file_surat_keterangan' => $filename
+               ]);
+        
+        log_message('info', "✅ Surat keterangan generated: " . $filename);
+        return true;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error generating surat keterangan: ' . $e->getMessage());
+        return false;
+    }
+}
 
     /**
      * Get debug info untuk troubleshooting

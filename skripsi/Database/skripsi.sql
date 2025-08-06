@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 06, 2025 at 12:00 PM
+-- Generation Time: Aug 06, 2025 at 02:43 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1913,57 +1913,30 @@ CREATE TABLE `publikasi_tugas_akhir` (
 --
 
 INSERT INTO `publikasi_tugas_akhir` (`id`, `proposal_mahasiswa_id`, `mahasiswa_id`, `nama_mahasiswa`, `nim`, `program_studi`, `judul_skripsi_final`, `dosen_pembimbing_id`, `nama_dosen_pembimbing`, `tanggal_ujian_skripsi`, `file_surat_revisi`, `file_skripsi_final`, `file_surat_perpustakaan`, `link_repository`, `file_surat_keterangan`, `status`, `status_pembimbing`, `status_staf`, `keterangan_mahasiswa`, `komentar_pembimbing`, `komentar_staf`, `tanggal_pengajuan`, `tanggal_review_pembimbing`, `tanggal_validasi_staf`, `tanggal_selesai`, `validated_by_staf_id`, `validated_by_staf_name`, `created_at`, `updated_at`) VALUES
-(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/downloadphp.pdf', NULL, 'review_staf', 'approved', 'approved', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Disetujui melalui quick approve', 'tessss', '2025-08-05 14:50:29', '2025-08-05 15:59:49', '2025-08-06 12:00:08', NULL, 29, 'Maria Karolina Itu', '2025-08-05 11:16:50', '2025-08-06 12:00:08'),
-(3, 46, 46, 'Mahasiswa Contoh 3', '12345677', 'Pendidikan Keagamaan Katolik', 'PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805130952_46_6891a0307cdc4.pdf', 'SKRIPSI_FINAL_20250805130952_46_6891a0307cf34.pdf', 'SURAT_PERPUS_20250805130952_46_6891a0307c980.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2024/04/Formulir-PMB.pdf', NULL, 'review_staf', 'approved', 'approved', 'tes saja', 'Saya merekomendasikan publikasi ini untuk latihan saja ya', 'Sudah ok', '2025-08-05 13:25:37', '2025-08-05 15:42:50', '2025-08-06 06:52:27', NULL, 29, 'Maria Karolina Itu', '2025-08-05 13:09:52', '2025-08-06 06:52:27');
+(2, 45, 45, 'Mahasiswa Contoh 2', '12345679', 'Pendidikan Keagamaan Katolik', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805111650_45_689185b288646.pdf', 'SKRIPSI_FINAL_20250805111650_45_689185b288a02.pdf', 'SURAT_PERPUS_20250805111650_45_689185b28805b.pdf', 'https://stkyakobus.ac.id/downloadphp.pdf', NULL, 'completed', 'approved', 'approved', 'tes saja PENGARUH PENGGUNAAN MEDIA TEKNOLOGI PEMBELAJARAN TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 'Disetujui melalui quick approve', 'Test after fix - 2025-08-06 14:40:07', '2025-08-05 14:50:29', '2025-08-05 15:59:49', '2025-08-06 12:55:18', '2025-08-06 12:55:18', NULL, NULL, '2025-08-05 11:16:50', '2025-08-06 14:40:07'),
+(3, 46, 46, 'Mahasiswa Contoh 3', '12345677', 'Pendidikan Keagamaan Katolik', 'PENGARUH PENGGUNAAN MEDIA PEMBELAJARAN INTERAKTIF PADA MATA PELAJARAN PENDIDIKAN AGAMA KATOLIK TERHADAP HASIL BELAJAR SISWA SMPN 2 MERAUKE', 25, 'Yohanes Hendro Pranyoto, S.Pd., M.Pd.', '2025-08-05', 'SURAT_REVISI_20250805130952_46_6891a0307cdc4.pdf', 'SKRIPSI_FINAL_20250805130952_46_6891a0307cf34.pdf', 'SURAT_PERPUS_20250805130952_46_6891a0307c980.pdf', 'https://stkyakobus.ac.id/wp-content/uploads/2024/04/Formulir-PMB.pdf', NULL, 'completed', 'approved', 'approved', 'tes saja', 'Saya merekomendasikan publikasi ini untuk latihan saja ya', 'Sudah ok', '2025-08-05 13:25:37', '2025-08-05 15:42:50', '2025-08-06 06:52:27', '2025-08-06 06:52:27', 29, 'Maria Karolina Itu', '2025-08-05 13:09:52', '2025-08-06 14:34:52');
 
 --
 -- Triggers `publikasi_tugas_akhir`
 --
 DELIMITER $$
-CREATE TRIGGER `tr_publikasi_completed` AFTER UPDATE ON `publikasi_tugas_akhir` FOR EACH ROW BEGIN
-    -- Jika status berubah ke completed, update workflow_status di proposal_mahasiswa
+CREATE TRIGGER `tr_publikasi_completed_safe` AFTER UPDATE ON `publikasi_tugas_akhir` FOR EACH ROW BEGIN
     IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
         UPDATE proposal_mahasiswa 
-        SET workflow_status = 'selesai',
-            updated_at = NOW()
+        SET workflow_status = 'selesai'
         WHERE id = NEW.proposal_mahasiswa_id;
-        
-        -- Set tanggal_selesai
-        UPDATE publikasi_tugas_akhir 
-        SET tanggal_selesai = NOW()
-        WHERE id = NEW.id;
     END IF;
 END
 $$
 DELIMITER ;
 DELIMITER $$
-CREATE TRIGGER `tr_publikasi_log` AFTER UPDATE ON `publikasi_tugas_akhir` FOR EACH ROW BEGIN
-    -- Log perubahan status
+CREATE TRIGGER `tr_publikasi_log_safe` AFTER UPDATE ON `publikasi_tugas_akhir` FOR EACH ROW BEGIN
     IF NEW.status != OLD.status THEN
-        INSERT INTO log_publikasi (
-            publikasi_id, user_id, user_role, user_name, aktivitas, deskripsi
-        ) VALUES (
-            NEW.id, 
-            COALESCE(NEW.validated_by_staf_id, NEW.mahasiswa_id), 
-            CASE WHEN NEW.validated_by_staf_id IS NOT NULL THEN 'staf' ELSE 'system' END,
-            COALESCE(NEW.validated_by_staf_name, 'System Auto'),
-            'status_changed',
-            CONCAT('Status berubah dari ', OLD.status, ' ke ', NEW.status)
-        );
-    END IF;
-    
-    -- Log input link repository oleh staf
-    IF NEW.link_repository != OLD.link_repository AND NEW.link_repository IS NOT NULL THEN
-        INSERT INTO log_publikasi (
-            publikasi_id, user_id, user_role, user_name, aktivitas, deskripsi
-        ) VALUES (
-            NEW.id, 
-            NEW.validated_by_staf_id,
-            'staf',
-            NEW.validated_by_staf_name,
-            'input_repository',
-            CONCAT('Input link repository: ', NEW.link_repository)
-        );
+        INSERT INTO log_publikasi (publikasi_id, user_id, user_role, user_name, aktivitas, deskripsi, created_at) 
+        VALUES (NEW.id, COALESCE(NEW.validated_by_staf_id, NEW.mahasiswa_id), 
+                CASE WHEN NEW.validated_by_staf_id IS NOT NULL THEN 'staf' ELSE 'system' END,
+                COALESCE(NEW.validated_by_staf_name, 'System Auto'), 'status_changed',
+                CONCAT('Status berubah dari ', OLD.status, ' ke ', NEW.status), NOW());
     END IF;
 END
 $$

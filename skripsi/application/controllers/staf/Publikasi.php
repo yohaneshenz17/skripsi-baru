@@ -142,7 +142,6 @@ public function input_repository($publikasi_id) {
                 // ===== FINAL FIX: GUNAKAN KOLOM YANG BENAR =====
                 $update_data = [
                     'link_repository' => $this->input->post('link_repository'),
-                    'updated_at' => date('Y-m-d H:i:s'),
                     'validated_by_staf_id' => $user_id,      // ✅ KOLOM INI ADA
                     'validated_by_staf_name' => $user_name   // ✅ KOLOM INI ADA
                 ];

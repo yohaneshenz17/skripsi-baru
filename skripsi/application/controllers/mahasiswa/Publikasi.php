@@ -584,7 +584,6 @@ class Publikasi extends CI_Controller {
             'tanggal_ujian_skripsi' => $this->input->post('tanggal_ujian_skripsi'),
             'link_repository' => $this->input->post('link_repository'),
             'keterangan_mahasiswa' => $this->input->post('keterangan_mahasiswa'),
-            'updated_at' => date('Y-m-d H:i:s')
         ];
         
         // ✅ HANYA INI YANG DIUBAH: Status update logic yang mendukung resubmit

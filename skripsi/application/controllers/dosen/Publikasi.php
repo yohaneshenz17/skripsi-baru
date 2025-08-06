@@ -406,7 +406,6 @@ class Publikasi extends CI_Controller {
             'status_pembimbing' => $rekomendasi,
             'komentar_pembimbing' => $komentar,
             'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
         ];
         
         // Update status utama berdasarkan rekomendasi
@@ -457,7 +456,6 @@ class Publikasi extends CI_Controller {
                 'status_pembimbing' => 'approved',
                 'komentar_pembimbing' => 'Disetujui melalui quick approve',
                 'tanggal_review_pembimbing' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
             ];
             
             $this->db->where('id', $publikasi->id);

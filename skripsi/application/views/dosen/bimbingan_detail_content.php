@@ -497,6 +497,8 @@
 </div>
 
 <script>
+console.log("ðŸ”§ DEBUG: Vanilla JavaScript loaded (No jQuery)");
+
 // PERBAIKAN: Multiple fallback methods untuk mendapatkan proposal ID
 var currentProposalId = null;
 
@@ -524,41 +526,49 @@ if (!currentProposalId) {
     }
 }
 
-// Method 4: Ambil dari data attribute
-if (!currentProposalId) {
-    const buttonWithId = document.querySelector('[data-proposal-id]');
-    if (buttonWithId && buttonWithId.dataset.proposalId) {
-        currentProposalId = buttonWithId.dataset.proposalId;
-    }
-}
-
-// Debug log
-console.log('=== Export Debug Info ===');
-console.log('Current Proposal ID:', currentProposalId);
-console.log('PHP mahasiswa object available:', <?= isset($mahasiswa) ? 'true' : 'false' ?>);
-console.log('Current URL:', window.location.href);
+console.log('ðŸ”§ DEBUG: Current Proposal ID:', currentProposalId);
 
 // Variables untuk tracking modal state
 var isEditMode = false;
 var currentEditJurnalId = null;
 
-// PERBAIKAN: Export function dengan robust proposal ID detection
+// âœ… VANILLA JS: Show/Hide Modal Functions
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+        document.body.classList.add('modal-open');
+        
+        // Create backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = modalId + '-backdrop';
+        document.body.appendChild(backdrop);
+    }
+}
+
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+        document.body.classList.remove('modal-open');
+        
+        // Remove backdrop
+        const backdrop = document.getElementById(modalId + '-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+    }
+}
+
+// Export function
 function exportJurnal() {
     console.log('exportJurnal called, currentProposalId:', currentProposalId);
     
     if (!currentProposalId) {
-        // Last resort: try to extract from URL again
-        const urlParts = window.location.href.split('/');
-        const detailIndex = urlParts.indexOf('detail_mahasiswa');
-        if (detailIndex !== -1 && urlParts[detailIndex + 1]) {
-            currentProposalId = urlParts[detailIndex + 1];
-            console.log('Last resort: found proposal ID from URL:', currentProposalId);
-        }
-    }
-    
-    if (!currentProposalId) {
-        alert('ID proposal tidak ditemukan! Debug info sudah ditulis ke console.');
-        console.error('Export PDF Error: No proposal ID found after all methods');
+        alert('ID proposal tidak ditemukan!');
         return;
     }
     
@@ -567,14 +577,20 @@ function exportJurnal() {
     window.open(exportUrl, '_blank');
 }
 
-// Tambah Jurnal Bimbingan
+// ðŸ”§ PERBAIKAN UTAMA: Tambah Jurnal Bimbingan (Vanilla JS)
 function tambahJurnalBimbingan() {
+    console.log("ðŸ”§ DEBUG: tambahJurnalBimbingan called");
+    
     isEditMode = false;
     currentEditJurnalId = null;
     
     document.getElementById('modalJurnalTitle').textContent = 'Tambah Jurnal Bimbingan';
-    document.getElementById('formJurnal').action = '<?= base_url("dosen/bimbingan/tambah_jurnal") ?>';
-    document.getElementById('formJurnal').reset();
+    
+    // PENTING: Jangan set action, biar AJAX yang handle
+    const form = document.getElementById('formJurnal');
+    form.removeAttribute('action');
+    form.reset();
+    
     document.getElementById('edit_jurnal_id').value = '';
     document.getElementById('submitJurnalBtn').textContent = 'Simpan Jurnal';
     
@@ -583,80 +599,42 @@ function tambahJurnalBimbingan() {
     document.querySelector('[name="tanggal_bimbingan"]').value = '<?= date('Y-m-d') ?>';
     document.querySelector('[name="proposal_id"]').value = currentProposalId || '';
     
-    $('#modalJurnal').modal('show');
+    showModal('modalJurnal');
 }
 
-// Edit Jurnal Bimbingan
+// Edit Jurnal Bimbingan (Vanilla JS)
 function editJurnal(jurnalId) {
+    console.log("ðŸ”§ DEBUG: editJurnal called with ID:", jurnalId);
+    
     isEditMode = true;
     currentEditJurnalId = jurnalId;
     
     document.getElementById('modalJurnalTitle').textContent = 'Edit Jurnal Bimbingan';
     document.getElementById('submitJurnalBtn').textContent = 'Update Jurnal';
     
-    // Fetch data jurnal - pastikan jQuery tersedia
-    if (typeof $ !== 'undefined') {
-        $.get('<?= base_url("dosen/bimbingan/get_jurnal/") ?>' + jurnalId)
-        .done(function(data) {
-            if (data.error) {
-                alert('Error: ' + data.message);
-                return;
-            }
-            
-            // Populate form
-            document.getElementById('edit_jurnal_id').value = data.data.id;
-            document.getElementById('input_pertemuan_ke').value = data.data.pertemuan_ke;
-            document.getElementById('input_tanggal_bimbingan').value = data.data.tanggal_bimbingan;
-            document.getElementById('input_materi_bimbingan').value = data.data.materi_bimbingan;
-            document.getElementById('input_catatan_dosen').value = data.data.catatan_dosen || '';
-            document.getElementById('input_tindak_lanjut').value = data.data.tindak_lanjut || '';
-            
-            $('#modalJurnal').modal('show');
-        })
-        .fail(function() {
-            alert('Terjadi kesalahan saat mengambil data jurnal!');
-        });
-    } else {
-        // Fallback untuk fetch API jika jQuery tidak tersedia
-        fetch('<?= base_url("dosen/bimbingan/get_jurnal/") ?>' + jurnalId)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert('Error: ' + data.message);
-                return;
-            }
-            
-            // Populate form
-            document.getElementById('edit_jurnal_id').value = data.data.id;
-            document.getElementById('input_pertemuan_ke').value = data.data.pertemuan_ke;
-            document.getElementById('input_tanggal_bimbingan').value = data.data.tanggal_bimbingan;
-            document.getElementById('input_materi_bimbingan').value = data.data.materi_bimbingan;
-            document.getElementById('input_catatan_dosen').value = data.data.catatan_dosen || '';
-            document.getElementById('input_tindak_lanjut').value = data.data.tindak_lanjut || '';
-            
-            // Jika jQuery tersedia gunakan, jika tidak gunakan vanilla JS
-            if (typeof $ !== 'undefined') {
-                $('#modalJurnal').modal('show');
-            } else {
-                // Vanilla JS modal show
-                const modal = document.getElementById('modalJurnal');
-                if (modal) {
-                    // Try Bootstrap 4 method
-                    if (window.bootstrap && window.bootstrap.Modal) {
-                        new window.bootstrap.Modal(modal).show();
-                    } else {
-                        // Fallback
-                        modal.style.display = 'block';
-                        modal.classList.add('show');
-                    }
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat mengambil data jurnal!');
-        });
-    }
+    // Fetch data jurnal dengan Vanilla JS
+    fetch('<?= base_url("dosen/bimbingan/get_jurnal/") ?>' + jurnalId)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.message);
+            return;
+        }
+        
+        // Populate form
+        document.getElementById('edit_jurnal_id').value = data.data.id;
+        document.getElementById('input_pertemuan_ke').value = data.data.pertemuan_ke;
+        document.getElementById('input_tanggal_bimbingan').value = data.data.tanggal_bimbingan;
+        document.getElementById('input_materi_bimbingan').value = data.data.materi_bimbingan;
+        document.getElementById('input_catatan_dosen').value = data.data.catatan_dosen || '';
+        document.getElementById('input_tindak_lanjut').value = data.data.tindak_lanjut || '';
+        
+        showModal('modalJurnal');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengambil data jurnal!');
+    });
 }
 
 // Delete Jurnal Bimbingan
@@ -666,7 +644,9 @@ function deleteJurnal(jurnalId) {
     }
     
     const formData = new FormData();
-    formData.append('jurnal_id', jurnalId);
+    formData.append('jurnal_id', jurnalId);          // ✅ ID jurnal
+    formData.append('status_validasi', status);      // ✅ 1=valid, 2=revisi
+    formData.append('catatan_dosen', '');            // ✅ Field required controller
     
     fetch('<?= base_url("dosen/bimbingan/delete_jurnal") ?>', {
         method: 'POST',
@@ -678,7 +658,6 @@ function deleteJurnal(jurnalId) {
             alert('Error: ' + data.message);
         } else {
             alert('Success: ' + data.message);
-            // Remove row from table atau refresh page
             location.reload();
         }
     })
@@ -688,7 +667,7 @@ function deleteJurnal(jurnalId) {
     });
 }
 
-// Validasi Jurnal
+// Validasi Jurnal (Vanilla JS)
 function validasiJurnal(jurnalId, status) {
     document.getElementById('validasi_jurnal_id').value = jurnalId;
     document.getElementById('validasi_status').value = status;
@@ -708,76 +687,128 @@ function validasiJurnal(jurnalId, status) {
         submitBtn.className = 'btn btn-warning';
     }
     
-    // Show modal
-    if (typeof $ !== 'undefined') {
-        $('#modalValidasi').modal('show');
-    } else {
-        const modal = document.getElementById('modalValidasi');
-        if (modal) {
-            modal.style.display = 'block';
-            modal.classList.add('show');
-        }
-    }
+    showModal('modalValidasi');
 }
 
-// Handle form submit untuk edit/tambah
+// ðŸš¨ PERBAIKAN KRITIS: Override form submit dengan AJAX (Vanilla JS)
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("ðŸ”§ DEBUG: DOM loaded, setting up form handler (Vanilla JS)");
+    
     const formJurnal = document.getElementById('formJurnal');
     if (formJurnal) {
+        // HAPUS action attribute untuk memastikan tidak redirect
+        formJurnal.removeAttribute('action');
+        
+        // Override submit event
         formJurnal.addEventListener('submit', function(e) {
-            if (isEditMode && currentEditJurnalId) {
-                e.preventDefault();
-                
-                const formData = new FormData(this);
-                formData.append('jurnal_id', currentEditJurnalId);
-                
-                const submitBtn = document.getElementById('submitJurnalBtn');
-                submitBtn.disabled = true;
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
-                
-                fetch('<?= base_url("dosen/bimbingan/edit_jurnal") ?>', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert('Error: ' + data.message);
-                    } else {
-                        alert('Success: ' + data.message);
-                        if (typeof $ !== 'undefined') {
-                            $('#modalJurnal').modal('hide');
-                        }
-                        location.reload();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan sistem!');
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                });
+            console.log("ðŸ”§ DEBUG: Form submit intercepted (Vanilla JS)");
+            console.log("ðŸ”§ DEBUG: isEditMode:", isEditMode);
+            console.log("ðŸ”§ DEBUG: currentEditJurnalId:", currentEditJurnalId);
+            
+            // SELALU prevent default untuk semua submit
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = document.getElementById('submitJurnalBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Validation check
+            const pertemuanKe = formData.get('pertemuan_ke');
+            const tanggalBimbingan = formData.get('tanggal_bimbingan');
+            const materiBimbingan = formData.get('materi_bimbingan');
+            
+            if (!pertemuanKe || !tanggalBimbingan || !materiBimbingan) {
+                alert('Semua field yang wajib harus diisi!');
+                return false;
             }
-            // Untuk mode tambah, biarkan form submit normal
+            
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+            
+            // Tentukan URL dan data berdasarkan mode
+            let fetchUrl;
+            if (isEditMode && currentEditJurnalId) {
+                fetchUrl = '<?= base_url("dosen/bimbingan/edit_jurnal") ?>';
+                formData.append('jurnal_id', currentEditJurnalId);
+                console.log("ðŸ”§ DEBUG: Edit mode - URL:", fetchUrl);
+            } else {
+                fetchUrl = '<?= base_url("dosen/bimbingan/tambah_jurnal") ?>';
+                console.log("ðŸ”§ DEBUG: Add mode - URL:", fetchUrl);
+            }
+            
+            console.log("ðŸ”§ DEBUG: Sending AJAX request to:", fetchUrl);
+            
+            // AJAX Request
+            fetch(fetchUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log("ðŸ”§ DEBUG: Response received:", response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log("ðŸ”§ DEBUG: Response data:", data);
+                
+                if (data.error) {
+                    alert('Error: ' + data.message);
+                } else {
+                    alert('Success: ' + data.message);
+                    
+                    // Tutup modal
+                    hideModal('modalJurnal');
+                    
+                    // Refresh halaman setelah delay singkat
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                }
+            })
+            .catch(error => {
+                console.error('ðŸš¨ AJAX Error:', error);
+                alert('Terjadi kesalahan sistem! Check console untuk detail.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            });
+            
+            return false; // Pastikan tidak ada submit default
         });
+        
+        console.log("ðŸ”§ DEBUG: Form handler installed successfully (Vanilla JS)");
+    } else {
+        console.error("ðŸš¨ ERROR: Form with ID 'formJurnal' not found!");
     }
+    
+    // Setup modal close buttons (Vanilla JS)
+    const closeButtons = document.querySelectorAll('[data-dismiss="modal"]');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                hideModal(modal.id);
+                
+                // Reset state jika modal jurnal
+                if (modal.id === 'modalJurnal') {
+                    isEditMode = false;
+                    currentEditJurnalId = null;
+                    document.getElementById('formJurnal').reset();
+                }
+            }
+        });
+    });
+    
+    // Setup backdrop click to close
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-backdrop')) {
+            hideModal('modalJurnal');
+            hideModal('modalValidasi');
+        }
+    });
 });
 
-// Reset modal saat ditutup
-if (typeof $ !== 'undefined') {
-    $('#modalJurnal').on('hidden.bs.modal', function () {
-        isEditMode = false;
-        currentEditJurnalId = null;
-        document.getElementById('formJurnal').reset();
-    });
-}
-
-// Pastikan proposal ID tersedia global
-window.currentProposalId = currentProposalId;
-
-// Debug info on load
-console.log('Content page loaded. Final proposal ID:', currentProposalId);
+console.log("ðŸ”§ DEBUG: All functions loaded successfully (Vanilla JS)");
 </script>

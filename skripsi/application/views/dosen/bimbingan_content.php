@@ -669,175 +669,132 @@
     </div>
 </div>
 
+<!-- PERBAIKAN LENGKAP - Fix Modal Function + Form Submit -->
 <script>
-// JavaScript untuk handling modal dan quick validasi
-var currentJurnalId = null;
-var currentJurnalAction = null;
-
+// 🔧 FIX 1: Tambah function yang hilang untuk buka modal
 function showTambahJurnalModal() {
-    $('#modalTambahJurnal').modal('show');
-}
-
-function tambahJurnalMahasiswa(proposalId, namaMahasiswa) {
-    const selectElement = document.getElementById('select_mahasiswa');
-    if (selectElement) {
-        selectElement.value = proposalId;
-        selectElement.disabled = true;
+    console.log("✅ showTambahJurnalModal called");
+    
+    // Reset form
+    const form = document.getElementById('formTambahJurnal');
+    if (form) {
+        form.reset();
+    }
+    
+    // Buka modal (coba jQuery dulu, fallback vanilla JS)
+    if (typeof $ !== 'undefined' && $('#modalTambahJurnal').length) {
         $('#modalTambahJurnal').modal('show');
-    }
-}
-
-// Function untuk quick validasi jurnal
-function quickValidasi(jurnalId, action) {
-    currentJurnalId = jurnalId;
-    currentJurnalAction = action;
-    
-    const infoDiv = document.getElementById('quickValidasiInfo');
-    const submitBtn = document.getElementById('quickValidasiSubmit');
-    
-    if (!infoDiv || !submitBtn) {
-        alert('Error: Modal elements not found');
-        return;
-    }
-    
-    if (action == 1) {
-        infoDiv.className = 'alert alert-success';
-        infoDiv.innerHTML = '<i class="fa fa-check"></i> <strong>Validasi Jurnal</strong><br>Jurnal akan ditandai sebagai tervalidasi dan mahasiswa dapat melanjutkan.';
-        submitBtn.textContent = 'Validasi Jurnal';
-        submitBtn.className = 'btn btn-success';
     } else {
-        infoDiv.className = 'alert alert-warning';
-        infoDiv.innerHTML = '<i class="fa fa-edit"></i> <strong>Minta Revisi</strong><br>Jurnal akan dikembalikan untuk diperbaiki mahasiswa. <strong>Catatan wajib diisi.</strong>';
-        submitBtn.textContent = 'Minta Revisi';
-        submitBtn.className = 'btn btn-warning';
-    }
-    
-    document.getElementById('quickCatatanDosen').value = '';
-    $('#modalQuickValidasi').modal('show');
-}
-
-// ✅ NEW: Function untuk export all PDF
-function exportAllPDF() {
-    if (!confirm('Export semua jurnal bimbingan dalam format PDF?\n\nCatatan: Proses ini mungkin memerlukan waktu beberapa menit tergantung jumlah mahasiswa.')) {
-        return;
-    }
-    
-    // Implementasi sederhana: buka tab baru untuk setiap mahasiswa
-    const mahasiswaCount = <?php echo isset($mahasiswa_bimbingan) ? count($mahasiswa_bimbingan) : 0; ?>;
-    
-    if (mahasiswaCount === 0) {
-        alert('Tidak ada mahasiswa bimbingan untuk di-export!');
-        return;
-    }
-    
-    let confirmed = confirm(`Akan membuka ${mahasiswaCount} tab baru untuk export PDF setiap mahasiswa.\n\nLanjutkan?`);
-    
-    if (confirmed) {
-        <?php if(isset($mahasiswa_bimbingan) && !empty($mahasiswa_bimbingan)): ?>
-        <?php foreach($mahasiswa_bimbingan as $mhs): ?>
-        <?php if(isset($mhs->proposal_id) && isset($mhs->total_bimbingan) && $mhs->total_bimbingan > 0): ?>
-        setTimeout(() => {
-            window.open('<?php echo base_url("dosen/bimbingan/export_jurnal/" . $mhs->proposal_id); ?>', '_blank');
-        }, <?php echo array_search($mhs, $mahasiswa_bimbingan) * 500; ?>); // Delay 500ms antara setiap tab
-        <?php endif; ?>
-        <?php endforeach; ?>
-        <?php endif; ?>
-        
-        alert('Export PDF dimulai! Silakan periksa tab baru yang terbuka.');
+        // Vanilla JS fallback
+        const modal = document.getElementById('modalTambahJurnal');
+        if (modal) {
+            modal.style.display = 'block';
+            modal.classList.add('show');
+            document.body.classList.add('modal-open');
+            
+            // Create backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            document.body.appendChild(backdrop);
+        }
     }
 }
 
-// Document ready
+// 🔧 FIX 2: Setup form submit handler saat DOM ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Set default date to today
-    const dateInput = document.getElementById('tanggal_bimbingan');
-    if (dateInput) {
-        dateInput.value = new Date().toISOString().split('T')[0];
-    }
+    const formTambahJurnal = document.getElementById('formTambahJurnal');
     
-    // Handle submit quick validasi
-    const quickSubmitBtn = document.getElementById('quickValidasiSubmit');
-    if (quickSubmitBtn) {
-        quickSubmitBtn.addEventListener('click', function() {
-            if (!currentJurnalId || !currentJurnalAction) {
-                alert('Data tidak lengkap!');
+    if (formTambahJurnal) {
+        console.log("✅ Form ditemukan, installing fix...");
+        
+        // Override submit event untuk mencegah redirect JSON
+        formTambahJurnal.addEventListener('submit', function(e) {
+            e.preventDefault(); // Cegah form submit biasa
+            
+            console.log("🔧 Form submit intercepted - processing with AJAX");
+            
+            // Validasi basic
+            const proposalId = this.querySelector('[name="proposal_id"]').value;
+            if (!proposalId) {
+                alert('Pilih mahasiswa terlebih dahulu!');
                 return;
             }
             
-            const catatan = document.getElementById('quickCatatanDosen').value.trim();
+            // Ambil data form
+            const formData = new FormData(this);
             
-            if (currentJurnalAction == 2 && catatan.length < 5) {
-                alert('Catatan wajib diisi untuk revisi (minimal 5 karakter)!');
-                document.getElementById('quickCatatanDosen').focus();
-                return;
+            // Get submit button untuk loading state
+            const submitBtn = this.querySelector('button[type="submit"]') || this.querySelector('input[type="submit"]');
+            const originalText = submitBtn ? submitBtn.innerHTML || submitBtn.value : 'Simpan';
+            
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                if (submitBtn.innerHTML !== undefined) {
+                    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+                } else {
+                    submitBtn.value = 'Menyimpan...';
+                }
             }
             
-            // Disable button dan show loading
-            this.disabled = true;
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
-            
-            // Kirim request via AJAX
-            const formData = new FormData();
-            formData.append('jurnal_id', currentJurnalId);
-            formData.append('status_validasi', currentJurnalAction);
-            formData.append('catatan_dosen', catatan);
-            
-            fetch('<?php echo base_url("dosen/bimbingan/quick_validasi"); ?>', {
+            // Kirim dengan AJAX
+            fetch('<?= base_url("dosen/bimbingan/tambah_jurnal") ?>', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.error) {
                     alert('Error: ' + data.message);
                 } else {
                     alert('Success: ' + data.message);
-                    // Reload halaman untuk update data
-                    window.location.reload();
+                    
+                    // Tutup modal
+                    if (typeof $ !== 'undefined' && $('#modalTambahJurnal').length) {
+                        $('#modalTambahJurnal').modal('hide');
+                    } else {
+                        const modal = document.getElementById('modalTambahJurnal');
+                        if (modal) {
+                            modal.style.display = 'none';
+                            modal.classList.remove('show');
+                            document.body.classList.remove('modal-open');
+                            const backdrop = document.querySelector('.modal-backdrop');
+                            if (backdrop) backdrop.remove();
+                        }
+                    }
+                    
+                    // Reset form
+                    this.reset();
+                    
+                    // Reload page
+                    setTimeout(() => location.reload(), 1000);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan sistem! Silakan coba lagi.');
+                console.error('AJAX Error:', error);
+                alert('Terjadi kesalahan sistem!');
             })
             .finally(() => {
-                // Restore button
-                this.disabled = false;
-                this.innerHTML = originalText;
-                $('#modalQuickValidasi').modal('hide');
+                // Reset button state
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    if (submitBtn.innerHTML !== undefined) {
+                        submitBtn.innerHTML = originalText;
+                    } else {
+                        submitBtn.value = originalText;
+                    }
+                }
             });
         });
+        
+        console.log("✅ Form submit handler installed");
+    } else {
+        console.warn("⚠️ Form 'formTambahJurnal' tidak ditemukan");
     }
 });
 
-// Reset modal saat ditutup
-$('#modalTambahJurnal').on('hidden.bs.modal', function () {
-    const selectElement = document.getElementById('select_mahasiswa');
-    if (selectElement) {
-        selectElement.disabled = false;
-        selectElement.value = '';
-    }
-    
-    // Reset form
-    document.getElementById('formTambahJurnal').reset();
-    
-    // Set default date again
-    const dateInput = document.getElementById('tanggal_bimbingan');
-    if (dateInput) {
-        dateInput.value = new Date().toISOString().split('T')[0];
-    }
-});
+// 🔧 FIX 3: Alias function untuk kompatibilitas
+window.tambahJurnalBimbingan = showTambahJurnalModal;
+window.openTambahJurnalModal = showTambahJurnalModal;
 
-// Reset quick validasi modal
-$('#modalQuickValidasi').on('hidden.bs.modal', function () {
-    currentJurnalId = null;
-    currentJurnalAction = null;
-    document.getElementById('quickCatatanDosen').value = '';
-});
+console.log("✅ All functions loaded successfully");
 </script>

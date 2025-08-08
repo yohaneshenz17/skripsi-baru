@@ -269,127 +269,156 @@ class Dashboard extends MY_Controller
     /**
      * ✅ METHOD HELPER BARU: Hitung status setiap tahap berdasarkan data aktual
      */
-    private function _calculate_stages_status($proposal)
-    {
-        // Default semua tahap pending
-        $stages = [
-            'usulan_proposal' => ['name' => 'Usulan Proposal', 'status' => 'pending', 'color' => 'secondary'],
-            'bimbingan' => ['name' => 'Bimbingan', 'status' => 'pending', 'color' => 'secondary'],
-            'seminar_proposal' => ['name' => 'Seminar Proposal', 'status' => 'pending', 'color' => 'secondary'],
-            'penelitian' => ['name' => 'Penelitian', 'status' => 'pending', 'color' => 'secondary'],
-            'seminar_skripsi' => ['name' => 'Seminar Skripsi', 'status' => 'pending', 'color' => 'secondary'],
-            'publikasi' => ['name' => 'Publikasi', 'status' => 'pending', 'color' => 'secondary']
-        ];
+private function _calculate_stages_status($proposal)
+{
+    // Default semua tahap pending
+    $stages = [
+        'usulan_proposal' => ['name' => 'Usulan Proposal', 'status' => 'pending', 'color' => 'secondary'],
+        'bimbingan' => ['name' => 'Bimbingan', 'status' => 'pending', 'color' => 'secondary'],
+        'seminar_proposal' => ['name' => 'Seminar Proposal', 'status' => 'pending', 'color' => 'secondary'],
+        'penelitian' => ['name' => 'Penelitian', 'status' => 'pending', 'color' => 'secondary'],
+        'seminar_skripsi' => ['name' => 'Seminar Skripsi', 'status' => 'pending', 'color' => 'secondary'],
+        'publikasi' => ['name' => 'Publikasi', 'status' => 'pending', 'color' => 'secondary']
+    ];
+    
+    // ✅ PERBAIKAN TAHAP 1: Usulan Proposal
+    // Debug: Proposal ID = 49, Status Kaprodi = 0, Status Pembimbing = 0
+    
+    // Cek apakah proposal sudah dibuat
+    if (!empty($proposal->id) && $proposal->id > 0) {
         
-        // TAHAP 1: Usulan Proposal
+        // Cek apakah sudah selesai semua (kaprodi DAN pembimbing setuju)
         if ($proposal->status_kaprodi == '1' && $proposal->status_pembimbing == '1') {
-            // Selesai: Kaprodi setuju DAN pembimbing setuju
+            // SELESAI: Kaprodi setuju DAN pembimbing setuju
             $stages['usulan_proposal'] = ['name' => 'Usulan Proposal', 'status' => 'completed', 'color' => 'success'];
-        } elseif ($proposal->status_kaprodi == '1' || $proposal->status_pembimbing != '0') {
-            // Proses: Sudah ada kemajuan tapi belum selesai
+        } else {
+            // ✅ PROSES: Proposal sudah dibuat tapi belum selesai semua
+            // Untuk kasus Yosefa: ID=49, status_kaprodi=0, status_pembimbing=0
+            // Ini masuk kondisi "PROSES" karena proposal sudah dibuat
             $stages['usulan_proposal'] = ['name' => 'Usulan Proposal', 'status' => 'active', 'color' => 'primary'];
         }
+    }
+    // Jika proposal->id = 0 atau null, tetap 'pending'
+    
+    // TAHAP 2: Bimbingan (hanya jika usulan proposal SELESAI)
+    if ($stages['usulan_proposal']['status'] == 'completed') {
+        // Hitung jurnal bimbingan tervalidasi
+        $this->db->where('proposal_id', $proposal->id);
+        $this->db->where('status_validasi', '1');
+        $jurnal_count = $this->db->count_all_results('jurnal_bimbingan');
         
-        // TAHAP 2: Bimbingan (hanya jika usulan proposal selesai)
-        if ($stages['usulan_proposal']['status'] == 'completed') {
-            // Hitung jurnal bimbingan tervalidasi
-            $this->db->where('proposal_id', $proposal->id);
-            $this->db->where('status_validasi', '1');
-            $jurnal_count = $this->db->count_all_results('jurnal_bimbingan');
-            
-            if ($jurnal_count >= 8) {
-                // Minimal 8 jurnal untuk bisa lanjut ke seminar proposal
-                $stages['bimbingan'] = ['name' => 'Bimbingan', 'status' => 'completed', 'color' => 'success'];
-            } elseif ($jurnal_count > 0) {
-                // Ada jurnal tapi belum cukup
-                $stages['bimbingan'] = ['name' => 'Bimbingan', 'status' => 'active', 'color' => 'primary'];
-            }
+        if ($jurnal_count >= 8) {
+            $stages['bimbingan'] = ['name' => 'Bimbingan', 'status' => 'completed', 'color' => 'success'];
+        } elseif ($jurnal_count > 0) {
+            $stages['bimbingan'] = ['name' => 'Bimbingan', 'status' => 'active', 'color' => 'primary'];
         }
-        
-        // TAHAP 3: Seminar Proposal
+    }
+    
+    // TAHAP 3: Seminar Proposal (hanya jika bimbingan SELESAI)
+    if ($stages['bimbingan']['status'] == 'completed') {
         if ($proposal->status_seminar_proposal == '1') {
-            // Selesai
             $stages['seminar_proposal'] = ['name' => 'Seminar Proposal', 'status' => 'completed', 'color' => 'success'];
-        } elseif ($proposal->status_seminar_proposal == '0' && $stages['bimbingan']['status'] == 'completed') {
-            // Bisa diajukan
+        } else {
             $stages['seminar_proposal'] = ['name' => 'Seminar Proposal', 'status' => 'active', 'color' => 'primary'];
         }
-        
-        // TAHAP 4: Penelitian
+    }
+    
+    // TAHAP 4: Penelitian
+    if ($stages['seminar_proposal']['status'] == 'completed') {
         if ($proposal->workflow_status == 'penelitian' || $proposal->workflow_status == 'seminar_skripsi' || $proposal->workflow_status == 'publikasi') {
             $stages['penelitian'] = ['name' => 'Penelitian', 'status' => 'completed', 'color' => 'success'];
-        } elseif ($stages['seminar_proposal']['status'] == 'completed') {
+        } else {
             $stages['penelitian'] = ['name' => 'Penelitian', 'status' => 'active', 'color' => 'primary'];
         }
-        
-        // TAHAP 5: Seminar Skripsi
+    }
+    
+    // TAHAP 5: Seminar Skripsi
+    if ($stages['penelitian']['status'] == 'completed') {
         if ($proposal->status_seminar_skripsi == '1') {
             $stages['seminar_skripsi'] = ['name' => 'Seminar Skripsi', 'status' => 'completed', 'color' => 'success'];
-        } elseif ($proposal->workflow_status == 'seminar_skripsi') {
+        } else {
             $stages['seminar_skripsi'] = ['name' => 'Seminar Skripsi', 'status' => 'active', 'color' => 'primary'];
         }
-        
-        // TAHAP 6: Publikasi
+    }
+    
+    // TAHAP 6: Publikasi
+    if ($stages['seminar_skripsi']['status'] == 'completed') {
         if ($proposal->status_publikasi == '1') {
             $stages['publikasi'] = ['name' => 'Publikasi', 'status' => 'completed', 'color' => 'success'];
-        } elseif ($proposal->workflow_status == 'publikasi') {
+        } else {
             $stages['publikasi'] = ['name' => 'Publikasi', 'status' => 'active', 'color' => 'primary'];
         }
-        
-        return $stages;
     }
+    
+    return $stages;
+}
 
     /**
      * ✅ METHOD HELPER BARU: Hitung progress percentage dan current stage
      */
-    private function _calculate_progress_data($proposal, $stages)
-    {
-        $total_stages = 6;
-        $completed_count = 0;
-        $current_stage = 'usulan_proposal';
-        $current_stage_name = 'Usulan Proposal';
-        
-        // Hitung berapa tahap yang selesai dan tentukan current stage
+private function _calculate_progress_data($proposal, $stages)
+{
+    $total_stages = 6;
+    $completed_count = 0;
+    $active_count = 0;
+    $current_stage = 'usulan_proposal';
+    $current_stage_name = 'Usulan Proposal';
+    
+    // Hitung berapa tahap yang selesai dan active
+    foreach ($stages as $key => $stage) {
+        if ($stage['status'] == 'completed') {
+            $completed_count++;
+        } elseif ($stage['status'] == 'active') {
+            $active_count++;
+        }
+    }
+    
+    // ✅ PERBAIKAN: Hitung progress percentage yang benar
+    $progress_percentage = 0;
+    
+    if ($completed_count > 0) {
+        // Jika ada yang completed, hitung berdasarkan completed (setiap tahap = 16.67%)
+        $progress_percentage = round(($completed_count / $total_stages) * 100);
+    } elseif ($active_count > 0) {
+        // ✅ KASUS YOSEFA: Ada tahap active (usulan_proposal sedang proses)
+        // Progress minimal 16% untuk tahap pertama yang sedang proses
+        $progress_percentage = 16;
+    } else {
+        // Tidak ada progress sama sekali
+        $progress_percentage = 0;
+    }
+    
+    // ✅ PERBAIKAN: Tentukan current stage dan nama
+    if ($completed_count == $total_stages) {
+        // Semua selesai
+        $current_stage = 'publikasi';
+        $current_stage_name = 'Selesai';
+    } else {
+        // Cari tahap yang sedang aktif atau pending pertama
         foreach ($stages as $key => $stage) {
-            if ($stage['status'] == 'completed') {
-                $completed_count++;
-            } elseif ($stage['status'] == 'active' && $current_stage == 'usulan_proposal') {
-                // Stage pertama yang sedang aktif
+            if ($stage['status'] == 'active') {
                 $current_stage = $key;
                 $current_stage_name = $stage['name'];
+                break; // Ambil yang pertama active
+            } elseif ($stage['status'] == 'pending' && $current_stage == 'usulan_proposal') {
+                // Jika tidak ada yang active, ambil pending pertama
+                $current_stage = $key;
+                $current_stage_name = $stage['name'];
+                break;
             }
         }
-        
-        // Jika semua selesai, update current stage
-        if ($completed_count == $total_stages) {
-            $current_stage = 'publikasi';
-            $current_stage_name = 'Selesai';
-        } elseif ($completed_count > 0) {
-            // Cari stage pertama yang belum selesai
-            foreach ($stages as $key => $stage) {
-                if ($stage['status'] != 'completed') {
-                    $current_stage = $key;
-                    $current_stage_name = $stage['name'];
-                    break;
-                }
-            }
-        }
-        
-        // Hitung persentase
-        $progress_percentage = round(($completed_count / $total_stages) * 100);
-        
-        // Adjust berdasarkan case khusus
-        if ($completed_count == 0 && $stages['usulan_proposal']['status'] == 'active') {
-            $progress_percentage = 16; // Sesuai requirement asli
-        }
-        
-        return [
-            'current_stage' => $current_stage,
-            'current_stage_name' => $current_stage_name,
-            'progress_percentage' => $progress_percentage,
-            'stages' => $stages
-        ];
     }
+    
+    // ✅ DEBUGGING: Log untuk memastikan logic berjalan
+    log_message('debug', 'Progress Debug - Completed: ' . $completed_count . ', Active: ' . $active_count . ', Progress: ' . $progress_percentage . '%');
+    
+    return [
+        'current_stage' => $current_stage,
+        'current_stage_name' => $current_stage_name,
+        'progress_percentage' => $progress_percentage,
+        'stages' => $stages
+    ];
+}
 
     /**
      * ✅ METHOD HELPER BARU: Default stages untuk kasus belum ada proposal

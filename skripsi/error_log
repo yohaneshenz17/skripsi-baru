@@ -393,3 +393,189 @@ Stack trace:
 [23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/47b8a620332e72136adead99e0b0120e.jpg
 [23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Database updated successfully with foto: 2ec0cb9edd6eeb951ce65dab0f0d4261.jpeg
 [23-Jul-2025 16:38:12 Asia/Jakarta] DEBUG: Session updated with foto: 2ec0cb9edd6eeb951ce65dab0f0d4261.jpeg
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: update() method called
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2717069001
+    [nama] => Yohanes Hendro Pranyoto, S.Pd., M.Pd.
+    [nomor_telepon] => 081295111706
+    [email] => yohaneshenz@stkyakobus.ac.id
+)
+
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: Dosen ID from session: 25
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: Is photo upload: NO
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: Routing to data update handler
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 25
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: Input data - NIP: 2717069001, Email: yohaneshenz@stkyakobus.ac.id
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: Attempting database update
+[25-Jul-2025 07:57:29 Asia/Jakarta] DEBUG: Database update successful
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: update() method called
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Pas Foto Biru copy.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpHB0yQd
+            [error] => 0
+            [size] => 439217
+        )
+
+)
+
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: Dosen ID from session: 25
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: Is photo upload: YES
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 25
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Pas Foto Biru copy.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpHB0yQd
+            [error] => 0
+            [size] => 439217
+        )
+
+)
+
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => cb7f7e58e87bc27937e271490b9d767e.jpg
+    [message] => Foto berhasil diupload
+)
+
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/78af977767e79451ad0b98e6c5280799.jpg
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: Database updated successfully with foto: cb7f7e58e87bc27937e271490b9d767e.jpg
+[25-Jul-2025 07:57:42 Asia/Jakarta] DEBUG: Session updated with foto: cb7f7e58e87bc27937e271490b9d767e.jpg
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: update() method called - KAPRODI
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2721128601
+    [nama] => Dedimus Berangka, S.Pd., M.Pd. (Kaprodi PKK)
+    [nomor_telepon] => 081290909003
+    [email] => dedimus@stkyakobus.ac.id
+)
+
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: Kaprodi ID from session: 10
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: Is photo upload: NO
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: Routing to data update handler
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: _handle_data_update called with kaprodi_id: 10
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: Input data - NIP: 2721128601, Email: dedimus@stkyakobus.ac.id
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: Attempting database update
+[25-Jul-2025 11:09:19 Asia/Jakarta] DEBUG: Database update successful
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: update() method called - KAPRODI
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedimus Berangka.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpOSrbGG
+            [error] => 0
+            [size] => 464199
+        )
+
+)
+
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: Kaprodi ID from session: 10
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: Is photo upload: YES
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: _handle_photo_upload called with kaprodi_id: 10
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedimus Berangka.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpOSrbGG
+            [error] => 0
+            [size] => 464199
+        )
+
+)
+
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => f5f78573e6f98ae0ec49bc71c07024b8.jpg
+    [message] => Foto berhasil diupload
+)
+
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/2ec0cb9edd6eeb951ce65dab0f0d4261.jpeg
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: Database updated successfully with foto: f5f78573e6f98ae0ec49bc71c07024b8.jpg
+[25-Jul-2025 11:09:59 Asia/Jakarta] DEBUG: Session updated with foto: f5f78573e6f98ae0ec49bc71c07024b8.jpg
+[27-Jul-2025 16:32:17 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Bimbingan::export_jurnal() in /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php on line 496
+[27-Jul-2025 16:32:21 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Bimbingan::export_jurnal() in /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php on line 496
+[27-Jul-2025 16:32:40 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Bimbingan::export_jurnal() in /home/stkp7133/public_html/skripsi/application/controllers/staf/Bimbingan.php on line 496
+[27-Jul-2025 18:01:29 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Bimbingan::_get_kaprodi_by_prodi() in /home/stkp7133/public_html/skripsi/application/controllers/dosen/Bimbingan.php on line 459
+[29-Jul-2025 09:00:01 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_proposal::_check_jurnal_requirement() in /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_proposal.php on line 959
+[29-Jul-2025 17:34:54 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_proposal::_get_statistics() in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php on line 278
+[29-Jul-2025 19:42:50 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_proposal::simpan_jadwal() in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php on line 799
+[29-Jul-2025 19:42:56 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_proposal::simpan_jadwal() in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php on line 799
+[29-Jul-2025 19:44:34 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_proposal::simpan_jadwal() in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php on line 803
+[30-Jul-2025 17:07:49 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Penelitian::index() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Penelitian.php on line 109
+[30-Jul-2025 17:17:36 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Penelitian::index() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Penelitian.php on line 109
+[31-Jul-2025 09:26:39 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_proposal::detail() in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_proposal.php on line 542
+[01-Aug-2025 13:39:55 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Penelitian::cetak_surat() in /home/stkp7133/public_html/skripsi/application/controllers/staf/Penelitian.php on line 373
+[01-Aug-2025 15:47:10 Asia/Jakarta] FCPATH: /home/stkp7133/public_html/skripsi/
+[01-Aug-2025 15:47:10 Asia/Jakarta] Upload path: /home/stkp7133/public_html/skripsi/uploads/surat_izin/
+[01-Aug-2025 15:47:10 Asia/Jakarta] Path exists: YES
+[01-Aug-2025 15:47:10 Asia/Jakarta] Path writable: YES
+[01-Aug-2025 15:47:10 Asia/Jakarta] Upload error: The upload path does not appear to be valid.
+[01-Aug-2025 15:47:10 Asia/Jakarta] Files info: Array
+(
+    [file_surat] => Array
+        (
+            [name] => bp.pdf
+            [type] => application/pdf
+            [tmp_name] => /tmp/phpcmEbhs
+            [error] => 0
+            [size] => 30064
+        )
+
+)
+
+[03-Aug-2025 06:52:23 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi::_prepare_dashboard_data() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php on line 404
+[03-Aug-2025 09:29:09 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi::_get_seminar_detail() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php on line 1078
+[03-Aug-2025 09:32:12 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi::_build_simple_progress() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php on line 487
+[03-Aug-2025 09:32:37 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi::_build_simple_progress() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php on line 487
+[03-Aug-2025 09:32:39 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi::_build_simple_progress() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php on line 487
+[03-Aug-2025 09:33:49 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi::_build_simple_progress() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php on line 487
+[03-Aug-2025 12:45:59 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() in /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php on line 991
+[03-Aug-2025 12:47:15 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() in /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php on line 991
+[03-Aug-2025 12:47:19 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi_model::get_badge_count_dosen() in /home/stkp7133/public_html/skripsi/application/models/Seminar_skripsi_model.php on line 991
+[03-Aug-2025 14:42:43 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi::_get_pengajuan_perlu_review() in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php on line 1152
+[03-Aug-2025 15:46:54 Asia/Jakarta] PHP Fatal error:  Cannot use try without catch or finally in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php on line 66
+[03-Aug-2025 15:48:07 Asia/Jakarta] PHP Fatal error:  Cannot use try without catch or finally in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php on line 66
+[03-Aug-2025 16:45:10 Asia/Jakarta] PHP Fatal error:  Cannot use try without catch or finally in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php on line 66
+[04-Aug-2025 15:12:10 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Seminar_skripsi::_get_penilaian_script() in /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php on line 1541
+[05-Aug-2025 10:12:12 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Publikasi::_check_syarat_publikasi() in /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Publikasi.php on line 341
+[05-Aug-2025 15:57:55 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Publikasi::_is_mahasiswa_bimbingan() in /home/stkp7133/public_html/skripsi/application/controllers/dosen/Publikasi.php on line 649
+[06-Aug-2025 13:12:35 Asia/Jakarta] PUBLIKASI TABLE FIELDS: id, proposal_mahasiswa_id, mahasiswa_id, nama_mahasiswa, nim, program_studi, judul_skripsi_final, dosen_pembimbing_id, nama_dosen_pembimbing, tanggal_ujian_skripsi, file_surat_revisi, file_skripsi_final, file_surat_perpustakaan, link_repository, file_surat_keterangan, status, status_pembimbing, status_staf, keterangan_mahasiswa, komentar_pembimbing, komentar_staf, tanggal_pengajuan, tanggal_review_pembimbing, tanggal_validasi_staf, tanggal_selesai, validated_by_staf_id, validated_by_staf_name, created_at, updated_at
+[06-Aug-2025 13:12:36 Asia/Jakarta] PUBLIKASI TABLE FIELDS: id, proposal_mahasiswa_id, mahasiswa_id, nama_mahasiswa, nim, program_studi, judul_skripsi_final, dosen_pembimbing_id, nama_dosen_pembimbing, tanggal_ujian_skripsi, file_surat_revisi, file_skripsi_final, file_surat_perpustakaan, link_repository, file_surat_keterangan, status, status_pembimbing, status_staf, keterangan_mahasiswa, komentar_pembimbing, komentar_staf, tanggal_pengajuan, tanggal_review_pembimbing, tanggal_validasi_staf, tanggal_selesai, validated_by_staf_id, validated_by_staf_name, created_at, updated_at
+[06-Aug-2025 13:12:37 Asia/Jakarta] PUBLIKASI TABLE FIELDS: id, proposal_mahasiswa_id, mahasiswa_id, nama_mahasiswa, nim, program_studi, judul_skripsi_final, dosen_pembimbing_id, nama_dosen_pembimbing, tanggal_ujian_skripsi, file_surat_revisi, file_skripsi_final, file_surat_perpustakaan, link_repository, file_surat_keterangan, status, status_pembimbing, status_staf, keterangan_mahasiswa, komentar_pembimbing, komentar_staf, tanggal_pengajuan, tanggal_review_pembimbing, tanggal_validasi_staf, tanggal_selesai, validated_by_staf_id, validated_by_staf_name, created_at, updated_at

@@ -1,0 +1,431 @@
+/* =====================================================
+   CUSTOM CSS UNTUK KAPRODI PUBLIKASI
+   File: assets/css/kaprodi-publikasi.css
+   ===================================================== */
+
+/* Card Statistics Enhancements */
+.card-stats {
+    transition: all 0.3s ease;
+}
+
+.card-stats:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.card-stats .icon-shape {
+    transition: all 0.3s ease;
+}
+
+.card-stats:hover .icon-shape {
+    transform: scale(1.1);
+}
+
+/* Timeline Styling */
+.timeline {
+    position: relative;
+    padding: 0;
+    list-style: none;
+}
+
+.timeline-one-side {
+    padding-left: 30px;
+}
+
+.timeline-one-side::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-block {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-step {
+    position: absolute;
+    left: -23px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #007bff;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timeline-step i {
+    font-size: 8px;
+    color: white;
+}
+
+.timeline-content {
+    padding-left: 15px;
+}
+
+/* Workflow Steps Styling */
+.workflow-steps .step-item {
+    padding: 1.5rem 0;
+    border-left: 3px solid #dee2e6;
+    margin-left: 1rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.workflow-steps .step-item.completed {
+    border-left-color: #28a745;
+    background-color: #f8fff9;
+}
+
+.workflow-steps .step-item.current {
+    border-left-color: #007bff;
+    background-color: #f8f9fa;
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0% { border-left-color: #007bff; }
+    50% { border-left-color: #0056b3; }
+    100% { border-left-color: #007bff; }
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: relative;
+    margin-left: -26px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.step-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.step-number {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: white;
+    color: #333;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    border: 2px solid;
+    min-width: 20px;
+    text-align: center;
+}
+
+.step-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #2c3e50;
+}
+
+.step-desc {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+/* Progress Bar Enhancements */
+.progress {
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #e9ecef;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    transition: width 1s ease-in-out;
+    border-radius: 10px;
+}
+
+.progress-bar-striped {
+    background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% { background-position: 1rem 0; }
+    100% { background-position: 0 0; }
+}
+
+/* Status Badges */
+.badge-pill {
+    border-radius: 50px;
+    padding: 0.375rem 0.75rem;
+}
+
+.badge-lg {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Table Enhancements */
+.table-responsive {
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+/* Media Object Enhancements */
+.media .media-body .name {
+    font-size: 0.875rem;
+    line-height: 1.2;
+}
+
+/* Alert Enhancements */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.alert-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+.alert .alert-heading {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Button Enhancements */
+.btn-group .btn {
+    border-radius: 0.25rem;
+    margin-right: 0.25rem;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+
+.btn-sm {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Card Enhancements */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Gradient Backgrounds */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Enhancements */
+@media (max-width: 768px) {
+    .card-stats {
+        margin-bottom: 1rem;
+    }
+    
+    .workflow-steps .step-item {
+        padding: 1rem 0;
+        margin-left: 0.5rem;
+    }
+    
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        margin-left: -21px;
+    }
+    
+    .step-number {
+        font-size: 8px;
+        padding: 1px 4px;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        margin-right: 0;
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .btn, .alert-dismissible .close, .breadcrumb, .card-header .btn {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+    
+    .workflow-steps .step-item {
+        break-inside: avoid;
+    }
+    
+    .table {
+        font-size: 12px;
+    }
+    
+    @page {
+        margin: 1cm;
+        size: A4;
+    }
+    
+    body {
+        font-size: 12px;
+        line-height: 1.3;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        break-after: avoid;
+    }
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .table {
+        color: #e2e8f0;
+    }
+    
+    .table thead th {
+        border-bottom-color: #4a5568;
+    }
+    
+    .workflow-steps .step-item.completed {
+        background-color: #1a2332;
+    }
+    
+    .workflow-steps .step-item.current {
+        background-color: #2d3748;
+    }
+}
+
+/* Accessibility Enhancements */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Focus States for Accessibility */
+.btn:focus,
+.form-control:focus,
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+    
+    .btn {
+        border: 2px solid #000;
+    }
+    
+    .badge {
+        border: 1px solid #000;
+    }
+}

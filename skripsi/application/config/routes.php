@@ -259,6 +259,7 @@ $route['kaprodi/publikasi/laporan'] = 'kaprodi/publikasi/laporan';
 $route['kaprodi/publikasi/override/(:num)'] = 'kaprodi/publikasi/override/$1';
 $route['kaprodi/publikasi/statistik'] = 'kaprodi/publikasi/statistik';
 $route['kaprodi/publikasi/export_laporan'] = 'kaprodi/publikasi/export_laporan';
+$route['kaprodi/publikasi/tracking/(:num)'] = 'kaprodi/publikasi/tracking/$1';
 
 // 7. Daftar Mahasiswa
 $route['kaprodi/mahasiswa'] = 'kaprodi/kaprodi/mahasiswa';                  // Daftar mahasiswa

@@ -553,7 +553,7 @@ $(document).ready(function() {
     loadRecentActivities();
 });
 
-// FIXED: loadWorkflowProgress dengan warna yang kontras
+// ✅ PERBAIKAN: Function loadWorkflowProgress dengan status mapping yang benar
 function loadWorkflowProgress() {
     console.log('Loading workflow progress...'); // Debug
     
@@ -570,7 +570,7 @@ function loadWorkflowProgress() {
             $('#progress-bar').css('width', data.progress_percentage + '%');
             $('#current-stage').text(data.current_stage_name);
             
-            // FIXED: Update workflow steps dengan warna yang kontras
+            // ✅ PERBAIKAN: Update workflow steps dengan status yang benar
             let stepsHtml = '';
             Object.keys(data.stages).forEach(function(key) {
                 const stage = data.stages[key];
@@ -579,22 +579,23 @@ function loadWorkflowProgress() {
                 let textColor = '';
                 let bgColor = '';
                 
-                // PERBAIKAN: Set warna berdasarkan status dengan kontras yang baik
+                // ✅ PERBAIKAN: Mapping status yang benar sesuai requirement
                 if (stage.status === 'completed') {
                     statusBadge = '<span class="badge badge-success badge-sm">Selesai</span>';
                     iconColor = 'success';
                     textColor = 'success';
                     bgColor = 'success';
                 } else if (stage.status === 'active') {
-                    statusBadge = '<span class="badge badge-primary badge-sm">Aktif</span>';
+                    // ✅ PERBAIKAN UTAMA: "active" menampilkan "Proses" bukan "Aktif"
+                    statusBadge = '<span class="badge badge-primary badge-sm">Proses</span>';
                     iconColor = 'primary';
                     textColor = 'primary';
                     bgColor = 'primary';
                 } else {
-                    // PENDING - WARNA YANG KONTRAS DAN MUDAH DIBACA
+                    // Status "pending" - tetap "Pending"
                     statusBadge = '<span class="badge badge-secondary badge-sm">Pending</span>';
                     iconColor = 'secondary';
-                    textColor = 'muted'; // Gunakan text-muted untuk kontras yang baik
+                    textColor = 'muted';
                     bgColor = 'secondary';
                 }
                 

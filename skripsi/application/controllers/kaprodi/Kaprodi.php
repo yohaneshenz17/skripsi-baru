@@ -1918,31 +1918,44 @@ private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
     // UPDATE METHOD dosen() DAN _get_dosen_content() di Kaprodi.php
     // ============================================
     
-        public function dosen() {
-            $data['title'] = 'Daftar Seluruh Dosen';
-            
-            // Tampilkan semua dosen dari semua prodi dengan info prodi dan statistik bimbingan/penguji
-            $this->db->select("
-                dosen.*, 
+    /**
+     * Method untuk menampilkan daftar dosen - SEDERHANA
+     */
+    public function dosen() {
+        $data['title'] = 'Daftar Dosen Program Studi';
+        
+        try {
+            // Query sederhana hanya ambil data yang ada di database
+            $this->db->select('
+                dosen.id,
+                dosen.nip, 
+                dosen.nama, 
+                dosen.email, 
+                dosen.nomor_telepon,
+                dosen.level,
+                dosen.bidang_keilmuan,
+                dosen.foto,
                 prodi.nama as nama_prodi,
                 (SELECT COUNT(*) 
                  FROM proposal_mahasiswa pm2 
                  JOIN mahasiswa m2 ON pm2.mahasiswa_id = m2.id 
                  WHERE pm2.dosen_id = dosen.id 
-                 AND pm2.status_kaprodi = '1' 
-                 AND pm2.status_pembimbing = '1'
+                 AND pm2.status_kaprodi = "1" 
+                 AND pm2.status_pembimbing = "1"
                 ) as jumlah_bimbingan,
                 (SELECT COUNT(*) 
                  FROM proposal_mahasiswa pm3 
                  JOIN mahasiswa m3 ON pm3.mahasiswa_id = m3.id 
                  WHERE (pm3.dosen_penguji_id = dosen.id OR pm3.dosen_penguji2_id = dosen.id)
-                 AND pm3.status_seminar_proposal = '1'
+                 AND pm3.status_seminar_proposal = "1"
                 ) as jumlah_penguji
-            ");
+            ');
+            
             $this->db->from('dosen');
             $this->db->join('prodi', 'dosen.prodi_id = prodi.id', 'left');
-            $this->db->where('dosen.level', '2');
+            $this->db->where('dosen.level', '2'); // Hanya dosen biasa
             $this->db->order_by('dosen.nama', 'ASC');
+            
             $data['dosen_list'] = $this->db->get()->result();
             
             $this->load->view('template/kaprodi', [
@@ -1950,512 +1963,309 @@ private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
                 'content' => $this->_get_dosen_content($data),
                 'script' => $this->_get_dosen_script()
             ]);
-        }
-    
-        private function _get_dosen_content($data) {
-            // Extract data agar tersedia sebagai variabel lokal
-            extract($data);
             
-            ob_start();
-            ?>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <h3 class="mb-0">Daftar Seluruh Dosen</h3>
-                                    <p class="text-sm mb-0">Dosen dari semua program studi yang dapat ditunjuk sebagai pembimbing dan penguji</p>
-                                </div>
-                                <div class="col-auto">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="refreshData()">
-                                        <i class="fa fa-sync"></i> Refresh Data
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <!-- Statistik Cards -->
-                            <div class="row mb-4">
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="card border-0 bg-gradient-info text-white">
-                                        <div class="card-body text-center">
-                                            <div class="icon icon-shape bg-white icon-shape-sm rounded-circle text-info mb-2">
-                                                <i class="fa fa-users"></i>
-                                            </div>
-                                            <h3 class="text-white mb-0"><?= count($dosen_list) ?></h3>
-                                            <p class="text-white-50 mb-0">Total Dosen</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="card border-0 bg-gradient-success text-white">
-                                        <div class="card-body text-center">
-                                            <div class="icon icon-shape bg-white icon-shape-sm rounded-circle text-success mb-2">
-                                                <i class="fa fa-chalkboard-teacher"></i>
-                                            </div>
-                                            <h3 class="text-white mb-0">
-                                                <?= count(array_filter($dosen_list, function($d) { return $d->jumlah_bimbingan > 0; })) ?>
-                                            </h3>
-                                            <p class="text-white-50 mb-0">Dosen Pembimbing Aktif</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="card border-0 bg-gradient-warning text-white">
-                                        <div class="card-body text-center">
-                                            <div class="icon icon-shape bg-white icon-shape-sm rounded-circle text-warning mb-2">
-                                                <i class="fa fa-gavel"></i>
-                                            </div>
-                                            <h3 class="text-white mb-0">
-                                                <?= count(array_filter($dosen_list, function($d) { return $d->jumlah_penguji > 0; })) ?>
-                                            </h3>
-                                            <p class="text-white-50 mb-0">Dosen Penguji Aktif</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="card border-0 bg-gradient-primary text-white">
-                                        <div class="card-body text-center">
-                                            <div class="icon icon-shape bg-white icon-shape-sm rounded-circle text-primary mb-2">
-                                                <i class="fa fa-chart-bar"></i>
-                                            </div>
-                                            <h3 class="text-white mb-0">
-                                                <?= array_sum(array_column($dosen_list, 'jumlah_bimbingan')) ?>
-                                            </h3>
-                                            <p class="text-white-50 mb-0">Total Bimbingan</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="table-responsive">
-                                <table class="table align-items-center table-flush" id="datatable-dosen">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th>No</th>
-                                            <th>NIP</th>
-                                            <th>Nama</th>
-                                            <th>Email</th>
-                                            <th>Program Studi</th>
-                                            <th class="text-center">Jumlah Bimbingan</th>
-                                            <th class="text-center">Jumlah Penguji</th>
-                                            <th class="text-center">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php $no = 1; foreach($dosen_list as $dsn): ?>
-                                        <tr>
-                                            <td><?= $no++ ?></td>
-                                            <td>
-                                                <span class="badge badge-outline-primary"><?= $dsn->nip ?></span>
-                                            </td>
-                                            <td>
-                                                <div class="media align-items-center">
-                                                    <div class="media-body">
-                                                        <span class="name mb-0 text-sm font-weight-bold"><?= $dsn->nama ?></span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <a href="mailto:<?= $dsn->email ?>" class="text-decoration-none">
-                                                    <?= $dsn->email ?>
-                                                </a>
-                                            </td>
-                                            <td>
-                                                <span class="text-sm font-weight-bold">
-                                                    <?= $dsn->nama_prodi ?? 'Belum ditentukan' ?>
-                                                </span>
-                                            </td>
-                                            <td class="text-center">
-                                                <?php if($dsn->jumlah_bimbingan > 0): ?>
-                                                    <span class="badge badge-success badge-lg">
-                                                        <i class="fa fa-chalkboard-teacher"></i> <?= $dsn->jumlah_bimbingan ?>
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="badge badge-light badge-lg">
-                                                        <i class="fa fa-minus"></i> 0
-                                                    </span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="text-center">
-                                                <?php if($dsn->jumlah_penguji > 0): ?>
-                                                    <span class="badge badge-warning badge-lg">
-                                                        <i class="fa fa-gavel"></i> <?= $dsn->jumlah_penguji ?>
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="badge badge-light badge-lg">
-                                                        <i class="fa fa-minus"></i> 0
-                                                    </span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge badge-success">Aktif</span>
-                                            </td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+        } catch (Exception $e) {
+            log_message('error', 'Error in kaprodi dosen: ' . $e->getMessage());
+            show_error('Terjadi kesalahan saat memuat data dosen');
+        }
+    }
+    
+    /**
+     * Method AJAX untuk detail dosen - SEDERHANA
+     */
+    public function ajax_dosen_detail($dosen_id) {
+        header('Content-Type: application/json');
+        
+        try {
+            if (!$dosen_id || !is_numeric($dosen_id)) {
+                echo json_encode(['success' => false, 'message' => 'ID dosen tidak valid']);
+                return;
+            }
+            
+            // Query sederhana hanya ambil data yang ada
+            $this->db->select('
+                d.id, d.nip, d.nama, d.email, d.nomor_telepon, 
+                d.foto, d.bidang_keilmuan, d.level,
+                p.nama as nama_prodi,
+                (SELECT COUNT(*) FROM proposal_mahasiswa pm 
+                 WHERE pm.dosen_id = d.id AND pm.status_kaprodi = "1" 
+                 AND pm.status_pembimbing = "1") as total_bimbingan,
+                (SELECT COUNT(*) FROM proposal_mahasiswa pm2 
+                 WHERE (pm2.dosen_penguji_id = d.id OR pm2.dosen_penguji2_id = d.id) 
+                 AND pm2.status_seminar_proposal = "1") as total_penguji
+            ');
+            $this->db->from('dosen d');
+            $this->db->join('prodi p', 'd.prodi_id = p.id', 'left');
+            $this->db->where('d.id', $dosen_id);
+            $this->db->where('d.level', '2');
+            
+            $dosen = $this->db->get()->row();
+            
+            if (!$dosen) {
+                echo json_encode(['success' => false, 'message' => 'Data dosen tidak ditemukan']);
+                return;
+            }
+            
+            // Generate HTML sederhana
+            $html = $this->_generate_simple_dosen_detail($dosen);
+            
+            echo json_encode(['success' => true, 'html' => $html]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error ajax_dosen_detail: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * Generate HTML detail dosen - SEDERHANA
+     */
+    private function _generate_simple_dosen_detail($dosen) {
+        // Handle foto dosen
+        $foto_html = '';
+        if (!empty($dosen->foto)) {
+            $foto_path = base_url('cdn/img/dosen/' . $dosen->foto);
+            $foto_html = '<img src="' . $foto_path . '" class="img-fluid rounded-circle mb-3" style="width:100px;height:100px;object-fit:cover;">';
+        } else {
+            $initial = strtoupper(substr($dosen->nama, 0, 1));
+            $foto_html = '<div class="bg-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:100px;height:100px;"><span class="text-white font-weight-bold">' . $initial . '</span></div>';
+        }
+        
+        // Level dosen
+        $level_text = '';
+        switch($dosen->level) {
+            case '1': $level_text = 'Admin'; break;
+            case '2': $level_text = 'Dosen'; break;
+            case '4': $level_text = 'Kaprodi'; break;
+            case '5': $level_text = 'Staf'; break;
+            default: $level_text = 'Tidak Diketahui';
+        }
+        
+        $html = '
+        <div class="row">
+            <div class="col-md-4 text-center">
+                ' . $foto_html . '
+                <h6 class="font-weight-bold">' . htmlspecialchars($dosen->nama) . '</h6>
+                <p class="text-muted">' . htmlspecialchars($dosen->nip) . '</p>
+            </div>
+            <div class="col-md-8">
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>NIP:</strong></td>
+                        <td>' . htmlspecialchars($dosen->nip) . '</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nama:</strong></td>
+                        <td>' . htmlspecialchars($dosen->nama) . '</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email:</strong></td>
+                        <td>' . htmlspecialchars($dosen->email) . '</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Telepon:</strong></td>
+                        <td>' . htmlspecialchars($dosen->nomor_telepon ?: 'Tidak tersedia') . '</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Program Studi:</strong></td>
+                        <td>' . htmlspecialchars($dosen->nama_prodi ?: 'Belum ditentukan') . '</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Level:</strong></td>
+                        <td>' . htmlspecialchars($level_text) . '</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bidang Keahlian:</strong></td>
+                        <td>' . htmlspecialchars($dosen->bidang_keilmuan ?: 'Belum diisi') . '</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bimbingan Aktif:</strong></td>
+                        <td><span class="badge badge-success">' . $dosen->total_bimbingan . '</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total Penguji:</strong></td>
+                        <td><span class="badge badge-info">' . $dosen->total_penguji . '</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>';
+        
+        return $html;
+    }
+    
+    /**
+     * Method untuk generate content dosen list
+     */
+    private function _get_dosen_content($data) {
+        extract($data);
+        
+        ob_start();
+        ?>
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header border-0">
+                        <h3 class="mb-0">Daftar Dosen Program Studi</h3>
+                    </div>
+    
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush" id="datatable-dosen">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>No</th>
+                                    <th>NIP</th>
+                                    <th>Nama Dosen</th>
+                                    <th>Email</th>
+                                    <th>No. Telepon</th>
+                                    <th>Level</th>
+                                    <th>Bidang Keahlian</th>
+                                    <th class="text-center">Bimbingan</th>
+                                    <th class="text-center">Penguji</th>
+                                    <th class="text-center">Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                                <?php if(!empty($dosen_list)): ?>
+                                    <?php 
+                                    $no = 1;
+                                    foreach($dosen_list as $d): 
+                                    ?>
+                                    <tr>
+                                        <td><?= $no++ ?></td>
+                                        <td><?= $d->nip ?></td>
+                                        <td><?= $d->nama ?></td>
+                                        <td><?= $d->email ?></td>
+                                        <td><?= $d->nomor_telepon ?: '-' ?></td>
+                                        <td>
+                                            <?php 
+                                                if($d->level == '2') echo '<span class="badge badge-info">Dosen</span>';
+                                                if($d->level == '4') echo '<span class="badge badge-primary">Kaprodi</span>';
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <?php if(!empty($d->bidang_keilmuan)): ?>
+                                                <span class="text-sm"><?= htmlspecialchars($d->bidang_keilmuan) ?></span>
+                                            <?php else: ?>
+                                                <span class="text-muted text-sm">Belum diisi</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-success"><?= $d->jumlah_bimbingan ?></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-warning"><?= $d->jumlah_penguji ?></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="showDosenDetail(<?= $d->id ?>)" 
+                                                    data-toggle="tooltip" 
+                                                    title="Lihat detail profil dosen">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="10" class="text-center">Tidak ada data dosen di program studi ini.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-            
-            <!-- Info Panel -->
-            <div class="row mt-4">
-                <div class="col-lg-12">
-                    <div class="card bg-gradient-info">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <h3 class="text-white mb-0">
-                                        <i class="fa fa-info-circle"></i> Informasi
-                                    </h3>
-                                    <div class="row mt-3">
-                                        <div class="col-md-4">
-                                            <p class="text-white mt-2 mb-0">
-                                                <strong><i class="fa fa-chalkboard-teacher"></i> Jumlah Bimbingan:</strong><br>
-                                                Mahasiswa yang sudah disetujui Kaprodi dan diterima sebagai bimbingan oleh dosen
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <p class="text-white mt-2 mb-0">
-                                                <strong><i class="fa fa-gavel"></i> Jumlah Penguji:</strong><br>
-                                                Mahasiswa yang ditugaskan sebagai penguji dan sudah disetujui untuk seminar proposal
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <p class="text-white mt-2 mb-0">
-                                                <strong><i class="fa fa-sync"></i> Data Real-time:</strong><br>
-                                                Data diambil secara langsung dari database dan selalu ter-update
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+        </div>
+    
+        <!-- Modal Detail Dosen -->
+        <div class="modal fade" id="modalDetailDosen" tabindex="-1" role="dialog" aria-labelledby="modalDetailDosenLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDetailDosenLabel">
+                            <i class="fas fa-user-graduate"></i> Detail Profil Dosen
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="detailDosenContent">
+                        <div class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                            <p class="mt-2">Memuat data...</p>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                     </div>
                 </div>
             </div>
-            <?php
-            return ob_get_clean();
-        }
+        </div>
+        <?php
+        return ob_get_clean();
+    }
     
-        private function _get_dosen_script() {
-            ob_start();
-            ?>
-            <script>
-            $(document).ready(function() {
-                console.log('=== DEBUG DataTables Export ===');
-                console.log('jQuery version:', $.fn.jquery);
-                console.log('DataTables available:', typeof $.fn.DataTable !== 'undefined');
-                console.log('DataTables.Buttons available:', typeof $.fn.DataTable.Buttons !== 'undefined');
-                console.log('JSZip available:', typeof JSZip !== 'undefined');
-                console.log('pdfMake available:', typeof pdfMake !== 'undefined');
-                console.log('================================');
-                
-                // Function untuk init DataTable dengan retry
-                function initDataTableWithRetry(attempt = 1) {
-                    console.log(`Attempt ${attempt} to initialize DataTable...`);
-                    
-                    try {
-                        if (typeof $.fn.DataTable === 'undefined') {
-                            console.error('DataTables not loaded');
-                            return;
-                        }
-                        
-                        // Check apakah table element exists
-                        if ($('#datatable-dosen').length === 0) {
-                            console.error('Table element #datatable-dosen not found');
-                            return;
-                        }
-                        
-                        // Destroy existing table if any
-                        if ($.fn.DataTable.isDataTable('#datatable-dosen')) {
-                            $('#datatable-dosen').DataTable().destroy();
-                        }
-                        
-                        // Base configuration
-                        let tableConfig = {
-                            "language": {
-                                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-                            },
-                            "order": [[ 1, "asc" ]],
-                            "pageLength": 25,
-                            "responsive": true,
-                            "columnDefs": [
-                                { "orderable": false, "targets": 7 },
-                                { "className": "text-center", "targets": [5, 6, 7] }
-                            ]
-                        };
-                        
-                        // Check if Buttons extension is available
-                        if (typeof $.fn.DataTable.Buttons !== 'undefined') {
-                            console.log('✅ DataTables Buttons extension available');
-                            
-                            tableConfig.dom = 'Bfrtip';
-                            tableConfig.buttons = [];
-                            
-                            // Add Excel button if JSZip available
-                            if (typeof JSZip !== 'undefined') {
-                                console.log('✅ JSZip available - adding Excel export');
-                                tableConfig.buttons.push({
-                                    extend: 'excel',
-                                    text: '<i class="fa fa-file-excel"></i> Export Excel',
-                                    className: 'btn btn-success btn-sm mr-2',
-                                    title: 'Daftar Dosen STK St. Yakobus',
-                                    exportOptions: {
-                                        columns: [0, 1, 2, 3, 4, 5, 6]
-                                    }
-                                });
-                            } else {
-                                console.warn('❌ JSZip not available - Excel export disabled');
-                            }
-                            
-                            // Add PDF button if pdfMake available
-                            if (typeof pdfMake !== 'undefined') {
-                                console.log('✅ pdfMake available - adding PDF export');
-                                tableConfig.buttons.push({
-                                    extend: 'pdf',
-                                    text: '<i class="fa fa-file-pdf"></i> Export PDF',
-                                    className: 'btn btn-danger btn-sm mr-2',
-                                    title: 'Daftar Dosen STK St. Yakobus',
-                                    orientation: 'landscape',
-                                    pageSize: 'A4',
-                                    exportOptions: {
-                                        columns: [0, 1, 2, 3, 4, 5, 6]
-                                    }
-                                });
-                            } else {
-                                console.warn('❌ pdfMake not available - PDF export disabled');
-                            }
-                            
-                            // Print button - should always work
-                            console.log('✅ Adding Print button');
-                            tableConfig.buttons.push({
-                                extend: 'print',
-                                text: '<i class="fa fa-print"></i> Print',
-                                className: 'btn btn-info btn-sm mr-2',
-                                title: 'Daftar Dosen STK St. Yakobus',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5, 6]
-                                },
-                                customize: function(win) {
-                                    $(win.document.body)
-                                        .css('font-size', '10pt')
-                                        .prepend(
-                                            '<div style="text-align:center; margin-bottom:20px;">' +
-                                            '<h2>Daftar Seluruh Dosen</h2>' +
-                                            '<h3>STK Santo Yakobus Merauke</h3>' +
-                                            '<p>Tanggal Cetak: ' + new Date().toLocaleDateString('id-ID') + '</p>' +
-                                            '</div>'
-                                        );
-                                    
-                                    $(win.document.body).find('table')
-                                        .addClass('compact')
-                                        .css('font-size', 'inherit');
-                                }
-                            });
-                            
-                            console.log('Total buttons configured:', tableConfig.buttons.length);
-                        } else {
-                            console.warn('❌ DataTables Buttons extension not available');
-                            // Add manual export buttons
-                            setTimeout(addManualExportButtons, 500);
-                        }
-                        
-                        // Initialize DataTable
-                        const table = $('#datatable-dosen').DataTable(tableConfig);
-                        console.log('✅ DataTable initialized successfully');
-                        
-                        // Debug: Log buttons after initialization
-                        setTimeout(() => {
-                            const buttonsContainer = $('.dt-buttons');
-                            console.log('Buttons container found:', buttonsContainer.length > 0);
-                            console.log('Number of button elements:', buttonsContainer.find('button, a').length);
-                            
-                            if (buttonsContainer.length === 0) {
-                                console.warn('No buttons container found - adding manual buttons');
-                                addManualExportButtons();
-                            }
-                        }, 1000);
-                        
-                    } catch (error) {
-                        console.error('DataTable initialization failed:', error);
-                        
-                        // Retry dengan delay jika belum exceed max attempts
-                        if (attempt < 3) {
-                            console.log(`Retrying in ${attempt * 1000}ms...`);
-                            setTimeout(() => initDataTableWithRetry(attempt + 1), attempt * 1000);
-                        } else {
-                            console.error('Max retry attempts reached - falling back to basic table');
-                            addManualExportButtons();
-                        }
-                    }
+    /**
+     * Method untuk generate script JavaScript
+     */
+    private function _get_dosen_script() {
+        ob_start();
+        ?>
+        <script>
+        $(document).ready(function() {
+            $('#datatable-dosen').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
                 }
-                
-                // Function untuk add manual export buttons jika DataTables buttons gagal
-                function addManualExportButtons() {
-                    console.log('Adding manual export buttons...');
-                    
-                    // Remove existing manual buttons
-                    $('#manual-export-buttons').remove();
-                    
-                    // Create buttons container
-                    const buttonsHtml = `
-                        <div id="manual-export-buttons" class="mb-3">
-                            <button type="button" class="btn btn-success btn-sm mr-2" onclick="manualExportExcel()">
-                                <i class="fa fa-file-excel"></i> Export Excel
-                            </button>
-                            <button type="button" class="btn btn-info btn-sm mr-2" onclick="manualPrint()">
-                                <i class="fa fa-print"></i> Print
-                            </button>
-                            <button type="button" class="btn btn-secondary btn-sm mr-2" onclick="refreshData()">
-                                <i class="fa fa-sync"></i> Refresh
-                            </button>
-                        </div>
-                    `;
-                    
-                    // Insert before table
-                    $('#datatable-dosen').before(buttonsHtml);
-                    console.log('✅ Manual export buttons added');
-                }
-                
-                // Start initialization
-                initDataTableWithRetry();
-                
-                // Highlight rows dengan beban kerja tinggi
-                setTimeout(function() {
-                    try {
-                        $('#datatable-dosen tbody tr').each(function() {
-                            const bimbinganText = $(this).find('td:eq(5) .badge').text().trim();
-                            const pengujiText = $(this).find('td:eq(6) .badge').text().trim();
-                            
-                            const bimbingan = parseInt(bimbinganText) || 0;
-                            const penguji = parseInt(pengujiText) || 0;
-                            const total = bimbingan + penguji;
-                            
-                            if (total >= 5) {
-                                $(this).addClass('table-warning');
-                            } else if (total === 0) {
-                                $(this).addClass('table-light');
-                            }
-                        });
-                        console.log('✅ Row highlighting applied');
-                    } catch (error) {
-                        console.error('Row highlighting failed:', error);
-                    }
-                }, 2000);
             });
-        
-            // Manual export functions
-            function manualExportExcel() {
-                console.log('Manual Excel export triggered');
-                try {
-                    // Get table data
-                    const table = $('#datatable-dosen').DataTable();
-                    const data = table.data().toArray();
-                    
-                    // Create CSV content
-                    let csvContent = "data:text/csv;charset=utf-8,";
-                    csvContent += "No,NIP,Nama,Email,Program Studi,Jumlah Bimbingan,Jumlah Penguji\n";
-                    
-                    $('#datatable-dosen tbody tr').each(function(index) {
-                        const row = [];
-                        $(this).find('td').each(function(i) {
-                            if (i < 7) { // Exclude status column
-                                let text = $(this).text().trim();
-                                // Clean badge text
-                                if (i === 5 || i === 6) {
-                                    const match = text.match(/\d+/);
-                                    text = match ? match[0] : '0';
-                                }
-                                row.push('"' + text.replace(/"/g, '""') + '"');
-                            }
-                        });
-                        csvContent += row.join(',') + '\n';
-                    });
-                    
-                    // Download CSV
-                    const encodedUri = encodeURI(csvContent);
-                    const link = document.createElement('a');
-                    link.setAttribute('href', encodedUri);
-                    link.setAttribute('download', 'daftar_dosen_stk_yakobus.csv');
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    console.log('✅ Manual Excel export completed');
-                } catch (error) {
-                    console.error('Manual Excel export failed:', error);
-                    alert('Export Excel gagal. Silakan coba lagi.');
-                }
-            }
-        
-            function manualPrint() {
-                console.log('Manual print triggered');
-                try {
-                    // Create print window
-                    const printWindow = window.open('', '_blank');
-                    
-                    // Get table HTML
-                    const tableHtml = $('#datatable-dosen')[0].outerHTML;
-                    
-                    // Create print content
-                    const printContent = `
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <title>Daftar Dosen STK St. Yakobus</title>
-                            <style>
-                                body { font-family: Arial, sans-serif; font-size: 12px; }
-                                .header { text-align: center; margin-bottom: 20px; }
-                                table { width: 100%; border-collapse: collapse; }
-                                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                                th { background-color: #f2f2f2; font-weight: bold; }
-                                .badge { background: none; color: black; font-weight: normal; }
-                                .btn { display: none; }
-                                @media print {
-                                    .no-print { display: none; }
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="header">
-                                <h2>Daftar Seluruh Dosen</h2>
-                                <h3>STK Santo Yakobus Merauke</h3>
-                                <p>Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}</p>
+            
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    
+        // Function untuk menampilkan detail dosen
+        function showDosenDetail(dosenId) {
+            $('#modalDetailDosen').modal('show');
+            
+            // Reset content dengan loading spinner
+            $('#detailDosenContent').html(`
+                <div class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                    <p class="mt-2">Memuat data...</p>
+                </div>
+            `);
+            
+            // AJAX call untuk get detail dosen
+            $.ajax({
+                url: base_url + 'kaprodi/ajax_dosen_detail/' + dosenId,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('#detailDosenContent').html(response.html);
+                    } else {
+                        $('#detailDosenContent').html(`
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                ${response.message || 'Gagal memuat data dosen'}
                             </div>
-                            ${tableHtml}
-                        </body>
-                        </html>
-                    `;
-                    
-                    printWindow.document.write(printContent);
-                    printWindow.document.close();
-                    
-                    // Wait for content to load, then print
-                    setTimeout(() => {
-                        printWindow.print();
-                        printWindow.close();
-                    }, 500);
-                    
-                    console.log('✅ Manual print completed');
-                } catch (error) {
-                    console.error('Manual print failed:', error);
-                    alert('Print gagal. Silakan coba lagi.');
+                        `);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#detailDosenContent').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Terjadi kesalahan saat memuat data. Silakan coba lagi.
+                        </div>
+                    `);
                 }
-            }
-        
-            function refreshData() {
-                console.log('Refresh data triggered');
-                location.reload();
-            }
-            </script>
-            <?php
-            return ob_get_clean();
+            });
         }
+        </script>
+        <?php
+        return ob_get_clean();
+    }
     
     public function laporan() {
         $data['title'] = 'Rekapitulasi Laporan';

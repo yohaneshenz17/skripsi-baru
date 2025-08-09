@@ -70,19 +70,37 @@
                 
                 <form id="edit">
                     <div class="form-group">
-                        <label>NIDN/NIP</label>
+                        <label>NIDN/NIP <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="nip" placeholder="Masukkan NIDN/NIP" autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label>Nama Lengkap</label>
+                        <label>Nama Lengkap <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="nama" placeholder="Masukkan Nama Lengkap" autocomplete="off">
                     </div>
+                    
+                    <!-- ✅ TAMBAHAN: Program Studi Dropdown -->
                     <div class="form-group">
-                        <label>Nomor Telepon</label>
+                        <label>Program Studi <span class="text-danger">*</span></label>
+                        <select class="form-control" name="prodi_id" id="prodi_id">
+                            <option value="">- Pilih Program Studi -</option>
+                            <!-- Options akan diisi oleh JavaScript -->
+                        </select>
+                        <small class="text-muted">Pilih program studi yang Anda ampu</small>
+                    </div>
+                    
+                    <!-- ✅ TAMBAHAN: Bidang Keilmuan -->
+                    <div class="form-group">
+                        <label>Bidang Keilmuan</label>
+                        <input type="text" class="form-control" name="bidang_keilmuan" placeholder="Contoh: Pendidikan Matematika, Teknologi Pendidikan" autocomplete="off">
+                        <small class="text-muted">Sesuai latar belakang pendidikan Anda</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nomor Telepon <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="nomor_telepon" placeholder="Masukkan Nomor Telepon" autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
+                        <label>Email <span class="text-danger">*</span></label>
                         <input type="email" class="form-control" name="email" placeholder="Masukkan Email" autocomplete="off">
                     </div>
                     <div class="text-right">
@@ -102,6 +120,26 @@
 $(document).ready(function() {
     var id = '<?= $this->session->userdata('id') ?>'
     
+    // ✅ TAMBAHAN: Load data program studi untuk dropdown
+    function loadProgramStudi() {
+        call('api/prodi').done(function(req) {
+            let options = '<option value="">- Pilih Program Studi -</option>';
+            if (req.data && req.data.length > 0) {
+                req.data.forEach(function(prodi) {
+                    options += `<option value="${prodi.id}">${prodi.nama}</option>`;
+                });
+            }
+            $('#prodi_id').html(options);
+            
+            // Setelah dropdown terisi, load data dosen
+            show();
+        }).fail(function(xhr, status, error) {
+            console.error('Failed to load program studi:', error);
+            // Tetap load data dosen meskipun prodi gagal
+            show();
+        });
+    }
+    
     function show() {
         call('api/dosen/details/' + id).done(function(res) {
             if (res.error == true) {
@@ -109,21 +147,44 @@ $(document).ready(function() {
                     window.location = base_url + 'auth/logout';
                 })
             } else {
-                $('[name=nip]').val(res.data.nip);
-                $('[name=nama]').val(res.data.nama);
-                $('[name=nomor_telepon]').val(res.data.nomor_telepon);
-                $('[name=email]').val(res.data.email);
+                console.log('Data dosen loaded:', res.data); // Debug log
+                
+                // Fill existing fields
+                $('[name=nip]').val(res.data.nip || '');
+                $('[name=nama]').val(res.data.nama || '');
+                $('[name=nomor_telepon]').val(res.data.nomor_telepon || '');
+                $('[name=email]').val(res.data.email || '');
+                
+                // ✅ TAMBAHAN: Fill new fields
+                $('[name=prodi_id]').val(res.data.prodi_id || '');
+                $('[name=bidang_keilmuan]').val(res.data.bidang_keilmuan || '');
             }
-        })
+        }).fail(function(xhr, status, error) {
+            console.error('Failed to load dosen data:', error);
+            notif('Gagal memuat data profil', 'error');
+        });
     }
 
-    show();
+    // Initialize - ✅ TAMBAHAN: Load program studi terlebih dahulu
+    loadProgramStudi();
 
-    // Form edit data (AJAX) - FIX ENDPOINT
+    // ✅ UPDATE: Form edit data (AJAX) untuk include field baru + validasi
     $(document).on('submit', 'form#edit', function(e) {
         e.preventDefault();
         console.log('Form edit submitted via AJAX');
         console.log('Form data:', $(this).serialize());
+        
+        // ✅ TAMBAHAN: Validasi field yang wajib diisi
+        let nip = $('[name=nip]').val().trim();
+        let nama = $('[name=nama]').val().trim();
+        let prodi_id = $('[name=prodi_id]').val();
+        let nomor_telepon = $('[name=nomor_telepon]').val().trim();
+        let email = $('[name=email]').val().trim();
+        
+        if (!nip || !nama || !prodi_id || !nomor_telepon || !email) {
+            notif('Mohon lengkapi semua field yang wajib diisi (bertanda *)', 'warning');
+            return false;
+        }
         
         // GUNAKAN ENDPOINT YANG BENAR - bukan api/dosen tapi dosen/profil/update
         $.ajax({

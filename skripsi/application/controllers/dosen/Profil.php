@@ -29,8 +29,12 @@ class Profil extends MY_Controller {
         $data['title'] = 'Profil Saya';
         $dosen_id = $this->session->userdata('id');
 
-        // Ambil data dosen
-        $data['user'] = $this->db->get_where('dosen', ['id' => $dosen_id])->row();
+        // ✅ TAMBAHAN: Ambil data dosen dengan join ke tabel prodi
+        $this->db->select('d.*, p.nama as nama_prodi');
+        $this->db->from('dosen d');
+        $this->db->join('prodi p', 'd.prodi_id = p.id', 'left');
+        $this->db->where('d.id', $dosen_id);
+        $data['user'] = $this->db->get()->row();
 
         if (!$data['user']) {
             // Jika data tidak ditemukan, buat object kosong untuk menghindari error
@@ -39,7 +43,9 @@ class Profil extends MY_Controller {
                 'nama' => '',
                 'nomor_telepon' => '',
                 'email' => '',
-                'foto' => ''
+                'foto' => '',
+                'prodi_id' => '',          // ✅ TAMBAHAN
+                'bidang_keilmuan' => ''    // ✅ TAMBAHAN
             ];
         }
 
@@ -121,6 +127,9 @@ class Profil extends MY_Controller {
     
     private function _handle_data_update($dosen_id)
     {
+        // Set header untuk AJAX response
+        header('Content-Type: application/json');
+        
         // Debug: Log input received
         error_log("DEBUG: _handle_data_update called with dosen_id: $dosen_id");
         
@@ -129,8 +138,24 @@ class Profil extends MY_Controller {
         $email = $this->input->post('email');
         $nomor_telepon = $this->input->post('nomor_telepon');
         $nip = $this->input->post('nip');
+        // ✅ TAMBAHAN: Ambil data field baru
+        $prodi_id = $this->input->post('prodi_id');
+        $bidang_keilmuan = $this->input->post('bidang_keilmuan');
 
-        error_log("DEBUG: Input data - NIP: $nip, Email: $email");
+        error_log("DEBUG: Input data - NIP: $nip, Email: $email, Prodi: $prodi_id, Bidang: $bidang_keilmuan");
+
+        // ✅ TAMBAHAN: Validasi prodi_id (wajib diisi)
+        if (empty($prodi_id) || !is_numeric($prodi_id)) {
+            echo json_encode(['error' => true, 'message' => 'Program Studi harus dipilih!']);
+            return;
+        }
+
+        // ✅ TAMBAHAN: Validasi prodi_id ada di database
+        $prodi_exists = $this->db->get_where('prodi', ['id' => $prodi_id])->row();
+        if (!$prodi_exists) {
+            echo json_encode(['error' => true, 'message' => 'Program Studi yang dipilih tidak valid!']);
+            return;
+        }
 
         // Validasi email unique (kecuali untuk dosen yang sama)
         $this->db->where('email', $email);
@@ -149,12 +174,14 @@ class Profil extends MY_Controller {
         // Validasi NIP dihilangkan sesuai permintaan user
         error_log("DEBUG: NIP validation SKIPPED as requested");
 
-        // Data yang akan diupdate
+        // ✅ TAMBAHAN: Data yang akan diupdate (termasuk field baru)
         $data_update = [
             'nama' => $nama,
             'email' => $email,
             'nomor_telepon' => $nomor_telepon,
-            'nip' => $nip
+            'nip' => $nip,
+            'prodi_id' => $prodi_id,              // ✅ TAMBAHAN
+            'bidang_keilmuan' => $bidang_keilmuan // ✅ TAMBAHAN
         ];
 
         error_log("DEBUG: Attempting database update");

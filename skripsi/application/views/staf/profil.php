@@ -58,7 +58,7 @@ ob_start();
                                 <span class="description"><?= $staf->id ?></span>
                             </div>
                             <div class="text-center mr-4">
-                                <span class="heading">NIP</span>
+                                <span class="heading">No. Peg.</span>
                                 <span class="description"><?= $staf->nip ?></span>
                             </div>
                             <div class="text-center">
@@ -161,7 +161,7 @@ ob_start();
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
-                                    <label class="form-control-label" for="nip">NIP <span class="text-danger">*</span></label>
+                                    <label class="form-control-label" for="nip">No. Peg. <span class="text-danger">*</span></label>
                                     <input type="text" id="nip" name="nip" class="form-control" placeholder="Nomor Induk Pegawai" value="<?= $staf->nip ?>" required>
                                 </div>
                             </div>
@@ -219,7 +219,7 @@ ob_start();
                                 <div class="alert alert-info" role="alert">
                                     <span class="alert-icon"><i class="ni ni-notification-70"></i></span>
                                     <span class="alert-text">
-                                        <strong>Informasi:</strong> Untuk keamanan, password login menggunakan NIP. 
+                                        <strong>Informasi:</strong> Untuk keamanan, password login menggunakan No. Peg. 
                                         Jika perlu mengubah password, hubungi administrator sistem.
                                     </span>
                                 </div>
@@ -231,7 +231,7 @@ ob_start();
                                 <div class="form-group">
                                     <label class="form-control-label">Password Login</label>
                                     <input type="password" class="form-control" value="<?= $staf->nip ?>" readonly>
-                                    <small class="text-muted">Password sama dengan NIP Anda</small>
+                                    <small class="text-muted">Password sama dengan No. Peg. Anda</small>
                                 </div>
                             </div>
                             <div class="col-lg-6">

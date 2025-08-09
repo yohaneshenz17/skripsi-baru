@@ -21,11 +21,76 @@ class Dosen extends REST_Controller
         return $this->response($response);
     }
 
-    // TAMBAH METHOD GET untuk details - FIX ERROR "details_get"  
+    // ✅ UPDATE: METHOD GET untuk details dengan JOIN ke tabel prodi
     public function details_get($id = null)
     {
-        $response = $this->model->details($id);
-        return $this->response($response);
+        header('Content-Type: application/json');
+        
+        try {
+            if (!$id) {
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'ID dosen tidak ditemukan'
+                ]);
+                return;
+            }
+
+            // ✅ TAMBAHAN: Query dengan JOIN ke tabel prodi dan include field baru
+            $this->db->select('
+                d.id,
+                d.nip,
+                d.nama,
+                d.nomor_telepon,
+                d.email,
+                d.level,
+                d.foto,
+                d.prodi_id,
+                d.bidang_keilmuan,
+                p.nama as nama_prodi,
+                p.kode as kode_prodi
+            ');
+            $this->db->from('dosen d');
+            $this->db->join('prodi p', 'd.prodi_id = p.id', 'left');
+            $this->db->where('d.id', $id);
+            
+            $query = $this->db->get();
+            
+            if ($query->num_rows() > 0) {
+                $data = $query->row();
+                
+                // ✅ TAMBAHAN: Format response dengan field baru
+                $response_data = [
+                    'id' => $data->id,
+                    'nip' => $data->nip,
+                    'nama' => $data->nama,
+                    'nomor_telepon' => $data->nomor_telepon,
+                    'email' => $data->email,
+                    'level' => $data->level,
+                    'foto' => $data->foto,
+                    'prodi_id' => $data->prodi_id,
+                    'bidang_keilmuan' => $data->bidang_keilmuan,
+                    'nama_prodi' => $data->nama_prodi,
+                    'kode_prodi' => $data->kode_prodi
+                ];
+                
+                echo json_encode([
+                    'error' => false,
+                    'message' => 'Data berhasil diambil',
+                    'data' => $response_data
+                ]);
+            } else {
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'Data dosen tidak ditemukan'
+                ]);
+            }
+            
+        } catch (Exception $e) {
+            echo json_encode([
+                'error' => true,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
+        }
     }
 
     // TAMBAH METHOD GET untuk getById jika diperlukan

@@ -1732,8 +1732,8 @@ private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
                                         <p class="form-control-static">
                                             <?php 
                                             switch($mahasiswa->jenis_kelamin) {
-                                                case 'L': echo 'Laki-laki'; break;
-                                                case 'P': echo 'Perempuan'; break;
+                                                case 'laki-laki': echo 'Laki-laki'; break;
+                                                case 'perempuan': echo 'Perempuan'; break;
                                                 default: echo '-';
                                             }
                                             ?>
@@ -1753,8 +1753,8 @@ private function _kirim_notifikasi_pembimbing($proposal_id, $dosen_id) {
                                         <p class="form-control-static"><?= $mahasiswa->nama_fakultas ?? '-' ?></p>
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-control-label">Tahun Masuk</label>
-                                        <p class="form-control-static"><?= $mahasiswa->tahun_masuk ?? '-' ?></p>
+                                        <label class="form-control-label">Alamat</label>
+                                        <p class="form-control-static"><?= $mahasiswa->alamat ?? '-' ?></p>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-control-label">Status Mahasiswa</label>

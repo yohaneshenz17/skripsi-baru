@@ -1,0 +1,320 @@
+ERROR - 2025-08-04 05:23:16 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-04 05:23:28 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-04 06:37:03 --> Severity: Warning --> Undefined property: stdClass::$judul_proposal /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 148
+ERROR - 2025-08-04 06:37:06 --> Severity: Warning --> Undefined property: stdClass::$judul_proposal /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 148
+ERROR - 2025-08-04 06:37:56 --> Severity: Warning --> Undefined property: stdClass::$judul_proposal /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/index.php 148
+ERROR - 2025-08-04 07:35:03 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 07:35:03 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 07:35:03 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 08:35:32 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-04 08:35:47 --> Severity: Warning --> Undefined property: stdClass::$judul /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 935
+ERROR - 2025-08-04 08:35:51 --> Severity: Warning --> Undefined property: stdClass::$judul /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 1015
+ERROR - 2025-08-04 08:35:54 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-04 08:35:55 --> Severity: Warning --> Undefined property: stdClass::$judul /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 935
+ERROR - 2025-08-04 08:35:59 --> Severity: Warning --> Undefined property: stdClass::$judul /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 1015
+ERROR - 2025-08-04 08:36:02 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-04 08:37:03 --> Query error: CONSTRAINT `chk_plagiarism_limit` failed for `stkp7133_skripsi`.`seminar_skripsi_mahasiswa` - Invalid query: UPDATE `seminar_skripsi_mahasiswa` SET `status_kaprodi` = 'rejected', `komentar_kaprodi` = 'Perbaiki lagi plagiasi masih tinggi', `tanggal_review_kaprodi` = '2025-08-04 08:37:03', `reviewed_by_kaprodi` = '10', `updated_at` = '2025-08-04 08:37:03', `status` = 'rejected', `current_step` = 'mahasiswa', `plagiarism_percentage` = '45', `file_turnitin` = 'turnitin_13_20250804083703.pdf'
+WHERE `id` = '13'
+ERROR - 2025-08-04 09:13:46 --> Severity: error --> Exception: Cannot use object of type stdClass as array /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/index.php 30
+ERROR - 2025-08-04 09:18:54 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:18:54 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:18:54 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:19:49 --> Severity: error --> Exception: Cannot use object of type stdClass as array /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/index.php 30
+ERROR - 2025-08-04 09:21:06 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:21:06 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:21:06 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:21:20 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:21:20 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:21:20 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:22:51 --> Severity: Warning --> Undefined property: stdClass::$judul /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 876
+ERROR - 2025-08-04 09:22:54 --> Severity: Warning --> Undefined property: stdClass::$judul /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 956
+ERROR - 2025-08-04 09:22:57 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-04 09:44:23 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:44:23 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 09:44:23 --> Severity: Warning --> Undefined property: stdClass::$progress_mahasiswa /home/stkp7133/public_html/skripsi/application/views/dosen/seminar_skripsi/detail.php 236
+ERROR - 2025-08-04 10:04:02 --> Severity: error --> Exception: Too few arguments to function Seminar_skripsi::penjadwalan(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 310
+ERROR - 2025-08-04 10:04:09 --> Severity: error --> Exception: Too few arguments to function Seminar_skripsi::detail(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 99
+ERROR - 2025-08-04 10:04:11 --> Severity: error --> Exception: Too few arguments to function Seminar_skripsi::penjadwalan(), 0 passed in /home/stkp7133/public_html/skripsi/system/core/CodeIgniter.php on line 529 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Seminar_skripsi.php 310
+ERROR - 2025-08-04 10:23:45 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-04 10:24:27 --> Query error: Unknown column 'aktif' in 'where clause' - Invalid query: SELECT `id`, `nama`, `email`
+FROM `dosen`
+WHERE `aktif` = 1
+ORDER BY `nama`
+ERROR - 2025-08-04 10:26:24 --> Severity: Warning --> Undefined property: stdClass::$judul /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 142
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:27:09 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 335
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 82
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 235
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 248
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 273
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined array key "found" /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 286
+ERROR - 2025-08-04 10:29:11 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 335
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:06 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 335
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:31:46 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 335
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 229
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 267
+ERROR - 2025-08-04 10:32:12 --> Severity: Warning --> Undefined property: stdClass::$pembimbing_id /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi/penjadwalan.php 335
+ERROR - 2025-08-04 10:41:20 --> 404 Page Not Found: dosen/Seminar_skripsi/penilaian
+ERROR - 2025-08-04 10:41:26 --> 404 Page Not Found: dosen/Seminar_skripsi/penilaian
+ERROR - 2025-08-04 10:41:34 --> 404 Page Not Found: dosen/Seminar_skripsi/penilaian
+ERROR - 2025-08-04 12:52:31 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-04 12:53:24 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-08-04 14:36:08 --> 404 Page Not Found: dosen/Seminar_skripsi/penilaian
+ERROR - 2025-08-04 15:06:26 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_existing_penilaian_from_view() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 290
+ERROR - 2025-08-04 15:12:10 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php:1541) /home/stkp7133/public_html/skripsi/system/core/Common.php 578
+ERROR - 2025-08-04 15:12:10 --> Severity: Compile Error --> Cannot redeclare Seminar_skripsi::_get_penilaian_script() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 1541
+ERROR - 2025-08-04 15:33:22 --> Query error: Unknown column 'updated_at' in 'field list' - Invalid query: UPDATE `proposal_mahasiswa` SET `workflow_status` = 'publikasi', `status_seminar_skripsi` = '1', `updated_at` = '2025-08-04 15:33:22'
+WHERE `id` = '45'
+ERROR - 2025-08-04 16:21:31 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_completed_status_text() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 395
+ERROR - 2025-08-04 16:33:45 --> Severity: Warning --> Undefined property: stdClass::$nama_mahasiswa /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 48
+ERROR - 2025-08-04 16:33:45 --> Severity: Warning --> Undefined property: stdClass::$nim /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 52
+ERROR - 2025-08-04 16:33:45 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 62
+ERROR - 2025-08-04 16:33:45 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 132
+ERROR - 2025-08-04 16:35:52 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_seminar_with_names() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1033
+ERROR - 2025-08-04 16:36:08 --> Query error: Table 'stkp7133_skripsi.program_studi' doesn't exist - Invalid query: SELECT `ssm`.*, `pm`.`judul` as `proposal_judul`, `m`.`nama` as `nama_mahasiswa`, `m`.`nim`, `d`.`nama` as `nama_pembimbing`, `d`.`email` as `email_pembimbing`, `p`.`nama` as `nama_prodi`, COALESCE(ssm.judul_skripsi, pm.judul) as judul_current
+FROM `seminar_skripsi_mahasiswa` `ssm`
+JOIN `proposal_mahasiswa` `pm` ON `ssm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `ssm`.`mahasiswa_id` = `m`.`id`
+JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+LEFT JOIN `program_studi` `p` ON `m`.`program_studi_id` = `p`.`id`
+WHERE `ssm`.`id` = '13'
+AND `ssm`.`mahasiswa_id` = '45'
+ERROR - 2025-08-04 16:36:53 --> Severity: Warning --> Undefined property: stdClass::$nama_mahasiswa /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 48
+ERROR - 2025-08-04 16:36:53 --> Severity: Warning --> Undefined property: stdClass::$nim /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 52
+ERROR - 2025-08-04 16:36:53 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 62
+ERROR - 2025-08-04 16:36:53 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 132
+ERROR - 2025-08-04 16:47:35 --> Severity: Warning --> Undefined property: stdClass::$nama_mahasiswa /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 48
+ERROR - 2025-08-04 16:47:35 --> Severity: Warning --> Undefined property: stdClass::$nim /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 52
+ERROR - 2025-08-04 16:47:35 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 62
+ERROR - 2025-08-04 16:47:35 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 132
+ERROR - 2025-08-04 16:48:28 --> Severity: Warning --> Undefined property: stdClass::$nama_mahasiswa /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 48
+ERROR - 2025-08-04 16:48:28 --> Severity: Warning --> Undefined property: stdClass::$nim /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 52
+ERROR - 2025-08-04 16:48:28 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 62
+ERROR - 2025-08-04 16:48:28 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 132
+ERROR - 2025-08-04 16:48:41 --> Severity: Warning --> Undefined property: stdClass::$nama_mahasiswa /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 48
+ERROR - 2025-08-04 16:48:41 --> Severity: Warning --> Undefined property: stdClass::$nim /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 52
+ERROR - 2025-08-04 16:48:41 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 62
+ERROR - 2025-08-04 16:48:41 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/view_penilaian.php 132
+ERROR - 2025-08-04 16:52:34 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_check_view_exists() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1094
+ERROR - 2025-08-04 16:54:20 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_check_view_exists() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1094
+ERROR - 2025-08-04 16:56:15 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_process_rekomendasi() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1076
+ERROR - 2025-08-04 17:12:56 --> Severity: Warning --> Undefined array key "WARNING" /home/stkp7133/public_html/skripsi/system/core/Log.php 180
+ERROR - 2025-08-04 17:23:05 --> Severity: Warning --> Undefined property: stdClass::$dinilai_oleh /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1080
+ERROR - 2025-08-04 17:25:19 --> Severity: Warning --> Undefined property: stdClass::$dinilai_oleh /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1080
+ERROR - 2025-08-04 17:26:06 --> Severity: Warning --> Undefined property: stdClass::$dinilai_oleh /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1080
+ERROR - 2025-08-04 17:26:10 --> Severity: Warning --> Undefined property: stdClass::$dinilai_oleh /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 1080
+ERROR - 2025-08-04 18:12:25 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/view_file
+ERROR - 2025-08-04 18:13:56 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/skripsi_files
+ERROR - 2025-08-04 18:14:51 --> 404 Page Not Found: Uploads/seminar_skripsi
+ERROR - 2025-08-04 18:15:33 --> 404 Page Not Found: Skripsi/uploads
+ERROR - 2025-08-04 18:17:23 --> 404 Page Not Found: mahasiswa/Seminar_skripsi/skripsi_files
+ERROR - 2025-08-04 18:47:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-04 18:47:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-04 18:48:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-04 18:48:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-04 18:54:35 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-04 18:54:35 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-04 18:54:37 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_predikat() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 446
+ERROR - 2025-08-04 18:55:50 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_predikat() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Seminar_skripsi.php 448

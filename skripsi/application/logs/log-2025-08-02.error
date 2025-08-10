@@ -1,0 +1,149 @@
+ERROR - 2025-08-02 06:11:35 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-02 08:01:36 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-08-02 08:03:32 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:03:36 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:03:39 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:03:47 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:04:05 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:04:12 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:04:35 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:04:39 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:04:40 --> 404 Page Not Found: mahasiswa/Publikasi/index
+ERROR - 2025-08-02 08:04:41 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:04:43 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:06:03 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-02 08:06:40 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:06:59 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:25:18 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:27:29 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:28:07 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:28:07 --> Query error: Unknown column 'pm.updated_at' in 'field list' - Invalid query: SELECT `pm`.`id` as `proposal_id`, `pm`.`judul`, `pm`.`workflow_status`, `m`.`nim`, `m`.`nama`, "eligible" as `status`, "Siap untuk diajukan" as `status_description`, `pm`.`created_at`, `pm`.`updated_at`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`mahasiswa_id` = '44'
+AND `pm`.`workflow_status` = 'seminar_skripsi'
+AND `pm`.`status` = '1'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-08-02 08:29:43 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:29:43 --> Query error: Unknown column 'pm.updated_at' in 'field list' - Invalid query: SELECT `pm`.`id` as `proposal_id`, `pm`.`judul`, `pm`.`workflow_status`, `m`.`nim`, `m`.`nama`, "eligible" as `status`, "Siap untuk diajukan" as `status_description`, `pm`.`created_at`, `pm`.`updated_at`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`mahasiswa_id` = '44'
+AND `pm`.`workflow_status` = 'seminar_skripsi'
+AND `pm`.`status` = '1'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-08-02 08:31:22 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:31:22 --> Query error: Unknown column 'pm.updated_at' in 'field list' - Invalid query: SELECT `pm`.`id` as `proposal_id`, `pm`.`judul`, `pm`.`workflow_status`, `m`.`nim`, `m`.`nama`, "eligible" as `status`, "Siap untuk diajukan" as `status_description`, `pm`.`created_at`, `pm`.`updated_at`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+WHERE `pm`.`mahasiswa_id` = '44'
+AND `pm`.`workflow_status` = 'seminar_skripsi'
+AND `pm`.`status` = '1'
+ORDER BY `pm`.`updated_at` DESC
+ERROR - 2025-08-02 08:31:47 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:35:47 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:36:52 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:38:03 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:38:07 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:53:56 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:55:54 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:56:34 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 08:56:50 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 09:02:36 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 09:03:04 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 09:04:04 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 09:04:33 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 09:05:09 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 09:14:01 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 09:14:12 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:02:10 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:08:20 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:08:50 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:10:06 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:10:19 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:13:01 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:16:26 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:16:55 --> 404 Page Not Found: Quick_debug_seminar_skripsi/index
+ERROR - 2025-08-02 10:16:59 --> 404 Page Not Found: Quick_debug_seminar_skripsi/index
+ERROR - 2025-08-02 10:21:56 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:22:08 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 10:22:10 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:05:40 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:05:45 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:06:28 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:20:42 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:20:42 --> Severity: Warning --> Undefined variable $form_title /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 73
+ERROR - 2025-08-02 11:20:42 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 123
+ERROR - 2025-08-02 11:23:31 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:23:35 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:23:35 --> Severity: Warning --> Undefined variable $form_title /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 73
+ERROR - 2025-08-02 11:23:35 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 123
+ERROR - 2025-08-02 11:31:17 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:31:17 --> Severity: error --> Exception: Call to undefined method Seminar_skripsi::_get_proposal_with_dosen() /home/stkp7133/public_html/skripsi/application/controllers/mahasiswa/Seminar_skripsi.php 104
+ERROR - 2025-08-02 11:33:43 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:33:43 --> Severity: Warning --> Undefined variable $form_title /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 136
+ERROR - 2025-08-02 11:33:43 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 186
+ERROR - 2025-08-02 11:34:11 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:34:11 --> Severity: Warning --> Undefined array key "required" /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 300
+ERROR - 2025-08-02 11:34:11 --> Severity: Warning --> Undefined array key "current" /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 301
+ERROR - 2025-08-02 11:34:11 --> Severity: Warning --> Undefined array key "required" /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 300
+ERROR - 2025-08-02 11:34:11 --> Severity: Warning --> Undefined array key "current" /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 301
+ERROR - 2025-08-02 11:34:43 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:34:43 --> Severity: Warning --> Undefined variable $form_title /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 74
+ERROR - 2025-08-02 11:34:43 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 124
+ERROR - 2025-08-02 11:38:58 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:38:58 --> Severity: Warning --> Undefined property: stdClass::$nama_pembimbing /home/stkp7133/public_html/skripsi/application/views/mahasiswa/seminar_skripsi/pengajuan.php 124
+ERROR - 2025-08-02 11:39:53 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:40:54 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:42:53 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:45:32 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 11:54:24 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 12:05:39 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 12:05:42 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 12:05:45 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 12:07:33 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 12:08:37 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 13:49:51 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 13:50:07 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 13:50:13 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 14:13:57 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 14:13:59 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 14:14:36 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 14:14:36 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'Skripsi Final', 'submitted', 'pembimbing', 'skripsi_1754118876_688dbadc104bc.docx', '2025-08-02 14:14:36', '2025-08-02 14:14:36')
+ERROR - 2025-08-02 14:15:21 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 14:28:20 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 14:28:22 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:33:33 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:33:47 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:33:57 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:34:16 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:34:16 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'Proposal Skripsi Final', 'submitted', 'pembimbing', 'skripsi_1754123656_688dcd8891675.docx', '2025-08-02 15:34:16', '2025-08-02 15:34:16')
+ERROR - 2025-08-02 15:45:39 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:46:14 --> Severity: error --> Exception: Call to undefined function word_limiter() /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 81
+ERROR - 2025-08-02 15:46:24 --> Severity: error --> Exception: Call to undefined function word_limiter() /home/stkp7133/public_html/skripsi/application/views/kaprodi/seminar_skripsi.php 81
+ERROR - 2025-08-02 15:56:16 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:56:18 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:56:27 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 15:56:27 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'Tes saja', 'submitted', 'pembimbing', 'skripsi_1754124987_688dd2bb19865.docx', '2025-08-02 15:56:27', '2025-08-02 15:56:27')
+ERROR - 2025-08-02 15:56:28 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 16:24:03 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 16:24:04 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 16:24:12 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 16:24:13 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'Tes', 'submitted', 'pembimbing', 'skripsi_1754126652_688dd93cf3ba9.docx', '2025-08-02 16:24:13', '2025-08-02 16:24:13')
+ERROR - 2025-08-02 16:24:15 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 16:57:38 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 16:57:40 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 16:57:48 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 16:57:48 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('44', '44', 'Tes', 'submitted', 'pembimbing', 'skripsi_1754128668_688de11c2b14e.docx', '2025-08-02 16:57:48', '2025-08-02 16:57:48')
+ERROR - 2025-08-02 16:57:49 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:13:13 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:18:57 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:19:51 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:21:59 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:22:20 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:23:41 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:23:51 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:23:59 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:23:59 --> Query error: Can't update table 'seminar_skripsi_mahasiswa' in stored function/trigger because it is already used by statement which invoked this stored function/trigger - Invalid query: INSERT INTO `seminar_skripsi_mahasiswa` (`proposal_id`, `mahasiswa_id`, `keterangan_mahasiswa`, `status`, `current_step`, `file_skripsi`, `created_at`, `updated_at`) VALUES ('46', '46', 'tes saja', 'submitted', 'pembimbing', 'skripsi_1754130239_688de73fc8c4d.pdf', '2025-08-02 17:23:59', '2025-08-02 17:23:59')
+ERROR - 2025-08-02 17:24:03 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model
+ERROR - 2025-08-02 17:24:09 --> Failed to load Seminar_skripsi_mahasiswa_model: Unable to locate the model you have specified: Seminar_skripsi_mahasiswa_model

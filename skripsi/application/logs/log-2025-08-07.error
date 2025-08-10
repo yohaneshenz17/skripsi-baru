@@ -1,0 +1,124 @@
+ERROR - 2025-08-07 05:37:39 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 71
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 71
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 73
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 73
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 77
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 77
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 80
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 80
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 82
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 82
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 86
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 86
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 89
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 89
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 91
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 91
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 95
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 95
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 98
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 98
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 100
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 100
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 104
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 104
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 107
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 107
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 109
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 109
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 113
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 113
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 116
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 116
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 118
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 118
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 122
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 122
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 125
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 125
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 127
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 127
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $progress_percentage /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 136
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $progress_percentage /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 137
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $completed_steps /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 145
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $total_steps /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 145
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $progress_percentage /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 146
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 147
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 147
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Undefined variable $workflow_progress /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 149
+ERROR - 2025-08-07 05:51:56 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 149
+ERROR - 2025-08-07 05:55:51 --> Severity: Warning --> Undefined variable $workflow_sync /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 119
+ERROR - 2025-08-07 05:55:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 119
+ERROR - 2025-08-07 05:55:51 --> Severity: Warning --> Undefined variable $workflow_sync /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 119
+ERROR - 2025-08-07 05:55:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 119
+ERROR - 2025-08-07 05:55:51 --> Severity: Warning --> Undefined variable $workflow_sync /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 121
+ERROR - 2025-08-07 05:55:51 --> Severity: Warning --> Trying to access array offset on value of type null /home/stkp7133/public_html/skripsi/application/views/mahasiswa/publikasi/index.php 121
+ERROR - 2025-08-07 06:22:51 --> Severity: Warning --> Undefined array key "jurnal_pending" /home/stkp7133/public_html/skripsi/application/views/dosen/dashboard.php 248
+ERROR - 2025-08-07 06:22:51 --> Severity: Warning --> Undefined array key "seminar_pending" /home/stkp7133/public_html/skripsi/application/views/dosen/dashboard.php 268
+ERROR - 2025-08-07 06:22:51 --> Severity: Warning --> Undefined array key "skripsi_pending" /home/stkp7133/public_html/skripsi/application/views/dosen/dashboard.php 308
+ERROR - 2025-08-07 06:43:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:43:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:45:30 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:45:30 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:46:54 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:46:55 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:47:23 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:47:23 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:50:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:50:09 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:50:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:50:39 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:51:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:51:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:51:47 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 06:51:47 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 07:01:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 07:01:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 07:05:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 07:05:37 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 08:16:59 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 08:20:20 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:20:20 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:20:22 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:20:22 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:22:46 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:22:46 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:22:51 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:22:51 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:22:58 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:22:58 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:22:58 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-07 08:23:11 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-08-07 08:23:13 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:23:13 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:23:25 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:23:25 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:23:31 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:23:31 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:23:34 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:23:34 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:25:56 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:25:56 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:25:59 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-07 08:25:59 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-07 08:36:26 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 08:36:26 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 08:40:35 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 08:40:35 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 08:57:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 08:57:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-07 09:48:17 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 10:05:56 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 10:36:25 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 10:39:06 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 10:56:06 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 11:30:56 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 11:44:31 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 11:47:10 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 11:59:07 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 12:53:28 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 13:35:40 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 17:51:47 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 17:58:53 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-07 18:31:34 --> 404 Page Not Found: Cdn/img

@@ -2,7 +2,7 @@
 /*
 =================================================
 VIEW: application/views/kaprodi/kontak.php  
-SIMPLE PATTERN - SEPERTI DOSEN
+FIXED VERSION - Hapus alert "Form telah direset"
 =================================================
 */
 ?>
@@ -288,12 +288,19 @@ function updateCharCount() {
     document.getElementById('charCount').textContent = count;
 }
 
+// FIXED: resetForm tanpa alert "Form telah direset"
 function resetForm() {
     document.getElementById('kontakForm').reset();
     document.getElementById('detailPenerima').style.display = 'none';
-    document.getElementById('whatsappList').style.display = 'none';
+    
+    const whatsappList = document.getElementById('whatsappList');
+    if (whatsappList) {
+        whatsappList.style.display = 'none';
+    }
+    
     updateCharCount();
-    showAlert('info', 'Form telah direset');
+    // HAPUS: showAlert('info', 'Form telah direset'); 
+    // Biarkan hanya success alert yang muncul
 }
 
 function kirimPesan() {
@@ -332,7 +339,7 @@ function kirimPesan() {
     .then(function(response) {
         if (response.status === 'success') {
             showAlert('success', response.message);
-            resetForm();
+            resetForm(); // Akan reset form tanpa alert tambahan
         } else {
             showAlert('error', response.message || 'Gagal mengirim');
         }

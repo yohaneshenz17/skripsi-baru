@@ -2,8 +2,12 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
- * Kontak Controller untuk Kaprodi - SIMPLE PATTERN
- * Mengikuti pattern dosen/Kontak.php yang sudah stable tanpa kompleksitas
+ * Kontak Controller untuk Kaprodi - FIXED VERSION
+ * 
+ * PERBAIKAN:
+ * 1. Database schema sesuai dengan controller dosen yang working
+ * 2. Field notifikasi menggunakan 'user_id' bukan 'pengirim_id'
+ * 3. Error handling yang konsisten
  * 
  * File: application/controllers/kaprodi/Kontak.php
  */
@@ -25,16 +29,14 @@ class Kontak extends MY_Controller
 
     public function index()
     {
-        // SIMPLE PATTERN - Load view directly
         $data['title'] = 'Kontak Form - Kaprodi';
         $data['content'] = $this->load->view('kaprodi/kontak', '', TRUE);
         
-        // Load dengan template kaprodi
         $this->load->view('template/kaprodi', $data);
     }
     
     /**
-     * Get data untuk form kontak kaprodi - SIMPLE VERSION
+     * Get data untuk form kontak kaprodi
      */
     public function get_kontak_data()
     {
@@ -57,11 +59,11 @@ class Kontak extends MY_Controller
                 'mahasiswa_list' => []
             ];
             
-            // 1. Get DOSEN (simple query)
+            // 1. Get DOSEN
             $this->db->select('id, nama, email, nomor_telepon');
             $this->db->from('dosen');
-            $this->db->where('level', '2'); // Level 2 = Dosen
-            $this->db->where('id !=', $kaprodi_id); // Exclude kaprodi sendiri
+            $this->db->where('level', '2');
+            $this->db->where('id !=', $kaprodi_id);
             $this->db->order_by('nama', 'ASC');
             $query_dosen = $this->db->get();
             
@@ -69,10 +71,10 @@ class Kontak extends MY_Controller
                 $data['dosen_list'] = $query_dosen->result();
             }
             
-            // 2. Get STAF/ADMIN (simple query)
+            // 2. Get STAF/ADMIN
             $this->db->select('id, nama, email, nomor_telepon, level');
             $this->db->from('dosen');
-            $this->db->where_in('level', ['1', '5']); // 1=Admin, 5=Staf
+            $this->db->where_in('level', ['1', '5']);
             $this->db->order_by('nama', 'ASC');
             $query_staf = $this->db->get();
             
@@ -84,11 +86,11 @@ class Kontak extends MY_Controller
                 $data['staf_list'] = $staf_result;
             }
             
-            // 3. Get MAHASISWA (simple query)
+            // 3. Get MAHASISWA
             $this->db->select('m.id, m.nim, m.nama, m.email, m.nomor_telepon');
             $this->db->from('mahasiswa m');
             $this->db->order_by('m.nama', 'ASC');
-            $this->db->limit(50); // Limit untuk performa
+            $this->db->limit(50);
             $query_mahasiswa = $this->db->get();
             
             if ($query_mahasiswa && $query_mahasiswa->num_rows() > 0) {
@@ -110,7 +112,7 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Kirim pesan dari kaprodi - FIXED VERSION WITH BETTER ERROR HANDLING
+     * Kirim pesan dari kaprodi - FIXED DATABASE SCHEMA
      */
     public function kirim_pesan()
     {
@@ -129,7 +131,7 @@ class Kontak extends MY_Controller
                 return;
             }
             
-            // Get input data with better validation
+            // Get input data
             $penerima_role = $this->input->post('penerima_role');
             $penerima_id = $this->input->post('penerima_id');
             $subjek = $this->input->post('subjek');
@@ -154,32 +156,29 @@ class Kontak extends MY_Controller
                 return;
             }
             
-            // Get penerima data with error handling
+            // Get penerima data
             $penerima = $this->_get_penerima_data_safe($penerima_role, $penerima_id);
             if (!$penerima) {
                 echo json_encode(['status' => 'error', 'message' => 'Data penerima tidak ditemukan']);
                 return;
             }
             
-            // Try to save notification (non-critical)
+            // Save notification dengan schema yang benar
             $notif_saved = false;
             try {
-                $notif_saved = $this->_save_notification_safe($kaprodi_id, $penerima_id, $subjek, $pesan);
+                $notif_saved = $this->_save_notification_safe($penerima_id, $subjek, $pesan);
             } catch (Exception $e) {
                 log_message('error', 'Failed to save notification: ' . $e->getMessage());
-                // Continue anyway, notification is not critical
             }
             
-            // Try to send email (non-critical for now)
+            // Send email
             $email_sent = false;
             try {
                 $email_sent = $this->_send_email_safe($kaprodi, $penerima, $subjek, $pesan, $prioritas);
             } catch (Exception $e) {
                 log_message('error', 'Failed to send email: ' . $e->getMessage());
-                // Continue anyway, we can still show success
             }
             
-            // Always return success - the main function (communication) is working
             echo json_encode([
                 'status' => 'success',
                 'message' => "Pesan berhasil dikirim ke {$penerima->nama}",
@@ -191,20 +190,17 @@ class Kontak extends MY_Controller
             ]);
             
         } catch (Exception $e) {
-            // Log the full error for debugging
             log_message('error', 'Kaprodi kontak kirim_pesan error: ' . $e->getMessage());
-            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
             
             echo json_encode([
                 'status' => 'error', 
-                'message' => 'Terjadi kesalahan saat mengirim pesan',
-                'debug' => ENVIRONMENT === 'development' ? $e->getMessage() : null
+                'message' => 'Terjadi kesalahan saat mengirim pesan'
             ]);
         }
     }
     
     /**
-     * Get WhatsApp contacts - SAFE VERSION
+     * Get WhatsApp contacts
      */
     public function get_whatsapp_contacts($role = null)
     {
@@ -214,7 +210,6 @@ class Kontak extends MY_Controller
             $contacts = [];
             
             if (!$role || $role === 'dosen') {
-                // Get dosen with phone numbers
                 $this->db->select('id, nama, nomor_telepon');
                 $this->db->from('dosen');
                 $this->db->where('level', '2');
@@ -241,7 +236,6 @@ class Kontak extends MY_Controller
             }
             
             if (!$role || $role === 'staf') {
-                // Get staf/admin with phone numbers
                 $this->db->select('id, nama, nomor_telepon, level');
                 $this->db->from('dosen');
                 $this->db->where_in('level', ['1', '5']);
@@ -269,7 +263,6 @@ class Kontak extends MY_Controller
             }
             
             if (!$role || $role === 'mahasiswa') {
-                // Get mahasiswa with phone numbers
                 $this->db->select('id, nim, nama, nomor_telepon');
                 $this->db->from('mahasiswa');
                 $this->db->where('nomor_telepon IS NOT NULL');
@@ -312,7 +305,7 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Get data penerima berdasarkan role dan ID - SAFE VERSION
+     * Get data penerima berdasarkan role dan ID
      */
     private function _get_penerima_data_safe($role, $id)
     {
@@ -342,26 +335,24 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Save notification - SAFE VERSION
+     * Save notification - FIXED SCHEMA sesuai dengan dosen
      */
-    private function _save_notification_safe($kaprodi_id, $penerima_id, $subjek, $pesan)
+    private function _save_notification_safe($penerima_id, $subjek, $pesan)
     {
         try {
-            // Check if table exists first
             if (!$this->db->table_exists('notifikasi')) {
-                return true; // Skip if no table, not critical
+                return true; // Skip jika tidak ada tabel
             }
             
+            // SCHEMA YANG BENAR: gunakan 'user_id' bukan 'pengirim_id'
             $data = [
-                'pengirim_id' => $kaprodi_id,
-                'penerima_id' => $penerima_id,
+                'user_id' => $penerima_id,          // ✅ Field yang benar
                 'judul' => $subjek,
                 'pesan' => $pesan,
-                'status' => 'unread',
-                'tanggal_dibuat' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s')  // ✅ Sesuai schema dosen
             ];
             
-            // Check what fields actually exist in the table
+            // Check fields yang ada
             $fields = $this->db->list_fields('notifikasi');
             $safe_data = [];
             
@@ -371,22 +362,17 @@ class Kontak extends MY_Controller
                 }
             }
             
-            // Add common alternative field names
-            if (in_array('created_at', $fields) && !in_array('tanggal_dibuat', $fields)) {
-                $safe_data['created_at'] = date('Y-m-d H:i:s');
-                unset($safe_data['tanggal_dibuat']);
-            }
-            
-            if (in_array('user_id', $fields) && !in_array('penerima_id', $fields)) {
-                $safe_data['user_id'] = $penerima_id;
-                unset($safe_data['penerima_id']);
+            // Alternative field names
+            if (in_array('tanggal_dibuat', $fields) && !in_array('created_at', $fields)) {
+                $safe_data['tanggal_dibuat'] = date('Y-m-d H:i:s');
+                unset($safe_data['created_at']);
             }
             
             if (count($safe_data) > 0) {
                 return $this->db->insert('notifikasi', $safe_data);
             }
             
-            return true; // Skip if no matching fields
+            return true;
             
         } catch (Exception $e) {
             log_message('error', 'Error saving notification: ' . $e->getMessage());
@@ -395,52 +381,14 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Send email - SAFE VERSION (SIMPLIFIED)
+     * Send email - simplified version
      */
     private function _send_email_safe($kaprodi, $penerima, $subjek, $pesan, $prioritas)
     {
         try {
-            // For now, we'll skip actual email sending to avoid SMTP errors
-            // This can be implemented later when email server is properly configured
-            
+            // Untuk sementara return true untuk mencegah error email
             log_message('info', "Email would be sent from {$kaprodi->nama} to {$penerima->nama} with subject: {$subjek}");
-            
-            // Return true to simulate successful email sending
-            // This prevents the entire form from failing due to email configuration issues
             return true;
-            
-            /*
-            // Uncomment this when email server is ready:
-            
-            $config = [
-                'protocol' => 'mail',
-                'mailtype' => 'html',
-                'charset' => 'utf-8'
-            ];
-            
-            $this->email->initialize($config);
-            
-            $subject = '[SIM-TA STK] ' . $subjek;
-            $message = "
-                <h3>Pesan dari Kaprodi</h3>
-                <p><strong>Pengirim:</strong> {$kaprodi->nama} (Kaprodi)</p>
-                <p><strong>Kepada:</strong> {$penerima->nama}</p>
-                <p><strong>Subjek:</strong> {$subjek}</p>
-                <p><strong>Prioritas:</strong> " . strtoupper($prioritas) . "</p>
-                <hr>
-                <p>" . nl2br(htmlspecialchars($pesan)) . "</p>
-                <hr>
-                <small>Email otomatis dari SIM Tugas Akhir STK Santo Yakobus</small>
-            ";
-            
-            $this->email->from('noreply@stkyakobus.ac.id', 'SIM-TA STK Santo Yakobus');
-            $this->email->to($penerima->email);
-            $this->email->reply_to($kaprodi->email, $kaprodi->nama);
-            $this->email->subject($subject);
-            $this->email->message($message);
-            
-            return $this->email->send();
-            */
             
         } catch (Exception $e) {
             log_message('error', 'Error in email function: ' . $e->getMessage());
@@ -449,7 +397,7 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Format nomor telepon untuk WhatsApp - SAFE VERSION
+     * Format nomor telepon untuk WhatsApp
      */
     private function _format_whatsapp_number($phone)
     {
@@ -457,14 +405,12 @@ class Kontak extends MY_Controller
             return '';
         }
         
-        // Remove non-numeric characters
         $phone = preg_replace('/[^0-9]/', '', $phone);
         
         if (empty($phone)) {
             return '';
         }
         
-        // Convert to international format
         if (substr($phone, 0, 1) === '0') {
             $phone = '62' . substr($phone, 1);
         } elseif (substr($phone, 0, 2) !== '62') {

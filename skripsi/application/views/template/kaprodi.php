@@ -478,6 +478,14 @@
                 </a>
               </li>
               
+            <!-- TAMBAHAN BARU: Kontak Form -->
+            <li class="nav-item">
+              <a class="nav-link" href="<?= base_url() ?>kaprodi/kontak">
+                <i class="ni ni-email-83 text-success"></i>
+                <span class="nav-link-text">Kontak Form</span>
+              </a>
+            </li>
+              
               <!-- Profil -->
               <li class="nav-item">
                 <a class="nav-link" href="<?= base_url() ?>kaprodi/profil">

@@ -276,7 +276,25 @@ $route['kaprodi/laporan'] = 'kaprodi/kaprodi/laporan';                      // L
 $route['kaprodi/laporan/export'] = 'kaprodi/kaprodi/laporan_export';
 $route['kaprodi/laporan/filter'] = 'kaprodi/kaprodi/laporan_filter';
 
-// 10. Profil (BARU - sesuai role dosen)
+// =====================================================
+//      10. KONTAK FORM (BARU) - TAMBAHAN SESUAI PERMINTAAN
+// =====================================================
+$route['kaprodi/kontak'] = 'kaprodi/kontak/index';                          // Kontak Form Index
+$route['kaprodi/kontak/index'] = 'kaprodi/kontak/index';                    // Kontak Form Index (eksplisit)
+
+// AJAX Endpoints untuk Kontak Form
+$route['kaprodi/kontak/get_kontak_data'] = 'kaprodi/kontak/get_kontak_data'; // Get data kontak
+$route['kaprodi/kontak/kirim_pesan'] = 'kaprodi/kontak/kirim_pesan';         // Kirim pesan (POST)
+
+// WhatsApp Integration (Optional - untuk future enhancement)
+$route['kaprodi/kontak/get_whatsapp_contacts'] = 'kaprodi/kontak/get_whatsapp_contacts';
+$route['kaprodi/kontak/get_whatsapp_contacts/(:any)'] = 'kaprodi/kontak/get_whatsapp_contacts/$1';
+
+// Routes dengan dash untuk konsistensi URL (OPSIONAL)
+$route['kaprodi/kontak-form'] = 'kaprodi/kontak/index';
+$route['kaprodi/kontak-form/kirim'] = 'kaprodi/kontak/kirim_pesan';
+
+// 11. Profil (BARU - sesuai role dosen)
 $route['kaprodi/profil'] = 'kaprodi/profil';                                // Profil kaprodi
 $route['kaprodi/profil/update'] = 'kaprodi/profil/update';                  // Update profil kaprodi
 $route['kaprodi/profil/hapus_foto'] = 'kaprodi/profil/hapus_foto';          // Hapus foto profil kaprodi

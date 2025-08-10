@@ -469,4 +469,172 @@ class Usulan_proposal extends CI_Controller {
         echo "<hr>";
         echo "<a href='" . base_url('dosen/usulan_proposal') . "' style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>← Kembali</a>";
     }
+    
+/**
+     * Method untuk melihat detail riwayat proposal yang sudah direspon
+     * Ditambahkan untuk fitur kolom Detail pada tabel riwayat
+     */
+    public function detail_riwayat($proposal_id) {
+        $data['title'] = 'Detail Riwayat Proposal';
+        $dosen_id = $this->session->userdata('id');
+        
+        // Ambil detail proposal dari riwayat dengan validasi kepemilikan
+        $this->db->select('
+            pm.*,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            m.email as email_mahasiswa,
+            m.nomor_telepon,
+            m.tempat_lahir,
+            m.tanggal_lahir,
+            m.jenis_kelamin,
+            m.alamat,
+            m.foto as foto_mahasiswa,
+            p.nama as nama_prodi,
+            k.nama as nama_kaprodi,
+            k.email as email_kaprodi
+        ');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi p', 'm.prodi_id = p.id');
+        $this->db->join('dosen k', 'p.dosen_id = k.id');
+        $this->db->where('pm.id', $proposal_id);
+        $this->db->where('pm.dosen_id', $dosen_id);
+        // Hanya yang sudah direspon pembimbing
+        $this->db->where('pm.status_pembimbing IS NOT NULL AND pm.status_pembimbing != "0"');
+        
+        $data['proposal'] = $this->db->get()->row();
+        
+        if (!$data['proposal']) {
+            $this->session->set_flashdata('error', 'Data proposal tidak ditemukan dalam riwayat Anda!');
+            redirect('dosen/usulan_proposal');
+            return;
+        }
+        
+        $this->load->view('dosen/usulan_proposal_detail_riwayat', $data);
+    }
+
+    /**
+     * Method untuk print detail proposal
+     * Untuk keperluan dokumentasi dan arsip dosen
+     */
+    public function print_detail($proposal_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Ambil detail proposal dari riwayat dengan validasi kepemilikan
+        $this->db->select('
+            pm.*,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            m.email as email_mahasiswa,
+            m.nomor_telepon,
+            m.tempat_lahir,
+            m.tanggal_lahir,
+            m.jenis_kelamin,
+            m.alamat,
+            p.nama as nama_prodi,
+            k.nama as nama_kaprodi,
+            k.email as email_kaprodi,
+            d.nama as nama_dosen_pembimbing
+        ');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi p', 'm.prodi_id = p.id');
+        $this->db->join('dosen k', 'p.dosen_id = k.id');
+        $this->db->join('dosen d', 'pm.dosen_id = d.id'); // Dosen pembimbing
+        $this->db->where('pm.id', $proposal_id);
+        $this->db->where('pm.dosen_id', $dosen_id);
+        $this->db->where('pm.status_pembimbing IS NOT NULL AND pm.status_pembimbing != "0"');
+        
+        $data['proposal'] = $this->db->get()->row();
+        
+        if (!$data['proposal']) {
+            show_404();
+            return;
+        }
+        
+        $data['title'] = 'Print Detail Proposal - ' . $data['proposal']->nama_mahasiswa;
+        
+        $this->load->view('dosen/usulan_proposal_print', $data);
+    }
+
+    /**
+     * Method untuk melihat riwayat lengkap dengan pagination
+     * Link "Lihat semua riwayat" di footer tabel
+     */
+    public function riwayat_lengkap() {
+        $data['title'] = 'Riwayat Lengkap Usulan Proposal';
+        $dosen_id = $this->session->userdata('id');
+        
+        // Load pagination library
+        $this->load->library('pagination');
+        
+        // Konfigurasi pagination
+        $config['base_url'] = base_url('dosen/usulan_proposal/riwayat_lengkap');
+        $config['total_rows'] = $this->db->where('dosen_id', $dosen_id)
+                                       ->where('status_pembimbing IS NOT NULL AND status_pembimbing != "0"')
+                                       ->from('proposal_mahasiswa')
+                                       ->count_all_results();
+        $config['per_page'] = 20;
+        $config['uri_segment'] = 4;
+        
+        // Styling pagination untuk Argon template
+        $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
+        $config['full_tag_close'] = '</ul>';
+        $config['attributes'] = ['class' => 'page-link'];
+        $config['first_link'] = 'First';
+        $config['last_link'] = 'Last';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['prev_link'] = '&laquo';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_link'] = '&raquo';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
+        $config['cur_tag_close'] = '<span class="sr-only">(current)</span></span></li>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        
+        $this->pagination->initialize($config);
+        
+        // Ambil data dengan limit dan offset
+        $page = ($this->uri->segment(4)) ? $this->uri->segment(4) : 0;
+        
+        $this->db->select('
+            pm.*,
+            m.nim,
+            m.nama as nama_mahasiswa,
+            m.foto as foto_mahasiswa,
+            p.nama as nama_prodi,
+            pm.status_pembimbing,
+            pm.komentar_pembimbing,
+            pm.tanggal_respon_pembimbing
+        ');
+        $this->db->from('proposal_mahasiswa pm');
+        $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
+        $this->db->join('prodi p', 'm.prodi_id = p.id');
+        $this->db->where('pm.dosen_id', $dosen_id);
+        $this->db->where('pm.status_pembimbing IS NOT NULL AND pm.status_pembimbing != "0"');
+        $this->db->order_by('pm.tanggal_respon_pembimbing', 'DESC');
+        $this->db->limit($config['per_page'], $page);
+        
+        $data['riwayat_proposals'] = $this->db->get()->result();
+        $data['pagination'] = $this->pagination->create_links();
+        
+        // Statistics untuk dashboard
+        $data['total_disetujui'] = $this->db->where('dosen_id', $dosen_id)
+                                          ->where('status_pembimbing', '1')
+                                          ->from('proposal_mahasiswa')
+                                          ->count_all_results();
+        $data['total_ditolak'] = $this->db->where('dosen_id', $dosen_id)
+                                        ->where('status_pembimbing', '2')
+                                        ->from('proposal_mahasiswa')
+                                        ->count_all_results();
+        
+        $this->load->view('dosen/usulan_proposal_riwayat_lengkap', $data);
+    }
 }

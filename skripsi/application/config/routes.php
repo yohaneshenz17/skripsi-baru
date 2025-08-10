@@ -332,6 +332,12 @@ $route['dosen/usulan_proposal'] = 'dosen/usulan_proposal';
 $route['dosen/usulan_proposal/detail/(:num)'] = 'dosen/usulan_proposal/detail/$1';
 $route['dosen/usulan_proposal/proses_persetujuan'] = 'dosen/usulan_proposal/proses_persetujuan';
 
+// TAMBAHAN BARU - Routes untuk fitur Detail pada tabel Riwayat Respon
+$route['dosen/usulan_proposal/detail_riwayat/(:num)'] = 'dosen/usulan_proposal/detail_riwayat/$1';
+$route['dosen/usulan_proposal/print_detail/(:num)'] = 'dosen/usulan_proposal/print_detail/$1';
+$route['dosen/usulan_proposal/riwayat_lengkap'] = 'dosen/usulan_proposal/riwayat_lengkap';
+$route['dosen/usulan_proposal/riwayat_lengkap/(:num)'] = 'dosen/usulan_proposal/riwayat_lengkap/$1';
+
 // =====================================================
 //      PHASE 2: BIMBINGAN
 // =====================================================

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 10, 2025 at 12:47 PM
+-- Generation Time: Aug 10, 2025 at 01:36 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -756,7 +756,8 @@ INSERT INTO `mahasiswa` (`id`, `nim`, `nama`, `prodi_id`, `jenis_kelamin`, `temp
 (73, '2202062', 'Melkianus Poyi', 10, 'laki-laki', 'Uwus 25-02-2002', '2002-02-25', 'melkianuspoyi42@gmail.com', 'Brawijaya Gank Daut ', '081344798052', '085299787346', '2.79', '689742d34586b.jpg', '$2y$10$aEJ1m6/8UK6tpPi1rq9R0.Rb6nXcina9xsF0yMIiLwd5u4.j0pI3C', '1'),
 (74, '2202013', 'FRANSISKA ITLAY', 10, 'perempuan', 'ABULAKMA', '2003-09-06', 'fransiskaitlay1@gmail.com', 'JL. MISSI II', '082155533045', '082136882268', '2.83', '20250809083654_74.png', '$2y$10$w9e6GskmyYWzWYaEESrpJ.vBGdp97yaGre4rPs0X6Wi6ZpXWQ42Ey', '1'),
 (75, '2202037', 'MELTIDIS ARSANTI', 10, 'perempuan', 'Merauke', '2001-12-05', 'arsantingabut@gmail.com', 'Jalan Missi 2', '082248503388', '085244817746', '2,96', NULL, '$2y$10$e/l9QeLSXaUAnhnMOk4m/.WLtyNIHziBMRx0AsTyzDDp5f9kLUOFq', '1'),
-(76, '12345678', 'Mahasiswa Contoh', 10, 'laki-laki', 'Merauke', '2025-08-06', 'yohaneshenz@gmail.com', 'Missi 2, Mandala, Merauke', '09713330264', '09713330265', 'dedimus@stkyakobus.ac.id', '68982727c2edf.jpg', '$2y$10$yDASQ4VTx7YS4LS.gBXKn.Nq22N1y33L0w49kBVD2Q0lZfGF3ITz.', '1');
+(76, '12345678', 'Mahasiswa Contoh', 10, 'laki-laki', 'Merauke', '2025-08-06', 'yohaneshenz@gmail.com', 'Missi 2, Mandala, Merauke', '09713330264', '09713330265', 'dedimus@stkyakobus.ac.id', '68982727c2edf.jpg', '$2y$10$yDASQ4VTx7YS4LS.gBXKn.Nq22N1y33L0w49kBVD2Q0lZfGF3ITz.', '1'),
+(77, '2002031', 'Gelarda Wota Aga', 10, 'perempuan', 'Busiri', '2001-06-01', 'Gelardawotaa@gmail.com', 'jl.mangga dua merauke', '082248744925', '085244908875', '1.85', '689833d6d9cba.jpg', '$2y$10$BnSMZjHFv9WUd2YnKTpZieh.FD0294ExyS8WXMMG13B6fOlCpbXfW', '1');
 
 -- --------------------------------------------------------
 
@@ -2968,7 +2969,7 @@ ALTER TABLE `log_publikasi`
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`

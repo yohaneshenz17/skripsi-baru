@@ -2,12 +2,13 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
- * Kontak Controller untuk Kaprodi - FIXED VERSION
+ * Kontak Controller untuk Kaprodi - COMPLETE FIXED VERSION
  * 
  * PERBAIKAN:
- * 1. Database schema sesuai dengan controller dosen yang working
- * 2. Field notifikasi menggunakan 'user_id' bukan 'pengirim_id'
- * 3. Error handling yang konsisten
+ * 1. Email real menggunakan konfigurasi yang terbukti working
+ * 2. Database schema yang benar (user_id, bukan pengirim_id)
+ * 3. Error handling yang komprehensif
+ * 4. Template email yang rapi
  * 
  * File: application/controllers/kaprodi/Kontak.php
  */
@@ -87,9 +88,9 @@ class Kontak extends MY_Controller
             }
             
             // 3. Get MAHASISWA
-            $this->db->select('m.id, m.nim, m.nama, m.email, m.nomor_telepon');
-            $this->db->from('mahasiswa m');
-            $this->db->order_by('m.nama', 'ASC');
+            $this->db->select('id, nim, nama, email, nomor_telepon');
+            $this->db->from('mahasiswa');
+            $this->db->order_by('nama', 'ASC');
             $this->db->limit(50);
             $query_mahasiswa = $this->db->get();
             
@@ -112,7 +113,7 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Kirim pesan dari kaprodi - FIXED DATABASE SCHEMA
+     * Kirim pesan dari kaprodi - FIXED dengan EMAIL REAL
      */
     public function kirim_pesan()
     {
@@ -163,7 +164,7 @@ class Kontak extends MY_Controller
                 return;
             }
             
-            // Save notification dengan schema yang benar
+            // Save notification (non-critical)
             $notif_saved = false;
             try {
                 $notif_saved = $this->_save_notification_safe($penerima_id, $subjek, $pesan);
@@ -171,7 +172,7 @@ class Kontak extends MY_Controller
                 log_message('error', 'Failed to save notification: ' . $e->getMessage());
             }
             
-            // Send email
+            // FIXED: Send REAL EMAIL dengan konfigurasi yang benar
             $email_sent = false;
             try {
                 $email_sent = $this->_send_email_safe($kaprodi, $penerima, $subjek, $pesan, $prioritas);
@@ -179,15 +180,28 @@ class Kontak extends MY_Controller
                 log_message('error', 'Failed to send email: ' . $e->getMessage());
             }
             
-            echo json_encode([
-                'status' => 'success',
-                'message' => "Pesan berhasil dikirim ke {$penerima->nama}",
-                'penerima' => $penerima->nama,
-                'details' => [
-                    'notification_saved' => $notif_saved,
-                    'email_sent' => $email_sent
-                ]
-            ]);
+            // Response berdasarkan hasil email
+            if ($email_sent) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => "Pesan berhasil dikirim ke {$penerima->nama}",
+                    'penerima' => $penerima->nama,
+                    'details' => [
+                        'notification_saved' => $notif_saved,
+                        'email_sent' => $email_sent
+                    ]
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => 'warning',
+                    'message' => "Notifikasi tersimpan, tetapi email gagal dikirim ke {$penerima->nama}. Silakan coba lagi.",
+                    'penerima' => $penerima->nama,
+                    'details' => [
+                        'notification_saved' => $notif_saved,
+                        'email_sent' => $email_sent
+                    ]
+                ]);
+            }
             
         } catch (Exception $e) {
             log_message('error', 'Kaprodi kontak kirim_pesan error: ' . $e->getMessage());
@@ -335,7 +349,7 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Save notification - FIXED SCHEMA sesuai dengan dosen
+     * Save notification - FIXED SCHEMA sesuai dengan dosen/mahasiswa
      */
     private function _save_notification_safe($penerima_id, $subjek, $pesan)
     {
@@ -349,7 +363,7 @@ class Kontak extends MY_Controller
                 'user_id' => $penerima_id,          // ✅ Field yang benar
                 'judul' => $subjek,
                 'pesan' => $pesan,
-                'created_at' => date('Y-m-d H:i:s')  // ✅ Sesuai schema dosen
+                'created_at' => date('Y-m-d H:i:s')  // ✅ Sesuai schema
             ];
             
             // Check fields yang ada
@@ -368,6 +382,18 @@ class Kontak extends MY_Controller
                 unset($safe_data['created_at']);
             }
             
+            if (in_array('jenis', $fields)) {
+                $safe_data['jenis'] = 'kontak_kaprodi';
+            }
+            
+            if (in_array('untuk_role', $fields)) {
+                $safe_data['untuk_role'] = 'umum';
+            }
+            
+            if (in_array('dibaca', $fields)) {
+                $safe_data['dibaca'] = 0;
+            }
+            
             if (count($safe_data) > 0) {
                 return $this->db->insert('notifikasi', $safe_data);
             }
@@ -381,19 +407,155 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Send email - simplified version
+     * Send email - FIXED VERSION dengan konfigurasi yang TERBUKTI WORKING
      */
     private function _send_email_safe($kaprodi, $penerima, $subjek, $pesan, $prioritas)
     {
         try {
-            // Untuk sementara return true untuk mencegah error email
-            log_message('info', "Email would be sent from {$kaprodi->nama} to {$penerima->nama} with subject: {$subjek}");
-            return true;
+            // Konfigurasi email yang TERBUKTI BEKERJA di STK Yakobus
+            $config = [
+                'protocol' => 'smtp',
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_timeout' => 30,
+                'smtp_user' => 'stkyakobus@gmail.com',
+                'smtp_pass' => 'yonroxhraathnaug',
+                'charset' => 'utf-8',
+                'newline' => "\r\n",
+                'mailtype' => 'html',
+                'validation' => TRUE,
+                'priority' => 3,
+                'crlf' => "\r\n",
+                'smtp_crypto' => 'tls',
+                'wordwrap' => TRUE,
+                'wrapchars' => 76,
+                'smtp_debug' => FALSE,
+                'smtp_keepalive' => FALSE,
+                'smtp_auto_tls' => TRUE
+            ];
+            
+            $this->email->initialize($config);
+            $this->email->clear();
+            
+            // Setup email content
+            $prioritas_text = '';
+            if ($prioritas === 'high') {
+                $prioritas_text = '[PRIORITAS TINGGI] ';
+            } elseif ($prioritas === 'urgent') {
+                $prioritas_text = '[URGENT] ';
+            }
+            
+            $subject = $prioritas_text . '[SIM-TA STK] ' . $subjek;
+            
+            // HTML Email Template yang rapi
+            $message = $this->_get_email_template($kaprodi, $penerima, $subjek, $pesan, $prioritas);
+            
+            // Setup email
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
+            $this->email->to($penerima->email);
+            $this->email->reply_to($kaprodi->email, $kaprodi->nama);
+            $this->email->subject($subject);
+            $this->email->message($message);
+            
+            // Send email
+            $sent = $this->email->send();
+            
+            if ($sent) {
+                log_message('info', "Email berhasil dikirim dari Kaprodi {$kaprodi->nama} ke {$penerima->nama} ({$penerima->email})");
+                return true;
+            } else {
+                log_message('error', 'Email gagal dikirim: ' . $this->email->print_debugger());
+                return false;
+            }
             
         } catch (Exception $e) {
-            log_message('error', 'Error in email function: ' . $e->getMessage());
+            log_message('error', 'Exception saat kirim email: ' . $e->getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Email template yang rapi untuk Kaprodi
+     */
+    private function _get_email_template($kaprodi, $penerima, $subjek, $pesan, $prioritas)
+    {
+        $prioritas_badge = '';
+        if ($prioritas === 'high') {
+            $prioritas_badge = '<span style="background:#ff6b35; color:white; padding:4px 8px; border-radius:4px; font-size:12px;">PRIORITAS TINGGI</span>';
+        } elseif ($prioritas === 'urgent') {
+            $prioritas_badge = '<span style="background:#dc3545; color:white; padding:4px 8px; border-radius:4px; font-size:12px;">URGENT</span>';
+        }
+        
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <title>Pesan dari Kaprodi</title>
+        </head>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+            
+            <!-- Header -->
+            <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;'>
+                <h2 style='margin: 0; font-size: 24px;'>📧 Pesan dari Kaprodi</h2>
+                <p style='margin: 5px 0 0 0; opacity: 0.9;'>Sistem Informasi Manajemen Tugas Akhir</p>
+            </div>
+            
+            <!-- Content -->
+            <div style='background: #ffffff; padding: 30px; border: 1px solid #e9ecef; border-top: none;'>
+                
+                <!-- Prioritas Badge -->
+                " . ($prioritas_badge ? "<div style='margin-bottom: 20px;'>{$prioritas_badge}</div>" : "") . "
+                
+                <!-- Info Pengirim -->
+                <div style='background: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin-bottom: 20px;'>
+                    <p style='margin: 0; font-weight: bold; color: #007bff;'>Pengirim:</p>
+                    <p style='margin: 5px 0 0 0;'>{$kaprodi->nama} (Kaprodi)</p>
+                    <p style='margin: 0; font-size: 14px; color: #6c757d;'>STK Santo Yakobus Merauke</p>
+                </div>
+                
+                <!-- Info Penerima -->
+                <div style='margin-bottom: 20px;'>
+                    <p style='margin: 0; font-weight: bold;'>Kepada:</p>
+                    <p style='margin: 5px 0 0 0;'>{$penerima->nama}</p>
+                    <p style='margin: 0; font-size: 14px; color: #6c757d;'>{$penerima->email}</p>
+                </div>
+                
+                <!-- Subjek -->
+                <div style='margin-bottom: 20px;'>
+                    <p style='margin: 0; font-weight: bold;'>Subjek:</p>
+                    <p style='margin: 5px 0 0 0;'>{$subjek}</p>
+                </div>
+                
+                <!-- Divider -->
+                <hr style='border: none; border-top: 2px solid #e9ecef; margin: 25px 0;'>
+                
+                <!-- Pesan -->
+                <div style='background: #ffffff; padding: 20px; border: 1px solid #dee2e6; border-radius: 6px;'>
+                    <p style='margin: 0 0 10px 0; font-weight: bold; color: #495057;'>Pesan:</p>
+                    <div style='color: #212529; line-height: 1.7;'>"
+                        . nl2br(htmlspecialchars($pesan)) . 
+                    "</div>
+                </div>
+                
+            </div>
+            
+            <!-- Footer -->
+            <div style='background: #f8f9fa; padding: 20px; text-align: center; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 8px 8px;'>
+                <p style='margin: 0; font-size: 14px; color: #6c757d;'>
+                    <strong>STK Santo Yakobus Merauke</strong><br>
+                    Jl. Missi 2, Mandala, Merauke, Papua Selatan<br>
+                    📞 09713330264 | ✉️ sipd@stkyakobus.ac.id
+                </p>
+                <hr style='border: none; border-top: 1px solid #dee2e6; margin: 15px 0;'>
+                <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                    Email otomatis dari Sistem Informasi Manajemen Tugas Akhir<br>
+                    Mohon tidak membalas langsung ke email ini.
+                </p>
+            </div>
+            
+        </body>
+        </html>";
     }
     
     /**

@@ -252,6 +252,7 @@
                                 <th scope="col">Tanggal Respon</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Komentar</th>
+                                <th scope="col" class="text-center">Detail</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -296,10 +297,40 @@
                                             <?= $riwayat->komentar_pembimbing ? substr($riwayat->komentar_pembimbing, 0, 40) . '...' : 'Tidak ada komentar' ?>
                                         </span>
                                     </td>
+                                    <!-- KOLOM DETAIL BARU -->
+                                    <td class="text-center">
+                                        <div class="dropdown">
+                                            <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                <a class="dropdown-item" href="<?= base_url('dosen/usulan_proposal/detail_riwayat/' . $riwayat->id) ?>">
+                                                    <i class="fa fa-eye mr-2"></i>
+                                                    Lihat Detail Lengkap
+                                                </a>
+                                                <a class="dropdown-item" href="#" onclick="printProposal(<?= $riwayat->id ?>)">
+                                                    <i class="fa fa-print mr-2"></i>
+                                                    Cetak Detail Proposal
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                </div>
+                
+                <!-- Footer tabel dengan info pagination -->
+                <div class="card-footer py-4">
+                    <div class="d-flex justify-content-center">
+                        <small class="text-muted">
+                            Menampilkan <?= count($riwayat_proposals) ?> proposal terakhir yang sudah direspon.
+                            <a href="<?= base_url('dosen/usulan_proposal/riwayat_lengkap') ?>" class="text-primary">
+                                Lihat semua riwayat →
+                            </a>
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -319,6 +350,12 @@ $(document).ready(function() {
         location.reload();
     }, 300000); // 5 minutes
 });
+
+// Function untuk print proposal detail
+function printProposal(proposalId) {
+    // Buka window baru untuk print detail proposal
+    window.open('<?= base_url("dosen/usulan_proposal/print_detail/") ?>' + proposalId, '_blank', 'width=800,height=600');
+}
 </script>
 <?php $this->app->endSection('script') ?>
 

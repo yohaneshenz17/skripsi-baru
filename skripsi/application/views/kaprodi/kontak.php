@@ -1,5 +1,13 @@
-<!-- CLEAN VIEW FILE: application/views/kaprodi/kontak.php -->
-<!-- PASTIKAN TIDAK ADA PHP CLASS DI FILE INI! -->
+<?php
+/*
+=================================================
+VIEW: application/views/kaprodi/kontak.php  
+=================================================
+*/
+?>
+<?php $this->app->extend('template/kaprodi') ?>
+<?php $this->app->setVar('title', 'Kontak Form - Kaprodi') ?>
+<?php $this->app->section() ?>
 
 <div class="row">
     <!-- Form Kontak -->
@@ -109,47 +117,6 @@
                         </small>
                     </div>
                     
-                    <!-- Template Pesan -->
-                    <div class="form-group">
-                        <label class="form-control-label">
-                            <i class="ni ni-archive-2"></i> Template Pesan Cepat
-                        </label>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="useTemplate('rapat')">
-                                    <i class="ni ni-calendar-grid-58"></i> Undangan Rapat
-                                </button>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="useTemplate('pengumuman')">
-                                    <i class="ni ni-sound-wave"></i> Pengumuman
-                                </button>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-outline-success btn-sm btn-block" onclick="useTemplate('koordinasi')">
-                                    <i class="ni ni-settings"></i> Koordinasi
-                                </button>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-outline-warning btn-sm btn-block" onclick="useTemplate('reminder')">
-                                    <i class="ni ni-bell-55"></i> Reminder
-                                </button>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-outline-danger btn-sm btn-block" onclick="useTemplate('evaluasi')">
-                                    <i class="ni ni-chart-bar-32"></i> Evaluasi
-                                </button>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-outline-secondary btn-sm btn-block" onclick="useTemplate('lainnya')">
-                                    <i class="ni ni-chat-round"></i> Lainnya
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <div class="text-right">
                         <button type="button" class="btn btn-secondary" onclick="resetForm()">
                             <i class="ni ni-curved-next"></i> Reset
@@ -189,15 +156,15 @@
             </div>
             <div class="card-body">
                 <div class="btn-group-vertical w-100" role="group">
-                    <button type="button" class="btn btn-success btn-sm mb-2" onclick="showWhatsAppModal('dosen')">
+                    <button type="button" class="btn btn-success btn-sm mb-2">
                         <i class="fab fa-whatsapp mr-2"></i>
                         WhatsApp Dosen
                     </button>
-                    <button type="button" class="btn btn-success btn-sm mb-2" onclick="showWhatsAppModal('staf')">
+                    <button type="button" class="btn btn-success btn-sm mb-2">
                         <i class="fab fa-whatsapp mr-2"></i>
                         WhatsApp Staf/Admin
                     </button>
-                    <button type="button" class="btn btn-success btn-sm" onclick="showWhatsAppModal('mahasiswa')">
+                    <button type="button" class="btn btn-success btn-sm">
                         <i class="fab fa-whatsapp mr-2"></i>
                         WhatsApp Mahasiswa
                     </button>
@@ -205,91 +172,19 @@
             </div>
         </div>
         
-        <!-- Panduan -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">📋 Panduan</h5>
-            </div>
-            <div class="card-body">
-                <div class="timeline timeline-one-side">
-                    <div class="timeline-block">
-                        <span class="timeline-step badge-success">
-                            <i class="ni ni-circle-08"></i>
-                        </span>
-                        <div class="timeline-content">
-                            <small class="text-muted">Langkah 1</small>
-                            <p class="text-sm mt-1 mb-0">Pilih kategori penerima pesan</p>
-                        </div>
-                    </div>
-                    <div class="timeline-block">
-                        <span class="timeline-step badge-warning">
-                            <i class="ni ni-single-02"></i>
-                        </span>
-                        <div class="timeline-content">
-                            <small class="text-muted">Langkah 2</small>
-                            <p class="text-sm mt-1 mb-0">Pilih penerima spesifik (jika perlu)</p>
-                        </div>
-                    </div>
-                    <div class="timeline-block">
-                        <span class="timeline-step badge-info">
-                            <i class="ni ni-email-83"></i>
-                        </span>
-                        <div class="timeline-content">
-                            <small class="text-muted">Langkah 3</small>
-                            <p class="text-sm mt-1 mb-0">Tulis subjek dan pesan</p>
-                        </div>
-                    </div>
-                    <div class="timeline-block">
-                        <span class="timeline-step badge-primary">
-                            <i class="ni ni-send"></i>
-                        </span>
-                        <div class="timeline-content">
-                            <small class="text-muted">Langkah 4</small>
-                            <p class="text-sm mt-1 mb-0">Kirim pesan via email</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
     </div>
 </div>
 
-<!-- Modal WhatsApp -->
-<div class="modal fade" id="whatsappModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fab fa-whatsapp text-success mr-2"></i>
-                    Kontak WhatsApp <span id="whatsappCategory"></span>
-                </h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="whatsappContacts">
-                <div class="text-center py-3">
-                    <div class="spinner-border text-success" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <p class="text-muted mt-2">Memuat kontak WhatsApp...</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
+<?php $this->app->endSection('content') ?>
 
-<!-- JavaScript - PASTIKAN JQUERY SUDAH LOAD -->
+<?php $this->app->section() ?>
 <script>
-// Wait for jQuery to be ready
+// Global variables
+let dataKontak = {};
+let formLoaded = false;
+
 $(document).ready(function() {
     console.log('🚀 Kontak form jQuery ready');
-    
-    // Initialize when page loads
     loadKontakData();
     
     // Form change handlers
@@ -317,10 +212,6 @@ $(document).ready(function() {
     });
 });
 
-// Global variables
-let dataKontak = {};
-let formLoaded = false;
-
 function loadKontakData() {
     console.log('📡 Starting AJAX call to get_kontak_data');
     
@@ -329,7 +220,7 @@ function loadKontakData() {
     hideElement('kontakForm');
     
     $.ajax({
-        url: '<?= base_url() ?>kaprodi/kontak/get_kontak_data',
+        url: base_url + 'kaprodi/kontak/get_kontak_data',
         type: 'GET',
         dataType: 'json',
         timeout: 10000,
@@ -339,7 +230,6 @@ function loadKontakData() {
             if (response.status === 'success') {
                 dataKontak = response.data;
                 
-                updateDropdownPenerima();
                 updateKontakInfo();
                 
                 hideElement('loadingIndicator');
@@ -370,16 +260,6 @@ function loadKontakData() {
             updateKontakInfoError();
         }
     });
-}
-
-function updateDropdownPenerima() {
-    $('#kategori_penerima').html(`
-        <option value="">-- Pilih Kategori Penerima --</option>
-        <option value="dosen">👨‍🏫 Dosen</option>
-        <option value="staf">👨‍💼 Staf/Admin</option>
-        <option value="mahasiswa">🎓 Mahasiswa (Pilih Spesifik)</option>
-        <option value="semua_mahasiswa">👥 Semua Mahasiswa Program Studi</option>
-    `);
 }
 
 function updatePenerima() {
@@ -418,7 +298,6 @@ function updatePenerima() {
     dataList.forEach(function(item) {
         let displayText = item.nama;
         if (item.nim) displayText += ` (${item.nim})`;
-        if (item.nama_prodi) displayText += ` - ${item.nama_prodi}`;
         
         options += `<option value="${item.id}">${displayText}</option>`;
     });
@@ -446,19 +325,8 @@ function updateInfoPenerima() {
     if (penerima) {
         let infoHtml = `
             <div class="alert alert-info alert-sm">
-                <div class="row">
-                    <div class="col">
-                        <strong>📧 Email:</strong> ${penerima.email || 'Tidak tersedia'}<br>
-                        <strong>📱 Telepon:</strong> ${penerima.nomor_telepon || 'Tidak tersedia'}
-        `;
-        
-        if (penerima.nama_prodi) {
-            infoHtml += `<br><strong>🏛️ Program Studi:</strong> ${penerima.nama_prodi}`;
-        }
-        
-        infoHtml += `
-                    </div>
-                </div>
+                <strong>📧 Email:</strong> ${penerima.email || 'Tidak tersedia'}<br>
+                <strong>📱 Telepon:</strong> ${penerima.nomor_telepon || 'Tidak tersedia'}
             </div>
         `;
         
@@ -540,7 +408,7 @@ function kirimPesan() {
     submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Mengirim...');
     
     $.ajax({
-        url: '<?= base_url() ?>kaprodi/kontak/kirim_pesan',
+        url: base_url + 'kaprodi/kontak/kirim_pesan',
         type: 'POST',
         dataType: 'json',
         data: {
@@ -577,58 +445,12 @@ function kirimPesan() {
     });
 }
 
-function useTemplate(type) {
-    const templates = {
-        'rapat': {
-            subjek: 'Undangan Rapat Koordinasi',
-            pesan: 'Dengan hormat,\n\nDengan ini kami mengundang Bapak/Ibu untuk menghadiri rapat koordinasi yang akan dilaksanakan pada:\n\nHari/Tanggal: [Isi tanggal]\nWaktu: [Isi waktu]\nTempat: [Isi tempat]\nAgenda: [Isi agenda]\n\nDemikian undangan ini kami sampaikan. Atas perhatian dan kehadiran Bapak/Ibu, kami ucapkan terima kasih.\n\nHormat kami,\nKaprodi'
-        },
-        'pengumuman': {
-            subjek: 'Pengumuman Penting',
-            pesan: 'Kepada Yth.,\n\nDengan ini kami sampaikan pengumuman sebagai berikut:\n\n[Isi pengumuman]\n\nDemikian pengumuman ini kami sampaikan untuk dapat diketahui dan dilaksanakan sebagaimana mestinya.\n\nTerima kasih atas perhatiannya.\n\nHormat kami,\nKaprodi'
-        },
-        'koordinasi': {
-            subjek: 'Koordinasi Kegiatan Akademik',
-            pesan: 'Kepada Yth.,\n\nDalam rangka koordinasi kegiatan akademik, kami perlu mendiskusikan beberapa hal berikut:\n\n1. [Point pertama]\n2. [Point kedua]\n3. [Point ketiga]\n\nMohon dapat memberikan tanggapan atau masukan terkait hal tersebut.\n\nTerima kasih atas kerjasamanya.\n\nHormat kami,\nKaprodi'
-        },
-        'reminder': {
-            subjek: 'Reminder: [Isi kegiatan]',
-            pesan: 'Kepada Yth.,\n\nIni adalah pengingat untuk:\n\n[Isi reminder]\n\nBatas waktu: [Isi deadline]\n\nMohon untuk dapat menyelesaikan tepat waktu sesuai jadwal yang telah ditentukan.\n\nTerima kasih atas perhatiannya.\n\nHormat kami,\nKaprodi'
-        },
-        'evaluasi': {
-            subjek: 'Evaluasi dan Tindak Lanjut',
-            pesan: 'Kepada Yth.,\n\nBerdasarkan evaluasi yang telah dilakukan, berikut adalah hasil dan tindak lanjut yang perlu dilakukan:\n\n[Isi hasil evaluasi]\n\nTindak lanjut:\n1. [Action item 1]\n2. [Action item 2]\n\nMohon dapat ditindaklanjuti sesuai dengan ketentuan yang berlaku.\n\nTerima kasih.\n\nHormat kami,\nKaprodi'
-        },
-        'lainnya': {
-            subjek: 'Informasi Program Studi',
-            pesan: 'Kepada Yth.,\n\nDengan ini kami sampaikan informasi terkait program studi sebagai berikut:\n\n[Isi informasi]\n\nApabila ada pertanyaan atau hal yang perlu dikonsultasikan, silakan menghubungi kami.\n\nTerima kasih atas perhatiannya.\n\nHormat kami,\nKaprodi'
-        }
-    };
-    
-    if (templates[type]) {
-        $('#subjek').val(templates[type].subjek);
-        $('#pesan').val(templates[type].pesan);
-        $('#pesan').trigger('input');
-    }
-}
-
 function resetForm() {
     $('#kontakForm')[0].reset();
     $('#detailPenerima').hide();
     $('#infoPenerima').html('');
     $('#karakterCount').text('0').removeClass('text-warning text-danger');
     hideAlert();
-}
-
-function showWhatsAppModal(category) {
-    const categoryLabels = {
-        'dosen': 'Dosen',
-        'staf': 'Staf/Admin', 
-        'mahasiswa': 'Mahasiswa'
-    };
-    
-    $('#whatsappCategory').text(categoryLabels[category]);
-    $('#whatsappModal').modal('show');
 }
 
 // Utility functions
@@ -660,3 +482,6 @@ function hideAlert() {
     $('#alertContainer').hide();
 }
 </script>
+<?php $this->app->endSection('script') ?>
+
+<?php $this->app->init() ?>

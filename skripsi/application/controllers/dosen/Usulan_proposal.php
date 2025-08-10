@@ -210,6 +210,7 @@ class Usulan_proposal extends CI_Controller {
             // DISETUJUI - Kirim ke mahasiswa dan kaprodi
             $this->_kirim_email_persetujuan_mahasiswa($proposal, $dosen_nama);
             $this->_kirim_email_persetujuan_kaprodi($proposal, $dosen_nama);
+            $this->_kirim_notifikasi_staf($proposal, $dosen_nama);
         } else {
             // DITOLAK - Kirim HANYA ke kaprodi (HAPUS kirim ke mahasiswa)
             $this->_kirim_email_penolakan_kaprodi($proposal, $dosen_nama, $komentar);
@@ -314,24 +315,187 @@ class Usulan_proposal extends CI_Controller {
         $subject = 'Pembimbing Menyetujui Penunjukan - ' . $proposal->nama_mahasiswa;
         
         $message = "
-        <h3>Pembimbing Menyetujui Penunjukan</h3>
-        <p>Yth. Kaprodi {$proposal->nama_prodi},</p>
-        <p>Dosen <strong>{$dosen_nama}</strong> telah <strong>menyetujui</strong> penunjukan sebagai pembimbing untuk:</p>
-        <ul>
-            <li><strong>Mahasiswa:</strong> {$proposal->nama_mahasiswa} ({$proposal->nim})</li>
-            <li><strong>Judul:</strong> {$proposal->judul}</li>
-        </ul>
-        <p><strong>Status:</strong> Mahasiswa dapat memulai proses bimbingan (Phase 2).</p>
-        <p>Login sistem: <a href='" . base_url('kaprodi/dashboard') . "'>Dashboard Kaprodi</a></p>
-        <p><br>Terima kasih.<br>Sistem SIM Tugas Akhir</p>
-        ";
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Persetujuan Dosen Pembimbing</title>
+        </head>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+            <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                
+                <!-- Header -->
+                <div style='text-align: center; background-color: #28a745; color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;'>
+                    <h2 style='margin: 0;'>✅ Persetujuan Dosen Pembimbing</h2>
+                </div>
+                
+                <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                    Yth. <strong>Kaprodi {$proposal->nama_prodi}</strong>,
+                </p>
+                
+                <p style='margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;'>
+                    Dengan hormat, kami informasikan bahwa dosen <strong>{$dosen_nama}</strong> telah 
+                    <strong style='color: #28a745;'>menyetujui</strong> penunjukan sebagai pembimbing.
+                </p>
+                
+                <!-- Data Mahasiswa -->
+                <div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                    <h3 style='color: #495057; margin: 0 0 15px 0; font-size: 18px;'>📋 Detail Mahasiswa:</h3>
+                    <table style='width: 100%; border-collapse: collapse;'>
+                        <tr>
+                            <td style='padding: 8px 0; font-weight: bold; width: 30%;'>Nama:</td>
+                            <td style='padding: 8px 0;'>{$proposal->nama_mahasiswa}</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; font-weight: bold;'>NIM:</td>
+                            <td style='padding: 8px 0;'>{$proposal->nim}</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; font-weight: bold;'>Judul Proposal:</td>
+                            <td style='padding: 8px 0;'>{$proposal->judul}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Status Update -->
+                <div style='background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <h4 style='color: #155724; margin: 0 0 10px 0; font-size: 16px;'>🎯 Status Terkini:</h4>
+                    <p style='margin: 0; color: #155724; font-weight: bold;'>
+                        Mahasiswa dapat memulai <strong>Phase 2: Bimbingan Proposal</strong>
+                    </p>
+                </div>
+                
+                <!-- Action Button -->
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='" . base_url('kaprodi/dashboard') . "' 
+                       style='background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                       📊 Dashboard Kaprodi
+                    </a>
+                </div>
+                
+                <!-- Footer -->
+                <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; border-radius: 0 0 8px 8px;'>
+                    <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                        Email ini dikirim secara otomatis oleh<br>
+                        <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                        STK Santo Yakobus Merauke
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>";
         
         $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
         $this->email->to($proposal->email_kaprodi);
         $this->email->subject($subject);
         $this->email->message($message);
         
-        $this->email->send();
+        return $this->email->send();
+    }
+
+    /**
+     * TAMBAHAN: Kirim notifikasi ke staf ketika dosen menyetujui penunjukan
+     */
+    private function _kirim_notifikasi_staf($proposal, $dosen_nama) {
+        try {
+            // Ambil email staf dari tabel dosen dengan level = '5'
+            $this->db->select('email, nama');
+            $this->db->where('level', '5');
+            $this->db->where('status', '1'); // Pastikan staf aktif
+            $staf_list = $this->db->get('dosen')->result();
+            
+            if (empty($staf_list)) {
+                log_message('warning', 'No active staff found for pembimbing notification');
+                return false;
+            }
+            
+            $subject = 'Dosen Pembimbing Disetujui - ' . $proposal->nama_mahasiswa;
+            
+            $message = "
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='UTF-8'>
+                <title>Notifikasi Pembimbing Disetujui</title>
+            </head>
+            <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+                <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                    
+                    <!-- Header -->
+                    <div style='text-align: center; background-color: #17a2b8; color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;'>
+                        <h2 style='margin: 0;'>📢 Notifikasi untuk Staf</h2>
+                    </div>
+                    
+                    <p style='margin: 0 0 20px 0; font-size: 16px;'>
+                        Yth. <strong>Tim Staf Akademik</strong>,
+                    </p>
+                    
+                    <p style='margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;'>
+                        Dosen <strong>{$dosen_nama}</strong> telah menyetujui penunjukan sebagai pembimbing untuk mahasiswa berikut:
+                    </p>
+                    
+                    <!-- Data Mahasiswa -->
+                    <div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                        <table style='width: 100%; border-collapse: collapse;'>
+                            <tr>
+                                <td style='padding: 8px 0; font-weight: bold; width: 30%;'>Mahasiswa:</td>
+                                <td style='padding: 8px 0;'>{$proposal->nama_mahasiswa} ({$proposal->nim})</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px 0; font-weight: bold;'>Program Studi:</td>
+                                <td style='padding: 8px 0;'>{$proposal->nama_prodi}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px 0; font-weight: bold;'>Dosen Pembimbing:</td>
+                                <td style='padding: 8px 0;'>{$dosen_nama}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px 0; font-weight: bold;'>Status:</td>
+                                <td style='padding: 8px 0; color: #28a745; font-weight: bold;'>Phase 2: Bimbingan</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 3px; margin: 20px 0;'>
+                        <p style='margin: 0; font-size: 12px; color: #856404; text-align: center;'>
+                            <strong>ℹ️ Info:</strong> Mahasiswa telah memasuki fase bimbingan proposal
+                        </p>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style='background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6; margin: 20px -20px -20px -20px; border-radius: 0 0 8px 8px;'>
+                        <p style='margin: 0; font-size: 12px; color: #6c757d;'>
+                            Email ini dikirim secara otomatis oleh<br>
+                            <strong>Sistem Informasi Manajemen Tugas Akhir</strong><br>
+                            STK Santo Yakobus Merauke
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            
+            // Kirim ke semua staf
+            foreach ($staf_list as $staf) {
+                $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
+                $this->email->to($staf->email);
+                $this->email->subject($subject);
+                $this->email->message($message);
+                
+                if ($this->email->send()) {
+                    log_message('info', 'Notifikasi berhasil dikirim ke staf: ' . $staf->email);
+                } else {
+                    log_message('error', 'Gagal kirim notifikasi ke staf: ' . $staf->email);
+                }
+                
+                $this->email->clear(); // Clear untuk email berikutnya
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Exception saat kirim notifikasi ke staf: ' . $e->getMessage());
+            return false;
+        }
     }
 
     private function _kirim_email_penolakan_mahasiswa($proposal, $dosen_nama, $komentar) {

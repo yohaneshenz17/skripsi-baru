@@ -548,6 +548,14 @@
               </a>
             </li>
             
+            <!-- 7. Kontak Form -->
+            <li class="nav-item">
+              <a class="nav-link" href="<?= base_url() ?>dosen/kontak">
+                <i class="ni ni-email-83 text-success"></i>
+                <span class="nav-link-text">Kontak Form</span>
+              </a>
+            </li>
+            
             <!-- Profil -->
             <li class="nav-item">
               <a class="nav-link" href="<?= base_url() ?>dosen/profil">

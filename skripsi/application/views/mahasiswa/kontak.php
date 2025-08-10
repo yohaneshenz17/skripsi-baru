@@ -169,6 +169,21 @@
             </div>
         </div>
         
+        <!-- 🆕 TAMBAHAN: WhatsApp Dosen Pembimbing -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">💬 Kontak WhatsApp</h5>
+            </div>
+            <div class="card-body" id="whatsappInfo">
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-success" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-2 mb-0">Mengecek dosen pembimbing...</p>
+                </div>
+            </div>
+        </div>
+        
         <!-- Tips -->
         <div class="card">
             <div class="card-header">
@@ -324,43 +339,15 @@ function makeRequest(endpoint, data = null, timeout = 30000) {
     });
 }
 
-// Show alert dengan auto-hide
-function showAlert(type, message, autoHide = true) {
-    const alertContainer = document.getElementById('alertContainer');
-    const alertMessage = document.getElementById('alertMessage');
-    const alertDiv = alertContainer.querySelector('.alert');
-    
-    // Map type to Bootstrap classes
-    const typeMap = {
-        'error': 'danger',
-        'success': 'success',
-        'warning': 'warning',
-        'info': 'info'
-    };
-    
-    const bootstrapType = typeMap[type] || 'info';
-    
-    alertMessage.innerHTML = message;
-    alertDiv.className = `alert alert-${bootstrapType} alert-dismissible fade show`;
-    alertContainer.style.display = 'block';
-    
-    // Scroll to alert
-    alertContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    
-    // Auto hide
-    if (autoHide) {
-        setTimeout(() => {
-            alertContainer.style.display = 'none';
-        }, 5000);
-    }
-}
-
 // Document ready
 $(document).ready(function() {
     console.log('📚 Document ready - initializing STK Yakobus Kontak Form');
     
     // Load kontak data
     loadKontakData();
+    
+    // 🆕 Load WhatsApp info
+    loadWhatsAppInfo();
     
     // Event listeners
     $('#penerima_role').change(updatePenerima);
@@ -375,6 +362,154 @@ $(document).ready(function() {
     
     updateCharCount();
 });
+
+// 🆕 Load WhatsApp info untuk dosen pembimbing
+function loadWhatsAppInfo() {
+    console.log('🔄 Loading WhatsApp dosen pembimbing...');
+    
+    makeRequest('mahasiswa/kontak/get_dosen_pembimbing')
+        .then(function(response) {
+            console.log('🔍 WhatsApp Response:', response); // DEBUG LOG
+            
+            if (response.status === 'success' && response.data.dosen_pembimbing) {
+                const dosen = response.data.dosen_pembimbing;
+                updateWhatsAppInfo(dosen);
+                
+                // Show debug info if available
+                if (response.debug) {
+                    console.log('📊 Debug Info:', response.debug);
+                }
+            } else {
+                updateWhatsAppInfoEmpty(response.message || 'Belum ada dosen pembimbing');
+                
+                // Show debug info for troubleshooting
+                if (response.debug) {
+                    console.log('📊 Debug Info:', response.debug);
+                    
+                    // Add debug panel to UI for admin
+                    if (environment === 'development') {
+                        const debugHtml = `
+                            <div class="alert alert-warning mt-2">
+                                <small>
+                                    <strong>🔧 DEBUG MODE:</strong><br>
+                                    <code>Proposal Count: ${response.debug.proposal_count || 0}</code><br>
+                                    <button class="btn btn-xs btn-outline-secondary mt-1" onclick="console.log(${JSON.stringify(response.debug)})">
+                                        View Full Debug
+                                    </button>
+                                </small>
+                            </div>
+                        `;
+                        $('#whatsappInfo').append(debugHtml);
+                    }
+                }
+            }
+        })
+        .catch(function(error) {
+            console.error('❌ Load WhatsApp info failed:', error);
+            updateWhatsAppInfoError();
+        });
+}
+
+// 🆕 Update WhatsApp info dengan data dosen pembimbing
+function updateWhatsAppInfo(dosen) {
+    let html = '';
+    
+    if (dosen.nomor_telepon) {
+        // Format nomor telepon untuk WhatsApp (hapus karakter non-digit, tambah 62)
+        let phoneNumber = dosen.nomor_telepon.replace(/\D/g, '');
+        if (phoneNumber.startsWith('0')) {
+            phoneNumber = '62' + phoneNumber.substring(1);
+        } else if (!phoneNumber.startsWith('62')) {
+            phoneNumber = '62' + phoneNumber;
+        }
+        
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=Assalamualaikum%20Pak/Bu%20${encodeURIComponent(dosen.nama)},%20saya%20${encodeURIComponent('<?= $this->session->userdata('nama') ?>')}%20(NIM:%20<?= $this->session->userdata('nim') ?>)%20mahasiswa%20bimbingan%20Bapak/Ibu.%20`;
+        
+        html = `
+            <div class="media align-items-center mb-3">
+                <div class="media-object">
+                    <div class="avatar rounded-circle bg-success">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                </div>
+                <div class="media-body ml-3">
+                    <h6 class="mb-0">🎓 ${dosen.nama}</h6>
+                    <p class="text-sm text-muted mb-1">Dosen Pembimbing</p>
+                    <small class="text-success">📱 ${dosen.nomor_telepon}</small>
+                </div>
+            </div>
+            
+            <a href="${whatsappUrl}" target="_blank" class="btn btn-success btn-block">
+                <i class="fab fa-whatsapp mr-2"></i>
+                Chat WhatsApp
+            </a>
+            
+            <div class="alert alert-info mt-3">
+                <small>
+                    <i class="ni ni-check-bold"></i>
+                    <strong>Status:</strong> ${dosen.status_pembimbing}
+                </small>
+            </div>
+        `;
+    } else {
+        html = `
+            <div class="media align-items-center mb-3">
+                <div class="media-object">
+                    <div class="avatar rounded-circle bg-warning">
+                        <i class="ni ni-single-02"></i>
+                    </div>
+                </div>
+                <div class="media-body ml-3">
+                    <h6 class="mb-0">🎓 ${dosen.nama}</h6>
+                    <p class="text-sm text-muted mb-1">Dosen Pembimbing</p>
+                    <small class="text-warning">📱 Nomor tidak tersedia</small>
+                </div>
+            </div>
+            
+            <button class="btn btn-outline-secondary btn-block" disabled>
+                <i class="ni ni-mobile-button mr-2"></i>
+                Nomor HP Tidak Tersedia
+            </button>
+            
+            <div class="alert alert-warning">
+                <small>
+                    <i class="ni ni-notification-70"></i>
+                    Dosen pembimbing belum mengisi nomor HP. Gunakan email untuk komunikasi.
+                </small>
+            </div>
+        `;
+    }
+    
+    $('#whatsappInfo').html(html);
+}
+
+// 🆕 Update WhatsApp info untuk kasus belum ada dosen pembimbing
+function updateWhatsAppInfoEmpty(message) {
+    $('#whatsappInfo').html(`
+        <div class="text-center py-3">
+            <i class="ni ni-single-02 fa-2x text-muted mb-3"></i>
+            <h6 class="text-muted">Belum Ada Dosen Pembimbing</h6>
+            <p class="text-sm text-muted mb-3">${message}</p>
+            <small class="text-info">
+                <i class="ni ni-bulb-61"></i>
+                Silakan ajukan proposal terlebih dahulu untuk mendapatkan dosen pembimbing
+            </small>
+        </div>
+    `);
+}
+
+// 🆕 Update WhatsApp info untuk error
+function updateWhatsAppInfoError() {
+    $('#whatsappInfo').html(`
+        <div class="alert alert-warning">
+            <small>
+                <i class="ni ni-notification-70"></i>
+                <strong>Perhatian:</strong> Tidak dapat memuat info dosen pembimbing. 
+                <a href="#" onclick="loadWhatsAppInfo()" class="alert-link">Coba lagi</a>
+            </small>
+        </div>
+    `);
+}
 
 // Load kontak data - UPDATED untuk struktur baru
 function loadKontakData() {
@@ -631,8 +766,6 @@ function updateCharCount() {
     }
 }
 
-// PERBAIKAN untuk function kirimPesan() dan resetForm()
-
 function kirimPesan() {
     console.log('📨 Attempting to send email...');
     
@@ -720,7 +853,7 @@ function resetForm() {
     showAlert('info', '🔄 Form telah direset', true);
 }
 
-// PERBAIKAN: Function showAlert yang lebih robust
+// Show alert dengan auto-hide yang robust
 function showAlert(type, message, autoHide = true) {
     const alertContainer = document.getElementById('alertContainer');
     const alertMessage = document.getElementById('alertMessage');

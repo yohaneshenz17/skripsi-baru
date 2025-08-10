@@ -548,7 +548,15 @@
               </a>
             </li>
             
-            <!-- 7. Kontak Form -->
+            <!-- 7. Daftar Penguji (Ditambahkan setelah Publikasi) -->
+            <li class="nav-item">
+              <a class="nav-link" href="<?= base_url() ?>dosen/daftar_penguji">
+                <i class="fa fa-gavel text-orange"></i>
+                <span class="nav-link-text">Daftar Penguji</span>
+              </a>
+            </li>
+
+            <!-- 8. Kontak Form -->
             <li class="nav-item">
               <a class="nav-link" href="<?= base_url() ?>dosen/kontak">
                 <i class="ni ni-email-83 text-success"></i>

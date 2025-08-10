@@ -478,6 +478,41 @@ $route['dosen/publikasi/download_file/(:any)/(:num)'] = 'dosen/publikasi/downloa
 // Laporan
 $route['dosen/publikasi/laporan'] = 'dosen/publikasi/laporan';
 
+// =================================================================
+// TAMBAHAN BARU: DAFTAR PENGUJI - LETAKKAN SETELAH ROUTES PUBLIKASI DOSEN
+// =================================================================
+
+// Dashboard Daftar Penguji
+$route['dosen/daftar_penguji'] = 'dosen/daftar_penguji/index';
+$route['dosen/daftar_penguji/index'] = 'dosen/daftar_penguji/index';
+
+// Detail Seminar sebagai Penguji
+$route['dosen/daftar_penguji/detail_proposal/(:num)'] = 'dosen/daftar_penguji/detail_proposal/$1';
+$route['dosen/daftar_penguji/detail_skripsi/(:num)'] = 'dosen/daftar_penguji/detail_skripsi/$1';
+
+// AJAX Endpoints
+$route['dosen/daftar_penguji/ajax_data'] = 'dosen/daftar_penguji/ajax_data';
+$route['dosen/daftar_penguji/ajax_stats'] = 'dosen/daftar_penguji/ajax_stats';
+
+// Export dan Print Functions
+$route['dosen/daftar_penguji/export_pdf'] = 'dosen/daftar_penguji/export_pdf';
+$route['dosen/daftar_penguji/export_bulk'] = 'dosen/daftar_penguji/export_bulk';
+$route['dosen/daftar_penguji/print_detail/(:any)/(:num)'] = 'dosen/daftar_penguji/print_detail/$1/$2';
+
+// Alias URL dengan dash untuk konsistensi
+$route['dosen/daftar-penguji'] = 'dosen/daftar_penguji/index';
+$route['dosen/daftar-penguji/detail-proposal/(:num)'] = 'dosen/daftar_penguji/detail_proposal/$1';
+$route['dosen/daftar-penguji/detail-skripsi/(:num)'] = 'dosen/daftar_penguji/detail_skripsi/$1';
+$route['dosen/daftar-penguji/export-pdf'] = 'dosen/daftar_penguji/export_pdf';
+
+// Optional: Routes untuk integrasi dengan penilaian (jika ada controller terpisah)
+$route['dosen/daftar_penguji/penilaian_proposal/(:num)'] = 'dosen/penilaian_proposal/input/$1';
+$route['dosen/daftar_penguji/penilaian_skripsi/(:num)'] = 'dosen/penilaian_skripsi/input/$1';
+
+// Optional: Routes untuk berita acara (jika menggunakan controller daftar_penguji)
+$route['dosen/daftar_penguji/berita_acara_proposal/(:num)'] = 'dosen/daftar_penguji/berita_acara_proposal/$1';
+$route['dosen/daftar_penguji/berita_acara_skripsi/(:num)'] = 'dosen/daftar_penguji/berita_acara_skripsi/$1';
+
 // =====================================================
 //      PROFIL DAN UTILITAS
 // =====================================================

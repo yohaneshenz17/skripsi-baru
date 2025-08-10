@@ -1323,17 +1323,22 @@ $verifikasi = $dataUser ? $dataUser->status : '';
     // Active menu highlighting
     function setActiveMenu() {
         const currentPath = window.location.pathname;
-        const currentPage = currentPath.split('/').pop() || 'dashboard';
         
-        // Remove all active classes
+        // Remove all active classes first
         $('.sidenav .nav-link').removeClass('active');
         
-        // Add active class to current page
+        // Use exact path matching instead of substring matching
         $('.sidenav .nav-link').each(function() {
             const href = $(this).attr('href');
-            if (href && (href.includes(currentPage) || 
-                (currentPage === 'dashboard' && href.includes('dashboard')))) {
-                $(this).addClass('active');
+            if (href) {
+                // Extract path from href and normalize
+                const linkPath = href.replace(window.location.origin, '').replace(base_url, '');
+                const normalizedCurrentPath = currentPath.replace(base_url, '');
+                
+                // Exact path matching
+                if (normalizedCurrentPath === linkPath) {
+                    $(this).addClass('active');
+                }
             }
         });
     }

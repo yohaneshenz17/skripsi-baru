@@ -2,12 +2,8 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
- * Kontak Controller untuk Dosen - STK Yakobus
- * Disesuaikan dengan permintaan:
- * 1. Dropdown "Kirim Ke": Mahasiswa (khususnya mahasiswa bimbingan)
- * 2. Detail penerima sesuai database mahasiswa
- * 3. Email real, bukan notifikasi sistem
- * 4. WhatsApp contact untuk mahasiswa bimbingan
+ * Kontak Controller untuk Dosen - MINIMAL FIX VERSION
+ * Perbaikan minimal hanya untuk masalah email ke mahasiswa bimbingan
  */
 class Kontak extends MY_Controller
 {
@@ -38,7 +34,6 @@ class Kontak extends MY_Controller
     
     /**
      * Get data untuk form kontak dosen
-     * Mengembalikan: mahasiswa_bimbingan, semua_mahasiswa, kaprodi_list, staf_list
      */
     public function get_kontak_data()
     {
@@ -63,7 +58,6 @@ class Kontak extends MY_Controller
             ];
             
             // 1. Get MAHASISWA BIMBINGAN berdasarkan proposal yang disetujui
-            // FIXED: Sesuaikan dengan enum database (1 = approved, 2 = approved)
             $this->db->select('
                 m.id, m.nim, m.nama, m.email, m.nomor_telepon, 
                 p.nama as nama_prodi,
@@ -74,8 +68,7 @@ class Kontak extends MY_Controller
             $this->db->join('mahasiswa m', 'pm.mahasiswa_id = m.id');
             $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
             $this->db->where('pm.dosen_id', $dosen_id);
-            // PERBAIKAN: Gunakan status yang sesuai dengan enum database
-            $this->db->where_in('pm.status_kaprodi', ['1', '2']); // 1=setuju, 2=approved
+            $this->db->where_in('pm.status_kaprodi', ['1', '2']); // FIXED: status enum
             $this->db->order_by('m.nama', 'ASC');
             $query_bimbingan = $this->db->get();
             
@@ -83,7 +76,7 @@ class Kontak extends MY_Controller
                 $data['mahasiswa_bimbingan'] = $query_bimbingan->result();
             }
             
-            // 2. Get SEMUA MAHASISWA (untuk opsi tambahan jika perlu)
+            // 2. Get SEMUA MAHASISWA
             $this->db->select('
                 m.id, m.nim, m.nama, m.email, m.nomor_telepon,
                 p.nama as nama_prodi
@@ -97,7 +90,7 @@ class Kontak extends MY_Controller
                 $data['semua_mahasiswa'] = $query_mahasiswa->result();
             }
             
-            // 3. Get KAPRODI untuk komunikasi dengan atasan
+            // 3. Get KAPRODI
             $this->db->select('d.id, d.nama, d.email, d.nomor_telepon, p.nama as nama_prodi');
             $this->db->from('dosen d');
             $this->db->join('prodi p', 'd.id = p.dosen_id', 'left');
@@ -109,7 +102,7 @@ class Kontak extends MY_Controller
                 $data['kaprodi_list'] = $query_kaprodi->result();
             }
             
-            // 4. Get STAF/ADMIN untuk keperluan administratif
+            // 4. Get STAF/ADMIN
             $this->db->select('id, nama, email, nomor_telepon');
             $this->db->from('dosen');
             $this->db->where('level', '5');
@@ -128,9 +121,7 @@ class Kontak extends MY_Controller
                     'semua_mahasiswa_count' => count($data['semua_mahasiswa']),
                     'kaprodi_count' => count($data['kaprodi_list']),
                     'staf_count' => count($data['staf_list']),
-                    'dosen_id' => $dosen_id,
-                    'last_query_bimbingan' => $this->db->last_query(),
-                    'environment' => ENVIRONMENT
+                    'dosen_id' => $dosen_id
                 ]
             ]);
             
@@ -162,8 +153,6 @@ class Kontak extends MY_Controller
                 return;
             }
             
-            // Get mahasiswa bimbingan dengan status proposal yang disetujui
-            // FIXED: Gunakan enum database yang benar
             $this->db->select('
                 m.id, m.nim, m.nama, m.email, m.nomor_telepon,
                 p.nama as nama_prodi,
@@ -176,8 +165,7 @@ class Kontak extends MY_Controller
             $this->db->join('prodi p', 'm.prodi_id = p.id', 'left');
             $this->db->join('jurnal_bimbingan jb', 'pm.id = jb.proposal_id', 'left');
             $this->db->where('pm.dosen_id', $dosen_id);
-            // PERBAIKAN: Gunakan status yang sesuai dengan enum database
-            $this->db->where_in('pm.status_kaprodi', ['1', '2']); // 1=setuju, 2=approved
+            $this->db->where_in('pm.status_kaprodi', ['1', '2']); // FIXED: status enum
             $this->db->group_by('m.id, pm.id');
             $this->db->order_by('pm.created_at', 'DESC');
             
@@ -203,8 +191,7 @@ class Kontak extends MY_Controller
                         'total_mahasiswa' => 0
                     ],
                     'debug' => [
-                        'dosen_id' => $dosen_id,
-                        'query_executed' => $this->db->last_query()
+                        'dosen_id' => $dosen_id
                     ]
                 ]);
             }
@@ -216,8 +203,6 @@ class Kontak extends MY_Controller
                 'status' => 'error', 
                 'message' => 'Database error: ' . $e->getMessage(),
                 'debug' => [
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
                     'dosen_id' => $dosen_id ?? 'NULL'
                 ]
             ]);
@@ -225,7 +210,7 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Kirim pesan via EMAIL - REAL EMAIL
+     * Kirim pesan via EMAIL - MINIMAL FIX VERSION
      */
     public function kirim_pesan()
     {
@@ -234,7 +219,7 @@ class Kontak extends MY_Controller
         try {
             // Validasi input
             $input = [
-                'penerima_kategori' => $this->input->post('penerima_kategori'), // mahasiswa/kaprodi/staf
+                'penerima_kategori' => $this->input->post('penerima_kategori'),
                 'penerima_id' => $this->input->post('penerima_id'),
                 'subjek' => trim($this->input->post('subjek')),
                 'pesan' => trim($this->input->post('pesan')),
@@ -267,10 +252,16 @@ class Kontak extends MY_Controller
                 return;
             }
             
-            // Get penerima data berdasarkan kategori
+            // FIXED: Get penerima data berdasarkan kategori
             $penerima = $this->_get_penerima_data($input['penerima_kategori'], $input['penerima_id']);
+            
             if (!$penerima) {
-                echo json_encode(['status' => 'error', 'message' => 'Data penerima tidak ditemukan']);
+                log_message('error', 'Penerima tidak ditemukan: kategori=' . $input['penerima_kategori'] . ', id=' . $input['penerima_id']);
+                
+                echo json_encode([
+                    'status' => 'error', 
+                    'message' => 'Data penerima tidak ditemukan. Kategori: ' . $input['penerima_kategori'] . ', ID: ' . $input['penerima_id']
+                ]);
                 return;
             }
             
@@ -296,25 +287,27 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Get data penerima berdasarkan kategori
+     * FIXED: Get data penerima berdasarkan kategori
      */
     private function _get_penerima_data($kategori, $penerima_id)
     {
-        if ($kategori === 'mahasiswa') {
+        // PERBAIKAN UTAMA: Tambahkan kategori yang sesuai dengan frontend
+        if ($kategori === 'mahasiswa_bimbingan' || $kategori === 'semua_mahasiswa' || $kategori === 'mahasiswa') {
             return $this->db->get_where('mahasiswa', ['id' => $penerima_id])->row();
         } elseif ($kategori === 'kaprodi' || $kategori === 'staf') {
             return $this->db->get_where('dosen', ['id' => $penerima_id])->row();
         }
+        
         return null;
     }
     
     /**
-     * Send REAL EMAIL menggunakan konfigurasi yang sudah terbukti bekerja
+     * Send REAL EMAIL - SIMPLIFIED VERSION
      */
     private function _send_real_email($dosen, $penerima, $input)
     {
         try {
-            // Konfigurasi email yang sudah TERBUKTI BEKERJA di STK Yakobus
+            // Konfigurasi email
             $config = [
                 'protocol' => 'smtp',
                 'smtp_host' => 'smtp.gmail.com',
@@ -349,8 +342,8 @@ class Kontak extends MY_Controller
             
             $subject = $prioritas_text . '[SIM-TA STK] ' . $input['subjek'];
             
-            // HTML Email Template
-            $message = $this->_get_email_template($dosen, $penerima, $input);
+            // SIMPLIFIED HTML Email Template
+            $message = $this->_get_simple_email_template($dosen, $penerima, $input);
             
             // Setup email
             $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK St. Yakobus');
@@ -377,186 +370,83 @@ class Kontak extends MY_Controller
     }
     
     /**
-     * Email template untuk dosen
+     * SIMPLIFIED Email template untuk menghindari syntax error
      */
-    private function _get_email_template($dosen, $penerima, $input)
+    private function _get_simple_email_template($dosen, $penerima, $input)
     {
-        $prioritas_badge = '';
         $prioritas_color = '#007bff';
-        
         if ($input['prioritas'] === 'high') {
-            $prioritas_badge = '<span style="background: #ffc107; color: #000; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">PRIORITAS TINGGI</span>';
             $prioritas_color = '#ffc107';
         } elseif ($input['prioritas'] === 'urgent') {
-            $prioritas_badge = '<span style="background: #dc3545; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">URGENT</span>';
             $prioritas_color = '#dc3545';
         }
         
-        // Tentukan salutation berdasarkan jenis penerima
         $penerima_nim = isset($penerima->nim) ? $penerima->nim : '';
         $role_penerima = $penerima_nim ? 'Mahasiswa' : 'Dosen/Staf';
         
-        $template = "
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset='utf-8'>
-            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-            <title>{$input['subjek']}</title>
-        </head>
-        <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f8f9fa;'>
-            <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #f8f9fa;'>
-                <tr>
-                    <td align='center' style='padding: 40px 20px;'>
-                        <table width='600' cellpadding='0' cellspacing='0' style='background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;'>
-                            <!-- Header -->
-                            <tr>
-                                <td style='background: linear-gradient(135deg, {$prioritas_color} 0%, #0056b3 100%); padding: 30px; text-align: center;'>
-                                    <h1 style='color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;'>
-                                        🎓 Pesan dari Dosen
-                                    </h1>
-                                    <p style='color: #ffffff; margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;'>
-                                        Sistem Informasi Manajemen Tugas Akhir
-                                    </p>
-                                </td>
-                            </tr>";
-                            
-        if ($prioritas_badge) {
-            $template .= "
-                            <tr>
-                                <td style='padding: 15px 30px 0 30px; text-align: center;'>
-                                    {$prioritas_badge}
-                                </td>
-                            </tr>";
-        }
+        $template = '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>' . htmlspecialchars($input['subjek']) . '</title>
+</head>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #ddd; border-radius: 8px;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, ' . $prioritas_color . ' 0%, #0056b3 100%); padding: 30px; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 24px;">🎓 Pesan dari Dosen</h1>
+            <p style="margin: 10px 0 0 0; font-size: 14px;">STK Santo Yakobus Merauke</p>
+        </div>
         
-        $template .= "
-                            <!-- Content -->
-                            <tr>
-                                <td style='padding: 30px;'>
-                                    <h2 style='color: #333333; margin: 0 0 20px 0; font-size: 20px;'>
-                                        {$input['subjek']}
-                                    </h2>
-                                    
-                                    <p style='color: #333333; margin: 0 0 15px 0; font-size: 16px;'>
-                                        Yth. <strong>{$penerima->nama}</strong>,
-                                    </p>
-                                    
-                                    <div style='background-color: #f8f9fa; border-left: 4px solid {$prioritas_color}; padding: 20px; margin: 20px 0; border-radius: 4px;'>
-                                        " . nl2br(htmlspecialchars($input['pesan'])) . "
-                                    </div>
-                                    
-                                    <p style='color: #666666; margin: 20px 0 0 0; font-size: 14px;'>
-                                        Hormat saya,<br>
-                                        <strong>{$dosen->nama}</strong><br>
-                                        <em>Dosen STK Santo Yakobus</em>
-                                    </p>
-                                </td>
-                            </tr>
-                            
-                            <!-- Sender Info -->
-                            <tr>
-                                <td style='background-color: #f8f9fa; padding: 20px 30px; border-top: 1px solid #dee2e6;'>
-                                    <h4 style='color: #333333; margin: 0 0 15px 0; font-size: 16px;'>
-                                        👨‍🏫 Informasi Pengirim:
-                                    </h4>
-                                    <table width='100%' cellpadding='0' cellspacing='0'>
-                                        <tr>
-                                            <td style='color: #666666; font-size: 14px; padding: 3px 0; width: 100px;'>
-                                                <strong>Nama:</strong>
-                                            </td>
-                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
-                                                {$dosen->nama}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style='color: #666666; font-size: 14px; padding: 3px 0;'>
-                                                <strong>Jabatan:</strong>
-                                            </td>
-                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
-                                                Dosen STK Santo Yakobus
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style='color: #666666; font-size: 14px; padding: 3px 0;'>
-                                                <strong>Email:</strong>
-                                            </td>
-                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
-                                                <a href='mailto:{$dosen->email}' style='color: {$prioritas_color}; text-decoration: none;'>
-                                                    {$dosen->email}
-                                                </a>
-                                            </td>
-                                        </tr>";
-                                        
-        if ($dosen->nomor_telepon) {
-            $template .= "
-                                        <tr>
-                                            <td style='color: #666666; font-size: 14px; padding: 3px 0;'>
-                                                <strong>Telepon:</strong>
-                                            </td>
-                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
-                                                <a href='tel:{$dosen->nomor_telepon}' style='color: {$prioritas_color}; text-decoration: none;'>
-                                                    {$dosen->nomor_telepon}
-                                                </a>
-                                            </td>
-                                        </tr>";
-        }
+        <!-- Content -->
+        <div style="padding: 30px;">
+            <h2 style="color: #333333; margin: 0 0 20px 0;">' . htmlspecialchars($input['subjek']) . '</h2>
+            
+            <p style="color: #333333; margin: 0 0 15px 0;">
+                Yth. <strong>' . htmlspecialchars($penerima->nama) . '</strong>,
+            </p>
+            
+            <div style="background-color: #f8f9fa; border-left: 4px solid ' . $prioritas_color . '; padding: 20px; margin: 20px 0;">
+                ' . nl2br(htmlspecialchars($input['pesan'])) . '
+            </div>
+            
+            <p style="color: #666666; margin: 20px 0 0 0;">
+                Hormat saya,<br>
+                <strong>' . htmlspecialchars($dosen->nama) . '</strong><br>
+                <em>Dosen STK Santo Yakobus</em>
+            </p>
+        </div>
         
-        $template .= "
-                                        <tr>
-                                            <td style='color: #666666; font-size: 14px; padding: 3px 0;'>
-                                                <strong>Waktu:</strong>
-                                            </td>
-                                            <td style='color: #333333; font-size: 14px; padding: 3px 0;'>
-                                                " . date('d F Y, H:i') . " WIT
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>";
-                            
-        // Tambahan info untuk mahasiswa
+        <!-- Info -->
+        <div style="background-color: #f8f9fa; padding: 20px; border-top: 1px solid #dee2e6;">
+            <h4 style="margin: 0 0 15px 0; color: #333333;">📋 Informasi Kontak:</h4>
+            <p style="margin: 0; font-size: 14px; color: #666666;">
+                <strong>Penerima:</strong> ' . htmlspecialchars($penerima->nama) . ' (' . $role_penerima . ')<br>';
+                
         if ($penerima_nim) {
-            $template .= "
-                            <tr>
-                                <td style='background-color: #e7f3ff; padding: 15px 30px; border-top: 1px solid #b3d9ff;'>
-                                    <p style='margin: 0; font-size: 12px; color: #0066cc; text-align: center;'>
-                                        <strong>📚 Untuk Mahasiswa:</strong> 
-                                        Jika ada pertanyaan lebih lanjut, silakan balas email ini atau hubungi dosen melalui WhatsApp 
-                                        (jika tersedia) untuk komunikasi yang lebih cepat.
-                                    </p>
-                                </td>
-                            </tr>";
+            $template .= '<strong>NIM:</strong> ' . htmlspecialchars($penerima->nim) . '<br>';
         }
         
-        $template .= "
-                            <!-- Footer -->
-                            <tr>
-                                <td style='background-color: #333333; color: #ffffff; padding: 20px 30px; text-align: center;'>
-                                    <p style='margin: 0 0 10px 0; font-size: 16px; font-weight: bold;'>
-                                        🏫 STK Santo Yakobus Merauke
-                                    </p>
-                                    <p style='margin: 0; font-size: 12px; opacity: 0.8; line-height: 1.4;'>
-                                        Jl. Missi 2, Mandala, Merauke, Papua Selatan<br>
-                                        Telepon: (0971) 333-0264 | Email: sipd@stkyakobus.ac.id<br>
-                                        <a href='https://stkyakobus.ac.id' style='color: #ffffff; text-decoration: none;'>www.stkyakobus.ac.id</a>
-                                    </p>
-                                    <p style='margin: 15px 0 0 0; font-size: 11px; opacity: 0.6;'>
-                                        Email ini dikirim otomatis dari Sistem Informasi Manajemen Tugas Akhir. 
-                                        Silakan balas langsung ke email pengirim untuk merespons.
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </body>
-        </html>";
+        $template .= '<strong>Email:</strong> ' . htmlspecialchars($penerima->email) . '<br>
+                <strong>Pengirim:</strong> ' . htmlspecialchars($dosen->nama) . ' (Dosen)<br>
+                <strong>Waktu:</strong> ' . date('d F Y, H:i') . ' WIT
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #333333; color: #ffffff; padding: 20px; text-align: center;">
+            <p style="margin: 0; font-size: 14px;">
+                🏫 STK Santo Yakobus Merauke<br>
+                Jl. Missi 2, Mandala, Merauke, Papua Selatan<br>
+                Email: sipd@stkyakobus.ac.id | Tel: (0971) 333-0264
+            </p>
+        </div>
+    </div>
+</body>
+</html>';
         
         return $template;
     }
 }
 
 /* End of file Kontak.php */
-/* Location: ./application/controllers/dosen/Kontak.php */

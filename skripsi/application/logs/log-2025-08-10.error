@@ -19,3 +19,271 @@ ERROR - 2025-08-10 10:17:20 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-08-10 10:17:26 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-08-10 10:40:35 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-08-10 11:11:36 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 11:19:43 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 11:30:41 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 11:57:29 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 12:05:09 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 12:21:07 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 12:42:55 --> Query error: Unknown column 'pm.dosen_pembimbing_id' in 'where clause' - Invalid query: SELECT `pm`.*, `d`.`nama` as `nama_dosen`, `d`.`email` as `email_dosen`, `d`.`nomor_telepon`
+FROM `proposal_mahasiswa` `pm`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_pembimbing_id` = `d`.`id`
+WHERE `pm`.`mahasiswa_id` = '76'
+AND `pm`.`status_kaprodi` = 'approved'
+AND `pm`.`dosen_pembimbing_id` IS NOT NULL
+ORDER BY `pm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-08-10 12:42:57 --> Query error: Unknown column 'pm.dosen_pembimbing_id' in 'where clause' - Invalid query: SELECT `pm`.*, `d`.`nama` as `nama_dosen`, `d`.`email` as `email_dosen`, `d`.`nomor_telepon`
+FROM `proposal_mahasiswa` `pm`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_pembimbing_id` = `d`.`id`
+WHERE `pm`.`mahasiswa_id` = '76'
+AND `pm`.`status_kaprodi` = 'approved'
+AND `pm`.`dosen_pembimbing_id` IS NOT NULL
+ORDER BY `pm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-08-10 12:43:54 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 12:43:55 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 12:46:58 --> Query error: Unknown column 'pm.dosen_pembimbing_id' in 'where clause' - Invalid query: SELECT `pm`.*, `d`.`nama` as `nama_dosen`, `d`.`email` as `email_dosen`, `d`.`nomor_telepon`
+FROM `proposal_mahasiswa` `pm`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_pembimbing_id` = `d`.`id`
+WHERE `pm`.`mahasiswa_id` = '76'
+AND `pm`.`status_kaprodi` = 'approved'
+AND `pm`.`dosen_pembimbing_id` IS NOT NULL
+ORDER BY `pm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-08-10 12:47:07 --> Query error: Unknown column 'pm.dosen_pembimbing_id' in 'where clause' - Invalid query: SELECT `pm`.*, `d`.`nama` as `nama_dosen`, `d`.`email` as `email_dosen`, `d`.`nomor_telepon`
+FROM `proposal_mahasiswa` `pm`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_pembimbing_id` = `d`.`id`
+WHERE `pm`.`mahasiswa_id` = '76'
+AND `pm`.`status_kaprodi` = 'approved'
+AND `pm`.`dosen_pembimbing_id` IS NOT NULL
+ORDER BY `pm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-08-10 12:47:11 --> Query error: Unknown column 'pm.dosen_pembimbing_id' in 'where clause' - Invalid query: SELECT `pm`.*, `d`.`nama` as `nama_dosen`, `d`.`email` as `email_dosen`, `d`.`nomor_telepon`
+FROM `proposal_mahasiswa` `pm`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_pembimbing_id` = `d`.`id`
+WHERE `pm`.`mahasiswa_id` = '76'
+AND `pm`.`status_kaprodi` = 'approved'
+AND `pm`.`dosen_pembimbing_id` IS NOT NULL
+ORDER BY `pm`.`created_at` DESC
+ LIMIT 1
+ERROR - 2025-08-10 12:50:39 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 12:52:08 --> Query error: Unknown column 'pm.dosen_pembimbing_id' in 'field list' - Invalid query: SELECT `pm`.*, `d`.`nama` as `nama_dosen`, `d`.`email` as `email_dosen`, `d`.`nomor_telepon`, `pm`.`status_kaprodi`, `pm`.`dosen_pembimbing_id`
+FROM `proposal_mahasiswa` `pm`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_pembimbing_id` = `d`.`id`
+WHERE `pm`.`mahasiswa_id` = '76'
+ORDER BY `pm`.`created_at` DESC
+ LIMIT 5
+ERROR - 2025-08-10 12:52:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 12:52:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 12:53:30 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 12:58:40 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 13:10:54 --> Query error: Unknown column 'p.nama' in 'field list' - Invalid query: SELECT `m`.`id`, `m`.`nim`, `m`.`nama`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `pm`.`judul` as `judul_proposal`, `pm`.`status_kaprodi` as `status_proposal`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_kaprodi` = 'approved'
+ORDER BY `m`.`nama` ASC
+ERROR - 2025-08-10 13:11:08 --> Query error: Unknown column 'p.nama' in 'field list' - Invalid query: SELECT `m`.`id`, `m`.`nim`, `m`.`nama`, `m`.`email`, `m`.`nomor_telepon`, `p`.`nama` as `nama_prodi`, `pm`.`judul` as `judul_proposal`, `pm`.`status_kaprodi` as `status_proposal`
+FROM `proposal_mahasiswa` `pm`
+JOIN `mahasiswa` `m` ON `pm`.`mahasiswa_id` = `m`.`id`
+LEFT JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+WHERE `pm`.`dosen_id` = '25'
+AND `pm`.`status_kaprodi` = 'approved'
+ORDER BY `m`.`nama` ASC
+ERROR - 2025-08-10 13:19:47 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 13:20:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 13:20:24 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 13:23:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 13:23:13 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 13:24:20 --> Severity: error --> Exception: syntax error, unexpected identifier "style" /home/stkp7133/public_html/skripsi/application/controllers/dosen/Kontak.php 592
+ERROR - 2025-08-10 13:34:38 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 13:49:42 --> 404 Page Not Found: dosen/Usulan_proposal/print_detail
+ERROR - 2025-08-10 13:49:48 --> 404 Page Not Found: dosen/Bimbingan/mahasiswa
+ERROR - 2025-08-10 13:51:54 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 13:52:24 --> 404 Page Not Found: dosen/Bimbingan/mahasiswa
+ERROR - 2025-08-10 13:54:31 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 13:54:39 --> 404 Page Not Found: dosen/Bimbingan/mahasiswa
+ERROR - 2025-08-10 13:54:44 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal_print.php 232
+ERROR - 2025-08-10 13:54:44 --> Severity: Warning --> Undefined property: stdClass::$tanggal_disetujui /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal_print.php 236
+ERROR - 2025-08-10 14:00:20 --> 404 Page Not Found: dosen/Bimbingan/mahasiswa
+ERROR - 2025-08-10 14:00:37 --> Severity: Warning --> Undefined property: stdClass::$tanggal_pengajuan /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal_print.php 232
+ERROR - 2025-08-10 14:00:37 --> Severity: Warning --> Undefined property: stdClass::$tanggal_disetujui /home/stkp7133/public_html/skripsi/application/views/dosen/usulan_proposal_print.php 236
+ERROR - 2025-08-10 14:35:45 --> Severity: error --> Exception: Call to undefined method App_lib::stop() /home/stkp7133/public_html/skripsi/application/views/kaprodi/kontak.php 720
+ERROR - 2025-08-10 14:41:52 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 14:44:17 --> Severity: Compile Error --> Cannot declare class Kontak, because the name is already in use /home/stkp7133/public_html/skripsi/application/views/kaprodi/kontak.php 0
+ERROR - 2025-08-10 14:47:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:47:58 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:48:19 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:48:19 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:49:52 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:49:52 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:52:26 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 14:57:06 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:57:06 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:57:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 14:57:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:03:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:03:41 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:05:10 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 15:06:02 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 15:06:02 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 15:06:35 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 15:10:15 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 15:17:43 --> Severity: error --> Exception: Too few arguments to function App_lib::endSection(), 0 passed in /home/stkp7133/public_html/skripsi/application/views/kaprodi/kontak.php on line 768 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/libraries/App_lib.php 65
+ERROR - 2025-08-10 15:19:25 --> Severity: error --> Exception: Too few arguments to function App_lib::endSection(), 0 passed in /home/stkp7133/public_html/skripsi/application/views/kaprodi/kontak.php on line 768 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/libraries/App_lib.php 65
+ERROR - 2025-08-10 15:19:26 --> Severity: error --> Exception: Too few arguments to function App_lib::endSection(), 0 passed in /home/stkp7133/public_html/skripsi/application/views/kaprodi/kontak.php on line 768 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/libraries/App_lib.php 65
+ERROR - 2025-08-10 15:19:27 --> Severity: error --> Exception: Too few arguments to function App_lib::endSection(), 0 passed in /home/stkp7133/public_html/skripsi/application/views/kaprodi/kontak.php on line 768 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/libraries/App_lib.php 65
+ERROR - 2025-08-10 15:19:45 --> Severity: error --> Exception: Too few arguments to function App_lib::endSection(), 0 passed in /home/stkp7133/public_html/skripsi/application/views/kaprodi/kontak.php on line 768 and exactly 1 expected /home/stkp7133/public_html/skripsi/application/libraries/App_lib.php 65
+ERROR - 2025-08-10 15:23:37 --> Severity: Notice --> ob_clean(): Failed to delete buffer. No buffer to delete /home/stkp7133/public_html/skripsi/application/libraries/App_lib.php 68
+ERROR - 2025-08-10 15:23:37 --> Severity: Notice --> ob_clean(): Failed to delete buffer. No buffer to delete /home/stkp7133/public_html/skripsi/application/libraries/App_lib.php 68
+ERROR - 2025-08-10 15:28:49 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:28:49 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:28:56 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:28:56 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:28:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:28:59 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:31:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:31:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:32:30 --> Query error: Unknown column 'pengirim_id' in 'field list' - Invalid query: INSERT INTO `notifikasi` (`pengirim_id`, `penerima_id`, `judul`, `pesan`, `status`, `created_at`) VALUES ('10', '25', 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nDengan hormat,\r\nPerlu koordinasi terkait:\r\n\r\n🎯 [Isi kegiatan]\r\n📅 [Isi jadwal]\r\n\r\nMohon konfirmasi.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 'unread', '2025-08-10 15:32:30')
+ERROR - 2025-08-10 15:33:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:33:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:33:07 --> Query error: Unknown column 'pengirim_id' in 'field list' - Invalid query: INSERT INTO `notifikasi` (`pengirim_id`, `penerima_id`, `judul`, `pesan`, `status`, `created_at`) VALUES ('10', '25', 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nDengan hormat,\r\nPerlu koordinasi terkait:\r\n\r\n🎯 [Isi kegiatan]\r\n📅 [Isi jadwal]\r\n\r\nMohon konfirmasi.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 'unread', '2025-08-10 15:33:07')
+ERROR - 2025-08-10 15:35:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:35:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:37:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:37:11 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:43:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:43:02 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:48:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:48:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:48:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 15:48:18 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:01:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:01:10 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:01:46 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:01:46 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:01:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:01:57 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:03:17 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 16:05:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:05:42 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:13:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:13:53 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:14:40 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:14:40 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:16:49 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:16:49 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 16:37:14 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 16:51:03 --> 404 Page Not Found: dosen/Daftar_penguji/index
+ERROR - 2025-08-10 16:56:00 --> Query error: Unknown column 'CASE WHEN spm.dosen_penguji1_id = 25 THEN "Penguji 1" WHEN spm.dosen_penguji2_id = 25 THEN "Penguji 2" ELSE "Tidak Diketahui" END' in 'field list' - Invalid query: SELECT `spm`.`id`, `spm`.`proposal_id`, `spm`.`mahasiswa_id`, `spm`.`status`, `spm`.`current_step`, `spm`.`tanggal_seminar`, `spm`.`jam_seminar`, `spm`.`tempat_seminar`, `spm`.`dosen_penguji1_id`, `spm`.`dosen_penguji2_id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `pm`.`judul`, `pm`.`dosen_id` as `pembimbing_id`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_penguji1`.`nama` as `nama_penguji1`, `d_penguji2`.`nama` as `nama_penguji2`, `pr`.`nama` as `nama_prodi`, `CASE WHEN spm`.`dosen_penguji1_id = 25 THEN "Penguji 1" WHEN spm`.`dosen_penguji2_id = 25 THEN "Penguji 2" ELSE "Tidak Diketahui" END` as `posisi_penguji`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `spm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `dosen` `d_penguji1` ON `spm`.`dosen_penguji1_id` = `d_penguji1`.`id`
+LEFT JOIN `dosen` `d_penguji2` ON `spm`.`dosen_penguji2_id` = `d_penguji2`.`id`
+WHERE (`spm`.`dosen_penguji1_id` = 25 OR `spm`.`dosen_penguji2_id` = 25)
+ORDER BY `spm`.`tanggal_seminar` DESC, `spm`.`created_at` DESC
+ERROR - 2025-08-10 17:04:30 --> Query error: Unknown column 'CASE WHEN spm.dosen_penguji1_id = 25 THEN "Penguji 1" WHEN spm.dosen_penguji2_id = 25 THEN "Penguji 2" ELSE "Tidak Diketahui" END' in 'field list' - Invalid query: SELECT `spm`.`id`, `spm`.`proposal_id`, `spm`.`mahasiswa_id`, `spm`.`status`, `spm`.`current_step`, `spm`.`tanggal_seminar`, `spm`.`jam_seminar`, `spm`.`tempat_seminar`, `spm`.`dosen_penguji1_id`, `spm`.`dosen_penguji2_id`, `m`.`nim`, `m`.`nama` as `nama_mahasiswa`, `m`.`email` as `email_mahasiswa`, `pm`.`judul`, `pm`.`dosen_id` as `pembimbing_id`, `d_pembimbing`.`nama` as `nama_pembimbing`, `d_penguji1`.`nama` as `nama_penguji1`, `d_penguji2`.`nama` as `nama_penguji2`, `pr`.`nama` as `nama_prodi`, `CASE WHEN spm`.`dosen_penguji1_id = 25 THEN "Penguji 1" WHEN spm`.`dosen_penguji2_id = 25 THEN "Penguji 2" ELSE "Tidak Diketahui" END` as `posisi_penguji`
+FROM `seminar_proposal_mahasiswa` `spm`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `mahasiswa` `m` ON `spm`.`mahasiswa_id` = `m`.`id`
+JOIN `prodi` `pr` ON `m`.`prodi_id` = `pr`.`id`
+LEFT JOIN `dosen` `d_pembimbing` ON `pm`.`dosen_id` = `d_pembimbing`.`id`
+LEFT JOIN `dosen` `d_penguji1` ON `spm`.`dosen_penguji1_id` = `d_penguji1`.`id`
+LEFT JOIN `dosen` `d_penguji2` ON `spm`.`dosen_penguji2_id` = `d_penguji2`.`id`
+WHERE (`spm`.`dosen_penguji1_id` = 25 OR `spm`.`dosen_penguji2_id` = 25)
+ORDER BY `spm`.`tanggal_seminar` DESC, `spm`.`created_at` DESC
+ERROR - 2025-08-10 17:07:46 --> Severity: error --> Exception: Call to undefined method Pdf::loadHtml() /home/stkp7133/public_html/skripsi/application/controllers/dosen/Daftar_penguji.php 223
+ERROR - 2025-08-10 17:12:37 --> 404 Page Not Found: dosen/Daftar_penguji/ajax_stats
+ERROR - 2025-08-10 17:17:37 --> 404 Page Not Found: dosen/Daftar_penguji/ajax_stats
+ERROR - 2025-08-10 17:17:49 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 17:22:37 --> 404 Page Not Found: dosen/Daftar_penguji/ajax_stats
+ERROR - 2025-08-10 17:27:37 --> 404 Page Not Found: dosen/Daftar_penguji/ajax_stats
+ERROR - 2025-08-10 17:32:37 --> 404 Page Not Found: dosen/Daftar_penguji/ajax_stats
+ERROR - 2025-08-10 17:38:24 --> 404 Page Not Found: dosen/Daftar_penguji/ajax_stats
+ERROR - 2025-08-10 17:46:10 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 17:46:10 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 17:46:12 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 17:46:12 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 17:46:17 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 17:46:17 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 17:47:03 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:03 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:03 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:47:15 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:15 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:15 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:47:21 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:21 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:21 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:47:32 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:32 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:32 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:47:42 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:42 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:47:42 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:48:02 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:02 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:02 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:48:04 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:04 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:04 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:48:05 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:05 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:05 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:48:08 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:08 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:08 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:48:14 --> Severity: Warning --> Undefined array key "nomor_telepon" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:14 --> Severity: Warning --> Undefined array key "nomor_telepon_orang_dekat" /home/stkp7133/public_html/skripsi/application/controllers/Home.php 48
+ERROR - 2025-08-10 17:48:14 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/system/core/Exceptions.php:271) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-10 17:48:52 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 17:57:38 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 18:13:41 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 18:13:41 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 18:13:41 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-10 18:13:44 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 18:13:44 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 18:14:06 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 18:14:06 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 18:14:11 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 18:14:11 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 18:14:30 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-08-10 18:19:25 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 18:19:25 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 18:19:29 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-08-10 18:21:26 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 18:21:26 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 18:21:28 --> 404 Page Not Found: staf/Seminar_skripsi/index
+ERROR - 2025-08-10 18:21:31 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-10 18:21:31 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-10 18:21:34 --> 404 Page Not Found: staf/Seminar_proposal/index
+ERROR - 2025-08-10 18:38:26 --> Severity: error --> Exception: Unable to locate the model you have specified: Penilaian_seminar_model /home/stkp7133/public_html/skripsi/system/core/Loader.php 344
+ERROR - 2025-08-10 18:39:03 --> Severity: error --> Exception: Unable to locate the model you have specified: Penilaian_seminar_model /home/stkp7133/public_html/skripsi/system/core/Loader.php 344
+ERROR - 2025-08-10 19:00:20 --> Severity: error --> Exception: Unable to locate the model you have specified: Penilaian_seminar_model /home/stkp7133/public_html/skripsi/system/core/Loader.php 344
+ERROR - 2025-08-10 20:03:15 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 20:30:14 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:11:01 --> 404 Page Not Found: Assets/essence
+ERROR - 2025-08-10 22:11:16 --> 404 Page Not Found: Assets/essence
+ERROR - 2025-08-10 22:11:17 --> 404 Page Not Found: Assets/essence
+ERROR - 2025-08-10 22:11:34 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:11:56 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 22:12:05 --> 404 Page Not Found: Cdn/vendor
+ERROR - 2025-08-10 22:12:24 --> 404 Page Not Found: Assets/essence
+ERROR - 2025-08-10 22:12:25 --> 404 Page Not Found: Assets/essence
+ERROR - 2025-08-10 22:12:31 --> 404 Page Not Found: Assets/essence
+ERROR - 2025-08-10 22:12:39 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:40 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:41 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:42 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:43 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:44 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:46 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:47 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:48 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:49 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:52 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-10 22:12:53 --> 404 Page Not Found: Cdn/img

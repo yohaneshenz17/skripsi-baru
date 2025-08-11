@@ -569,14 +569,170 @@ $route['staf/bimbingan/export_all'] = 'staf/bimbingan/export_all';
 $route['staf/bimbingan/cetak_jurnal/(:num)'] = 'staf/bimbingan/cetak_jurnal/$1';
 
 // 3. Seminar Proposal - Penjadwalan dan Berita Acara
-$route['staf/seminar-proposal'] = 'staf/seminar_proposal';
-$route['staf/seminar_proposal'] = 'staf/seminar_proposal';
+// =============================================================================
+// a. DASHBOARD DAN NAVIGASI UTAMA
+// =============================================================================
+
+// Dashboard utama seminar proposal staf
+$route['staf/seminar_proposal'] = 'staf/seminar_proposal/index';
 $route['staf/seminar_proposal/index'] = 'staf/seminar_proposal/index';
+
+// Alias dengan dash untuk konsistensi URL (user-friendly)
+$route['staf/seminar-proposal'] = 'staf/seminar_proposal/index';
+
+// =============================================================================
+// b. DETAIL DAN MONITORING
+// =============================================================================
+
+// Detail seminar proposal untuk administrasi staf
 $route['staf/seminar_proposal/detail/(:num)'] = 'staf/seminar_proposal/detail/$1';
-$route['staf/seminar_proposal/penjadwalan'] = 'staf/seminar_proposal/penjadwalan';
-$route['staf/seminar_proposal/berita_acara/(:num)'] = 'staf/seminar_proposal/berita_acara/$1';
-$route['staf/seminar_proposal/export_berita_acara/(:num)'] = 'staf/seminar_proposal/export_berita_acara/$1';
-$route['staf/seminar_proposal/cetak_berita_acara/(:num)'] = 'staf/seminar_proposal/cetak_berita_acara/$1';
+
+// Alias detail dengan dash
+$route['staf/seminar-proposal/detail/(:num)'] = 'staf/seminar_proposal/detail/$1';
+
+// =============================================================================
+// c. DOWNLOAD/PRINT DOKUMEN ADMINISTRASI
+// =============================================================================
+
+// 3.1 Form Permohonan Seminar Proposal
+$route['staf/seminar_proposal/download_form_permohonan/(:num)'] = 'staf/seminar_proposal/download_form_permohonan/$1';
+$route['staf/seminar_proposal/print_form_permohonan/(:num)'] = 'staf/seminar_proposal/download_form_permohonan/$1'; // Alias print
+
+// 3.2 Undangan Seminar Proposal
+$route['staf/seminar_proposal/download_undangan/(:num)'] = 'staf/seminar_proposal/download_undangan/$1';
+$route['staf/seminar_proposal/print_undangan/(:num)'] = 'staf/seminar_proposal/download_undangan/$1'; // Alias print
+
+// 3.3 Berita Acara Seminar Proposal
+$route['staf/seminar_proposal/download_berita_acara/(:num)'] = 'staf/seminar_proposal/download_berita_acara/$1';
+$route['staf/seminar_proposal/print_berita_acara/(:num)'] = 'staf/seminar_proposal/download_berita_acara/$1'; // Alias print
+
+// 3.4 Form Penilaian Seminar Proposal
+// Download untuk penguji spesifik
+$route['staf/seminar_proposal/download_form_penilaian/(:num)/(:any)'] = 'staf/seminar_proposal/download_form_penilaian/$1/$2';
+// Download untuk semua penguji (default)
+$route['staf/seminar_proposal/download_form_penilaian/(:num)'] = 'staf/seminar_proposal/download_form_penilaian/$1/all';
+// Alias print
+$route['staf/seminar_proposal/print_form_penilaian/(:num)/(:any)'] = 'staf/seminar_proposal/download_form_penilaian/$1/$2';
+$route['staf/seminar_proposal/print_form_penilaian/(:num)'] = 'staf/seminar_proposal/download_form_penilaian/$1/all';
+
+// 3.5 Rekapitulasi Nilai Akhir
+$route['staf/seminar_proposal/download_rekapitulasi_nilai/(:num)'] = 'staf/seminar_proposal/download_rekapitulasi_nilai/$1';
+$route['staf/seminar_proposal/print_rekapitulasi_nilai/(:num)'] = 'staf/seminar_proposal/download_rekapitulasi_nilai/$1'; // Alias print
+
+// =============================================================================
+// d. INPUT DAN EDIT PENILAIAN
+// =============================================================================
+
+// Input penilaian seminar proposal (GET: show form, POST: process form)
+$route['staf/seminar_proposal/input_penilaian/(:num)'] = 'staf/seminar_proposal/input_penilaian/$1';
+
+// Alias edit (same function, different semantic meaning)
+$route['staf/seminar_proposal/edit_penilaian/(:num)'] = 'staf/seminar_proposal/input_penilaian/$1';
+
+// =============================================================================
+// e. AJAX ENDPOINTS UNTUK INTERAKTIVITAS
+// =============================================================================
+
+// AJAX endpoint untuk mendapatkan statistik dashboard
+$route['staf/seminar_proposal/ajax_statistics'] = 'staf/seminar_proposal/ajax_statistics';
+
+// AJAX endpoint untuk mendapatkan data table (jika menggunakan server-side processing)
+$route['staf/seminar_proposal/ajax_datatable'] = 'staf/seminar_proposal/ajax_datatable';
+
+// AJAX endpoint untuk quick actions
+$route['staf/seminar_proposal/ajax_quick_action'] = 'staf/seminar_proposal/ajax_quick_action';
+
+// AJAX endpoint untuk auto-save draft penilaian
+$route['staf/seminar_proposal/ajax_save_draft_penilaian'] = 'staf/seminar_proposal/ajax_save_draft_penilaian';
+
+// AJAX endpoint untuk validasi real-time
+$route['staf/seminar_proposal/ajax_validate_penilaian'] = 'staf/seminar_proposal/ajax_validate_penilaian';
+
+// =============================================================================
+// f. BULK OPERATIONS (OPTIONAL ADVANCED FEATURES)
+// =============================================================================
+
+// Bulk download multiple dokumen
+$route['staf/seminar_proposal/bulk_download'] = 'staf/seminar_proposal/bulk_download';
+
+// Bulk export data seminar proposal
+$route['staf/seminar_proposal/bulk_export'] = 'staf/seminar_proposal/bulk_export';
+
+// Export statistik dan laporan
+$route['staf/seminar_proposal/export_laporan'] = 'staf/seminar_proposal/export_laporan';
+
+// =============================================================================
+// g. FILTER DAN SEARCH ENDPOINTS
+// =============================================================================
+
+// Advanced filter untuk dashboard
+$route['staf/seminar_proposal/filter'] = 'staf/seminar_proposal/index'; // POST request dengan filter params
+
+// Search dan autocomplete
+$route['staf/seminar_proposal/search'] = 'staf/seminar_proposal/search';
+$route['staf/seminar_proposal/autocomplete'] = 'staf/seminar_proposal/autocomplete';
+
+// =============================================================================
+// h. API ENDPOINTS UNTUK MOBILE/EXTERNAL ACCESS (FUTURE)
+// =============================================================================
+
+// API endpoint untuk mobile app (future development)
+$route['api/staf/seminar_proposal/list'] = 'api/staf/seminar_proposal/list';
+$route['api/staf/seminar_proposal/detail/(:num)'] = 'api/staf/seminar_proposal/detail/$1';
+$route['api/staf/seminar_proposal/statistics'] = 'api/staf/seminar_proposal/statistics';
+
+// =============================================================================
+// i. ALIAS ROUTES UNTUK KOMPATIBILITAS DAN UX
+// =============================================================================
+
+// Alias dengan underscore dan dash (untuk fleksibilitas URL)
+$route['staf/seminar-proposal/download-form-permohonan/(:num)'] = 'staf/seminar_proposal/download_form_permohonan/$1';
+$route['staf/seminar-proposal/download-undangan/(:num)'] = 'staf/seminar_proposal/download_undangan/$1';
+$route['staf/seminar-proposal/download-berita-acara/(:num)'] = 'staf/seminar_proposal/download_berita_acara/$1';
+$route['staf/seminar-proposal/download-form-penilaian/(:num)/(:any)'] = 'staf/seminar_proposal/download_form_penilaian/$1/$2';
+$route['staf/seminar-proposal/download-form-penilaian/(:num)'] = 'staf/seminar_proposal/download_form_penilaian/$1/all';
+$route['staf/seminar-proposal/download-rekapitulasi-nilai/(:num)'] = 'staf/seminar_proposal/download_rekapitulasi_nilai/$1';
+$route['staf/seminar-proposal/input-penilaian/(:num)'] = 'staf/seminar_proposal/input_penilaian/$1';
+
+// Short aliases untuk quick access
+$route['staf/sp'] = 'staf/seminar_proposal/index'; // Short alias untuk dashboard
+$route['staf/sp/detail/(:num)'] = 'staf/seminar_proposal/detail/$1'; // Short alias untuk detail
+$route['staf/sp/penilaian/(:num)'] = 'staf/seminar_proposal/input_penilaian/$1'; // Short alias untuk penilaian
+
+// =============================================================================
+// j. LEGACY SUPPORT DAN BACKWARD COMPATIBILITY
+// =============================================================================
+
+// Legacy URLs (jika ada sistem lama yang perlu didukung)
+$route['staf/administrasi/seminar_proposal'] = 'staf/seminar_proposal/index';
+$route['staf/administrasi/seminar_proposal/(:any)'] = 'staf/seminar_proposal/$1';
+
+// Redirect old URLs to new structure (jika diperlukan)
+$route['staf/seminar/proposal'] = 'staf/seminar_proposal/index';
+$route['staf/seminar/proposal/(:any)'] = 'staf/seminar_proposal/$1';
+
+// =============================================================================
+// k. ERROR HANDLING DAN FALLBACK ROUTES
+// =============================================================================
+
+// Fallback untuk seminar proposal routes yang tidak ditemukan
+$route['staf/seminar_proposal/(.*)'] = 'staf/seminar_proposal/index'; // Redirect ke index jika route tidak ditemukan
+
+// =============================================================================
+// l. INTEGRATION DENGAN WORKFLOW SISTEM LAIN
+// =============================================================================
+
+// Integration dengan sistem notifikasi
+$route['staf/seminar_proposal/send_notification/(:num)'] = 'staf/seminar_proposal/send_notification/$1';
+
+// Integration dengan sistem email
+$route['staf/seminar_proposal/send_email_reminder/(:num)'] = 'staf/seminar_proposal/send_email_reminder/$1';
+
+// Integration dengan calendar system
+$route['staf/seminar_proposal/add_to_calendar/(:num)'] = 'staf/seminar_proposal/add_to_calendar/$1';
+
+// Integration dengan sistem absensi
+$route['staf/seminar_proposal/attendance/(:num)'] = 'staf/seminar_proposal/attendance/$1';
 
 // 4. Penelitian - Surat Izin Penelitian
 

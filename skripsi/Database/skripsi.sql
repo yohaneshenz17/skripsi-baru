@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 10, 2025 at 01:36 PM
+-- Generation Time: Aug 11, 2025 at 08:11 AM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -757,7 +757,9 @@ INSERT INTO `mahasiswa` (`id`, `nim`, `nama`, `prodi_id`, `jenis_kelamin`, `temp
 (74, '2202013', 'FRANSISKA ITLAY', 10, 'perempuan', 'ABULAKMA', '2003-09-06', 'fransiskaitlay1@gmail.com', 'JL. MISSI II', '082155533045', '082136882268', '2.83', '20250809083654_74.png', '$2y$10$w9e6GskmyYWzWYaEESrpJ.vBGdp97yaGre4rPs0X6Wi6ZpXWQ42Ey', '1'),
 (75, '2202037', 'MELTIDIS ARSANTI', 10, 'perempuan', 'Merauke', '2001-12-05', 'arsantingabut@gmail.com', 'Jalan Missi 2', '082248503388', '085244817746', '2,96', NULL, '$2y$10$e/l9QeLSXaUAnhnMOk4m/.WLtyNIHziBMRx0AsTyzDDp5f9kLUOFq', '1'),
 (76, '12345678', 'Mahasiswa Contoh', 10, 'laki-laki', 'Merauke', '2025-08-06', 'yohaneshenz@gmail.com', 'Missi 2, Mandala, Merauke', '09713330264', '09713330265', 'dedimus@stkyakobus.ac.id', '68982727c2edf.jpg', '$2y$10$yDASQ4VTx7YS4LS.gBXKn.Nq22N1y33L0w49kBVD2Q0lZfGF3ITz.', '1'),
-(77, '2002031', 'Gelarda Wota Aga', 10, 'perempuan', 'Busiri', '2001-06-01', 'Gelardawotaa@gmail.com', 'jl.mangga dua merauke', '082248744925', '085244908875', '1.85', '689833d6d9cba.jpg', '$2y$10$BnSMZjHFv9WUd2YnKTpZieh.FD0294ExyS8WXMMG13B6fOlCpbXfW', '1');
+(77, '2002031', 'Gelarda Wota Aga', 10, 'perempuan', 'Busiri', '2001-06-01', 'Gelardawotaa@gmail.com', 'jl.mangga dua merauke', '082248744925', '085244908875', '1.85', '689833d6d9cba.jpg', '$2y$10$BnSMZjHFv9WUd2YnKTpZieh.FD0294ExyS8WXMMG13B6fOlCpbXfW', '1'),
+(78, '2202056', 'YOHAYA MARIANA MABUR', 10, 'perempuan', 'Mur', '2004-12-04', 'yohanamabur@gmail.com', 'Jln, bandara ', '085355978068', '081343157104', '2,96', '20250810055738_78.png', '$2y$10$snLPyN1GgXLlfWhYyf0k3.x8CzCI0TSPPEO9wzgVzxQ8y3IvKzzP6', '1'),
+(79, '2202061', 'Petrus kalikimbian', 10, 'laki-laki', 'Semangga', '1970-01-01', 'kalikimbianpetrus@gmail.com', 'Kampung marga mulya', '082239151418', '+62 813-4405-1729', '2.87', '689913b2393f8.jpg', '$2y$10$NbjuKeo5SvWnlCIuYsriBOt65ZB.Leg35mLaVV/bW.E3s3XqU0Dgu', '1');
 
 -- --------------------------------------------------------
 
@@ -846,7 +848,29 @@ INSERT INTO `notifikasi` (`id`, `jenis`, `untuk_role`, `user_id`, `proposal_id`,
 (4, '', 'dosen', 10, NULL, 'Pengaturan Jadwal Bimbingan', 'Yth. Bapak/Ibu,\n\nSaya ingin mengatur jadwal bimbingan. Apakah Bapak/Ibu berkenan untuk:\n\nWaktu yang saya usulkan:\n- Hari: [Hari]\n- Tanggal: [Tanggal]\n- Jam: [Jam]\n- Tempat: [Tempat/Online]\n\nTerima kasih.\n\nHormat saya,\nYohanes Kandam', 0, '2025-07-21 17:04:37'),
 (5, '', 'dosen', 2, NULL, 'Pengaturan Jadwal Bimbingan', 'Yth. Bapak/Ibu,\n\nSaya ingin mengatur jadwal bimbingan. Apakah Bapak/Ibu berkenan untuk:\n\nWaktu yang saya usulkan:\n- Hari: [Hari]\n- Tanggal: [Tanggal]\n- Jam: [Jam]\n- Tempat: [Tempat/Online]\n\nTerima kasih.\n\nHormat saya,\nYohanes Kandam', 0, '2025-07-21 17:05:48'),
 (7, 'proposal_masuk', 'dosen', 25, NULL, 'Review Pengajuan Seminar Proposal', 'Mahasiswa Mahasiswa Contoh (12345676) telah mengajukan seminar proposal dan membutuhkan review Anda.', 0, '2025-07-28 12:49:09'),
-(9, 'proposal_masuk', 'dosen', 25, 45, '???? Review Pengajuan Seminar Proposal Diperlukan', 'Mahasiswa Mahasiswa Contoh 2 (12345679) telah mengajukan seminar proposal dengan ID #SP-0002 dan membutuhkan review Anda. Harap segera lakukan review melalui sistem.', 0, '2025-07-29 11:42:09');
+(9, 'proposal_masuk', 'dosen', 25, 45, '???? Review Pengajuan Seminar Proposal Diperlukan', 'Mahasiswa Mahasiswa Contoh 2 (12345679) telah mengajukan seminar proposal dengan ID #SP-0002 dan membutuhkan review Anda. Harap segera lakukan review melalui sistem.', 0, '2025-07-29 11:42:09'),
+(10, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nDengan hormat,\r\nPerlu koordinasi terkait:\r\n\r\n???? [Isi kegiatan]\r\n???? [Isi jadwal]\r\n\r\nMohon konfirmasi.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 15:36:46'),
+(11, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nDengan hormat,\r\nPerlu koordinasi terkait:\r\n\r\n???? [Isi kegiatan]\r\n???? [Isi jadwal]\r\n\r\nMohon konfirmasi.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 15:37:03'),
+(12, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nDengan hormat,\r\nPerlu koordinasi terkait:\r\n\r\n???? [Isi kegiatan]\r\n???? [Isi jadwal]\r\n\r\nMohon konfirmasi.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 15:37:36'),
+(13, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nDengan hormat,\r\nPerlu koordinasi terkait:\r\n\r\n???? [Isi kegiatan]\r\n???? [Isi jadwal]\r\n\r\nMohon konfirmasi.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 15:38:14'),
+(14, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nDengan hormat,\r\nPerlu koordinasi terkait:\r\n\r\n???? [Isi kegiatan]\r\n???? [Isi jadwal]\r\n\r\nMohon konfirmasi.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 15:42:23'),
+(15, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 15:46:47'),
+(16, 'proposal_masuk', 'mahasiswa', 34, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 15:47:51'),
+(17, 'proposal_masuk', 'mahasiswa', 12, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 15:48:28'),
+(18, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:01:21'),
+(19, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:01:57'),
+(20, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:05:53'),
+(21, 'proposal_masuk', 'mahasiswa', 26, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:09:42'),
+(22, 'proposal_masuk', 'mahasiswa', 26, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:09:51'),
+(23, 'proposal_masuk', 'mahasiswa', 26, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:14:14'),
+(24, 'proposal_masuk', 'mahasiswa', 26, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:14:14'),
+(25, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:16:50'),
+(26, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:16:50'),
+(27, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:19:41'),
+(28, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:19:41'),
+(29, 'proposal_masuk', 'mahasiswa', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:21:27'),
+(30, '', '', 25, NULL, 'Koordinasi Kegiatan', 'Yth. Bapak/Ibu,\r\n\r\nPerlu koordinasi kegiatan.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:26:49'),
+(31, '', '', 34, NULL, 'Pengumuman Penting', 'Yth. Bapak/Ibu/Saudara/i,\r\n\r\nKami sampaikan pengumuman penting.\r\n\r\nHormat kami,\r\nKaprodi STK Santo Yakobus', 0, '2025-08-10 16:27:09');
 
 -- --------------------------------------------------------
 
@@ -1459,7 +1483,11 @@ INSERT INTO `proposal_mahasiswa` (`id`, `mahasiswa_id`, `judul`, `ringkasan`, `j
 (71, 74, 'STUDI FENOMENOLI: MAKNA PENDIDIKAN DAN MASA DEPAN BAGI PEREMPUAN ASLI PAPUA YANG TIDAK MELANJUTKAN SEKOLAH DI KAMPUNG SIEPKOSSY DISTRIK SIEPKOSSY KABUPATEN JAYAWIJAYA PROVINSI PAPUA PEGUNUNGAN', 'SAYA INGIN MENELITI MENGAPA PEREMPUAN WAMENA TIDAK TERTARIK UNTUK MELANJUTKAN PENDIDIKAN DAN LEBIH TERTARIK DENGAN KENYAMANAN DUNIAWI (HAMIL DILUAR NIKAH) ', 'Kualitatif', 'KAMPUNG SIEPKOSSY DISTRIK SIEPKOSSY KABUPATEN JAYAWIJAYA PROVINSI PAPUA PEGUNUNGAN', 'SAYA INGIN MENELITI MENGAPA PEREMPUAN WAMENA TIDAK TERTARIK UNTUK MELANJUTKAN PENDIDIKAN DAN LEBIH TERTARIK DENGAN KENYAMANAN DUNIAWI (HAMIL DILUAR NIKAH) ', '3ff5563fdf632cf20512893b94773b9e.docx', '2025-08-09 20:36:01', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
 (72, 68, 'KURANGNYA KESADARAN MAHASISWA DALAM MEMANFAATKAN PERPUSTAKAAN SEBAGAI SUMBER REFRENSI DI SEKOLAH TINGGI KATOLIK SANTO YAKOBUS MERAUKE', 'Yang melatarbelakangi dari judul ini adalah karena mahasiswa di kampus STK ini mengangap perpustakaan sebagai tempat pemijamnan buku intuk mengerjakan tugas tugas dari dosen maupun tugas akhir.Dan faktor penyebabnya  karena rendahnya minat baca,penga', 'Kualitatif', 'LOKASIH PENELITIAN : BERTEMPAT  DALAM LINGKUNGAN KAMPUS STK ST. YAKOBUS MERAUKE', 'Yang melatarbelakangi dari judul ini adalah karena mahasiswa di kampus STK ini mengangap perpustakaan sebagai tempat pemijamnan buku intuk mengerjakan tugas tugas dari dosen maupun tugas akhir.Dan faktor penyebabnya  karena rendahnya minat baca,pengaruh hp  menoton tiktok,fesbuk,malas dalam membaca buku dan mahasiswa lebih menghabiskan waktu belajar dengan hal-hal yang di luar kelas. seperti cerita ,jalan menoton di lingkuangan kampus.', 'ed21c43fddb37ac8eab14699a4850ced.pdf', '2025-08-10 07:01:24', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
 (73, 76, 'Judul Ini Hanya untuk Simulasi Sistem Informasi Manajemen Tugas Akhir: Mohon Diabaikan Saja', 'Ini hanya simulasi, Judul Ini Hanya untuk Simulasi Sistem Informasi Manajemen Tugas Akhir: Mohon Diabaikan Saja', 'Kualitatif', 'STK St. Yakobus Merauke', 'Ini hanya simulasi, Judul Ini Hanya untuk Simulasi Sistem Informasi Manajemen Tugas Akhir: Mohon Diabaikan Saja', '5f8bc15ed69b39ea255929826917b48a.pdf', '2025-08-10 12:00:42', 25, 1, NULL, NULL, '0', '1', 'Simulasi saja', '2025-08-10 12:44:20', '1', 'Baik, saya akan membimbing', '2025-08-10 12:46:48', NULL, '2025-08-10 12:44:20', 10, 'bimbingan', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
-(74, 75, 'ANALISISA FAKTOR PEYEBAB DAN DAMPAK KURANGNYA KETERLIBATAN UMAT DALAM HIDUP MENGEREJA DI STASI SANTO YOSEP PAROKI SANTO PETRUS EROM', 'saya ingin meneliti dampak dari kurangnya keterlibatan hidup menggereja umat stasi santo yosep paroki santo petrus erom yang menyebabkan umat kurang mengimani Yesus, pendidikan iman anak dalam keluarga kurang diperhatikan.\r\n ', 'Kualitatif', 'STASI SANTO YOSEP PAROKI SANTO PETRUS EROM', 'saya ingin meneliti dampak dari kurangnya keterlibatan hidup menggereja umat stasi santo yosep paroki santo petrus erom yang menyebabkan umat kurang mengimani Yesus, pendidikan iman anak dalam keluarga kurang diperhatikan.\r\n ', 'f6ef482c2b9270db7bfac57d23129fe2.pdf', '2025-08-10 12:02:25', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
+(74, 75, 'ANALISISA FAKTOR PEYEBAB DAN DAMPAK KURANGNYA KETERLIBATAN UMAT DALAM HIDUP MENGEREJA DI STASI SANTO YOSEP PAROKI SANTO PETRUS EROM', 'saya ingin meneliti dampak dari kurangnya keterlibatan hidup menggereja umat stasi santo yosep paroki santo petrus erom yang menyebabkan umat kurang mengimani Yesus, pendidikan iman anak dalam keluarga kurang diperhatikan.\r\n ', 'Kualitatif', 'STASI SANTO YOSEP PAROKI SANTO PETRUS EROM', 'saya ingin meneliti dampak dari kurangnya keterlibatan hidup menggereja umat stasi santo yosep paroki santo petrus erom yang menyebabkan umat kurang mengimani Yesus, pendidikan iman anak dalam keluarga kurang diperhatikan.\r\n ', 'f6ef482c2b9270db7bfac57d23129fe2.pdf', '2025-08-10 12:02:25', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(75, 77, 'PENGARUH KETERLIBATAN MAHASISWA DALAM KEGIATAN EKSTRAKURIKULER TERHADAP PENGEMBANGAN DIRI DAN PRESTASI AKADEMIK DI STK SANTO YAKOBUS MERAUKE’’', '1.3	Rumusan masalah\r\nBerdasarkan pembatasan masalah tersebut,maka dapat di rumuskan masalah sebagi berikut.\r\n1.Bagaimana prosedur kegiatan ekstrakulikuler dengan menggunakan  mendia gambar untuk  meninkatkan hasil kegiatan ekstrakulikuler pendidikan ', 'Kuantitatif', 'STK SANTO YAKOBUS MERAUKE', '1.3	Rumusan masalah\r\nBerdasarkan pembatasan masalah tersebut,maka dapat di rumuskan masalah sebagi berikut.\r\n1.Bagaimana prosedur kegiatan ekstrakulikuler dengan menggunakan  mendia gambar untuk  meninkatkan hasil kegiatan ekstrakulikuler pendidikan agama katolik pada mahasiswa-mahasiswi  sekolah tinggi katolik santo yakabus merauke?\r\n2.Apakah pengunaan mendia  dapat meningkatkan hasil kegiatan mahasiswa-mahasiswi untuk menikuti kegiatan ekstrakulikuler  sekolah tinggi katolik santo yakobus merauke.\r\n3.Sejauh mana efekivitas penggunaan  mendia dalam meningkatkan hasil kegiatan ekstrakulikuler pada mahasiswi- mahasiswi  sekolah tinggi katolik santo yakobus merauke.\r\n1.4 Tunjuan Penulisan\r\nBerdasarkan masalah yang telah dirumuskan, maka peneliti bertujuan untuk mengetahui hal-hal sebagai berikut:\r\n1.Agar  Menganlisis pengaruh dalam menggunakanan media  dalam  kegiatan  terhadap motivasi  mahasiswa-mahasiswi untuk menikuti ekstrakulikuler di sekolah tinggi katolik santo yakobus merauke.\r\n2.Untuk menenukan besar pengaruh  terhadap mahasiswa-mahasiswi untuk menikuti kegiatan ekstrakulikuler, karena kecendurugan mahasiswa-mahasiswi   tidak aktif  dalam menikuti kegiatan ekstarkulikuler pada hari sabtu di sekolah tinggi santo yakobus merauke.\r\n3.Untuk mendeskripsikan  dalam usulan program sebagai meningkatkan perkembangan  kegiatan ekstrakulikuler di sekolah tinggi katolik santo yakobus merauke.\r\n', 'e583424887ba3f83e1a3a73d53b98970.docx', '2025-08-10 14:19:28', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(76, 78, '                   PERAN KELUARGA DALAM MENGURANGI TINGGINYA \r\nANGKA ANAK PUTUS SEKOLAH DI LINGKUNGAN ST. YOHANES DON BOSKO\r\n', 'permasalahannya mengenai anak-anak yang putus sekolah ', 'Kualitatif', 'Lingkungan Santo Yohanis Don Bosko', 'permasalahannya mengenai anak-anak yang putus sekolah ', 'a48c8eb5699cba88870267689ad16644.docx', '2025-08-10 17:54:56', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(77, 66, 'PARTISIPASIH GEREJA KATOLIK TERHADAP MAMA MAMA ASAMAT YANG MEJADI PEMULUNG BARANG BEKAS DI KOTA MERAUKE', 'mama mama asmat yang menjadi pemulung barang bekas faktornya ekonomi dan faktor lingkungan yang sering terjadi pencuri masyarakat punya barang barnang dirumah', 'Kualitatif', 'stadion maro', 'mama mama asmat yang menjadi pemulung barang bekas faktornya ekonomi dan faktor lingkungan yang sering terjadi pencuri masyarakat punya barang barnang dirumah', 'a31a353bb17d450733dee291b6bb5550.docx', '2025-08-10 18:00:37', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL),
+(78, 79, 'PERAN SAKRAMEN KRISMA DALAM PEMBENTUKAN KARAKTER UMAT KATOLIK DI LINGKUNGAN SANTA MARGARETHA, PAROKI SANTO MIKAEL KUDA MATI\r\n\r\n', 'PERAN SAKRAMEN KRISMA DALAM PEMBENTUKAN KARAKTER UMAT KATOLIK DI LINGKUNGAN SANTA MARGARETHA, \r\nKurangnya pemahaman umat dalam memaknai sakramen krisma sehingga berdampak pada karakter umat yang tidak mendalami ajaran gereja dan nilai nilai agama', 'Kuantitatif', 'Lingkungan santa margaretha paroki santo Mikael kudamati', 'PERAN SAKRAMEN KRISMA DALAM PEMBENTUKAN KARAKTER UMAT KATOLIK DI LINGKUNGAN SANTA MARGARETHA, \r\nKurangnya pemahaman umat dalam memaknai sakramen krisma sehingga berdampak pada karakter umat yang tidak mendalami ajaran gereja dan nilai nilai agama', 'c0458fda5958413d840ed62880791faf.docx', '2025-08-11 04:56:44', NULL, 1, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, 'proposal', '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, 0, '0', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2385,7 +2413,9 @@ INSERT INTO `staf_aktivitas` (`id`, `staf_id`, `aktivitas`, `mahasiswa_id`, `pro
 (36, 29, '', NULL, 45, 'Cetak form permohonan untuk MAHASISWA CONTOH 2', NULL, '2025-08-05 17:47:13'),
 (37, 29, '', NULL, 45, 'Cetak surat izin penelitian untuk Mahasiswa Contoh 2', NULL, '2025-08-05 17:47:16'),
 (38, 29, '', NULL, 45, 'Cetak form permohonan untuk MAHASISWA CONTOH 2', NULL, '2025-08-05 17:47:27'),
-(39, 29, '', NULL, 45, 'Upload surat izin penelitian untuk Mahasiswa Contoh 2', NULL, '2025-08-05 17:47:37');
+(39, 29, '', NULL, 45, 'Upload surat izin penelitian untuk Mahasiswa Contoh 2', NULL, '2025-08-05 17:47:37'),
+(40, 29, '', 76, 73, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-08-10 17:46:17'),
+(41, 29, '', 76, 73, 'Melihat detail bimbingan mahasiswa Mahasiswa Contoh', NULL, '2025-08-10 18:13:40');
 
 -- --------------------------------------------------------
 
@@ -2969,13 +2999,13 @@ ALTER TABLE `log_publikasi`
 -- AUTO_INCREMENT for table `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`
 --
 ALTER TABLE `notifikasi`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `penelitian`
@@ -3023,7 +3053,7 @@ ALTER TABLE `prodi`
 -- AUTO_INCREMENT for table `proposal_mahasiswa`
 --
 ALTER TABLE `proposal_mahasiswa`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `proposal_workflow`
@@ -3065,7 +3095,7 @@ ALTER TABLE `skripsi`
 -- AUTO_INCREMENT for table `staf_aktivitas`
 --
 ALTER TABLE `staf_aktivitas`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- Constraints for dumped tables

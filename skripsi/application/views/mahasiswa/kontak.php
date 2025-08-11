@@ -1,5 +1,5 @@
-<?php $this->app->extend('template/dosen') ?>
-<?php $this->app->setVar('title', 'Kontak Form - Dosen') ?>
+<?php $this->app->extend('template/mahasiswa') ?>
+<?php $this->app->setVar('title', 'Kontak Form') ?>
 <?php $this->app->section() ?>
 
 <div class="row">
@@ -11,7 +11,7 @@
                     <div class="col">
                         <h3 class="mb-0">📧 Kirim Pesan</h3>
                         <p class="text-sm mb-0 text-muted">
-                            Kirim pesan via email ke mahasiswa bimbingan, kaprodi, atau staf untuk konsultasi dan koordinasi
+                            Kirim pesan via email ke kaprodi, dosen, atau staf untuk konsultasi dan bantuan
                         </p>
                     </div>
                 </div>
@@ -49,16 +49,15 @@
                 <!-- Main Form -->
                 <form id="kontakForm" style="display: none;">
                     
-                    <!-- Pilih Kategori Penerima -->
+                    <!-- Pilih Penerima -->
                     <div class="form-group">
-                        <label class="form-control-label" for="penerima_kategori">
+                        <label class="form-control-label" for="penerima_role">
                             <i class="ni ni-circle-08"></i> Kirim Ke *
                         </label>
-                        <select class="form-control" id="penerima_kategori" name="penerima_kategori" required>
-                            <option value="">-- Pilih Kategori Penerima --</option>
-                            <option value="mahasiswa_bimbingan">🎓 Mahasiswa Bimbingan</option>
-                            <option value="semua_mahasiswa">👥 Semua Mahasiswa</option>
+                        <select class="form-control" id="penerima_role" name="penerima_role" required>
+                            <option value="">-- Pilih Penerima --</option>
                             <option value="kaprodi">👑 Kaprodi</option>
+                            <option value="dosen">🎓 Dosen</option>
                             <option value="staf">👨‍💼 Staf/Admin</option>
                         </select>
                         <small class="form-text text-muted">
@@ -96,7 +95,7 @@
                             <i class="ni ni-tag"></i> Subjek *
                         </label>
                         <input type="text" class="form-control" id="subjek" name="subjek" 
-                               placeholder="Contoh: Penjadwalan Bimbingan Skripsi" maxlength="200" required>
+                               placeholder="Contoh: Konsultasi Proposal Skripsi" maxlength="200" required>
                     </div>
                     
                     <!-- Pesan -->
@@ -116,23 +115,23 @@
                         <label class="form-control-label">Template Pesan Cepat</label>
                         <div class="row">
                             <div class="col-lg-6 col-md-6 mb-2">
-                                <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="useTemplate('jadwal_bimbingan')">
+                                <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="useTemplate('konsultasi')">
+                                    <i class="ni ni-bulb-61"></i> Konsultasi Proposal
+                                </button>
+                            </div>
+                            <div class="col-lg-6 col-md-6 mb-2">
+                                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="useTemplate('bimbingan')">
                                     <i class="ni ni-calendar-grid-58"></i> Jadwal Bimbingan
                                 </button>
                             </div>
                             <div class="col-lg-6 col-md-6 mb-2">
-                                <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="useTemplate('revisi_proposal')">
-                                    <i class="ni ni-bulb-61"></i> Revisi Proposal
+                                <button type="button" class="btn btn-outline-success btn-sm btn-block" onclick="useTemplate('seminar')">
+                                    <i class="ni ni-hat-3"></i> Pendaftaran Seminar
                                 </button>
                             </div>
                             <div class="col-lg-6 col-md-6 mb-2">
-                                <button type="button" class="btn btn-outline-success btn-sm btn-block" onclick="useTemplate('persetujuan_seminar')">
-                                    <i class="ni ni-hat-3"></i> Persetujuan Seminar
-                                </button>
-                            </div>
-                            <div class="col-lg-6 col-md-6 mb-2">
-                                <button type="button" class="btn btn-outline-warning btn-sm btn-block" onclick="useTemplate('koordinasi_kaprodi')">
-                                    <i class="ni ni-settings"></i> Koordinasi Kaprodi
+                                <button type="button" class="btn btn-outline-warning btn-sm btn-block" onclick="useTemplate('penelitian')">
+                                    <i class="ni ni-atom"></i> Izin Penelitian
                                 </button>
                             </div>
                         </div>
@@ -170,17 +169,17 @@
             </div>
         </div>
         
-        <!-- WhatsApp Mahasiswa Bimbingan -->
+        <!-- 🆕 TAMBAHAN: WhatsApp Dosen Pembimbing -->
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">💬 WhatsApp Mahasiswa</h5>
+                <h5 class="mb-0">💬 Kontak WhatsApp</h5>
             </div>
             <div class="card-body" id="whatsappInfo">
                 <div class="text-center py-3">
                     <div class="spinner-border spinner-border-sm text-success" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>
-                    <p class="text-muted mt-2 mb-0">Mengecek mahasiswa bimbingan...</p>
+                    <p class="text-muted mt-2 mb-0">Mengecek dosen pembimbing...</p>
                 </div>
             </div>
         </div>
@@ -198,27 +197,27 @@
                     </li>
                     <li class="mb-2">
                         <i class="ni ni-check-bold text-success"></i>
-                        Tulis pesan dengan bahasa yang profesional
+                        Tulis pesan dengan bahasa yang sopan
                     </li>
                     <li class="mb-2">
                         <i class="ni ni-check-bold text-success"></i>
-                        Sertakan instruksi yang jelas untuk mahasiswa
+                        Sertakan informasi yang diperlukan
                     </li>
                     <li class="mb-2">
                         <i class="ni ni-check-bold text-success"></i>
-                        Berikan deadline yang realistic
+                        Berikan waktu respons yang wajar (1-2 hari)
                     </li>
                     <li class="mb-2">
                         <i class="ni ni-check-bold text-success"></i>
-                        Follow up jika diperlukan
+                        Periksa email Anda untuk balasan
                     </li>
                 </ul>
                 
                 <div class="alert alert-info">
                     <small>
                         <i class="ni ni-email-83"></i>
-                        <strong>Info:</strong> Email dikirim atas nama Anda sebagai dosen. 
-                        Balasan akan dikirim ke email pribadi Anda.
+                        <strong>Info:</strong> Pesan akan dikirim langsung ke email penerima. 
+                        Balasan akan dikirim ke email Anda.
                     </small>
                 </div>
             </div>
@@ -253,40 +252,39 @@
 
 <?php $this->app->section() ?>
 <script>
-// CONFIGURATION - Disesuaikan dengan STK Yakobus Dosen
+// CONFIGURATION - Disesuaikan dengan STK Yakobus
 var base_url = '<?= base_url() ?>'; // https://stkyakobus.ac.id/skripsi/
 var environment = '<?= ENVIRONMENT ?>';
 
-console.log('🎓 STK Yakobus Dosen Kontak Form initialized');
+console.log('🏫 STK Yakobus Kontak Form initialized');
 console.log('Base URL:', base_url);
 
-// Global data storage - STRUKTUR UNTUK DOSEN
+// Global data storage - STRUKTUR BARU
 let dataKontak = {
-    mahasiswa_bimbingan: [],
-    semua_mahasiswa: [],
     kaprodi_list: [],
+    dosen_list: [],
     staf_list: []
 };
 
 let formLoaded = false;
 
-// Template pesan untuk dosen
+// Template pesan
 const templates = {
-    jadwal_bimbingan: {
-        subjek: "Penjadwalan Bimbingan Skripsi",
-        pesan: "Yth. Saudara/i,\n\nSaya mengundang Anda untuk melakukan bimbingan skripsi dengan jadwal sebagai berikut:\n\n📅 Hari/Tanggal: [Isi hari dan tanggal]\n🕒 Waktu: [Isi waktu]\n📍 Tempat: [Ruang dosen/Online]\n\nMohon konfirmasi kehadiran dan bawa dokumen:\n- Draft proposal/skripsi terbaru\n- Catatan pertanyaan yang ingin didiskusikan\n\nTerima kasih.\n\nHormat saya,\n<?= $this->session->userdata('nama') ?>"
+    konsultasi: {
+        subjek: "Konsultasi Proposal Skripsi",
+        pesan: "Yth. Bapak/Ibu,\n\nSaya ingin berkonsultasi mengenai proposal skripsi saya. Mohon bantuan untuk:\n\n1. [Jelaskan hal yang ingin dikonsultasikan]\n2. [Tambahkan pertanyaan spesifik]\n\nTerima kasih atas waktu dan bimbingannya.\n\nHormat saya,\n<?= $this->session->userdata('nama') ?>"
     },
-    revisi_proposal: {
-        subjek: "Revisi Proposal Skripsi",
-        pesan: "Yth. Saudara/i,\n\nSetelah saya review proposal Anda, berikut beberapa hal yang perlu diperbaiki:\n\n1. [Jelaskan revisi yang diperlukan]\n2. [Tambahkan poin revisi lainnya]\n\nMohon lakukan revisi sesuai catatan di atas dan kirimkan kembali paling lambat [tanggal deadline].\n\nJika ada pertanyaan, silakan hubungi saya.\n\nHormat saya,\n<?= $this->session->userdata('nama') ?>"
+    bimbingan: {
+        subjek: "Pengaturan Jadwal Bimbingan",
+        pesan: "Yth. Bapak/Ibu,\n\nSaya ingin mengatur jadwal bimbingan. Apakah Bapak/Ibu berkenan untuk:\n\nWaktu yang saya usulkan:\n- Hari: [Hari]\n- Tanggal: [Tanggal]\n- Jam: [Jam]\n- Tempat: [Tempat/Online]\n\nTerima kasih.\n\nHormat saya,\n<?= $this->session->userdata('nama') ?>"
     },
-    persetujuan_seminar: {
-        subjek: "Persetujuan Seminar Proposal/Skripsi",
-        pesan: "Yth. Saudara/i,\n\nSetelah meninjau kemajuan penelitian Anda, saya menyetujui Anda untuk mengajukan seminar [proposal/skripsi].\n\nPersyaratan yang sudah dipenuhi:\n✓ [Daftar persyaratan yang sudah terpenuhi]\n\nLangkah selanjutnya:\n1. Mengajukan seminar melalui sistem\n2. Melengkapi berkas administrasi\n3. Koordinasi dengan staf untuk penjadwalan\n\nSelamat dan semoga sukses!\n\nHormat saya,\n<?= $this->session->userdata('nama') ?>"
+    seminar: {
+        subjek: "Pendaftaran Seminar Proposal/Skripsi",
+        pesan: "Yth. Bapak/Ibu,\n\nSaya bermaksud untuk mendaftar seminar [proposal/skripsi]. Dokumen yang sudah saya siapkan:\n\n- [Daftar dokumen]\n\nMohon bimbingan untuk langkah selanjutnya.\n\nTerima kasih.\n\nHormat saya,\n<?= $this->session->userdata('nama') ?>"
     },
-    koordinasi_kaprodi: {
-        subjek: "Koordinasi Akademik",
-        pesan: "Yth. Bapak/Ibu Kaprodi,\n\nSaya ingin melakukan koordinasi terkait:\n\n[Jelaskan hal yang ingin dikoordinasikan, misalnya:]\n- Jadwal seminar mahasiswa bimbingan\n- Penetapan dosen penguji\n- Kebijakan akademik terbaru\n- Evaluasi mahasiswa\n\nMohon waktu untuk diskusi lebih lanjut.\n\nTerima kasih.\n\nHormat saya,\n<?= $this->session->userdata('nama') ?>"
+    penelitian: {
+        subjek: "Permohonan Surat Izin Penelitian",
+        pesan: "Yth. Bapak/Ibu,\n\nSaya bermaksud untuk mengajukan surat izin penelitian dengan detail:\n\nTempat penelitian: [Nama tempat]\nWaktu penelitian: [Periode waktu]\nTujuan: [Jelaskan tujuan penelitian]\n\nMohon bantuan untuk proses selanjutnya.\n\nTerima kasih.\n\nHormat saya,\n<?= $this->session->userdata('nama') ?>"
     }
 };
 
@@ -343,16 +341,16 @@ function makeRequest(endpoint, data = null, timeout = 30000) {
 
 // Document ready
 $(document).ready(function() {
-    console.log('📚 Document ready - initializing Dosen Kontak Form');
+    console.log('📚 Document ready - initializing STK Yakobus Kontak Form');
     
     // Load kontak data
     loadKontakData();
     
-    // Load WhatsApp info
+    // 🆕 Load WhatsApp info
     loadWhatsAppInfo();
     
     // Event listeners
-    $('#penerima_kategori').change(updatePenerima);
+    $('#penerima_role').change(updatePenerima);
     $('#penerima_id').change(updateInfoPenerima);
     $('#pesan').on('input', updateCharCount);
     
@@ -365,18 +363,45 @@ $(document).ready(function() {
     updateCharCount();
 });
 
-// Load WhatsApp info untuk mahasiswa bimbingan
+// 🆕 Load WhatsApp info untuk dosen pembimbing
 function loadWhatsAppInfo() {
-    console.log('🔄 Loading WhatsApp mahasiswa bimbingan...');
+    console.log('🔄 Loading WhatsApp dosen pembimbing...');
     
-    makeRequest('dosen/kontak/get_mahasiswa_bimbingan')
+    makeRequest('mahasiswa/kontak/get_dosen_pembimbing')
         .then(function(response) {
-            console.log('🔍 WhatsApp Response:', response);
+            console.log('🔍 WhatsApp Response:', response); // DEBUG LOG
             
-            if (response.status === 'success' && response.data.mahasiswa_bimbingan && response.data.mahasiswa_bimbingan.length > 0) {
-                updateWhatsAppInfo(response.data.mahasiswa_bimbingan);
+            if (response.status === 'success' && response.data.dosen_pembimbing) {
+                const dosen = response.data.dosen_pembimbing;
+                updateWhatsAppInfo(dosen);
+                
+                // Show debug info if available
+                if (response.debug) {
+                    console.log('📊 Debug Info:', response.debug);
+                }
             } else {
-                updateWhatsAppInfoEmpty(response.message || 'Belum ada mahasiswa bimbingan');
+                updateWhatsAppInfoEmpty(response.message || 'Belum ada dosen pembimbing');
+                
+                // Show debug info for troubleshooting
+                if (response.debug) {
+                    console.log('📊 Debug Info:', response.debug);
+                    
+                    // Add debug panel to UI for admin
+                    if (environment === 'development') {
+                        const debugHtml = `
+                            <div class="alert alert-warning mt-2">
+                                <small>
+                                    <strong>🔧 DEBUG MODE:</strong><br>
+                                    <code>Proposal Count: ${response.debug.proposal_count || 0}</code><br>
+                                    <button class="btn btn-xs btn-outline-secondary mt-1" onclick="console.log(${JSON.stringify(response.debug)})">
+                                        View Full Debug
+                                    </button>
+                                </small>
+                            </div>
+                        `;
+                        $('#whatsappInfo').append(debugHtml);
+                    }
+                }
             }
         })
         .catch(function(error) {
@@ -385,111 +410,108 @@ function loadWhatsAppInfo() {
         });
 }
 
-// Update WhatsApp info dengan data mahasiswa bimbingan
-function updateWhatsAppInfo(mahasiswaList) {
+// 🆕 Update WhatsApp info dengan data dosen pembimbing
+function updateWhatsAppInfo(dosen) {
     let html = '';
     
-    if (mahasiswaList.length > 0) {
-        html += `
-            <div class="alert alert-success mb-3">
+    if (dosen.nomor_telepon) {
+        // Format nomor telepon untuk WhatsApp (hapus karakter non-digit, tambah 62)
+        let phoneNumber = dosen.nomor_telepon.replace(/\D/g, '');
+        if (phoneNumber.startsWith('0')) {
+            phoneNumber = '62' + phoneNumber.substring(1);
+        } else if (!phoneNumber.startsWith('62')) {
+            phoneNumber = '62' + phoneNumber;
+        }
+        
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=Assalamualaikum%20Pak/Bu%20${encodeURIComponent(dosen.nama)},%20saya%20${encodeURIComponent('<?= $this->session->userdata('nama') ?>')}%20(NIM:%20<?= $this->session->userdata('nim') ?>)%20mahasiswa%20bimbingan%20Bapak/Ibu.%20`;
+        
+        html = `
+            <div class="media align-items-center mb-3">
+                <div class="media-object">
+                    <div class="avatar rounded-circle bg-success">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                </div>
+                <div class="media-body ml-3">
+                    <h6 class="mb-0">🎓 ${dosen.nama}</h6>
+                    <p class="text-sm text-muted mb-1">Dosen Pembimbing</p>
+                    <small class="text-success">📱 ${dosen.nomor_telepon}</small>
+                </div>
+            </div>
+            
+            <a href="${whatsappUrl}" target="_blank" class="btn btn-success btn-block">
+                <i class="fab fa-whatsapp mr-2"></i>
+                Chat WhatsApp
+            </a>
+            
+            <div class="alert alert-info mt-3">
                 <small>
                     <i class="ni ni-check-bold"></i>
-                    <strong>${mahasiswaList.length} mahasiswa bimbingan</strong> tersedia untuk kontak WhatsApp
+                    <strong>Status:</strong> ${dosen.status_pembimbing}
                 </small>
             </div>
         `;
-        
-        // List mahasiswa dengan WhatsApp
-        mahasiswaList.forEach(function(mahasiswa, index) {
-            if (mahasiswa.nomor_telepon) {
-                // Format nomor telepon untuk WhatsApp
-                let phoneNumber = mahasiswa.nomor_telepon.replace(/\D/g, '');
-                if (phoneNumber.startsWith('0')) {
-                    phoneNumber = '62' + phoneNumber.substring(1);
-                } else if (!phoneNumber.startsWith('62')) {
-                    phoneNumber = '62' + phoneNumber;
-                }
-                
-                const whatsappUrl = `https://wa.me/${phoneNumber}?text=Assalamualaikum%20${encodeURIComponent(mahasiswa.nama)},%20saya%20${encodeURIComponent('<?= $this->session->userdata('nama') ?>')}%20dosen%20pembimbing%20Anda.%20`;
-                
-                html += `
-                    <div class="media align-items-center mb-3 p-2 border rounded">
-                        <div class="media-object">
-                            <div class="avatar rounded-circle bg-success">
-                                <i class="ni ni-single-02"></i>
-                            </div>
-                        </div>
-                        <div class="media-body ml-3">
-                            <h6 class="mb-0">${mahasiswa.nama}</h6>
-                            <p class="text-sm text-muted mb-1">NIM: ${mahasiswa.nim}</p>
-                            <small class="text-success">📱 ${mahasiswa.nomor_telepon}</small>
-                        </div>
-                        <div class="media-right">
-                            <a href="${whatsappUrl}" target="_blank" class="btn btn-success btn-sm">
-                                <i class="fab fa-whatsapp"></i>
-                            </a>
-                        </div>
-                    </div>
-                `;
-            } else {
-                html += `
-                    <div class="media align-items-center mb-3 p-2 border rounded">
-                        <div class="media-object">
-                            <div class="avatar rounded-circle bg-warning">
-                                <i class="ni ni-single-02"></i>
-                            </div>
-                        </div>
-                        <div class="media-body ml-3">
-                            <h6 class="mb-0">${mahasiswa.nama}</h6>
-                            <p class="text-sm text-muted mb-1">NIM: ${mahasiswa.nim}</p>
-                            <small class="text-warning">📱 Nomor tidak tersedia</small>
-                        </div>
-                        <div class="media-right">
-                            <button class="btn btn-outline-secondary btn-sm" disabled>
-                                <i class="ni ni-mobile-button"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-        
     } else {
-        html = updateWhatsAppInfoEmpty('Belum ada mahasiswa bimbingan');
+        html = `
+            <div class="media align-items-center mb-3">
+                <div class="media-object">
+                    <div class="avatar rounded-circle bg-warning">
+                        <i class="ni ni-single-02"></i>
+                    </div>
+                </div>
+                <div class="media-body ml-3">
+                    <h6 class="mb-0">🎓 ${dosen.nama}</h6>
+                    <p class="text-sm text-muted mb-1">Dosen Pembimbing</p>
+                    <small class="text-warning">📱 Nomor tidak tersedia</small>
+                </div>
+            </div>
+            
+            <button class="btn btn-outline-secondary btn-block" disabled>
+                <i class="ni ni-mobile-button mr-2"></i>
+                Nomor HP Tidak Tersedia
+            </button>
+            
+            <div class="alert alert-warning">
+                <small>
+                    <i class="ni ni-notification-70"></i>
+                    Dosen pembimbing belum mengisi nomor HP. Gunakan email untuk komunikasi.
+                </small>
+            </div>
+        `;
     }
     
     $('#whatsappInfo').html(html);
 }
 
-// Update WhatsApp info untuk kasus belum ada mahasiswa bimbingan
+// 🆕 Update WhatsApp info untuk kasus belum ada dosen pembimbing
 function updateWhatsAppInfoEmpty(message) {
-    return `
+    $('#whatsappInfo').html(`
         <div class="text-center py-3">
             <i class="ni ni-single-02 fa-2x text-muted mb-3"></i>
-            <h6 class="text-muted">Belum Ada Mahasiswa Bimbingan</h6>
+            <h6 class="text-muted">Belum Ada Dosen Pembimbing</h6>
             <p class="text-sm text-muted mb-3">${message}</p>
             <small class="text-info">
                 <i class="ni ni-bulb-61"></i>
-                Mahasiswa akan muncul setelah proposal mereka disetujui dan Anda ditugaskan sebagai pembimbing
+                Silakan ajukan proposal terlebih dahulu untuk mendapatkan dosen pembimbing
             </small>
         </div>
-    `;
+    `);
 }
 
-// Update WhatsApp info untuk error
+// 🆕 Update WhatsApp info untuk error
 function updateWhatsAppInfoError() {
     $('#whatsappInfo').html(`
         <div class="alert alert-warning">
             <small>
                 <i class="ni ni-notification-70"></i>
-                <strong>Perhatian:</strong> Tidak dapat memuat info mahasiswa bimbingan. 
+                <strong>Perhatian:</strong> Tidak dapat memuat info dosen pembimbing. 
                 <a href="#" onclick="loadWhatsAppInfo()" class="alert-link">Coba lagi</a>
             </small>
         </div>
     `);
 }
 
-// Load kontak data untuk dosen
+// Load kontak data - UPDATED untuk struktur baru
 function loadKontakData() {
     console.log('🔄 Loading kontak data...');
     
@@ -498,7 +520,7 @@ function loadKontakData() {
     hideElement('kontakForm');
     hideElement('errorState');
     
-    makeRequest('dosen/kontak/get_kontak_data')
+    makeRequest('mahasiswa/kontak/get_kontak_data')
         .then(function(response) {
             if (response.status === 'success') {
                 dataKontak = response.data;
@@ -509,7 +531,7 @@ function loadKontakData() {
                 showElement('kontakForm');
                 formLoaded = true;
                 
-                showAlert('success', `✅ Data kontak berhasil dimuat: ${response.debug.mahasiswa_bimbingan_count} mahasiswa bimbingan, ${response.debug.semua_mahasiswa_count} total mahasiswa, ${response.debug.kaprodi_count} kaprodi, ${response.debug.staf_count} staf`, true);
+                showAlert('success', `✅ Data kontak berhasil dimuat: ${response.debug.kaprodi_count} kaprodi, ${response.debug.dosen_count} dosen, ${response.debug.staf_count} staf`, true);
                 console.log('✅ Kontak data loaded successfully');
                 
             } else {
@@ -527,9 +549,9 @@ function loadKontakData() {
         });
 }
 
-// Update dropdown penerima berdasarkan kategori yang dipilih
+// Update dropdown penerima berdasarkan role yang dipilih
 function updatePenerima() {
-    const kategori = $('#penerima_kategori').val();
+    const role = $('#penerima_role').val();
     const penerimaSelect = $('#penerima_id');
     const detailDiv = $('#detailPenerima');
     const infoDiv = $('#infoPenerima');
@@ -538,7 +560,7 @@ function updatePenerima() {
     penerimaSelect.html('<option value="">-- Pilih Nama Penerima --</option>');
     infoDiv.html('');
     
-    if (!kategori) {
+    if (!role) {
         detailDiv.hide();
         return;
     }
@@ -548,16 +570,13 @@ function updatePenerima() {
     let listData = [];
     let emptyMessage = 'Tidak ada data tersedia';
     
-    if (kategori === 'mahasiswa_bimbingan') {
-        listData = dataKontak.mahasiswa_bimbingan || [];
-        emptyMessage = 'Belum ada mahasiswa bimbingan';
-    } else if (kategori === 'semua_mahasiswa') {
-        listData = dataKontak.semua_mahasiswa || [];
-        emptyMessage = 'Tidak ada mahasiswa tersedia';
-    } else if (kategori === 'kaprodi') {
+    if (role === 'kaprodi') {
         listData = dataKontak.kaprodi_list || [];
         emptyMessage = 'Tidak ada kaprodi tersedia';
-    } else if (kategori === 'staf') {
+    } else if (role === 'dosen') {
+        listData = dataKontak.dosen_list || [];
+        emptyMessage = 'Tidak ada dosen tersedia';
+    } else if (role === 'staf') {
         listData = dataKontak.staf_list || [];
         emptyMessage = 'Tidak ada staf tersedia';
     }
@@ -565,9 +584,7 @@ function updatePenerima() {
     if (listData.length > 0) {
         listData.forEach(item => {
             let displayName = item.nama;
-            if (item.nim) {
-                displayName += ` (${item.nim})`;
-            } else if (item.nama_prodi) {
+            if (item.nama_prodi) {
                 displayName += ` (${item.nama_prodi})`;
             }
             penerimaSelect.append(`<option value="${item.id}">${displayName}</option>`);
@@ -579,43 +596,36 @@ function updatePenerima() {
 
 // Update info penerima berdasarkan pilihan
 function updateInfoPenerima() {
-    const kategori = $('#penerima_kategori').val();
+    const role = $('#penerima_role').val();
     const penerimaId = $('#penerima_id').val();
     const infoDiv = $('#infoPenerima');
     
-    if (!penerimaId || !kategori) {
+    if (!penerimaId || !role) {
         infoDiv.html('');
         return;
     }
     
     let data = null;
     
-    if (kategori === 'mahasiswa_bimbingan') {
-        data = dataKontak.mahasiswa_bimbingan.find(item => item.id == penerimaId);
-    } else if (kategori === 'semua_mahasiswa') {
-        data = dataKontak.semua_mahasiswa.find(item => item.id == penerimaId);
-    } else if (kategori === 'kaprodi') {
+    if (role === 'kaprodi') {
         data = dataKontak.kaprodi_list.find(item => item.id == penerimaId);
-    } else if (kategori === 'staf') {
+    } else if (role === 'dosen') {
+        data = dataKontak.dosen_list.find(item => item.id == penerimaId);
+    } else if (role === 'staf') {
         data = dataKontak.staf_list.find(item => item.id == penerimaId);
     }
     
     if (data) {
         let roleIcon = '👤';
         let roleName = 'Kontak';
-        let extraInfo = '';
         
-        if (kategori === 'mahasiswa_bimbingan' || kategori === 'semua_mahasiswa') {
-            roleIcon = '🎓';
-            roleName = 'Mahasiswa';
-            extraInfo = data.nim ? `<br><small class="text-primary">NIM: ${data.nim}</small>` : '';
-            if (data.judul_proposal) {
-                extraInfo += `<br><small class="text-success">Judul: ${data.judul_proposal}</small>`;
-            }
-        } else if (kategori === 'kaprodi') {
+        if (role === 'kaprodi') {
             roleIcon = '👑';
             roleName = 'Kaprodi';
-        } else if (kategori === 'staf') {
+        } else if (role === 'dosen') {
+            roleIcon = '🎓';
+            roleName = 'Dosen';
+        } else if (role === 'staf') {
             roleIcon = '👨‍💼';
             roleName = 'Staf/Admin';
         }
@@ -630,7 +640,6 @@ function updateInfoPenerima() {
                         <h6 class="mb-0">${roleIcon} ${data.nama}</h6>
                         <small class="text-muted">${roleName}</small>
                         ${data.nama_prodi ? `<br><small class="text-primary">${data.nama_prodi}</small>` : ''}
-                        ${extraInfo}
                         <br><small class="text-success"><i class="ni ni-email-83"></i> ${data.email}</small>
                         ${data.nomor_telepon ? `<br><small class="text-info"><i class="ni ni-mobile-button"></i> ${data.nomor_telepon}</small>` : ''}
                     </div>
@@ -644,41 +653,6 @@ function updateInfoPenerima() {
 function updateKontakInfo() {
     let html = '';
     
-    // Mahasiswa Bimbingan
-    if (dataKontak.mahasiswa_bimbingan && dataKontak.mahasiswa_bimbingan.length > 0) {
-        html += `
-            <div class="media align-items-center mb-3">
-                <div class="media-object">
-                    <div class="avatar rounded-circle bg-primary">
-                        <i class="ni ni-hat-3"></i>
-                    </div>
-                </div>
-                <div class="media-body ml-3">
-                    <h6 class="mb-0">🎓 Mahasiswa Bimbingan</h6>
-                    <p class="text-sm text-muted mb-0">${dataKontak.mahasiswa_bimbingan.length} mahasiswa bimbingan</p>
-                    <small class="text-success">• ${dataKontak.mahasiswa_bimbingan.slice(0, 2).map(m => m.nama.split(' ')[0]).join(', ')}${dataKontak.mahasiswa_bimbingan.length > 2 ? '...' : ''}</small>
-                </div>
-            </div>
-        `;
-    }
-    
-    // Semua Mahasiswa
-    if (dataKontak.semua_mahasiswa && dataKontak.semua_mahasiswa.length > 0) {
-        html += `
-            <div class="media align-items-center mb-3">
-                <div class="media-object">
-                    <div class="avatar rounded-circle bg-info">
-                        <i class="ni ni-single-02"></i>
-                    </div>
-                </div>
-                <div class="media-body ml-3">
-                    <h6 class="mb-0">👥 Semua Mahasiswa</h6>
-                    <p class="text-sm text-muted mb-0">${dataKontak.semua_mahasiswa.length} mahasiswa tersedia</p>
-                </div>
-            </div>
-        `;
-    }
-    
     // Kaprodi
     if (dataKontak.kaprodi_list && dataKontak.kaprodi_list.length > 0) {
         html += `
@@ -691,7 +665,24 @@ function updateKontakInfo() {
                 <div class="media-body ml-3">
                     <h6 class="mb-0">👑 Kaprodi</h6>
                     <p class="text-sm text-muted mb-0">${dataKontak.kaprodi_list.length} kaprodi tersedia</p>
-                    <small class="text-success">• ${dataKontak.kaprodi_list.map(k => k.nama.split(' ')[0]).join(', ')}</small>
+                    <small class="text-success">• ${dataKontak.kaprodi_list.map(k => k.nama.split('(')[0].trim()).join(', ')}</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Dosen
+    if (dataKontak.dosen_list && dataKontak.dosen_list.length > 0) {
+        html += `
+            <div class="media align-items-center mb-3">
+                <div class="media-object">
+                    <div class="avatar rounded-circle bg-primary">
+                        <i class="ni ni-single-02"></i>
+                    </div>
+                </div>
+                <div class="media-body ml-3">
+                    <h6 class="mb-0">🎓 Dosen</h6>
+                    <p class="text-sm text-muted mb-0">${dataKontak.dosen_list.length} dosen tersedia</p>
                 </div>
             </div>
         `;
@@ -702,14 +693,14 @@ function updateKontakInfo() {
         html += `
             <div class="media align-items-center mb-3">
                 <div class="media-object">
-                    <div class="avatar rounded-circle bg-secondary">
+                    <div class="avatar rounded-circle bg-info">
                         <i class="ni ni-settings-gear-65"></i>
                     </div>
                 </div>
                 <div class="media-body ml-3">
                     <h6 class="mb-0">👨‍💼 Staf/Admin</h6>
                     <p class="text-sm text-muted mb-0">${dataKontak.staf_list.length} staf tersedia</p>
-                    <small class="text-success">• ${dataKontak.staf_list.map(s => s.nama.split(' ')[0]).join(', ')}</small>
+                    <small class="text-success">• ${dataKontak.staf_list.map(s => s.nama).join(', ')}</small>
                 </div>
             </div>
         `;
@@ -724,16 +715,12 @@ function updateKontakInfo() {
             </div>
         `;
     } else {
-        const totalBimbingan = dataKontak.mahasiswa_bimbingan?.length || 0;
-        const totalMahasiswa = dataKontak.semua_mahasiswa?.length || 0;
-        const totalKaprodi = dataKontak.kaprodi_list?.length || 0;
-        const totalStaf = dataKontak.staf_list?.length || 0;
-        
+        const totalKontak = (dataKontak.kaprodi_list?.length || 0) + (dataKontak.dosen_list?.length || 0) + (dataKontak.staf_list?.length || 0);
         html += `
             <div class="alert alert-success">
                 <small>
                     <i class="ni ni-check-bold"></i>
-                    <strong>Kontak tersedia:</strong> ${totalBimbingan} mahasiswa bimbingan, ${totalMahasiswa} total mahasiswa, ${totalKaprodi} kaprodi, ${totalStaf} staf
+                    <strong>Total ${totalKontak} kontak</strong> tersedia dan siap menerima email
                 </small>
             </div>
         `;
@@ -785,10 +772,10 @@ function kirimPesan() {
     // Validate form
     const pesan = $('#pesan').val().trim();
     const subjek = $('#subjek').val().trim();
-    const penerima_kategori = $('#penerima_kategori').val();
+    const penerima_role = $('#penerima_role').val();
     const penerima_id = $('#penerima_id').val();
     
-    if (!penerima_kategori || !penerima_id || !subjek || !pesan) {
+    if (!penerima_role || !penerima_id || !subjek || !pesan) {
         showAlert('warning', '⚠️ Semua field bertanda * wajib diisi');
         return false;
     }
@@ -807,7 +794,7 @@ function kirimPesan() {
     
     // Get form data
     const formData = {
-        penerima_kategori: penerima_kategori,
+        penerima_role: penerima_role,
         penerima_id: penerima_id,
         subjek: subjek,
         pesan: pesan,
@@ -817,13 +804,18 @@ function kirimPesan() {
     console.log('📤 Sending email data:', formData);
     
     // Send via AJAX
-    makeRequest('dosen/kontak/kirim_pesan', formData, 60000) // 1 minute timeout untuk email
+    makeRequest('mahasiswa/kontak/kirim_pesan', formData, 60000) // 1 minute timeout untuk email
         .then(function(response) {
             if (response.status === 'success') {
-                showAlert('success', '✅ ' + response.message, false);
+                // PERBAIKAN: Tampilkan pesan sukses terlebih dahulu
+                showAlert('success', '✅ ' + response.message, false); // false = tidak auto hide
+                
+                // Reset form TANPA showAlert
                 resetFormSilent();
+                
                 console.log('✅ Email sent successfully');
                 
+                // Auto hide success message setelah 8 detik
                 setTimeout(function() {
                     $('#alertContainer').fadeOut();
                 }, 8000);
@@ -845,16 +837,17 @@ function kirimPesan() {
         });
 }
 
-// Function reset form tanpa notifikasi
+// PERBAIKAN: Function reset form tanpa notifikasi
 function resetFormSilent() {
     $('#kontakForm')[0].reset();
     $('#detailPenerima').hide();
     $('#infoPenerima').html('');
     updateCharCount();
+    
     console.log('Form direset tanpa notifikasi');
 }
 
-// Function resetForm dengan alert untuk tombol Reset
+// Function resetForm yang lama (dengan alert) untuk tombol Reset
 function resetForm() {
     resetFormSilent();
     showAlert('info', '🔄 Form telah direset', true);

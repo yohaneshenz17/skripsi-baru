@@ -41,7 +41,8 @@ class Bimbingan extends CI_Controller
             d.id as dosen_id, 
             d.nama as nama_dosen,
             d.email as email_dosen,
-            d.nomor_telepon as telepon_dosen
+            d.nomor_telepon as telepon_dosen,
+            d.foto as foto_dosen
         ');
         $this->db->from('proposal_mahasiswa pm');
         $this->db->join('dosen d', 'pm.dosen_id = d.id', 'left');

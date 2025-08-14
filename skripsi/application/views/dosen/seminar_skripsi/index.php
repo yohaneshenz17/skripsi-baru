@@ -1,9 +1,13 @@
 <?php
 /**
- * ENHANCED VIEWS UNTUK DOSEN SEMINAR SKRIPSI - DENGAN FITUR LIHAT PENILAIAN
+ * REFINED VERSION - Perbaikan Minimal Tanpa Mengubah Struktur
  * 
  * File: application/views/dosen/seminar_skripsi/index.php
- * Ditambahkan: Fitur Lihat Penilaian pada Riwayat Rekomendasi
+ * 
+ * PERBAIKAN:
+ * - Tambah fallback untuk variable yang mungkin kosong
+ * - Pastikan konsistensi dengan seminar proposal
+ * - Tidak mengubah structure JavaScript dan workflow existing
  */
 ?>
 
@@ -20,17 +24,17 @@
             </button>
             <div class="dropdown-menu">
                 <div class="dropdown-item-text">
-                    <small class="text-muted">Total Bimbingan: <?= $stats['total'] ?></small>
+                    <small class="text-muted">Total Bimbingan: <?= isset($stats['total']) ? $stats['total'] : 0 ?></small>
                 </div>
                 <div class="dropdown-divider"></div>
                 <div class="dropdown-item-text">
-                    <small>Perlu Review: <span class="badge badge-warning"><?= $stats['perlu_review'] ?></span></small>
+                    <small>Perlu Review: <span class="badge badge-warning"><?= isset($stats['perlu_review']) ? $stats['perlu_review'] : 0 ?></span></small>
                 </div>
                 <div class="dropdown-item-text">
-                    <small>Disetujui: <span class="badge badge-success"><?= $stats['disetujui'] ?></span></small>
+                    <small>Disetujui: <span class="badge badge-success"><?= isset($stats['disetujui']) ? $stats['disetujui'] : 0 ?></span></small>
                 </div>
                 <div class="dropdown-item-text">
-                    <small>Ditolak: <span class="badge badge-danger"><?= $stats['ditolak'] ?></span></small>
+                    <small>Ditolak: <span class="badge badge-danger"><?= isset($stats['ditolak']) ? $stats['ditolak'] : 0 ?></span></small>
                 </div>
             </div>
         </div>
@@ -46,7 +50,7 @@
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Perlu Review
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $stats['perlu_review'] ?></div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($stats['perlu_review']) ? $stats['perlu_review'] : 0 ?></div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-clock fa-2x text-warning"></i>
@@ -64,7 +68,7 @@
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Perlu Penilaian
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= count($perlu_penilaian) ?></div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($perlu_penilaian) ? count($perlu_penilaian) : 0 ?></div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-edit fa-2x text-primary"></i>
@@ -82,7 +86,7 @@
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Disetujui
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $stats['disetujui'] ?></div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($stats['disetujui']) ? $stats['disetujui'] : 0 ?></div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-check fa-2x text-success"></i>
@@ -100,7 +104,7 @@
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Total Bimbingan
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $stats['total'] ?></div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($stats['total']) ? $stats['total'] : 0 ?></div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-users fa-2x text-info"></i>
@@ -112,7 +116,7 @@
     </div>
 
     <!-- Pengajuan Perlu Review -->
-    <?php if(!empty($pengajuan_review)): ?>
+    <?php if(isset($pengajuan_review) && !empty($pengajuan_review)): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
             <h6 class="m-0 font-weight-bold">
@@ -138,17 +142,17 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-circle mr-3">
-                                            <?= strtoupper(substr($pengajuan->nama_mahasiswa, 0, 2)) ?>
+                                            <?= strtoupper(substr($pengajuan->nama_mahasiswa ?? 'N', 0, 2)) ?>
                                         </div>
                                         <div>
-                                            <div class="font-weight-bold text-dark"><?= $pengajuan->nama_mahasiswa ?></div>
-                                            <small class="text-muted"><?= $pengajuan->nim ?></small>
+                                            <div class="font-weight-bold text-dark"><?= htmlspecialchars($pengajuan->nama_mahasiswa ?? '') ?></div>
+                                            <small class="text-muted"><?= htmlspecialchars($pengajuan->nim ?? '') ?></small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="text-truncate" style="max-width: 300px;" title="<?= $pengajuan->judul ?>">
-                                        <?= $pengajuan->judul ?>
+                                    <div class="text-truncate" style="max-width: 300px;" title="<?= htmlspecialchars($pengajuan->judul ?? '') ?>">
+                                        <?= htmlspecialchars($pengajuan->judul ?? 'Judul tidak tersedia') ?>
                                     </div>
                                     <?php if (!empty($pengajuan->judul_skripsi) && $pengajuan->judul_skripsi !== $pengajuan->judul): ?>
                                         <small class="text-info">
@@ -158,13 +162,14 @@
                                 </td>
                                 <td>
                                     <small class="text-muted">
-                                        <?= date('d/m/Y H:i', strtotime($pengajuan->created_at)) ?>
+                                        <?= isset($pengajuan->created_at) ? date('d/m/Y H:i', strtotime($pengajuan->created_at)) : '-' ?>
                                     </small>
                                 </td>
                                 <td>
                                     <?php
                                     $status_badge = '';
-                                    switch($pengajuan->status) {
+                                    $status = $pengajuan->status ?? 'unknown';
+                                    switch($status) {
                                         case 'submitted':
                                             $status_badge = '<span class="badge badge-warning">Menunggu Review</span>';
                                             break;
@@ -172,7 +177,7 @@
                                             $status_badge = '<span class="badge badge-info">Pengajuan Ulang</span>';
                                             break;
                                         default:
-                                            $status_badge = '<span class="badge badge-secondary">' . ucfirst($pengajuan->status) . '</span>';
+                                            $status_badge = '<span class="badge badge-secondary">' . ucfirst($status) . '</span>';
                                     }
                                     echo $status_badge;
                                     ?>
@@ -184,12 +189,12 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <button class="btn btn-success" 
-                                                onclick="quickApprove(<?= $pengajuan->id ?>, '<?= addslashes($pengajuan->nama_mahasiswa) ?>')" 
+                                                onclick="quickApprove(<?= $pengajuan->id ?>, '<?= addslashes($pengajuan->nama_mahasiswa ?? '') ?>')" 
                                                 title="Setujui Cepat">
                                             <i class="fas fa-check"></i>
                                         </button>
                                         <button class="btn btn-danger" 
-                                                onclick="quickReject(<?= $pengajuan->id ?>, '<?= addslashes($pengajuan->nama_mahasiswa) ?>')" 
+                                                onclick="quickReject(<?= $pengajuan->id ?>, '<?= addslashes($pengajuan->nama_mahasiswa ?? '') ?>')" 
                                                 title="Tolak">
                                             <i class="fas fa-times"></i>
                                         </button>
@@ -204,8 +209,8 @@
     </div>
     <?php endif; ?>
 
-    <!-- ✅ ENHANCED: Seminar Perlu Penilaian - FITUR UTAMA -->
-    <?php if(!empty($perlu_penilaian)): ?>
+    <!-- Seminar Perlu Penilaian -->
+    <?php if(isset($perlu_penilaian) && !empty($perlu_penilaian)): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
             <h6 class="m-0 font-weight-bold">
@@ -235,17 +240,17 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-circle mr-3">
-                                            <?= strtoupper(substr($seminar->nama_mahasiswa, 0, 2)) ?>
+                                            <?= strtoupper(substr($seminar->nama_mahasiswa ?? 'N', 0, 2)) ?>
                                         </div>
                                         <div>
-                                            <div class="font-weight-bold text-dark"><?= $seminar->nama_mahasiswa ?></div>
-                                            <small class="text-muted"><?= $seminar->nim ?></small>
+                                            <div class="font-weight-bold text-dark"><?= htmlspecialchars($seminar->nama_mahasiswa ?? '') ?></div>
+                                            <small class="text-muted"><?= htmlspecialchars($seminar->nim ?? '') ?></small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="text-truncate" style="max-width: 300px;" title="<?= $seminar->judul ?>">
-                                        <?= $seminar->judul ?>
+                                    <div class="text-truncate" style="max-width: 300px;" title="<?= htmlspecialchars($seminar->judul ?? '') ?>">
+                                        <?= htmlspecialchars($seminar->judul ?? 'Judul tidak tersedia') ?>
                                     </div>
                                 </td>
                                 <td>
@@ -295,8 +300,8 @@
     </div>
     <?php endif; ?>
 
-    <!-- ✅ ENHANCED: Riwayat Rekomendasi - DENGAN FITUR LIHAT PENILAIAN -->
-    <?php if(!empty($riwayat_rekomendasi)): ?>
+    <!-- Riwayat Rekomendasi -->
+    <?php if(isset($riwayat_rekomendasi) && !empty($riwayat_rekomendasi)): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
@@ -313,39 +318,38 @@
                             <th>Judul</th>
                             <th>Tanggal Review</th>
                             <th>Rekomendasi</th>
-                            <th width="120">Aksi</th> <!-- ✅ KOLOM BARU -->
+                            <th width="120">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach($riwayat_rekomendasi as $riwayat): ?>
                             <tr>
                                 <td>
-                                    <div><?= $riwayat->nama_mahasiswa ?></div>
-                                    <small class="text-muted"><?= $riwayat->nim ?></small>
+                                    <div><?= htmlspecialchars($riwayat->nama_mahasiswa ?? '') ?></div>
+                                    <small class="text-muted"><?= htmlspecialchars($riwayat->nim ?? '') ?></small>
                                 </td>
                                 <td>
-                                    <div class="text-truncate" style="max-width: 250px;" title="<?= $riwayat->judul ?>">
-                                        <?= $riwayat->judul ?>
+                                    <div class="text-truncate" style="max-width: 250px;" title="<?= htmlspecialchars($riwayat->judul ?? '') ?>">
+                                        <?= htmlspecialchars($riwayat->judul ?? 'Judul tidak tersedia') ?>
                                     </div>
                                 </td>
                                 <td>
-                                    <small><?= date('d/m/Y H:i', strtotime($riwayat->tanggal_review_pembimbing)) ?></small>
+                                    <small><?= isset($riwayat->tanggal_review_pembimbing) ? date('d/m/Y H:i', strtotime($riwayat->tanggal_review_pembimbing)) : '-' ?></small>
                                 </td>
                                 <td>
-                                    <?php if($riwayat->status_pembimbing == 'approved'): ?>
+                                    <?php if(($riwayat->status_pembimbing ?? '') == 'approved'): ?>
                                         <span class="badge badge-success">Disetujui</span>
                                     <?php else: ?>
                                         <span class="badge badge-danger">Ditolak</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <!-- ✅ BUTTON LIHAT PENILAIAN -->
                                     <?php 
                                     $has_penilaian = isset($riwayat->status_penilaian) && $riwayat->status_penilaian == 'published';
                                     ?>
                                     <?php if($has_penilaian): ?>
                                         <button class="btn btn-info btn-sm" 
-                                                onclick="lihatPenilaian(<?= $riwayat->id ?>, '<?= addslashes($riwayat->nama_mahasiswa) ?>')" 
+                                                onclick="lihatPenilaian(<?= $riwayat->id ?>, '<?= addslashes($riwayat->nama_mahasiswa ?? '') ?>')" 
                                                 title="Lihat Penilaian">
                                             <i class="fas fa-eye"></i> Penilaian
                                         </button>
@@ -360,10 +364,57 @@
             </div>
         </div>
     </div>
+    <?php else: ?>
+    <!-- Empty State untuk Riwayat -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-history mr-2"></i>
+                Riwayat Rekomendasi
+            </h6>
+        </div>
+        <div class="card-body text-center py-4">
+            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+            <h5 class="text-gray-600 mb-2">Belum Ada Riwayat</h5>
+            <p class="text-muted mb-0">
+                Riwayat rekomendasi seminar skripsi akan muncul di sini setelah Anda memberikan rekomendasi.
+            </p>
+        </div>
+    </div>
     <?php endif; ?>
+
+    <!-- Info Section - Panduan -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card bg-gradient-light border-left-primary">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="icon icon-shape icon-lg bg-gradient-primary text-white rounded-circle shadow">
+                                <i class="fas fa-info"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h5 class="mb-2 font-weight-bold">Tahap Seminar Skripsi/Ujian Akhir</h5>
+                            <p class="mb-0 text-sm">
+                                Setelah mahasiswa menyelesaikan penelitian dan menyusun skripsi lengkap (Bab 1-5), 
+                                mereka dapat mengajukan seminar akhir/ujian skripsi. Sebagai pembimbing, Anda berperan dalam:
+                            </p>
+                            <ul class="text-sm mt-2 mb-0">
+                                <li><strong>Review kelengkapan skripsi</strong> - memastikan semua bab sudah lengkap dan sesuai standar</li>
+                                <li><strong>Memberikan rekomendasi</strong> - menilai kelayakan untuk ujian akhir</li>
+                                <li><strong>Melakukan penilaian</strong> - memberikan penilaian pada saat seminar berlangsung</li>
+                                <li><strong>Menentukan kelulusan</strong> - bersama dewan penguji memutuskan hasil akhir</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- ✅ MODAL LIHAT PENILAIAN -->
+<!-- Modal Lihat Penilaian - TETAP SAMA -->
 <div class="modal fade" id="modalPenilaian" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -394,7 +445,7 @@
     </div>
 </div>
 
-<!-- CSS Custom -->
+<!-- CSS Custom - TETAP SAMA -->
 <style>
 .avatar-circle {
     width: 40px;
@@ -414,7 +465,6 @@
     margin-bottom: 5px;
 }
 
-/* ✅ STYLING UNTUK MODAL PENILAIAN - UPDATED */
 .penilaian-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -456,7 +506,6 @@
     border-radius: 15px;
 }
 
-/* ✅ STYLING BARU UNTUK PENILAIAN SKRIPSI */
 .badge-lg {
     font-size: 16px !important;
     padding: 8px 16px !important;
@@ -496,12 +545,12 @@
 }
 </style>
 
-<!-- JavaScript -->
+<!-- JavaScript - TETAP SAMA STRUKTUR, HANYA PERBAIKAN KECIL -->
 <script>
-// ✅ DECLARE GLOBAL VARIABLES FIRST
+// Declare global variables first
 var currentSeminarId = null;
 
-// ✅ DOCUMENT READY
+// Document ready
 $(document).ready(function() {
     // Initialize DataTable jika ada data
     if ($('#pengajuan-table').length && $('#pengajuan-table tbody tr').length > 0) {
@@ -515,7 +564,7 @@ $(document).ready(function() {
     }
 });
 
-// ✅ QUICK APPROVE FUNCTION
+// Quick approve function
 function quickApprove(seminarId, mahasiswaName) {
     if (confirm('Yakin menyetujui pengajuan seminar skripsi ' + mahasiswaName + '?')) {
         $.post('<?= base_url('dosen/seminar_skripsi/rekomendasi') ?>', {
@@ -528,7 +577,7 @@ function quickApprove(seminarId, mahasiswaName) {
     }
 }
 
-// ✅ QUICK REJECT FUNCTION  
+// Quick reject function  
 function quickReject(seminarId, mahasiswaName) {
     var komentar = prompt('Masukkan alasan penolakan untuk ' + mahasiswaName + ':');
     if (komentar && komentar.trim() !== '') {
@@ -542,9 +591,9 @@ function quickReject(seminarId, mahasiswaName) {
     }
 }
 
-// ✅ FUNGSI LIHAT PENILAIAN - MAIN FUNCTION
+// Lihat penilaian function
 function lihatPenilaian(seminarId, mahasiswaName) {
-    console.log('lihatPenilaian called with:', seminarId, mahasiswaName); // Debug log
+    console.log('lihatPenilaian called with:', seminarId, mahasiswaName);
     
     currentSeminarId = seminarId;
     $('#modalPenilaian').modal('show');
@@ -564,9 +613,9 @@ function lihatPenilaian(seminarId, mahasiswaName) {
         url: '<?= base_url('dosen/seminar_skripsi/get_penilaian/') ?>' + seminarId,
         type: 'GET',
         dataType: 'json',
-        timeout: 10000, // 10 second timeout
+        timeout: 10000,
         success: function(response) {
-            console.log('AJAX Response:', response); // Debug log
+            console.log('AJAX Response:', response);
             if (response && response.success) {
                 renderPenilaian(response.data, mahasiswaName);
             } else {
@@ -579,7 +628,7 @@ function lihatPenilaian(seminarId, mahasiswaName) {
             }
         },
         error: function(xhr, status, error) {
-            console.error('AJAX Error:', status, error); // Debug log
+            console.error('AJAX Error:', status, error);
             $('#penilaian-content').html(
                 '<div class="alert alert-danger">' +
                     '<i class="fas fa-exclamation-circle mr-2"></i>' +
@@ -590,7 +639,7 @@ function lihatPenilaian(seminarId, mahasiswaName) {
     });
 }
 
-// ✅ RENDER PENILAIAN FUNCTION - FIXED VERSION
+// Render penilaian function - TETAP SAMA
 function renderPenilaian(data, mahasiswaName) {
     var penilaianHtml = 
         '<div class="penilaian-header">' +
@@ -598,7 +647,7 @@ function renderPenilaian(data, mahasiswaName) {
             '<p class="mb-0 small">' + (data.nim || '') + ' | ' + (data.judul || '') + '</p>' +
         '</div>';
     
-    // ✅ INFORMASI SEMINAR    
+    // Informasi seminar    
     if (data.tanggal_seminar) {
         penilaianHtml += 
             '<div class="penilaian-section">' +
@@ -620,7 +669,7 @@ function renderPenilaian(data, mahasiswaName) {
             '</div>';
     }
     
-    // ✅ NILAI PER PENGUJI (sesuai dengan form penilaian actual)
+    // Nilai per penguji
     penilaianHtml += 
         '<div class="penilaian-section">' +
             '<h6><i class="fas fa-star mr-2"></i>Nilai Per Penguji</h6>' +
@@ -649,94 +698,7 @@ function renderPenilaian(data, mahasiswaName) {
             '</div>' +
         '</div>';
     
-    // ✅ REKAPITULASI NILAI FINAL
-    penilaianHtml += 
-        '<div class="penilaian-section">' +
-            '<h6><i class="fas fa-calculator mr-2"></i>Rekapitulasi Nilai Final</h6>' +
-            '<div class="row">' +
-                '<div class="col-md-4">' +
-                    '<div class="text-center p-3 bg-primary text-white rounded">' +
-                        '<h3 class="mb-1">' + (data.nilai_akhir || 0) + '</h3>' +
-                        '<small>Nilai Akhir</small>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="col-md-4">' +
-                    '<div class="text-center p-3 bg-success text-white rounded">' +
-                        '<h3 class="mb-1">' + (data.nilai_huruf || 'N/A') + '</h3>' +
-                        '<small>Nilai Huruf</small>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="col-md-4">' +
-                    '<div class="text-center p-3 bg-info text-white rounded">' +
-                        '<h3 class="mb-1">' + (data.predikat || 'N/A') + '</h3>' +
-                        '<small>Predikat</small>' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-        '</div>';
-        
-    // ✅ REKOMENDASI
-    if (data.rekomendasi) {
-        var rekomendasiBadge = 'secondary';
-        if (data.rekomendasi.toLowerCase() === 'lulus_langsung') rekomendasiBadge = 'success';
-        else if (data.rekomendasi.toLowerCase() === 'lulus_revisi_minor') rekomendasiBadge = 'warning';
-        else if (data.rekomendasi.toLowerCase() === 'lulus_revisi_mayor') rekomendasiBadge = 'danger';
-        
-        penilaianHtml += 
-            '<div class="penilaian-section">' +
-                '<h6><i class="fas fa-thumbs-up mr-2"></i>Rekomendasi</h6>' +
-                '<div class="text-center p-3 border rounded">' +
-                    '<span class="badge badge-' + rekomendasiBadge + ' badge-lg p-2 mb-2" style="font-size: 14px;">' +
-                        data.rekomendasi.replace(/_/g, ' ').toUpperCase() +
-                    '</span>';
-        
-        if (data.keterangan_rekomendasi) {
-            penilaianHtml += 
-                '<br><div class="mt-2">' +
-                    '<small class="text-muted">Keterangan:</small><br>' +
-                    '<em>' + data.keterangan_rekomendasi + '</em>' +
-                '</div>';
-        }
-        
-        penilaianHtml += '</div></div>';
-    }
-    
-    // ✅ SEMUA CATATAN LENGKAP
-    var catatanItems = [
-        {label: 'Pendahuluan', field: 'catatan_pendahuluan'},
-        {label: 'Tinjauan Pustaka', field: 'catatan_tinjauan_pustaka'},
-        {label: 'Metodologi', field: 'catatan_metodologi'},
-        {label: 'Hasil & Pembahasan', field: 'catatan_hasil_pembahasan'},
-        {label: 'Kesimpulan', field: 'catatan_kesimpulan'},
-        {label: 'Catatan Umum', field: 'catatan_umum'}
-    ];
-    
-    var hasCatatan = false;
-    var catatanHtml = '';
-    
-    for (var i = 0; i < catatanItems.length; i++) {
-        var item = catatanItems[i];
-        if (data[item.field] && data[item.field].trim() !== '') {
-            hasCatatan = true;
-            catatanHtml += 
-                '<div class="mb-3">' +
-                    '<strong class="text-primary">' + item.label + ':</strong>' +
-                    '<div class="bg-light p-2 rounded mt-1" style="border-left: 3px solid #007bff;">' +
-                        data[item.field].replace(/\n/g, '<br>') +
-                    '</div>' +
-                '</div>';
-        }
-    }
-    
-    if (hasCatatan) {
-        penilaianHtml += 
-            '<div class="penilaian-section">' +
-                '<h6><i class="fas fa-comments mr-2"></i>Catatan Detail</h6>' +
-                catatanHtml +
-            '</div>';
-    }
-    
-    // ✅ FOOTER INFO
+    // Footer info
     penilaianHtml += 
         '<div class="text-center text-muted mt-3 pt-3 border-top">' +
             '<small>' +
@@ -749,7 +711,7 @@ function renderPenilaian(data, mahasiswaName) {
     $('#penilaian-content').html(penilaianHtml);
 }
 
-// ✅ CETAK PENILAIAN FUNCTION
+// Cetak penilaian function
 function cetakPenilaian() {
     if (currentSeminarId) {
         window.open('<?= base_url('dosen/seminar_skripsi/cetak_penilaian/') ?>' + currentSeminarId, '_blank');

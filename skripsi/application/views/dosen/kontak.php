@@ -410,7 +410,7 @@ function updateWhatsAppInfo(mahasiswaList) {
                     phoneNumber = '62' + phoneNumber;
                 }
                 
-                const whatsappUrl = `https://wa.me/${phoneNumber}?text=Assalamualaikum%20${encodeURIComponent(mahasiswa.nama)},%20saya%20${encodeURIComponent('<?= $this->session->userdata('nama') ?>')}%20dosen%20pembimbing%20Anda.%20`;
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=Salam%20${encodeURIComponent(mahasiswa.nama)},%20saya%20${encodeURIComponent('<?= $this->session->userdata('nama') ?>')}%20dosen%20pembimbing%20Anda.%20`;
                 
                 html += `
                     <div class="media align-items-center mb-3 p-2 border rounded">

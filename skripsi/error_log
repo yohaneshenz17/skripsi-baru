@@ -579,3 +579,1093 @@ Stack trace:
 [06-Aug-2025 13:12:35 Asia/Jakarta] PUBLIKASI TABLE FIELDS: id, proposal_mahasiswa_id, mahasiswa_id, nama_mahasiswa, nim, program_studi, judul_skripsi_final, dosen_pembimbing_id, nama_dosen_pembimbing, tanggal_ujian_skripsi, file_surat_revisi, file_skripsi_final, file_surat_perpustakaan, link_repository, file_surat_keterangan, status, status_pembimbing, status_staf, keterangan_mahasiswa, komentar_pembimbing, komentar_staf, tanggal_pengajuan, tanggal_review_pembimbing, tanggal_validasi_staf, tanggal_selesai, validated_by_staf_id, validated_by_staf_name, created_at, updated_at
 [06-Aug-2025 13:12:36 Asia/Jakarta] PUBLIKASI TABLE FIELDS: id, proposal_mahasiswa_id, mahasiswa_id, nama_mahasiswa, nim, program_studi, judul_skripsi_final, dosen_pembimbing_id, nama_dosen_pembimbing, tanggal_ujian_skripsi, file_surat_revisi, file_skripsi_final, file_surat_perpustakaan, link_repository, file_surat_keterangan, status, status_pembimbing, status_staf, keterangan_mahasiswa, komentar_pembimbing, komentar_staf, tanggal_pengajuan, tanggal_review_pembimbing, tanggal_validasi_staf, tanggal_selesai, validated_by_staf_id, validated_by_staf_name, created_at, updated_at
 [06-Aug-2025 13:12:37 Asia/Jakarta] PUBLIKASI TABLE FIELDS: id, proposal_mahasiswa_id, mahasiswa_id, nama_mahasiswa, nim, program_studi, judul_skripsi_final, dosen_pembimbing_id, nama_dosen_pembimbing, tanggal_ujian_skripsi, file_surat_revisi, file_skripsi_final, file_surat_perpustakaan, link_repository, file_surat_keterangan, status, status_pembimbing, status_staf, keterangan_mahasiswa, komentar_pembimbing, komentar_staf, tanggal_pengajuan, tanggal_review_pembimbing, tanggal_validasi_staf, tanggal_selesai, validated_by_staf_id, validated_by_staf_name, created_at, updated_at
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2717069001
+    [nama] => Yohanes Hendro Pranyoto, S.Pd., M.Pd.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Pendidikan Agama Katolik, Manajemen Pendidikan
+    [nomor_telepon] => 081295111706
+    [email] => yohaneshenz@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: Dosen ID from session: 25
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 25
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: Input data - NIP: 2717069001, Email: yohaneshenz@stkyakobus.ac.id, Prodi: 10, Bidang: Pendidikan Agama Katolik, Manajemen Pendidikan
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:18:18 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2721128601
+    [nama] => Dedimus Berangka, S.Pd., M.Pd.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Pendidikan Agama Katolik, Manajemen Pendidikan
+    [nomor_telepon] => 081290909003
+    [email] => dedydbeau@gmail.com
+)
+
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: Dosen ID from session: 26
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 26
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: Input data - NIP: 2721128601, Email: dedydbeau@gmail.com, Prodi: 10, Bidang: Pendidikan Agama Katolik, Manajemen Pendidikan
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:19:16 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2709109301
+    [nama] => Lambertus Ayiriga, S.Pd., M.Pd.
+    [prodi_id] => 11
+    [bidang_keilmuan] => Pendidikan Guru Sekolah Dasar, Evaluasi Pembelajaran
+    [nomor_telepon] => 82197819425
+    [email] => lambertus@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: Dosen ID from session: 14
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 14
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: Input data - NIP: 2709109301, Email: lambertus@stkyakobus.ac.id, Prodi: 11, Bidang: Pendidikan Guru Sekolah Dasar, Evaluasi Pembelajaran
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:21:54 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Screenshot 2024-05-27 093226.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpXfVkDJ
+            [error] => 0
+            [size] => 33908
+        )
+
+)
+
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: Dosen ID from session: 14
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 14
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Screenshot 2024-05-27 093226.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpXfVkDJ
+            [error] => 0
+            [size] => 33908
+        )
+
+)
+
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => acdb01613d1ffe29172e4412ce6bb43d.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: Database updated successfully with foto: acdb01613d1ffe29172e4412ce6bb43d.jpg
+[09-Aug-2025 08:22:20 Asia/Jakarta] DEBUG: Session updated with foto: acdb01613d1ffe29172e4412ce6bb43d.jpg
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Linda 4.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpzshsin
+            [error] => 0
+            [size] => 878417
+        )
+
+)
+
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: Dosen ID from session: 12
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 12
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Linda 4.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpzshsin
+            [error] => 0
+            [size] => 878417
+        )
+
+)
+
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 0aeb4ba6a821018aaeda920f716230ea.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: Database updated successfully with foto: 0aeb4ba6a821018aaeda920f716230ea.jpg
+[09-Aug-2025 08:23:03 Asia/Jakarta] DEBUG: Session updated with foto: 0aeb4ba6a821018aaeda920f716230ea.jpg
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2720067001
+    [nama] => Dr. Berlinda Setyo Yunarti, M.Pd.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Manajemen Pendidikan
+    [nomor_telepon] => 085244791002
+    [email] => lindayunarti@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: Dosen ID from session: 12
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 12
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: Input data - NIP: 2720067001, Email: lindayunarti@stkyakobus.ac.id, Prodi: 10, Bidang: Manajemen Pendidikan
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:23:12 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => IMG_0001 (2).jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phplwtv81
+            [error] => 0
+            [size] => 99552
+        )
+
+)
+
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: Dosen ID from session: 15
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 15
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => IMG_0001 (2).jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phplwtv81
+            [error] => 0
+            [size] => 99552
+        )
+
+)
+
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 343c76cd72357ee976280e95822526ed.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: Database updated successfully with foto: 343c76cd72357ee976280e95822526ed.jpg
+[09-Aug-2025 08:23:45 Asia/Jakarta] DEBUG: Session updated with foto: 343c76cd72357ee976280e95822526ed.jpg
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2728048001
+    [nama] => Rikardus Kristian Sarang, S.Fil., M.Pd.
+    [prodi_id] => 11
+    [bidang_keilmuan] => Filsafat, Manajemen Pendidikan
+    [nomor_telepon] => 81248525845
+    [email] => rikardkristians@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: Dosen ID from session: 15
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 15
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: Input data - NIP: 2728048001, Email: rikardkristians@stkyakobus.ac.id, Prodi: 11, Bidang: Filsafat, Manajemen Pendidikan
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:24:01 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => 12.Scan Foto Warna.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpw8FFpH
+            [error] => 0
+            [size] => 144321
+        )
+
+)
+
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: Dosen ID from session: 16
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 16
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => 12.Scan Foto Warna.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpw8FFpH
+            [error] => 0
+            [size] => 144321
+        )
+
+)
+
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 2a43963890246436769d2e5ae2c2b5bd.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: Database updated successfully with foto: 2a43963890246436769d2e5ae2c2b5bd.jpg
+[09-Aug-2025 08:24:28 Asia/Jakarta] DEBUG: Session updated with foto: 2a43963890246436769d2e5ae2c2b5bd.jpg
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2730068501
+    [nama] => Raimundus Sedo, S.T., M.T.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Sistem Informasi
+    [nomor_telepon] => 81338623494
+    [email] => raimundus@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: Dosen ID from session: 16
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 16
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: Input data - NIP: 2730068501, Email: raimundus@stkyakobus.ac.id, Prodi: 10, Bidang: Sistem Informasi
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:24:43 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2730068501
+    [nama] => Raimundus Sedo, S.T., M.T.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Sistem Informasi, Teknik Komputer
+    [nomor_telepon] => 81338623494
+    [email] => raimundus@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: Dosen ID from session: 16
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 16
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: Input data - NIP: 2730068501, Email: raimundus@stkyakobus.ac.id, Prodi: 10, Bidang: Sistem Informasi, Teknik Komputer
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:24:53 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:25:20 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:25:20 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:25:20 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Foto - Copy.JPG
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpZ1rb6H
+            [error] => 0
+            [size] => 467947
+        )
+
+)
+
+[09-Aug-2025 08:25:20 Asia/Jakarta] DEBUG: Dosen ID from session: 17
+[09-Aug-2025 08:25:20 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:25:20 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:25:20 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 17
+[09-Aug-2025 08:25:20 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Foto - Copy.JPG
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpZ1rb6H
+            [error] => 0
+            [size] => 467947
+        )
+
+)
+
+[09-Aug-2025 08:25:21 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 6a5f094014253fffe2f79bb5e26b89fd.JPG
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:25:21 Asia/Jakarta] DEBUG: Database updated successfully with foto: 6a5f094014253fffe2f79bb5e26b89fd.JPG
+[09-Aug-2025 08:25:21 Asia/Jakarta] DEBUG: Session updated with foto: 6a5f094014253fffe2f79bb5e26b89fd.JPG
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2705077801
+    [nama] => Dr. Erly Lumban Gaol, M.Th.
+    [prodi_id] => 11
+    [bidang_keilmuan] => Pastoral, Teknologi Pendidikan
+    [nomor_telepon] => 81239904548
+    [email] => erly@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: Dosen ID from session: 17
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 17
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: Input data - NIP: 2705077801, Email: erly@stkyakobus.ac.id, Prodi: 11, Bidang: Pastoral, Teknologi Pendidikan
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:25:35 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Yan Yusuf Subu.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpXM2DXp
+            [error] => 0
+            [size] => 85583
+        )
+
+)
+
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: Dosen ID from session: 18
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 18
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Yan Yusuf Subu.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpXM2DXp
+            [error] => 0
+            [size] => 85583
+        )
+
+)
+
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 45b252dbccad7b99bd9e3b2060feee72.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: Database updated successfully with foto: 45b252dbccad7b99bd9e3b2060feee72.jpg
+[09-Aug-2025 08:26:30 Asia/Jakarta] DEBUG: Session updated with foto: 45b252dbccad7b99bd9e3b2060feee72.jpg
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2727128101
+    [nama] => Yan Yusuf Subu, S.Fil., M.Hum.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Teologi
+    [nomor_telepon] => 81227909867
+    [email] => yanyusuf@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: Dosen ID from session: 18
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 18
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: Input data - NIP: 2727128101, Email: yanyusuf@stkyakobus.ac.id, Prodi: 10, Bidang: Teologi
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:26:38 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Rosmayasinta Makasau.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpRCd7JJ
+            [error] => 0
+            [size] => 34126
+        )
+
+)
+
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: Dosen ID from session: 19
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 19
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Rosmayasinta Makasau.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpRCd7JJ
+            [error] => 0
+            [size] => 34126
+        )
+
+)
+
+[09-Aug-2025 08:27:04 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => b9389b10cf94c423662d55e86cc326a7.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:27:05 Asia/Jakarta] DEBUG: Database updated successfully with foto: b9389b10cf94c423662d55e86cc326a7.jpg
+[09-Aug-2025 08:27:05 Asia/Jakarta] DEBUG: Session updated with foto: b9389b10cf94c423662d55e86cc326a7.jpg
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2729108301
+    [nama] => Rosmayasinta Makasau, S.Pd., M.Pd.
+    [prodi_id] => 11
+    [bidang_keilmuan] => Pendidikan Bahasa Inggris
+    [nomor_telepon] => 85244236555
+    [email] => mayamakasau@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: Dosen ID from session: 19
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 19
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: Input data - NIP: 2729108301, Email: mayamakasau@stkyakobus.ac.id, Prodi: 11, Bidang: Pendidikan Bahasa Inggris
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:27:20 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2717077001
+    [nama] => Dr. Donatus Wea, Lic.Iur.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Hukum Gereja, Manajemen Pendidikan
+    [nomor_telepon] => 81247719057
+    [email] => romodonwea@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: Dosen ID from session: 20
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 20
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: Input data - NIP: 2717077001, Email: romodonwea@stkyakobus.ac.id, Prodi: 10, Bidang: Hukum Gereja, Manajemen Pendidikan
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:28:06 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Xaverius Wonmut.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpjX9J0A
+            [error] => 0
+            [size] => 259275
+        )
+
+)
+
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: Dosen ID from session: 21
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 21
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Xaverius Wonmut.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpjX9J0A
+            [error] => 0
+            [size] => 259275
+        )
+
+)
+
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => a2ead8e0f3726f05e09c850575fbdfe0.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: Database updated successfully with foto: a2ead8e0f3726f05e09c850575fbdfe0.jpg
+[09-Aug-2025 08:28:44 Asia/Jakarta] DEBUG: Session updated with foto: a2ead8e0f3726f05e09c850575fbdfe0.jpg
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2719076301
+    [nama] => Drs. Xaverius Wonmut, M.Hum.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Antropologi Budaya
+    [nomor_telepon] => 81248202058
+    [email] => xaveriuswonmut@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: Dosen ID from session: 21
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 21
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: Input data - NIP: 2719076301, Email: xaveriuswonmut@stkyakobus.ac.id, Prodi: 10, Bidang: Antropologi Budaya
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:28:55 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Pastor Agus.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpEftJaO
+            [error] => 0
+            [size] => 190516
+        )
+
+)
+
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: Dosen ID from session: 22
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 22
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Pastor Agus.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpEftJaO
+            [error] => 0
+            [size] => 190516
+        )
+
+)
+
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 18b86379703536f30994654376417e60.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: Database updated successfully with foto: 18b86379703536f30994654376417e60.jpg
+[09-Aug-2025 08:29:20 Asia/Jakarta] DEBUG: Session updated with foto: 18b86379703536f30994654376417e60.jpg
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2729086901
+    [nama] => Agustinus Kia Wolomasi, S.Ag., M.Pd.
+    [prodi_id] => 11
+    [bidang_keilmuan] => Filsafat, Manajemen Pendidikan
+    [nomor_telepon] => 081386503387
+    [email] => aguswolomasi@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: Dosen ID from session: 22
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 22
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: Input data - NIP: 2729086901, Email: aguswolomasi@stkyakobus.ac.id, Prodi: 11, Bidang: Filsafat, Manajemen Pendidikan
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:29:30 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Markus Meran.JPG
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpGxbOwo
+            [error] => 0
+            [size] => 454424
+        )
+
+)
+
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: Dosen ID from session: 23
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 23
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Markus Meran.JPG
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpGxbOwo
+            [error] => 0
+            [size] => 454424
+        )
+
+)
+
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => dec3cf8eab5496d4fece1474ab2833b9.JPG
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: Database updated successfully with foto: dec3cf8eab5496d4fece1474ab2833b9.JPG
+[09-Aug-2025 08:29:56 Asia/Jakarta] DEBUG: Session updated with foto: dec3cf8eab5496d4fece1474ab2833b9.JPG
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2709077801
+    [nama] => Markus Meran, S.Ag., M.Th.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Pastoral, Perbandingan Agama
+    [nomor_telepon] => 82248526104
+    [email] => markusmeran@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: Dosen ID from session: 23
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 23
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: Input data - NIP: 2709077801, Email: markusmeran@stkyakobus.ac.id, Prodi: 10, Bidang: Pastoral, Perbandingan Agama
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:30:05 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Foto.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php7mIdu2
+            [error] => 0
+            [size] => 45545
+        )
+
+)
+
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: Dosen ID from session: 24
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 24
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Foto.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php7mIdu2
+            [error] => 0
+            [size] => 45545
+        )
+
+)
+
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 90e289fc18476464542d24a99756a2b8.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: Database updated successfully with foto: 90e289fc18476464542d24a99756a2b8.jpg
+[09-Aug-2025 08:31:56 Asia/Jakarta] DEBUG: Session updated with foto: 90e289fc18476464542d24a99756a2b8.jpg
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 1423056901
+    [nama] => Francisco Noerjanto, S.Ag., M.Si.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Filsafat, Psikologi
+    [nomor_telepon] => 8114890505
+    [email] => francisco@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: Dosen ID from session: 24
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 24
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: Input data - NIP: 1423056901, Email: francisco@stkyakobus.ac.id, Prodi: 10, Bidang: Filsafat, Psikologi
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:32:22 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 1423056901
+    [nama] => Francisco Noerjanto, S.Ag., M.Si.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Filsafat, Psikologi
+    [nomor_telepon] => 8114890505
+    [email] => francisco@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: Dosen ID from session: 24
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 24
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: Input data - NIP: 1423056901, Email: francisco@stkyakobus.ac.id, Prodi: 10, Bidang: Filsafat, Psikologi
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:33:32 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedi-Biru.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phplNJg8v
+            [error] => 0
+            [size] => 94917
+        )
+
+)
+
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: Dosen ID from session: 26
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 26
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Dedi-Biru.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phplNJg8v
+            [error] => 0
+            [size] => 94917
+        )
+
+)
+
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => dcf30a6f727a39d2011da1853ccadcdd.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: Database updated successfully with foto: dcf30a6f727a39d2011da1853ccadcdd.jpg
+[09-Aug-2025 08:34:43 Asia/Jakarta] DEBUG: Session updated with foto: dcf30a6f727a39d2011da1853ccadcdd.jpg
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2721128601
+    [nama] => Dedimus Berangka, S.Pd., M.Pd.
+    [prodi_id] => 10
+    [bidang_keilmuan] => Pendidikan Agama Katolik, Manajemen Pendidikan
+    [nomor_telepon] => 081290909003
+    [email] => dedydbeau@gmail.com
+)
+
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: Dosen ID from session: 26
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 26
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: Input data - NIP: 2721128601, Email: dedydbeau@gmail.com, Prodi: 10, Bidang: Pendidikan Agama Katolik, Manajemen Pendidikan
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:34:47 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 08:35:24 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:35:24 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[09-Aug-2025 08:35:24 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Steven Ronald Ahlaro.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpPQpOJ6
+            [error] => 0
+            [size] => 138661
+        )
+
+)
+
+[09-Aug-2025 08:35:24 Asia/Jakarta] DEBUG: Dosen ID from session: 27
+[09-Aug-2025 08:35:24 Asia/Jakarta] DEBUG: Is photo upload: YES
+[09-Aug-2025 08:35:24 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[09-Aug-2025 08:35:24 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 27
+[09-Aug-2025 08:35:24 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Steven Ronald Ahlaro.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpPQpOJ6
+            [error] => 0
+            [size] => 138661
+        )
+
+)
+
+[09-Aug-2025 08:35:25 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => ae93469473c97b4aea5c79313daa68fc.jpg
+    [message] => Foto berhasil diupload
+)
+
+[09-Aug-2025 08:35:25 Asia/Jakarta] DEBUG: Database updated successfully with foto: ae93469473c97b4aea5c79313daa68fc.jpg
+[09-Aug-2025 08:35:25 Asia/Jakarta] DEBUG: Session updated with foto: ae93469473c97b4aea5c79313daa68fc.jpg
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: update() method called
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2706058401
+    [nama] => Steven Ronald Ahlaro, S.Pd., M.Pd.
+    [prodi_id] => 11
+    [bidang_keilmuan] => Pendidikan Bahasa Inggris, Teknologi Pembelajaran
+    [nomor_telepon] => 082271403437
+    [email] => steveahlaro@stkyakobus.ac.id
+)
+
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: Dosen ID from session: 27
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: Is photo upload: NO
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: Routing to data update handler
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 27
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: Input data - NIP: 2706058401, Email: steveahlaro@stkyakobus.ac.id, Prodi: 11, Bidang: Pendidikan Bahasa Inggris, Teknologi Pembelajaran
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: Attempting database update
+[09-Aug-2025 08:35:41 Asia/Jakarta] DEBUG: Database update successful
+[09-Aug-2025 09:34:22 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Kaprodi::_get_dosen_script() in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php on line 2270
+[09-Aug-2025 09:34:30 Asia/Jakarta] PHP Fatal error:  Cannot redeclare Kaprodi::_get_dosen_script() in /home/stkp7133/public_html/skripsi/application/controllers/kaprodi/Kaprodi.php on line 2163
+[10-Aug-2025 14:44:17 Asia/Jakarta] PHP Fatal error:  Cannot declare class Kontak, because the name is already in use in /home/stkp7133/public_html/skripsi/application/views/kaprodi/kontak.php on line 0
+[12-Aug-2025 18:12:34 Asia/Jakarta] DEBUG: update() method called
+[12-Aug-2025 18:12:34 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [action] => upload_foto
+)
+
+[12-Aug-2025 18:12:34 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Academic - 34 - PORTRAIT (1).jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpY6AQJC
+            [error] => 0
+            [size] => 990524
+        )
+
+)
+
+[12-Aug-2025 18:12:34 Asia/Jakarta] DEBUG: Dosen ID from session: 25
+[12-Aug-2025 18:12:34 Asia/Jakarta] DEBUG: Is photo upload: YES
+[12-Aug-2025 18:12:34 Asia/Jakarta] DEBUG: Routing to photo upload handler
+[12-Aug-2025 18:12:34 Asia/Jakarta] DEBUG: _handle_photo_upload called with dosen_id: 25
+[12-Aug-2025 18:12:34 Asia/Jakarta] DEBUG: FILES data: Array
+(
+    [foto] => Array
+        (
+            [name] => Academic - 34 - PORTRAIT (1).jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpY6AQJC
+            [error] => 0
+            [size] => 990524
+        )
+
+)
+
+[12-Aug-2025 18:12:35 Asia/Jakarta] DEBUG: Upload result: Array
+(
+    [status] => 1
+    [filename] => 54c78cdf6e7d2add6e919d9333598452.jpg
+    [message] => Foto berhasil diupload
+)
+
+[12-Aug-2025 18:12:35 Asia/Jakarta] DEBUG: Old photo deleted: ./cdn/img/dosen/cb7f7e58e87bc27937e271490b9d767e.jpg
+[12-Aug-2025 18:12:35 Asia/Jakarta] DEBUG: Database updated successfully with foto: 54c78cdf6e7d2add6e919d9333598452.jpg
+[12-Aug-2025 18:12:35 Asia/Jakarta] DEBUG: Session updated with foto: 54c78cdf6e7d2add6e919d9333598452.jpg
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: update() method called
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: POST data: Array
+(
+    [nip] => 2706058401
+    [nama] => Steven Ronald Ahlaro, S.Pd., M.Pd.
+    [prodi_id] => 11
+    [bidang_keilmuan] => Pendidikan Bahasa Inggris, Teknologi Pembelajaran
+    [nomor_telepon] => 082271403437
+    [email] => stevenahlaro@stkyakobus.ac.id
+)
+
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: FILES data: Array
+(
+)
+
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: Dosen ID from session: 27
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: Is photo upload: NO
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: Routing to data update handler
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: _handle_data_update called with dosen_id: 27
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: Input data - NIP: 2706058401, Email: stevenahlaro@stkyakobus.ac.id, Prodi: 11, Bidang: Pendidikan Bahasa Inggris, Teknologi Pembelajaran
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: Email validation - exists: 0
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: NIP validation SKIPPED as requested
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: Attempting database update
+[14-Aug-2025 11:15:17 Asia/Jakarta] DEBUG: Database update successful

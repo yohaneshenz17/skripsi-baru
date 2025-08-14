@@ -401,7 +401,6 @@ class Usulan_proposal extends CI_Controller {
             // Ambil email staf dari tabel dosen dengan level = '5'
             $this->db->select('email, nama');
             $this->db->where('level', '5');
-            $this->db->where('status', '1'); // Pastikan staf aktif
             $staf_list = $this->db->get('dosen')->result();
             
             if (empty($staf_list)) {

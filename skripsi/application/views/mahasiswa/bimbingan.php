@@ -253,10 +253,46 @@
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
-                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" 
-                         style="width: 80px; height: 80px;">
-                        <i class="fas fa-user text-white fa-2x"></i>
-                    </div>
+                    <?php if (!empty($proposal->foto_dosen)): 
+                        // Cek path foto dosen
+                        $foto_path = '';
+                        $has_foto = false;
+                        
+                        $path1 = FCPATH . 'cdn/img/dosen/' . $proposal->foto_dosen;
+                        $path2 = FCPATH . 'cdn/dosen/foto/' . $proposal->foto_dosen;
+                        
+                        if (file_exists($path1)) {
+                            $foto_path = base_url('cdn/img/dosen/' . $proposal->foto_dosen);
+                            $has_foto = true;
+                        } elseif (file_exists($path2)) {
+                            $foto_path = base_url('cdn/dosen/foto/' . $proposal->foto_dosen);
+                            $has_foto = true;
+                        }
+                        
+                        if ($has_foto): ?>
+                            <!-- Tampilkan foto dosen -->
+                            <img src="<?= $foto_path ?>" 
+                                 class="rounded-circle" 
+                                 style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #007bff;"
+                                 alt="Foto <?= $proposal->nama_dosen ?>">
+                        <?php else: ?>
+                            <!-- Fallback: Inisial nama dosen -->
+                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px; border: 3px solid #007bff;">
+                                <span class="text-white" style="font-size: 24px; font-weight-bold;">
+                                    <?= isset($proposal->nama_dosen) ? strtoupper(substr($proposal->nama_dosen, 0, 1)) : 'D' ?>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <!-- Tidak ada foto: Tampilkan inisial -->
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" 
+                             style="width: 80px; height: 80px; border: 3px solid #007bff;">
+                            <span class="text-white" style="font-size: 24px; font-weight-bold;">
+                                <?= isset($proposal->nama_dosen) ? strtoupper(substr($proposal->nama_dosen, 0, 1)) : 'D' ?>
+                            </span>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="text-center">

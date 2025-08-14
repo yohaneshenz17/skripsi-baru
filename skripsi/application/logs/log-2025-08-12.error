@@ -1,0 +1,75 @@
+ERROR - 2025-08-12 08:15:09 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 10:03:06 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 10:04:52 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 15:16:54 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 15:23:07 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 15:23:18 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 15:38:40 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 15:58:49 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 16:10:23 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 16:31:18 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 16:37:29 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 16:42:44 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 16:44:12 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 16:57:53 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 17:00:12 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 17:02:16 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 17:03:07 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 17:03:52 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 17:04:14 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 17:12:05 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 17:21:28 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 17:22:12 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 17:23:51 --> Query error: Unknown column 'status' in 'where clause' - Invalid query: SELECT `email`, `nama`
+FROM `dosen`
+WHERE `level` = '5'
+AND `status` = '1'
+ERROR - 2025-08-12 17:29:26 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 17:56:19 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 17:57:51 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 18:01:31 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 18:02:00 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 18:05:06 --> Query error: Unknown column 'd.nomor_telepon as telepon_dosen d.foto' in 'field list' - Invalid query: SELECT `pm`.`id` as `proposal_id`, `pm`.`judul`, `pm`.`jenis_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`workflow_status`, `pm`.`status_kaprodi`, `pm`.`status_pembimbing`, `pm`.`dosen_id`, `pm`.`created_at`, `pm`.`tanggal_review_kaprodi`, `pm`.`komentar_kaprodi`, `pm`.`tanggal_penetapan`, `pm`.`tanggal_respon_pembimbing`, `pm`.`komentar_pembimbing`, `d`.`id` as `dosen_id`, `d`.`nama` as `nama_dosen`, `d`.`email` as `email_dosen`, `d`.`nomor_telepon as telepon_dosen d`.`foto` as `foto_dosen`
+FROM `proposal_mahasiswa` `pm`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `pm`.`mahasiswa_id` = '51'
+ORDER BY `pm`.`id` DESC
+ERROR - 2025-08-12 18:05:33 --> Query error: Unknown column 'd.nomor_telepon as telepon_dosen d.foto' in 'field list' - Invalid query: SELECT `pm`.`id` as `proposal_id`, `pm`.`judul`, `pm`.`jenis_penelitian`, `pm`.`lokasi_penelitian`, `pm`.`workflow_status`, `pm`.`status_kaprodi`, `pm`.`status_pembimbing`, `pm`.`dosen_id`, `pm`.`created_at`, `pm`.`tanggal_review_kaprodi`, `pm`.`komentar_kaprodi`, `pm`.`tanggal_penetapan`, `pm`.`tanggal_respon_pembimbing`, `pm`.`komentar_pembimbing`, `d`.`id` as `dosen_id`, `d`.`nama` as `nama_dosen`, `d`.`email` as `email_dosen`, `d`.`nomor_telepon as telepon_dosen d`.`foto` as `foto_dosen`
+FROM `proposal_mahasiswa` `pm`
+LEFT JOIN `dosen` `d` ON `pm`.`dosen_id` = `d`.`id`
+WHERE `pm`.`mahasiswa_id` = '51'
+ORDER BY `pm`.`id` DESC
+ERROR - 2025-08-12 18:09:36 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 18:10:52 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 18:12:26 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 18:35:26 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 18:41:45 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 19:23:30 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 20:14:41 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 20:23:36 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 20:24:15 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-12 20:38:31 --> 404 Page Not Found: Cdn/img

@@ -234,38 +234,46 @@ class Seminar_proposal extends CI_Controller {
     // PRIVATE HELPER FUNCTIONS - SIMPLIFIED WITH FALLBACKS
     // =================================================================
 
-    /**
-     * Get list seminar proposal yang sudah disetujui kaprodi
-     */
-    private function _get_approved_seminar_list() {
-        try {
-            // Simple query dengan error handling
-            $this->db->select('
-                spm.id, spm.proposal_id, spm.mahasiswa_id, spm.status,
-                spm.tanggal_seminar, spm.jam_seminar, spm.tempat_seminar,
-                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                pm.judul, pm.status_kaprodi,
-                d_pembimbing.nama as nama_pembimbing,
-                pr.nama as nama_prodi
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
-            $this->db->join('prodi pr', 'm.prodi_id = pr.id');
-            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
-            
-            // Filter sederhana
-            $this->db->where('pm.status_kaprodi', 'approved');
-            $this->db->order_by('spm.tanggal_seminar', 'DESC');
-            $this->db->limit(50); // Limit untuk performa
-            
-            return $this->db->get()->result();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting approved seminar list: ' . $e->getMessage());
-            return [];
-        }
+/**
+ * Get list seminar proposal yang sudah dijadwalkan kaprodi dan siap untuk administrasi staf
+ */
+private function _get_approved_seminar_list() {
+    try {
+        // ✅ FIXED: Query sesuai controller dosen yang working
+        $this->db->select('
+            spm.id, spm.proposal_id, spm.mahasiswa_id, spm.status,
+            spm.current_step, spm.tanggal_seminar, spm.jam_seminar, spm.tempat_seminar,
+            spm.dosen_penguji1_id, spm.dosen_penguji2_id,
+            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+            pm.judul, 
+            d_pembimbing.nama as nama_pembimbing,
+            d_penguji1.nama as nama_penguji1,
+            d_penguji2.nama as nama_penguji2,
+            pr.nama as nama_prodi
+        ');
+        $this->db->from('seminar_proposal_mahasiswa spm');
+        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+        $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+        $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
+        $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
+        
+        // ✅ PERBAIKAN FILTER: Sama seperti controller dosen yang working
+        $this->db->where('spm.status', 'scheduled');
+        $this->db->where('spm.current_step', 'staf');
+        $this->db->where('spm.tanggal_seminar IS NOT NULL'); // Pastikan sudah dijadwalkan
+        
+        $this->db->order_by('spm.tanggal_seminar', 'ASC');
+        $this->db->limit(50); // Limit untuk performa
+        
+        return $this->db->get()->result();
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error getting scheduled seminar list for staf: ' . $e->getMessage());
+        return [];
     }
+}
 
     /**
      * Get detail seminar untuk staf

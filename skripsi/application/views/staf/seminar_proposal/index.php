@@ -1,6 +1,10 @@
 <!-- =====================================================
-     VIEW: Staf Seminar Proposal Index - COMPLETE FIXED VERSION
+     VIEW: Staf Seminar Proposal Index - READ-ONLY PENILAIAN VERSION
      File: application/views/staf/seminar_proposal/index.php
+     
+     PERUBAHAN:
+     - Tombol "Input Penilaian" diganti "Lihat Penilaian"
+     - Staf hanya bisa view, tidak bisa input/edit
      ===================================================== -->
 
 <div class="container-fluid">
@@ -33,6 +37,17 @@
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-triangle mr-2"></i>
             <?= $this->session->flashdata('error') ?>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <!-- ✅ PERUBAHAN: Info alert tentang role read-only -->
+    <?php if($this->session->flashdata('info')): ?>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle mr-2"></i>
+            <?= $this->session->flashdata('info') ?>
             <button type="button" class="close" data-dismiss="alert">
                 <span>&times;</span>
             </button>
@@ -83,35 +98,14 @@
             </div>
         </div>
 
-        <!-- Belum Dinilai -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Perlu Input Penilaian
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                <?= isset($stats['belum_dinilai']) ? $stats['belum_dinilai'] : '0' ?>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-edit fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sudah Dinilai -->
+        <!-- ✅ PERUBAHAN: Ubah statistik untuk read-only -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Sudah Dinilai
+                                Sudah Dinilai Dosen
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?= isset($stats['sudah_dinilai']) ? $stats['sudah_dinilai'] : '0' ?>
@@ -119,6 +113,27 @@
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Administrasi -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Perlu Administrasi
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <?= isset($stats['belum_dinilai']) ? $stats['belum_dinilai'] : '0' ?>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -163,6 +178,13 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <!-- ✅ PERUBAHAN: Info untuk staf tentang akses read-only -->
+                    <div class="alert alert-light border-left-warning">
+                        <i class="fas fa-info-circle text-warning mr-2"></i>
+                        <strong>Catatan:</strong> Sebagai staf, Anda memiliki akses <strong>read-only</strong> untuk melihat penilaian. 
+                        Hanya dosen yang dapat melakukan input dan edit penilaian seminar proposal.
+                    </div>
+
                     <!-- Filter Row -->
                     <div class="row mb-3">
                         <div class="col-md-4">
@@ -324,13 +346,13 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     
-                                                    <!-- Tombol Input Penilaian (jika sudah terjadwal) -->
+                                                    <!-- ✅ PERUBAHAN: Tombol "Lihat Penilaian" bukan "Input Penilaian" -->
                                                     <?php if (!empty($seminar->tanggal_seminar)): ?>
-                                                        <a href="<?= base_url('staf/seminar_proposal/input_penilaian/' . $seminar->id) ?>" 
-                                                           class="btn btn-warning btn-sm" 
-                                                           title="Input Penilaian"
+                                                        <a href="<?= base_url('staf/seminar_proposal/lihat_penilaian/' . $seminar->id) ?>" 
+                                                           class="btn btn-secondary btn-sm" 
+                                                           title="Lihat Penilaian (Read-Only)"
                                                            data-toggle="tooltip">
-                                                            <i class="fas fa-edit"></i>
+                                                            <i class="fas fa-eye"></i>
                                                         </a>
                                                     <?php endif; ?>
                                                     
@@ -404,7 +426,8 @@
                             <div class="col-12">
                                 <small class="text-muted">
                                     <i class="fas fa-info-circle mr-1"></i>
-                                    Menampilkan <?= count($seminar_list) ?> data seminar proposal yang siap untuk administrasi staf.
+                                    Menampilkan <?= count($seminar_list) ?> data seminar proposal. 
+                                    <strong>Akses Staf:</strong> Read-only untuk penilaian.
                                     Last updated: <?= date('d/m/Y H:i:s') ?>
                                 </small>
                             </div>
@@ -471,6 +494,11 @@
 /* Badge enhancements */
 .badge {
     font-size: 0.75rem;
+}
+
+/* ✅ PERUBAHAN: Styling untuk read-only access */
+.border-left-warning {
+    border-left: 0.25rem solid #f1c40f !important;
 }
 
 /* Responsive improvements */

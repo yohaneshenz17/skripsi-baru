@@ -1,25 +1,14 @@
 <?php
 /**
- * Staf Seminar Proposal Detail View - SIM TA STK Santo Yakobus
+ * Staf Seminar Proposal Detail View - READ-ONLY PENILAIAN VERSION
  * 
- * View untuk menampilkan detail lengkap seminar proposal dari perspektif staf akademik
- * Menampilkan identitas mahasiswa, detail proposal, jadwal, dewan penguji, dan aksi administrasi
+ * PERUBAHAN:
+ * - Tombol "Input Penilaian" diganti "Lihat Penilaian"
+ * - Staf hanya bisa view penilaian yang diinput dosen
+ * - Ditambah info alert tentang akses read-only
  * 
  * File: application/views/staf/seminar_proposal/detail.php
  * Controller: staf/Seminar_proposal::detail()
- * 
- * FIXED VERSION - Safe Property Access
- * - Mengatasi error "Undefined property" 
- * - Mempertahankan struktur existing
- * - Menambahkan fallback values
- * 
- * Features:
- * - Detail identitas mahasiswa dan proposal
- * - Detail tempat dan jadwal pelaksanaan
- * - Detail dewan penguji lengkap
- * - Download/print semua dokumen administrasi
- * - Input penilaian (jika belum ada)
- * - Status penilaian existing
  * 
  * @package     SIM_TA
  * @subpackage  Views/Staf
@@ -100,6 +89,24 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
             </div>
         <?php endif; ?>
 
+        <!-- ✅ PERUBAHAN: Info alert untuk akses read-only -->
+        <?php if($this->session->flashdata('info')): ?>
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle mr-2"></i>
+                <?= $this->session->flashdata('info') ?>
+                <button type="button" class="close" data-dismiss="alert">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+
+        <!-- ✅ PERUBAHAN: Alert tentang akses read-only untuk staf -->
+        <div class="alert alert-light border-left-info">
+            <i class="fas fa-shield-alt text-info mr-2"></i>
+            <strong>Akses Staf:</strong> Anda memiliki akses <strong>read-only</strong> untuk penilaian seminar proposal. 
+            Hanya dosen yang dapat melakukan input dan edit penilaian.
+        </div>
+
         <!-- Back Button dan Quick Actions -->
         <div class="row mb-3">
             <div class="col-md-6">
@@ -140,17 +147,11 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                     </div>
                 </div>
                 
-                <?php if(empty($existing_penilaian) || (isset($existing_penilaian) && !$existing_penilaian)): ?>
-                    <a href="<?= base_url('staf/seminar_proposal/input_penilaian/' . $seminar->id) ?>" class="btn btn-success">
-                        <i class="fas fa-edit mr-2"></i>
-                        Input Penilaian
-                    </a>
-                <?php else: ?>
-                    <a href="<?= base_url('staf/seminar_proposal/input_penilaian/' . $seminar->id) ?>" class="btn btn-warning">
-                        <i class="fas fa-edit mr-2"></i>
-                        Edit Penilaian
-                    </a>
-                <?php endif; ?>
+                <!-- ✅ PERUBAHAN: Tombol "Lihat Penilaian" bukan "Input Penilaian" -->
+                <a href="<?= base_url('staf/seminar_proposal/lihat_penilaian/' . $seminar->id) ?>" class="btn btn-info">
+                    <i class="fas fa-eye mr-2"></i>
+                    Lihat Penilaian
+                </a>
             </div>
         </div>
 
@@ -538,11 +539,17 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                         </h3>
                     </div>
                     <div class="card-body">
+                        <!-- ✅ PERUBAHAN: Info tentang akses read-only -->
+                        <div class="alert alert-info alert-sm">
+                            <i class="fas fa-eye mr-2"></i>
+                            <strong>Mode:</strong> Read-only untuk staf
+                        </div>
+
                         <?php if(isset($existing_penilaian) && $existing_penilaian): ?>
                             <!-- Penilaian Sudah Ada -->
                             <div class="alert alert-success">
                                 <i class="fas fa-check-circle mr-2"></i>
-                                <strong>Penilaian Telah Diinput</strong>
+                                <strong>Penilaian Telah Diinput Dosen</strong>
                                 <br>
                                 <small>
                                     Tanggal: <?= safe_date(safe_get($existing_penilaian, 'created_at', null), 'd F Y H:i') ?>
@@ -601,34 +608,37 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                 </div>
                             <?php endif; ?>
                             
+                            <!-- ✅ PERUBAHAN: Tombol "Lihat Detail" bukan "Edit" -->
                             <div class="text-center mt-3">
-                                <a href="<?= base_url('staf/seminar_proposal/input_penilaian/' . $seminar->id) ?>" 
-                                   class="btn btn-warning">
-                                    <i class="fas fa-edit mr-2"></i>
-                                    Edit Penilaian
+                                <a href="<?= base_url('staf/seminar_proposal/lihat_penilaian/' . $seminar->id) ?>" 
+                                   class="btn btn-info">
+                                    <i class="fas fa-eye mr-2"></i>
+                                    Lihat Detail Penilaian
                                 </a>
                             </div>
                         <?php else: ?>
                             <!-- Belum Ada Penilaian -->
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle mr-2"></i>
-                                <strong>Penilaian Belum Diinput</strong>
+                                <strong>Penilaian Belum Diinput Dosen</strong>
                                 <br>
-                                <small>Staf dapat memberikan penilaian sebagai backup/second opinion</small>
+                                <small>Menunggu dosen pembimbing melakukan penilaian</small>
                             </div>
                             
+                            <!-- ✅ PERUBAHAN: Tombol "Lihat" bukan "Input" -->
                             <div class="text-center">
-                                <a href="<?= base_url('staf/seminar_proposal/input_penilaian/' . $seminar->id) ?>" 
-                                   class="btn btn-success btn-lg">
-                                    <i class="fas fa-edit mr-2"></i>
-                                    Input Penilaian
+                                <a href="<?= base_url('staf/seminar_proposal/lihat_penilaian/' . $seminar->id) ?>" 
+                                   class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-eye mr-2"></i>
+                                    Lihat Status Penilaian
                                 </a>
                             </div>
                             
                             <hr>
                             <p class="text-muted text-sm">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                <strong>Info:</strong> Staf dan dosen pembimbing memiliki hak akses yang sama untuk input penilaian selama belum dipublikasikan.
+                                <strong>Info:</strong> Hanya dosen pembimbing yang dapat melakukan input penilaian. 
+                                Staf memiliki akses read-only untuk monitoring.
                             </p>
                         <?php endif; ?>
                     </div>
@@ -742,5 +752,16 @@ td.dosen-name-wrap {
     white-space: normal;
     line-height: 1.2;
     margin-bottom: 0.5rem;
+}
+
+/* ✅ PERUBAHAN: CSS untuk read-only alerts */
+.alert-sm {
+    padding: 0.375rem 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #17a2b8 !important;
 }
 </style>

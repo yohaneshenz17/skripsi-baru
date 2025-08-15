@@ -485,10 +485,15 @@ $route['dosen/publikasi/laporan'] = 'dosen/publikasi/laporan';
 // Dashboard Daftar Penguji
 $route['dosen/daftar_penguji'] = 'dosen/daftar_penguji/index';
 $route['dosen/daftar_penguji/index'] = 'dosen/daftar_penguji/index';
+$route['dosen/daftar_penguji/download_proposal/(:num)'] = 'dosen/daftar_penguji/download_proposal/$1';
 
 // Detail Seminar sebagai Penguji
 $route['dosen/daftar_penguji/detail_proposal/(:num)'] = 'dosen/daftar_penguji/detail_proposal/$1';
 $route['dosen/daftar_penguji/detail_skripsi/(:num)'] = 'dosen/daftar_penguji/detail_skripsi/$1';
+
+// View Assessment Results (Lihat Penilaian) - PERBAIKAN MASALAH 2 & 3
+$route['dosen/daftar_penguji/lihat_penilaian_proposal/(:num)'] = 'dosen/daftar_penguji/lihat_penilaian_proposal/$1';
+$route['dosen/daftar_penguji/lihat_penilaian_skripsi/(:num)'] = 'dosen/daftar_penguji/lihat_penilaian_skripsi/$1';
 
 // AJAX Endpoints
 $route['dosen/daftar_penguji/ajax_data'] = 'dosen/daftar_penguji/ajax_data';
@@ -504,6 +509,10 @@ $route['dosen/daftar-penguji'] = 'dosen/daftar_penguji/index';
 $route['dosen/daftar-penguji/detail-proposal/(:num)'] = 'dosen/daftar_penguji/detail_proposal/$1';
 $route['dosen/daftar-penguji/detail-skripsi/(:num)'] = 'dosen/daftar_penguji/detail_skripsi/$1';
 $route['dosen/daftar-penguji/export-pdf'] = 'dosen/daftar_penguji/export_pdf';
+// Alias untuk konsistensi URL
+$route['dosen/daftar-penguji/download-proposal/(:num)'] = 'dosen/daftar_penguji/download_proposal/$1';
+$route['dosen/daftar-penguji/lihat-penilaian-proposal/(:num)'] = 'dosen/daftar_penguji/lihat_penilaian_proposal/$1';
+$route['dosen/daftar-penguji/lihat-penilaian-skripsi/(:num)'] = 'dosen/daftar_penguji/lihat_penilaian_skripsi/$1';
 
 // Optional: Routes untuk integrasi dengan penilaian (jika ada controller terpisah)
 $route['dosen/daftar_penguji/penilaian_proposal/(:num)'] = 'dosen/penilaian_proposal/input/$1';

@@ -13,7 +13,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Dosen
  * @category    Daftar Penguji
  * @author      Unit SIPD STK Santo Yakobus
- * @version     1.1 (FIXED PDF EXPORT)
+ * @version     1.2 (FIXED DOWNLOAD & ASSESSMENT VIEW)
  */
 class Daftar_penguji extends CI_Controller {
 
@@ -133,6 +133,174 @@ class Daftar_penguji extends CI_Controller {
             'title' => 'Detail Seminar Skripsi - ' . $seminar->nama_mahasiswa,
             'content' => $this->load->view('dosen/daftar_penguji/detail_skripsi', $view_data, TRUE),
             'script' => $this->load->view('dosen/daftar_penguji/script', [], TRUE)
+        ];
+        
+        // Load template existing
+        $this->load->view('template/dosen', $data);
+    }
+
+    /**
+     * Download file proposal untuk dosen penguji - PERBAIKAN MASALAH 1
+     * PATH YANG BENAR: skripsi/uploads/seminar_proposal/proposal_files
+     */
+    public function download_proposal($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Validasi dosen sebagai penguji
+        $seminar = $this->penguji_model->get_detail_seminar_proposal($seminar_id, $dosen_id);
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau Anda bukan penguji!');
+            redirect('dosen/daftar_penguji');
+            return;
+        }
+        
+        // Cek field file proposal (backward compatibility)
+        $file_proposal = null;
+        if (!empty($seminar->file_draft_proposal)) {
+            $file_proposal = $seminar->file_draft_proposal;
+        } elseif (!empty($seminar->file_proposal)) {
+            $file_proposal = $seminar->file_proposal;
+        }
+        
+        if (!$file_proposal) {
+            $this->session->set_flashdata('error', 'File proposal tidak tersedia.');
+            redirect('dosen/daftar_penguji/detail_proposal/' . $seminar_id);
+            return;
+        }
+        
+        // PATH YANG BENAR: skripsi/uploads/seminar_proposal/proposal_files
+        $file_path = FCPATH . 'uploads/seminar_proposal/proposal_files/' . $file_proposal;
+        
+        // Cek apakah file fisik ada di server
+        if (!file_exists($file_path)) {
+            // Log error untuk debugging dengan path yang benar
+            log_message('error', "Proposal file not found - Expected path: {$file_path}, Seminar ID: {$seminar_id}, File name: {$file_proposal}");
+            
+            $this->session->set_flashdata('error', 'File tidak ditemukan di server. Hubungi administrator.');
+            redirect('dosen/daftar_penguji/detail_proposal/' . $seminar_id);
+            return;
+        }
+        
+        // Load helper download
+        $this->load->helper('download');
+        
+        // Generate nama file yang user-friendly
+        $clean_name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $seminar->nama_mahasiswa);
+        $clean_nim = preg_replace('/[^a-zA-Z0-9]/', '', $seminar->nim);
+        $file_extension = pathinfo($file_proposal, PATHINFO_EXTENSION);
+        $download_name = "Proposal_{$clean_name}_{$clean_nim}.{$file_extension}";
+        
+        // Log download activity
+        log_message('info', "Proposal downloaded by examiner - Dosen ID: {$dosen_id}, Seminar ID: {$seminar_id}, File: {$file_proposal}");
+        
+        // Force download
+        force_download($download_name, file_get_contents($file_path));
+    }
+
+/**
+     * Lihat hasil penilaian seminar proposal - VERSI SEDERHANA (FALLBACK)
+     */
+    public function lihat_penilaian_proposal($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Validasi dosen sebagai penguji
+        $seminar = $this->penguji_model->get_detail_seminar_proposal($seminar_id, $dosen_id);
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau Anda bukan penguji!');
+            redirect('dosen/daftar_penguji');
+            return;
+        }
+        
+        // VERSI SEDERHANA: Hanya tampilkan info basic tanpa query complex
+        $penilaian_data = [];
+        $berita_acara = null;
+        
+        // Get susunan dewan penguji lengkap
+        $dewan_penguji = $this->penguji_model->get_dewan_penguji_proposal($seminar_id);
+        
+        // Prepare data untuk view
+        $view_data = [
+            'seminar' => $seminar,
+            'penilaian_data' => $penilaian_data, // Kosong dulu untuk testing
+            'dewan_penguji' => $dewan_penguji,
+            'berita_acara' => $berita_acara,
+            'is_penguji1' => ($seminar->dosen_penguji1_id == $dosen_id),
+            'is_penguji2' => ($seminar->dosen_penguji2_id == $dosen_id)
+        ];
+        
+        // Data untuk template dosen.php
+        $data = [
+            'title' => 'Hasil Penilaian Seminar Proposal - ' . $seminar->nama_mahasiswa,
+            'content' => $this->load->view('dosen/daftar_penguji/lihat_penilaian_proposal', $view_data, TRUE),
+            'script' => ''
+        ];
+        
+        // Load template existing
+        $this->load->view('template/dosen', $data);
+    }
+
+    /**
+     * Lihat hasil penilaian seminar skripsi - PERBAIKAN MASALAH 2 & 3
+     */
+    public function lihat_penilaian_skripsi($seminar_id) {
+        $dosen_id = $this->session->userdata('id');
+        
+        // Validasi dosen sebagai penguji
+        $seminar = $this->penguji_model->get_detail_seminar_skripsi($seminar_id, $dosen_id);
+        
+        if (!$seminar) {
+            $this->session->set_flashdata('error', 'Data seminar tidak ditemukan atau Anda bukan penguji!');
+            redirect('dosen/daftar_penguji');
+            return;
+        }
+        
+        // Get semua penilaian dari dewan penguji
+        $this->db->select('
+            pss.*, 
+            d.nama as nama_penguji,
+            d.nip,
+            CASE 
+                WHEN pss.dosen_id = pm.dosen_id THEN "Dosen Pembimbing"
+                WHEN pss.dosen_id = ssm.dosen_penguji1_id THEN "Dosen Penguji I" 
+                WHEN pss.dosen_id = ssm.dosen_penguji2_id THEN "Dosen Penguji II"
+                ELSE "Unknown"
+            END as posisi_penguji
+        ');
+        $this->db->from('penilaian_seminar_skripsi pss');
+        $this->db->join('seminar_skripsi_mahasiswa ssm', 'pss.seminar_skripsi_id = ssm.id');
+        $this->db->join('proposal_mahasiswa pm', 'ssm.proposal_id = pm.id');
+        $this->db->join('dosen d', 'pss.dosen_id = d.id');
+        $this->db->where('pss.seminar_skripsi_id', $seminar_id);
+        $this->db->order_by('pss.created_at', 'ASC');
+        
+        $penilaian_data = $this->db->get()->result();
+        
+        // Get susunan dewan penguji lengkap
+        $dewan_penguji = $this->penguji_model->get_dewan_penguji_skripsi($seminar_id);
+        
+        // Get berita acara jika sudah ada
+        $this->db->select('*');
+        $this->db->from('berita_acara_seminar_skripsi');
+        $this->db->where('seminar_skripsi_id', $seminar_id);
+        $berita_acara = $this->db->get()->row();
+        
+        // Prepare data untuk view
+        $view_data = [
+            'seminar' => $seminar,
+            'penilaian_data' => $penilaian_data,
+            'dewan_penguji' => $dewan_penguji,
+            'berita_acara' => $berita_acara,
+            'is_penguji1' => ($seminar->dosen_penguji1_id == $dosen_id),
+            'is_penguji2' => ($seminar->dosen_penguji2_id == $dosen_id)
+        ];
+        
+        // Data untuk template dosen.php
+        $data = [
+            'title' => 'Hasil Penilaian Seminar Skripsi - ' . $seminar->nama_mahasiswa,
+            'content' => $this->load->view('dosen/daftar_penguji/lihat_penilaian_skripsi', $view_data, TRUE),
+            'script' => ''
         ];
         
         // Load template existing

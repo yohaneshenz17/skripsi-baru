@@ -3,3 +3,76 @@ ERROR - 2025-08-15 05:26:53 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-08-15 05:32:48 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-08-15 05:49:29 --> 404 Page Not Found: Cdn/img
 ERROR - 2025-08-15 05:49:55 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-15 06:51:07 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-15 06:51:14 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 06:51:14 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 06:51:19 --> Severity: error --> Exception: Unable to locate the model you have specified: Penilaian_seminar_model /home/stkp7133/public_html/skripsi/system/core/Loader.php 344
+ERROR - 2025-08-15 06:51:26 --> Severity: error --> Exception: Unable to locate the model you have specified: Penilaian_seminar_model /home/stkp7133/public_html/skripsi/system/core/Loader.php 344
+ERROR - 2025-08-15 06:54:41 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-15 07:06:36 --> Severity: Warning --> Undefined array key "seminar_hari_ini" /home/stkp7133/public_html/skripsi/application/views/staf/seminar_proposal/index.php 75
+ERROR - 2025-08-15 07:06:36 --> Severity: Warning --> Undefined array key "seminar_minggu_ini" /home/stkp7133/public_html/skripsi/application/views/staf/seminar_proposal/index.php 90
+ERROR - 2025-08-15 07:06:36 --> Severity: Warning --> Undefined array key "belum_dinilai" /home/stkp7133/public_html/skripsi/application/views/staf/seminar_proposal/index.php 108
+ERROR - 2025-08-15 07:06:36 --> Severity: Warning --> Undefined array key "sudah_dinilai" /home/stkp7133/public_html/skripsi/application/views/staf/seminar_proposal/index.php 123
+ERROR - 2025-08-15 07:06:36 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:06:36 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:06:41 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:06:41 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:06:44 --> Severity: Warning --> Undefined array key "seminar_hari_ini" /home/stkp7133/public_html/skripsi/application/views/staf/seminar_proposal/index.php 75
+ERROR - 2025-08-15 07:06:44 --> Severity: Warning --> Undefined array key "seminar_minggu_ini" /home/stkp7133/public_html/skripsi/application/views/staf/seminar_proposal/index.php 90
+ERROR - 2025-08-15 07:06:44 --> Severity: Warning --> Undefined array key "belum_dinilai" /home/stkp7133/public_html/skripsi/application/views/staf/seminar_proposal/index.php 108
+ERROR - 2025-08-15 07:06:44 --> Severity: Warning --> Undefined array key "sudah_dinilai" /home/stkp7133/public_html/skripsi/application/views/staf/seminar_proposal/index.php 123
+ERROR - 2025-08-15 07:06:44 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:06:44 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:08:11 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:08:11 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:08:12 --> 404 Page Not Found: Assets/img
+ERROR - 2025-08-15 07:09:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:09:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:09:57 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:09:57 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:18:12 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:18:12 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 284
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 296
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 306
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 316
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 317
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 318
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 319
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 377
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/drivers/Session_files_driver.php 108
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> session_set_save_handler(): Session save handler cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 110
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> session_start(): Session cannot be started after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 143
+ERROR - 2025-08-15 07:18:14 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/staf/Seminar_proposal.php:1) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 284
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> session_set_cookie_params(): Session cookie parameters cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 296
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 306
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 316
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 317
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 318
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 319
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 377
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> ini_set(): Session ini settings cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/drivers/Session_files_driver.php 108
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> session_set_save_handler(): Session save handler cannot be changed after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 110
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> session_start(): Session cannot be started after headers have already been sent /home/stkp7133/public_html/skripsi/system/libraries/Session/Session.php 143
+ERROR - 2025-08-15 07:18:27 --> Severity: Warning --> Cannot modify header information - headers already sent by (output started at /home/stkp7133/public_html/skripsi/application/controllers/staf/Seminar_proposal.php:1) /home/stkp7133/public_html/skripsi/system/helpers/url_helper.php 564
+ERROR - 2025-08-15 07:26:40 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:26:40 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:26:43 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:26:43 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:26:51 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:26:51 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:28:34 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-15 07:30:04 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:30:04 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:30:07 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:30:07 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:31:12 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:31:12 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:31:16 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 07:31:16 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 07:36:15 --> 404 Page Not Found: Uploads/proposal
+ERROR - 2025-08-15 07:36:27 --> 404 Page Not Found: dosen/Penilaian_proposal/input
+ERROR - 2025-08-15 07:37:52 --> 404 Page Not Found: Uploads/proposal
+ERROR - 2025-08-15 07:39:33 --> 404 Page Not Found: Uploads/proposal
+ERROR - 2025-08-15 07:41:01 --> 404 Page Not Found: dosen/Penilaian_proposal/input

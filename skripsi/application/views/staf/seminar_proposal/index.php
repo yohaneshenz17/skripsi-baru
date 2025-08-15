@@ -1,5 +1,5 @@
 <!-- =====================================================
-     VIEW: Staf Seminar Proposal Index - FIXED VERSION
+     VIEW: Staf Seminar Proposal Index - COMPLETE FIXED VERSION
      File: application/views/staf/seminar_proposal/index.php
      ===================================================== -->
 
@@ -17,6 +17,27 @@
             </ol>
         </nav>
     </div>
+
+    <!-- Flash Messages -->
+    <?php if($this->session->flashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i>
+            <?= $this->session->flashdata('success') ?>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <?php if($this->session->flashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <?= $this->session->flashdata('error') ?>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
 
     <!-- Statistics Cards Row -->
     <div class="row">
@@ -113,6 +134,9 @@
                     <h6 class="m-0 font-weight-bold text-primary">
                         <i class="fas fa-list-alt mr-2"></i>
                         Daftar Seminar Proposal Mahasiswa
+                        <?php if (isset($seminar_list) && !empty($seminar_list)): ?>
+                            <span class="badge badge-primary ml-2"><?= count($seminar_list) ?></span>
+                        <?php endif; ?>
                     </h6>
                     <div class="dropdown no-arrow">
                         <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
@@ -130,6 +154,11 @@
                                 <i class="fas fa-file-pdf fa-sm fa-fw mr-2 text-danger"></i>
                                 Export PDF
                             </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="<?= base_url('staf/seminar_proposal') ?>">
+                                <i class="fas fa-sync fa-sm fa-fw mr-2 text-info"></i>
+                                Refresh Data
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -141,7 +170,7 @@
                                 <label for="filter_prodi">Filter Program Studi:</label>
                                 <select class="form-control" id="filter_prodi">
                                     <option value="">-- Semua Prodi --</option>
-                                    <!-- Options akan diisi via JavaScript -->
+                                    <!-- Options akan diisi via JavaScript atau dari controller -->
                                 </select>
                             </div>
                         </div>
@@ -187,53 +216,73 @@
                                         <tr>
                                             <td class="text-center"><?= $no++ ?></td>
                                             <td>
-                                                <strong><?= htmlspecialchars($seminar->nim) ?></strong>
+                                                <strong><?= htmlspecialchars($seminar->nim ?? 'N/A') ?></strong>
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="avatar-sm mr-2">
                                                         <span class="avatar-title bg-primary text-white rounded-circle">
-                                                            <?= strtoupper(substr($seminar->nama_mahasiswa, 0, 1)) ?>
+                                                            <?= strtoupper(substr($seminar->nama_mahasiswa ?? 'N', 0, 1)) ?>
                                                         </span>
                                                     </div>
                                                     <div>
-                                                        <strong><?= htmlspecialchars($seminar->nama_mahasiswa) ?></strong>
+                                                        <strong><?= htmlspecialchars($seminar->nama_mahasiswa ?? 'N/A') ?></strong>
                                                         <br>
-                                                        <small class="text-muted"><?= htmlspecialchars($seminar->email_mahasiswa) ?></small>
+                                                        <small class="text-muted"><?= htmlspecialchars($seminar->email_mahasiswa ?? 'N/A') ?></small>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="text-wrap">
-                                                    <?= character_limiter(htmlspecialchars($seminar->judul), 80) ?>
+                                                    <?php 
+                                                    // ✅ FIXED: Safe text truncation without character_limiter helper
+                                                    $judul = $seminar->judul ?? 'Tidak ada judul';
+                                                    echo htmlspecialchars(strlen($judul) > 80 ? substr($judul, 0, 80) . '...' : $judul);
+                                                    ?>
                                                 </div>
-                                                <?php if (isset($seminar->nama_pembimbing)): ?>
+                                                <?php if (isset($seminar->nama_pembimbing) && !empty($seminar->nama_pembimbing)): ?>
                                                     <small class="text-muted">
                                                         <i class="fas fa-user-tie mr-1"></i>
                                                         Pembimbing: <?= htmlspecialchars($seminar->nama_pembimbing) ?>
                                                     </small>
                                                 <?php endif; ?>
+                                                
+                                                <!-- ✅ TAMBAHAN: Display dosen penguji dari controller yang sudah diperbaiki -->
+                                                <?php if (isset($seminar->nama_penguji1) && !empty($seminar->nama_penguji1)): ?>
+                                                    <br>
+                                                    <small class="text-info">
+                                                        <i class="fas fa-users mr-1"></i>
+                                                        Penguji: <?= htmlspecialchars($seminar->nama_penguji1) ?>
+                                                        <?php if (isset($seminar->nama_penguji2) && !empty($seminar->nama_penguji2)): ?>
+                                                            , <?= htmlspecialchars($seminar->nama_penguji2) ?>
+                                                        <?php endif; ?>
+                                                    </small>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
-                                                <span class="badge badge-info">
-                                                    <?= htmlspecialchars($seminar->nama_prodi) ?>
-                                                </span>
+                                                <?php if (isset($seminar->nama_prodi) && !empty($seminar->nama_prodi)): ?>
+                                                    <span class="badge badge-info"><?= htmlspecialchars($seminar->nama_prodi) ?></span>
+                                                <?php else: ?>
+                                                    <span class="text-muted">N/A</span>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
-                                                <?php if (!empty($seminar->tanggal_seminar)): ?>
+                                                <?php if (isset($seminar->tanggal_seminar) && !empty($seminar->tanggal_seminar)): ?>
                                                     <div>
-                                                        <i class="fas fa-calendar mr-1"></i>
-                                                        <?= date('d/m/Y', strtotime($seminar->tanggal_seminar)) ?>
+                                                        <i class="fas fa-calendar mr-1 text-primary"></i>
+                                                        <strong class="text-primary">
+                                                            <?= date('d/m/Y', strtotime($seminar->tanggal_seminar)) ?>
+                                                        </strong>
                                                     </div>
-                                                    <?php if (!empty($seminar->jam_seminar)): ?>
+                                                    <?php if (isset($seminar->jam_seminar) && !empty($seminar->jam_seminar)): ?>
                                                         <small class="text-muted">
                                                             <i class="fas fa-clock mr-1"></i>
-                                                            <?= date('H:i', strtotime($seminar->jam_seminar)) ?>
+                                                            <?= date('H:i', strtotime($seminar->jam_seminar)) ?> WIT
                                                         </small>
                                                     <?php endif; ?>
-                                                    <?php if (!empty($seminar->tempat_seminar)): ?>
+                                                    <?php if (isset($seminar->tempat_seminar) && !empty($seminar->tempat_seminar)): ?>
                                                         <br>
-                                                        <small class="text-muted">
+                                                        <small class="text-info">
                                                             <i class="fas fa-map-marker-alt mr-1"></i>
                                                             <?= htmlspecialchars($seminar->tempat_seminar) ?>
                                                         </small>
@@ -243,54 +292,60 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td class="text-center">
-                                                <?php
-                                                $status_class = 'secondary';
-                                                $status_text = 'Menunggu';
+                                                <?php 
+                                                // ✅ FIXED: Status badge berdasarkan field yang benar dari controller
+                                                $status = $seminar->status ?? 'unknown';
+                                                $current_step = $seminar->current_step ?? '';
                                                 
-                                                if (isset($seminar->status)) {
-                                                    switch ($seminar->status) {
-                                                        case 'scheduled':
-                                                            $status_class = 'primary';
-                                                            $status_text = 'Terjadwal';
-                                                            break;
-                                                        case 'completed':
-                                                            $status_class = 'success';
-                                                            $status_text = 'Selesai';
-                                                            break;
-                                                        case 'evaluated':
-                                                            $status_class = 'info';
-                                                            $status_text = 'Dinilai';
-                                                            break;
-                                                    }
+                                                if ($status === 'scheduled' && $current_step === 'staf') {
+                                                    echo '<span class="badge badge-warning">Siap Administrasi</span>';
+                                                } elseif ($status === 'scheduled') {
+                                                    echo '<span class="badge badge-info">Terjadwal</span>';
+                                                } elseif ($status === 'completed') {
+                                                    echo '<span class="badge badge-success">Selesai</span>';
+                                                } elseif ($status === 'approved') {
+                                                    echo '<span class="badge badge-primary">Disetujui</span>';
+                                                } else {
+                                                    echo '<span class="badge badge-secondary">' . htmlspecialchars(ucfirst($status)) . '</span>';
                                                 }
                                                 ?>
-                                                <span class="badge badge-<?= $status_class ?>">
-                                                    <?= $status_text ?>
-                                                </span>
+                                                <br>
+                                                <small class="text-muted">
+                                                    Step: <?= htmlspecialchars($current_step) ?>
+                                                </small>
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <!-- Tombol Detail -->
                                                     <a href="<?= base_url('staf/seminar_proposal/detail/' . $seminar->id) ?>" 
-                                                       class="btn btn-info btn-sm" title="Lihat Detail">
+                                                       class="btn btn-info btn-sm" 
+                                                       title="Lihat Detail" 
+                                                       data-toggle="tooltip">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     
                                                     <!-- Tombol Input Penilaian (jika sudah terjadwal) -->
                                                     <?php if (!empty($seminar->tanggal_seminar)): ?>
                                                         <a href="<?= base_url('staf/seminar_proposal/input_penilaian/' . $seminar->id) ?>" 
-                                                           class="btn btn-warning btn-sm" title="Input Penilaian">
+                                                           class="btn btn-warning btn-sm" 
+                                                           title="Input Penilaian"
+                                                           data-toggle="tooltip">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     <?php endif; ?>
                                                     
                                                     <!-- Dropdown untuk Download -->
                                                     <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-success btn-sm dropdown-toggle" 
-                                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Download">
+                                                        <button type="button" 
+                                                                class="btn btn-success btn-sm dropdown-toggle" 
+                                                                data-toggle="dropdown" 
+                                                                aria-haspopup="true" 
+                                                                aria-expanded="false" 
+                                                                title="Download Dokumen">
                                                             <i class="fas fa-download"></i>
                                                         </button>
-                                                        <div class="dropdown-menu">
+                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                            <h6 class="dropdown-header">Dokumen Administrasi</h6>
                                                             <a class="dropdown-item" 
                                                                href="<?= base_url('staf/seminar_proposal/download_form_permohonan/' . $seminar->id) ?>">
                                                                 <i class="fas fa-file-alt mr-2"></i>Form Permohonan
@@ -300,6 +355,7 @@
                                                                 <i class="fas fa-envelope mr-2"></i>Surat Undangan
                                                             </a>
                                                             <div class="dropdown-divider"></div>
+                                                            <h6 class="dropdown-header">Dokumen Hasil</h6>
                                                             <a class="dropdown-item" 
                                                                href="<?= base_url('staf/seminar_proposal/download_berita_acara/' . $seminar->id) ?>">
                                                                 <i class="fas fa-file-contract mr-2"></i>Berita Acara
@@ -318,11 +374,22 @@
                                     <tr>
                                         <td colspan="8" class="text-center py-4">
                                             <div class="py-4">
-                                                <i class="fas fa-inbox fa-3x text-gray-400 mb-3"></i>
+                                                <i class="fas fa-calendar-times fa-3x text-gray-400 mb-3"></i>
                                                 <h5 class="text-gray-600">Belum Ada Data Seminar Proposal</h5>
-                                                <p class="text-muted">
-                                                    Data seminar proposal yang sudah disetujui kaprodi akan muncul di sini.
+                                                <p class="text-muted mb-0">
+                                                    Data seminar proposal yang sudah dijadwalkan kaprodi akan muncul di sini.<br>
+                                                    <small class="text-info">
+                                                        <i class="fas fa-info-circle mr-1"></i>
+                                                        Menampilkan seminar dengan status <strong>"scheduled"</strong> dan <strong>current_step "staf"</strong>
+                                                    </small>
                                                 </p>
+                                                <hr class="my-3">
+                                                <small class="text-muted">
+                                                    <strong>Debug Info:</strong><br>
+                                                    Controller: <?= $this->router->class ?? 'Unknown' ?><br>
+                                                    Method: <?= $this->router->method ?? 'Unknown' ?><br>
+                                                    Timestamp: <?= date('Y-m-d H:i:s') ?>
+                                                </small>
                                             </div>
                                         </td>
                                     </tr>
@@ -330,13 +397,26 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- ✅ TAMBAHAN: Info Footer untuk debugging -->
+                    <?php if (isset($seminar_list) && !empty($seminar_list)): ?>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Menampilkan <?= count($seminar_list) ?> data seminar proposal yang siap untuk administrasi staf.
+                                    Last updated: <?= date('d/m/Y H:i:s') ?>
+                                </small>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Styles untuk avatar -->
+<!-- ✅ ENHANCED: Styles untuk avatar dan UI improvements -->
 <style>
 .avatar-sm {
     width: 32px;
@@ -371,4 +451,73 @@
     border-top-right-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
 }
+
+/* Enhanced table styling */
+.table td {
+    vertical-align: middle;
+}
+
+.dropdown-header {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+/* Tooltip improvements */
+[data-toggle="tooltip"] {
+    cursor: pointer;
+}
+
+/* Badge enhancements */
+.badge {
+    font-size: 0.75rem;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 2px;
+        border-radius: 0.25rem !important;
+    }
+}
 </style>
+
+<!-- ✅ TAMBAHAN: JavaScript untuk enhanced functionality -->
+<script>
+$(document).ready(function() {
+    // Initialize tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Enhanced table search functionality
+    $('#search_mahasiswa').on('keyup', function() {
+        var value = $(this).val().toLowerCase();
+        $('#seminarTable tbody tr').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+    
+    // Status filter functionality
+    $('#filter_status').on('change', function() {
+        var selectedStatus = $(this).val().toLowerCase();
+        $('#seminarTable tbody tr').each(function() {
+            var statusText = $(this).find('td:eq(6) .badge').text().toLowerCase();
+            if (selectedStatus === '' || statusText.indexOf(selectedStatus) > -1) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+    
+    // Auto-refresh every 5 minutes
+    setInterval(function() {
+        // Optional: Add auto-refresh functionality
+        // location.reload();
+    }, 300000); // 5 minutes
+});
+</script>

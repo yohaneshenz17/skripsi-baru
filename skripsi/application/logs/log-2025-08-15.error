@@ -76,3 +76,38 @@ ERROR - 2025-08-15 07:36:27 --> 404 Page Not Found: dosen/Penilaian_proposal/inp
 ERROR - 2025-08-15 07:37:52 --> 404 Page Not Found: Uploads/proposal
 ERROR - 2025-08-15 07:39:33 --> 404 Page Not Found: Uploads/proposal
 ERROR - 2025-08-15 07:41:01 --> 404 Page Not Found: dosen/Penilaian_proposal/input
+ERROR - 2025-08-15 07:50:06 --> 404 Page Not Found: Uploads/proposal
+ERROR - 2025-08-15 07:53:29 --> 404 Page Not Found: Uploads/proposal
+ERROR - 2025-08-15 07:58:24 --> 404 Page Not Found: Uploads/proposal
+ERROR - 2025-08-15 07:58:36 --> 404 Page Not Found: dosen/Berita_acara_proposal/6
+ERROR - 2025-08-15 08:03:26 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`dosen_id = spm`.`dosen_penguji1_id THEN "Dosen Penguji I" WHEN psp`.`dosen_...' at line 1 - Invalid query: SELECT `psp`.*, `d`.`nama` as `nama_penguji`, `d`.`nip`, `CASE WHEN psp`.`dosen_id = pm`.`dosen_id THEN "Dosen Pembimbing" WHEN psp`.`dosen_id = spm`.`dosen_penguji1_id THEN "Dosen Penguji I" WHEN psp`.`dosen_id = spm`.`dosen_penguji2_id THEN "Dosen Penguji II" ELSE "Unknown" END` as `posisi_penguji`
+FROM `penilaian_seminar_proposal` `psp`
+JOIN `seminar_proposal_mahasiswa` `spm` ON `psp`.`seminar_proposal_id` = `spm`.`id`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `dosen` `d` ON `psp`.`dosen_id` = `d`.`id`
+WHERE `psp`.`seminar_proposal_id` = '6'
+ORDER BY `psp`.`created_at` ASC
+ERROR - 2025-08-15 08:04:17 --> Query error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`dosen_id = spm`.`dosen_penguji1_id THEN "Dosen Penguji I" WHEN psp`.`dosen_...' at line 1 - Invalid query: SELECT `psp`.*, `d`.`nama` as `nama_penguji`, `d`.`nip`, `CASE WHEN psp`.`dosen_id = pm`.`dosen_id THEN "Dosen Pembimbing" WHEN psp`.`dosen_id = spm`.`dosen_penguji1_id THEN "Dosen Penguji I" WHEN psp`.`dosen_id = spm`.`dosen_penguji2_id THEN "Dosen Penguji II" ELSE "Unknown" END` as `posisi_penguji`
+FROM `penilaian_seminar_proposal` `psp`
+JOIN `seminar_proposal_mahasiswa` `spm` ON `psp`.`seminar_proposal_id` = `spm`.`id`
+JOIN `proposal_mahasiswa` `pm` ON `spm`.`proposal_id` = `pm`.`id`
+JOIN `dosen` `d` ON `psp`.`dosen_id` = `d`.`id`
+WHERE `psp`.`seminar_proposal_id` = '6'
+ORDER BY `psp`.`created_at` ASC
+ERROR - 2025-08-15 08:05:39 --> Query error: Unknown column 'psp.dosen_id' in 'on clause' - Invalid query: SELECT `psp`.*, `d`.`nama` as `nama_penguji`, `d`.`nip`
+FROM `penilaian_seminar_proposal` `psp`
+JOIN `dosen` `d` ON `psp`.`dosen_id` = `d`.`id`
+WHERE `psp`.`seminar_proposal_id` = '6'
+ORDER BY `psp`.`created_at` ASC
+ERROR - 2025-08-15 08:07:15 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 08:07:15 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 08:27:17 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 08:27:17 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 08:30:00 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 08:30:00 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 08:30:43 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 08:30:43 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 09:24:21 --> 404 Page Not Found: Cdn/img
+ERROR - 2025-08-15 09:33:32 --> 404 Page Not Found: Assets/vendor
+ERROR - 2025-08-15 09:33:32 --> 404 Page Not Found: Assets/css
+ERROR - 2025-08-15 11:09:43 --> 404 Page Not Found: Cdn/img

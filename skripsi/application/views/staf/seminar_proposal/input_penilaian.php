@@ -1,26 +1,20 @@
 <?php
 /**
- * Staf Seminar Proposal Input Penilaian View - SIM TA STK Santo Yakobus
- * 
- * View untuk input penilaian seminar proposal dari perspektif staf akademik
- * Menggunakan rubrik penilaian sesuai dokumen yang dilampirkan
- * Staf memiliki hak akses yang sama seperti dosen untuk input penilaian
- * 
+ * Input Penilaian Seminar Proposal - Staf View
  * File: application/views/staf/seminar_proposal/input_penilaian.php
- * Controller: staf/Seminar_proposal::input_penilaian()
  * 
- * Features:
- * - Form penilaian berdasarkan rubrik yang dilampirkan
- * - Auto-calculate nilai berdasarkan bobot komponen
- * - Rekomendasi final dan catatan saran
- * - Validasi input real-time
- * - Save/update existing penilaian
- * 
- * @package     SIM_TA
- * @subpackage  Views/Staf
- * @category    Seminar Proposal
- * @author      Unit SIPD STK Santo Yakobus
+ * Form untuk input penilaian seminar proposal oleh staf akademik
+ * Compatible dengan struktur penilaian dosen
  */
+
+// ✅ Set default values untuk mencegah undefined variable errors
+$is_edit = isset($existing_penilaian) && $existing_penilaian && !empty($existing_penilaian) ? true : false;
+$page_title = $is_edit ? 'Edit Penilaian Seminar Proposal' : 'Input Penilaian Seminar Proposal';
+
+// Helper function untuk safe property access
+function get_penilaian_value($penilaian, $field, $default = '') {
+    return (isset($penilaian->$field) && !empty($penilaian->$field)) ? $penilaian->$field : $default;
+}
 ?>
 
 <!-- Content Header -->
@@ -29,10 +23,10 @@
         <div class="row mb-2">
             <div class="col-sm-6">
                 <h1 class="m-0">
-                    <i class="fas fa-edit mr-2 text-success"></i>
-                    <?= $is_edit ? 'Edit' : 'Input' ?> Penilaian Seminar Proposal
+                    <i class="fas fa-edit mr-2 text-primary"></i>
+                    <?= $page_title ?>
                 </h1>
-                <p class="text-muted">Penilaian untuk: <?= $seminar->nama_mahasiswa ?> (<?= $seminar->nim ?>)</p>
+                <p class="text-muted">Penilaian untuk: <?= isset($seminar->nama_mahasiswa) ? $seminar->nama_mahasiswa : 'Unknown' ?> (<?= isset($seminar->nim) ? $seminar->nim : 'Unknown' ?>)</p>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
@@ -71,8 +65,8 @@
             </div>
         <?php endif; ?>
 
-        <!-- Validation Errors -->
-        <?php if(validation_errors()): ?>
+        <!-- ✅ FIXED: Validation errors dengan null check -->
+        <?php if(function_exists('validation_errors') && validation_errors()): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle mr-2"></i>
                 <strong>Kesalahan Validasi:</strong>
@@ -93,608 +87,423 @@
             </div>
         </div>
 
-        <!-- Main Form -->
-        <form method="POST" action="<?= current_url() ?>" id="penilaianForm">
-            <input type="hidden" name="seminar_id" value="<?= $seminar->id ?>">
-            
-            <div class="row">
-                <!-- Left Column: Form Penilaian -->
-                <div class="col-md-8">
-                    
-                    <!-- Info Mahasiswa -->
-                    <div class="card">
-                        <div class="card-header bg-info">
-                            <h3 class="card-title">
-                                <i class="fas fa-user mr-2"></i>
-                                Informasi Mahasiswa & Proposal
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <table class="table table-borderless table-sm">
-                                        <tr>
-                                            <td width="40%"><strong>NIM</strong></td>
-                                            <td width="5%">:</td>
-                                            <td><?= $seminar->nim ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Nama</strong></td>
-                                            <td>:</td>
-                                            <td><?= $seminar->nama_mahasiswa ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Prodi</strong></td>
-                                            <td>:</td>
-                                            <td><?= $seminar->nama_prodi ?></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-6">
-                                    <table class="table table-borderless table-sm">
-                                        <tr>
-                                            <td width="30%"><strong>Tanggal</strong></td>
-                                            <td width="5%">:</td>
-                                            <td><?= date('d F Y', strtotime($seminar->tanggal_seminar)) ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Waktu</strong></td>
-                                            <td>:</td>
-                                            <td><?= date('H:i', strtotime($seminar->jam_seminar)) ?> WIT</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Tempat</strong></td>
-                                            <td>:</td>
-                                            <td><?= $seminar->tempat_seminar ?></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="form-group mb-0">
-                                <label class="font-weight-bold">Judul Proposal:</label>
-                                <p class="text-muted mb-0"><?= $seminar->judul ?></p>
-                            </div>
-                        </div>
+        <div class="row">
+            <!-- Left Column: Info Seminar -->
+            <div class="col-md-4">
+                <!-- Card: Info Seminar -->
+                <div class="card">
+                    <div class="card-header bg-info">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Informasi Seminar
+                        </h3>
                     </div>
-
-                    <!-- KOMPONEN 1: Substansi dan Metode Penelitian (50%) -->
-                    <div class="card">
-                        <div class="card-header bg-primary">
-                            <h3 class="card-title">
-                                <i class="fas fa-book mr-2"></i>
-                                Komponen 1: Substansi dan Metode Penelitian (Bobot: 50%)
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <p class="text-muted mb-4">
-                                Komponen ini menilai kualitas dokumen proposal yang diajukan. 
-                                Penilaian berfokus pada kedalaman, logika, dan kelayakan ilmiah dari rencana penelitian.
-                            </p>
-                            
-                            <!-- Indikator 1.1 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">1.1 Latar Belakang & Rumusan Masalah <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_substansi_1_1" id="nilai_substansi_1_1"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_substansi_1_1 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Masalah sangat relevan, didukung data/fakta kuat, dan dirumuskan dengan sangat tajam dan jelas.<br>
-                                            <strong>Cukup:</strong> Masalah relevan, ada data pendukung, rumusan cukup jelas.<br>
-                                            <strong>Lemah:</strong> Konteks masalah tidak jelas, tidak ada urgensi, rumusan terlalu luas/kabur.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Indikator 1.2 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">1.2 Tinjauan Pustaka & Kebaruan (Novelty) <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_substansi_1_2" id="nilai_substansi_1_2"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_substansi_1_2 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Mampu memetakan state-of-the-art dengan baik, menunjukkan research gap secara eksplisit, dan posisi penelitian sangat jelas.<br>
-                                            <strong>Cukup:</strong> Ada tinjauan pustaka yang relevan, upaya menunjukkan kebaruan ada tapi kurang tajam.<br>
-                                            <strong>Lemah:</strong> Tinjauan pustaka minim, tidak menunjukkan kebaruan.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Indikator 1.3 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">1.3 Landasan Teori <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_substansi_1_3" id="nilai_substansi_1_3"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_substansi_1_3 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Teori yang digunakan sangat relevan, mendalam, dan mampu menjadi pisau analisis yang tajam.<br>
-                                            <strong>Cukup:</strong> Teori yang digunakan relevan, namun pembahasannya standar.<br>
-                                            <strong>Lemah:</strong> Teori tidak tepat atau hanya tempelan.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Indikator 1.4 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">1.4 Metodologi Penelitian <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_substansi_1_4" id="nilai_substansi_1_4"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_substansi_1_4 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Metode sangat tepat untuk menjawab rumusan masalah. Teknik pengumpulan & analisis data dijelaskan rinci, sistematis, dan logis.<br>
-                                            <strong>Cukup:</strong> Pilihan metode bisa diterima. Penjelasan teknik cukup jelas tapi kurang detail.<br>
-                                            <strong>Lemah:</strong> Metode tidak sesuai, rancu, atau tidak mungkin dilaksanakan (infeasible).
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Indikator 1.5 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">1.5 Sistematika & Tata Tulis <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_substansi_1_5" id="nilai_substansi_1_5"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_substansi_1_5 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Alur tulisan sangat logis. Menggunakan bahasa baku, format sitasi konsisten, dan bebas dari kesalahan tik.<br>
-                                            <strong>Cukup:</strong> Alur tulisan cukup baik, ada beberapa kesalahan tata tulis atau sitasi.<br>
-                                            <strong>Lemah:</strong> Tulisan tidak terstruktur, banyak kesalahan tata bahasa.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Rata-rata Komponen 1 -->
-                            <div class="bg-light p-3 rounded">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Rata-rata Skor Komponen 1:</strong>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <span class="badge badge-primary badge-lg" id="rata_rata_substansi">0.0</span>
-                                        <small class="text-muted">(Total Skor / 5)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td><strong>Mahasiswa</strong></td>
+                                <td>:</td>
+                                <td><?= isset($seminar->nama_mahasiswa) ? $seminar->nama_mahasiswa : 'Unknown' ?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>NIM</strong></td>
+                                <td>:</td>
+                                <td><?= isset($seminar->nim) ? $seminar->nim : 'Unknown' ?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Program Studi</strong></td>
+                                <td>:</td>
+                                <td><?= isset($seminar->nama_prodi) ? $seminar->nama_prodi : 'Unknown' ?></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tanggal</strong></td>
+                                <td>:</td>
+                                <td>
+                                    <?php if(isset($seminar->tanggal_seminar) && !empty($seminar->tanggal_seminar)): ?>
+                                        <?= date('d F Y', strtotime($seminar->tanggal_seminar)) ?>
+                                    <?php else: ?>
+                                        Belum ditentukan
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tempat</strong></td>
+                                <td>:</td>
+                                <td><?= isset($seminar->tempat_seminar) ? $seminar->tempat_seminar : 'Belum ditentukan' ?></td>
+                            </tr>
+                        </table>
                     </div>
-
-                    <!-- KOMPONEN 2: Presentasi dan Teknik Penyajian (20%) -->
-                    <div class="card">
-                        <div class="card-header bg-success">
-                            <h3 class="card-title">
-                                <i class="fas fa-presentation mr-2"></i>
-                                Komponen 2: Presentasi dan Teknik Penyajian (Bobot: 20%)
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <p class="text-muted mb-4">
-                                Komponen ini menilai kemampuan mahasiswa dalam mengomunikasikan ide penelitiannya secara lisan dan visual.
-                            </p>
-                            
-                            <!-- Indikator 2.1 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">2.1 Kejelasan & Alur Penyampaian <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_presentasi_2_1" id="nilai_presentasi_2_1"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_presentasi_2_1 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Berbicara dengan jelas, runtut, dan langsung ke poin-poin penting. Tidak hanya membaca slide.<br>
-                                            <strong>Cukup:</strong> Penyampaian cukup jelas, namun terkadang berbelit-belit atau terlalu banyak membaca.<br>
-                                            <strong>Lemah:</strong> Sulit dipahami, tidak terstruktur, atau gugup berlebihan.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Indikator 2.2 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">2.2 Desain Media Presentasi (Slide) <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_presentasi_2_2" id="nilai_presentasi_2_2"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_presentasi_2_2 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Slide efektif, visual menarik, ringkas, dan sangat membantu pemahaman.<br>
-                                            <strong>Cukup:</strong> Slide cukup informatif, namun desain standar atau terlalu padat teks.<br>
-                                            <strong>Lemah:</strong> Slide tidak efektif, sulit dibaca, atau isinya hanya salinan dari naskah.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Indikator 2.3 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">2.3 Manajemen Waktu & Etika <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_presentasi_2_3" id="nilai_presentasi_2_3"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_presentasi_2_3 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Menyelesaikan presentasi tepat waktu. Menunjukkan sikap percaya diri, sopan, dan menjaga kontak mata.<br>
-                                            <strong>Cukup:</strong> Melebihi waktu sedikit, sikap cukup baik.<br>
-                                            <strong>Lemah:</strong> Jauh melebihi alokasi waktu, terlihat tidak siap atau kurang sopan.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Rata-rata Komponen 2 -->
-                            <div class="bg-light p-3 rounded">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Rata-rata Skor Komponen 2:</strong>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <span class="badge badge-success badge-lg" id="rata_rata_presentasi">0.0</span>
-                                        <small class="text-muted">(Total Skor / 3)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- KOMPONEN 3: Penguasaan Materi dan Diskusi (30%) -->
-                    <div class="card">
-                        <div class="card-header bg-warning">
-                            <h3 class="card-title">
-                                <i class="fas fa-comments mr-2"></i>
-                                Komponen 3: Penguasaan Materi dan Diskusi (Bobot: 30%)
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <p class="text-muted mb-4">
-                                Komponen ini menilai kedalaman pemahaman mahasiswa terhadap proposalnya 
-                                dan kemampuannya dalam berdiskusi secara ilmiah.
-                            </p>
-                            
-                            <!-- Indikator 3.1 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">3.1 Kemampuan Menjawab Pertanyaan <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_diskusi_3_1" id="nilai_diskusi_3_1"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_diskusi_3_1 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Mampu menjawab semua pertanyaan dengan tepat, logis, dan terstruktur. Menunjukkan pemahaman di luar teks proposal.<br>
-                                            <strong>Cukup:</strong> Mampu menjawab sebagian besar pertanyaan, meskipun ada jawaban yang kurang mendalam.<br>
-                                            <strong>Lemah:</strong> Tidak mampu menjawab, jawaban tidak relevan atau kebingungan.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Indikator 3.2 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">3.2 Kemampuan Berargumentasi <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_diskusi_3_2" id="nilai_diskusi_3_2"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_diskusi_3_2 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Mampu mempertahankan pilihan topik, teori, dan metode dengan argumentasi yang kokoh dan berbasis bukti/referensi.<br>
-                                            <strong>Cukup:</strong> Mampu berargumen, namun terkadang kurang didukung oleh dasar yang kuat.<br>
-                                            <strong>Lemah:</strong> Tidak mampu mempertahankan gagasannya, mudah goyah.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Indikator 3.3 -->
-                            <div class="form-group">
-                                <label class="font-weight-bold">3.3 Sikap Ilmiah dalam Diskusi <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="form-control nilai-input" 
-                                               name="nilai_diskusi_3_3" id="nilai_diskusi_3_3"
-                                               min="1" max="100" step="0.1" required
-                                               value="<?= $existing_penilaian ? $existing_penilaian->nilai_diskusi_3_3 : '' ?>"
-                                               placeholder="1-100">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="text-sm">
-                                            <strong>Kuat:</strong> Sangat terbuka dan responsif terhadap masukan/kritik. Menunjukkan sikap menghargai dan tidak defensif.<br>
-                                            <strong>Cukup:</strong> Menerima masukan, meskipun terkadang sedikit defensif.<br>
-                                            <strong>Lemah:</strong> Menolak masukan, bersikap defensif atau arogan.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Rata-rata Komponen 3 -->
-                            <div class="bg-light p-3 rounded">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Rata-rata Skor Komponen 3:</strong>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <span class="badge badge-warning badge-lg" id="rata_rata_diskusi">0.0</span>
-                                        <small class="text-muted">(Total Skor / 3)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Rekomendasi dan Catatan -->
-                    <div class="card">
-                        <div class="card-header bg-danger">
-                            <h3 class="card-title">
-                                <i class="fas fa-clipboard-check mr-2"></i>
-                                Rekomendasi Penguji dan Catatan
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label class="font-weight-bold">Rekomendasi Penguji <span class="text-danger">*</span></label>
-                                <select name="rekomendasi" id="rekomendasi" class="form-control" required>
-                                    <option value="">-- Pilih Rekomendasi --</option>
-                                    <option value="diterima_tanpa_revisi" <?= ($existing_penilaian && $existing_penilaian->rekomendasi == 'diterima_tanpa_revisi') ? 'selected' : '' ?>>
-                                        ✓ Diterima tanpa revisi
-                                    </option>
-                                    <option value="diterima_revisi_minor" <?= ($existing_penilaian && $existing_penilaian->rekomendasi == 'diterima_revisi_minor') ? 'selected' : '' ?>>
-                                        ⚠ Diterima dengan revisi minor
-                                    </option>
-                                    <option value="diterima_revisi_mayor" <?= ($existing_penilaian && $existing_penilaian->rekomendasi == 'diterima_revisi_mayor') ? 'selected' : '' ?>>
-                                        ⚠ Diterima dengan revisi mayor
-                                    </option>
-                                    <option value="ditolak_mengulang" <?= ($existing_penilaian && $existing_penilaian->rekomendasi == 'ditolak_mengulang') ? 'selected' : '' ?>>
-                                        ✗ Ditolak / Mengulang seminar
-                                    </option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="font-weight-bold">Catatan/Saran Revisi</label>
-                                <textarea name="catatan_saran" id="catatan_saran" rows="6" class="form-control" 
-                                          placeholder="Berikan catatan, saran perbaikan, atau feedback konstruktif untuk mahasiswa..."><?= $existing_penilaian ? $existing_penilaian->catatan_saran : '' ?></textarea>
-                                <small class="text-muted">
-                                    Catatan akan membantu mahasiswa memahami area yang perlu diperbaiki.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
-                <!-- Right Column: Summary & Action -->
-                <div class="col-md-4">
-                    
-                    <!-- Rekapitulasi Nilai -->
-                    <div class="card sticky-top">
-                        <div class="card-header bg-info">
-                            <h3 class="card-title">
-                                <i class="fas fa-calculator mr-2"></i>
-                                Rekapitulasi Nilai Akhir
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <td><strong>Komponen 1 (50%)</strong></td>
-                                    <td>:</td>
-                                    <td><span class="badge badge-primary" id="nilai_komponen_1">0.0</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Komponen 2 (20%)</strong></td>
-                                    <td>:</td>
-                                    <td><span class="badge badge-success" id="nilai_komponen_2">0.0</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Komponen 3 (30%)</strong></td>
-                                    <td>:</td>
-                                    <td><span class="badge badge-warning" id="nilai_komponen_3">0.0</span></td>
-                                </tr>
-                                <tr class="bg-light">
-                                    <td><strong>NILAI AKHIR</strong></td>
-                                    <td>:</td>
-                                    <td><span class="badge badge-danger badge-lg" id="nilai_akhir">0.0</span></td>
-                                </tr>
-                            </table>
-                            
-                            <div class="alert alert-info">
-                                <h6><i class="fas fa-info-circle mr-2"></i>Rumus Perhitungan:</h6>
-                                <small>
-                                    Nilai Akhir = (Komponen 1 × 50%) + (Komponen 2 × 20%) + (Komponen 3 × 30%)
-                                </small>
-                            </div>
-                            
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
-                                    <i class="fas fa-save mr-2"></i>
-                                    <?= $is_edit ? 'Update' : 'Simpan' ?> Penilaian
-                                </button>
-                            </div>
-                        </div>
+                <!-- Card: Guidelines -->
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h3 class="card-title">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Panduan Penilaian
+                        </h3>
                     </div>
-
-                    <!-- Info Dewan Penguji -->
-                    <div class="card">
-                        <div class="card-header bg-warning">
-                            <h3 class="card-title">
-                                <i class="fas fa-users mr-2"></i>
-                                Dewan Penguji
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <strong class="text-primary">Dosen Pembimbing:</strong><br>
-                                <?= $dewan_penguji->nama_pembimbing ?>
-                                <br><small class="text-muted">NIP: <?= $dewan_penguji->nip_pembimbing ?></small>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <strong class="text-success">Dosen Penguji I:</strong><br>
-                                <?= $dewan_penguji->nama_penguji1 ?: '<em class="text-muted">Belum ditetapkan</em>' ?>
-                                <?php if($dewan_penguji->nama_penguji1): ?>
-                                    <br><small class="text-muted">NIP: <?= $dewan_penguji->nip_penguji1 ?></small>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <strong class="text-info">Dosen Penguji II:</strong><br>
-                                <?= $dewan_penguji->nama_penguji2 ?: '<em class="text-muted">Belum ditetapkan</em>' ?>
-                                <?php if($dewan_penguji->nama_penguji2): ?>
-                                    <br><small class="text-muted">NIP: <?= $dewan_penguji->nip_penguji2 ?></small>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="alert alert-warning">
-                                <small>
-                                    <i class="fas fa-lightbulb mr-1"></i>
-                                    <strong>Info:</strong> Sebagai staf, Anda dapat memberikan penilaian sebagai backup atau second opinion untuk memastikan objektivitas penilaian.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Petunjuk Penilaian -->
-                    <div class="card">
-                        <div class="card-header bg-secondary">
-                            <h3 class="card-title">
-                                <i class="fas fa-question-circle mr-2"></i>
-                                Petunjuk Penilaian
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled text-sm">
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success mr-2"></i>
-                                    Nilai berkisar antara 1-100
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success mr-2"></i>
-                                    Sistem akan menghitung otomatis
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success mr-2"></i>
-                                    Pastikan semua field diisi
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success mr-2"></i>
-                                    Berikan rekomendasi yang tepat
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success mr-2"></i>
-                                    Catatan membantu mahasiswa
-                                </li>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <strong>Komponen Penilaian:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Substansi & Metode (50%)</li>
+                                <li>Presentasi & Teknik (20%)</li>
+                                <li>Penguasaan & Diskusi (30%)</li>
                             </ul>
-                            
-                            <hr>
-                            <h6>Skala Penilaian:</h6>
-                            <ul class="list-unstyled text-sm">
-                                <li><strong>85-100:</strong> Sangat Baik</li>
-                                <li><strong>70-84:</strong> Baik</li>
-                                <li><strong>55-69:</strong> Cukup</li>
-                                <li><strong>40-54:</strong> Kurang</li>
-                                <li><strong>1-39:</strong> Sangat Kurang</li>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <strong>Rentang Nilai:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>A: 80-100 (Sangat Baik)</li>
+                                <li>B: 70-79 (Baik)</li>
+                                <li>C: 60-69 (Cukup)</li>
+                                <li>D: 50-59 (Kurang)</li>
+                                <li>E: 0-49 (Sangat Kurang)</li>
                             </ul>
                         </div>
                     </div>
-
                 </div>
             </div>
-        </form>
+
+            <!-- Right Column: Form Penilaian -->
+            <div class="col-md-8">
+                <!-- Form Penilaian -->
+                <div class="card">
+                    <div class="card-header bg-primary">
+                        <h3 class="card-title">
+                            <i class="fas fa-clipboard-check mr-2"></i>
+                            Form Penilaian Seminar Proposal
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Form Start -->
+                        <?= form_open('staf/seminar_proposal/input_penilaian/' . $seminar->id, ['class' => 'form-horizontal']) ?>
+                        
+                        <!-- Judul Proposal -->
+                        <div class="form-group">
+                            <label class="font-weight-bold">Judul Proposal:</label>
+                            <div class="bg-light p-3 rounded">
+                                <em><?= isset($seminar->judul) ? $seminar->judul : 'Judul tidak tersedia' ?></em>
+                            </div>
+                        </div>
+
+                        <!-- Komponen Penilaian -->
+                        <div class="row">
+                            <!-- Nilai Substansi & Metode -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="nilai_substansi" class="font-weight-bold">
+                                        Substansi & Metode <span class="text-danger">*</span>
+                                        <small class="text-muted d-block">(Bobot: 50%)</small>
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="nilai_substansi" 
+                                           name="nilai_substansi" 
+                                           min="0" 
+                                           max="100" 
+                                           step="0.1"
+                                           value="<?= get_penilaian_value($existing_penilaian, 'nilai_substansi_metode') ?>"
+                                           placeholder="0.0" 
+                                           required>
+                                    <small class="form-text text-muted">Nilai 0-100</small>
+                                </div>
+                            </div>
+
+                            <!-- Nilai Presentasi & Teknik -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="nilai_presentasi" class="font-weight-bold">
+                                        Presentasi & Teknik <span class="text-danger">*</span>
+                                        <small class="text-muted d-block">(Bobot: 20%)</small>
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="nilai_presentasi" 
+                                           name="nilai_presentasi" 
+                                           min="0" 
+                                           max="100" 
+                                           step="0.1"
+                                           value="<?= get_penilaian_value($existing_penilaian, 'nilai_presentasi_teknik') ?>"
+                                           placeholder="0.0" 
+                                           required>
+                                    <small class="form-text text-muted">Nilai 0-100</small>
+                                </div>
+                            </div>
+
+                            <!-- Nilai Penguasaan & Diskusi -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="nilai_diskusi" class="font-weight-bold">
+                                        Penguasaan & Diskusi <span class="text-danger">*</span>
+                                        <small class="text-muted d-block">(Bobot: 30%)</small>
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="nilai_diskusi" 
+                                           name="nilai_diskusi" 
+                                           min="0" 
+                                           max="100" 
+                                           step="0.1"
+                                           value="<?= get_penilaian_value($existing_penilaian, 'nilai_penguasaan_diskusi') ?>"
+                                           placeholder="0.0" 
+                                           required>
+                                    <small class="form-text text-muted">Nilai 0-100</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hasil Kalkulasi Otomatis -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-secondary">
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <strong>Nilai Akhir:</strong>
+                                            <h4 id="nilai_akhir_display" class="text-primary">0.0</h4>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Grade:</strong>
+                                            <h4 id="grade_display" class="text-success">-</h4>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Keterangan:</strong>
+                                            <p id="keterangan_display" class="mb-0">Masukkan nilai untuk melihat hasil</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Hidden field untuk nilai akhir -->
+                                <input type="hidden" id="nilai_akhir_hidden" name="nilai_akhir" value="<?= get_penilaian_value($existing_penilaian, 'nilai_akhir') ?>">
+                                <input type="hidden" id="nilai_huruf_hidden" name="nilai_huruf" value="<?= get_penilaian_value($existing_penilaian, 'nilai_huruf') ?>">
+                            </div>
+                        </div>
+
+                        <!-- Rekomendasi -->
+                        <div class="form-group">
+                            <label for="rekomendasi" class="font-weight-bold">
+                                Rekomendasi <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="rekomendasi" name="rekomendasi" required>
+                                <option value="">-- Pilih Rekomendasi --</option>
+                                <option value="diterima_tanpa_revisi" 
+                                    <?= get_penilaian_value($existing_penilaian, 'rekomendasi') == 'diterima_tanpa_revisi' ? 'selected' : '' ?>>
+                                    Diterima Tanpa Revisi
+                                </option>
+                                <option value="revisi_minor" 
+                                    <?= get_penilaian_value($existing_penilaian, 'rekomendasi') == 'revisi_minor' ? 'selected' : '' ?>>
+                                    Diterima dengan Revisi Minor
+                                </option>
+                                <option value="revisi_mayor" 
+                                    <?= get_penilaian_value($existing_penilaian, 'rekomendasi') == 'revisi_mayor' ? 'selected' : '' ?>>
+                                    Diterima dengan Revisi Mayor
+                                </option>
+                                <option value="ditolak" 
+                                    <?= get_penilaian_value($existing_penilaian, 'rekomendasi') == 'ditolak' ? 'selected' : '' ?>>
+                                    Ditolak / Mengulang Seminar
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Catatan Detail -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catatan_latar_belakang" class="font-weight-bold">
+                                        Catatan Latar Belakang & Rumusan Masalah
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="catatan_latar_belakang" 
+                                              name="catatan_latar_belakang" 
+                                              rows="3" 
+                                              placeholder="Masukkan catatan untuk aspek latar belakang dan rumusan masalah..."><?= get_penilaian_value($existing_penilaian, 'catatan_latar_belakang') ?></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catatan_tinjauan_pustaka" class="font-weight-bold">
+                                        Catatan Tinjauan Pustaka & Kebaruan
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="catatan_tinjauan_pustaka" 
+                                              name="catatan_tinjauan_pustaka" 
+                                              rows="3" 
+                                              placeholder="Masukkan catatan untuk aspek tinjauan pustaka dan novelty..."><?= get_penilaian_value($existing_penilaian, 'catatan_tinjauan_pustaka') ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catatan_landasan_teori" class="font-weight-bold">
+                                        Catatan Landasan Teori
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="catatan_landasan_teori" 
+                                              name="catatan_landasan_teori" 
+                                              rows="3" 
+                                              placeholder="Masukkan catatan untuk aspek landasan teori..."><?= get_penilaian_value($existing_penilaian, 'catatan_landasan_teori') ?></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catatan_metodologi" class="font-weight-bold">
+                                        Catatan Metodologi Penelitian
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="catatan_metodologi" 
+                                              name="catatan_metodologi" 
+                                              rows="3" 
+                                              placeholder="Masukkan catatan untuk aspek metodologi penelitian..."><?= get_penilaian_value($existing_penilaian, 'catatan_metodologi') ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catatan_sistematika" class="font-weight-bold">
+                                        Catatan Sistematika & Tata Tulis
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="catatan_sistematika" 
+                                              name="catatan_sistematika" 
+                                              rows="3" 
+                                              placeholder="Masukkan catatan untuk aspek sistematika dan tata tulis..."><?= get_penilaian_value($existing_penilaian, 'catatan_sistematika') ?></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catatan_umum" class="font-weight-bold">
+                                        Catatan Umum & Saran
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="catatan_umum" 
+                                              name="catatan_umum" 
+                                              rows="3" 
+                                              placeholder="Masukkan catatan umum atau saran tambahan..."><?= get_penilaian_value($existing_penilaian, 'catatan_umum') ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-group">
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <a href="<?= base_url('staf/seminar_proposal/detail/' . $seminar->id) ?>" 
+                                       class="btn btn-secondary btn-block">
+                                        <i class="fas fa-times mr-2"></i>
+                                        Batal
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-save mr-2"></i>
+                                        <?= $is_edit ? 'Update Penilaian' : 'Simpan Penilaian' ?>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?= form_close() ?>
+
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 </section>
 
-<!-- Additional CSS -->
-<style>
-.badge-lg {
-    font-size: 1rem;
-    padding: 0.5rem 1rem;
-}
+<!-- JavaScript untuk Kalkulasi Otomatis -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nilaiSubstansi = document.getElementById('nilai_substansi');
+    const nilaiPresentasi = document.getElementById('nilai_presentasi');
+    const nilaiDiskusi = document.getElementById('nilai_diskusi');
+    const nilaiAkhirDisplay = document.getElementById('nilai_akhir_display');
+    const gradeDisplay = document.getElementById('grade_display');
+    const keteranganDisplay = document.getElementById('keterangan_display');
+    const nilaiAkhirHidden = document.getElementById('nilai_akhir_hidden');
+    const nilaiHurufHidden = document.getElementById('nilai_huruf_hidden');
 
-.nilai-input:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-}
+    function hitungNilaiAkhir() {
+        const substansi = parseFloat(nilaiSubstansi.value) || 0;
+        const presentasi = parseFloat(nilaiPresentasi.value) || 0;
+        const diskusi = parseFloat(nilaiDiskusi.value) || 0;
 
-.card .card-body table td {
-    padding: 0.25rem 0.5rem;
-    border: none;
-}
+        // Hitung dengan bobot: Substansi (50%), Presentasi (20%), Diskusi (30%)
+        const nilaiAkhir = (substansi * 0.5) + (presentasi * 0.2) + (diskusi * 0.3);
+        
+        // Tentukan grade
+        let grade, keterangan;
+        if (nilaiAkhir >= 80) {
+            grade = 'A';
+            keterangan = 'Sangat Baik';
+        } else if (nilaiAkhir >= 70) {
+            grade = 'B';
+            keterangan = 'Baik';
+        } else if (nilaiAkhir >= 60) {
+            grade = 'C';
+            keterangan = 'Cukup';
+        } else if (nilaiAkhir >= 50) {
+            grade = 'D';
+            keterangan = 'Kurang';
+        } else {
+            grade = 'E';
+            keterangan = 'Sangat Kurang';
+        }
 
-.sticky-top {
-    top: 20px;
-}
-
-@media (max-width: 768px) {
-    .sticky-top {
-        position: relative;
-        top: auto;
+        // Update display
+        nilaiAkhirDisplay.textContent = nilaiAkhir.toFixed(1);
+        gradeDisplay.textContent = grade;
+        keteranganDisplay.textContent = keterangan;
+        
+        // Update hidden fields
+        nilaiAkhirHidden.value = nilaiAkhir.toFixed(2);
+        nilaiHurufHidden.value = grade;
     }
+
+    // Event listeners
+    nilaiSubstansi.addEventListener('input', hitungNilaiAkhir);
+    nilaiPresentasi.addEventListener('input', hitungNilaiAkhir);
+    nilaiDiskusi.addEventListener('input', hitungNilaiAkhir);
+
+    // Hitung initial jika ada nilai existing
+    hitungNilaiAkhir();
+});
+</script>
+
+<style>
+.form-group label.font-weight-bold {
+    color: #495057;
 }
 
-.text-sm {
-    font-size: 0.875rem;
-    line-height: 1.4;
+.alert-secondary {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
 }
 
-.form-group label {
-    margin-bottom: 0.5rem;
+#nilai_akhir_display {
+    font-size: 1.5rem;
+    margin-bottom: 0;
 }
 
-.alert-info h6 {
-    margin-bottom: 0.5rem;
+#grade_display {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+}
+
+.text-center h4 {
+    margin-bottom: 5px;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 </style>

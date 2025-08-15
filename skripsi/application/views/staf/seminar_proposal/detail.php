@@ -234,7 +234,7 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                     <tr>
                                         <td><strong>Dosen Pembimbing</strong></td>
                                         <td>:</td>
-                                        <td>
+                                        <td class="dosen-name-wrap">
                                             <strong><?= safe_get($seminar, 'nama_pembimbing') ?></strong>
                                             <br>
                                             <small class="text-muted">NIP: <?= safe_get($seminar, 'nip_pembimbing') ?></small>
@@ -335,7 +335,7 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                         </h5>
                                     </div>
                                     <div class="card-body text-center">
-                                        <h6 class="font-weight-bold"><?= safe_get($dewan_penguji, 'nama_pembimbing', safe_get($seminar, 'nama_pembimbing')) ?></h6>
+                                        <h6 class="font-weight-bold dosen-name-wrap"><?= safe_get($dewan_penguji, 'nama_pembimbing', safe_get($seminar, 'nama_pembimbing')) ?></h6>
                                         <p class="text-muted mb-1">NIP: <?= safe_get($dewan_penguji, 'nip_pembimbing', safe_get($seminar, 'nip_pembimbing')) ?></p>
                                         <p class="text-muted">
                                             <?php $email_pembimbing = safe_email($dewan_penguji, 'email_pembimbing', safe_email($seminar, 'email_pembimbing')); ?>
@@ -348,11 +348,6 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                                 <em class="text-muted"><?= $email_pembimbing ?></em>
                                             <?php endif; ?>
                                         </p>
-                                        <a href="<?= base_url('staf/seminar_proposal/download_form_penilaian/' . $seminar->id . '/pembimbing') ?>" 
-                                           target="_blank" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-download mr-1"></i>
-                                            Form Penilaian
-                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -369,7 +364,7 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                     <div class="card-body text-center">
                                         <?php $nama_penguji1 = safe_get($dewan_penguji, 'nama_penguji1', safe_get($seminar, 'nama_penguji1')); ?>
                                         <?php if($nama_penguji1 != 'Tidak tersedia'): ?>
-                                            <h6 class="font-weight-bold"><?= $nama_penguji1 ?></h6>
+                                            <h6 class="font-weight-bold dosen-name-wrap"><?= $nama_penguji1 ?></h6>
                                             <p class="text-muted mb-1">NIP: <?= safe_get($dewan_penguji, 'nip_penguji1', safe_get($seminar, 'nip_penguji1')) ?></p>
                                             <p class="text-muted">
                                                 <?php $email_penguji1 = safe_email($dewan_penguji, 'email_penguji1', safe_email($seminar, 'email_penguji1')); ?>
@@ -382,11 +377,6 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                                     <em class="text-muted"><?= $email_penguji1 ?></em>
                                                 <?php endif; ?>
                                             </p>
-                                            <a href="<?= base_url('staf/seminar_proposal/download_form_penilaian/' . $seminar->id . '/penguji1') ?>" 
-                                               target="_blank" class="btn btn-success btn-sm">
-                                                <i class="fas fa-download mr-1"></i>
-                                                Form Penilaian
-                                            </a>
                                         <?php else: ?>
                                             <p class="text-muted">
                                                 <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -410,7 +400,7 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                     <div class="card-body text-center">
                                         <?php $nama_penguji2 = safe_get($dewan_penguji, 'nama_penguji2', safe_get($seminar, 'nama_penguji2')); ?>
                                         <?php if($nama_penguji2 != 'Tidak tersedia'): ?>
-                                            <h6 class="font-weight-bold"><?= $nama_penguji2 ?></h6>
+                                            <h6 class="font-weight-bold dosen-name-wrap"><?= $nama_penguji2 ?></h6>
                                             <p class="text-muted mb-1">NIP: <?= safe_get($dewan_penguji, 'nip_penguji2', safe_get($seminar, 'nip_penguji2')) ?></p>
                                             <p class="text-muted">
                                                 <?php $email_penguji2 = safe_email($dewan_penguji, 'email_penguji2', safe_email($seminar, 'email_penguji2')); ?>
@@ -423,11 +413,6 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                                     <em class="text-muted"><?= $email_penguji2 ?></em>
                                                 <?php endif; ?>
                                             </p>
-                                            <a href="<?= base_url('staf/seminar_proposal/download_form_penilaian/' . $seminar->id . '/penguji2') ?>" 
-                                               target="_blank" class="btn btn-info btn-sm">
-                                                <i class="fas fa-download mr-1"></i>
-                                                Form Penilaian
-                                            </a>
                                         <?php else: ?>
                                             <p class="text-muted">
                                                 <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -731,5 +716,31 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
 
 .text-purple {
     color: #6f42c1 !important;
+}
+
+/* ✅ NEW: CSS untuk wrap text nama dosen */
+.dosen-name-wrap {
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.3;
+    max-width: 100%;
+}
+
+/* Khusus untuk table cells */
+td.dosen-name-wrap {
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 200px; /* Batasi lebar maksimal */
+}
+
+/* Khusus untuk card body di dewan penguji */
+.card-body .dosen-name-wrap {
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
 }
 </style>

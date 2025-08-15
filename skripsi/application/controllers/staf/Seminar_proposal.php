@@ -167,8 +167,8 @@ class Seminar_proposal extends CI_Controller {
         }
     }
 
-    /**
-     * Input penilaian seminar proposal untuk staf
+/**
+     * Input penilaian seminar proposal untuk staf - FIXED VERSION
      */
     public function input_penilaian($seminar_id) {
         try {
@@ -190,7 +190,7 @@ class Seminar_proposal extends CI_Controller {
 
             // Proses form jika method POST
             if ($this->input->method() === 'post') {
-                $this->_process_input_penilaian($seminar_id);
+                $this->_process_input_penilaian_enhanced($seminar_id);
                 return;
             }
 
@@ -198,11 +198,12 @@ class Seminar_proposal extends CI_Controller {
             $existing_penilaian = $this->_get_existing_penilaian_staf($seminar_id);
             $rubrik_template = $this->_get_rubrik_penilaian_template();
             
-            // Prepare data untuk view
+            // ✅ FIXED: Pastikan semua variabel yang dibutuhkan view tersedia
             $view_data = [
                 'seminar' => $seminar_detail,
                 'existing_penilaian' => $existing_penilaian,
                 'rubrik_template' => $rubrik_template,
+                'is_edit' => !empty($existing_penilaian), // ✅ FIXED: Variable yang missing
                 'page_title' => 'Input Penilaian - ' . ($seminar_detail->nama_mahasiswa ?? 'Unknown')
             ];
             
@@ -432,6 +433,126 @@ class Seminar_proposal extends CI_Controller {
         } catch (Exception $e) {
             log_message('error', 'Error getting existing penilaian: ' . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * ✅ NEW: Enhanced process input penilaian dengan validation yang lengkap
+     */
+    private function _process_input_penilaian_enhanced($seminar_id) {
+        try {
+            $this->load->library('form_validation');
+            
+            // ✅ ENHANCED: Validation rules yang lengkap
+            $this->form_validation->set_rules('nilai_substansi', 'Nilai Substansi & Metode', 'required|numeric|greater_than_equal_to[0]|less_than_equal_to[100]');
+            $this->form_validation->set_rules('nilai_presentasi', 'Nilai Presentasi & Teknik', 'required|numeric|greater_than_equal_to[0]|less_than_equal_to[100]');
+            $this->form_validation->set_rules('nilai_diskusi', 'Nilai Penguasaan & Diskusi', 'required|numeric|greater_than_equal_to[0]|less_than_equal_to[100]');
+            $this->form_validation->set_rules('rekomendasi', 'Rekomendasi', 'required|in_list[diterima_tanpa_revisi,revisi_minor,revisi_mayor,ditolak]');
+            $this->form_validation->set_rules('catatan_latar_belakang', 'Catatan Latar Belakang', 'trim|max_length[2000]');
+            $this->form_validation->set_rules('catatan_tinjauan_pustaka', 'Catatan Tinjauan Pustaka', 'trim|max_length[2000]');
+            $this->form_validation->set_rules('catatan_landasan_teori', 'Catatan Landasan Teori', 'trim|max_length[2000]');
+            $this->form_validation->set_rules('catatan_metodologi', 'Catatan Metodologi', 'trim|max_length[2000]');
+            $this->form_validation->set_rules('catatan_sistematika', 'Catatan Sistematika', 'trim|max_length[2000]');
+            $this->form_validation->set_rules('catatan_umum', 'Catatan Umum', 'trim|max_length[2000]');
+
+            if ($this->form_validation->run() == FALSE) {
+                $this->session->set_flashdata('error', 'Validasi gagal! Periksa kembali input Anda.');
+                redirect('staf/seminar_proposal/input_penilaian/' . $seminar_id);
+                return;
+            }
+
+            // ✅ ENHANCED: Get detail seminar untuk mahasiswa_id dan proposal_id
+            $seminar_detail = $this->_get_seminar_detail_for_staf($seminar_id);
+            if (!$seminar_detail) {
+                throw new Exception('Data seminar tidak ditemukan');
+            }
+
+            // ✅ ENHANCED: Calculate nilai akhir dan huruf
+            $nilai_substansi = (float)$this->input->post('nilai_substansi');
+            $nilai_presentasi = (float)$this->input->post('nilai_presentasi');
+            $nilai_diskusi = (float)$this->input->post('nilai_diskusi');
+            
+            // Hitung nilai akhir dengan bobot: Substansi (50%), Presentasi (20%), Diskusi (30%)
+            $nilai_akhir = ($nilai_substansi * 0.5) + ($nilai_presentasi * 0.2) + ($nilai_diskusi * 0.3);
+            
+            // Tentukan nilai huruf
+            $nilai_huruf = 'E';
+            if ($nilai_akhir >= 80) $nilai_huruf = 'A';
+            elseif ($nilai_akhir >= 70) $nilai_huruf = 'B';
+            elseif ($nilai_akhir >= 60) $nilai_huruf = 'C';
+            elseif ($nilai_akhir >= 50) $nilai_huruf = 'D';
+
+            // ✅ ENHANCED: Prepare comprehensive save data
+            $save_data = [
+                'seminar_proposal_id' => $seminar_id,
+                'mahasiswa_id' => $seminar_detail->mahasiswa_id,
+                'proposal_id' => $seminar_detail->proposal_id,
+                'dinilai_oleh' => $this->session->userdata('id'),
+                'role_penilai' => 'staf',
+                
+                // Nilai komponen
+                'nilai_substansi_metode' => $nilai_substansi,
+                'nilai_presentasi_teknik' => $nilai_presentasi,
+                'nilai_penguasaan_diskusi' => $nilai_diskusi,
+                'nilai_akhir' => $nilai_akhir,
+                'nilai_huruf' => $nilai_huruf,
+                
+                // Rekomendasi
+                'rekomendasi' => $this->input->post('rekomendasi'),
+                
+                // Catatan detail
+                'catatan_latar_belakang' => $this->input->post('catatan_latar_belakang'),
+                'catatan_tinjauan_pustaka' => $this->input->post('catatan_tinjauan_pustaka'),
+                'catatan_landasan_teori' => $this->input->post('catatan_landasan_teori'),
+                'catatan_metodologi' => $this->input->post('catatan_metodologi'),
+                'catatan_sistematika' => $this->input->post('catatan_sistematika'),
+                'catatan_umum' => $this->input->post('catatan_umum'),
+                
+                // Status dan timestamp
+                'status_penilaian' => 'published',
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            // ✅ ENHANCED: Check if table exists and handle insert/update
+            if (!$this->db->table_exists('penilaian_seminar_proposal')) {
+                // Create table if not exists (optional)
+                log_message('error', 'Table penilaian_seminar_proposal does not exist');
+                throw new Exception('Tabel penilaian tidak ditemukan dalam database');
+            }
+
+            // Check if existing penilaian
+            $existing = $this->db->get_where('penilaian_seminar_proposal', [
+                'seminar_proposal_id' => $seminar_id,
+                'dinilai_oleh' => $this->session->userdata('id'),
+                'role_penilai' => 'staf'
+            ])->row();
+
+            if ($existing) {
+                // Update existing
+                $result = $this->db->update('penilaian_seminar_proposal', $save_data, [
+                    'seminar_proposal_id' => $seminar_id,
+                    'dinilai_oleh' => $this->session->userdata('id'),
+                    'role_penilai' => 'staf'
+                ]);
+                $action = 'diperbarui';
+            } else {
+                // Insert new
+                $save_data['created_at'] = date('Y-m-d H:i:s');
+                $result = $this->db->insert('penilaian_seminar_proposal', $save_data);
+                $action = 'disimpan';
+            }
+
+            if ($result) {
+                $this->session->set_flashdata('success', "Penilaian berhasil {$action}! Nilai akhir: {$nilai_akhir} ({$nilai_huruf})");
+                redirect('staf/seminar_proposal/detail/' . $seminar_id);
+            } else {
+                throw new Exception('Gagal menyimpan data ke database');
+            }
+
+        } catch (Exception $e) {
+            log_message('error', 'Error processing enhanced penilaian: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Gagal menyimpan penilaian: ' . $e->getMessage());
+            redirect('staf/seminar_proposal/input_penilaian/' . $seminar_id);
         }
     }
 

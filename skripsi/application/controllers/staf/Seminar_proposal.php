@@ -332,8 +332,13 @@ class Seminar_proposal extends CI_Controller {
             }
 
             if ($result) {
+                // ✅ TAMBAHKAN: Kirim notifikasi email ketika publikasi
                 if ($action_type === 'publish') {
-                    $this->session->set_flashdata('success', 'Penilaian berhasil dipublikasi oleh staf! Nilai akhir: ' . number_format($penilaian_data['nilai_akhir'], 2) . ' (' . $penilaian_data['nilai_huruf'] . ')');
+                    $this->_kirim_notifikasi_penilaian_publikasi_staf($seminar_id, $penilaian_data);
+                    
+                    $this->session->set_flashdata('success', 
+                        'Penilaian berhasil dipublikasi oleh staf! Notifikasi telah dikirim ke mahasiswa, dosen, dan kaprodi. Nilai akhir: ' . 
+                        number_format($penilaian_data['nilai_akhir'], 2) . ' (' . $penilaian_data['nilai_huruf'] . ')');
                 } else {
                     $this->session->set_flashdata('success', 'Penilaian berhasil ' . $action_msg . ' sebagai draft oleh staf.');
                 }
@@ -343,7 +348,7 @@ class Seminar_proposal extends CI_Controller {
             } else {
                 throw new Exception('Gagal menyimpan data ke database');
             }
-
+    
         } catch (Exception $e) {
             log_message('error', 'Error processing penilaian identik dosen: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan saat menyimpan penilaian: ' . $e->getMessage());
@@ -743,6 +748,342 @@ class Seminar_proposal extends CI_Controller {
             log_message('error', 'Error processing enhanced penilaian: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Gagal menyimpan penilaian: ' . $e->getMessage());
             redirect('staf/seminar_proposal/input_penilaian/' . $seminar_id);
+        }
+    }
+    
+    // =================================================================
+    // ✅ NEW: METHOD NOTIFIKASI EMAIL UNTUK STAF
+    // =================================================================
+    
+    /**
+     * ✅ NEW: Method utama untuk kirim notifikasi penilaian publikasi oleh staf
+     */
+    private function _kirim_notifikasi_penilaian_publikasi_staf($seminar_id, $penilaian_data) {
+        try {
+            // Get data seminar lengkap untuk notifikasi
+            $seminar = $this->_get_seminar_detail_for_notification($seminar_id);
+            
+            if (!$seminar) {
+                log_message('error', 'Seminar data not found for notification: ID ' . $seminar_id);
+                return false;
+            }
+            
+            $staf_nama = $this->session->userdata('nama');
+            
+            // ✅ 1. Email ke mahasiswa
+            $this->_kirim_email_penilaian_ke_mahasiswa($seminar, $penilaian_data, $staf_nama);
+            
+            // ✅ 2. Email ke dosen pembimbing  
+            $this->_kirim_email_penilaian_ke_dosen($seminar, $penilaian_data, $staf_nama);
+            
+            // ✅ 3. Email ke kaprodi
+            $this->_kirim_email_penilaian_ke_kaprodi($seminar, $penilaian_data, $staf_nama);
+            
+            log_message('info', "Penilaian published by staf with notifications sent - Seminar ID: {$seminar_id}");
+            
+            return true;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error sending penilaian notifications from staf: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ NEW: Get seminar detail lengkap untuk notifikasi
+     */
+    private function _get_seminar_detail_for_notification($seminar_id) {
+        try {
+            $this->db->select('
+                spm.*, 
+                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+                pm.judul,
+                d_pembimbing.nama as nama_pembimbing, d_pembimbing.email as email_pembimbing,
+                d_penguji1.nama as nama_penguji1, d_penguji1.email as email_penguji1,
+                d_penguji2.nama as nama_penguji2, d_penguji2.email as email_penguji2,
+                pr.nama as nama_prodi
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+            $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+            $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
+            $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
+            $this->db->where('spm.id', $seminar_id);
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting seminar detail for notification: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * ✅ NEW: Kirim email ke mahasiswa tentang hasil penilaian
+     */
+    private function _kirim_email_penilaian_ke_mahasiswa($seminar, $penilaian_data, $staf_nama) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_mahasiswa);
+            $this->email->subject('✅ Hasil Penilaian Seminar Proposal - ' . $seminar->nama_mahasiswa);
+            
+            $nilai_color = $penilaian_data['nilai_akhir'] >= 80 ? '#28a745' : 
+                          ($penilaian_data['nilai_akhir'] >= 70 ? '#ffc107' : '#dc3545');
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>✅ Hasil Penilaian Seminar Proposal</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_mahasiswa}</strong>,</p>
+                    
+                    <p>Penilaian seminar proposal Anda telah selesai dan dipublikasi oleh staf administrasi.</p>
+                    
+                    <div style='background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #0056b3; margin: 0 0 10px 0;'>📊 Hasil Penilaian:</h4>
+                        <ul style='color: #0056b3; margin: 0;'>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Nilai Akhir:</strong> <span style='color: {$nilai_color}; font-weight: bold;'>" . number_format($penilaian_data['nilai_akhir'], 2) . " ({$penilaian_data['nilai_huruf']})</span></li>
+                            <li><strong>Rekomendasi:</strong> " . ucwords(str_replace('_', ' ', $penilaian_data['rekomendasi'])) . "</li>
+                            <li><strong>Dinilai oleh:</strong> {$staf_nama} (Staf Administrasi)</li>
+                            <li><strong>Tanggal:</strong> " . date('d F Y, H:i') . "</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>🎯 Langkah Selanjutnya:</h4>
+                        <p style='color: #155724; margin: 0;'>
+                            Anda dapat melanjutkan ke <strong>Fase 4: Penelitian</strong>. 
+                            Silakan login ke sistem untuk melihat detail penilaian dan melanjutkan proses tugas akhir Anda.
+                        </p>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('mahasiswa/seminar_proposal') . "' style='background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            👁️ Lihat Detail Penilaian
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis oleh sistem. Selamat atas pencapaian Anda!
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send penilaian email to mahasiswa: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending penilaian email to mahasiswa: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ NEW: Kirim email ke dosen pembimbing tentang hasil penilaian oleh staf
+     */
+    private function _kirim_email_penilaian_ke_dosen($seminar, $penilaian_data, $staf_nama) {
+        try {
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($seminar->email_pembimbing);
+            $this->email->subject('📋 Penilaian Selesai oleh Staf - ' . $seminar->nama_mahasiswa);
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📋 Penilaian Seminar Proposal Selesai</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>{$seminar->nama_pembimbing}</strong>,</p>
+                    
+                    <p>Penilaian seminar proposal telah selesai dilakukan oleh staf administrasi untuk mahasiswa bimbingan Anda.</p>
+                    
+                    <div style='background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff;'>
+                        <h4 style='color: #0056b3; margin: 0 0 10px 0;'>📊 Ringkasan Penilaian:</h4>
+                        <ul style='color: #0056b3; margin: 0;'>
+                            <li><strong>Mahasiswa:</strong> {$seminar->nama_mahasiswa} ({$seminar->nim})</li>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Nilai Akhir:</strong> " . number_format($penilaian_data['nilai_akhir'], 2) . " ({$penilaian_data['nilai_huruf']})</li>
+                            <li><strong>Rekomendasi:</strong> " . ucwords(str_replace('_', ' ', $penilaian_data['rekomendasi'])) . "</li>
+                            <li><strong>Dinilai oleh:</strong> {$staf_nama} (Staf)</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #17a2b8;'>
+                        <h4 style='color: #0c5460; margin: 0 0 10px 0;'>ℹ️ Informasi:</h4>
+                        <p style='color: #0c5460; margin: 0;'>
+                            Mahasiswa dapat melanjutkan ke fase penelitian. 
+                            Anda dapat memantau progress mahasiswa melalui sistem.
+                        </p>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('dosen/seminar_proposal') . "' style='background-color: #17a2b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            👁️ Lihat Detail di Sistem
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis untuk memberitahu adanya update penilaian oleh staf.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send penilaian email to dosen: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending penilaian email to dosen: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ NEW: Kirim email ke kaprodi tentang mahasiswa siap fase berikutnya
+     */
+    private function _kirim_email_penilaian_ke_kaprodi($seminar, $penilaian_data, $staf_nama) {
+        try {
+            // Get kaprodi data
+            $kaprodi = $this->_get_kaprodi_data();
+            if (!$kaprodi) {
+                log_message('warning', 'Kaprodi data not found for penilaian notification');
+                return false;
+            }
+            
+            $config = $this->_get_email_config();
+            $this->email->initialize($config);
+            
+            $this->email->clear();
+            $this->email->from('stkyakobus@gmail.com', 'SIM Tugas Akhir STK Santo Yakobus');
+            $this->email->to($kaprodi->email);
+            $this->email->subject('📋 Mahasiswa Siap Fase Penelitian - ' . $seminar->nama_mahasiswa);
+            
+            $message = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;'>
+                <div style='background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%); color: white; padding: 20px; text-align: center;'>
+                    <h2 style='margin: 0;'>📋 Mahasiswa Siap Fase Penelitian</h2>
+                </div>
+                
+                <div style='padding: 20px; background-color: #f8f9fa;'>
+                    <p>Kepada Yth. <strong>Ketua Program Studi</strong>,</p>
+                    
+                    <p>Penilaian seminar proposal telah selesai dan mahasiswa siap melanjutkan ke fase penelitian.</p>
+                    
+                    <div style='background-color: #f8f4ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #6f42c1;'>
+                        <h4 style='color: #4a1a5c; margin: 0 0 10px 0;'>📊 Detail Penilaian:</h4>
+                        <ul style='color: #4a1a5c; margin: 0;'>
+                            <li><strong>Mahasiswa:</strong> {$seminar->nama_mahasiswa} ({$seminar->nim})</li>
+                            <li><strong>Program Studi:</strong> {$seminar->nama_prodi}</li>
+                            <li><strong>Judul:</strong> {$seminar->judul}</li>
+                            <li><strong>Pembimbing:</strong> {$seminar->nama_pembimbing}</li>
+                            <li><strong>Nilai Akhir:</strong> " . number_format($penilaian_data['nilai_akhir'], 2) . " ({$penilaian_data['nilai_huruf']})</li>
+                            <li><strong>Rekomendasi:</strong> " . ucwords(str_replace('_', ' ', $penilaian_data['rekomendasi'])) . "</li>
+                            <li><strong>Dinilai oleh:</strong> {$staf_nama} (Staf)</li>
+                        </ul>
+                    </div>
+                    
+                    <div style='background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;'>
+                        <h4 style='color: #155724; margin: 0 0 10px 0;'>🎯 Status Selanjutnya:</h4>
+                        <p style='color: #155724; margin: 0;'>
+                            Mahasiswa dapat melanjutkan ke <strong>Fase 4: Penelitian</strong>. 
+                            Mohon siap untuk monitoring dan evaluasi tahap selanjutnya.
+                        </p>
+                    </div>
+                    
+                    <div style='text-align: center; margin: 20px 0;'>
+                        <a href='" . base_url('kaprodi/dashboard') . "' style='background-color: #6f42c1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                            📊 Buka Dashboard Kaprodi
+                        </a>
+                    </div>
+                    
+                    <p style='color: #6c757d; font-size: 14px; margin-top: 20px;'>
+                        Email ini dikirim otomatis untuk memberitahu adanya mahasiswa yang siap tahap penelitian.
+                    </p>
+                </div>
+                
+                <div style='background-color: #e9ecef; padding: 15px; text-align: center; font-size: 12px; color: #6c757d;'>
+                    <p style='margin: 0;'>© " . date('Y') . " STK Santo Yakobus - Sistem Informasi Manajemen Tugas Akhir</p>
+                </div>
+            </div>";
+            
+            $this->email->message($message);
+            $result = $this->email->send();
+            
+            if (!$result) {
+                log_message('error', 'Failed to send penilaian email to kaprodi: ' . $this->email->print_debugger());
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error sending penilaian email to kaprodi: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * ✅ NEW: Get email configuration
+     */
+    private function _get_email_config() {
+        return [
+            'protocol' => 'smtp',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => 587,
+            'smtp_user' => 'stkyakobus@gmail.com',
+            'smtp_pass' => 'yonroxhraathnaug',
+            'charset' => 'utf-8',
+            'newline' => "\r\n",
+            'mailtype' => 'html',
+            'smtp_crypto' => 'tls',
+            'smtp_timeout' => 30
+        ];
+    }
+    
+    /**
+     * ✅ NEW: Get kaprodi data untuk notifikasi
+     */
+    private function _get_kaprodi_data() {
+        try {
+            $this->db->select('id, nama, email');
+            $this->db->from('dosen');
+            $this->db->where('level', '3'); // Level kaprodi
+            $this->db->limit(1);
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting kaprodi data: ' . $e->getMessage());
+            return null;
         }
     }
 }

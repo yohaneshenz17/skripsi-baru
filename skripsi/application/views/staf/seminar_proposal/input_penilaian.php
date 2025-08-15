@@ -1,509 +1,643 @@
 <?php
 /**
- * Input Penilaian Seminar Proposal - Staf View
  * File: application/views/staf/seminar_proposal/input_penilaian.php
+ * Form Penilaian Seminar Proposal - STAF VERSION (JavaScript Fixed)
  * 
- * Form untuk input penilaian seminar proposal oleh staf akademik
- * Compatible dengan struktur penilaian dosen
+ * FIXED: Container preview tidak hilang setelah beberapa detik
  */
 
-// ✅ Set default values untuk mencegah undefined variable errors
-$is_edit = isset($existing_penilaian) && $existing_penilaian && !empty($existing_penilaian) ? true : false;
-$page_title = $is_edit ? 'Edit Penilaian Seminar Proposal' : 'Input Penilaian Seminar Proposal';
-
-// Helper function untuk safe property access
-function get_penilaian_value($penilaian, $field, $default = '') {
-    return (isset($penilaian->$field) && !empty($penilaian->$field)) ? $penilaian->$field : $default;
+// Helper untuk mengambil value form dengan fallback
+if (!function_exists('get_form_value')) {
+    function get_form_value($field_name, $data_source = null) {
+        $ci = &get_instance();
+        
+        // Jika ada data dari database
+        if ($data_source && isset($data_source->$field_name)) {
+            return $data_source->$field_name;
+        }
+        
+        // Jika ada post data
+        if ($ci->input->post($field_name)) {
+            return $ci->input->post($field_name);
+        }
+        
+        return '';
+    }
 }
 ?>
 
-<!-- Content Header -->
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0">
-                    <i class="fas fa-edit mr-2 text-primary"></i>
-                    <?= $page_title ?>
-                </h1>
-                <p class="text-muted">Penilaian untuk: <?= isset($seminar->nama_mahasiswa) ? $seminar->nama_mahasiswa : 'Unknown' ?> (<?= isset($seminar->nim) ? $seminar->nim : 'Unknown' ?>)</p>
+<div class="container-fluid">
+    
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-clipboard-list mr-2"></i>
+            Penilaian Seminar Proposal (Staf Backup)
+        </h1>
+        <a href="<?= base_url('staf/seminar_proposal/detail/' . $seminar->id) ?>" class="btn btn-secondary">
+            <i class="fas fa-arrow-left mr-2"></i>Kembali ke Detail
+        </a>
+    </div>
+
+    <!-- Alert Information -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle mr-2"></i>
+        <strong>Informasi:</strong> Anda melakukan input penilaian sebagai staf backup. 
+        Pastikan semua komponen penilaian diisi dengan lengkap dan akurat.
+    </div>
+
+    <!-- Flash Messages -->
+    <?php if ($this->session->flashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle mr-2"></i>
+            <?= $this->session->flashdata('success') ?>
+            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($this->session->flashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <?= $this->session->flashdata('error') ?>
+            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Informasi Seminar -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-info-circle mr-2"></i>
+                Informasi Seminar Proposal
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td width="20%"><strong>Mahasiswa</strong></td>
+                            <td width="3%">:</td>
+                            <td><?= isset($seminar->nama_mahasiswa) ? $seminar->nama_mahasiswa : '-' ?> 
+                                (<?= isset($seminar->nim) ? $seminar->nim : '-' ?>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Program Studi</strong></td>
+                            <td>:</td>
+                            <td><?= isset($seminar->nama_prodi) ? $seminar->nama_prodi : '-' ?></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status Seminar</strong></td>
+                            <td>:</td>
+                            <td>
+                                <?php if (isset($seminar->status)): ?>
+                                    <span class="badge badge-info"><?= ucfirst($seminar->status) ?></span>
+                                <?php else: ?>
+                                    <span class="badge badge-secondary">-</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status Penilaian</strong></td>
+                            <td>:</td>
+                            <td>
+                                <?php if (isset($existing_penilaian) && $existing_penilaian): ?>
+                                    <?php if ($existing_penilaian->status_penilaian == 'published'): ?>
+                                        <span class="badge badge-success">Sudah Dipublikasi</span>
+                                        <?php if (isset($existing_penilaian->published_at)): ?>
+                                        <small class="text-muted">
+                                            (<?= date('d M Y H:i', strtotime($existing_penilaian->published_at)) ?>)
+                                        </small>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="badge badge-warning">Draft</span>
+                                        <?php if (isset($existing_penilaian->updated_at)): ?>
+                                        <small class="text-muted">
+                                            (<?= date('d M Y H:i', strtotime($existing_penilaian->updated_at)) ?>)
+                                        </small>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <span class="badge badge-secondary">Belum Dinilai</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="<?= base_url('staf/dashboard') ?>">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="<?= base_url('staf/seminar_proposal') ?>">Seminar Proposal</a></li>
-                    <li class="breadcrumb-item"><a href="<?= base_url('staf/seminar_proposal/detail/' . $seminar->id) ?>">Detail</a></li>
-                    <li class="breadcrumb-item active"><?= $is_edit ? 'Edit' : 'Input' ?> Penilaian</li>
-                </ol>
+            
+            <div class="mt-3">
+                <strong>Judul Proposal:</strong>
+                <p class="text-justify mb-0"><?= isset($seminar->judul) ? $seminar->judul : '-' ?></p>
             </div>
         </div>
     </div>
+
+    <!-- ✅ FIXED: Menggunakan HTML form biasa, bukan form_open() -->
+    <?php 
+    $is_published = (isset($existing_penilaian) && $existing_penilaian && $existing_penilaian->status_penilaian == 'published');
+    $readonly = $is_published ? 'readonly' : '';
+    $disabled = $is_published ? 'disabled' : '';
+    ?>
+    
+    <?php if (!$is_published): ?>
+    <form method="post" action="<?= base_url('staf/seminar_proposal/input_penilaian/' . $seminar->id) ?>" id="penilaianForm">
+    <?php endif; ?>
+        
+        <!-- Komponen 1: Catatan Revisi Seminar Proposal -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-edit mr-2"></i>
+                    1. Catatan Revisi Seminar Proposal
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Masukkan catatan perbaikan dari para dosen penguji untuk berbagai aspek proposal
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Latar Belakang & Rumusan Masalah:</label>
+                            <textarea name="catatan_latar_belakang" class="form-control" rows="3" 
+                                      placeholder="Masukkan catatan perbaikan untuk latar belakang dan rumusan masalah..." 
+                                      <?= $readonly ?>><?= get_form_value('catatan_latar_belakang', $existing_penilaian ?? null) ?></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="font-weight-bold">Tinjauan Pustaka & Kebaruan (Novelty):</label>
+                            <textarea name="catatan_tinjauan_pustaka" class="form-control" rows="3" 
+                                      placeholder="Masukkan catatan perbaikan untuk tinjauan pustaka dan novelty..." 
+                                      <?= $readonly ?>><?= get_form_value('catatan_tinjauan_pustaka', $existing_penilaian ?? null) ?></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="font-weight-bold">Landasan Teori:</label>
+                            <textarea name="catatan_landasan_teori" class="form-control" rows="3" 
+                                      placeholder="Masukkan catatan perbaikan untuk landasan teori..." 
+                                      <?= $readonly ?>><?= get_form_value('catatan_landasan_teori', $existing_penilaian ?? null) ?></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Metodologi Penelitian:</label>
+                            <textarea name="catatan_metodologi" class="form-control" rows="3" 
+                                      placeholder="Masukkan catatan perbaikan untuk metodologi penelitian..." 
+                                      <?= $readonly ?>><?= get_form_value('catatan_metodologi', $existing_penilaian ?? null) ?></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="font-weight-bold">Sistematika & Tata Tulis:</label>
+                            <textarea name="catatan_sistematika" class="form-control" rows="3" 
+                                      placeholder="Masukkan catatan perbaikan untuk sistematika dan tata tulis..." 
+                                      <?= $readonly ?>><?= get_form_value('catatan_sistematika', $existing_penilaian ?? null) ?></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="font-weight-bold">Catatan Umum:</label>
+                            <textarea name="catatan_umum" class="form-control" rows="3" 
+                                      placeholder="Masukkan catatan umum atau saran tambahan..." 
+                                      <?= $readonly ?>><?= get_form_value('catatan_umum', $existing_penilaian ?? null) ?></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Komponen 2: Nilai Final Seminar Proposal -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-calculator mr-2"></i>
+                    2. Nilai Final Seminar Proposal
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    <strong>Sistem Penilaian:</strong> Nilai dari 3 dosen. Preview Nilai Akhir adalah rata-rata ketiganya: (Nilai Penguji 1 + Nilai Penguji 2 + Nilai Pembimbing) ÷ 3
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">
+                                <i class="fas fa-user-graduate mr-1"></i>
+                                Nilai Dosen Penguji 1
+                                <?php if (isset($dewan_penguji->nama_penguji1)): ?>
+                                    <br><small class="text-info"><?= $dewan_penguji->nama_penguji1 ?></small>
+                                <?php endif; ?>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" name="nilai_penguji1" class="form-control nilai-input" 
+                                       id="nilai_penguji1"
+                                       min="0" max="100" step="0.01"
+                                       value="<?= get_form_value('nilai_penguji1', $existing_penilaian ?? null) ?>"
+                                       placeholder="0-100" <?= $readonly ?>>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">/ 100</span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Nilai dari Dosen Penguji 1
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">
+                                <i class="fas fa-user-graduate mr-1"></i>
+                                Nilai Dosen Penguji 2
+                                <?php if (isset($dewan_penguji->nama_penguji2)): ?>
+                                    <br><small class="text-info"><?= $dewan_penguji->nama_penguji2 ?></small>
+                                <?php endif; ?>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" name="nilai_penguji2" class="form-control nilai-input" 
+                                       id="nilai_penguji2"
+                                       min="0" max="100" step="0.01"
+                                       value="<?= get_form_value('nilai_penguji2', $existing_penilaian ?? null) ?>"
+                                       placeholder="0-100" <?= $readonly ?>>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">/ 100</span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Nilai dari Dosen Penguji 2
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">
+                                <i class="fas fa-chalkboard-teacher mr-1"></i>
+                                Nilai Dosen Pembimbing
+                                <?php if (isset($dewan_penguji->nama_pembimbing)): ?>
+                                    <br><small class="text-success"><?= $dewan_penguji->nama_pembimbing ?></small>
+                                <?php endif; ?>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" name="nilai_pembimbing" class="form-control nilai-input" 
+                                       id="nilai_pembimbing"
+                                       min="0" max="100" step="0.01"
+                                       value="<?= get_form_value('nilai_pembimbing', $existing_penilaian ?? null) ?>"
+                                       placeholder="0-100" <?= $readonly ?>>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">/ 100</span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Nilai dari Dosen Pembimbing
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                    
+                <!-- ✅ FIXED: Preview Nilai Akhir dengan ID yang persistent -->
+                <div class="row" id="previewNilaiContainer" style="display: block !important;">
+                    <div class="col-md-6">
+                        <div class="alert alert-light border" id="previewNilaiBox" style="display: block !important;">
+                            <h6 class="font-weight-bold mb-2">
+                                <i class="fas fa-chart-line mr-2"></i>
+                                Preview Nilai Akhir:
+                            </h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Nilai Angka:</span>
+                                <span class="font-weight-bold" id="previewNilaiAngka">
+                                    <?= (isset($existing_penilaian) && isset($existing_penilaian->nilai_akhir) && $existing_penilaian->nilai_akhir) ? number_format($existing_penilaian->nilai_akhir, 2) : '-' ?>
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Nilai Huruf:</span>
+                                <span class="font-weight-bold" id="previewNilaiHuruf">
+                                    <?= (isset($existing_penilaian) && isset($existing_penilaian->nilai_huruf) && $existing_penilaian->nilai_huruf) ? $existing_penilaian->nilai_huruf : '-' ?>
+                                </span>
+                            </div>
+                            <hr class="my-2">
+                            <small class="text-muted">
+                                <i class="fas fa-calculator mr-1"></i>
+                                <strong>Rumus:</strong> (Penguji 1 + Penguji 2 + Pembimbing) ÷ 3
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-info" id="konversiNilaiBox" style="display: block !important;">
+                            <h6 class="font-weight-bold mb-2">
+                                <i class="fas fa-graduation-cap mr-2"></i>
+                                Konversi Nilai:
+                            </h6>
+                            <div class="small">
+                                <div><span class="badge badge-success">A</span> ≥80: Sangat Baik</div>
+                                <div><span class="badge badge-primary">B</span> 70-79.9: Baik</div>
+                                <div><span class="badge badge-warning">C</span> 60-69.9: Cukup</div>
+                                <div><span class="badge badge-secondary">D</span> 50-59.9: Kurang</div>
+                                <div><span class="badge badge-danger">E</span> <50: Sangat Kurang</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+
+        <!-- Komponen 3: Rekomendasi Hasil Seminar -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-thumbs-up mr-2"></i>
+                    3. Rekomendasi Hasil Seminar
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Pilih rekomendasi berdasarkan hasil seminar proposal
+                </p>
+                
+                <div class="form-group">
+                    <label class="font-weight-bold">Pilih Rekomendasi</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="custom-control custom-radio mb-2">
+                                <input type="radio" name="rekomendasi" value="diterima_tanpa_revisi" id="rekomen1" class="custom-control-input" 
+                                       <?= (isset($existing_penilaian) && $existing_penilaian && $existing_penilaian->rekomendasi == 'diterima_tanpa_revisi') ? 'checked' : '' ?>
+                                       <?= $disabled ?>>
+                                <label class="custom-control-label" for="rekomen1">
+                                    <i class="fas fa-check-circle text-success mr-1"></i>
+                                    <strong>Diterima Tanpa Revisi</strong><br>
+                                    <small class="text-muted">Proposal dapat dilanjutkan ke tahap penelitian</small>
+                                </label>
+                            </div>
+                            
+                            <div class="custom-control custom-radio mb-2">
+                                <input type="radio" name="rekomendasi" value="revisi_minor" id="rekomen2" class="custom-control-input"
+                                       <?= (isset($existing_penilaian) && $existing_penilaian && $existing_penilaian->rekomendasi == 'revisi_minor') ? 'checked' : '' ?>
+                                       <?= $disabled ?>>
+                                <label class="custom-control-label" for="rekomen2">
+                                    <i class="fas fa-edit text-info mr-1"></i>
+                                    <strong>Revisi Minor</strong><br>
+                                    <small class="text-muted">Perlu perbaikan kecil, dapat dilanjutkan ke penelitian</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="custom-control custom-radio mb-2">
+                                <input type="radio" name="rekomendasi" value="revisi_mayor" id="rekomen3" class="custom-control-input"
+                                       <?= (isset($existing_penilaian) && $existing_penilaian && $existing_penilaian->rekomendasi == 'revisi_mayor') ? 'checked' : '' ?>
+                                       <?= $disabled ?>>
+                                <label class="custom-control-label" for="rekomen3">
+                                    <i class="fas fa-exclamation-triangle text-warning mr-1"></i>
+                                    <strong>Revisi Mayor</strong><br>
+                                    <small class="text-muted">Perlu perbaikan besar, dapat dilanjutkan setelah revisi</small>
+                                </label>
+                            </div>
+                            
+                            <div class="custom-control custom-radio mb-2">
+                                <input type="radio" name="rekomendasi" value="ditolak" id="rekomen4" class="custom-control-input"
+                                       <?= (isset($existing_penilaian) && $existing_penilaian && $existing_penilaian->rekomendasi == 'ditolak') ? 'checked' : '' ?>
+                                       <?= $disabled ?>>
+                                <label class="custom-control-label" for="rekomen4">
+                                    <i class="fas fa-times-circle text-danger mr-1"></i>
+                                    <strong>Ditolak</strong><br>
+                                    <small class="text-muted">Harus mengajukan ulang seminar proposal</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="font-weight-bold">Keterangan Rekomendasi</label>
+                    <textarea name="keterangan_rekomendasi" class="form-control" rows="3" 
+                              placeholder="Masukkan keterangan tambahan untuk rekomendasi (opsional)..." 
+                              <?= $readonly ?>><?= get_form_value('keterangan_rekomendasi', $existing_penilaian ?? null) ?></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <?php if (!$is_published): ?>
+                        <h6 class="font-weight-bold text-primary mb-3">
+                            <i class="fas fa-save mr-2"></i>
+                            Opsi Penyimpanan (Staf Backup)
+                        </h6>
+                        <p class="text-muted mb-3">
+                            <strong>Draft:</strong> Penilaian disimpan tapi belum dikirim ke mahasiswa (masih bisa diedit)<br>
+                            <strong>Simpan dan Publikasi:</strong> Penilaian final dikirim ke mahasiswa via email & sistem (tidak bisa diedit lagi)
+                        </p>
+                        <?php else: ?>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <strong>Penilaian Sudah Dipublikasi</strong><br>
+                            <?php if (isset($existing_penilaian->published_at)): ?>
+                            Penilaian ini telah dipublikasi pada <?= date('d F Y, H:i', strtotime($existing_penilaian->published_at)) ?> WIB
+                            dan tidak dapat diubah lagi.
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <?php if (!$is_published): ?>
+                        <button type="submit" name="action_type" value="draft" class="btn btn-outline-primary btn-lg mb-2">
+                            <i class="fas fa-save mr-2"></i>
+                            Simpan Draft
+                        </button>
+                        <br>
+                        <button type="submit" name="action_type" value="publish" class="btn btn-success btn-lg" 
+                                onclick="return confirm('Apakah Anda yakin ingin mempublikasi penilaian ini? Penilaian yang sudah dipublikasi tidak dapat diubah lagi.')">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Simpan & Publikasi
+                        </button>
+                        <?php else: ?>
+                        <a href="<?= base_url('staf/seminar_proposal/detail/' . $seminar->id) ?>" class="btn btn-primary btn-lg">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Kembali ke Detail
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <?php if (!$is_published): ?>
+    </form>
+    <?php endif; ?>
+
 </div>
 
-<!-- Main content -->
-<section class="content">
-    <div class="container-fluid">
-        
-        <!-- Alert Messages -->
-        <?php if($this->session->flashdata('success')): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle mr-2"></i>
-                <?= $this->session->flashdata('success') ?>
-                <button type="button" class="close" data-dismiss="alert">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-        
-        <?php if($this->session->flashdata('error')): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle mr-2"></i>
-                <?= $this->session->flashdata('error') ?>
-                <button type="button" class="close" data-dismiss="alert">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-
-        <!-- ✅ FIXED: Validation errors dengan null check -->
-        <?php if(function_exists('validation_errors') && validation_errors()): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
-                <strong>Kesalahan Validasi:</strong>
-                <?= validation_errors() ?>
-                <button type="button" class="close" data-dismiss="alert">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-
-        <!-- Back Button -->
-        <div class="row mb-3">
-            <div class="col-12">
-                <a href="<?= base_url('staf/seminar_proposal/detail/' . $seminar->id) ?>" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Kembali ke Detail
-                </a>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Left Column: Info Seminar -->
-            <div class="col-md-4">
-                <!-- Card: Info Seminar -->
-                <div class="card">
-                    <div class="card-header bg-info">
-                        <h3 class="card-title">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            Informasi Seminar
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-sm table-borderless">
-                            <tr>
-                                <td><strong>Mahasiswa</strong></td>
-                                <td>:</td>
-                                <td><?= isset($seminar->nama_mahasiswa) ? $seminar->nama_mahasiswa : 'Unknown' ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>NIM</strong></td>
-                                <td>:</td>
-                                <td><?= isset($seminar->nim) ? $seminar->nim : 'Unknown' ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Program Studi</strong></td>
-                                <td>:</td>
-                                <td><?= isset($seminar->nama_prodi) ? $seminar->nama_prodi : 'Unknown' ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tanggal</strong></td>
-                                <td>:</td>
-                                <td>
-                                    <?php if(isset($seminar->tanggal_seminar) && !empty($seminar->tanggal_seminar)): ?>
-                                        <?= date('d F Y', strtotime($seminar->tanggal_seminar)) ?>
-                                    <?php else: ?>
-                                        Belum ditentukan
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tempat</strong></td>
-                                <td>:</td>
-                                <td><?= isset($seminar->tempat_seminar) ? $seminar->tempat_seminar : 'Belum ditentukan' ?></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Card: Guidelines -->
-                <div class="card">
-                    <div class="card-header bg-warning">
-                        <h3 class="card-title">
-                            <i class="fas fa-lightbulb mr-2"></i>
-                            Panduan Penilaian
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-info">
-                            <strong>Komponen Penilaian:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>Substansi & Metode (50%)</li>
-                                <li>Presentasi & Teknik (20%)</li>
-                                <li>Penguasaan & Diskusi (30%)</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="alert alert-warning">
-                            <strong>Rentang Nilai:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>A: 80-100 (Sangat Baik)</li>
-                                <li>B: 70-79 (Baik)</li>
-                                <li>C: 60-69 (Cukup)</li>
-                                <li>D: 50-59 (Kurang)</li>
-                                <li>E: 0-49 (Sangat Kurang)</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Form Penilaian -->
-            <div class="col-md-8">
-                <!-- Form Penilaian -->
-                <div class="card">
-                    <div class="card-header bg-primary">
-                        <h3 class="card-title">
-                            <i class="fas fa-clipboard-check mr-2"></i>
-                            Form Penilaian Seminar Proposal
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        
-                        <!-- Form Start -->
-                        <?= form_open('staf/seminar_proposal/input_penilaian/' . $seminar->id, ['class' => 'form-horizontal']) ?>
-                        
-                        <!-- Judul Proposal -->
-                        <div class="form-group">
-                            <label class="font-weight-bold">Judul Proposal:</label>
-                            <div class="bg-light p-3 rounded">
-                                <em><?= isset($seminar->judul) ? $seminar->judul : 'Judul tidak tersedia' ?></em>
-                            </div>
-                        </div>
-
-                        <!-- Komponen Penilaian -->
-                        <div class="row">
-                            <!-- Nilai Substansi & Metode -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="nilai_substansi" class="font-weight-bold">
-                                        Substansi & Metode <span class="text-danger">*</span>
-                                        <small class="text-muted d-block">(Bobot: 50%)</small>
-                                    </label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           id="nilai_substansi" 
-                                           name="nilai_substansi" 
-                                           min="0" 
-                                           max="100" 
-                                           step="0.1"
-                                           value="<?= get_penilaian_value($existing_penilaian, 'nilai_substansi_metode') ?>"
-                                           placeholder="0.0" 
-                                           required>
-                                    <small class="form-text text-muted">Nilai 0-100</small>
-                                </div>
-                            </div>
-
-                            <!-- Nilai Presentasi & Teknik -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="nilai_presentasi" class="font-weight-bold">
-                                        Presentasi & Teknik <span class="text-danger">*</span>
-                                        <small class="text-muted d-block">(Bobot: 20%)</small>
-                                    </label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           id="nilai_presentasi" 
-                                           name="nilai_presentasi" 
-                                           min="0" 
-                                           max="100" 
-                                           step="0.1"
-                                           value="<?= get_penilaian_value($existing_penilaian, 'nilai_presentasi_teknik') ?>"
-                                           placeholder="0.0" 
-                                           required>
-                                    <small class="form-text text-muted">Nilai 0-100</small>
-                                </div>
-                            </div>
-
-                            <!-- Nilai Penguasaan & Diskusi -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="nilai_diskusi" class="font-weight-bold">
-                                        Penguasaan & Diskusi <span class="text-danger">*</span>
-                                        <small class="text-muted d-block">(Bobot: 30%)</small>
-                                    </label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           id="nilai_diskusi" 
-                                           name="nilai_diskusi" 
-                                           min="0" 
-                                           max="100" 
-                                           step="0.1"
-                                           value="<?= get_penilaian_value($existing_penilaian, 'nilai_penguasaan_diskusi') ?>"
-                                           placeholder="0.0" 
-                                           required>
-                                    <small class="form-text text-muted">Nilai 0-100</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Hasil Kalkulasi Otomatis -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="alert alert-secondary">
-                                    <div class="row text-center">
-                                        <div class="col-md-3">
-                                            <strong>Nilai Akhir:</strong>
-                                            <h4 id="nilai_akhir_display" class="text-primary">0.0</h4>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <strong>Grade:</strong>
-                                            <h4 id="grade_display" class="text-success">-</h4>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <strong>Keterangan:</strong>
-                                            <p id="keterangan_display" class="mb-0">Masukkan nilai untuk melihat hasil</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Hidden field untuk nilai akhir -->
-                                <input type="hidden" id="nilai_akhir_hidden" name="nilai_akhir" value="<?= get_penilaian_value($existing_penilaian, 'nilai_akhir') ?>">
-                                <input type="hidden" id="nilai_huruf_hidden" name="nilai_huruf" value="<?= get_penilaian_value($existing_penilaian, 'nilai_huruf') ?>">
-                            </div>
-                        </div>
-
-                        <!-- Rekomendasi -->
-                        <div class="form-group">
-                            <label for="rekomendasi" class="font-weight-bold">
-                                Rekomendasi <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-control" id="rekomendasi" name="rekomendasi" required>
-                                <option value="">-- Pilih Rekomendasi --</option>
-                                <option value="diterima_tanpa_revisi" 
-                                    <?= get_penilaian_value($existing_penilaian, 'rekomendasi') == 'diterima_tanpa_revisi' ? 'selected' : '' ?>>
-                                    Diterima Tanpa Revisi
-                                </option>
-                                <option value="revisi_minor" 
-                                    <?= get_penilaian_value($existing_penilaian, 'rekomendasi') == 'revisi_minor' ? 'selected' : '' ?>>
-                                    Diterima dengan Revisi Minor
-                                </option>
-                                <option value="revisi_mayor" 
-                                    <?= get_penilaian_value($existing_penilaian, 'rekomendasi') == 'revisi_mayor' ? 'selected' : '' ?>>
-                                    Diterima dengan Revisi Mayor
-                                </option>
-                                <option value="ditolak" 
-                                    <?= get_penilaian_value($existing_penilaian, 'rekomendasi') == 'ditolak' ? 'selected' : '' ?>>
-                                    Ditolak / Mengulang Seminar
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- Catatan Detail -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="catatan_latar_belakang" class="font-weight-bold">
-                                        Catatan Latar Belakang & Rumusan Masalah
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="catatan_latar_belakang" 
-                                              name="catatan_latar_belakang" 
-                                              rows="3" 
-                                              placeholder="Masukkan catatan untuk aspek latar belakang dan rumusan masalah..."><?= get_penilaian_value($existing_penilaian, 'catatan_latar_belakang') ?></textarea>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="catatan_tinjauan_pustaka" class="font-weight-bold">
-                                        Catatan Tinjauan Pustaka & Kebaruan
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="catatan_tinjauan_pustaka" 
-                                              name="catatan_tinjauan_pustaka" 
-                                              rows="3" 
-                                              placeholder="Masukkan catatan untuk aspek tinjauan pustaka dan novelty..."><?= get_penilaian_value($existing_penilaian, 'catatan_tinjauan_pustaka') ?></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="catatan_landasan_teori" class="font-weight-bold">
-                                        Catatan Landasan Teori
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="catatan_landasan_teori" 
-                                              name="catatan_landasan_teori" 
-                                              rows="3" 
-                                              placeholder="Masukkan catatan untuk aspek landasan teori..."><?= get_penilaian_value($existing_penilaian, 'catatan_landasan_teori') ?></textarea>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="catatan_metodologi" class="font-weight-bold">
-                                        Catatan Metodologi Penelitian
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="catatan_metodologi" 
-                                              name="catatan_metodologi" 
-                                              rows="3" 
-                                              placeholder="Masukkan catatan untuk aspek metodologi penelitian..."><?= get_penilaian_value($existing_penilaian, 'catatan_metodologi') ?></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="catatan_sistematika" class="font-weight-bold">
-                                        Catatan Sistematika & Tata Tulis
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="catatan_sistematika" 
-                                              name="catatan_sistematika" 
-                                              rows="3" 
-                                              placeholder="Masukkan catatan untuk aspek sistematika dan tata tulis..."><?= get_penilaian_value($existing_penilaian, 'catatan_sistematika') ?></textarea>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="catatan_umum" class="font-weight-bold">
-                                        Catatan Umum & Saran
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="catatan_umum" 
-                                              name="catatan_umum" 
-                                              rows="3" 
-                                              placeholder="Masukkan catatan umum atau saran tambahan..."><?= get_penilaian_value($existing_penilaian, 'catatan_umum') ?></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Form Actions -->
-                        <div class="form-group">
-                            <hr>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <a href="<?= base_url('staf/seminar_proposal/detail/' . $seminar->id) ?>" 
-                                       class="btn btn-secondary btn-block">
-                                        <i class="fas fa-times mr-2"></i>
-                                        Batal
-                                    </a>
-                                </div>
-                                <div class="col-md-6">
-                                    <button type="submit" class="btn btn-primary btn-block">
-                                        <i class="fas fa-save mr-2"></i>
-                                        <?= $is_edit ? 'Update Penilaian' : 'Simpan Penilaian' ?>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <?= form_close() ?>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</section>
-
-<!-- JavaScript untuk Kalkulasi Otomatis -->
+<!-- ✅ FIXED: JavaScript yang robust dan tidak menghapus container -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const nilaiSubstansi = document.getElementById('nilai_substansi');
-    const nilaiPresentasi = document.getElementById('nilai_presentasi');
-    const nilaiDiskusi = document.getElementById('nilai_diskusi');
-    const nilaiAkhirDisplay = document.getElementById('nilai_akhir_display');
-    const gradeDisplay = document.getElementById('grade_display');
-    const keteranganDisplay = document.getElementById('keterangan_display');
-    const nilaiAkhirHidden = document.getElementById('nilai_akhir_hidden');
-    const nilaiHurufHidden = document.getElementById('nilai_huruf_hidden');
-
-    function hitungNilaiAkhir() {
-        const substansi = parseFloat(nilaiSubstansi.value) || 0;
-        const presentasi = parseFloat(nilaiPresentasi.value) || 0;
-        const diskusi = parseFloat(nilaiDiskusi.value) || 0;
-
-        // Hitung dengan bobot: Substansi (50%), Presentasi (20%), Diskusi (30%)
-        const nilaiAkhir = (substansi * 0.5) + (presentasi * 0.2) + (diskusi * 0.3);
-        
-        // Tentukan grade
-        let grade, keterangan;
-        if (nilaiAkhir >= 80) {
-            grade = 'A';
-            keterangan = 'Sangat Baik';
-        } else if (nilaiAkhir >= 70) {
-            grade = 'B';
-            keterangan = 'Baik';
-        } else if (nilaiAkhir >= 60) {
-            grade = 'C';
-            keterangan = 'Cukup';
-        } else if (nilaiAkhir >= 50) {
-            grade = 'D';
-            keterangan = 'Kurang';
-        } else {
-            grade = 'E';
-            keterangan = 'Sangat Kurang';
-        }
-
-        // Update display
-        nilaiAkhirDisplay.textContent = nilaiAkhir.toFixed(1);
-        gradeDisplay.textContent = grade;
-        keteranganDisplay.textContent = keterangan;
-        
-        // Update hidden fields
-        nilaiAkhirHidden.value = nilaiAkhir.toFixed(2);
-        nilaiHurufHidden.value = grade;
+// ✅ FIXED: JavaScript dengan proteksi container
+(function() {
+    'use strict';
+    
+    // Pastikan jQuery tersedia
+    if (typeof jQuery === 'undefined') {
+        console.warn('jQuery not loaded, using vanilla JS');
     }
-
-    // Event listeners
-    nilaiSubstansi.addEventListener('input', hitungNilaiAkhir);
-    nilaiPresentasi.addEventListener('input', hitungNilaiAkhir);
-    nilaiDiskusi.addEventListener('input', hitungNilaiAkhir);
-
-    // Hitung initial jika ada nilai existing
-    hitungNilaiAkhir();
-});
+    
+    // ✅ FIXED: Function untuk menghitung nilai akhir
+    function calculateNilaiAkhir() {
+        try {
+            // Get input values dengan fallback
+            const penguji1Element = document.getElementById('nilai_penguji1');
+            const penguji2Element = document.getElementById('nilai_penguji2');
+            const pembimbingElement = document.getElementById('nilai_pembimbing');
+            
+            if (!penguji1Element || !penguji2Element || !pembimbingElement) {
+                console.warn('Input elements not found');
+                return;
+            }
+            
+            const penguji1 = parseFloat(penguji1Element.value) || 0;
+            const penguji2 = parseFloat(penguji2Element.value) || 0;
+            const pembimbing = parseFloat(pembimbingElement.value) || 0;
+            
+            // Get preview elements dengan fallback
+            const previewAngkaElement = document.getElementById('previewNilaiAngka');
+            const previewHurufElement = document.getElementById('previewNilaiHuruf');
+            
+            if (!previewAngkaElement || !previewHurufElement) {
+                console.warn('Preview elements not found');
+                return;
+            }
+            
+            // Calculate nilai akhir
+            if (penguji1 > 0 && penguji2 > 0 && pembimbing > 0) {
+                const nilaiAkhir = (penguji1 + penguji2 + pembimbing) / 3;
+                
+                let nilaiHuruf = '';
+                if (nilaiAkhir >= 80) nilaiHuruf = 'A';
+                else if (nilaiAkhir >= 70) nilaiHuruf = 'B';
+                else if (nilaiAkhir >= 60) nilaiHuruf = 'C';
+                else if (nilaiAkhir >= 50) nilaiHuruf = 'D';
+                else nilaiHuruf = 'E';
+                
+                previewAngkaElement.textContent = nilaiAkhir.toFixed(2);
+                previewHurufElement.textContent = nilaiHuruf;
+            } else {
+                previewAngkaElement.textContent = '-';
+                previewHurufElement.textContent = '-';
+            }
+            
+            // ✅ FIXED: Pastikan container tetap terlihat
+            ensureContainerVisible();
+            
+        } catch (error) {
+            console.error('Error calculating nilai akhir:', error);
+        }
+    }
+    
+    // ✅ FIXED: Function untuk memastikan container tidak hilang
+    function ensureContainerVisible() {
+        try {
+            const previewContainer = document.getElementById('previewNilaiContainer');
+            const previewBox = document.getElementById('previewNilaiBox');
+            const konversiBox = document.getElementById('konversiNilaiBox');
+            
+            if (previewContainer) {
+                previewContainer.style.display = 'block';
+                previewContainer.style.visibility = 'visible';
+            }
+            
+            if (previewBox) {
+                previewBox.style.display = 'block';
+                previewBox.style.visibility = 'visible';
+            }
+            
+            if (konversiBox) {
+                konversiBox.style.display = 'block';
+                konversiBox.style.visibility = 'visible';
+            }
+        } catch (error) {
+            console.error('Error ensuring container visibility:', error);
+        }
+    }
+    
+    // ✅ FIXED: DOM ready handler
+    function initializeForm() {
+        try {
+            // Add event listeners untuk input nilai
+            const nilaiInputs = document.querySelectorAll('.nilai-input');
+            nilaiInputs.forEach(function(input) {
+                if (input) {
+                    input.addEventListener('input', calculateNilaiAkhir);
+                    input.addEventListener('change', calculateNilaiAkhir);
+                    input.addEventListener('keyup', calculateNilaiAkhir);
+                }
+            });
+            
+            // Calculate on page load
+            calculateNilaiAkhir();
+            
+            // ✅ FIXED: Interval untuk memastikan container tidak hilang
+            setInterval(ensureContainerVisible, 1000);
+            
+            // Form validation
+            const form = document.getElementById('penilaianForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const actionButton = document.activeElement;
+                    const actionType = actionButton ? actionButton.value : '';
+                    
+                    if (actionType === 'publish') {
+                        const penguji1 = parseFloat(document.getElementById('nilai_penguji1').value) || 0;
+                        const penguji2 = parseFloat(document.getElementById('nilai_penguji2').value) || 0;
+                        const pembimbing = parseFloat(document.getElementById('nilai_pembimbing').value) || 0;
+                        const rekomendasi = document.querySelector('input[name="rekomendasi"]:checked');
+                        
+                        if (penguji1 <= 0 || penguji2 <= 0 || pembimbing <= 0) {
+                            e.preventDefault();
+                            alert('Semua komponen nilai harus diisi dengan nilai > 0 untuk publikasi!');
+                            return false;
+                        }
+                        
+                        if (!rekomendasi) {
+                            e.preventDefault();
+                            alert('Rekomendasi hasil seminar harus dipilih untuk publikasi!');
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            console.log('Form initialized successfully');
+            
+        } catch (error) {
+            console.error('Error initializing form:', error);
+        }
+    }
+    
+    // ✅ FIXED: Multiple DOM ready handlers untuk compatibility
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeForm);
+    } else {
+        initializeForm();
+    }
+    
+    // Fallback dengan setTimeout
+    setTimeout(function() {
+        initializeForm();
+        ensureContainerVisible();
+    }, 500);
+    
+    // ✅ FIXED: Window load handler sebagai backup
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            initializeForm();
+            ensureContainerVisible();
+        }, 100);
+    });
+    
+})();
 </script>
-
-<style>
-.form-group label.font-weight-bold {
-    color: #495057;
-}
-
-.alert-secondary {
-    background-color: #f8f9fa;
-    border-color: #dee2e6;
-}
-
-#nilai_akhir_display {
-    font-size: 1.5rem;
-    margin-bottom: 0;
-}
-
-#grade_display {
-    font-size: 1.5rem;
-    margin-bottom: 0;
-}
-
-.text-center h4 {
-    margin-bottom: 5px;
-}
-
-.form-control:focus {
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-</style>

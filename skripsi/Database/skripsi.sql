@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 15, 2025 at 05:33 PM
+-- Generation Time: Aug 15, 2025 at 06:03 PM
 -- Server version: 10.3.39-MariaDB-cll-lve
 -- PHP Version: 8.1.33
 
@@ -1046,7 +1046,7 @@ CREATE TABLE `penilaian_seminar_proposal` (
 --
 
 INSERT INTO `penilaian_seminar_proposal` (`id`, `seminar_proposal_id`, `mahasiswa_id`, `proposal_id`, `catatan_latar_belakang`, `catatan_tinjauan_pustaka`, `catatan_landasan_teori`, `catatan_metodologi`, `catatan_sistematika`, `catatan_umum`, `nilai_penguji1`, `nilai_penguji2`, `nilai_pembimbing`, `nilai_substansi_metode`, `nilai_presentasi_teknik`, `nilai_penguasaan_diskusi`, `nilai_akhir`, `nilai_huruf`, `rekomendasi`, `keterangan_rekomendasi`, `status_penilaian`, `dinilai_oleh`, `role_penilai`, `created_at`, `updated_at`, `published_at`) VALUES
-(6, 6, 76, 73, 'Ini latihan saja pak', 'Ini latihan saja pak', 'Ini latihan saja pak', 'Ini latihan saja pak', 'Ini latihan saja pak', 'Ini latihan saja pak', 85.00, 90.00, 80.00, NULL, NULL, NULL, 85.00, 'A', 'revisi_minor', 'Ini latihan saja pak', 'draft', 29, 'staf', '2025-08-15 17:19:36', '2025-08-15 17:30:13', NULL);
+(6, 6, 76, 73, 'Ini latihan saja pak', 'Ini latihan saja pak', 'Ini latihan saja pak', 'Ini latihan saja pak', 'Ini latihan saja pak', 'Ini latihan saja pak', 85.00, 90.00, 80.00, NULL, NULL, NULL, 85.00, 'A', 'revisi_minor', 'Ini latihan saja pak', 'draft', 29, 'staf', '2025-08-15 17:19:36', '2025-08-15 17:56:36', NULL);
 
 --
 -- Triggers `penilaian_seminar_proposal`
@@ -3065,7 +3065,7 @@ ALTER TABLE `pengumuman_tahapan`
 -- AUTO_INCREMENT for table `penilaian_seminar_proposal`
 --
 ALTER TABLE `penilaian_seminar_proposal`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `penilaian_seminar_proposal_backup_20250729`

@@ -239,7 +239,6 @@ class Seminar_proposal extends CI_Controller {
  */
 private function _get_approved_seminar_list() {
     try {
-        // ✅ FIXED: Query sesuai controller dosen yang working
         $this->db->select('
             spm.id, spm.proposal_id, spm.mahasiswa_id, spm.status,
             spm.current_step, spm.tanggal_seminar, spm.jam_seminar, spm.tempat_seminar,
@@ -259,13 +258,20 @@ private function _get_approved_seminar_list() {
         $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
         $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
         
-        // ✅ PERBAIKAN FILTER: Sama seperti controller dosen yang working
-        $this->db->where('spm.status', 'scheduled');
-        $this->db->where('spm.current_step', 'staf');
-        $this->db->where('spm.tanggal_seminar IS NOT NULL'); // Pastikan sudah dijadwalkan
+        // ✅ PERBAIKAN FILTER: Lebih fleksibel untuk menampilkan seminar yang sudah dijadwalkan
+        $this->db->where('spm.status_kaprodi', 'approved'); // Yang sudah disetujui kaprodi
+        
+        // Terima berbagai kombinasi status
+        $this->db->group_start();
+            $this->db->where('spm.status', 'scheduled'); // Status scheduled
+            $this->db->or_group_start();
+                $this->db->where('spm.status', 'approved'); // Atau approved
+                $this->db->where('spm.tanggal_seminar IS NOT NULL'); // Yang sudah ada jadwal
+            $this->db->group_end();
+        $this->db->group_end();
         
         $this->db->order_by('spm.tanggal_seminar', 'ASC');
-        $this->db->limit(50); // Limit untuk performa
+        $this->db->limit(50);
         
         return $this->db->get()->result();
         

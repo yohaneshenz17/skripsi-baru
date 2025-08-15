@@ -493,33 +493,49 @@ class Seminar_proposal extends CI_Controller {
      * Get penilaian existing dari staf dengan handling error yang lebih baik
      * METHOD EXISTING - TIDAK DIUBAH
      */
-    private function _get_existing_penilaian_staf($seminar_id) {
+    private function _get_penilaian_with_correct_fields($seminar_id) {
         try {
             // Check if table exists first
             if (!$this->db->table_exists('penilaian_seminar_proposal')) {
                 return null;
             }
             
-            // ✅ PERBAIKAN: Enhanced query untuk cek existing penilaian dari siapa saja
+            // ✅ PERBAIKAN: Query dengan field yang benar
             $this->db->select('
                 psp.*,
-                psp.nilai_substansi_metode as rata_rata_substansi,
+                psp.nilai_pembimbing,
+                psp.nilai_penguji1, 
+                psp.nilai_penguji2,
                 psp.nilai_akhir,
-                psp.rekomendasi
+                psp.rekomendasi,
+                psp.status_penilaian,
+                psp.created_at,
+                psp.updated_at,
+                psp.catatan_umum as catatan_saran
             ');
             $this->db->from('penilaian_seminar_proposal psp');
             $this->db->where('psp.seminar_proposal_id', $seminar_id);
+            $this->db->where('psp.role_penilai', 'dosen_pembimbing'); // Prioritas dosen
             
-            // Ambil penilaian terbaru dari siapa saja (dosen atau staf)
+            // Ambil penilaian terbaru dari dosen
             $this->db->order_by('psp.updated_at', 'DESC');
             $this->db->limit(1);
             
             return $this->db->get()->row();
             
         } catch (Exception $e) {
-            log_message('error', 'Error getting existing penilaian: ' . $e->getMessage());
+            log_message('error', 'Error getting correct penilaian fields: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Get penilaian existing dari staf dengan handling error yang lebih baik
+     * METHOD EXISTING - UNTUK BACKWARD COMPATIBILITY
+     */
+    private function _get_existing_penilaian_staf($seminar_id) {
+        // Redirect ke method baru
+        return $this->_get_penilaian_with_correct_fields($seminar_id);
     }
 
     /**

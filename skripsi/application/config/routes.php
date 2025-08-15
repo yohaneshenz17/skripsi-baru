@@ -632,6 +632,8 @@ $route['staf/seminar_proposal/print_rekapitulasi_nilai/(:num)'] = 'staf/seminar_
 // d. INPUT DAN EDIT PENILAIAN
 // =============================================================================
 
+$route['staf/seminar_proposal/lihat_penilaian/(:num)'] = 'staf/seminar_proposal/lihat_penilaian/$1';
+
 // Input penilaian seminar proposal (GET: show form, POST: process form)
 $route['staf/seminar_proposal/input_penilaian/(:num)'] = 'staf/seminar_proposal/input_penilaian/$1';
 

@@ -530,7 +530,7 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                     </div>
                 </div>
 
-                <!-- Card: Status Penilaian -->
+<!-- ✅ UPDATED: Card Status Penilaian dengan field yang benar -->
                 <div class="card">
                     <div class="card-header bg-warning">
                         <h3 class="card-title">
@@ -539,7 +539,7 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                         </h3>
                     </div>
                     <div class="card-body">
-                        <!-- ✅ PERUBAHAN: Info tentang akses read-only -->
+                        <!-- Info tentang akses read-only -->
                         <div class="alert alert-info alert-sm">
                             <i class="fas fa-eye mr-2"></i>
                             <strong>Mode:</strong> Read-only untuk staf
@@ -556,54 +556,83 @@ function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
                                 </small>
                             </div>
                             
+                            <!-- ✅ PERBAIKAN: Label dan field yang benar -->
                             <table class="table table-sm">
                                 <tr>
-                                    <td><strong>Nilai Substansi</strong></td>
+                                    <td><strong>Nilai Dosen Pembimbing</strong></td>
                                     <td>:</td>
-                                    <td><span class="badge badge-primary"><?= safe_number(safe_get($existing_penilaian, 'rata_rata_substansi', null)) ?></span></td>
+                                    <td>
+                                        <span class="badge <?= isset($existing_penilaian->nilai_pembimbing) && $existing_penilaian->nilai_pembimbing > 0 ? 'badge-primary' : 'badge-secondary' ?>">
+                                            <?= safe_number(safe_get($existing_penilaian, 'nilai_pembimbing', null)) ?>
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Nilai Presentasi</strong></td>
+                                    <td><strong>Nilai Dosen Penguji 1</strong></td>
                                     <td>:</td>
-                                    <td><span class="badge badge-success"><?= safe_number(safe_get($existing_penilaian, 'rata_rata_presentasi', null)) ?></span></td>
+                                    <td>
+                                        <span class="badge <?= isset($existing_penilaian->nilai_penguji1) && $existing_penilaian->nilai_penguji1 > 0 ? 'badge-success' : 'badge-secondary' ?>">
+                                            <?= safe_number(safe_get($existing_penilaian, 'nilai_penguji1', null)) ?>
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Nilai Diskusi</strong></td>
+                                    <td><strong>Nilai Dosen Penguji 2</strong></td>
                                     <td>:</td>
-                                    <td><span class="badge badge-info"><?= safe_number(safe_get($existing_penilaian, 'rata_rata_diskusi', null)) ?></span></td>
+                                    <td>
+                                        <span class="badge <?= isset($existing_penilaian->nilai_penguji2) && $existing_penilaian->nilai_penguji2 > 0 ? 'badge-info' : 'badge-secondary' ?>">
+                                            <?= safe_number(safe_get($existing_penilaian, 'nilai_penguji2', null)) ?>
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr class="bg-light">
                                     <td><strong>Nilai Akhir</strong></td>
                                     <td>:</td>
-                                    <td><span class="badge badge-warning badge-lg"><?= safe_number(safe_get($existing_penilaian, 'nilai_akhir', null)) ?></span></td>
+                                    <td>
+                                        <span class="badge <?= isset($existing_penilaian->nilai_akhir) && $existing_penilaian->nilai_akhir > 0 ? 'badge-warning badge-lg' : 'badge-secondary' ?>">
+                                            <?= safe_number(safe_get($existing_penilaian, 'nilai_akhir', null)) ?>
+                                        </span>
+                                    </td>
                                 </tr>
                             </table>
                             
+<!-- ✅ PERBAIKAN: Rekomendasi dengan handling yang lebih baik -->
                             <div class="form-group">
                                 <label class="font-weight-bold">Rekomendasi:</label>
                                 <p>
                                     <?php
                                     $rekomendasi = safe_get($existing_penilaian, 'rekomendasi', null);
                                     $rekomendasi_labels = [
-                                        'diterima_tanpa_revisi' => '<span class="badge badge-success">Diterima Tanpa Revisi</span>',
-                                        'diterima_revisi_minor' => '<span class="badge badge-warning">Diterima dengan Revisi Minor</span>',
-                                        'diterima_revisi_mayor' => '<span class="badge badge-danger">Diterima dengan Revisi Mayor</span>',
-                                        'ditolak_mengulang' => '<span class="badge badge-dark">Ditolak / Mengulang Seminar</span>',
-                                        'revisi_minor' => '<span class="badge badge-warning">Revisi Minor</span>',
-                                        'revisi_mayor' => '<span class="badge badge-danger">Revisi Mayor</span>',
-                                        'ditolak' => '<span class="badge badge-dark">Ditolak</span>'
+                                        'diterima_tanpa_revisi' => '<span class="badge badge-success badge-lg">✓ Diterima Tanpa Revisi</span>',
+                                        'revisi_minor' => '<span class="badge badge-warning badge-lg">⚠ Revisi Minor</span>',
+                                        'revisi_mayor' => '<span class="badge badge-danger badge-lg">⚠ Revisi Mayor</span>',
+                                        'ditolak' => '<span class="badge badge-dark badge-lg">✗ Ditolak</span>'
                                     ];
-                                    echo isset($rekomendasi_labels[$rekomendasi]) ? $rekomendasi_labels[$rekomendasi] : '<span class="badge badge-secondary">Belum Ditetapkan</span>';
+                                    
+                                    if ($rekomendasi && $rekomendasi != 'Tidak tersedia') {
+                                        echo isset($rekomendasi_labels[$rekomendasi]) ? 
+                                             $rekomendasi_labels[$rekomendasi] : 
+                                             '<span class="badge badge-secondary badge-lg">⏳ ' . ucwords(str_replace('_', ' ', $rekomendasi)) . '</span>';
+                                    } else {
+                                        echo '<span class="badge badge-secondary badge-lg">⏳ Belum Ditetapkan</span>';
+                                    }
                                     ?>
                                 </p>
                             </div>
                             
-                            <?php $catatan = safe_get($existing_penilaian, 'catatan_saran', null); ?>
+                <!-- ✅ PERBAIKAN: Catatan dengan fallback yang lebih baik -->
+                            <?php 
+                            $catatan = safe_get($existing_penilaian, 'catatan_saran', null);
+                            if (!$catatan || $catatan == 'Tidak tersedia') {
+                                $catatan = safe_get($existing_penilaian, 'catatan_umum', null);
+                            }
+                            ?>
                             <?php if($catatan && $catatan != 'Tidak tersedia'): ?>
                                 <div class="form-group">
                                     <label class="font-weight-bold">Catatan/Saran:</label>
-                                    <div class="bg-light p-2 rounded text-sm">
-                                        <?= nl2br($catatan) ?>
+                                    <div class="bg-light p-3 rounded text-sm border-left-warning">
+                                        <i class="fas fa-sticky-note text-warning mr-2"></i>
+                                        <?= nl2br(htmlspecialchars($catatan)) ?>
                                     </div>
                                 </div>
                             <?php endif; ?>

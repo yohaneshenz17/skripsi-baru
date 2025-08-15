@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Staf Seminar Proposal Controller - CLEAN VERSION (No Headers Issue)
+ * Staf Seminar Proposal Controller - FIXED VERSION (No Duplicate Methods)
  * 
  * Controller untuk mengelola seminar proposal dari perspektif staf akademik
  * 
@@ -10,6 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * - Headers already sent error
  * - Session cannot be started error
  * - Clean output buffering
+ * - Duplicate method declarations
  * 
  * File: application/controllers/staf/Seminar_proposal.php
  * 
@@ -17,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Staf
  * @category    Seminar Proposal
  * @author      Unit SIPD STK Santo Yakobus
- * @version     1.2 (CLEAN - No Headers Error)
+ * @version     1.3 (FIXED - No Duplicate Methods)
  */
 class Seminar_proposal extends CI_Controller {
 
@@ -95,21 +96,33 @@ class Seminar_proposal extends CI_Controller {
                 return;
             }
             
-            // Get data pendukung
+            // Get data pendukung dengan default values
             $dewan_penguji = $this->_get_dewan_penguji($seminar_id);
             $existing_penilaian = $this->_get_existing_penilaian_staf($seminar_id);
             
-            // Prepare data untuk view
+            // Prepare data untuk view dengan failsafe
             $view_data = [
                 'seminar' => $seminar_detail,
-                'dewan_penguji' => $dewan_penguji,
-                'existing_penilaian' => $existing_penilaian,
-                'can_edit_penilaian' => $this->_can_edit_penilaian($seminar_detail->status ?? '')
+                'dewan_penguji' => $dewan_penguji ?: (object)[
+                    'nama_pembimbing' => $seminar_detail->nama_pembimbing ?? 'Belum ditentukan',
+                    'nip_pembimbing' => 'Belum ditentukan',
+                    'nama_penguji1' => $seminar_detail->nama_penguji1 ?? 'Belum ditentukan',
+                    'nip_penguji1' => 'Belum ditentukan',
+                    'nama_penguji2' => $seminar_detail->nama_penguji2 ?? 'Belum ditentukan',
+                    'nip_penguji2' => 'Belum ditentukan'
+                ],
+                'existing_penilaian' => $existing_penilaian ?: (object)[
+                    'status' => 'belum_dinilai',
+                    'catatan' => null,
+                    'nilai_total' => null
+                ],
+                'can_edit_penilaian' => true,
+                'page_title' => 'Detail Seminar Proposal - ' . ($seminar_detail->nama_mahasiswa ?? 'Unknown')
             ];
             
             // Data untuk template staf.php
             $data = [
-                'title' => 'Detail Seminar Proposal - ' . ($seminar_detail->nama_mahasiswa ?? 'Unknown'),
+                'title' => 'Detail Seminar Proposal',
                 'content' => $this->load->view('staf/seminar_proposal/detail', $view_data, TRUE)
             ];
             
@@ -231,55 +244,55 @@ class Seminar_proposal extends CI_Controller {
     }
 
     // =================================================================
-    // PRIVATE HELPER FUNCTIONS - SIMPLIFIED WITH FALLBACKS
+    // PRIVATE HELPER FUNCTIONS - CLEAN VERSION (NO DUPLICATES)
     // =================================================================
 
-/**
- * Get list seminar proposal yang sudah dijadwalkan kaprodi dan siap untuk administrasi staf
- */
-private function _get_approved_seminar_list() {
-    try {
-        $this->db->select('
-            spm.id, spm.proposal_id, spm.mahasiswa_id, spm.status,
-            spm.current_step, spm.tanggal_seminar, spm.jam_seminar, spm.tempat_seminar,
-            spm.dosen_penguji1_id, spm.dosen_penguji2_id,
-            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-            pm.judul, 
-            d_pembimbing.nama as nama_pembimbing,
-            d_penguji1.nama as nama_penguji1,
-            d_penguji2.nama as nama_penguji2,
-            pr.nama as nama_prodi
-        ');
-        $this->db->from('seminar_proposal_mahasiswa spm');
-        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-        $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
-        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
-        $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
-        $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
-        $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
-        
-        // ✅ PERBAIKAN FILTER: Lebih fleksibel untuk menampilkan seminar yang sudah dijadwalkan
-        $this->db->where('spm.status_kaprodi', 'approved'); // Yang sudah disetujui kaprodi
-        
-        // Terima berbagai kombinasi status
-        $this->db->group_start();
-            $this->db->where('spm.status', 'scheduled'); // Status scheduled
-            $this->db->or_group_start();
-                $this->db->where('spm.status', 'approved'); // Atau approved
-                $this->db->where('spm.tanggal_seminar IS NOT NULL'); // Yang sudah ada jadwal
+    /**
+     * Get list seminar proposal yang sudah dijadwalkan kaprodi dan siap untuk administrasi staf
+     */
+    private function _get_approved_seminar_list() {
+        try {
+            $this->db->select('
+                spm.id, spm.proposal_id, spm.mahasiswa_id, spm.status,
+                spm.current_step, spm.tanggal_seminar, spm.jam_seminar, spm.tempat_seminar,
+                spm.dosen_penguji1_id, spm.dosen_penguji2_id,
+                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+                pm.judul, 
+                d_pembimbing.nama as nama_pembimbing,
+                d_penguji1.nama as nama_penguji1,
+                d_penguji2.nama as nama_penguji2,
+                pr.nama as nama_prodi
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+            $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+            $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
+            $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
+            
+            // ✅ PERBAIKAN FILTER: Lebih fleksibel untuk menampilkan seminar yang sudah dijadwalkan
+            $this->db->where('spm.status_kaprodi', 'approved'); // Yang sudah disetujui kaprodi
+            
+            // Terima berbagai kombinasi status
+            $this->db->group_start();
+                $this->db->where('spm.status', 'scheduled'); // Status scheduled
+                $this->db->or_group_start();
+                    $this->db->where('spm.status', 'approved'); // Atau approved
+                    $this->db->where('spm.tanggal_seminar IS NOT NULL'); // Yang sudah ada jadwal
+                $this->db->group_end();
             $this->db->group_end();
-        $this->db->group_end();
-        
-        $this->db->order_by('spm.tanggal_seminar', 'ASC');
-        $this->db->limit(50);
-        
-        return $this->db->get()->result();
-        
-    } catch (Exception $e) {
-        log_message('error', 'Error getting scheduled seminar list for staf: ' . $e->getMessage());
-        return [];
+            
+            $this->db->order_by('spm.tanggal_seminar', 'ASC');
+            $this->db->limit(50);
+            
+            return $this->db->get()->result();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting scheduled seminar list for staf: ' . $e->getMessage());
+            return [];
+        }
     }
-}
 
     /**
      * Get detail seminar untuk staf
@@ -289,9 +302,13 @@ private function _get_approved_seminar_list() {
             $this->db->select('
                 spm.*, 
                 m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                pm.judul, pm.ringkasan,
+                m.nomor_telepon, m.tempat_lahir, m.tanggal_lahir,
+                pm.judul, pm.ringkasan, pm.jenis_penelitian, pm.lokasi_penelitian,
+                pm.uraian_masalah, pm.file_draft_proposal,
                 pm.dosen_id as pembimbing_id,
-                d_pembimbing.nama as nama_pembimbing,
+                d_pembimbing.nama as nama_pembimbing, d_pembimbing.nip as nip_pembimbing,
+                d_penguji1.nama as nama_penguji1, d_penguji1.nip as nip_penguji1,
+                d_penguji2.nama as nama_penguji2, d_penguji2.nip as nip_penguji2,
                 pr.nama as nama_prodi
             ');
             $this->db->from('seminar_proposal_mahasiswa spm');
@@ -299,12 +316,69 @@ private function _get_approved_seminar_list() {
             $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
             $this->db->join('prodi pr', 'm.prodi_id = pr.id');
             $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+            $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
+            $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
             $this->db->where('spm.id', $seminar_id);
             
             return $this->db->get()->row();
             
         } catch (Exception $e) {
             log_message('error', 'Error getting seminar detail: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get dewan penguji untuk seminar
+     */
+    private function _get_dewan_penguji($seminar_id) {
+        try {
+            $this->db->select('
+                pm.dosen_id as pembimbing_id,
+                d_pembimbing.nama as nama_pembimbing,
+                d_pembimbing.nip as nip_pembimbing,
+                spm.dosen_penguji1_id,
+                d_penguji1.nama as nama_penguji1,
+                d_penguji1.nip as nip_penguji1,
+                spm.dosen_penguji2_id,
+                d_penguji2.nama as nama_penguji2,
+                d_penguji2.nip as nip_penguji2
+            ');
+            $this->db->from('seminar_proposal_mahasiswa spm');
+            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+            $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
+            $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
+            $this->db->where('spm.id', $seminar_id);
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting dewan penguji: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get penilaian existing dari staf
+     */
+    private function _get_existing_penilaian_staf($seminar_id) {
+        try {
+            // Check if table exists first
+            if (!$this->db->table_exists('penilaian_seminar_proposal')) {
+                return null;
+            }
+            
+            // Simple query untuk cek existing penilaian
+            $this->db->select('*');
+            $this->db->from('penilaian_seminar_proposal');
+            $this->db->where('seminar_proposal_id', $seminar_id);
+            $this->db->where('role_penilai', 'staf');
+            
+            return $this->db->get()->row();
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error getting existing penilaian: ' . $e->getMessage());
             return null;
         }
     }
@@ -341,48 +415,6 @@ private function _get_approved_seminar_list() {
                 'belum_dinilai' => 0,
                 'sudah_dinilai' => 0
             ];
-        }
-    }
-
-    /**
-     * Get dewan penguji untuk seminar
-     */
-    private function _get_dewan_penguji($seminar_id) {
-        try {
-            $this->db->select('
-                pm.dosen_id as pembimbing_id,
-                pm.dosen_penguji_id,
-                d_pembimbing.nama as nama_pembimbing,
-                d_penguji.nama as nama_penguji
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
-            $this->db->join('dosen d_penguji', 'pm.dosen_penguji_id = d_penguji.id', 'left');
-            $this->db->where('spm.id', $seminar_id);
-            
-            return $this->db->get()->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting dewan penguji: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Get penilaian existing dari staf
-     */
-    private function _get_existing_penilaian_staf($seminar_id) {
-        try {
-            // Simple query untuk cek existing penilaian
-            return $this->db->get_where('penilaian_seminar_proposal', [
-                'seminar_proposal_id' => $seminar_id,
-                'dinilai_oleh' => $this->session->userdata('id')
-            ])->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting existing penilaian: ' . $e->getMessage());
-            return null;
         }
     }
 

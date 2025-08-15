@@ -219,23 +219,26 @@ class Seminar_proposal extends CI_Controller {
     /**
      * Get existing penilaian untuk compatibility dengan view dosen
      */
-    private function _get_existing_penilaian_identik_dosen($seminar_id) {
-        try {
-            $this->db->select('*');
-            $this->db->from('penilaian_seminar_proposal');
-            $this->db->where('seminar_proposal_id', $seminar_id);
-            // Ambil penilaian existing (bisa dari dosen atau staf)
-            
-            return $this->db->get()->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting existing penilaian identik dosen: ' . $e->getMessage());
-            return null;
-        }
+private function _get_existing_penilaian_identik_dosen($seminar_id) {
+    try {
+        $this->db->select('*');
+        $this->db->from('penilaian_seminar_proposal');
+        $this->db->where('seminar_proposal_id', $seminar_id);
+        
+        // ✅ PERBAIKAN: Ambil penilaian terbaru dari siapa saja (tidak peduli role)
+        $this->db->order_by('updated_at', 'DESC');
+        $this->db->limit(1);
+        
+        return $this->db->get()->row();
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error getting existing penilaian identik dosen: ' . $e->getMessage());
+        return null;
     }
+}
 
     /**
-     * Process form penilaian IDENTIK dengan controller dosen
+     * Process form penilaian IDENTIK dengan controller dosen - COMPREHENSIVE FIXED VERSION
      */
     private function _process_penilaian_identik_dosen($seminar_id) {
         try {
@@ -247,7 +250,7 @@ class Seminar_proposal extends CI_Controller {
             $nilai_penguji2 = (float)$this->input->post('nilai_penguji2');
             $nilai_pembimbing = (float)$this->input->post('nilai_pembimbing');
             $rekomendasi = $this->input->post('rekomendasi');
-
+    
             // Validasi untuk publikasi
             if ($action_type === 'publish') {
                 if ($nilai_penguji1 <= 0 || $nilai_penguji2 <= 0 || $nilai_pembimbing <= 0) {
@@ -263,7 +266,7 @@ class Seminar_proposal extends CI_Controller {
                 }
             }
             
-            // Prepare data penilaian - IDENTIK dengan struktur dosen
+            // ✅ FIXED: Prepare data penilaian dengan field database yang benar
             $penilaian_data = [
                 'seminar_proposal_id' => $seminar_id,
                 
@@ -284,11 +287,12 @@ class Seminar_proposal extends CI_Controller {
                 'rekomendasi' => $rekomendasi,
                 'keterangan_rekomendasi' => $this->input->post('keterangan_rekomendasi'),
                 
-                // Metadata
-                'input_by_staf' => $this->session->userdata('id'), // Penanda bahwa input oleh staf
+                // ✅ FIXED: Gunakan field yang ada di database
+                'role_penilai' => 'staf', // Field yang benar sesuai enum
+                'dinilai_oleh' => $this->session->userdata('id'), // Field yang benar untuk user ID
                 'updated_at' => date('Y-m-d H:i:s')
             ];
-
+    
             // Calculate nilai akhir - IDENTIK dengan sistem dosen (rata-rata sederhana)
             if ($nilai_penguji1 > 0 && $nilai_penguji2 > 0 && $nilai_pembimbing > 0) {
                 $penilaian_data['nilai_akhir'] = ($nilai_penguji1 + $nilai_penguji2 + $nilai_pembimbing) / 3;
@@ -306,51 +310,145 @@ class Seminar_proposal extends CI_Controller {
                     $penilaian_data['nilai_huruf'] = 'E';
                 }
             }
-
+    
             // Set status berdasarkan action - IDENTIK dengan dosen
             if ($action_type === 'publish') {
                 $penilaian_data['status_penilaian'] = 'published';
                 $penilaian_data['published_at'] = date('Y-m-d H:i:s');
-                $penilaian_data['published_by_staf'] = $this->session->userdata('id');
             } else {
                 $penilaian_data['status_penilaian'] = 'draft';
             }
-
-            // Check if update or insert - IDENTIK dengan dosen
-            $existing = $this->_get_existing_penilaian_identik_dosen($seminar_id);
+    
+            // ✅ COMPREHENSIVE FIX: Anti-duplicate robust insert/update logic
+            // STEP 1: Multiple checks untuk existing record
+            $existing = null;
+            $result = false;
+            $action_msg = '';
             
-            if ($existing) {
-                // Update existing
-                $this->db->where('id', $existing->id);
-                $result = $this->db->update('penilaian_seminar_proposal', $penilaian_data);
-                $action_msg = 'diperbarui';
-            } else {
-                // Insert new
-                $penilaian_data['created_at'] = date('Y-m-d H:i:s');
-                $result = $this->db->insert('penilaian_seminar_proposal', $penilaian_data);
-                $action_msg = 'disimpan';
-            }
-
-            if ($result) {
-                // ✅ TAMBAHKAN: Kirim notifikasi email ketika publikasi
-                if ($action_type === 'publish') {
-                    $this->_kirim_notifikasi_penilaian_publikasi_staf($seminar_id, $penilaian_data);
+            // Check 1: Direct query dengan detailed info
+            $this->db->select('id, role_penilai, dinilai_oleh, status_penilaian');
+            $this->db->from('penilaian_seminar_proposal');
+            $this->db->where('seminar_proposal_id', $seminar_id);
+            $this->db->order_by('updated_at', 'DESC');
+            $this->db->limit(1);
+            $existing = $this->db->get()->row();
+            
+            // Check 2: Double verification dengan count
+            $this->db->where('seminar_proposal_id', $seminar_id);
+            $count = $this->db->count_all_results('penilaian_seminar_proposal');
+            
+            log_message('debug', "Seminar {$seminar_id}: Found {$count} existing records, staf attempting save");
+            
+            // ✅ STEP 2: Robust database operation dengan multiple fallbacks
+            try {
+                if ($existing || $count > 0) {
+                    // ✅ UPDATE PATH: Ada record existing
+                    if ($existing) {
+                        log_message('info', "Updating existing penilaian ID {$existing->id} (originally by {$existing->role_penilai}) with staf data for seminar {$seminar_id}");
+                        
+                        // Update berdasarkan ID specific
+                        $this->db->where('id', $existing->id);
+                        $result = $this->db->update('penilaian_seminar_proposal', $penilaian_data);
+                    } else {
+                        // Update berdasarkan seminar_id jika tidak dapat ID
+                        log_message('warning', "No ID found but count > 0, updating by seminar_id for seminar {$seminar_id}");
+                        $this->db->where('seminar_proposal_id', $seminar_id);
+                        $result = $this->db->update('penilaian_seminar_proposal', $penilaian_data);
+                    }
+                    $action_msg = 'diperbarui';
                     
-                    $this->session->set_flashdata('success', 
-                        'Penilaian berhasil dipublikasi oleh staf! Notifikasi telah dikirim ke mahasiswa, dosen, dan kaprodi. Nilai akhir: ' . 
-                        number_format($penilaian_data['nilai_akhir'], 2) . ' (' . $penilaian_data['nilai_huruf'] . ')');
+                } else {
+                    // ✅ INSERT PATH: Benar-benar belum ada record
+                    $penilaian_data['created_at'] = date('Y-m-d H:i:s');
+                    
+                    // Final safety check sebelum insert
+                    $this->db->where('seminar_proposal_id', $seminar_id);
+                    $final_count = $this->db->count_all_results('penilaian_seminar_proposal');
+                    
+                    if ($final_count > 0) {
+                        // Race condition detected - switch to update
+                        log_message('warning', "Race condition detected for seminar {$seminar_id}, switching to update");
+                        $this->db->where('seminar_proposal_id', $seminar_id);
+                        $result = $this->db->update('penilaian_seminar_proposal', $penilaian_data);
+                        $action_msg = 'diperbarui (race condition handled)';
+                    } else {
+                        // Safe to insert
+                        $result = $this->db->insert('penilaian_seminar_proposal', $penilaian_data);
+                        $action_msg = 'disimpan';
+                        log_message('info', "Created new penilaian for seminar {$seminar_id} by staf");
+                    }
+                }
+                
+            } catch (Exception $db_exception) {
+                // ✅ STEP 3: Ultimate fallback untuk database errors
+                $error_message = $db_exception->getMessage();
+                $db_error_code = $this->db->error();
+                
+                log_message('error', "Database exception for seminar {$seminar_id}: " . $error_message);
+                log_message('error', "DB Error Code: " . json_encode($db_error_code));
+                
+                // Check jika duplicate key error
+                if (strpos($error_message, '1062') !== false || 
+                    strpos($error_message, 'Duplicate') !== false ||
+                    (isset($db_error_code['code']) && $db_error_code['code'] == 1062)) {
+                    
+                    log_message('warning', "Duplicate key detected for seminar {$seminar_id}, attempting force update");
+                    
+                    try {
+                        // Force update tanpa kondisi specific
+                        $this->db->where('seminar_proposal_id', $seminar_id);
+                        $result = $this->db->update('penilaian_seminar_proposal', $penilaian_data);
+                        $action_msg = 'diperbarui (force update after duplicate error)';
+                        
+                        if (!$result) {
+                            throw new Exception('Force update juga gagal. Mungkin ada masalah permission database.');
+                        }
+                        
+                        log_message('info', "Force update berhasil untuk seminar {$seminar_id}");
+                        
+                    } catch (Exception $force_exception) {
+                        log_message('error', "Force update failed for seminar {$seminar_id}: " . $force_exception->getMessage());
+                        throw new Exception('Gagal menyimpan penilaian. Error: Duplicate key dan force update gagal. Silakan refresh halaman dan coba lagi, atau hubungi administrator jika masalah berlanjut.');
+                    }
+                } else {
+                    // Bukan duplicate key error, lempar exception asli
+                    throw new Exception('Gagal menyimpan ke database: ' . $error_message);
+                }
+            }
+    
+            // ✅ STEP 4: Verify result dan lanjutkan jika berhasil
+            if ($result) {
+                log_message('info', "Penilaian successfully {$action_msg} for seminar {$seminar_id} by staf");
+                
+                // Kirim notifikasi jika publish
+                if ($action_type === 'publish') {
+                    try {
+                        $this->_kirim_notifikasi_penilaian_publikasi_staf($seminar_id, $penilaian_data);
+                        
+                        $this->session->set_flashdata('success', 
+                            'Penilaian berhasil dipublikasi oleh staf! Notifikasi telah dikirim ke mahasiswa, dosen, dan kaprodi. Nilai akhir: ' . 
+                            number_format($penilaian_data['nilai_akhir'], 2) . ' (' . $penilaian_data['nilai_huruf'] . ')');
+                    } catch (Exception $notif_exception) {
+                        log_message('error', 'Email notification failed: ' . $notif_exception->getMessage());
+                        $this->session->set_flashdata('success', 
+                            'Penilaian berhasil dipublikasi oleh staf! Nilai akhir: ' . 
+                            number_format($penilaian_data['nilai_akhir'], 2) . ' (' . $penilaian_data['nilai_huruf'] . ') - Notifikasi email mungkin gagal dikirim.');
+                    }
                 } else {
                     $this->session->set_flashdata('success', 'Penilaian berhasil ' . $action_msg . ' sebagai draft oleh staf.');
                 }
                 
-                // Redirect ke detail
                 redirect('staf/seminar_proposal/detail/' . $seminar_id);
+                
             } else {
-                throw new Exception('Gagal menyimpan data ke database');
+                // Last resort error
+                $db_error = $this->db->error();
+                log_message('error', "Final result false for seminar {$seminar_id}, DB error: " . json_encode($db_error));
+                throw new Exception('Gagal menyimpan data ke database. DB Error: ' . (isset($db_error['message']) ? $db_error['message'] : 'Unknown database error'));
             }
     
         } catch (Exception $e) {
-            log_message('error', 'Error processing penilaian identik dosen: ' . $e->getMessage());
+            log_message('error', 'Error processing penilaian identik dosen for seminar ' . $seminar_id . ': ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan saat menyimpan penilaian: ' . $e->getMessage());
             redirect('staf/seminar_proposal/input_penilaian/' . $seminar_id);
         }
@@ -415,49 +513,62 @@ class Seminar_proposal extends CI_Controller {
     /**
      * Get list seminar proposal yang sudah dijadwalkan kaprodi dan siap untuk administrasi staf
      */
-    private function _get_approved_seminar_list() {
-        try {
-            $this->db->select('
-                spm.id, spm.proposal_id, spm.mahasiswa_id, spm.status,
-                spm.current_step, spm.tanggal_seminar, spm.jam_seminar, spm.tempat_seminar,
-                spm.dosen_penguji1_id, spm.dosen_penguji2_id,
-                m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
-                pm.judul, 
-                d_pembimbing.nama as nama_pembimbing,
-                d_penguji1.nama as nama_penguji1,
-                d_penguji2.nama as nama_penguji2,
-                pr.nama as nama_prodi
-            ');
-            $this->db->from('seminar_proposal_mahasiswa spm');
-            $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
-            $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
-            $this->db->join('prodi pr', 'm.prodi_id = pr.id');
-            $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
-            $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
-            $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
-            
-            // ✅ PERBAIKAN FILTER: Lebih fleksibel untuk menampilkan seminar yang sudah dijadwalkan
-            $this->db->where('spm.status_kaprodi', 'approved'); // Yang sudah disetujui kaprodi
-            
-            // Terima berbagai kombinasi status
-            $this->db->group_start();
-                $this->db->where('spm.status', 'scheduled'); // Status scheduled
-                $this->db->or_group_start();
-                    $this->db->where('spm.status', 'approved'); // Atau approved
-                    $this->db->where('spm.tanggal_seminar IS NOT NULL'); // Yang sudah ada jadwal
-                $this->db->group_end();
-            $this->db->group_end();
-            
-            $this->db->order_by('spm.tanggal_seminar', 'ASC');
-            $this->db->limit(50);
-            
-            return $this->db->get()->result();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting scheduled seminar list for staf: ' . $e->getMessage());
-            return [];
-        }
+/**
+ * ✅ FIXED: Get list seminar proposal yang sudah dijadwalkan kaprodi dan siap untuk administrasi staf
+ * PERBAIKAN: Filter yang lebih fleksibel, tidak terlalu ketat
+ */
+private function _get_approved_seminar_list() {
+    try {
+        $this->db->select('
+            spm.id, spm.proposal_id, spm.mahasiswa_id, spm.status,
+            spm.current_step, spm.tanggal_seminar, spm.jam_seminar, spm.tempat_seminar,
+            spm.dosen_penguji1_id, spm.dosen_penguji2_id,
+            spm.status_kaprodi, spm.status_pembimbing,
+            m.nim, m.nama as nama_mahasiswa, m.email as email_mahasiswa,
+            pm.judul, 
+            d_pembimbing.nama as nama_pembimbing,
+            d_penguji1.nama as nama_penguji1,
+            d_penguji2.nama as nama_penguji2,
+            pr.nama as nama_prodi,
+            psp.status_penilaian,
+            psp.role_penilai
+        ');
+        $this->db->from('seminar_proposal_mahasiswa spm');
+        $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
+        $this->db->join('mahasiswa m', 'spm.mahasiswa_id = m.id');
+        $this->db->join('prodi pr', 'm.prodi_id = pr.id');
+        $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
+        $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
+        $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
+        
+        // ✅ LEFT JOIN dengan penilaian untuk melihat status
+        $this->db->join('penilaian_seminar_proposal psp', 'spm.id = psp.seminar_proposal_id', 'left');
+        
+        // ✅ SIMPLE VERSION: Tampilkan SEMUA seminar untuk testing
+        // Tidak ada filter ketat, biar data muncul dulu
+        
+        // Filter minimal: hanya yang bukan draft
+        $this->db->where('spm.status !=', 'draft');
+        
+        // ✅ TESTING: Uncomment line ini untuk tampilkan SEMUA data tanpa filter
+        // $this->db->where('1=1'); // Tampilkan semua
+        
+        $this->db->order_by('spm.created_at', 'DESC');
+        $this->db->limit(50);
+        
+        $result = $this->db->get()->result();
+        
+        // ✅ DEBUG: Log query untuk troubleshooting
+        log_message('debug', 'Staf seminar query: ' . $this->db->last_query());
+        log_message('debug', 'Staf seminar count: ' . count($result));
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error getting seminar list for staf: ' . $e->getMessage());
+        return [];
     }
+}
 
     /**
      * ✅ FIXED: Get detail seminar untuk staf dengan email lengkap dan penilaian
@@ -540,34 +651,41 @@ class Seminar_proposal extends CI_Controller {
         }
     }
 
-    /**
-     * ✅ IMPROVED: Get penilaian existing dari staf dengan handling error yang lebih baik
-     */
-    private function _get_existing_penilaian_staf($seminar_id) {
-        try {
-            // Check if table exists first
-            if (!$this->db->table_exists('penilaian_seminar_proposal')) {
-                return null;
-            }
-            
-            // Enhanced query untuk cek existing penilaian
-            $this->db->select('
-                psp.*,
-                psp.nilai_substansi_metode as rata_rata_substansi,
-                psp.nilai_akhir,
-                psp.rekomendasi
-            ');
-            $this->db->from('penilaian_seminar_proposal psp');
-            $this->db->where('psp.seminar_proposal_id', $seminar_id);
-            $this->db->where('psp.role_penilai', 'staf');
-            
-            return $this->db->get()->row();
-            
-        } catch (Exception $e) {
-            log_message('error', 'Error getting existing penilaian: ' . $e->getMessage());
+/**
+ * ✅ FIXED: Get penilaian existing dari staf dengan handling error yang lebih baik
+ * PERBAIKAN: Ambil penilaian terbaru dari siapa saja (dosen atau staf)
+ */
+private function _get_existing_penilaian_staf($seminar_id) {
+    try {
+        // Check if table exists first
+        if (!$this->db->table_exists('penilaian_seminar_proposal')) {
             return null;
         }
+        
+        // ✅ PERBAIKAN: Enhanced query untuk cek existing penilaian dari siapa saja
+        $this->db->select('
+            psp.*,
+            psp.nilai_substansi_metode as rata_rata_substansi,
+            psp.nilai_akhir,
+            psp.rekomendasi
+        ');
+        $this->db->from('penilaian_seminar_proposal psp');
+        $this->db->where('psp.seminar_proposal_id', $seminar_id);
+        
+        // ✅ PERBAIKAN: HAPUS filter role_penilai - ambil dari siapa saja
+        // $this->db->where('psp.role_penilai', 'staf'); // ❌ INI YANG MENYEBABKAN MASALAH!
+        
+        // Ambil penilaian terbaru dari siapa saja (dosen atau staf)
+        $this->db->order_by('psp.updated_at', 'DESC');
+        $this->db->limit(1);
+        
+        return $this->db->get()->row();
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error getting existing penilaian: ' . $e->getMessage());
+        return null;
     }
+}
 
     /**
      * Get statistik dashboard

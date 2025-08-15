@@ -8,6 +8,11 @@
  * File: application/views/staf/seminar_proposal/detail.php
  * Controller: staf/Seminar_proposal::detail()
  * 
+ * FIXED VERSION - Safe Property Access
+ * - Mengatasi error "Undefined property" 
+ * - Mempertahankan struktur existing
+ * - Menambahkan fallback values
+ * 
  * Features:
  * - Detail identitas mahasiswa dan proposal
  * - Detail tempat dan jadwal pelaksanaan
@@ -21,6 +26,31 @@
  * @category    Seminar Proposal
  * @author      Unit SIPD STK Santo Yakobus
  */
+
+// ✅ FIXED: Helper functions untuk safe property access
+function safe_get($object, $property, $default = 'Tidak tersedia') {
+    return isset($object->$property) && !empty($object->$property) ? $object->$property : $default;
+}
+
+function safe_email($object, $property, $default = 'Tidak tersedia') {
+    $email = safe_get($object, $property, $default);
+    return ($email != $default && filter_var($email, FILTER_VALIDATE_EMAIL)) ? $email : $default;
+}
+
+function safe_date($date, $format = 'd F Y', $default = 'Tidak tersedia') {
+    if (empty($date) || $date == '0000-00-00' || $date == null) {
+        return $default;
+    }
+    try {
+        return date($format, strtotime($date));
+    } catch (Exception $e) {
+        return $default;
+    }
+}
+
+function safe_number($number, $decimals = 1, $default = 'Belum dinilai') {
+    return (is_numeric($number) && $number > 0) ? number_format($number, $decimals) : $default;
+}
 ?>
 
 <!-- Content Header -->
@@ -32,7 +62,7 @@
                     <i class="fas fa-eye mr-2 text-primary"></i>
                     Detail Seminar Proposal
                 </h1>
-                <p class="text-muted">Administrasi dan Monitoring: <?= $seminar->nama_mahasiswa ?></p>
+                <p class="text-muted">Administrasi dan Monitoring: <?= safe_get($seminar, 'nama_mahasiswa', 'Mahasiswa') ?></p>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
@@ -110,7 +140,7 @@
                     </div>
                 </div>
                 
-                <?php if(empty($existing_penilaian)): ?>
+                <?php if(empty($existing_penilaian) || (isset($existing_penilaian) && !$existing_penilaian)): ?>
                     <a href="<?= base_url('staf/seminar_proposal/input_penilaian/' . $seminar->id) ?>" class="btn btn-success">
                         <i class="fas fa-edit mr-2"></i>
                         Input Penilaian
@@ -143,28 +173,33 @@
                                     <tr>
                                         <td width="40%"><strong>NIM</strong></td>
                                         <td width="5%">:</td>
-                                        <td><?= $seminar->nim ?></td>
+                                        <td><?= safe_get($seminar, 'nim') ?></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Nama Lengkap</strong></td>
                                         <td>:</td>
-                                        <td><?= $seminar->nama_mahasiswa ?></td>
+                                        <td><?= safe_get($seminar, 'nama_mahasiswa') ?></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Program Studi</strong></td>
                                         <td>:</td>
                                         <td>
-                                            <span class="badge badge-secondary"><?= $seminar->nama_prodi ?></span>
+                                            <span class="badge badge-secondary"><?= safe_get($seminar, 'nama_prodi') ?></span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>Email</strong></td>
                                         <td>:</td>
                                         <td>
-                                            <a href="mailto:<?= $seminar->email_mahasiswa ?>">
-                                                <i class="fas fa-envelope mr-1"></i>
-                                                <?= $seminar->email_mahasiswa ?>
-                                            </a>
+                                            <?php $email = safe_email($seminar, 'email_mahasiswa'); ?>
+                                            <?php if($email != 'Tidak tersedia'): ?>
+                                                <a href="mailto:<?= $email ?>">
+                                                    <i class="fas fa-envelope mr-1"></i>
+                                                    <?= $email ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <em class="text-muted"><?= $email ?></em>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 </table>
@@ -175,35 +210,34 @@
                                         <td width="40%"><strong>No. Telepon</strong></td>
                                         <td width="5%">:</td>
                                         <td>
-                                            <?php if($seminar->nomor_telepon): ?>
-                                                <a href="tel:<?= $seminar->nomor_telepon ?>">
+                                            <?php $phone = safe_get($seminar, 'nomor_telepon'); ?>
+                                            <?php if($phone != 'Tidak tersedia'): ?>
+                                                <a href="tel:<?= $phone ?>">
                                                     <i class="fas fa-phone mr-1"></i>
-                                                    <?= $seminar->nomor_telepon ?>
+                                                    <?= $phone ?>
                                                 </a>
                                             <?php else: ?>
-                                                <em class="text-muted">Tidak tersedia</em>
+                                                <em class="text-muted"><?= $phone ?></em>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>Tempat Lahir</strong></td>
                                         <td>:</td>
-                                        <td><?= $seminar->tempat_lahir ?: '<em class="text-muted">Tidak tersedia</em>' ?></td>
+                                        <td><?= safe_get($seminar, 'tempat_lahir') ?></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Tanggal Lahir</strong></td>
                                         <td>:</td>
-                                        <td>
-                                            <?= $seminar->tanggal_lahir ? date('d F Y', strtotime($seminar->tanggal_lahir)) : '<em class="text-muted">Tidak tersedia</em>' ?>
-                                        </td>
+                                        <td><?= safe_date(safe_get($seminar, 'tanggal_lahir', null)) ?></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Dosen Pembimbing</strong></td>
                                         <td>:</td>
                                         <td>
-                                            <strong><?= $seminar->nama_pembimbing ?></strong>
+                                            <strong><?= safe_get($seminar, 'nama_pembimbing') ?></strong>
                                             <br>
-                                            <small class="text-muted">NIP: <?= $seminar->nip_pembimbing ?></small>
+                                            <small class="text-muted">NIP: <?= safe_get($seminar, 'nip_pembimbing') ?></small>
                                         </td>
                                     </tr>
                                 </table>
@@ -223,7 +257,7 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label class="font-weight-bold">Judul Proposal:</label>
-                            <p class="bg-light p-3 rounded"><?= $seminar->judul ?></p>
+                            <p class="bg-light p-3 rounded"><?= safe_get($seminar, 'judul') ?></p>
                         </div>
                         
                         <div class="row">
@@ -232,7 +266,7 @@
                                     <label class="font-weight-bold">Jenis Penelitian:</label>
                                     <p>
                                         <span class="badge badge-info badge-lg">
-                                            <?= $seminar->jenis_penelitian ?>
+                                            <?= safe_get($seminar, 'jenis_penelitian') ?>
                                         </span>
                                     </p>
                                 </div>
@@ -242,7 +276,7 @@
                                     <label class="font-weight-bold">Lokasi Penelitian:</label>
                                     <p>
                                         <i class="fas fa-map-marker-alt mr-2 text-danger"></i>
-                                        <?= $seminar->lokasi_penelitian ?>
+                                        <?= safe_get($seminar, 'lokasi_penelitian') ?>
                                     </p>
                                 </div>
                             </div>
@@ -251,22 +285,26 @@
                         <div class="form-group">
                             <label class="font-weight-bold">Ringkasan Proposal:</label>
                             <div class="bg-light p-3 rounded">
-                                <?= nl2br($seminar->ringkasan) ?>
+                                <?= nl2br(safe_get($seminar, 'ringkasan')) ?>
                             </div>
                         </div>
                         
+                        <?php $uraian = safe_get($seminar, 'uraian_masalah', null); ?>
+                        <?php if($uraian && $uraian != 'Tidak tersedia'): ?>
                         <div class="form-group">
                             <label class="font-weight-bold">Uraian Masalah:</label>
                             <div class="bg-light p-3 rounded">
-                                <?= nl2br($seminar->uraian_masalah) ?>
+                                <?= nl2br($uraian) ?>
                             </div>
                         </div>
+                        <?php endif; ?>
                         
-                        <?php if($seminar->file_draft_proposal): ?>
+                        <?php $file_proposal = safe_get($seminar, 'file_draft_proposal', null); ?>
+                        <?php if($file_proposal && $file_proposal != 'Tidak tersedia'): ?>
                             <div class="form-group">
                                 <label class="font-weight-bold">File Proposal:</label>
                                 <p>
-                                    <a href="<?= base_url('uploads/proposal/' . $seminar->file_draft_proposal) ?>" 
+                                    <a href="<?= base_url('uploads/proposal/' . $file_proposal) ?>" 
                                        target="_blank" class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-download mr-2"></i>
                                         Download File Proposal
@@ -297,13 +335,18 @@
                                         </h5>
                                     </div>
                                     <div class="card-body text-center">
-                                        <h6 class="font-weight-bold"><?= $dewan_penguji->nama_pembimbing ?></h6>
-                                        <p class="text-muted mb-1">NIP: <?= $dewan_penguji->nip_pembimbing ?></p>
+                                        <h6 class="font-weight-bold"><?= safe_get($dewan_penguji, 'nama_pembimbing', safe_get($seminar, 'nama_pembimbing')) ?></h6>
+                                        <p class="text-muted mb-1">NIP: <?= safe_get($dewan_penguji, 'nip_pembimbing', safe_get($seminar, 'nip_pembimbing')) ?></p>
                                         <p class="text-muted">
-                                            <a href="mailto:<?= $dewan_penguji->email_pembimbing ?>">
-                                                <i class="fas fa-envelope mr-1"></i>
-                                                <?= $dewan_penguji->email_pembimbing ?>
-                                            </a>
+                                            <?php $email_pembimbing = safe_email($dewan_penguji, 'email_pembimbing', safe_email($seminar, 'email_pembimbing')); ?>
+                                            <?php if($email_pembimbing != 'Tidak tersedia'): ?>
+                                                <a href="mailto:<?= $email_pembimbing ?>">
+                                                    <i class="fas fa-envelope mr-1"></i>
+                                                    <?= $email_pembimbing ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <em class="text-muted"><?= $email_pembimbing ?></em>
+                                            <?php endif; ?>
                                         </p>
                                         <a href="<?= base_url('staf/seminar_proposal/download_form_penilaian/' . $seminar->id . '/pembimbing') ?>" 
                                            target="_blank" class="btn btn-primary btn-sm">
@@ -324,14 +367,20 @@
                                         </h5>
                                     </div>
                                     <div class="card-body text-center">
-                                        <?php if($dewan_penguji->nama_penguji1): ?>
-                                            <h6 class="font-weight-bold"><?= $dewan_penguji->nama_penguji1 ?></h6>
-                                            <p class="text-muted mb-1">NIP: <?= $dewan_penguji->nip_penguji1 ?></p>
+                                        <?php $nama_penguji1 = safe_get($dewan_penguji, 'nama_penguji1', safe_get($seminar, 'nama_penguji1')); ?>
+                                        <?php if($nama_penguji1 != 'Tidak tersedia'): ?>
+                                            <h6 class="font-weight-bold"><?= $nama_penguji1 ?></h6>
+                                            <p class="text-muted mb-1">NIP: <?= safe_get($dewan_penguji, 'nip_penguji1', safe_get($seminar, 'nip_penguji1')) ?></p>
                                             <p class="text-muted">
-                                                <a href="mailto:<?= $dewan_penguji->email_penguji1 ?>">
-                                                    <i class="fas fa-envelope mr-1"></i>
-                                                    <?= $dewan_penguji->email_penguji1 ?>
-                                                </a>
+                                                <?php $email_penguji1 = safe_email($dewan_penguji, 'email_penguji1', safe_email($seminar, 'email_penguji1')); ?>
+                                                <?php if($email_penguji1 != 'Tidak tersedia'): ?>
+                                                    <a href="mailto:<?= $email_penguji1 ?>">
+                                                        <i class="fas fa-envelope mr-1"></i>
+                                                        <?= $email_penguji1 ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <em class="text-muted"><?= $email_penguji1 ?></em>
+                                                <?php endif; ?>
                                             </p>
                                             <a href="<?= base_url('staf/seminar_proposal/download_form_penilaian/' . $seminar->id . '/penguji1') ?>" 
                                                target="_blank" class="btn btn-success btn-sm">
@@ -359,14 +408,20 @@
                                         </h5>
                                     </div>
                                     <div class="card-body text-center">
-                                        <?php if($dewan_penguji->nama_penguji2): ?>
-                                            <h6 class="font-weight-bold"><?= $dewan_penguji->nama_penguji2 ?></h6>
-                                            <p class="text-muted mb-1">NIP: <?= $dewan_penguji->nip_penguji2 ?></p>
+                                        <?php $nama_penguji2 = safe_get($dewan_penguji, 'nama_penguji2', safe_get($seminar, 'nama_penguji2')); ?>
+                                        <?php if($nama_penguji2 != 'Tidak tersedia'): ?>
+                                            <h6 class="font-weight-bold"><?= $nama_penguji2 ?></h6>
+                                            <p class="text-muted mb-1">NIP: <?= safe_get($dewan_penguji, 'nip_penguji2', safe_get($seminar, 'nip_penguji2')) ?></p>
                                             <p class="text-muted">
-                                                <a href="mailto:<?= $dewan_penguji->email_penguji2 ?>">
-                                                    <i class="fas fa-envelope mr-1"></i>
-                                                    <?= $dewan_penguji->email_penguji2 ?>
-                                                </a>
+                                                <?php $email_penguji2 = safe_email($dewan_penguji, 'email_penguji2', safe_email($seminar, 'email_penguji2')); ?>
+                                                <?php if($email_penguji2 != 'Tidak tersedia'): ?>
+                                                    <a href="mailto:<?= $email_penguji2 ?>">
+                                                        <i class="fas fa-envelope mr-1"></i>
+                                                        <?= $email_penguji2 ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <em class="text-muted"><?= $email_penguji2 ?></em>
+                                                <?php endif; ?>
                                             </p>
                                             <a href="<?= base_url('staf/seminar_proposal/download_form_penilaian/' . $seminar->id . '/penguji2') ?>" 
                                                target="_blank" class="btn btn-info btn-sm">
@@ -407,11 +462,14 @@
                                 <td width="5%">:</td>
                                 <td>
                                     <strong class="text-primary">
-                                        <?= date('d F Y', strtotime($seminar->tanggal_seminar)) ?>
+                                        <?= safe_date(safe_get($seminar, 'tanggal_seminar', null)) ?>
                                     </strong>
                                     <br>
                                     <small class="text-muted">
-                                        <?= date('l', strtotime($seminar->tanggal_seminar)) ?>
+                                        <?php $tgl_seminar = safe_get($seminar, 'tanggal_seminar', null); ?>
+                                        <?php if($tgl_seminar && $tgl_seminar != 'Tidak tersedia'): ?>
+                                            <?= date('l', strtotime($tgl_seminar)) ?>
+                                        <?php endif; ?>
                                     </small>
                                 </td>
                             </tr>
@@ -419,9 +477,14 @@
                                 <td><i class="fas fa-clock text-warning mr-2"></i><strong>Waktu</strong></td>
                                 <td>:</td>
                                 <td>
-                                    <strong class="text-warning">
-                                        <?= date('H:i', strtotime($seminar->jam_seminar)) ?> WIT
-                                    </strong>
+                                    <?php $jam_seminar = safe_get($seminar, 'jam_seminar'); ?>
+                                    <?php if($jam_seminar != 'Tidak tersedia'): ?>
+                                        <strong class="text-warning">
+                                            <?= date('H:i', strtotime($jam_seminar)) ?> WIT
+                                        </strong>
+                                    <?php else: ?>
+                                        <em class="text-muted"><?= $jam_seminar ?></em>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <tr>
@@ -429,7 +492,7 @@
                                 <td>:</td>
                                 <td>
                                     <strong class="text-info">
-                                        <?= $seminar->tempat_seminar ?>
+                                        <?= safe_get($seminar, 'tempat_seminar') ?>
                                     </strong>
                                 </td>
                             </tr>
@@ -437,31 +500,44 @@
                         
                         <!-- Countdown -->
                         <?php 
-                        $seminar_datetime = $seminar->tanggal_seminar . ' ' . $seminar->jam_seminar;
-                        $now = time();
-                        $seminar_time = strtotime($seminar_datetime);
-                        $diff = $seminar_time - $now;
+                        $tgl_seminar = safe_get($seminar, 'tanggal_seminar', null);
+                        $jam_seminar = safe_get($seminar, 'jam_seminar', null);
+                        if($tgl_seminar != 'Tidak tersedia' && $jam_seminar != 'Tidak tersedia') {
+                            $seminar_datetime = $tgl_seminar . ' ' . $jam_seminar;
+                            $now = time();
+                            $seminar_time = strtotime($seminar_datetime);
+                            $diff = $seminar_time - $now;
+                        } else {
+                            $diff = null;
+                        }
                         ?>
                         
                         <hr>
                         <div class="text-center">
-                            <?php if($diff > 0): ?>
-                                <p class="mb-1"><strong>Waktu Tersisa:</strong></p>
-                                <div id="countdown" class="text-primary font-weight-bold" 
-                                     data-target="<?= $seminar_datetime ?>">
-                                    <span id="days">0</span> hari 
-                                    <span id="hours">0</span> jam 
-                                    <span id="minutes">0</span> menit
-                                </div>
-                            <?php elseif($diff > -3600): ?>
-                                <span class="badge badge-warning badge-lg">
-                                    <i class="fas fa-clock mr-1"></i>
-                                    Sedang Berlangsung
-                                </span>
+                            <?php if($diff !== null): ?>
+                                <?php if($diff > 0): ?>
+                                    <p class="mb-1"><strong>Waktu Tersisa:</strong></p>
+                                    <div id="countdown" class="text-primary font-weight-bold" 
+                                         data-target="<?= $seminar_datetime ?>">
+                                        <span id="days">0</span> hari 
+                                        <span id="hours">0</span> jam 
+                                        <span id="minutes">0</span> menit
+                                    </div>
+                                <?php elseif($diff > -3600): ?>
+                                    <span class="badge badge-warning badge-lg">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Sedang Berlangsung
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge badge-secondary badge-lg">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Telah Selesai
+                                    </span>
+                                <?php endif; ?>
                             <?php else: ?>
-                                <span class="badge badge-secondary badge-lg">
-                                    <i class="fas fa-check mr-1"></i>
-                                    Telah Selesai
+                                <span class="badge badge-secondary">
+                                    <i class="fas fa-calendar-times mr-1"></i>
+                                    Jadwal Belum Ditetapkan
                                 </span>
                             <?php endif; ?>
                         </div>
@@ -477,14 +553,14 @@
                         </h3>
                     </div>
                     <div class="card-body">
-                        <?php if($existing_penilaian): ?>
+                        <?php if(isset($existing_penilaian) && $existing_penilaian): ?>
                             <!-- Penilaian Sudah Ada -->
                             <div class="alert alert-success">
                                 <i class="fas fa-check-circle mr-2"></i>
                                 <strong>Penilaian Telah Diinput</strong>
                                 <br>
                                 <small>
-                                    Tanggal: <?= date('d F Y H:i', strtotime($existing_penilaian->created_at)) ?>
+                                    Tanggal: <?= safe_date(safe_get($existing_penilaian, 'created_at', null), 'd F Y H:i') ?>
                                 </small>
                             </div>
                             
@@ -492,22 +568,22 @@
                                 <tr>
                                     <td><strong>Nilai Substansi</strong></td>
                                     <td>:</td>
-                                    <td><span class="badge badge-primary"><?= number_format($existing_penilaian->rata_rata_substansi, 1) ?></span></td>
+                                    <td><span class="badge badge-primary"><?= safe_number(safe_get($existing_penilaian, 'rata_rata_substansi', null)) ?></span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Nilai Presentasi</strong></td>
                                     <td>:</td>
-                                    <td><span class="badge badge-success"><?= number_format($existing_penilaian->rata_rata_presentasi, 1) ?></span></td>
+                                    <td><span class="badge badge-success"><?= safe_number(safe_get($existing_penilaian, 'rata_rata_presentasi', null)) ?></span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Nilai Diskusi</strong></td>
                                     <td>:</td>
-                                    <td><span class="badge badge-info"><?= number_format($existing_penilaian->rata_rata_diskusi, 1) ?></span></td>
+                                    <td><span class="badge badge-info"><?= safe_number(safe_get($existing_penilaian, 'rata_rata_diskusi', null)) ?></span></td>
                                 </tr>
                                 <tr class="bg-light">
                                     <td><strong>Nilai Akhir</strong></td>
                                     <td>:</td>
-                                    <td><span class="badge badge-warning badge-lg"><?= number_format($existing_penilaian->nilai_akhir, 1) ?></span></td>
+                                    <td><span class="badge badge-warning badge-lg"><?= safe_number(safe_get($existing_penilaian, 'nilai_akhir', null)) ?></span></td>
                                 </tr>
                             </table>
                             
@@ -515,22 +591,27 @@
                                 <label class="font-weight-bold">Rekomendasi:</label>
                                 <p>
                                     <?php
+                                    $rekomendasi = safe_get($existing_penilaian, 'rekomendasi', null);
                                     $rekomendasi_labels = [
                                         'diterima_tanpa_revisi' => '<span class="badge badge-success">Diterima Tanpa Revisi</span>',
                                         'diterima_revisi_minor' => '<span class="badge badge-warning">Diterima dengan Revisi Minor</span>',
                                         'diterima_revisi_mayor' => '<span class="badge badge-danger">Diterima dengan Revisi Mayor</span>',
-                                        'ditolak_mengulang' => '<span class="badge badge-dark">Ditolak / Mengulang Seminar</span>'
+                                        'ditolak_mengulang' => '<span class="badge badge-dark">Ditolak / Mengulang Seminar</span>',
+                                        'revisi_minor' => '<span class="badge badge-warning">Revisi Minor</span>',
+                                        'revisi_mayor' => '<span class="badge badge-danger">Revisi Mayor</span>',
+                                        'ditolak' => '<span class="badge badge-dark">Ditolak</span>'
                                     ];
-                                    echo $rekomendasi_labels[$existing_penilaian->rekomendasi] ?? $existing_penilaian->rekomendasi;
+                                    echo isset($rekomendasi_labels[$rekomendasi]) ? $rekomendasi_labels[$rekomendasi] : '<span class="badge badge-secondary">Belum Ditetapkan</span>';
                                     ?>
                                 </p>
                             </div>
                             
-                            <?php if($existing_penilaian->catatan_saran): ?>
+                            <?php $catatan = safe_get($existing_penilaian, 'catatan_saran', null); ?>
+                            <?php if($catatan && $catatan != 'Tidak tersedia'): ?>
                                 <div class="form-group">
                                     <label class="font-weight-bold">Catatan/Saran:</label>
                                     <div class="bg-light p-2 rounded text-sm">
-                                        <?= nl2br($existing_penilaian->catatan_saran) ?>
+                                        <?= nl2br($catatan) ?>
                                     </div>
                                 </div>
                             <?php endif; ?>

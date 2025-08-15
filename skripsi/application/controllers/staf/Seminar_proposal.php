@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Staf Seminar Proposal Controller - FIXED VERSION (No Duplicate Methods)
+ * Staf Seminar Proposal Controller - FIXED VERSION (Lengkap dengan Email & Penilaian)
  * 
  * Controller untuk mengelola seminar proposal dari perspektif staf akademik
  * 
@@ -11,6 +11,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * - Session cannot be started error
  * - Clean output buffering
  * - Duplicate method declarations
+ * - Missing email_pembimbing, email_penguji1, email_penguji2
+ * - Missing nilai_akhir, rata_rata_substansi, rekomendasi
  * 
  * File: application/controllers/staf/Seminar_proposal.php
  * 
@@ -18,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Controllers/Staf
  * @category    Seminar Proposal
  * @author      Unit SIPD STK Santo Yakobus
- * @version     1.3 (FIXED - No Duplicate Methods)
+ * @version     2.0 (FIXED - Complete with Email & Scoring)
  */
 class Seminar_proposal extends CI_Controller {
 
@@ -83,7 +85,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * Detail seminar proposal untuk staf
+     * Detail seminar proposal untuk staf - FIXED VERSION
      */
     public function detail($seminar_id) {
         try {
@@ -100,21 +102,50 @@ class Seminar_proposal extends CI_Controller {
             $dewan_penguji = $this->_get_dewan_penguji($seminar_id);
             $existing_penilaian = $this->_get_existing_penilaian_staf($seminar_id);
             
+            // ✅ FIXED: Pastikan semua property yang dibutuhkan view tersedia
+            // Ensure email properties exist with defaults
+            if (!isset($seminar_detail->email_pembimbing)) {
+                $seminar_detail->email_pembimbing = 'Belum ditentukan';
+            }
+            if (!isset($seminar_detail->email_penguji1)) {
+                $seminar_detail->email_penguji1 = 'Belum ditentukan';
+            }
+            if (!isset($seminar_detail->email_penguji2)) {
+                $seminar_detail->email_penguji2 = 'Belum ditentukan';
+            }
+            
+            // Ensure scoring properties exist with defaults
+            if (!isset($seminar_detail->rata_rata_substansi)) {
+                $seminar_detail->rata_rata_substansi = null;
+            }
+            if (!isset($seminar_detail->nilai_akhir)) {
+                $seminar_detail->nilai_akhir = null;
+            }
+            if (!isset($seminar_detail->rekomendasi)) {
+                $seminar_detail->rekomendasi = null;
+            }
+            
             // Prepare data untuk view dengan failsafe
             $view_data = [
                 'seminar' => $seminar_detail,
                 'dewan_penguji' => $dewan_penguji ?: (object)[
                     'nama_pembimbing' => $seminar_detail->nama_pembimbing ?? 'Belum ditentukan',
                     'nip_pembimbing' => 'Belum ditentukan',
+                    'email_pembimbing' => $seminar_detail->email_pembimbing ?? 'Belum ditentukan',
                     'nama_penguji1' => $seminar_detail->nama_penguji1 ?? 'Belum ditentukan',
                     'nip_penguji1' => 'Belum ditentukan',
+                    'email_penguji1' => $seminar_detail->email_penguji1 ?? 'Belum ditentukan',
                     'nama_penguji2' => $seminar_detail->nama_penguji2 ?? 'Belum ditentukan',
-                    'nip_penguji2' => 'Belum ditentukan'
+                    'nip_penguji2' => 'Belum ditentukan',
+                    'email_penguji2' => $seminar_detail->email_penguji2 ?? 'Belum ditentukan'
                 ],
                 'existing_penilaian' => $existing_penilaian ?: (object)[
                     'status' => 'belum_dinilai',
                     'catatan' => null,
-                    'nilai_total' => null
+                    'nilai_total' => null,
+                    'rata_rata_substansi' => null,
+                    'nilai_akhir' => null,
+                    'rekomendasi' => null
                 ],
                 'can_edit_penilaian' => true,
                 'page_title' => 'Detail Seminar Proposal - ' . ($seminar_detail->nama_mahasiswa ?? 'Unknown')
@@ -244,7 +275,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     // =================================================================
-    // PRIVATE HELPER FUNCTIONS - CLEAN VERSION (NO DUPLICATES)
+    // PRIVATE HELPER FUNCTIONS - FIXED VERSION (WITH EMAIL & SCORING)
     // =================================================================
 
     /**
@@ -295,7 +326,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * Get detail seminar untuk staf
+     * ✅ FIXED: Get detail seminar untuk staf dengan email lengkap dan penilaian
      */
     private function _get_seminar_detail_for_staf($seminar_id) {
         try {
@@ -306,10 +337,19 @@ class Seminar_proposal extends CI_Controller {
                 pm.judul, pm.ringkasan, pm.jenis_penelitian, pm.lokasi_penelitian,
                 pm.uraian_masalah, pm.file_draft_proposal,
                 pm.dosen_id as pembimbing_id,
-                d_pembimbing.nama as nama_pembimbing, d_pembimbing.nip as nip_pembimbing,
-                d_penguji1.nama as nama_penguji1, d_penguji1.nip as nip_penguji1,
-                d_penguji2.nama as nama_penguji2, d_penguji2.nip as nip_penguji2,
-                pr.nama as nama_prodi
+                d_pembimbing.nama as nama_pembimbing, 
+                d_pembimbing.nip as nip_pembimbing,
+                d_pembimbing.email as email_pembimbing,
+                d_penguji1.nama as nama_penguji1, 
+                d_penguji1.nip as nip_penguji1,
+                d_penguji1.email as email_penguji1,
+                d_penguji2.nama as nama_penguji2, 
+                d_penguji2.nip as nip_penguji2,
+                d_penguji2.email as email_penguji2,
+                pr.nama as nama_prodi,
+                psp.nilai_akhir,
+                psp.rekomendasi,
+                psp.nilai_substansi_metode as rata_rata_substansi
             ');
             $this->db->from('seminar_proposal_mahasiswa spm');
             $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
@@ -318,6 +358,10 @@ class Seminar_proposal extends CI_Controller {
             $this->db->join('dosen d_pembimbing', 'pm.dosen_id = d_pembimbing.id', 'left');
             $this->db->join('dosen d_penguji1', 'spm.dosen_penguji1_id = d_penguji1.id', 'left');
             $this->db->join('dosen d_penguji2', 'spm.dosen_penguji2_id = d_penguji2.id', 'left');
+            
+            // ✅ LEFT JOIN dengan tabel penilaian untuk mendapatkan nilai dan rekomendasi
+            $this->db->join('penilaian_seminar_proposal psp', 'spm.id = psp.seminar_proposal_id', 'left');
+            
             $this->db->where('spm.id', $seminar_id);
             
             return $this->db->get()->row();
@@ -329,7 +373,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * Get dewan penguji untuk seminar
+     * ✅ IMPROVED: Get dewan penguji untuk seminar dengan email lengkap
      */
     private function _get_dewan_penguji($seminar_id) {
         try {
@@ -337,12 +381,15 @@ class Seminar_proposal extends CI_Controller {
                 pm.dosen_id as pembimbing_id,
                 d_pembimbing.nama as nama_pembimbing,
                 d_pembimbing.nip as nip_pembimbing,
+                d_pembimbing.email as email_pembimbing,
                 spm.dosen_penguji1_id,
                 d_penguji1.nama as nama_penguji1,
                 d_penguji1.nip as nip_penguji1,
+                d_penguji1.email as email_penguji1,
                 spm.dosen_penguji2_id,
                 d_penguji2.nama as nama_penguji2,
-                d_penguji2.nip as nip_penguji2
+                d_penguji2.nip as nip_penguji2,
+                d_penguji2.email as email_penguji2
             ');
             $this->db->from('seminar_proposal_mahasiswa spm');
             $this->db->join('proposal_mahasiswa pm', 'spm.proposal_id = pm.id');
@@ -360,7 +407,7 @@ class Seminar_proposal extends CI_Controller {
     }
 
     /**
-     * Get penilaian existing dari staf
+     * ✅ IMPROVED: Get penilaian existing dari staf dengan handling error yang lebih baik
      */
     private function _get_existing_penilaian_staf($seminar_id) {
         try {
@@ -369,11 +416,16 @@ class Seminar_proposal extends CI_Controller {
                 return null;
             }
             
-            // Simple query untuk cek existing penilaian
-            $this->db->select('*');
-            $this->db->from('penilaian_seminar_proposal');
-            $this->db->where('seminar_proposal_id', $seminar_id);
-            $this->db->where('role_penilai', 'staf');
+            // Enhanced query untuk cek existing penilaian
+            $this->db->select('
+                psp.*,
+                psp.nilai_substansi_metode as rata_rata_substansi,
+                psp.nilai_akhir,
+                psp.rekomendasi
+            ');
+            $this->db->from('penilaian_seminar_proposal psp');
+            $this->db->where('psp.seminar_proposal_id', $seminar_id);
+            $this->db->where('psp.role_penilai', 'staf');
             
             return $this->db->get()->row();
             
@@ -449,7 +501,8 @@ class Seminar_proposal extends CI_Controller {
                 'dinilai_oleh' => $this->session->userdata('id'),
                 'status_penilaian' => $this->input->post('status'),
                 'catatan_saran' => $this->input->post('catatan_masukan'),
-                'tanggal_penilaian' => date('Y-m-d H:i:s')
+                'tanggal_penilaian' => date('Y-m-d H:i:s'),
+                'role_penilai' => 'staf'
             ];
 
             // Try insert/update

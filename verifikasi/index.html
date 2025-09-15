@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Data Mahasiswa PPG - STKY Merauke</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles untuk loading dan animasi */
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Custom alert styles */
+        .alert-success {
+            background-color: #ecfdf5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        
+        .alert-error {
+            background-color: #fef2f2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        /* Logo styles */
+        .logo-container {
+            position: relative;
+            margin: 0 auto 1.5rem;
+            width: 120px;
+            height: 120px;
+        }
+
+        .stk-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: contain;
+            border: 3px solid #3b82f6;
+            padding: 8px;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stk-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-fallback {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.2;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 480px) {
+            .logo-container {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .stk-logo,
+            .logo-fallback {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Icon components sederhana
+        const AlertCircle = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        );
+
+        const CheckCircle = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        );
+
+        const Loader2 = ({ className = "w-4 h-4" }) => (
+            <svg className={`${className} animate-spin`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+        );
+
+        const MapPin = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        );
+
+        const Users = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+        );
+
+        const User = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+        );
+
+        // Logo Component
+        const STKLogo = () => {
+            const [logoError, setLogoError] = useState(false);
+
+            const handleLogoError = () => {
+                setLogoError(true);
+            };
+
+            return (
+                <div className="logo-container">
+                    {!logoError ? (
+                        <img
+                            src="https://stkyakobus.ac.id/verifikasi/assets/stk-logo.png"
+                            alt="Logo STK Yakobus"
+                            className="stk-logo"
+                            onError={handleLogoError}
+                        />
+                    ) : (
+                        <div className="logo-fallback" style={{ display: 'flex' }}>
+                            STK<br />YAKOBUS
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const StudentVerificationApp = () => {
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [loginAccount, setLoginAccount] = useState('');
+            const [studentData, setStudentData] = useState(null);
+            const [isEditing, setIsEditing] = useState(false);
+            const [isConfirmed, setIsConfirmed] = useState(false);
+            const [activeTab, setActiveTab] = useState('alamat');
+            const [formData, setFormData] = useState({});
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [successMessage, setSuccessMessage] = useState('');
+
+            // Base URL untuk API
+            const API_BASE_URL = './api';
+
+            const showMessage = (message, type = 'success') => {
+                if (type === 'success') {
+                    setSuccessMessage(message);
+                    setError('');
+                } else {
+                    setError(message);
+                    setSuccessMessage('');
+                }
+                
+                setTimeout(() => {
+                    setSuccessMessage('');
+                    setError('');
+                }, 5000);
+            };
+
+            const handleLogin = async () => {
+                if (!loginAccount.trim()) {
+                    setError('Nomor akun harus diisi');
+                    return;
+                }
+
+                setLoading(true);
+                setError('');
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/login.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            account: loginAccount.trim()
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        setStudentData(result.data);
+                        setFormData(result.data);
+                        setIsConfirmed(result.data.confirmed === true || result.data.confirmed === 1);
+                        setIsLoggedIn(true);
+                        showMessage('Login berhasil!');
+                    } else {
+                        setError(result.message || 'Login gagal');
+                    }
+                } catch (err) {
+                    console.error('Login error:', err);
+                    setError('Terjadi kesalahan koneksi. Pastikan Anda terhubung internet.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleInputChange = (field, value) => {
+                setFormData(prev => ({
+                    ...prev,
+                    [field]: value
+                }));
+            };
+
+            const handleUpdate = async () => {
+                setLoading(true);
+                setError('');
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/update.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        setStudentData(result.data);
+                        setFormData(result.data);
+                        showMessage('Data berhasil diperbarui!');
+                        return true;
+                    } else {
+                        setError(result.message || 'Gagal memperbarui data');
+                        return false;
+                    }
+                } catch (err) {
+                    console.error('Update error:', err);
+                    setError('Terjadi kesalahan saat memperbarui data');
+                    return false;
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleConfirm = async () => {
+                if (!window.confirm('Apakah Anda yakin ingin mengonfirmasi data? Setelah dikonfirmasi, data tidak dapat diubah lagi.')) {
+                    return;
+                }
+
+                setLoading(true);
+                setError('');
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/confirm.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            nim: studentData.nim
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        setStudentData(result.data);
+                        setFormData(result.data);
+                        setIsConfirmed(true);
+                        setIsEditing(false);
+                        showMessage('Data berhasil dikonfirmasi dan telah terkunci!');
+                    } else {
+                        setError(result.message || 'Gagal mengonfirmasi data');
+                    }
+                } catch (err) {
+                    console.error('Confirm error:', err);
+                    setError('Terjadi kesalahan saat mengonfirmasi data');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleLogout = () => {
+                setIsLoggedIn(false);
+                setStudentData(null);
+                setFormData({});
+                setLoginAccount('');
+                setIsConfirmed(false);
+                setIsEditing(false);
+                setActiveTab('alamat');
+                setError('');
+                setSuccessMessage('');
+            };
+
+            if (!isLoggedIn) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                        <div className="max-w-md w-full bg-white rounded-xl shadow-xl p-8">
+                            {/* Logo Section */}
+                            <div className="text-center mb-8">
+                                <STKLogo />
+                                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                                    Verifikasi Data Mahasiswa PPG
+                                </h1>
+                                <p className="text-gray-600 text-center leading-relaxed">
+                                    Sekolah Tinggi Katolik Santo Yakobus Merauke
+                                </p>
+                                <p className="text-sm text-gray-500 mt-2 bg-blue-50 px-3 py-1 rounded-full inline-block">
+                                    Semester: 2025/2026 Ganjil
+                                </p>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Nomor Akun (NIM/NISN)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={loginAccount}
+                                        onChange={(e) => setLoginAccount(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                                        placeholder="Masukkan Nomor Akun"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                {error && (
+                                    <div className="flex items-center space-x-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                        <span>{error}</span>
+                                    </div>
+                                )}
+
+                                {successMessage && (
+                                    <div className="flex items-center space-x-2 text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-200">
+                                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                                        <span>{successMessage}</span>
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={handleLogin}
+                                    disabled={loading}
+                                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 disabled:from-blue-300 disabled:to-blue-400 flex items-center justify-center font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
+                                >
+                                    {loading ? (
+                                        React.createElement('div', { className: 'flex items-center' }, [
+                                            React.createElement(Loader2, { key: 'loader', className: 'w-5 h-5 mr-2' }),
+                                            'Memproses...'
+                                        ])
+                                    ) : (
+                                        'Login'
+                                    )}
+                                </button>
+
+                                <div className="text-xs text-gray-500 text-center bg-gray-50 p-3 rounded-lg">
+                                    <p>Masukkan NIM atau NISN Anda untuk mengakses data verifikasi</p>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="mt-8 text-center">
+                                <p className="text-xs text-gray-400">
+                                    Made with ❤️ by{' '}
+                                    <span className="text-blue-500 font-medium">SIPD</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                            <div className="flex items-center space-x-4">
+                                {/* Small logo in header */}
+                                <div className="flex-shrink-0">
+                                    <img
+                                        src="https://stkyakobus.ac.id/verifikasi/assets/stk-logo.png"
+                                        alt="Logo STK"
+                                        className="w-10 h-10 rounded-full border-2 border-blue-500"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextElementSibling.style.display = 'flex';
+                                        }}
+                                    />
+                                    <div className="w-10 h-10 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center" style={{display: 'none'}}>
+                                        STK
+                                    </div>
+                                </div>
+                                <div>
+                                    <h1 className="text-lg font-medium text-gray-900">Detail Mahasiswa</h1>
+                                    <p className="text-sm text-gray-600">
+                                        Sekolah Tinggi Katolik Santo Yakobus Merauke - Semester: 2025/2026 Ganjil
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex space-x-2 items-center">
+                                <button
+                                    onClick={handleLogout}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    Logout
+                                </button>
+                                {isConfirmed && (
+                                    <div className="flex items-center text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        <span className="text-sm font-medium">Data Dikonfirmasi</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        {/* Messages */}
+                        {error && (
+                            <div className="mb-4 flex items-center space-x-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        {successMessage && (
+                            <div className="mb-4 flex items-center space-x-2 text-green-600 text-sm bg-green-50 p-3 rounded-lg border border-green-200">
+                                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                                <span>{successMessage}</span>
+                            </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex space-x-3 mb-6">
+                            <button 
+                                onClick={() => setIsEditing(!isEditing)}
+                                disabled={isConfirmed || loading}
+                                className={`px-4 py-2 rounded-lg text-sm flex items-center font-medium transition-all duration-200 ${
+                                    isConfirmed 
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                        : isEditing
+                                          ? 'bg-gray-500 text-white hover:bg-gray-600 shadow-md'
+                                          : 'bg-yellow-500 text-white hover:bg-yellow-600 shadow-md hover:shadow-lg'
+                                }`}
+                            >
+                                {loading && React.createElement(Loader2, { className: 'w-4 h-4 mr-2' })}
+                                {isEditing ? 'BATALKAN EDIT' : 'UBAH DATA'}
+                            </button>
+                            
+                            {isEditing && !isConfirmed && (
+                                <button 
+                                    onClick={handleUpdate}
+                                    disabled={loading}
+                                    className="px-4 py-2 rounded-lg text-sm flex items-center font-medium transition-all duration-200 bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg"
+                                >
+                                    {loading && React.createElement(Loader2, { className: 'w-4 h-4 mr-2' })}
+                                    SIMPAN PERUBAHAN
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="bg-white rounded-xl shadow-lg">
+                            {/* Basic Data Section */}
+                            <div className="p-6 border-b">
+                                <h2 className="text-lg font-medium text-blue-600 mb-4 flex items-center">
+                                    <User className="w-5 h-5 mr-2" />
+                                    Data Mahasiswa
+                                </h2>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Nama <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.nama || ''}
+                                            onChange={(e) => handleInputChange('nama', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Tempat Lahir <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.tempat_lahir || ''}
+                                            onChange={(e) => handleInputChange('tempat_lahir', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Jenis Kelamin <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            value={formData.jenis_kelamin || ''}
+                                            onChange={(e) => handleInputChange('jenis_kelamin', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        >
+                                            <option value="">Pilih Jenis Kelamin</option>
+                                            <option value="Laki-laki">Laki-laki</option>
+                                            <option value="Perempuan">Perempuan</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Nama Ibu <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.nama_ibu || ''}
+                                            onChange={(e) => handleInputChange('nama_ibu', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Tanggal Lahir <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={formData.tanggal_lahir || ''}
+                                            onChange={(e) => handleInputChange('tanggal_lahir', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Agama <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            value={formData.agama || ''}
+                                            onChange={(e) => handleInputChange('agama', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        >
+                                            <option value="">Pilih Agama</option>
+                                            <option value="Islam">Islam</option>
+                                            <option value="Kristen">Kristen</option>
+                                            <option value="Katolik">Katolik</option>
+                                            <option value="Hindu">Hindu</option>
+                                            <option value="Buddha">Buddha</option>
+                                            <option value="Konghucu">Konghucu</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            NIK <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.nik || ''}
+                                            onChange={(e) => handleInputChange('nik', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            No. Handphone <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            value={formData.no_handphone || ''}
+                                            onChange={(e) => handleInputChange('no_handphone', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Email <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={formData.email || ''}
+                                            onChange={(e) => handleInputChange('email', e.target.value)}
+                                            disabled={!isEditing || isConfirmed}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 transition-all duration-200"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Confirmation Button - Satu tombol untuk save dan confirm */}
+                            {!isConfirmed && (
+                                <div className="p-6 bg-gray-50 border-t">
+                                    {isEditing && (
+                                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <p className="text-sm text-blue-700 text-center">
+                                                <strong>Catatan:</strong> Tombol di bawah akan otomatis menyimpan semua perubahan yang Anda buat dan mengunci data untuk input ke PDDIKTI.
+                                            </p>
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={handleConfirm}
+                                        disabled={loading}
+                                        className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all duration-200 ${
+                                            loading
+                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                : 'bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                                        }`}
+                                    >
+                                        {loading ? (
+                                            React.createElement('div', { className: 'flex items-center' }, [
+                                                React.createElement(Loader2, { key: 'loader', className: 'w-5 h-5 mr-2' }),
+                                                isEditing ? 'Menyimpan & Mengonfirmasi...' : 'Mengonfirmasi...'
+                                            ])
+                                        ) : (
+                                            isEditing ? 'SIMPAN & KONFIRMASI DATA' : 'KONFIRMASI DATA'
+                                        )}
+                                    </button>
+                                    <p className="text-sm text-gray-500 text-center mt-2">
+                                        {isEditing 
+                                            ? 'Data akan disimpan dan dikunci setelah konfirmasi'
+                                            : 'Data akan dikunci setelah konfirmasi dan siap untuk input ke PDDIKTI'
+                                        }
+                                    </p>
+                                </div>
+                            )}
+
+                            {isConfirmed && (
+                                <div className="p-6 bg-green-50 border-t border-green-200 rounded-b-xl">
+                                    <div className="flex items-center justify-center text-green-700">
+                                        <CheckCircle className="w-6 h-6 mr-2" />
+                                        <span className="font-medium">
+                                            Data telah dikonfirmasi dan terkunci. Siap untuk input ke PDDIKTI.
+                                        </span>
+                                    </div>
+                                    {studentData.confirmed_at && (
+                                        <p className="text-sm text-green-600 text-center mt-2">
+                                            Dikonfirmasi pada: {new Date(studentData.confirmed_at).toLocaleString('id-ID')}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(React.createElement(StudentVerificationApp), document.getElementById('root'));
+    </script>
+</body>
+</html>

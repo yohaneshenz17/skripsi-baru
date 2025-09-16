@@ -60,7 +60,7 @@ try {
         ], 400);
     }
     
-    // Validasi data wajib sebelum konfirmasi
+    // Validasi data wajib sebelum konfirmasi - UPDATED dengan kolom baru
     $required_for_confirmation = [
         'nama' => 'Nama',
         'nik' => 'NIK',
@@ -69,7 +69,11 @@ try {
         'jenis_kelamin' => 'Jenis Kelamin',
         'nama_ibu' => 'Nama Ibu',
         'email' => 'Email',
-        'no_handphone' => 'No. Handphone'
+        'no_handphone' => 'No. Handphone',
+        'provinsi' => 'Provinsi',
+        'kabupaten_kota' => 'Kabupaten/Kota',
+        'kecamatan' => 'Kecamatan',
+        'desa' => 'Desa/Kelurahan'
     ];
     
     $missing_fields = [];
@@ -108,8 +112,17 @@ try {
         // Commit transaksi
         $pdo->commit();
         
-        // Ambil data yang sudah dikonfirmasi
-        $stmt = $pdo->prepare("SELECT * FROM mahasiswa WHERE nim = ? LIMIT 1");
+        // Ambil data yang sudah dikonfirmasi - UPDATED query dengan kolom baru
+        $stmt = $pdo->prepare("
+            SELECT 
+                id, nim, nisn, nama, nik, tempat_lahir, tanggal_lahir, 
+                jenis_kelamin, no_handphone, email, agama, provinsi,
+                kabupaten_kota, kecamatan, desa, nama_ibu, kewarganegaraan, 
+                npwp, alamat_jalan, confirmed, confirmed_at, created_at, updated_at
+            FROM mahasiswa 
+            WHERE nim = ? 
+            LIMIT 1
+        ");
         $stmt->execute([$nim]);
         $confirmed_student = $stmt->fetch();
         

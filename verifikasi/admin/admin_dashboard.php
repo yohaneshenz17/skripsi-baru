@@ -7,7 +7,7 @@ require_once '../api/config.php';
 // Simple authentication
 session_start();
 $admin_username = 'admin';
-$admin_password = 'stky2025'; // Ganti dengan password yang aman
+$admin_password = 'stkmerauke01'; // Ganti dengan password yang aman
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     if ($_POST['username'] === $admin_username && $_POST['password'] === $admin_password) {

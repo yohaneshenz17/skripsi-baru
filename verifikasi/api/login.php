@@ -47,13 +47,13 @@ try {
     // Koneksi database
     $pdo = getDBConnection();
     
-    // Cari mahasiswa berdasarkan NIM atau NISN
+    // Cari mahasiswa berdasarkan NIM atau NISN - UPDATED query dengan kolom baru
     $stmt = $pdo->prepare("
         SELECT 
             id, nim, nisn, nama, nik, tempat_lahir, tanggal_lahir, 
-            jenis_kelamin, no_handphone, email, agama, desa, nama_ibu,
-            kewarganegaraan, npwp, alamat_jalan, confirmed, confirmed_at,
-            created_at, updated_at
+            jenis_kelamin, no_handphone, email, agama, provinsi,
+            kabupaten_kota, kecamatan, desa, nama_ibu, kewarganegaraan, 
+            npwp, alamat_jalan, confirmed, confirmed_at, created_at, updated_at
         FROM mahasiswa 
         WHERE nim = ? OR nisn = ?
         LIMIT 1

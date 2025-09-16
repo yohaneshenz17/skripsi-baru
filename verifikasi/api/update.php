@@ -1,14 +1,14 @@
 <?php
 // update.php
-// API untuk update data mahasiswa
+// API untuk update data mahasiswa sebelum konfirmasi
 
 require_once 'config.php';
 
 // Set CORS headers
 setCORSHeaders();
 
-// Hanya izinkan method POST dan PUT
-if (!in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT'])) {
+// Hanya izinkan method POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse([
         'success' => false,
         'message' => 'Method tidak diizinkan'
@@ -27,14 +27,10 @@ try {
     }
     
     // Validasi input wajib
-    $required_fields = ['nim', 'nama'];
-    $validation_errors = validateInput($input, $required_fields);
-    
-    if (!empty($validation_errors)) {
+    if (empty($input['nim'])) {
         jsonResponse([
             'success' => false,
-            'message' => 'Data tidak valid',
-            'errors' => $validation_errors
+            'message' => 'NIM wajib diisi'
         ], 400);
     }
     
@@ -43,51 +39,119 @@ try {
     // Koneksi database
     $pdo = getDBConnection();
     
-    // Cek apakah mahasiswa ada dan belum dikonfirmasi
+    // Cek apakah mahasiswa ada
     $stmt = $pdo->prepare("SELECT * FROM mahasiswa WHERE nim = ? LIMIT 1");
     $stmt->execute([$nim]);
-    $existing_student = $stmt->fetch();
+    $student = $stmt->fetch();
     
-    if (!$existing_student) {
+    if (!$student) {
         jsonResponse([
             'success' => false,
             'message' => 'Data mahasiswa tidak ditemukan'
         ], 404);
     }
     
-    if ($existing_student['confirmed']) {
+    // Cek apakah data sudah dikonfirmasi (terkunci)
+    if ($student['confirmed']) {
         jsonResponse([
             'success' => false,
-            'message' => 'Data telah dikonfirmasi dan tidak dapat diubah'
-        ], 403);
+            'message' => 'Data sudah dikonfirmasi dan tidak dapat diubah'
+        ], 400);
     }
     
-    // Persiapkan data untuk update - Fixed field mapping untuk konsistensi dengan frontend
-    $update_fields = [
-        'nama' => $input['nama'] ?? $existing_student['nama'],
-        'nik' => $input['nik'] ?? $existing_student['nik'],
-        'tempat_lahir' => $input['tempat_lahir'] ?? $existing_student['tempat_lahir'],
-        'tanggal_lahir' => $input['tanggal_lahir'] ?? $existing_student['tanggal_lahir'],
-        'jenis_kelamin' => $input['jenis_kelamin'] ?? $existing_student['jenis_kelamin'],
-        'no_handphone' => $input['no_handphone'] ?? $existing_student['no_handphone'],
-        'email' => $input['email'] ?? $existing_student['email'],
-        'agama' => $input['agama'] ?? $existing_student['agama'],
-        'desa' => $input['desa'] ?? $existing_student['desa'],
-        'nama_ibu' => $input['nama_ibu'] ?? $existing_student['nama_ibu'],
-        'kewarganegaraan' => $input['kewarganegaraan'] ?? $existing_student['kewarganegaraan'],
-        'npwp' => $input['npwp'] ?? $existing_student['npwp'],
-        'alamat_jalan' => $input['alamat_jalan'] ?? $existing_student['alamat_jalan'],
-        'updated_at' => date('Y-m-d H:i:s')
+    // Field yang dapat diupdate
+    $updatable_fields = [
+        'nama', 'nik', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin',
+        'nama_ibu', 'email', 'no_handphone', 'agama', 'desa', 
+        'kewarganegaraan', 'npwp', 'alamat_jalan', 'provinsi', 
+        'kabupaten_kota', 'kecamatan'
     ];
     
-    // Validasi data update
-    $validation_errors = validateInput($update_fields, ['nama']);
+    // Buat array untuk update
+    $update_data = [];
+    $update_fields = [];
+    $update_values = [];
     
-    if (!empty($validation_errors)) {
+    foreach ($updatable_fields as $field) {
+        if (isset($input[$field])) {
+            $value = trim($input[$field]);
+            
+            // Validasi khusus untuk field tertentu
+            switch ($field) {
+                case 'nik':
+                    if (!empty($value) && !preg_match('/^\d{16}$/', $value)) {
+                        jsonResponse([
+                            'success' => false,
+                            'message' => 'NIK harus berupa 16 digit angka'
+                        ], 400);
+                    }
+                    break;
+                    
+                case 'email':
+                    if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        jsonResponse([
+                            'success' => false,
+                            'message' => 'Format email tidak valid'
+                        ], 400);
+                    }
+                    break;
+                    
+                case 'no_handphone':
+                    if (!empty($value) && !preg_match('/^[0-9+\-\s]{8,}$/', $value)) {
+                        jsonResponse([
+                            'success' => false,
+                            'message' => 'Format nomor handphone tidak valid'
+                        ], 400);
+                    }
+                    break;
+                    
+                case 'tanggal_lahir':
+                    if (!empty($value)) {
+                        $date = DateTime::createFromFormat('Y-m-d', $value);
+                        if (!$date || $date->format('Y-m-d') !== $value) {
+                            jsonResponse([
+                                'success' => false,
+                                'message' => 'Format tanggal lahir tidak valid (YYYY-MM-DD)'
+                            ], 400);
+                        }
+                    }
+                    break;
+                    
+                case 'nama':
+                    if (empty($value)) {
+                        jsonResponse([
+                            'success' => false,
+                            'message' => 'Nama wajib diisi'
+                        ], 400);
+                    }
+                    break;
+                    
+                case 'provinsi':
+                    if (!empty($value)) {
+                        $valid_provinces = [
+                            'Papua Selatan', 'Papua', 'Papua Barat', 'Papua Tengah', 
+                            'Papua Pegunungan', 'Papua Barat Daya'
+                        ];
+                        if (!in_array($value, $valid_provinces)) {
+                            jsonResponse([
+                                'success' => false,
+                                'message' => 'Provinsi tidak valid'
+                            ], 400);
+                        }
+                    }
+                    break;
+            }
+            
+            $update_fields[] = "$field = ?";
+            $update_values[] = $value;
+            $update_data[$field] = $value;
+        }
+    }
+    
+    if (empty($update_fields)) {
         jsonResponse([
             'success' => false,
-            'message' => 'Data tidak valid',
-            'errors' => $validation_errors
+            'message' => 'Tidak ada data yang dapat diupdate'
         ], 400);
     }
     
@@ -96,50 +160,38 @@ try {
     
     try {
         // Update data mahasiswa
-        $sql = "UPDATE mahasiswa SET 
-                nama = ?, nik = ?, tempat_lahir = ?, tanggal_lahir = ?, 
-                jenis_kelamin = ?, no_handphone = ?, email = ?, agama = ?, 
-                desa = ?, nama_ibu = ?, kewarganegaraan = ?, npwp = ?, 
-                alamat_jalan = ?, updated_at = ?
-                WHERE nim = ?";
+        $updated_at = date('Y-m-d H:i:s');
+        $update_fields[] = "updated_at = ?";
+        $update_values[] = $updated_at;
+        $update_values[] = $nim; // untuk WHERE clause
         
+        $sql = "UPDATE mahasiswa SET " . implode(', ', $update_fields) . " WHERE nim = ?";
         $stmt = $pdo->prepare($sql);
-        $result = $stmt->execute([
-            $update_fields['nama'],
-            $update_fields['nik'],
-            $update_fields['tempat_lahir'],
-            $update_fields['tanggal_lahir'],
-            $update_fields['jenis_kelamin'],
-            $update_fields['no_handphone'],
-            $update_fields['email'],
-            $update_fields['agama'],
-            $update_fields['desa'],
-            $update_fields['nama_ibu'],
-            $update_fields['kewarganegaraan'],
-            $update_fields['npwp'],
-            $update_fields['alamat_jalan'],
-            $update_fields['updated_at'],
-            $nim
-        ]);
+        $stmt->execute($update_values);
         
-        if (!$result) {
-            throw new Exception("Failed to update student data");
+        // Cek apakah ada baris yang terupdate
+        if ($stmt->rowCount() === 0) {
+            throw new Exception('Tidak ada data yang diupdate');
         }
         
         // Log aktivitas update
-        logActivity($nim, 'DATA_UPDATED', $existing_student, $update_fields);
+        logActivity($nim, 'DATA_UPDATED', json_encode($update_data), [
+            'updated_fields' => array_keys($update_data),
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+        ]);
         
-        // Commit transaksi
-        $pdo->commit();
-        
-        // Ambil data yang sudah diupdate
-        $stmt = $pdo->prepare("SELECT * FROM mahasiswa WHERE nim = ? LIMIT 1");
+        // Ambil data terbaru
+        $stmt = $pdo->prepare("
+            SELECT 
+                id, nim, nisn, nama, nik, tempat_lahir, tanggal_lahir, 
+                jenis_kelamin, no_handphone, email, agama, desa, nama_ibu,
+                kewarganegaraan, npwp, alamat_jalan, provinsi, kabupaten_kota,
+                kecamatan, confirmed, confirmed_at, created_at, updated_at
+            FROM mahasiswa 
+            WHERE nim = ?
+        ");
         $stmt->execute([$nim]);
         $updated_student = $stmt->fetch();
-        
-        if (!$updated_student) {
-            throw new Exception("Failed to retrieve updated student data");
-        }
         
         // Format tanggal untuk frontend
         if ($updated_student['tanggal_lahir']) {
@@ -149,14 +201,18 @@ try {
         // Sanitize output
         $updated_student = sanitizeOutput($updated_student);
         
+        // Commit transaksi
+        $pdo->commit();
+        
+        // Response sukses
         jsonResponse([
             'success' => true,
             'message' => 'Data berhasil diperbarui',
-            'data' => $updated_student
+            'data' => $updated_student,
+            'updated_fields' => array_keys($update_data)
         ]);
         
     } catch (Exception $e) {
-        // Rollback transaksi jika terjadi error
         $pdo->rollBack();
         throw $e;
     }
@@ -164,9 +220,17 @@ try {
 } catch (PDOException $e) {
     error_log("Update error: " . $e->getMessage());
     
+    // Cek jika error karena duplicate entry
+    if ($e->getCode() == 23000) {
+        jsonResponse([
+            'success' => false,
+            'message' => 'Data yang dimasukkan sudah ada (duplikat)'
+        ], 400);
+    }
+    
     jsonResponse([
         'success' => false,
-        'message' => 'Terjadi kesalahan saat memperbarui data'
+        'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.'
     ], 500);
     
 } catch (Exception $e) {
@@ -174,7 +238,7 @@ try {
     
     jsonResponse([
         'success' => false,
-        'message' => 'Terjadi kesalahan yang tidak terduga'
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
     ], 500);
 }
 ?>

@@ -187,38 +187,77 @@ function validateInput($data, $required_fields = []) {
         }
     }
     
-    // Validasi provinsi
+    // Validasi provinsi - UPDATE: Fleksibel untuk seluruh Indonesia
     if (!empty($data['provinsi'])) {
-        $valid_provinces = [
-            'Papua Selatan', 'Papua', 'Papua Barat', 'Papua Tengah', 
-            'Papua Pegunungan', 'Papua Barat Daya'
-        ];
-        if (!in_array($data['provinsi'], $valid_provinces)) {
-            $errors[] = "Provinsi tidak valid";
+        $provinsi = trim($data['provinsi']);
+        
+        // Validasi minimal panjang nama provinsi
+        if (strlen($provinsi) < 3) {
+            $errors[] = "Nama provinsi minimal 3 karakter";
         }
+        
+        // Validasi format nama provinsi (hanya huruf, spasi, dan beberapa karakter khusus)
+        if (!preg_match('/^[a-zA-Z\s\-\.]+$/u', $provinsi)) {
+            $errors[] = "Nama provinsi hanya boleh berisi huruf, spasi, dan tanda hubung";
+        }
+        
+        // Optional: Validasi strict terhadap daftar provinsi yang valid
+        // Uncomment jika ingin validasi ketat:
+        /*
+        $valid_provinces = [
+            'Aceh', 'Sumatera Utara', 'Sumatera Barat', 'Riau', 'Jambi', 'Sumatera Selatan',
+            'Bengkulu', 'Lampung', 'Kepulauan Bangka Belitung', 'Kepulauan Riau',
+            'DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'DI Yogyakarta', 'Jawa Timur', 'Banten',
+            'Bali', 'Nusa Tenggara Barat', 'Nusa Tenggara Timur', 'Kalimantan Barat',
+            'Kalimantan Tengah', 'Kalimantan Selatan', 'Kalimantan Timur', 'Kalimantan Utara',
+            'Sulawesi Utara', 'Sulawesi Tengah', 'Sulawesi Selatan', 'Sulawesi Tenggara',
+            'Gorontalo', 'Sulawesi Barat', 'Maluku', 'Maluku Utara', 'Papua Barat',
+            'Papua', 'Papua Selatan', 'Papua Tengah', 'Papua Pegunungan', 'Papua Barat Daya'
+        ];
+        
+        if (!in_array($provinsi, $valid_provinces)) {
+            $errors[] = "Provinsi '$provinsi' tidak valid";
+        }
+        */
     }
     
-    // Validasi kabupaten/kota
+    // Validasi kabupaten/kota - UPDATE: Lebih fleksibel
     if (!empty($data['kabupaten_kota'])) {
         $kabupaten = trim($data['kabupaten_kota']);
+        
         if (strlen($kabupaten) < 3) {
             $errors[] = "Kabupaten/Kota minimal 3 karakter";
         }
-    }
-    
-    // Validasi kecamatan
-    if (!empty($data['kecamatan'])) {
-        $kecamatan = trim($data['kecamatan']);
-        if (strlen($kecamatan) < 3) {
-            $errors[] = "Kecamatan minimal 3 karakter";
+        
+        // Validasi format (boleh ada kata "Kabupaten", "Kota", "Kab.", dll)
+        if (!preg_match('/^[a-zA-Z\s\-\.]+$/u', $kabupaten)) {
+            $errors[] = "Nama kabupaten/kota hanya boleh berisi huruf, spasi, dan tanda hubung";
         }
     }
     
-    // Validasi desa
+    // Validasi kecamatan - UPDATE: Lebih fleksibel
+    if (!empty($data['kecamatan'])) {
+        $kecamatan = trim($data['kecamatan']);
+        
+        if (strlen($kecamatan) < 2) {
+            $errors[] = "Kecamatan minimal 2 karakter";
+        }
+        
+        if (!preg_match('/^[a-zA-Z\s\-\.]+$/u', $kecamatan)) {
+            $errors[] = "Nama kecamatan hanya boleh berisi huruf, spasi, dan tanda hubung";
+        }
+    }
+    
+    // Validasi desa/kelurahan - UPDATE: Lebih fleksibel
     if (!empty($data['desa'])) {
         $desa = trim($data['desa']);
-        if (strlen($desa) < 3) {
-            $errors[] = "Desa/Kelurahan minimal 3 karakter";
+        
+        if (strlen($desa) < 2) {
+            $errors[] = "Desa/Kelurahan minimal 2 karakter";
+        }
+        
+        if (!preg_match('/^[a-zA-Z\s\-\.]+$/u', $desa)) {
+            $errors[] = "Nama desa/kelurahan hanya boleh berisi huruf, spasi, dan tanda hubung";
         }
     }
     

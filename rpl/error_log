@@ -1,0 +1,10 @@
+[21-Sep-2025 13:14:54 Asia/Jakarta] PHP Warning:  require_once(config.php): Failed to open stream: No such file or directory in /home/stkp7133/public_html/rpl/index.php on line 2
+[21-Sep-2025 13:14:54 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required 'config.php' (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/stkp7133/public_html/rpl/index.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/rpl/index.php on line 2
+[21-Sep-2025 13:18:06 Asia/Jakarta] PHP Warning:  require_once(config.php): Failed to open stream: No such file or directory in /home/stkp7133/public_html/rpl/index.php on line 2
+[21-Sep-2025 13:18:06 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required 'config.php' (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/stkp7133/public_html/rpl/index.php:2
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/rpl/index.php on line 2

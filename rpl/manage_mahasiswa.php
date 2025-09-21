@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $reset++;
                 }
                 
-                // Hapus penilaian yang ada
+                // Hapus semua penilaian
                 $ids_placeholder = str_repeat('?,', count($mahasiswa_ids) - 1) . '?';
                 $stmt = $pdo->prepare("DELETE FROM penilaian_rpl WHERE mahasiswa_id IN ($ids_placeholder)");
                 $stmt->execute(array_map('intval', $mahasiswa_ids));
@@ -71,9 +71,136 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+    
+    // 🆕 NEW: Delete Mahasiswa (Hard Delete)
+    if ($action === 'delete_mahasiswa') {
+        $mahasiswa_ids = $_POST['mahasiswa_ids'] ?? [];
+        
+        if (empty($mahasiswa_ids)) {
+            $error = 'Pilih mahasiswa yang akan dihapus!';
+        } else {
+            try {
+                $pdo->beginTransaction();
+                
+                // Get nama mahasiswa untuk log
+                $ids_placeholder = str_repeat('?,', count($mahasiswa_ids) - 1) . '?';
+                $stmt = $pdo->prepare("SELECT nim, nama_lengkap FROM mahasiswa WHERE id IN ($ids_placeholder)");
+                $stmt->execute(array_map('intval', $mahasiswa_ids));
+                $mahasiswa_names = $stmt->fetchAll();
+                
+                // Hapus penilaian terkait (CASCADE akan handle ini, tapi explicit lebih baik)
+                $stmt = $pdo->prepare("DELETE FROM penilaian_rpl WHERE mahasiswa_id IN ($ids_placeholder)");
+                $stmt->execute(array_map('intval', $mahasiswa_ids));
+                
+                // Hapus dokumen perangkat terkait
+                $stmt = $pdo->prepare("DELETE FROM dokumen_perangkat WHERE mahasiswa_id IN ($ids_placeholder)");
+                $stmt->execute(array_map('intval', $mahasiswa_ids));
+                
+                // Hapus mahasiswa
+                $stmt = $pdo->prepare("DELETE FROM mahasiswa WHERE id IN ($ids_placeholder)");
+                $stmt->execute(array_map('intval', $mahasiswa_ids));
+                $deleted = $stmt->rowCount();
+                
+                $pdo->commit();
+                
+                // Log detail mahasiswa yang dihapus
+                $nama_list = array_map(function($m) { return $m['nim'] . ' - ' . $m['nama_lengkap']; }, $mahasiswa_names);
+                logAktivitas($pdo, $_SESSION['user_id'], 'Delete Mahasiswa', "Hapus $deleted mahasiswa: " . implode(', ', $nama_list));
+                
+                $message = "Berhasil menghapus $deleted mahasiswa beserta semua data penilaiannya!";
+                
+            } catch (PDOException $e) {
+                $pdo->rollBack();
+                $error = 'Gagal menghapus mahasiswa: ' . $e->getMessage();
+            }
+        }
+    }
+    
+    // 🆕 NEW: Reset Penilaian Final ke Draft
+    if ($action === 'reset_penilaian') {
+        $mahasiswa_ids = $_POST['mahasiswa_ids'] ?? [];
+        
+        if (empty($mahasiswa_ids)) {
+            $error = 'Pilih mahasiswa yang penilaiannya akan direset!';
+        } else {
+            try {
+                // Update status penilaian dari final ke draft
+                $ids_placeholder = str_repeat('?,', count($mahasiswa_ids) - 1) . '?';
+                $stmt = $pdo->prepare("
+                    UPDATE penilaian_rpl 
+                    SET status_penilaian = 'draft' 
+                    WHERE mahasiswa_id IN ($ids_placeholder) AND status_penilaian = 'final'
+                ");
+                $stmt->execute(array_map('intval', $mahasiswa_ids));
+                $reset_count = $stmt->rowCount();
+                
+                // Update status mahasiswa
+                $stmt = $pdo->prepare("
+                    UPDATE mahasiswa 
+                    SET status_penilaian = 'sedang_dinilai' 
+                    WHERE id IN ($ids_placeholder) AND status_penilaian = 'selesai'
+                ");
+                $stmt->execute(array_map('intval', $mahasiswa_ids));
+                
+                logAktivitas($pdo, $_SESSION['user_id'], 'Reset Penilaian Final', "Reset $reset_count penilaian final ke draft");
+                
+                if ($reset_count > 0) {
+                    $message = "Berhasil mereset $reset_count penilaian dari status final ke draft. Dosen dapat mengedit kembali.";
+                } else {
+                    $message = "Tidak ada penilaian final yang direset. Pastikan mahasiswa yang dipilih memiliki penilaian final.";
+                }
+                
+            } catch (PDOException $e) {
+                $error = 'Gagal reset penilaian: ' . $e->getMessage();
+            }
+        }
+    }
+    
+    // 🆕 NEW: Delete Single Mahasiswa
+    if ($action === 'delete_single') {
+        $mahasiswa_id = (int)($_POST['mahasiswa_id'] ?? 0);
+        
+        if (!$mahasiswa_id) {
+            $error = 'ID mahasiswa tidak valid!';
+        } else {
+            try {
+                $pdo->beginTransaction();
+                
+                // Get data mahasiswa untuk log
+                $stmt = $pdo->prepare("SELECT nim, nama_lengkap FROM mahasiswa WHERE id = ?");
+                $stmt->execute([$mahasiswa_id]);
+                $mahasiswa = $stmt->fetch();
+                
+                if (!$mahasiswa) {
+                    throw new Exception('Mahasiswa tidak ditemukan');
+                }
+                
+                // Hapus penilaian terkait
+                $stmt = $pdo->prepare("DELETE FROM penilaian_rpl WHERE mahasiswa_id = ?");
+                $stmt->execute([$mahasiswa_id]);
+                
+                // Hapus dokumen perangkat terkait
+                $stmt = $pdo->prepare("DELETE FROM dokumen_perangkat WHERE mahasiswa_id = ?");
+                $stmt->execute([$mahasiswa_id]);
+                
+                // Hapus mahasiswa
+                $stmt = $pdo->prepare("DELETE FROM mahasiswa WHERE id = ?");
+                $stmt->execute([$mahasiswa_id]);
+                
+                $pdo->commit();
+                
+                logAktivitas($pdo, $_SESSION['user_id'], 'Delete Mahasiswa Single', "Hapus mahasiswa: {$mahasiswa['nim']} - {$mahasiswa['nama_lengkap']}");
+                $message = "Berhasil menghapus mahasiswa {$mahasiswa['nama_lengkap']} beserta semua data penilaiannya!";
+                
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $error = 'Gagal menghapus mahasiswa: ' . $e->getMessage();
+            }
+        }
+    }
 }
 
-// Build query with filters
+// Build query with filters (unchanged)
 $where_conditions = [];
 $params = [];
 
@@ -267,6 +394,7 @@ try {
         .btn-success { background: #27ae60; color: white; }
         .btn-warning { background: #f39c12; color: white; }
         .btn-danger { background: #e74c3c; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
         .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
         
         .btn:hover { opacity: 0.9; }
@@ -295,6 +423,13 @@ try {
         
         .bulk-actions.show {
             display: block;
+        }
+        
+        .action-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
         }
         
         table {
@@ -374,11 +509,36 @@ try {
             border: 1px solid #f5c6cb;
         }
         
+        /* 🆕 NEW: Styling untuk tombol delete yang lebih prominent */
+        .btn-delete {
+            background: #dc3545;
+            border: 2px solid #dc3545;
+        }
+        
+        .btn-delete:hover {
+            background: #c82333;
+            border-color: #c82333;
+        }
+        
+        .danger-zone {
+            border: 2px solid #dc3545;
+            border-radius: 8px;
+            background: #f8d7da;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .danger-zone h4 {
+            color: #721c24;
+            margin-bottom: 0.5rem;
+        }
+        
         @media (max-width: 768px) {
             .container { padding: 1rem; }
             .filter-row { grid-template-columns: 1fr; }
             table { font-size: 0.8rem; }
             th, td { padding: 0.5rem; }
+            .action-group { flex-direction: column; }
         }
     </style>
 </head>
@@ -484,14 +644,15 @@ try {
             </div>
             
             <div id="bulkActions" class="bulk-actions">
-                <form method="POST" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                    <div>
-                        <span id="selectedCount">0</span> mahasiswa terpilih
-                    </div>
-                    
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <div style="margin-bottom: 1rem;">
+                    <span id="selectedCount">0</span> mahasiswa terpilih
+                </div>
+                
+                <!-- Assignment Actions -->
+                <div class="action-group">
+                    <form method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
                         <label for="assign_dosen_id">Assign ke dosen:</label>
-                        <select id="assign_dosen_id" name="assign_dosen_id">
+                        <select id="assign_dosen_id" name="assign_dosen_id" style="width: auto;">
                             <option value="">Pilih Dosen</option>
                             <?php foreach ($dosen_options as $dosen): ?>
                                 <option value="<?= $dosen['id'] ?>"><?= sanitizeInput($dosen['nama_lengkap']) ?></option>
@@ -500,13 +661,28 @@ try {
                         <button type="submit" name="action" value="assign_mahasiswa" class="btn btn-sm btn-success">
                             👨‍🏫 Assign
                         </button>
-                    </div>
+                    </form>
                     
-                    <button type="submit" name="action" value="reset_assignment" class="btn btn-sm btn-danger"
-                            onclick="return confirm('Reset assignment mahasiswa terpilih? Penilaian yang ada akan dihapus!')">
+                    <button type="button" onclick="resetAssignment()" class="btn btn-sm btn-warning">
                         🔄 Reset Assignment
                     </button>
-                </form>
+                </div>
+                
+                <!-- 🆕 NEW: Reset Penilaian Actions -->
+                <div class="action-group">
+                    <button type="button" onclick="resetPenilaian()" class="btn btn-sm btn-info">
+                        📝 Reset Penilaian ke Draft
+                    </button>
+                </div>
+                
+                <!-- 🆕 NEW: Danger Zone -->
+                <div class="danger-zone">
+                    <h4>⚠️ Zona Berbahaya</h4>
+                    <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">Operasi di bawah akan menghapus data secara permanen!</p>
+                    <button type="button" onclick="deleteMahasiswa()" class="btn btn-sm btn-delete">
+                        🗑️ Hapus Mahasiswa Terpilih
+                    </button>
+                </div>
             </div>
             
             <?php if (empty($mahasiswa_list)): ?>
@@ -514,63 +690,67 @@ try {
                     <p>Tidak ada data mahasiswa yang sesuai dengan filter.</p>
                 </div>
             <?php else: ?>
-                <form id="bulkForm" method="POST">
-                    <table>
-                        <thead>
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            </th>
+                            <th>NIM</th>
+                            <th>Nama Lengkap</th>
+                            <th>Jenjang</th>
+                            <th>Tempat Tugas</th>
+                            <th>Dosen Penilai</th>
+                            <th>Status Penilaian</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($mahasiswa_list as $mhs): ?>
                             <tr>
-                                <th width="40">
-                                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
-                                </th>
-                                <th>NIM</th>
-                                <th>Nama Lengkap</th>
-                                <th>Jenjang</th>
-                                <th>Tempat Tugas</th>
-                                <th>Dosen Penilai</th>
-                                <th>Status Penilaian</th>
-                                <th>Aksi</th>
+                                <td>
+                                    <input type="checkbox" name="mahasiswa_ids[]" value="<?= $mhs['id'] ?>" 
+                                           class="mahasiswa-checkbox" onchange="updateSelectedCount()">
+                                </td>
+                                <td><?= sanitizeInput($mhs['nim']) ?></td>
+                                <td><?= sanitizeInput($mhs['nama_lengkap']) ?></td>
+                                <td>
+                                    <span class="badge badge-info"><?= sanitizeInput($mhs['jenjang']) ?></span>
+                                </td>
+                                <td><?= sanitizeInput($mhs['tempat_tugas']) ?></td>
+                                <td>
+                                    <?php if ($mhs['nama_dosen']): ?>
+                                        <?= sanitizeInput($mhs['nama_dosen']) ?>
+                                    <?php else: ?>
+                                        <span class="badge badge-warning">Belum Di-assign</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($mhs['penilaian_status'] === 'final'): ?>
+                                        <span class="badge badge-success">✅ Selesai</span>
+                                    <?php elseif ($mhs['penilaian_status'] === 'draft'): ?>
+                                        <span class="badge badge-warning">📝 Draft</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-danger">⏳ Belum Dinilai</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($mhs['nama_dosen']): ?>
+                                        <a href="penilaian.php?id=<?= $mhs['id'] ?>" class="btn btn-sm btn-primary">
+                                            👁️ Lihat
+                                        </a>
+                                    <?php endif; ?>
+                                    
+                                    <!-- 🆕 NEW: Delete Single Button -->
+                                    <button onclick="deleteSingle(<?= $mhs['id'] ?>, '<?= sanitizeInput($mhs['nama_lengkap']) ?>')" 
+                                            class="btn btn-sm btn-danger" title="Hapus mahasiswa">
+                                        🗑️
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($mahasiswa_list as $mhs): ?>
-                                <tr>
-                                    <td>
-                                        <input type="checkbox" name="mahasiswa_ids[]" value="<?= $mhs['id'] ?>" 
-                                               class="mahasiswa-checkbox" onchange="updateSelectedCount()">
-                                    </td>
-                                    <td><?= sanitizeInput($mhs['nim']) ?></td>
-                                    <td><?= sanitizeInput($mhs['nama_lengkap']) ?></td>
-                                    <td>
-                                        <span class="badge badge-info"><?= sanitizeInput($mhs['jenjang']) ?></span>
-                                    </td>
-                                    <td><?= sanitizeInput($mhs['tempat_tugas']) ?></td>
-                                    <td>
-                                        <?php if ($mhs['nama_dosen']): ?>
-                                            <?= sanitizeInput($mhs['nama_dosen']) ?>
-                                        <?php else: ?>
-                                            <span class="badge badge-warning">Belum Di-assign</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($mhs['penilaian_status'] === 'final'): ?>
-                                            <span class="badge badge-success">✅ Selesai</span>
-                                        <?php elseif ($mhs['penilaian_status'] === 'draft'): ?>
-                                            <span class="badge badge-warning">📝 Draft</span>
-                                        <?php else: ?>
-                                            <span class="badge badge-danger">⏳ Belum Dinilai</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($mhs['nama_dosen']): ?>
-                                            <a href="penilaian.php?id=<?= $mhs['id'] ?>" class="btn btn-sm btn-primary">
-                                                👁️ Lihat
-                                            </a>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </form>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             <?php endif; ?>
         </div>
         
@@ -599,6 +779,17 @@ try {
             </div>
         <?php endif; ?>
     </div>
+    
+    <!-- Hidden forms for POST actions -->
+    <form id="bulkActionForm" method="POST" style="display: none;">
+        <input type="hidden" name="action" id="bulkAction">
+        <div id="selectedIds"></div>
+    </form>
+    
+    <form id="singleActionForm" method="POST" style="display: none;">
+        <input type="hidden" name="action" id="singleAction">
+        <input type="hidden" name="mahasiswa_id" id="singleMahasiswaId">
+    </form>
     
     <script>
         let allSelected = false;
@@ -636,6 +827,111 @@ try {
         function showBulkActions() {
             const bulkActions = document.getElementById('bulkActions');
             bulkActions.classList.toggle('show');
+        }
+        
+        function getSelectedIds() {
+            const selected = document.querySelectorAll('.mahasiswa-checkbox:checked');
+            return Array.from(selected).map(cb => cb.value);
+        }
+        
+        function submitBulkAction(action) {
+            const selectedIds = getSelectedIds();
+            if (selectedIds.length === 0) {
+                alert('Pilih minimal satu mahasiswa!');
+                return;
+            }
+            
+            document.getElementById('bulkAction').value = action;
+            
+            // Add selected IDs to form
+            const idsContainer = document.getElementById('selectedIds');
+            idsContainer.innerHTML = '';
+            selectedIds.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'mahasiswa_ids[]';
+                input.value = id;
+                idsContainer.appendChild(input);
+            });
+            
+            document.getElementById('bulkActionForm').submit();
+        }
+        
+        // 🆕 NEW: Reset Assignment Function
+        function resetAssignment() {
+            if (confirm('Reset assignment mahasiswa terpilih? Penilaian yang ada akan dihapus!')) {
+                submitBulkAction('reset_assignment');
+            }
+        }
+        
+        // 🆕 NEW: Reset Penilaian Function
+        function resetPenilaian() {
+            const count = getSelectedIds().length;
+            if (count === 0) {
+                alert('Pilih minimal satu mahasiswa!');
+                return;
+            }
+            
+            if (confirm(`Reset ${count} penilaian dari status FINAL ke DRAFT? Dosen akan dapat mengedit kembali penilaian tersebut.`)) {
+                submitBulkAction('reset_penilaian');
+            }
+        }
+        
+        // 🆕 NEW: Delete Mahasiswa Function
+        function deleteMahasiswa() {
+            const selectedIds = getSelectedIds();
+            if (selectedIds.length === 0) {
+                alert('Pilih minimal satu mahasiswa!');
+                return;
+            }
+            
+            const count = selectedIds.length;
+            if (confirm(`⚠️ PERINGATAN KERAS! 
+            
+Anda akan menghapus ${count} mahasiswa secara PERMANEN!
+
+Data yang akan dihapus:
+• ${count} Data mahasiswa
+• Semua penilaian terkait
+• Semua dokumen terkait
+• Assignment ke dosen
+
+Operasi ini TIDAK DAPAT DIBATALKAN!
+
+Ketik "HAPUS" untuk melanjutkan:`)) {
+                const confirmation = prompt('Ketik "HAPUS" untuk konfirmasi:');
+                if (confirmation === 'HAPUS') {
+                    submitBulkAction('delete_mahasiswa');
+                } else {
+                    alert('Konfirmasi tidak sesuai. Operasi dibatalkan.');
+                }
+            }
+        }
+        
+        // 🆕 NEW: Delete Single Function
+        function deleteSingle(mahasiswaId, namaMahasiswa) {
+            if (confirm(`⚠️ PERINGATAN KERAS!
+
+Anda akan menghapus mahasiswa "${namaMahasiswa}" secara PERMANEN!
+
+Data yang akan dihapus:
+• Data mahasiswa
+• Semua penilaian terkait
+• Semua dokumen terkait
+• Assignment ke dosen
+
+Operasi ini TIDAK DAPAT DIBATALKAN!
+
+Lanjutkan?`)) {
+                const confirmation = prompt('Ketik "HAPUS" untuk konfirmasi:');
+                if (confirmation === 'HAPUS') {
+                    document.getElementById('singleAction').value = 'delete_single';
+                    document.getElementById('singleMahasiswaId').value = mahasiswaId;
+                    document.getElementById('singleActionForm').submit();
+                } else {
+                    alert('Konfirmasi tidak sesuai. Operasi dibatalkan.');
+                }
+            }
         }
         
         // Initialize

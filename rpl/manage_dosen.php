@@ -86,6 +86,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+    
+    // 🆕 NEW: Delete Dosen (Hard Delete dengan Auto-Reset Assignment)
+    if ($action === 'delete_dosen') {
+        $id = (int)($_POST['id'] ?? 0);
+        
+        if (!$id) {
+            $error = 'ID dosen tidak valid!';
+        } else {
+            try {
+                $pdo->beginTransaction();
+                
+                // Get data dosen untuk log
+                $stmt = $pdo->prepare("SELECT username, nama_lengkap FROM users WHERE id = ? AND role = 'dosen'");
+                $stmt->execute([$id]);
+                $dosen = $stmt->fetch();
+                
+                if (!$dosen) {
+                    throw new Exception('Dosen tidak ditemukan');
+                }
+                
+                // Get count mahasiswa yang akan di-reset
+                $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM mahasiswa WHERE assigned_dosen_id = ?");
+                $stmt->execute([$id]);
+                $mahasiswa_count = $stmt->fetch()['count'];
+                
+                // Reset assignment mahasiswa (set ke NULL)
+                $stmt = $pdo->prepare("UPDATE mahasiswa SET assigned_dosen_id = NULL, status_penilaian = 'belum_dinilai' WHERE assigned_dosen_id = ?");
+                $stmt->execute([$id]);
+                
+                // Hapus semua penilaian yang dibuat oleh dosen ini
+                $stmt = $pdo->prepare("DELETE FROM penilaian_rpl WHERE dosen_penilai_id = ?");
+                $stmt->execute([$id]);
+                
+                // Hapus dosen
+                $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND role = 'dosen'");
+                $stmt->execute([$id]);
+                
+                $pdo->commit();
+                
+                logAktivitas($pdo, $_SESSION['user_id'], 'Delete Dosen', "Hapus dosen: {$dosen['username']} - {$dosen['nama_lengkap']}, Reset {$mahasiswa_count} mahasiswa");
+                $message = "Berhasil menghapus dosen {$dosen['nama_lengkap']} dan mereset assignment {$mahasiswa_count} mahasiswa!";
+                
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $error = 'Gagal menghapus dosen: ' . $e->getMessage();
+            }
+        }
+    }
 }
 
 // Ambil data dosen dengan statistik
@@ -276,6 +324,32 @@ try {
             border-radius: 3px;
         }
         
+        /* 🆕 NEW: Styling untuk button delete dan peringatan */
+        .btn-delete {
+            background: #dc3545;
+            border: 2px solid #dc3545;
+        }
+        
+        .btn-delete:hover {
+            background: #c82333;
+            border-color: #c82333;
+        }
+        
+        .danger-actions {
+            border-top: 2px solid #dc3545;
+            margin-top: 1rem;
+            padding-top: 1rem;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ffeaa7;
+            margin-bottom: 1rem;
+        }
+        
         @media (max-width: 768px) {
             .container { padding: 1rem; }
             table { font-size: 0.8rem; }
@@ -382,12 +456,32 @@ try {
                                             class="btn btn-warning btn-sm">✏️ Edit</button>
                                     <button onclick="resetPassword(<?= $dosen['id'] ?>, '<?= sanitizeInput($dosen['nama_lengkap']) ?>')" 
                                             class="btn btn-danger btn-sm">🔑 Reset PW</button>
+                                    
+                                    <!-- 🆕 NEW: Delete Button -->
+                                    <div class="danger-actions">
+                                        <button onclick="deleteDosen(<?= $dosen['id'] ?>, '<?= sanitizeInput($dosen['nama_lengkap']) ?>', <?= $dosen['jumlah_mahasiswa'] ?>)" 
+                                                class="btn btn-delete btn-sm" title="Hapus dosen">
+                                            🗑️ Hapus
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php endif; ?>
+        </div>
+        
+        <!-- 🆕 NEW: Warning Box untuk operasi delete -->
+        <div class="warning-box">
+            <h4>⚠️ Informasi Penting tentang Hapus Dosen</h4>
+            <p><strong>Ketika Anda menghapus dosen:</strong></p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>Semua assignment mahasiswa ke dosen tersebut akan direset</li>
+                <li>Semua penilaian yang dibuat dosen akan dihapus</li>
+                <li>Mahasiswa akan kembali ke status "Belum Di-assign"</li>
+                <li>Operasi ini TIDAK dapat dibatalkan</li>
+            </ul>
         </div>
     </div>
     
@@ -450,6 +544,12 @@ try {
         </div>
     </div>
     
+    <!-- 🆕 NEW: Hidden form untuk delete dosen -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        <input type="hidden" name="action" value="delete_dosen">
+        <input type="hidden" name="id" id="delete_dosen_id">
+    </form>
+    
     <script>
         function editDosen(id, nama, email, status) {
             document.getElementById('edit_id').value = id;
@@ -464,6 +564,33 @@ try {
             document.getElementById('reset_confirm_text').textContent = 
                 'Reset password untuk dosen: ' + nama;
             document.getElementById('resetModal').style.display = 'block';
+        }
+        
+        // 🆕 NEW: Delete Dosen Function
+        function deleteDosen(id, nama, jumlahMahasiswa) {
+            let warningMessage = `⚠️ PERINGATAN KERAS!
+
+Anda akan menghapus dosen "${nama}" secara PERMANEN!
+
+Dampak yang akan terjadi:
+• Data dosen akan dihapus
+• ${jumlahMahasiswa} mahasiswa akan di-reset assignment-nya
+• Semua penilaian yang dibuat dosen ini akan dihapus
+• Mahasiswa akan kembali ke status "Belum Di-assign"
+
+Operasi ini TIDAK DAPAT DIBATALKAN!
+
+Lanjutkan?`;
+
+            if (confirm(warningMessage)) {
+                const confirmation = prompt('Ketik "HAPUS" untuk konfirmasi:');
+                if (confirmation === 'HAPUS') {
+                    document.getElementById('delete_dosen_id').value = id;
+                    document.getElementById('deleteForm').submit();
+                } else {
+                    alert('Konfirmasi tidak sesuai. Operasi dibatalkan.');
+                }
+            }
         }
         
         function closeModal(modalId) {

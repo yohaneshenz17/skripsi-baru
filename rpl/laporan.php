@@ -24,7 +24,7 @@ if ($dosen_filter) {
 
 $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
 
-// Get report data
+// Get report data with document counts
 try {
     $sql = "
         SELECT 
@@ -39,7 +39,33 @@ try {
             p.catatan_dosen, p.updated_at as tanggal_penilaian,
             -- Hitung total skor dan rata-rata berbobot
             ROUND((p.rpl01_pedagogik * 6 + p.rpl02_perangkat * 6 + p.rpl03_profesional * 6 + 
-                   p.rpl04_administrasi * 6 + p.rpl05_inovasi * 3) / 27, 2) as rata_rata_berbobot
+                   p.rpl04_administrasi * 6 + p.rpl05_inovasi * 3) / 27, 2) as rata_rata_berbobot,
+            -- Hitung dokumen tersedia untuk RPL.02
+            (CASE WHEN m.rpl02_perangkat_ganjil_2019 IS NOT NULL AND m.rpl02_perangkat_ganjil_2019 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_genap_2019 IS NOT NULL AND m.rpl02_perangkat_genap_2019 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_ganjil_2020 IS NOT NULL AND m.rpl02_perangkat_ganjil_2020 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_genap_2020 IS NOT NULL AND m.rpl02_perangkat_genap_2020 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_ganjil_2021 IS NOT NULL AND m.rpl02_perangkat_ganjil_2021 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_genap_2021 IS NOT NULL AND m.rpl02_perangkat_genap_2021 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_ganjil_2022 IS NOT NULL AND m.rpl02_perangkat_ganjil_2022 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_genap_2022 IS NOT NULL AND m.rpl02_perangkat_genap_2022 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_ganjil_2023 IS NOT NULL AND m.rpl02_perangkat_ganjil_2023 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_genap_2023 IS NOT NULL AND m.rpl02_perangkat_genap_2023 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_ganjil_2024 IS NOT NULL AND m.rpl02_perangkat_ganjil_2024 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl02_perangkat_genap_2024 IS NOT NULL AND m.rpl02_perangkat_genap_2024 != '' THEN 1 ELSE 0 END) as rpl02_doc_count,
+            -- Hitung dokumen tersedia untuk RPL.03
+            (CASE WHEN m.rpl03_pengembangan_ganjil_2019 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2019 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_genap_2019 IS NOT NULL AND m.rpl03_pengembangan_genap_2019 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_ganjil_2020 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2020 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_genap_2020 IS NOT NULL AND m.rpl03_pengembangan_genap_2020 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_ganjil_2021 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2021 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_genap_2021 IS NOT NULL AND m.rpl03_pengembangan_genap_2021 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_ganjil_2022 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2022 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_genap_2022 IS NOT NULL AND m.rpl03_pengembangan_genap_2022 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_ganjil_2023 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2023 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_genap_2023 IS NOT NULL AND m.rpl03_pengembangan_genap_2023 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_ganjil_2024 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2024 != '' THEN 1 ELSE 0 END +
+             CASE WHEN m.rpl03_pengembangan_genap_2024 IS NOT NULL AND m.rpl03_pengembangan_genap_2024 != '' THEN 1 ELSE 0 END) as rpl03_doc_count
         FROM mahasiswa m
         INNER JOIN penilaian_rpl p ON m.id = p.mahasiswa_id
         INNER JOIN users u ON p.dosen_penilai_id = u.id
@@ -64,12 +90,12 @@ if ($export === 'csv' && !empty($laporan_data)) {
     
     $output = fopen('php://output', 'w');
     
-    // CSV Header
+    // CSV Header - Updated dengan document counts
     $header = [
         'NIM', 'Nama Lengkap', 'Jenjang', 'Tempat Tugas', 'Email', 'Provinsi', 'Kabupaten',
         'Dosen Penilai', 'Tanggal Penilaian',
-        'RPL01 Skor', 'RPL01 Huruf', 'RPL02 Skor', 'RPL02 Huruf', 
-        'RPL03 Skor', 'RPL03 Huruf', 'RPL04 Skor', 'RPL04 Huruf', 
+        'RPL01 Skor', 'RPL01 Huruf', 'RPL02 Skor', 'RPL02 Huruf', 'RPL02 Docs (/12)',
+        'RPL03 Skor', 'RPL03 Huruf', 'RPL03 Docs (/12)', 'RPL04 Skor', 'RPL04 Huruf', 
         'RPL05 Skor', 'RPL05 Huruf', 'Rata-rata Berbobot', 'Catatan'
     ];
     
@@ -82,8 +108,8 @@ if ($export === 'csv' && !empty($laporan_data)) {
             $row['email'], $row['provinsi'], $row['kabupaten'], $row['nama_dosen'],
             formatTanggalIndo($row['tanggal_penilaian']),
             $row['rpl01_pedagogik'], $row['rpl01_huruf_mutu'],
-            $row['rpl02_perangkat'], $row['rpl02_huruf_mutu'],
-            $row['rpl03_profesional'], $row['rpl03_huruf_mutu'],
+            $row['rpl02_perangkat'], $row['rpl02_huruf_mutu'], $row['rpl02_doc_count'] . '/12',
+            $row['rpl03_profesional'], $row['rpl03_huruf_mutu'], $row['rpl03_doc_count'] . '/12',
             $row['rpl04_administrasi'], $row['rpl04_huruf_mutu'],
             $row['rpl05_inovasi'], $row['rpl05_huruf_mutu'],
             $row['rata_rata_berbobot'], $row['catatan_dosen']
@@ -95,7 +121,7 @@ if ($export === 'csv' && !empty($laporan_data)) {
     exit();
 }
 
-// Get statistics
+// Get statistics - Updated dengan document counts
 try {
     $stats_sql = "
         SELECT 
@@ -106,7 +132,32 @@ try {
             COUNT(CASE WHEN p.rpl02_huruf_mutu = 'A' THEN 1 END) as rpl02_a,
             COUNT(CASE WHEN p.rpl03_huruf_mutu = 'A' THEN 1 END) as rpl03_a,
             COUNT(CASE WHEN p.rpl04_huruf_mutu = 'A' THEN 1 END) as rpl04_a,
-            COUNT(CASE WHEN p.rpl05_huruf_mutu = 'A' THEN 1 END) as rpl05_a
+            COUNT(CASE WHEN p.rpl05_huruf_mutu = 'A' THEN 1 END) as rpl05_a,
+            -- Average document availability
+            AVG((CASE WHEN m.rpl02_perangkat_ganjil_2019 IS NOT NULL AND m.rpl02_perangkat_ganjil_2019 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_genap_2019 IS NOT NULL AND m.rpl02_perangkat_genap_2019 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_ganjil_2020 IS NOT NULL AND m.rpl02_perangkat_ganjil_2020 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_genap_2020 IS NOT NULL AND m.rpl02_perangkat_genap_2020 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_ganjil_2021 IS NOT NULL AND m.rpl02_perangkat_ganjil_2021 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_genap_2021 IS NOT NULL AND m.rpl02_perangkat_genap_2021 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_ganjil_2022 IS NOT NULL AND m.rpl02_perangkat_ganjil_2022 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_genap_2022 IS NOT NULL AND m.rpl02_perangkat_genap_2022 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_ganjil_2023 IS NOT NULL AND m.rpl02_perangkat_ganjil_2023 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_genap_2023 IS NOT NULL AND m.rpl02_perangkat_genap_2023 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_ganjil_2024 IS NOT NULL AND m.rpl02_perangkat_ganjil_2024 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl02_perangkat_genap_2024 IS NOT NULL AND m.rpl02_perangkat_genap_2024 != '' THEN 1 ELSE 0 END)) as avg_rpl02_docs,
+            AVG((CASE WHEN m.rpl03_pengembangan_ganjil_2019 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2019 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_genap_2019 IS NOT NULL AND m.rpl03_pengembangan_genap_2019 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_ganjil_2020 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2020 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_genap_2020 IS NOT NULL AND m.rpl03_pengembangan_genap_2020 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_ganjil_2021 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2021 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_genap_2021 IS NOT NULL AND m.rpl03_pengembangan_genap_2021 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_ganjil_2022 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2022 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_genap_2022 IS NOT NULL AND m.rpl03_pengembangan_genap_2022 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_ganjil_2023 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2023 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_genap_2023 IS NOT NULL AND m.rpl03_pengembangan_genap_2023 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_ganjil_2024 IS NOT NULL AND m.rpl03_pengembangan_ganjil_2024 != '' THEN 1 ELSE 0 END +
+                 CASE WHEN m.rpl03_pengembangan_genap_2024 IS NOT NULL AND m.rpl03_pengembangan_genap_2024 != '' THEN 1 ELSE 0 END)) as avg_rpl03_docs
         FROM penilaian_rpl p
         INNER JOIN mahasiswa m ON p.mahasiswa_id = m.id
         $where_clause
@@ -117,7 +168,7 @@ try {
     $stats = $stmt->fetch();
     
 } catch (PDOException $e) {
-    $stats = ['total_dinilai' => 0, 'rata_rata_keseluruhan' => 0];
+    $stats = ['total_dinilai' => 0, 'rata_rata_keseluruhan' => 0, 'avg_rpl02_docs' => 0, 'avg_rpl03_docs' => 0];
 }
 
 // Get dosen list for filter
@@ -128,7 +179,7 @@ try {
     $dosen_options = [];
 }
 
-// Distribution by grade
+// Distribution by grade - Updated
 $grade_distribution = [];
 if (!empty($laporan_data)) {
     foreach (['A', 'B', 'C', 'D', 'E'] as $grade) {
@@ -296,6 +347,24 @@ if (!empty($laporan_data)) {
         .grade-d { background: #f8d7da; color: #721c24; font-weight: bold; }
         .grade-e { background: #f8d7da; color: #721c24; font-weight: bold; }
         
+        .doc-count {
+            font-size: 0.8rem;
+            color: #666;
+            display: block;
+        }
+        
+        .doc-indicator {
+            display: inline-block;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+        }
+        
+        .doc-full { background: #d4edda; color: #155724; }
+        .doc-partial { background: #fff3cd; color: #856404; }
+        .doc-none { background: #f8d7da; color: #721c24; }
+        
         .distribution-chart {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -346,7 +415,7 @@ if (!empty($laporan_data)) {
 </head>
 <body>
     <div class="header">
-        <h1>📊 Laporan Penilaian RPL</h1>
+        <h1>📊 Laporan Penilaian RPL - Multiple Documents</h1>
         <div>
             <?php if (!empty($laporan_data)): ?>
                 <a href="?<?= http_build_query(array_merge($_GET, ['export' => 'csv'])) ?>" 
@@ -359,7 +428,7 @@ if (!empty($laporan_data)) {
     </div>
     
     <div class="container">
-        <!-- Statistics -->
+        <!-- Statistics - Updated -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number"><?= number_format($stats['total_dinilai'] ?? 0) ?></div>
@@ -370,8 +439,12 @@ if (!empty($laporan_data)) {
                 <div class="stat-label">Rata-rata Keseluruhan</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number"><?= number_format($stats['rpl01_a'] ?? 0) ?></div>
-                <div class="stat-label">Grade A - RPL01</div>
+                <div class="stat-number"><?= number_format($stats['avg_rpl02_docs'] ?? 0, 1) ?>/12</div>
+                <div class="stat-label">Avg RPL.02 Docs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><?= number_format($stats['avg_rpl03_docs'] ?? 0, 1) ?>/12</div>
+                <div class="stat-label">Avg RPL.03 Docs</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number"><?= date('d/m/Y') ?></div>
@@ -448,7 +521,7 @@ if (!empty($laporan_data)) {
         
         <!-- Data Table -->
         <div class="card">
-            <h3>📋 Detail Hasil Penilaian</h3>
+            <h3>📋 Detail Hasil Penilaian (dengan Document Count)</h3>
             
             <?php if (empty($laporan_data)): ?>
                 <div style="text-align: center; padding: 3rem; color: #666;">
@@ -458,6 +531,7 @@ if (!empty($laporan_data)) {
             <?php else: ?>
                 <div style="margin-bottom: 1rem; color: #666;">
                     Menampilkan <?= count($laporan_data) ?> hasil penilaian
+                    <br><small>Keterangan dokumen: 🟢 Lengkap (12/12) | 🟡 Sebagian | 🔴 Tidak ada</small>
                 </div>
                 
                 <table>
@@ -466,13 +540,12 @@ if (!empty($laporan_data)) {
                             <th>NIM</th>
                             <th>Nama Lengkap</th>
                             <th>Jenjang</th>
-                            <th>Tempat Tugas</th>
                             <th>Dosen Penilai</th>
-                            <th>RPL01</th>
-                            <th>RPL02</th>
-                            <th>RPL03</th>
-                            <th>RPL04</th>
-                            <th>RPL05</th>
+                            <th>RPL01<br><small>(1 doc)</small></th>
+                            <th>RPL02<br><small>(12 docs)</small></th>
+                            <th>RPL03<br><small>(12 docs)</small></th>
+                            <th>RPL04<br><small>(1 doc)</small></th>
+                            <th>RPL05<br><small>(1 doc)</small></th>
                             <th>Rata-rata</th>
                             <th>Tanggal</th>
                         </tr>
@@ -483,7 +556,6 @@ if (!empty($laporan_data)) {
                                 <td><?= sanitizeInput($row['nim']) ?></td>
                                 <td><?= sanitizeInput($row['nama_lengkap']) ?></td>
                                 <td><?= sanitizeInput($row['jenjang']) ?></td>
-                                <td><?= sanitizeInput($row['tempat_tugas']) ?></td>
                                 <td><?= sanitizeInput($row['nama_dosen']) ?></td>
                                 
                                 <td>
@@ -491,21 +563,41 @@ if (!empty($laporan_data)) {
                                         <?= $row['rpl01_pedagogik'] ?> (<?= $row['rpl01_huruf_mutu'] ?>)
                                     </span>
                                 </td>
+                                
                                 <td>
                                     <span class="grade-<?= strtolower($row['rpl02_huruf_mutu']) ?>">
                                         <?= $row['rpl02_perangkat'] ?> (<?= $row['rpl02_huruf_mutu'] ?>)
                                     </span>
+                                    <?php 
+                                    $doc_class = 'doc-none';
+                                    if ($row['rpl02_doc_count'] == 12) $doc_class = 'doc-full';
+                                    elseif ($row['rpl02_doc_count'] > 0) $doc_class = 'doc-partial';
+                                    ?>
+                                    <span class="doc-indicator <?= $doc_class ?>">
+                                        <?= $row['rpl02_doc_count'] ?>/12
+                                    </span>
                                 </td>
+                                
                                 <td>
                                     <span class="grade-<?= strtolower($row['rpl03_huruf_mutu']) ?>">
                                         <?= $row['rpl03_profesional'] ?> (<?= $row['rpl03_huruf_mutu'] ?>)
                                     </span>
+                                    <?php 
+                                    $doc_class = 'doc-none';
+                                    if ($row['rpl03_doc_count'] == 12) $doc_class = 'doc-full';
+                                    elseif ($row['rpl03_doc_count'] > 0) $doc_class = 'doc-partial';
+                                    ?>
+                                    <span class="doc-indicator <?= $doc_class ?>">
+                                        <?= $row['rpl03_doc_count'] ?>/12
+                                    </span>
                                 </td>
+                                
                                 <td>
                                     <span class="grade-<?= strtolower($row['rpl04_huruf_mutu']) ?>">
                                         <?= $row['rpl04_administrasi'] ?> (<?= $row['rpl04_huruf_mutu'] ?>)
                                     </span>
                                 </td>
+                                
                                 <td>
                                     <span class="grade-<?= strtolower($row['rpl05_huruf_mutu']) ?>">
                                         <?= $row['rpl05_inovasi'] ?> (<?= $row['rpl05_huruf_mutu'] ?>)
@@ -528,6 +620,8 @@ if (!empty($laporan_data)) {
                 <div style="line-height: 1.6;">
                     <p><strong>Total Mahasiswa yang Telah Dinilai:</strong> <?= count($laporan_data) ?> orang</p>
                     <p><strong>Rata-rata Skor Keseluruhan:</strong> <?= number_format($stats['rata_rata_keseluruhan'], 2) ?></p>
+                    <p><strong>Rata-rata Dokumen RPL.02:</strong> <?= number_format($stats['avg_rpl02_docs'], 1) ?>/12 semester</p>
+                    <p><strong>Rata-rata Dokumen RPL.03:</strong> <?= number_format($stats['avg_rpl03_docs'], 1) ?>/12 semester</p>
                     <p><strong>Periode Laporan:</strong> <?= formatTanggalIndo(date('Y-m-d')) ?></p>
                     
                     <?php if ($jenjang_filter): ?>
@@ -546,7 +640,8 @@ if (!empty($laporan_data)) {
                     
                     <p style="margin-top: 1rem; font-style: italic; color: #666;">
                         Laporan ini menampilkan hasil penilaian RPL yang telah difinalisasi oleh dosen penilai.
-                        Rata-rata dihitung berdasarkan bobot SKS masing-masing bidang RPL.
+                        Rata-rata dihitung berdasarkan bobot SKS masing-masing bidang RPL. Sistem sekarang mendukung 
+                        multiple documents untuk RPL.02 (12 semester) dan RPL.03 (12 semester).
                     </p>
                 </div>
             </div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 21 Sep 2025 pada 13.19
+-- Waktu pembuatan: 21 Sep 2025 pada 17.31
 -- Versi server: 10.3.39-MariaDB-cll-lve
 -- Versi PHP: 8.1.33
 
@@ -51,6 +51,23 @@ CREATE TABLE `log_aktivitas` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
+--
+-- Dumping data untuk tabel `log_aktivitas`
+--
+
+INSERT INTO `log_aktivitas` (`id`, `user_id`, `aktivitas`, `detail`, `ip_address`, `created_at`) VALUES
+(1, 1, 'Login', 'User berhasil login', '36.90.146.195', '2025-09-21 06:39:12'),
+(2, 1, 'Assign Mahasiswa', 'Berhasil assign 0 mahasiswa ke dosen', '36.90.146.195', '2025-09-21 06:40:24'),
+(3, 1, 'Logout', 'User berhasil logout', '36.90.146.195', '2025-09-21 06:40:56'),
+(4, 2, 'Login', 'User berhasil login', '36.90.146.195', '2025-09-21 06:41:07'),
+(5, 2, 'Logout', 'User berhasil logout', '36.90.146.195', '2025-09-21 06:41:26'),
+(6, 1, 'Login', 'User berhasil login', '36.90.146.195', '2025-09-21 06:41:37'),
+(7, 1, 'Import Mahasiswa', 'Berhasil import 2 mahasiswa', '36.90.146.195', '2025-09-21 06:44:14'),
+(8, 2, 'Login', 'User berhasil login', '36.90.146.195', '2025-09-21 10:26:55'),
+(9, 2, 'Mulai Penilaian', 'Mahasiswa ID: 1', '36.90.146.195', '2025-09-21 10:26:58'),
+(10, 2, 'Simpan Draft Penilaian', 'Mahasiswa: ADELFINA FRANSISKA BRIA (ID: 1)', '36.90.146.195', '2025-09-21 10:29:29'),
+(11, 2, 'Finalisasi Penilaian', 'Mahasiswa: ADELFINA FRANSISKA BRIA (ID: 1)', '36.90.146.195', '2025-09-21 10:30:21');
+
 -- --------------------------------------------------------
 
 --
@@ -79,8 +96,40 @@ CREATE TABLE `mahasiswa` (
   `assigned_dosen_id` int(11) DEFAULT NULL,
   `status_penilaian` enum('belum_dinilai','sedang_dinilai','selesai') DEFAULT 'belum_dinilai',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `rpl02_perangkat_ganjil_2019` text DEFAULT NULL,
+  `rpl02_perangkat_genap_2019` text DEFAULT NULL,
+  `rpl02_perangkat_ganjil_2020` text DEFAULT NULL,
+  `rpl02_perangkat_genap_2020` text DEFAULT NULL,
+  `rpl02_perangkat_ganjil_2021` text DEFAULT NULL,
+  `rpl02_perangkat_genap_2021` text DEFAULT NULL,
+  `rpl02_perangkat_ganjil_2022` text DEFAULT NULL,
+  `rpl02_perangkat_genap_2022` text DEFAULT NULL,
+  `rpl02_perangkat_ganjil_2023` text DEFAULT NULL,
+  `rpl02_perangkat_genap_2023` text DEFAULT NULL,
+  `rpl02_perangkat_ganjil_2024` text DEFAULT NULL,
+  `rpl02_perangkat_genap_2024` text DEFAULT NULL,
+  `rpl03_pengembangan_ganjil_2019` text DEFAULT NULL,
+  `rpl03_pengembangan_genap_2019` text DEFAULT NULL,
+  `rpl03_pengembangan_ganjil_2020` text DEFAULT NULL,
+  `rpl03_pengembangan_genap_2020` text DEFAULT NULL,
+  `rpl03_pengembangan_ganjil_2021` text DEFAULT NULL,
+  `rpl03_pengembangan_genap_2021` text DEFAULT NULL,
+  `rpl03_pengembangan_ganjil_2022` text DEFAULT NULL,
+  `rpl03_pengembangan_genap_2022` text DEFAULT NULL,
+  `rpl03_pengembangan_ganjil_2023` text DEFAULT NULL,
+  `rpl03_pengembangan_genap_2023` text DEFAULT NULL,
+  `rpl03_pengembangan_ganjil_2024` text DEFAULT NULL,
+  `rpl03_pengembangan_genap_2024` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data untuk tabel `mahasiswa`
+--
+
+INSERT INTO `mahasiswa` (`id`, `nim`, `nama_lengkap`, `jenis_kelamin`, `tempat_tugas`, `email`, `no_telepon`, `nik`, `status_pegawai`, `tempat_lahir`, `tanggal_lahir`, `provinsi`, `kabupaten`, `kecamatan`, `jenjang`, `link_sk_mengajar`, `link_administrasi`, `link_inovasi`, `assigned_dosen_id`, `status_penilaian`, `created_at`, `updated_at`, `rpl02_perangkat_ganjil_2019`, `rpl02_perangkat_genap_2019`, `rpl02_perangkat_ganjil_2020`, `rpl02_perangkat_genap_2020`, `rpl02_perangkat_ganjil_2021`, `rpl02_perangkat_genap_2021`, `rpl02_perangkat_ganjil_2022`, `rpl02_perangkat_genap_2022`, `rpl02_perangkat_ganjil_2023`, `rpl02_perangkat_genap_2023`, `rpl02_perangkat_ganjil_2024`, `rpl02_perangkat_genap_2024`, `rpl03_pengembangan_ganjil_2019`, `rpl03_pengembangan_genap_2019`, `rpl03_pengembangan_ganjil_2020`, `rpl03_pengembangan_genap_2020`, `rpl03_pengembangan_ganjil_2021`, `rpl03_pengembangan_genap_2021`, `rpl03_pengembangan_ganjil_2022`, `rpl03_pengembangan_genap_2022`, `rpl03_pengembangan_ganjil_2023`, `rpl03_pengembangan_genap_2023`, `rpl03_pengembangan_ganjil_2024`, `rpl03_pengembangan_genap_2024`) VALUES
+(1, '25869050001', 'ADELFINA FRANSISKA BRIA', 'Perempuan', 'SMP NEGERI HELIBAUK', 'adelfinabria24@guru.SMP.belajar.id', '081237045344', '5304084204950007', 'PPPK', 'WEDARE', '1995-04-01', 'NUSA TENGGARA TIMUR', 'KABUPATEN MALAKA', 'MALAKA TENGAH', 'SMP', 'https://drive.google.com/open?id=1-J--zMVJA-BkPY8ScbPEvHm6ULAXCiNl', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 2, 'selesai', '2025-09-21 06:44:14', '2025-09-21 10:30:21', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1PbZGppM1pm2pXcPKwESwVSjPwhpB_zBr', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm', 'https://drive.google.com/open?id=1MWyMVCTzJ2-BprzFVo44lXBD8xuf3igm'),
+(2, '25869050002', 'ADELHEID SAINA', 'Perempuan', 'SDI LELIT', 'adelheidsaina34@guru.sd.belajar.id', '081338731398', '5310156304910001', 'PPPK', 'GENCOR', '1991-04-22', 'NUSA TENGGARA TIMUR', 'KABUPATEN MANGGARAI', 'SATAR MESE BARAT', 'SD', 'https://drive.google.com/open?id=11wJjdCwaKHTj2TLno_53iclac6b8hTKY', 'https://drive.google.com/open?id=1jyCFAla9HzbMMkHyr2A7UmrAHGmZx4So', 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', 2, 'belum_dinilai', '2025-09-21 06:44:14', '2025-09-21 10:14:07', 'https://drive.google.com/open?id=1jyCFAla9HzbMMkHyr2A7UmrAHGmZx4So', NULL, 'https://drive.google.com/open?id=1jyCFAla9HzbMMkHyr2A7UmrAHGmZx4So', NULL, 'https://drive.google.com/open?id=1jyCFAla9HzbMMkHyr2A7UmrAHGmZx4So', 'https://drive.google.com/open?id=1jyCFAla9HzbMMkHyr2A7UmrAHGmZx4So', NULL, 'https://drive.google.com/open?id=1jyCFAla9HzbMMkHyr2A7UmrAHGmZx4So', 'https://drive.google.com/open?id=1jyCFAla9HzbMMkHyr2A7UmrAHGmZx4So', NULL, NULL, 'https://drive.google.com/open?id=1jyCFAla9HzbMMkHyr2A7UmrAHGmZx4So', 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', NULL, 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', NULL, 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', NULL, 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', 'https://drive.google.com/open?id=1JS3-5nvkAV48kFHLgNfGtgbIIGMblMOJ', NULL);
 
 -- --------------------------------------------------------
 
@@ -107,6 +156,13 @@ CREATE TABLE `penilaian_rpl` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data untuk tabel `penilaian_rpl`
+--
+
+INSERT INTO `penilaian_rpl` (`id`, `mahasiswa_id`, `dosen_penilai_id`, `rpl01_pedagogik`, `rpl02_perangkat`, `rpl03_profesional`, `rpl04_administrasi`, `rpl05_inovasi`, `rpl01_huruf_mutu`, `rpl02_huruf_mutu`, `rpl03_huruf_mutu`, `rpl04_huruf_mutu`, `rpl05_huruf_mutu`, `status_penilaian`, `catatan_dosen`, `created_at`, `updated_at`) VALUES
+(1, 1, 2, 80, 70, 80, 75, 89, 'A', 'B', 'A', 'B', 'A', 'final', 'Penilaian selesai', '2025-09-21 10:26:58', '2025-09-21 10:30:21');
 
 -- --------------------------------------------------------
 
@@ -194,7 +250,8 @@ ALTER TABLE `log_aktivitas`
 ALTER TABLE `mahasiswa`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `nim` (`nim`),
-  ADD KEY `assigned_dosen_id` (`assigned_dosen_id`);
+  ADD KEY `idx_mahasiswa_nim` (`nim`),
+  ADD KEY `idx_mahasiswa_assigned` (`assigned_dosen_id`);
 
 --
 -- Indeks untuk tabel `penilaian_rpl`
@@ -202,7 +259,8 @@ ALTER TABLE `mahasiswa`
 ALTER TABLE `penilaian_rpl`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_penilaian` (`mahasiswa_id`,`dosen_penilai_id`),
-  ADD KEY `dosen_penilai_id` (`dosen_penilai_id`);
+  ADD KEY `idx_penilaian_mahasiswa` (`mahasiswa_id`),
+  ADD KEY `idx_penilaian_dosen` (`dosen_penilai_id`);
 
 --
 -- Indeks untuk tabel `users`
@@ -225,19 +283,19 @@ ALTER TABLE `dokumen_perangkat`
 -- AUTO_INCREMENT untuk tabel `log_aktivitas`
 --
 ALTER TABLE `log_aktivitas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT untuk tabel `mahasiswa`
 --
 ALTER TABLE `mahasiswa`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT untuk tabel `penilaian_rpl`
 --
 ALTER TABLE `penilaian_rpl`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`

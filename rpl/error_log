@@ -13,3 +13,30 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/stkp7133/public_html/rpl/index.php on line 2
+[29-Sep-2025 12:07:46 Asia/Jakarta] PHP Fatal error:  Uncaught DivisionByZeroError: Division by zero in /home/stkp7133/public_html/rpl/robust_csv_import.php:849
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/rpl/robust_csv_import.php on line 849
+[29-Sep-2025 12:20:02 Asia/Jakarta] PHP Warning:  include(header_admin.php): Failed to open stream: No such file or directory in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 281
+[29-Sep-2025 12:20:02 Asia/Jakarta] PHP Warning:  include(): Failed opening 'header_admin.php' for inclusion (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 281
+[29-Sep-2025 12:20:02 Asia/Jakarta] PHP Warning:  include(footer_admin.php): Failed to open stream: No such file or directory in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 728
+[29-Sep-2025 12:20:02 Asia/Jakarta] PHP Warning:  include(): Failed opening 'footer_admin.php' for inclusion (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 728
+[29-Sep-2025 12:20:04 Asia/Jakarta] PHP Warning:  include(header_admin.php): Failed to open stream: No such file or directory in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 281
+[29-Sep-2025 12:20:04 Asia/Jakarta] PHP Warning:  include(): Failed opening 'header_admin.php' for inclusion (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 281
+[29-Sep-2025 12:20:04 Asia/Jakarta] PHP Warning:  include(footer_admin.php): Failed to open stream: No such file or directory in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 728
+[29-Sep-2025 12:20:04 Asia/Jakarta] PHP Warning:  include(): Failed opening 'footer_admin.php' for inclusion (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 728
+[29-Sep-2025 12:25:44 Asia/Jakarta] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.rpl01_huruf' in 'field list' in /home/stkp7133/public_html/rpl/manage_mahasiswa.php:87
+Stack trace:
+#0 /home/stkp7133/public_html/rpl/manage_mahasiswa.php(87): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 87
+[29-Sep-2025 12:25:57 Asia/Jakarta] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.rpl01_huruf' in 'field list' in /home/stkp7133/public_html/rpl/manage_mahasiswa.php:87
+Stack trace:
+#0 /home/stkp7133/public_html/rpl/manage_mahasiswa.php(87): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 87
+[29-Sep-2025 12:26:19 Asia/Jakarta] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.rpl01_huruf' in 'field list' in /home/stkp7133/public_html/rpl/manage_mahasiswa.php:87
+Stack trace:
+#0 /home/stkp7133/public_html/rpl/manage_mahasiswa.php(87): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stkp7133/public_html/rpl/manage_mahasiswa.php on line 87

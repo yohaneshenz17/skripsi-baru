@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - <?= APP_NAME ?></title>
+    <title>Login - Sistem Penilaian RPL STK St. Yakobus</title>
     <style>
         * {
             margin: 0;
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 10px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
         }
         
         .logo {
@@ -88,10 +88,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 2rem;
         }
         
+        .logo img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            object-fit: contain;
+        }
+        
         .logo h1 {
             color: #333;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+        
+        .logo h2 {
+            color: #667eea;
+            font-size: 1.1rem;
             margin-bottom: 0.5rem;
+            font-weight: 600;
         }
         
         .logo p {
@@ -122,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         input[type="text"]:focus, input[type="password"]:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         .btn {
@@ -134,10 +151,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1rem;
             cursor: pointer;
             transition: background 0.3s;
+            font-weight: 500;
         }
         
         .btn:hover {
             background: #5a6fd8;
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
         }
         
         .error {
@@ -147,28 +169,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 5px;
             margin-bottom: 1rem;
             border: 1px solid #ff7675;
-        }
-        
-        .info {
-            background: #e8f4fd;
-            color: #0984e3;
-            padding: 0.75rem;
-            border-radius: 5px;
-            margin-top: 1rem;
-            border: 1px solid #74b9ff;
+            text-align: center;
             font-size: 0.9rem;
         }
         
-        .info strong {
-            display: block;
-            margin-bottom: 0.5rem;
+        .footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #999;
+            font-size: 0.8rem;
+        }
+        
+        .footer p {
+            margin-top: 0.2rem;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 1rem;
+                padding: 1.5rem;
+                max-width: 350px;
+            }
+            
+            .logo img {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .logo h1 {
+                font-size: 1.1rem;
+            }
+            
+            .logo h2 {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="logo">
-            <h1><?= APP_NAME ?></h1>
+            <img src="assets/logo-stk.png" alt="Logo STK Yakobus" onerror="this.style.display='none'">
+            <h1>Sistem Informasi Penilaian RPL</h1>
+            <h2>Sekolah Tinggi Katolik St. Yakobus Merauke</h2>
             <p>Silakan masuk untuk melanjutkan</p>
         </div>
         
@@ -180,21 +224,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required 
-                       value="<?= isset($_POST['username']) ? sanitizeInput($_POST['username']) : '' ?>">
+                       value="<?= isset($_POST['username']) ? sanitizeInput($_POST['username']) : '' ?>"
+                       placeholder="Masukkan username">
             </div>
             
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required
+                       placeholder="Masukkan password">
             </div>
             
             <button type="submit" class="btn">Masuk</button>
         </form>
         
-        <div class="info">
-            <strong>Akun Demo:</strong>
-            Admin: admin / password<br>
-            Dosen: dosen001 / password
+        <div class="footer">
+            @ Made With Love by SIPD @
+            <p>2025</p>
         </div>
     </div>
 </body>

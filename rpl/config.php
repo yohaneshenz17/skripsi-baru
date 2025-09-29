@@ -18,7 +18,7 @@ try {
 }
 
 // Konfigurasi aplikasi
-define('APP_NAME', 'Sistem Penilaian RPL - STKYAKOBUS');
+define('APP_NAME', 'Sistem Penilaian RPL - STK St. Yakobus Merauke');
 define('BASE_URL', 'https://stkyakobus.ac.id/rpl/');
 
 // Fungsi untuk mengecek login

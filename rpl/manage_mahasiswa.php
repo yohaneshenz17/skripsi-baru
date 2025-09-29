@@ -18,6 +18,147 @@ $offset = ($page - 1) * $per_page;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
+    // 🆕 NEW: Export Data Mahasiswa - FIXED dengan struktur database yang benar
+    if ($action === 'export_data') {
+        // Build query with same filters as display
+        $where_conditions = [];
+        $params = [];
+
+        if ($search) {
+            $where_conditions[] = "(m.nim LIKE ? OR m.nama_lengkap LIKE ? OR m.tempat_tugas LIKE ?)";
+            $search_param = "%$search%";
+            $params = array_merge($params, [$search_param, $search_param, $search_param]);
+        }
+
+        if ($jenjang_filter) {
+            $where_conditions[] = "m.jenjang = ?";
+            $params[] = $jenjang_filter;
+        }
+
+        if ($status_filter) {
+            $where_conditions[] = "m.status_penilaian = ?";
+            $params[] = $status_filter;
+        }
+
+        if ($dosen_filter) {
+            $where_conditions[] = "m.assigned_dosen_id = ?";
+            $params[] = $dosen_filter;
+        }
+
+        $where_clause = empty($where_conditions) ? '' : 'WHERE ' . implode(' AND ', $where_conditions);
+        
+        // ✅ FIXED: Export query dengan nama kolom yang BENAR sesuai struktur database
+        $export_query = "
+            SELECT 
+                m.nim as 'NIM',
+                m.nama_lengkap as 'Nama Lengkap',
+                m.jenis_kelamin as 'Jenis Kelamin',
+                m.jenjang as 'Jenjang',
+                m.tempat_tugas as 'Tempat Tugas',
+                m.kabupaten as 'Kabupaten',
+                m.provinsi as 'Provinsi',
+                m.status_pegawai as 'Status Pegawai',
+                m.no_telepon as 'No Telepon',
+                COALESCE(u.nama_lengkap, 'Belum Di-assign') as 'Dosen Penilai',
+                CASE 
+                    WHEN p.status_penilaian = 'final' THEN 'Selesai Dinilai'
+                    WHEN p.status_penilaian = 'draft' THEN 'Sedang Dinilai'
+                    ELSE 'Belum Dinilai'
+                END as 'Status Penilaian',
+                CASE 
+                    WHEN p.status_penilaian IS NOT NULL THEN 
+                        CONCAT(
+                            'RPL01: ', COALESCE(p.rpl01_huruf_mutu, '-'), ' (', COALESCE(p.rpl01_pedagogik, '-'), ') | ',
+                            'RPL02: ', COALESCE(p.rpl02_huruf_mutu, '-'), ' (', COALESCE(p.rpl02_perangkat, '-'), ') | ',
+                            'RPL03: ', COALESCE(p.rpl03_huruf_mutu, '-'), ' (', COALESCE(p.rpl03_profesional, '-'), ') | ',
+                            'RPL04: ', COALESCE(p.rpl04_huruf_mutu, '-'), ' (', COALESCE(p.rpl04_administrasi, '-'), ') | ',
+                            'RPL05: ', COALESCE(p.rpl05_huruf_mutu, '-'), ' (', COALESCE(p.rpl05_inovasi, '-'), ')'
+                        )
+                    ELSE '-'
+                END as 'Nilai RPL',
+                m.link_sk_mengajar as 'Link SK Mengajar',
+                m.link_administrasi as 'Link Administrasi', 
+                m.link_inovasi as 'Link Inovasi'
+            FROM mahasiswa m
+            LEFT JOIN users u ON m.assigned_dosen_id = u.id
+            LEFT JOIN penilaian_rpl p ON m.id = p.mahasiswa_id
+            $where_clause
+            ORDER BY m.nama_lengkap ASC
+        ";
+        
+        $stmt = $pdo->prepare($export_query);
+        $stmt->execute($params);
+        $export_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Generate CSV
+        $filename = 'data_mahasiswa_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Output UTF-8 BOM for Excel compatibility
+        echo "\xEF\xBB\xBF";
+        
+        $output = fopen('php://output', 'w');
+        
+        // Write header
+        if (!empty($export_data)) {
+            fputcsv($output, array_keys($export_data[0]));
+            
+            // Write data
+            foreach ($export_data as $row) {
+                fputcsv($output, $row);
+            }
+        }
+        
+        fclose($output);
+        
+        // Log activity
+        logAktivitas($pdo, $_SESSION['user_id'], 'Export Data Mahasiswa', "Export " . count($export_data) . " data mahasiswa");
+        exit;
+    }
+    
+    // 🆕 NEW: Unassign Single Mahasiswa
+    if ($action === 'unassign_single') {
+        $mahasiswa_id = (int)($_POST['mahasiswa_id'] ?? 0);
+        
+        if (!$mahasiswa_id) {
+            $error = 'ID mahasiswa tidak valid!';
+        } else {
+            try {
+                $pdo->beginTransaction();
+                
+                // Get mahasiswa data for logging
+                $stmt = $pdo->prepare("SELECT nim, nama_lengkap FROM mahasiswa WHERE id = ?");
+                $stmt->execute([$mahasiswa_id]);
+                $mahasiswa = $stmt->fetch();
+                
+                if (!$mahasiswa) {
+                    throw new Exception('Mahasiswa tidak ditemukan');
+                }
+                
+                // Reset assignment
+                $stmt = $pdo->prepare("UPDATE mahasiswa SET assigned_dosen_id = NULL WHERE id = ?");
+                $stmt->execute([$mahasiswa_id]);
+                
+                // Delete any existing evaluations
+                $stmt = $pdo->prepare("DELETE FROM penilaian_rpl WHERE mahasiswa_id = ?");
+                $stmt->execute([$mahasiswa_id]);
+                
+                $pdo->commit();
+                
+                logAktivitas($pdo, $_SESSION['user_id'], 'Unassign Mahasiswa', "Batalkan assignment: {$mahasiswa['nim']} - {$mahasiswa['nama_lengkap']}");
+                $message = "Berhasil membatalkan assignment untuk {$mahasiswa['nama_lengkap']}!";
+                
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $error = 'Gagal membatalkan assignment: ' . $e->getMessage();
+            }
+        }
+    }
+    
     if ($action === 'assign_mahasiswa') {
         $mahasiswa_ids = $_POST['mahasiswa_ids'] ?? [];
         $dosen_id = (int)($_POST['assign_dosen_id'] ?? 0);
@@ -72,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // 🆕 NEW: Delete Mahasiswa (Hard Delete)
+    // DELETE and other existing actions remain the same...
     if ($action === 'delete_mahasiswa') {
         $mahasiswa_ids = $_POST['mahasiswa_ids'] ?? [];
         
@@ -116,7 +257,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // 🆕 NEW: Reset Penilaian Final ke Draft
     if ($action === 'reset_penilaian') {
         $mahasiswa_ids = $_POST['mahasiswa_ids'] ?? [];
         
@@ -156,7 +296,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // 🆕 NEW: Delete Single Mahasiswa
     if ($action === 'delete_single') {
         $mahasiswa_id = (int)($_POST['mahasiswa_id'] ?? 0);
         
@@ -345,6 +484,68 @@ try {
             margin-top: 0.5rem;
         }
         
+        /* 🆕 NEW: Export Section Styles */
+        .export-section {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .export-section h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .export-section p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .btn-export {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-export:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        
+        /* 🆕 NEW: Unassign Button Styles */
+        .btn-unassign {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 0.25rem;
+        }
+        
+        .btn-unassign:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+        
         .filters {
             background: white;
             padding: 1.5rem;
@@ -509,7 +710,6 @@ try {
             border: 1px solid #f5c6cb;
         }
         
-        /* 🆕 NEW: Styling untuk tombol delete yang lebih prominent */
         .btn-delete {
             background: #dc3545;
             border: 2px solid #dc3545;
@@ -536,6 +736,7 @@ try {
         @media (max-width: 768px) {
             .container { padding: 1rem; }
             .filter-row { grid-template-columns: 1fr; }
+            .export-section { flex-direction: column; text-align: center; gap: 1rem; }
             table { font-size: 0.8rem; }
             th, td { padding: 0.5rem; }
             .action-group { flex-direction: column; }
@@ -546,7 +747,7 @@ try {
     <div class="header">
         <h1>Kelola Data Mahasiswa</h1>
         <div>
-            <a href="import_mahasiswa.php" class="btn btn-success">📤 Import Data</a>
+            <a href="import_mahasiswa.php" class="btn btn-success">Import Data</a>
             <a href="dashboard_admin.php" class="btn btn-primary">← Kembali</a>
         </div>
     </div>
@@ -559,6 +760,23 @@ try {
         <?php if ($error): ?>
             <div class="alert alert-error"><?= sanitizeInput($error) ?></div>
         <?php endif; ?>
+        
+        <!-- 🆕 NEW: Export Section -->
+        <div class="export-section">
+            <div>
+                <h3>Export Data Mahasiswa</h3>
+                <p>Export data mahasiswa (<?= number_format($total_records) ?> records) sesuai filter yang diterapkan</p>
+            </div>
+            <form method="POST" style="margin: 0;">
+                <input type="hidden" name="action" value="export_data">
+                <!-- Pass current filters -->
+                <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
+                <input type="hidden" name="jenjang" value="<?= htmlspecialchars($jenjang_filter) ?>">
+                <input type="hidden" name="status" value="<?= htmlspecialchars($status_filter) ?>">
+                <input type="hidden" name="dosen" value="<?= $dosen_filter ?>">
+                <button type="submit" class="btn-export">Export ke CSV</button>
+            </form>
+        </div>
         
         <!-- Statistics -->
         <div class="stats-grid">
@@ -582,7 +800,7 @@ try {
         
         <!-- Filters -->
         <div class="filters">
-            <h3 style="margin-bottom: 1rem;">🔍 Filter & Pencarian</h3>
+            <h3 style="margin-bottom: 1rem;">Filter & Pencarian</h3>
             <form method="GET">
                 <div class="filter-row">
                     <div class="form-group">
@@ -626,8 +844,8 @@ try {
                     </div>
                     
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary">🔍 Filter</button>
-                        <a href="manage_mahasiswa.php" class="btn btn-warning">🔄 Reset</a>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="manage_mahasiswa.php" class="btn btn-warning">Reset</a>
                     </div>
                 </div>
             </form>
@@ -636,10 +854,10 @@ try {
         <!-- Data Table -->
         <div class="card">
             <div class="card-header">
-                <h3>📋 Data Mahasiswa (<?= number_format($total_records) ?> total)</h3>
+                <h3>Data Mahasiswa (<?= number_format($total_records) ?> total)</h3>
                 <div>
-                    <button onclick="toggleSelectAll()" class="btn btn-sm btn-warning">☑️ Pilih Semua</button>
-                    <button onclick="showBulkActions()" class="btn btn-sm btn-success">⚡ Aksi Massal</button>
+                    <button onclick="toggleSelectAll()" class="btn btn-sm btn-warning">Pilih Semua</button>
+                    <button onclick="showBulkActions()" class="btn btn-sm btn-success">Aksi Massal</button>
                 </div>
             </div>
             
@@ -659,28 +877,28 @@ try {
                             <?php endforeach; ?>
                         </select>
                         <button type="button" onclick="assignMahasiswa()" class="btn btn-sm btn-success">
-                            👨‍🏫 Assign
+                            Assign
                         </button>
                     </div>
                     
                     <button type="button" onclick="resetAssignment()" class="btn btn-sm btn-warning">
-                        🔄 Reset Assignment
+                        Reset Assignment
                     </button>
                 </div>
                                 
-                <!-- 🆕 NEW: Reset Penilaian Actions -->
+                <!-- Reset Penilaian Actions -->
                 <div class="action-group">
                     <button type="button" onclick="resetPenilaian()" class="btn btn-sm btn-info">
-                        📝 Reset Penilaian ke Draft
+                        Reset Penilaian ke Draft
                     </button>
                 </div>
                 
-                <!-- 🆕 NEW: Danger Zone -->
+                <!-- Danger Zone -->
                 <div class="danger-zone">
-                    <h4>⚠️ Zona Berbahaya</h4>
+                    <h4>Zona Berbahaya</h4>
                     <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">Operasi di bawah akan menghapus data secara permanen!</p>
                     <button type="button" onclick="deleteMahasiswa()" class="btn btn-sm btn-delete">
-                        🗑️ Hapus Mahasiswa Terpilih
+                        Hapus Mahasiswa Terpilih
                     </button>
                 </div>
             </div>
@@ -719,7 +937,7 @@ try {
                                 <td>
                                     <strong><?= sanitizeInput($mhs['nama_lengkap']) ?></strong>
                                     <?php if ($mhs['no_telepon']): ?>
-                                        <br><small style="color: #666;">📞 <?= sanitizeInput($mhs['no_telepon']) ?></small>
+                                        <br><small style="color: #666;"><?= sanitizeInput($mhs['no_telepon']) ?></small>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -733,7 +951,7 @@ try {
                                 <td>
                                     <?= sanitizeInput($mhs['tempat_tugas']) ?>
                                     <?php if ($mhs['provinsi']): ?>
-                                        <br><small style="color: #666;">📍 <?= sanitizeInput($mhs['kabupaten'] ?? '') ?>, <?= sanitizeInput($mhs['provinsi']) ?></small>
+                                        <br><small style="color: #666;"><?= sanitizeInput($mhs['kabupaten'] ?? '') ?>, <?= sanitizeInput($mhs['provinsi']) ?></small>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -747,23 +965,28 @@ try {
                                 <td>
                                     <?php if ($mhs['nama_dosen']): ?>
                                         <?= sanitizeInput($mhs['nama_dosen']) ?>
+                                        <!-- 🆕 NEW: Unassign Button -->
+                                        <button onclick="unassignSingle(<?= $mhs['id'] ?>, '<?= addslashes($mhs['nama_lengkap']) ?>')" 
+                                                class="btn-unassign" title="Batalkan Assignment">
+                                            ❌
+                                        </button>
                                     <?php else: ?>
                                         <span class="badge badge-warning">Belum Di-assign</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($mhs['penilaian_status'] === 'final'): ?>
-                                        <span class="badge badge-success">✅ Selesai</span>
+                                        <span class="badge badge-success">Selesai</span>
                                     <?php elseif ($mhs['penilaian_status'] === 'draft'): ?>
-                                        <span class="badge badge-warning">📝 Draft</span>
+                                        <span class="badge badge-warning">Draft</span>
                                     <?php else: ?>
-                                        <span class="badge badge-danger">⏳ Belum Dinilai</span>
+                                        <span class="badge badge-danger">Belum Dinilai</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($mhs['nama_dosen']): ?>
                                         <a href="penilaian.php?id=<?= $mhs['id'] ?>" class="btn btn-sm btn-primary">
-                                            👁️ Lihat
+                                            Lihat
                                         </a>
                                     <?php endif; ?>
                                     
@@ -814,6 +1037,12 @@ try {
     <form id="singleActionForm" method="POST" style="display: none;">
         <input type="hidden" name="action" id="singleAction">
         <input type="hidden" name="mahasiswa_id" id="singleMahasiswaId">
+    </form>
+    
+    <!-- 🆕 NEW: Unassign Single Form -->
+    <form id="unassignSingleForm" method="POST" style="display: none;">
+        <input type="hidden" name="action" value="unassign_single">
+        <input type="hidden" id="unassign_mahasiswa_id" name="mahasiswa_id">
     </form>
     
     <script>
@@ -887,7 +1116,6 @@ try {
             document.getElementById('bulkActionForm').submit();
         }
         
-        // 🆕 NEW: Reset Assignment Function
         function resetAssignment() {
             const selectedIds = getSelectedIds();
             if (selectedIds.length === 0) {
@@ -900,7 +1128,6 @@ try {
             }
         }
         
-        // 🆕 NEW: Reset Penilaian Function
         function resetPenilaian() {
             const count = getSelectedIds().length;
             if (count === 0) {
@@ -913,7 +1140,6 @@ try {
             }
         }
         
-        // 🆕 NEW: Delete Mahasiswa Function
         function deleteMahasiswa() {
             const selectedIds = getSelectedIds();
             if (selectedIds.length === 0) {
@@ -922,7 +1148,7 @@ try {
             }
             
             const count = selectedIds.length;
-            if (confirm(`⚠️ PERINGATAN KERAS! 
+            if (confirm(`PERINGATAN KERAS! 
             
 Anda akan menghapus ${count} mahasiswa secara PERMANEN!
 
@@ -944,9 +1170,8 @@ Ketik "HAPUS" untuk melanjutkan:`)) {
             }
         }
         
-        // 🆕 NEW: Delete Single Function
         function deleteSingle(mahasiswaId, namaMahasiswa) {
-            if (confirm(`⚠️ PERINGATAN KERAS!
+            if (confirm(`PERINGATAN KERAS!
 
 Anda akan menghapus mahasiswa "${namaMahasiswa}" secara PERMANEN!
 
@@ -964,6 +1189,31 @@ Lanjutkan?`)) {
                     document.getElementById('singleAction').value = 'delete_single';
                     document.getElementById('singleMahasiswaId').value = mahasiswaId;
                     document.getElementById('singleActionForm').submit();
+                } else {
+                    alert('Konfirmasi tidak sesuai. Operasi dibatalkan.');
+                }
+            }
+        }
+        
+        // 🆕 NEW: Unassign Single Function
+        function unassignSingle(mahasiswaId, mahasiswaNama) {
+            const confirmMsg = `KONFIRMASI BATALKAN ASSIGNMENT
+
+Anda akan membatalkan assignment untuk mahasiswa:
+"${mahasiswaNama}"
+
+Setelah dibatalkan:
+• Status akan menjadi "Belum Di-assign"
+• Semua penilaian yang ada akan dihapus
+• Mahasiswa bisa di-assign ulang ke dosen lain
+
+Lanjutkan?`;
+
+            if (confirm(confirmMsg)) {
+                const confirmation = prompt('Ketik "BATALKAN" untuk konfirmasi:');
+                if (confirmation === 'BATALKAN') {
+                    document.getElementById('unassign_mahasiswa_id').value = mahasiswaId;
+                    document.getElementById('unassignSingleForm').submit();
                 } else {
                     alert('Konfirmasi tidak sesuai. Operasi dibatalkan.');
                 }

@@ -10,6 +10,60 @@ if (!$mahasiswa_id) {
     exit();
 }
 
+// =============================================================================
+// TAMBAHAN: WHATSAPP FUNCTIONS (LETAKKAN SETELAH BARIS requireLogin() di atas)
+// =============================================================================
+
+/**
+ * Konversi nomor HP Indonesia ke format internasional untuk WhatsApp
+ */
+function formatWhatsAppNumber($phone_number) {
+    if (empty($phone_number) || $phone_number === 'Tidak tersedia') {
+        return null;
+    }
+    
+    // Clean number - remove spaces, dashes, dots
+    $clean_number = preg_replace('/[^0-9]/', '', $phone_number);
+    
+    // Convert to international format
+    if (strlen($clean_number) >= 10) {
+        // Remove leading 0 and add 62
+        if (substr($clean_number, 0, 1) === '0') {
+            $clean_number = '62' . substr($clean_number, 1);
+        }
+        // If doesn't start with 62, assume it's local and add 62
+        elseif (substr($clean_number, 0, 2) !== '62') {
+            $clean_number = '62' . $clean_number;
+        }
+        
+        return $clean_number;
+    }
+    
+    return null;
+}
+
+/**
+ * Generate WhatsApp chat URL
+ */
+function generateWhatsAppURL($phone_number, $nama_mahasiswa = '') {
+    $formatted_number = formatWhatsAppNumber($phone_number);
+    
+    if (!$formatted_number) {
+        return null;
+    }
+    
+    $default_message = $nama_mahasiswa ? 
+        "Halo {$nama_mahasiswa}, saya dosen penilai RPL Anda. " : 
+        "Halo, saya dosen penilai RPL Anda. ";
+    $default_message .= "Ada beberapa hal yang ingin saya diskusikan terkait dokumen dan penilaian RPL Anda.";
+    
+    return "https://wa.me/{$formatted_number}?text=" . urlencode($default_message);
+}
+
+// =============================================================================
+// SISANYA TETAP SAMA SAMPAI BAGIAN INFO-GRID...
+// =============================================================================
+
 // Ambil data mahasiswa dan cek akses - UPDATE: tambah semua kolom dokumen baru
 try {
     $stmt = $pdo->prepare("
@@ -253,6 +307,67 @@ $rubrik = getRubrikPenilaian();
             font-weight: 600;
             color: #2c3e50;
         }
+        
+        /* =============================================================================
+           TAMBAHAN: CSS UNTUK WHATSAPP BUTTON (LETAKKAN SEBELUM .form-section)
+           ============================================================================= */
+        
+        /* WhatsApp Button Styling */
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 0.5rem 0.8rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);
+            border: none;
+            cursor: pointer;
+            max-width: 110px;
+        }
+
+        .whatsapp-btn:hover {
+            background: linear-gradient(135deg, #128C7E, #075E54);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(37, 211, 102, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .whatsapp-btn:active {
+            transform: translateY(0);
+        }
+
+        .wa-icon {
+            font-size: 1rem;
+        }
+
+        .wa-text {
+            white-space: nowrap;
+        }
+
+        .wa-unavailable {
+            color: #999;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .whatsapp-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+                max-width: 90px;
+            }
+        }
+        
+        /* =============================================================================
+           CSS ASLI DILANJUTKAN...
+           ============================================================================= */
         
         .form-section {
             margin-bottom: 2rem;
@@ -567,6 +682,30 @@ $rubrik = getRubrikPenilaian();
                         <span class="info-label">Provinsi</span>
                         <span class="info-value"><?= sanitizeInput($data['provinsi'] ?? 'Tidak tersedia') ?></span>
                     </div>
+                    
+                    <!-- =============================================================================
+                         TAMBAHAN: KOLOM CHAT WA (TAMBAHKAN SETELAH KOLOM PROVINSI)
+                         ============================================================================= -->
+                    <div class="info-item">
+                        <span class="info-label">Chat WA</span>
+                        <span class="info-value">
+                            <?php 
+                            $wa_url = generateWhatsAppURL($data['no_telepon'] ?? '', $data['nama_lengkap'] ?? '');
+                            if ($wa_url): 
+                            ?>
+                                <a href="<?= $wa_url ?>" 
+                                   target="_blank" 
+                                   class="whatsapp-btn"
+                                   title="Chat WhatsApp dengan <?= sanitizeInput($data['nama_lengkap']) ?>">
+                                    <span class="wa-icon">💬</span>
+                                    <span class="wa-text">Chat WA</span>
+                                </a>
+                            <?php else: ?>
+                                <span class="wa-unavailable">Nomor tidak valid</span>
+                            <?php endif; ?>
+                        </span>
+                    </div>
+                    
                     <div class="info-item">
                         <span class="info-label">Status Penilaian</span>
                         <span class="info-value">
@@ -578,9 +717,6 @@ $rubrik = getRubrikPenilaian();
                                 <span class="badge badge-danger">⏳ Belum Dinilai</span>
                             <?php endif; ?>
                         </span>
-                    </div>
-                    <div class="info-item">
-                        <!-- Kosong untuk grid balance -->
                     </div>
                 </div>
             </div>
@@ -859,7 +995,7 @@ $rubrik = getRubrikPenilaian();
             </div>
             
             <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-top: 2rem;">
-                <h4 style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Konversi Nilai (Update)</h4>
+                <h4 style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Konversi Nilai</h4>
                 <div style="font-size: 0.8rem; color: #666;">
                     <div>80-100 = A</div>
                     <div>70-79,9 = B</div>

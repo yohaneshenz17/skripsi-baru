@@ -510,6 +510,7 @@ $rubrik = getRubrikPenilaian();
             <div class="mahasiswa-info">
                 <h3>Informasi Mahasiswa</h3>
                 <div class="info-grid">
+                    <!-- Row 1 -->
                     <div class="info-item">
                         <span class="info-label">NIM</span>
                         <span class="info-value"><?= sanitizeInput($data['nim']) ?></span>
@@ -519,12 +520,67 @@ $rubrik = getRubrikPenilaian();
                         <span class="info-value"><?= sanitizeInput($data['nama_lengkap']) ?></span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Jenjang</span>
-                        <span class="info-value"><?= sanitizeInput($data['jenjang']) ?></span>
+                        <span class="info-label">Jenis Kelamin</span>
+                        <span class="info-value"><?= sanitizeInput($data['jenis_kelamin'] ?? 'Tidak tersedia') ?></span>
                     </div>
+                    
+                    <!-- Row 2 -->
+                    <div class="info-item">
+                        <span class="info-label">Tanggal Lahir</span>
+                        <span class="info-value">
+                            <?= $data['tanggal_lahir'] ? formatTanggalIndo($data['tanggal_lahir']) : 'Tidak tersedia' ?>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Nomor HP</span>
+                        <span class="info-value"><?= sanitizeInput($data['no_telepon'] ?? 'Tidak tersedia') ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Jenjang</span>
+                        <span class="info-value">
+                            <span class="badge badge-info"><?= sanitizeInput($data['jenjang']) ?></span>
+                        </span>
+                    </div>
+                    
+                    <!-- Row 3 -->
                     <div class="info-item">
                         <span class="info-label">Tempat Tugas</span>
                         <span class="info-value"><?= sanitizeInput($data['tempat_tugas']) ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status Pegawai</span>
+                        <span class="info-value">
+                            <?php if ($data['status_pegawai']): ?>
+                                <span class="badge badge-success"><?= sanitizeInput($data['status_pegawai']) ?></span>
+                            <?php else: ?>
+                                Tidak tersedia
+                            <?php endif; ?>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Kabupaten</span>
+                        <span class="info-value"><?= sanitizeInput($data['kabupaten'] ?? 'Tidak tersedia') ?></span>
+                    </div>
+                    
+                    <!-- Row 4 -->
+                    <div class="info-item">
+                        <span class="info-label">Provinsi</span>
+                        <span class="info-value"><?= sanitizeInput($data['provinsi'] ?? 'Tidak tersedia') ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status Penilaian</span>
+                        <span class="info-value">
+                            <?php if ($data['status_penilaian'] === 'final'): ?>
+                                <span class="badge badge-success">✅ Selesai</span>
+                            <?php elseif ($data['status_penilaian'] === 'draft'): ?>
+                                <span class="badge badge-warning">📝 Draft</span>
+                            <?php else: ?>
+                                <span class="badge badge-danger">⏳ Belum Dinilai</span>
+                            <?php endif; ?>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <!-- Kosong untuk grid balance -->
                     </div>
                 </div>
             </div>

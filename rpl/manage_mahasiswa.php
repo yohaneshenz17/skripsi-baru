@@ -650,24 +650,24 @@ try {
                 
                 <!-- Assignment Actions -->
                 <div class="action-group">
-                    <form method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
                         <label for="assign_dosen_id">Assign ke dosen:</label>
-                        <select id="assign_dosen_id" name="assign_dosen_id" style="width: auto;">
+                        <select id="assign_dosen_id" style="width: auto;">
                             <option value="">Pilih Dosen</option>
                             <?php foreach ($dosen_options as $dosen): ?>
                                 <option value="<?= $dosen['id'] ?>"><?= sanitizeInput($dosen['nama_lengkap']) ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <button type="submit" name="action" value="assign_mahasiswa" class="btn btn-sm btn-success">
+                        <button type="button" onclick="assignMahasiswa()" class="btn btn-sm btn-success">
                             👨‍🏫 Assign
                         </button>
-                    </form>
+                    </div>
                     
                     <button type="button" onclick="resetAssignment()" class="btn btn-sm btn-warning">
                         🔄 Reset Assignment
                     </button>
                 </div>
-                
+                                
                 <!-- 🆕 NEW: Reset Penilaian Actions -->
                 <div class="action-group">
                     <button type="button" onclick="resetPenilaian()" class="btn btn-sm btn-info">
@@ -698,8 +698,11 @@ try {
                             </th>
                             <th>NIM</th>
                             <th>Nama Lengkap</th>
+                            <th>L/P</th>
                             <th>Jenjang</th>
                             <th>Tempat Tugas</th>
+                            <th>Status Pegawai</th>
+                            <th>Kabupaten</th>
                             <th>Dosen Penilai</th>
                             <th>Status Penilaian</th>
                             <th>Aksi</th>
@@ -713,11 +716,34 @@ try {
                                            class="mahasiswa-checkbox" onchange="updateSelectedCount()">
                                 </td>
                                 <td><?= sanitizeInput($mhs['nim']) ?></td>
-                                <td><?= sanitizeInput($mhs['nama_lengkap']) ?></td>
+                                <td>
+                                    <strong><?= sanitizeInput($mhs['nama_lengkap']) ?></strong>
+                                    <?php if ($mhs['no_telepon']): ?>
+                                        <br><small style="color: #666;">📞 <?= sanitizeInput($mhs['no_telepon']) ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <span class="badge <?= ($mhs['jenis_kelamin'] ?? '') === 'Laki-laki' ? 'badge-info' : 'badge-warning' ?>">
+                                        <?= $mhs['jenis_kelamin'] === 'Laki-laki' ? 'L' : ($mhs['jenis_kelamin'] === 'Perempuan' ? 'P' : '?') ?>
+                                    </span>
+                                </td>
                                 <td>
                                     <span class="badge badge-info"><?= sanitizeInput($mhs['jenjang']) ?></span>
                                 </td>
-                                <td><?= sanitizeInput($mhs['tempat_tugas']) ?></td>
+                                <td>
+                                    <?= sanitizeInput($mhs['tempat_tugas']) ?>
+                                    <?php if ($mhs['provinsi']): ?>
+                                        <br><small style="color: #666;">📍 <?= sanitizeInput($mhs['kabupaten'] ?? '') ?>, <?= sanitizeInput($mhs['provinsi']) ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($mhs['status_pegawai']): ?>
+                                        <span class="badge badge-success"><?= sanitizeInput($mhs['status_pegawai']) ?></span>
+                                    <?php else: ?>
+                                        <span style="color: #999; font-size: 0.8rem;">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= sanitizeInput($mhs['kabupaten'] ?? '-') ?></td>
                                 <td>
                                     <?php if ($mhs['nama_dosen']): ?>
                                         <?= sanitizeInput($mhs['nama_dosen']) ?>
@@ -741,7 +767,6 @@ try {
                                         </a>
                                     <?php endif; ?>
                                     
-                                    <!-- 🆕 NEW: Delete Single Button -->
                                     <button onclick="deleteSingle(<?= $mhs['id'] ?>, '<?= sanitizeInput($mhs['nama_lengkap']) ?>')" 
                                             class="btn btn-sm btn-danger" title="Hapus mahasiswa">
                                         🗑️
@@ -807,20 +832,25 @@ try {
         
         function updateSelectedCount() {
             const selected = document.querySelectorAll('.mahasiswa-checkbox:checked');
-            document.getElementById('selectedCount').textContent = selected.length;
+            const countElement = document.getElementById('selectedCount');
+            if (countElement) {
+                countElement.textContent = selected.length;
+            }
             
             // Update selectAll checkbox
             const total = document.querySelectorAll('.mahasiswa-checkbox');
             const selectAllCheckbox = document.getElementById('selectAll');
             
-            if (selected.length === 0) {
-                selectAllCheckbox.indeterminate = false;
-                selectAllCheckbox.checked = false;
-            } else if (selected.length === total.length) {
-                selectAllCheckbox.indeterminate = false;
-                selectAllCheckbox.checked = true;
-            } else {
-                selectAllCheckbox.indeterminate = true;
+            if (selectAllCheckbox) {
+                if (selected.length === 0) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = false;
+                } else if (selected.length === total.length) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = true;
+                } else {
+                    selectAllCheckbox.indeterminate = true;
+                }
             }
         }
         
@@ -842,7 +872,7 @@ try {
             }
             
             document.getElementById('bulkAction').value = action;
-            
+                    
             // Add selected IDs to form
             const idsContainer = document.getElementById('selectedIds');
             idsContainer.innerHTML = '';
@@ -859,7 +889,13 @@ try {
         
         // 🆕 NEW: Reset Assignment Function
         function resetAssignment() {
-            if (confirm('Reset assignment mahasiswa terpilih? Penilaian yang ada akan dihapus!')) {
+            const selectedIds = getSelectedIds();
+            if (selectedIds.length === 0) {
+                alert('Pilih minimal satu mahasiswa!');
+                return;
+            }
+            
+            if (confirm(`Reset assignment ${selectedIds.length} mahasiswa? Penilaian yang ada akan dihapus!`)) {
                 submitBulkAction('reset_assignment');
             }
         }
@@ -937,5 +973,54 @@ Lanjutkan?`)) {
         // Initialize
         updateSelectedCount();
     </script>
+
+    <script>
+    function assignMahasiswa() {
+        const selectedIds = getSelectedIds();
+        const dosenId = document.getElementById('assign_dosen_id').value;
+        
+        if (selectedIds.length === 0) {
+            alert('Pilih minimal satu mahasiswa!');
+            return;
+        }
+        
+        if (!dosenId) {
+            alert('Pilih dosen yang akan ditugaskan!');
+            return;
+        }
+        
+        // Create form dynamically
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.style.display = 'none';
+        
+        // Add action
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'assign_mahasiswa';
+        form.appendChild(actionInput);
+        
+        // Add dosen ID
+        const dosenInput = document.createElement('input');
+        dosenInput.type = 'hidden';
+        dosenInput.name = 'assign_dosen_id';
+        dosenInput.value = dosenId;
+        form.appendChild(dosenInput);
+        
+        // Add selected mahasiswa IDs
+        selectedIds.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'mahasiswa_ids[]';
+            input.value = id;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+    </script>
+
 </body>
 </html>

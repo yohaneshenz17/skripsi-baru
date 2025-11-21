@@ -1,9 +1,14 @@
 """
-Aplikasi Generator Sertifikat Pendidik
+Aplikasi Generator Sertifikat Pendidik - FIXED VERSION
 STK Santo Yakobus Merauke
 
+PERUBAHAN:
+- PDF UKMPPG langsung digunakan sebagai konten (tidak di-extract ulang)
+- Hanya menambahkan: Nomor Seri, TTD, dan QR Code
+- Koordinat disesuaikan dengan preview.jpg
+
 Author: Claude AI Assistant
-Version: 1.0
+Version: 1.1 (FIXED)
 """
 
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
@@ -38,7 +43,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def extract_text_from_pdf(pdf_path):
-    """Extract text from PDF UKMPPG"""
+    """Extract text from PDF UKMPPG - HANYA untuk penamaan file"""
     try:
         reader = PdfReader(pdf_path)
         text = ""
@@ -50,14 +55,10 @@ def extract_text_from_pdf(pdf_path):
         return ""
 
 def parse_certificate_data(text):
-    """Parse data mahasiswa dari text PDF"""
+    """Parse data mahasiswa dari text PDF - HANYA untuk penamaan file"""
     data = {
-        'nomor': '',
         'nama': '',
-        'nim': '',
-        'tempat_lahir': '',
-        'tanggal_lahir': '',
-        'tanggal_kelulusan': ''
+        'nim': ''
     }
     
     try:
@@ -65,115 +66,80 @@ def parse_certificate_data(text):
         for i, line in enumerate(lines):
             line = line.strip()
             
-            # Extract Nomor
-            if 'Nomor:' in line:
-                data['nomor'] = line.replace('Nomor:', '').strip()
-            
             # Extract Nama (biasanya dalam huruf kapital semua)
             if line.isupper() and len(line) > 10 and 'KEMENTERIAN' not in line and 'SEKOLAH' not in line and 'SERTIFIKAT' not in line:
                 if not data['nama']:
                     data['nama'] = line.strip()
             
             # Extract NIM
-            if 'Nomor Induk Mahasiswa:' in line:
-                data['nim'] = line.replace('Nomor Induk Mahasiswa:', '').strip()
-            
-            # Extract tempat dan tanggal lahir
-            if 'lahir di' in line.lower():
-                parts = line.split('pada tanggal')
-                if len(parts) == 2:
-                    data['tempat_lahir'] = parts[0].replace('lahir di', '').strip()
-                    data['tanggal_lahir'] = parts[1].strip()
-            
-            # Extract tanggal kelulusan
-            if 'Merauke,' in line:
-                data['tanggal_kelulusan'] = line.replace('Merauke,', '').strip()
+            if 'Nomor Induk Mahasiswa:' in line or 'Nomor Induk Mahasiswa :' in line:
+                nim_part = line.replace('Nomor Induk Mahasiswa:', '').replace('Nomor Induk Mahasiswa :', '').strip()
+                if nim_part:
+                    data['nim'] = nim_part
                 
     except Exception as e:
         print(f"Error parsing data: {e}")
     
+    # Fallback jika tidak ketemu
+    if not data['nama']:
+        data['nama'] = 'UNKNOWN'
+    if not data['nim']:
+        data['nim'] = '00000000000'
+    
     return data
 
-def create_overlay_pdf(data, nomor_seri, ttd_ketua_path, ttd_kaprodi_path, 
-                       qr_ketua_path, qr_kaprodi_path, photo_data=None):
-    """Create overlay PDF with all elements"""
+def create_overlay_pdf(nomor_seri, ttd_ketua_path, ttd_kaprodi_path, 
+                       qr_ketua_path, qr_kaprodi_path):
+    """Create overlay PDF with ONLY nomor seri, TTD, and QR codes"""
     
     # Create a BytesIO buffer
     packet = io.BytesIO()
     
     # Create canvas with A4 landscape (like certificate)
-    can = canvas.Canvas(packet, pagesize=(842, 595))  # A4 landscape in points
+    # 842 x 595 points = A4 landscape
+    can = canvas.Canvas(packet, pagesize=(842, 595))
     
-    # Set font
-    can.setFont("Helvetica", 10)
-    
-    # Add Nomor Seri (pojok kanan atas)
-    can.setFont("Helvetica", 12)
-    can.drawRightString(820, 570, f"Nomor Seri : {nomor_seri}")
-    
-    # Add data mahasiswa (center area)
-    can.setFont("Helvetica-Bold", 12)
-    can.drawCentredString(421, 490, data['nomor'])
-    
-    can.setFont("Helvetica-Bold", 16)
-    can.drawCentredString(421, 440, data['nama'])
-    
+    # ========== HANYA NOMOR SERI (angka saja) ==========
+    # Koordinat disesuaikan dengan "Nomor Seri :" yang sudah ada di blanko
+    # Di preview.jpg, nomor seri ada di pojok kanan atas setelah "Nomor Seri :"
     can.setFont("Helvetica", 11)
-    can.drawCentredString(421, 415, f"Nomor Induk Mahasiswa: {data['nim']}")
+    can.drawString(1110, 570, nomor_seri)  # Koordinat X disesuaikan agar pas setelah "Nomor Seri :"
     
-    tempat_tgl = f"lahir di {data['tempat_lahir']} pada tanggal {data['tanggal_lahir']}"
-    can.drawCentredString(421, 395, tempat_tgl)
+    # ========== TTD DAN QR CODE ==========
+    # Koordinat disesuaikan dengan preview.jpg
     
-    # Add tanggal kelulusan (kanan bawah)
-    can.setFont("Helvetica", 10)
-    can.drawString(620, 240, f"Merauke, {data['tanggal_kelulusan']}")
-    can.drawString(620, 225, "Ketua Program Studi PPG,")
-    
-    # Add TTD Ketua (kiri bawah)
+    # TTD Ketua (kiri bawah) 
     if os.path.exists(ttd_ketua_path):
         try:
             img = ImageReader(ttd_ketua_path)
-            can.drawImage(img, 100, 150, width=100, height=50, mask='auto', preserveAspectRatio=True)
+            # Posisi dan ukuran disesuaikan dengan preview
+            can.drawImage(img, 160, 155, width=90, height=45, mask='auto', preserveAspectRatio=True)
         except Exception as e:
             print(f"Error adding TTD Ketua: {e}")
     
-    # Add QR Code Ketua (di samping TTD Ketua)
+    # QR Code Ketua (di samping TTD Ketua)
     if os.path.exists(qr_ketua_path):
         try:
             img = ImageReader(qr_ketua_path)
-            can.drawImage(img, 210, 150, width=50, height=50, mask='auto')
+            can.drawImage(img, 310, 140, width=70, height=70, mask='auto')
         except Exception as e:
             print(f"Error adding QR Ketua: {e}")
     
-    can.setFont("Helvetica", 9)
-    can.drawString(100, 140, "Dr. Donatus Wea, S.Ag., Lic.Iur.")
-    
-    # Add TTD Kaprodi (kanan bawah)
+    # TTD Kaprodi (kanan bawah)
     if os.path.exists(ttd_kaprodi_path):
         try:
             img = ImageReader(ttd_kaprodi_path)
-            can.drawImage(img, 620, 150, width=100, height=50, mask='auto', preserveAspectRatio=True)
+            can.drawImage(img, 960, 155, width=90, height=45, mask='auto', preserveAspectRatio=True)
         except Exception as e:
             print(f"Error adding TTD Kaprodi: {e}")
     
-    # Add QR Code Kaprodi (di samping TTD Kaprodi)
+    # QR Code Kaprodi (di samping TTD Kaprodi)
     if os.path.exists(qr_kaprodi_path):
         try:
             img = ImageReader(qr_kaprodi_path)
-            can.drawImage(img, 730, 150, width=50, height=50, mask='auto')
+            can.drawImage(img, 1110, 140, width=70, height=70, mask='auto')
         except Exception as e:
             print(f"Error adding QR Kaprodi: {e}")
-    
-    can.setFont("Helvetica", 9)
-    can.drawString(620, 140, "Paulina Wula, S.Pd., M.Pd.")
-    
-    # Add photo if available (center bottom)
-    if photo_data:
-        try:
-            # Photo will be added from extracted PDF data
-            pass
-        except Exception as e:
-            print(f"Error adding photo: {e}")
     
     can.save()
     
@@ -185,40 +151,60 @@ def generate_certificate(blanko_path, pdf_ukmppg_path, nomor_seri,
                          ttd_ketua_path, ttd_kaprodi_path,
                          qr_ketua_path, qr_kaprodi_path,
                          output_path):
-    """Generate final certificate PDF"""
+    """Generate final certificate PDF by merging: Blanko + PDF UKMPPG + Overlay"""
     
     try:
-        # Extract data from UKMPPG PDF
+        # Extract nama dan NIM HANYA untuk penamaan file
         text = extract_text_from_pdf(pdf_ukmppg_path)
         data = parse_certificate_data(text)
         
-        # Create overlay
-        overlay_packet = create_overlay_pdf(
-            data, nomor_seri,
-            ttd_ketua_path, ttd_kaprodi_path,
-            qr_ketua_path, qr_kaprodi_path
-        )
+        print(f"Processing: {data['nama']} (NIM: {data['nim']})")
+        
+        # Read PDF UKMPPG (ini yang punya semua data mahasiswa lengkap)
+        ukmppg_reader = PdfReader(pdf_ukmppg_path)
         
         # Read blanko as background
         blanko_reader = PdfReader(blanko_path)
+        
+        # Create overlay dengan hanya nomor seri, TTD, dan QR
+        overlay_packet = create_overlay_pdf(
+            nomor_seri,
+            ttd_ketua_path, ttd_kaprodi_path,
+            qr_ketua_path, qr_kaprodi_path
+        )
         overlay_reader = PdfReader(overlay_packet)
         
         # Create output
         output = PdfWriter()
         
-        # Merge blanko with overlay
+        # ========== MERGE STRATEGY ==========
+        # Layer 1: Blanko (background)
+        # Layer 2: PDF UKMPPG (content dengan data mahasiswa lengkap)
+        # Layer 3: Overlay (nomor seri + TTD + QR)
+        
+        # Start with blanko as base
         page = blanko_reader.pages[0]
+        
+        # Merge UKMPPG content (ini yang punya data mahasiswa lengkap)
+        if len(ukmppg_reader.pages) > 0:
+            page.merge_page(ukmppg_reader.pages[0])
+        
+        # Merge overlay (nomor seri + TTD + QR)
         page.merge_page(overlay_reader.pages[0])
+        
         output.add_page(page)
         
         # Write output
         with open(output_path, 'wb') as output_file:
             output.write(output_file)
         
+        print(f"✅ Generated: {output_path}")
         return True, data['nama'], data['nim']
         
     except Exception as e:
-        print(f"Error generating certificate: {e}")
+        import traceback
+        traceback.print_exc()
+        print(f"❌ Error generating certificate: {e}")
         return False, str(e), ""
 
 @app.route('/')
@@ -366,9 +352,16 @@ def generate():
         results = []
         nomor_seri = session_data['nomor_awal']
         
+        print("\n" + "="*60)
+        print("🎓 MULAI GENERATE SERTIFIKAT")
+        print("="*60)
+        
         # Generate each certificate
         for i, pdf_path in enumerate(session_data['pdf_paths']):
             nomor_seri_str = str(nomor_seri).zfill(7)
+            
+            print(f"\n[{i+1}/{len(session_data['pdf_paths'])}] Processing: {os.path.basename(pdf_path)}")
+            print(f"   Nomor Seri: {nomor_seri_str}")
             
             # Extract nama for filename
             text = extract_text_from_pdf(pdf_path)
@@ -404,6 +397,10 @@ def generate():
                 })
             
             nomor_seri += 1
+        
+        print("\n" + "="*60)
+        print(f"✅ SELESAI! Generated {len(results)} sertifikat")
+        print("="*60 + "\n")
         
         # Store output folder for download
         session_data['output_folder'] = output_folder
@@ -517,6 +514,7 @@ if __name__ == '__main__':
     
     print("=" * 60)
     print("🎓 GENERATOR SERTIFIKAT PENDIDIK - STK YAKOBUS MERAUKE")
+    print("   VERSION 1.1 - FIXED")
     print("=" * 60)
     print("\n✅ Aplikasi berjalan di: http://localhost:5000")
     print("📝 Buka browser dan akses URL di atas")

@@ -1,14 +1,14 @@
 """
-Aplikasi Generator Sertifikat Pendidik - FIXED VERSION
+Aplikasi Generator Sertifikat Pendidik - FINAL VERSION
 STK Santo Yakobus Merauke
 
-PERUBAHAN:
+PERUBAHAN v1.3:
 - PDF UKMPPG langsung digunakan sebagai konten (tidak di-extract ulang)
 - Hanya menambahkan: Nomor Seri, TTD, dan QR Code
-- Koordinat disesuaikan dengan preview.jpg
+- Koordinat FINE-TUNED berdasarkan pengukuran manual + screenshot actual output
 
 Author: Claude AI Assistant
-Version: 1.1 (FIXED)
+Version: 1.3 (FINAL - FINE-TUNED)
 """
 
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
@@ -90,7 +90,7 @@ def parse_certificate_data(text):
 
 def create_overlay_pdf(nomor_seri, ttd_ketua_path, ttd_kaprodi_path, 
                        qr_ketua_path, qr_kaprodi_path):
-    """Create overlay PDF with ONLY nomor seri, TTD, and QR codes"""
+    """Create overlay PDF with ONLY nomor seri, TTD, and QR codes - FINE-TUNED"""
     
     # Create a BytesIO buffer
     packet = io.BytesIO()
@@ -99,43 +99,43 @@ def create_overlay_pdf(nomor_seri, ttd_ketua_path, ttd_kaprodi_path,
     # 842 x 595 points = A4 landscape
     can = canvas.Canvas(packet, pagesize=(842, 595))
     
-    # ========== KOORDINAT BERDASARKAN PENGUKURAN MANUAL ==========
-    # Pengukuran dalam mm, dikonversi ke points (1mm = 2.83465 points)
-    # A4 Landscape: 297mm x 210mm = 842pt x 595pt
+    # ========== KOORDINAT FINE-TUNED v1.3 ==========
+    # Berdasarkan pengukuran manual + adjustment dari screenshot actual output
     
-    # NOMOR SERI (263mm dari kiri, 195mm dari bawah)
-    can.setFont("Helvetica", 12)
-    can.drawString(750, 561, nomor_seri)
+    # NOMOR SERI - Posisi SUDAH BAGUS dari screenshot ✅
+    can.setFont("Helvetica", 11)
+    can.drawString(746, 553, nomor_seri)
     
-    # TTD KETUA (40mm dari kiri, 37mm dari bawah, ukuran 35x30mm)
+    # TTD KETUA - Diperkecil 30% dan geser sedikit ke kanan
+    # Screenshot menunjukkan TTD terlalu besar, jadi dikecilkan
     if os.path.exists(ttd_ketua_path):
         try:
             img = ImageReader(ttd_ketua_path)
-            can.drawImage(img, 93, 65, width=119, height=105, mask='auto', preserveAspectRatio=True)
+            can.drawImage(img, 130, 105, width=70, height=60, mask='auto', preserveAspectRatio=True)
         except Exception as e:
             print(f"Error adding TTD Ketua: {e}")
     
-    # QR CODE KETUA (75mm dari kiri, 37mm dari bawah, ukuran 21x21mm)
+    # QR CODE KETUA - Geser lebih ke kanan untuk spacing dari TTD
     if os.path.exists(qr_ketua_path):
         try:
             img = ImageReader(qr_ketua_path)
-            can.drawImage(img, 208, 85, width=60, height=60, mask='auto')
+            can.drawImage(img, 240, 105, width=60, height=60, mask='auto')
         except Exception as e:
             print(f"Error adding QR Ketua: {e}")
     
-    # TTD KAPRODI (208mm dari kiri, 37mm dari bawah, ukuran 40x17mm)
+    # TTD KAPRODI - SUDAH BAGUS dari screenshot ✅
     if os.path.exists(ttd_kaprodi_path):
         try:
             img = ImageReader(ttd_kaprodi_path)
-            can.drawImage(img, 590, 80, width=113, height=55, mask='auto', preserveAspectRatio=True)
+            can.drawImage(img, 590, 105, width=113, height=48, mask='auto', preserveAspectRatio=True)
         except Exception as e:
             print(f"Error adding TTD Kaprodi: {e}")
     
-    # QR CODE KAPRODI (255mm dari kiri, 37mm dari bawah, ukuran 21x21mm)
+    # QR CODE KAPRODI - SUDAH BAGUS dari screenshot ✅
     if os.path.exists(qr_kaprodi_path):
         try:
             img = ImageReader(qr_kaprodi_path)
-            can.drawImage(img, 723, 85, width=60, height=60, mask='auto')
+            can.drawImage(img, 723, 105, width=60, height=60, mask='auto')
         except Exception as e:
             print(f"Error adding QR Kaprodi: {e}")
     
@@ -512,7 +512,7 @@ if __name__ == '__main__':
     
     print("=" * 60)
     print("🎓 GENERATOR SERTIFIKAT PENDIDIK - STK YAKOBUS MERAUKE")
-    print("   VERSION 1.1 - FIXED")
+    print("   VERSION 1.3 - FINAL (FINE-TUNED)")
     print("=" * 60)
     print("\n✅ Aplikasi berjalan di: http://localhost:5000")
     print("📝 Buka browser dan akses URL di atas")

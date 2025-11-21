@@ -103,15 +103,15 @@ def create_overlay_pdf(nomor_seri, ttd_ketua_path, ttd_kaprodi_path,
     # Berdasarkan pengukuran manual + adjustment dari screenshot actual output
     
     # NOMOR SERI - Posisi SUDAH BAGUS dari screenshot ✅
-    can.setFont("Helvetica", 11)
-    can.drawString(746, 553, nomor_seri)
+    can.setFont("Helvetica", 13)
+    can.drawString(750, 562, nomor_seri)
     
     # TTD KETUA - Diperkecil 30% dan geser sedikit ke kanan
     # Screenshot menunjukkan TTD terlalu besar, jadi dikecilkan
     if os.path.exists(ttd_ketua_path):
         try:
             img = ImageReader(ttd_ketua_path)
-            can.drawImage(img, 130, 105, width=70, height=60, mask='auto', preserveAspectRatio=True)
+            can.drawImage(img, 70, 54, width=150, height=108, mask='auto', preserveAspectRatio=True)
         except Exception as e:
             print(f"Error adding TTD Ketua: {e}")
     
@@ -119,7 +119,7 @@ def create_overlay_pdf(nomor_seri, ttd_ketua_path, ttd_kaprodi_path,
     if os.path.exists(qr_ketua_path):
         try:
             img = ImageReader(qr_ketua_path)
-            can.drawImage(img, 240, 105, width=60, height=60, mask='auto')
+            can.drawImage(img, 208, 82, width=60, height=60, mask='auto')
         except Exception as e:
             print(f"Error adding QR Ketua: {e}")
     
@@ -127,7 +127,7 @@ def create_overlay_pdf(nomor_seri, ttd_ketua_path, ttd_kaprodi_path,
     if os.path.exists(ttd_kaprodi_path):
         try:
             img = ImageReader(ttd_kaprodi_path)
-            can.drawImage(img, 590, 105, width=113, height=48, mask='auto', preserveAspectRatio=True)
+            can.drawImage(img, 580, 65, width=133, height=78, mask='auto', preserveAspectRatio=True)
         except Exception as e:
             print(f"Error adding TTD Kaprodi: {e}")
     
@@ -135,7 +135,7 @@ def create_overlay_pdf(nomor_seri, ttd_ketua_path, ttd_kaprodi_path,
     if os.path.exists(qr_kaprodi_path):
         try:
             img = ImageReader(qr_kaprodi_path)
-            can.drawImage(img, 723, 105, width=60, height=60, mask='auto')
+            can.drawImage(img, 735, 82, width=60, height=60, mask='auto')
         except Exception as e:
             print(f"Error adding QR Kaprodi: {e}")
     

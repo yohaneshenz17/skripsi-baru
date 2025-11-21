@@ -99,45 +99,43 @@ def create_overlay_pdf(nomor_seri, ttd_ketua_path, ttd_kaprodi_path,
     # 842 x 595 points = A4 landscape
     can = canvas.Canvas(packet, pagesize=(842, 595))
     
-    # ========== HANYA NOMOR SERI (angka saja) ==========
-    # Koordinat disesuaikan dengan "Nomor Seri :" yang sudah ada di blanko
-    # Di preview.jpg, nomor seri ada di pojok kanan atas setelah "Nomor Seri :"
-    can.setFont("Helvetica", 11)
-    can.drawString(1110, 570, nomor_seri)  # Koordinat X disesuaikan agar pas setelah "Nomor Seri :"
+    # ========== KOORDINAT BERDASARKAN PENGUKURAN MANUAL ==========
+    # Pengukuran dalam mm, dikonversi ke points (1mm = 2.83465 points)
+    # A4 Landscape: 297mm x 210mm = 842pt x 595pt
     
-    # ========== TTD DAN QR CODE ==========
-    # Koordinat disesuaikan dengan preview.jpg
+    # NOMOR SERI (263mm dari kiri, 195mm dari bawah)
+    can.setFont("Helvetica", 12)
+    can.drawString(750, 561, nomor_seri)
     
-    # TTD Ketua (kiri bawah) 
+    # TTD KETUA (40mm dari kiri, 37mm dari bawah, ukuran 35x30mm)
     if os.path.exists(ttd_ketua_path):
         try:
             img = ImageReader(ttd_ketua_path)
-            # Posisi dan ukuran disesuaikan dengan preview
-            can.drawImage(img, 160, 155, width=90, height=45, mask='auto', preserveAspectRatio=True)
+            can.drawImage(img, 93, 65, width=119, height=105, mask='auto', preserveAspectRatio=True)
         except Exception as e:
             print(f"Error adding TTD Ketua: {e}")
     
-    # QR Code Ketua (di samping TTD Ketua)
+    # QR CODE KETUA (75mm dari kiri, 37mm dari bawah, ukuran 21x21mm)
     if os.path.exists(qr_ketua_path):
         try:
             img = ImageReader(qr_ketua_path)
-            can.drawImage(img, 310, 140, width=70, height=70, mask='auto')
+            can.drawImage(img, 208, 85, width=60, height=60, mask='auto')
         except Exception as e:
             print(f"Error adding QR Ketua: {e}")
     
-    # TTD Kaprodi (kanan bawah)
+    # TTD KAPRODI (208mm dari kiri, 37mm dari bawah, ukuran 40x17mm)
     if os.path.exists(ttd_kaprodi_path):
         try:
             img = ImageReader(ttd_kaprodi_path)
-            can.drawImage(img, 960, 155, width=90, height=45, mask='auto', preserveAspectRatio=True)
+            can.drawImage(img, 590, 80, width=113, height=55, mask='auto', preserveAspectRatio=True)
         except Exception as e:
             print(f"Error adding TTD Kaprodi: {e}")
     
-    # QR Code Kaprodi (di samping TTD Kaprodi)
+    # QR CODE KAPRODI (255mm dari kiri, 37mm dari bawah, ukuran 21x21mm)
     if os.path.exists(qr_kaprodi_path):
         try:
             img = ImageReader(qr_kaprodi_path)
-            can.drawImage(img, 1110, 140, width=70, height=70, mask='auto')
+            can.drawImage(img, 723, 85, width=60, height=60, mask='auto')
         except Exception as e:
             print(f"Error adding QR Kaprodi: {e}")
     

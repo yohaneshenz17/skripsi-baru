@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Sertifikat Pendidik - STK Yakobus Merauke</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .step {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .step-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-area.dragover {
+            background: #e3f2fd;
+            border-color: #2196F3;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e7f3ff;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #0066cc;
+        }
+        
+        .input-group {
+            margin-top: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .results-container {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .results-table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Generator Sertifikat Pendidik</h1>
+            <p>Sekolah Tinggi Katolik Santo Yakobus Merauke</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="alert alert-info">
+                <strong>ℹ️ Panduan Penggunaan:</strong>
+                <ol style="margin-top: 10px; margin-left: 20px;">
+                    <li>Upload blanko sertifikat kosong (background)</li>
+                    <li>Upload file PDF dari UKMPPG (bisa multiple files sekaligus)</li>
+                    <li>Upload tanda tangan Ketua & Ketua Program Studi (format PNG)</li>
+                    <li>Upload QR code segel elektronik untuk masing-masing pejabat</li>
+                    <li>Masukkan nomor seri awal (7 digit, contoh: 0000900)</li>
+                    <li>Klik "Upload Semua File" lalu "Generate Sertifikat"</li>
+                </ol>
+            </div>
+            
+            <!-- Step 1: Blanko -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    Upload Blanko Sertifikat Kosong
+                </div>
+                <div class="upload-area" id="blanko-area" onclick="document.getElementById('blanko-input').click()">
+                    <div class="upload-icon">📄</div>
+                    <p><strong>Klik atau drag & drop</strong> file blanko sertifikat</p>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">Format: PDF</p>
+                </div>
+                <input type="file" id="blanko-input" class="file-input" accept=".pdf">
+                <div id="blanko-info" class="file-info" style="display: none;"></div>
+            </div>
+            
+            <!-- Step 2: PDF Files -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    Upload File PDF dari UKMPPG (Batch)
+                </div>
+                <div class="upload-area" id="pdf-area" onclick="document.getElementById('pdf-input').click()">
+                    <div class="upload-icon">📚</div>
+                    <p><strong>Klik atau drag & drop</strong> file PDF mahasiswa</p>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">Format: PDF (bisa pilih multiple files)</p>
+                </div>
+                <input type="file" id="pdf-input" class="file-input" accept=".pdf" multiple>
+                <div id="pdf-info" class="file-info" style="display: none;"></div>
+            </div>
+            
+            <!-- Step 3: TTD -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    Upload Tanda Tangan Pejabat
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label style="font-weight: bold; margin-bottom: 10px; display: block;">TTD Ketua</label>
+                        <div class="upload-area" id="ttd-ketua-area" onclick="document.getElementById('ttd-ketua-input').click()">
+                            <div class="upload-icon">✍️</div>
+                            <p style="font-size: 14px;"><strong>Upload TTD Ketua</strong></p>
+                        </div>
+                        <input type="file" id="ttd-ketua-input" class="file-input" accept=".png,.jpg,.jpeg">
+                        <div id="ttd-ketua-info" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-weight: bold; margin-bottom: 10px; display: block;">TTD Ketua Program Studi</label>
+                        <div class="upload-area" id="ttd-kaprodi-area" onclick="document.getElementById('ttd-kaprodi-input').click()">
+                            <div class="upload-icon">✍️</div>
+                            <p style="font-size: 14px;"><strong>Upload TTD Kaprodi</strong></p>
+                        </div>
+                        <input type="file" id="ttd-kaprodi-input" class="file-input" accept=".png,.jpg,.jpeg">
+                        <div id="ttd-kaprodi-info" class="file-info" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 4: QR Code -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">4</span>
+                    Upload QR Code Segel Elektronik
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label style="font-weight: bold; margin-bottom: 10px; display: block;">QR Code Ketua</label>
+                        <div class="upload-area" id="qr-ketua-area" onclick="document.getElementById('qr-ketua-input').click()">
+                            <div class="upload-icon">📱</div>
+                            <p style="font-size: 14px;"><strong>Upload QR Ketua</strong></p>
+                        </div>
+                        <input type="file" id="qr-ketua-input" class="file-input" accept=".png,.jpg,.jpeg">
+                        <div id="qr-ketua-info" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-weight: bold; margin-bottom: 10px; display: block;">QR Code Kaprodi</label>
+                        <div class="upload-area" id="qr-kaprodi-area" onclick="document.getElementById('qr-kaprodi-input').click()">
+                            <div class="upload-icon">📱</div>
+                            <p style="font-size: 14px;"><strong>Upload QR Kaprodi</strong></p>
+                        </div>
+                        <input type="file" id="qr-kaprodi-input" class="file-input" accept=".png,.jpg,.jpeg">
+                        <div id="qr-kaprodi-info" class="file-info" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 5: Nomor Seri -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">5</span>
+                    Nomor Seri Sertifikat
+                </div>
+                <div class="input-group">
+                    <label for="nomor-awal">Nomor Seri Awal (7 digit)</label>
+                    <input type="text" id="nomor-awal" placeholder="Contoh: 0000900" maxlength="7" pattern="[0-9]{7}">
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                        💡 Nomor akan otomatis increment untuk setiap sertifikat
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="button-group">
+                <button class="btn btn-primary" id="upload-btn" onclick="uploadFiles()">
+                    📤 Upload Semua File
+                </button>
+                <button class="btn btn-success" id="generate-btn" onclick="generateCertificates()" disabled>
+                    ⚙️ Generate Sertifikat
+                </button>
+            </div>
+            
+            <!-- Progress -->
+            <div class="progress-container" id="progress-container">
+                <h3 style="margin-bottom: 15px;">⏳ Generating Certificates...</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill">0%</div>
+                </div>
+                <p style="margin-top: 10px; text-align: center; color: #666;" id="progress-text"></p>
+            </div>
+            
+            <!-- Results -->
+            <div class="results-container" id="results-container">
+                <div class="alert alert-success">
+                    <strong>✅ Sukses!</strong> Semua sertifikat berhasil di-generate.
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-success" onclick="downloadAll()" style="width: auto; padding: 10px 20px;">
+                            📥 Download Semua (ZIP)
+                        </button>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 20px 0;">📋 Daftar Sertifikat</h3>
+                <table class="results-table" id="results-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>NIM</th>
+                            <th>Nomor Seri</th>
+                            <th>Status</th>
+                            <th>Download</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 STK Santo Yakobus Merauke | Generator Sertifikat Pendidik v1.0</p>
+        </div>
+    </div>
+    
+    <script>
+        // File upload handlers
+        const fileInputs = {
+            'blanko': document.getElementById('blanko-input'),
+            'pdf': document.getElementById('pdf-input'),
+            'ttd-ketua': document.getElementById('ttd-ketua-input'),
+            'ttd-kaprodi': document.getElementById('ttd-kaprodi-input'),
+            'qr-ketua': document.getElementById('qr-ketua-input'),
+            'qr-kaprodi': document.getElementById('qr-kaprodi-input')
+        };
+        
+        // Setup file input change handlers
+        Object.keys(fileInputs).forEach(key => {
+            fileInputs[key].addEventListener('change', function(e) {
+                handleFileSelect(key, e.target.files);
+            });
+        });
+        
+        function handleFileSelect(type, files) {
+            const infoDiv = document.getElementById(`${type}-info`);
+            if (files.length > 0) {
+                if (type === 'pdf') {
+                    infoDiv.textContent = `✅ ${files.length} file PDF dipilih`;
+                } else {
+                    infoDiv.textContent = `✅ ${files[0].name}`;
+                }
+                infoDiv.style.display = 'block';
+            }
+        }
+        
+        // Drag and drop
+        const uploadAreas = document.querySelectorAll('.upload-area');
+        uploadAreas.forEach(area => {
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+            
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragover');
+            });
+            
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                
+                const id = area.id.replace('-area', '');
+                const input = document.getElementById(`${id}-input`);
+                input.files = e.dataTransfer.files;
+                handleFileSelect(id, e.dataTransfer.files);
+            });
+        });
+        
+        async function uploadFiles() {
+            const uploadBtn = document.getElementById('upload-btn');
+            const generateBtn = document.getElementById('generate-btn');
+            
+            // Validate
+            if (!fileInputs['blanko'].files[0]) {
+                alert('❌ Blanko sertifikat belum diupload!');
+                return;
+            }
+            if (!fileInputs['pdf'].files[0]) {
+                alert('❌ File PDF UKMPPG belum diupload!');
+                return;
+            }
+            if (!fileInputs['ttd-ketua'].files[0] || !fileInputs['ttd-kaprodi'].files[0]) {
+                alert('❌ Tanda tangan belum lengkap!');
+                return;
+            }
+            if (!fileInputs['qr-ketua'].files[0] || !fileInputs['qr-kaprodi'].files[0]) {
+                alert('❌ QR Code belum lengkap!');
+                return;
+            }
+            
+            const nomorAwal = document.getElementById('nomor-awal').value;
+            if (!nomorAwal || nomorAwal.length !== 7) {
+                alert('❌ Nomor seri harus 7 digit!');
+                return;
+            }
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('blanko', fileInputs['blanko'].files[0]);
+            formData.append('ttd_ketua', fileInputs['ttd-ketua'].files[0]);
+            formData.append('ttd_kaprodi', fileInputs['ttd-kaprodi'].files[0]);
+            formData.append('qr_ketua', fileInputs['qr-ketua'].files[0]);
+            formData.append('qr_kaprodi', fileInputs['qr-kaprodi'].files[0]);
+            formData.append('nomor_awal', nomorAwal);
+            
+            // Add all PDF files
+            for (let i = 0; i < fileInputs['pdf'].files.length; i++) {
+                formData.append('pdf_files', fileInputs['pdf'].files[i]);
+            }
+            
+            // Disable button
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="loading"></span> Uploading...';
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ ${data.message}`);
+                    generateBtn.disabled = false;
+                } else {
+                    alert(`❌ Error: ${data.error}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '📤 Upload Semua File';
+            }
+        }
+        
+        async function generateCertificates() {
+            const generateBtn = document.getElementById('generate-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const resultsContainer = document.getElementById('results-container');
+            
+            // Show progress
+            progressContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<span class="loading"></span> Generating...';
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update progress
+                    document.getElementById('progress-fill').style.width = '100%';
+                    document.getElementById('progress-fill').textContent = '100%';
+                    
+                    // Show results
+                    setTimeout(() => {
+                        displayResults(data.results);
+                        progressContainer.style.display = 'none';
+                        resultsContainer.style.display = 'block';
+                    }, 500);
+                } else {
+                    alert(`❌ Error: ${data.error}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '⚙️ Generate Sertifikat';
+            }
+        }
+        
+        function displayResults(results) {
+            const tbody = document.getElementById('results-body');
+            tbody.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                const row = document.createElement('tr');
+                
+                if (result.status === 'success') {
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${result.nama}</td>
+                        <td>${result.nim}</td>
+                        <td><strong>${result.nomor_seri}</strong></td>
+                        <td><span class="status-badge status-success">✅ Sukses</span></td>
+                        <td>
+                            <button onclick="downloadFile('${result.filename}')" style="padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                📥 Download
+                            </button>
+                        </td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td colspan="3">${result.filename}</td>
+                        <td><span class="status-badge status-error">❌ Error</span></td>
+                        <td>-</td>
+                    `;
+                }
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function downloadFile(filename) {
+            window.location.href = `/download/${filename}`;
+        }
+        
+        function downloadAll() {
+            window.location.href = '/download-all';
+        }
+    </script>
+</body>
+</html>

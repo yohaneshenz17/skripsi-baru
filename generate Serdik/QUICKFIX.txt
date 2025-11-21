@@ -1,0 +1,97 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                    ⚠️  QUICK FIX GUIDE  ⚠️                    ║
+║          Error: Access is denied: 'uploads'                   ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🚨 ANDA MENGALAMI ERROR PERMISSION!
+
+═══════════════════════════════════════════════════════════════
+
+✅ SOLUSI TERCEPAT (30 DETIK):
+
+1. ❌ Tutup aplikasi (CTRL+C di Command Prompt)
+
+2. 🖱️ Klik kanan file "jalankan.bat"
+
+3. ⚡ Pilih "Run as Administrator"
+
+4. ✅ Klik "Yes" jika ada prompt
+
+5. 🎉 SELESAI! Aplikasi akan berjalan normal.
+
+═══════════════════════════════════════════════════════════════
+
+💡 PENJELASAN:
+
+Windows memproteksi beberapa folder dari aplikasi yang tidak
+dijalankan sebagai Administrator. Dengan "Run as Administrator",
+aplikasi mendapat permission untuk membuat folder 'uploads' dan
+'output'.
+
+═══════════════════════════════════════════════════════════════
+
+📋 SOLUSI ALTERNATIF (Jika masih error):
+
+OPSI A: Pindah ke Lokasi yang Lebih Aman
+   1. Copy folder 'sertifikat-generator' ke Desktop
+   2. Jalankan dari sana
+   3. Desktop biasanya tidak ada masalah permission
+
+OPSI B: Manual Create Folders
+   1. Buka folder 'sertifikat-generator'
+   2. Buat folder baru namanya: uploads
+   3. Buat folder baru namanya: output
+   4. Klik kanan masing-masing folder → Properties
+   5. Uncheck "Read-only" → Apply
+   6. Jalankan ulang aplikasi
+
+OPSI C: Disable Antivirus Sementara
+   1. Beberapa antivirus memblokir folder creation
+   2. Disable antivirus sementara
+   3. Jalankan aplikasi
+   4. Enable lagi antivirus setelah selesai
+
+═══════════════════════════════════════════════════════════════
+
+📖 DOKUMENTASI LENGKAP:
+
+Baca file: TROUBLESHOOTING_PERMISSION.md
+(Ada di folder aplikasi)
+
+═══════════════════════════════════════════════════════════════
+
+🎯 TIPS UNTUK NEXT TIME:
+
+✅ SELALU extract aplikasi ke:
+   - Desktop
+   - Documents
+   - D:\ atau E:\ (drive selain C:)
+
+❌ JANGAN extract ke:
+   - C:\Program Files
+   - C:\Windows
+   - Folder yang ter-sync dengan OneDrive/Dropbox
+
+═══════════════════════════════════════════════════════════════
+
+🆘 MASIH BERMASALAH?
+
+Jika setelah "Run as Administrator" masih error:
+
+1. Screenshot error message
+2. Screenshot lokasi folder (File Explorer address bar)
+3. Hubungi IT support dengan screenshot tersebut
+
+═══════════════════════════════════════════════════════════════
+
+✅ VERSION 1.1 - FIXED:
+
+Update ini sudah include:
+✅ Better error handling
+✅ Auto folder creation dengan permission check
+✅ Clear error messages
+✅ Troubleshooting guide lengkap
+
+═══════════════════════════════════════════════════════════════
+
+        🎉 Selamat Menggunakan! 🎉

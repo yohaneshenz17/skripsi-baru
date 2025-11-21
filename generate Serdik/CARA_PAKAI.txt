@@ -1,0 +1,76 @@
+# ⚡ CARA TERCEPAT JALANKAN APLIKASI
+
+## 🚀 3 CARA MUDAH:
+
+---
+
+### ✅ CARA 1: Double-Click START.bat (PALING MUDAH!) ⭐
+
+```
+1. Double-click file "START.bat"
+2. Tunggu hingga muncul "Aplikasi berjalan di: http://localhost:5000"
+3. Buka browser: http://localhost:5000
+4. SELESAI!
+```
+
+**Ini cara PALING MUDAH dan PALING AMAN!**
+
+---
+
+### ✅ CARA 2: Run as Administrator
+
+```
+1. Klik kanan "jalankan.bat"
+2. Pilih "Run as Administrator"
+3. Klik "Yes" jika ada prompt
+4. Buka browser: http://localhost:5000
+```
+
+---
+
+### ✅ CARA 3: Manual via Command Prompt
+
+```
+1. Buka Command Prompt
+2. cd ke folder aplikasi
+3. Ketik: python app.py
+4. Enter
+5. Buka browser: http://localhost:5000
+```
+
+---
+
+## ⚠️ JIKA ADA ERROR:
+
+### Error: "Python tidak dikenali"
+→ Install Python dari: https://www.python.org/downloads/
+→ Centang "Add Python to PATH"!
+
+### Error: "Access denied"
+→ Gunakan CARA 1 (START.bat) atau CARA 2 (Run as Admin)
+
+### Aplikasi langsung keluar
+→ Gunakan START.bat (file baru!)
+
+---
+
+## 🎯 REKOMENDASI:
+
+**Selalu gunakan START.bat** - ini versi paling sederhana dan paling reliable!
+
+---
+
+## 📝 SETELAH APLIKASI JALAN:
+
+1. Upload blanko PDF
+2. Upload PDF dari UKMPPG (multiple files)
+3. Upload 2 TTD (PNG)
+4. Upload 2 QR Code (PNG)
+5. Input nomor seri (7 digit)
+6. Klik "Upload Semua File"
+7. Klik "Generate Sertifikat"
+8. Download hasil!
+
+---
+
+**🎉 Selamat Menggunakan! 🎉**

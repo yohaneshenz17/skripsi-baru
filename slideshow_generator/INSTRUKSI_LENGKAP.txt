@@ -1,0 +1,283 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║           PANDUAN LENGKAP GENERATOR SLIDESHOW YUDISIUM PPG 2025          ║
+║                                                                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+Created by: Claude AI Assistant
+Date: 22 November 2025
+Total Mahasiswa: 2,254 orang
+Total Slide: 1,127 slide (2 mahasiswa per slide)
+
+═══════════════════════════════════════════════════════════════════════════
+
+📋 ISI PAKET:
+
+1. generate_slideshow.py              → Script utama (jangan diubah)
+2. Formulir_Lapor_Diri...xlsx         → Data mahasiswa (jangan diubah)
+3. requirements.txt                   → Daftar library Python
+4. RUN_WINDOWS.bat                    → Shortcut untuk Windows
+5. RUN_MAC_LINUX.sh                   → Shortcut untuk Mac/Linux
+6. README.txt                         → Dokumentasi lengkap
+7. QUICK_START.txt                    → Panduan cepat
+8. INSTRUKSI_LENGKAP.txt             → File ini
+
+═══════════════════════════════════════════════════════════════════════════
+
+🔧 PERSIAPAN SISTEM:
+
+A. INSTALL PYTHON
+
+   Windows:
+   1. Download Python dari: https://www.python.org/downloads/
+   2. Klik installer yang sudah di-download
+   3. ⚠️  PENTING: Centang "Add Python to PATH" di halaman pertama!
+   4. Klik "Install Now"
+   5. Tunggu hingga selesai
+   6. Restart komputer (recommended)
+
+   Mac:
+   1. Buka Terminal (Applications → Utilities → Terminal)
+   2. Install Homebrew (jika belum):
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   3. Install Python:
+      brew install python3
+
+   Linux (Ubuntu/Debian):
+   1. Buka Terminal
+   2. Update package list:
+      sudo apt update
+   3. Install Python:
+      sudo apt install python3 python3-pip
+
+B. VERIFIKASI INSTALASI PYTHON
+
+   Windows:
+   1. Buka Command Prompt (tekan Win+R, ketik cmd, Enter)
+   2. Ketik: python --version
+   3. Harus muncul: Python 3.x.x
+
+   Mac/Linux:
+   1. Buka Terminal
+   2. Ketik: python3 --version
+   3. Harus muncul: Python 3.x.x
+
+═══════════════════════════════════════════════════════════════════════════
+
+🚀 CARA MENJALANKAN SCRIPT:
+
+METODE 1: OTOMATIS (RECOMMENDED)
+---------------------------------
+
+Windows:
+  1. Extract semua file ke folder (misalnya: C:\slideshow_generator)
+  2. Klik 2x file: RUN_WINDOWS.bat
+  3. Tunggu proses selesai
+
+Mac/Linux:
+  1. Extract semua file ke folder (misalnya: ~/slideshow_generator)
+  2. Klik 2x file: RUN_MAC_LINUX.sh
+     (atau buka Terminal, ketik: bash RUN_MAC_LINUX.sh)
+  3. Tunggu proses selesai
+
+
+METODE 2: MANUAL
+----------------
+
+Windows:
+  1. Buka Command Prompt
+  2. Masuk ke folder script:
+     cd C:\lokasi\folder\slideshow_generator
+  3. Install library:
+     pip install -r requirements.txt
+  4. Jalankan script:
+     python generate_slideshow.py
+
+Mac/Linux:
+  1. Buka Terminal
+  2. Masuk ke folder script:
+     cd /lokasi/folder/slideshow_generator
+  3. Install library:
+     pip3 install -r requirements.txt
+  4. Jalankan script:
+     python3 generate_slideshow.py
+
+═══════════════════════════════════════════════════════════════════════════
+
+⏱️ PROSES YANG AKAN TERJADI:
+
+TAHAP 1: Download Foto (20-30 menit)
+┌─────────────────────────────────────────────────────────┐
+│ Script akan download 2,254 foto dari Google Drive      │
+│ Progress akan ditampilkan setiap 50 foto               │
+│ Foto disimpan di folder: foto_mahasiswa/                │
+│ Format nama: 0001.jpg, 0002.jpg, ..., 2254.jpg          │
+└─────────────────────────────────────────────────────────┘
+
+⚠️  CATATAN:
+   - Proses ini LAMA, jangan panik!
+   - Bisa ditinggal, script berjalan otomatis
+   - Jika terputus, jalankan lagi (akan lanjut dari terakhir)
+   - Perlu koneksi internet stabil
+
+TAHAP 2: Generate PowerPoint (5-10 menit)
+┌─────────────────────────────────────────────────────────┐
+│ Script akan membuat PowerPoint                          │
+│ 2 mahasiswa per slide                                   │
+│ Progress ditampilkan setiap 100 slide                   │
+│ File output: Slideshow_Yudisium_2025.pptx               │
+└─────────────────────────────────────────────────────────┘
+
+TAHAP 3: Selesai!
+┌─────────────────────────────────────────────────────────┐
+│ PowerPoint siap digunakan                               │
+│ Buka file dan cek hasilnya                              │
+│ Jika ada masalah, lihat bagian TROUBLESHOOTING         │
+└─────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎨 FORMAT SLIDE:
+
+Setiap slide berisi 2 mahasiswa:
+
+┌──────────────────────────┬──────────────────────────┐
+│   [FOTO MAHASISWA 1]     │   [FOTO MAHASISWA 2]     │
+│                          │                          │
+│     Nama Mahasiswa 1     │     Nama Mahasiswa 2     │
+│                          │                          │
+│  Tempat Lahir: XXX       │  Tempat Lahir: YYY       │
+│  Tanggal Lahir: DD MM YY │  Tanggal Lahir: DD MM YY │
+└──────────────────────────┴──────────────────────────┘
+
+Warna:
+- Background: Putih
+- Kotak Nama: Putih dengan border hitam
+- Kotak TTL: Biru tua dengan teks putih
+- Foto: Ukuran 3.5" x 3.5"
+
+═══════════════════════════════════════════════════════════════════════════
+
+❌ TROUBLESHOOTING:
+
+PROBLEM: "Python tidak dikenali sebagai perintah internal atau eksternal"
+SOLUSI:
+  1. Install ulang Python
+  2. PASTIKAN centang "Add Python to PATH"
+  3. Restart komputer
+  4. Coba lagi
+
+PROBLEM: "pip tidak dikenali"
+SOLUSI:
+  1. Sama seperti di atas, install ulang Python
+  2. Atau jalankan: python -m pip install -r requirements.txt
+
+PROBLEM: "ModuleNotFoundError: No module named 'pandas'"
+SOLUSI:
+  1. Jalankan: pip install -r requirements.txt
+  2. Atau: pip install pandas openpyxl python-pptx pillow requests
+
+PROBLEM: "PermissionError" atau "Access Denied"
+SOLUSI:
+  1. Tutup PowerPoint jika sedang terbuka
+  2. Tutup file Excel jika sedang terbuka
+  3. Jalankan Command Prompt sebagai Administrator (klik kanan → Run as Admin)
+
+PROBLEM: Download foto sangat lambat atau banyak yang gagal
+SOLUSI:
+  1. Cek koneksi internet
+  2. Tutup aplikasi yang menggunakan bandwidth (Netflix, YouTube, dll)
+  3. Jalankan ulang script (foto yang sudah terdownload akan di-skip)
+  4. Gunakan koneksi internet yang lebih stabil
+
+PROBLEM: "Excel file not found"
+SOLUSI:
+  1. Pastikan file Excel ada di folder yang sama dengan script
+  2. Nama file HARUS persis: Formulir_Lapor_Diri_Mahasiswa_PPG_2025_Batch_3.xlsx
+  3. Jangan rename atau pindahkan file
+
+PROBLEM: PowerPoint terlalu besar / tidak bisa dibuka
+SOLUSI:
+  1. File PowerPoint normal berukuran 500MB - 1GB
+  2. Gunakan PowerPoint 2016 atau lebih baru
+  3. Jika tetap tidak bisa, compress foto terlebih dahulu
+
+PROBLEM: Script berhenti tiba-tiba
+SOLUSI:
+  1. Screenshot error message yang muncul
+  2. Jalankan ulang script
+  3. Jika tetap error, lihat error message dan cari solusinya
+
+═══════════════════════════════════════════════════════════════════════════
+
+📊 SPESIFIKASI TEKNIS:
+
+Input:
+- Format: Excel (.xlsx)
+- Total data: 2,254 baris
+- Kolom: Nama, Tempat Lahir, Tanggal Lahir, Link Foto
+
+Process:
+- Download foto dari Google Drive
+- Format foto: JPG, ratio 4:6 (passport photo)
+- Resize otomatis untuk PowerPoint
+
+Output:
+- File: Slideshow_Yudisium_2025.pptx
+- Format: PowerPoint (.pptx)
+- Ukuran slide: 16:9 (10" x 5.625")
+- Total slide: 1,127
+- Ukuran file: ~500MB - 1GB
+
+═══════════════════════════════════════════════════════════════════════════
+
+✅ CHECKLIST SEBELUM MULAI:
+
+Hardware:
+□ RAM minimal 4GB (recommended 8GB)
+□ Ruang disk minimal 2GB tersedia
+□ Koneksi internet stabil
+
+Software:
+□ Python 3.8 atau lebih baru terinstall
+□ Semua library Python terinstall (requirements.txt)
+□ PowerPoint 2016 atau lebih baru (untuk membuka hasil)
+
+Files:
+□ Semua file extract ke folder yang sama
+□ File Excel tidak corrupt/rusak
+□ Tidak ada file yang missing
+
+Lain-lain:
+□ Antivirus tidak memblock script
+□ Windows Firewall allow Python
+□ Komputer tidak sleep saat proses berjalan
+
+═══════════════════════════════════════════════════════════════════════════
+
+📞 SUPPORT:
+
+Jika mengalami masalah yang tidak bisa diselesaikan:
+
+1. Screenshot error message lengkap
+2. Catat langkah-langkah yang sudah dilakukan
+3. Hubungi Claude AI untuk troubleshooting lebih lanjut
+
+═══════════════════════════════════════════════════════════════════════════
+
+💡 TIPS & TRICKS:
+
+TIP 1: Jalankan saat bandwidth internet tidak ramai (malam hari)
+TIP 2: Matikan auto-sleep di komputer agar proses tidak terputus
+TIP 3: Jangan buka file PowerPoint saat script masih berjalan
+TIP 4: Backup file Excel sebelum mulai (just in case)
+TIP 5: Test dulu dengan 10-20 mahasiswa untuk cek formatnya
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎉 SELAMAT MENGGUNAKAN!
+
+Semoga proses yudisium berjalan lancar.
+Jika ada pertanyaan atau masalah, jangan ragu untuk bertanya.
+
+═══════════════════════════════════════════════════════════════════════════

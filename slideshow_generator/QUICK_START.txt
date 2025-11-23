@@ -1,0 +1,68 @@
+╔══════════════════════════════════════════════════════════════╗
+║     QUICK START - GENERATOR SLIDESHOW YUDISIUM PPG 2025      ║
+╚══════════════════════════════════════════════════════════════╝
+
+█ LANGKAH CEPAT:
+
+  1. Install Python dari: https://www.python.org/downloads/
+     ⚠️  PENTING: Centang "Add Python to PATH" saat install!
+
+  2. WINDOWS USER:
+     - Klik 2x file: RUN_WINDOWS.bat
+     - Script akan jalan otomatis
+
+     MAC/LINUX USER:
+     - Buka Terminal
+     - Ketik: bash RUN_MAC_LINUX.sh
+
+  3. Tunggu ~25-40 menit hingga selesai
+
+  4. Buka file: Slideshow_Yudisium_2025.pptx
+
+═══════════════════════════════════════════════════════════════
+
+█ INSTALL MANUAL (jika perlu):
+
+  Buka Command Prompt/Terminal, lalu ketik:
+  
+  pip install -r requirements.txt
+
+═══════════════════════════════════════════════════════════════
+
+█ TROUBLESHOOTING CEPAT:
+
+  ❌ "Python tidak ditemukan"
+     → Install Python, jangan lupa centang "Add to PATH"
+  
+  ❌ "pip tidak dikenali"
+     → Install ulang Python, centang "Add to PATH"
+  
+  ❌ "ModuleNotFoundError"
+     → Jalankan: pip install -r requirements.txt
+  
+  ❌ Download foto lambat
+     → Normal, proses ~20-30 menit untuk 2254 foto
+     → Bisa ditinggal, script akan jalan sendiri
+
+═══════════════════════════════════════════════════════════════
+
+█ FILE YANG DIBUTUHKAN:
+
+  ✓ generate_slideshow.py
+  ✓ Formulir_Lapor_Diri_Mahasiswa_PPG_2025_Batch_3.xlsx
+  ✓ requirements.txt
+  ✓ RUN_WINDOWS.bat (untuk Windows)
+  ✓ RUN_MAC_LINUX.sh (untuk Mac/Linux)
+
+  📝 Semua file HARUS di folder yang sama!
+
+═══════════════════════════════════════════════════════════════
+
+█ HASIL AKHIR:
+
+  📄 Slideshow_Yudisium_2025.pptx (1,127 slide)
+  📁 foto_mahasiswa/ (2,254 foto)
+
+═══════════════════════════════════════════════════════════════
+
+Selamat menggunakan! 🎉

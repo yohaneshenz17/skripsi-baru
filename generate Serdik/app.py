@@ -361,12 +361,14 @@ def generate():
             print(f"\n[{i+1}/{len(session_data['pdf_paths'])}] Processing: {os.path.basename(pdf_path)}")
             print(f"   Nomor Seri: {nomor_seri_str}")
             
-            # Extract nama for filename
+            # Get original filename for output (KEEP SAME AS INPUT)
+            original_filename = os.path.basename(pdf_path)
+            output_filename = original_filename
+            output_path = os.path.join(output_folder, output_filename)
+            
+            # Extract nama for display in results table
             text = extract_text_from_pdf(pdf_path)
             data = parse_certificate_data(text)
-            
-            output_filename = f"Sertifikat_{data['nim']}_{data['nama'].replace(' ', '_')}.pdf"
-            output_path = os.path.join(output_folder, output_filename)
             
             success, nama, nim = generate_certificate(
                 session_data['blanko_path'],

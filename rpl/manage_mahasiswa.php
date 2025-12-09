@@ -5,13 +5,20 @@ requireAdmin();
 $message = '';
 $error = '';
 
-// Filter parameters
+// Filter parameters - MODIFIED: Added per_page selection
 $search = sanitizeInput($_GET['search'] ?? '');
 $jenjang_filter = $_GET['jenjang'] ?? '';
 $status_filter = $_GET['status'] ?? '';
 $dosen_filter = (int)($_GET['dosen'] ?? 0);
 $page = max(1, (int)($_GET['page'] ?? 1));
-$per_page = 50;
+
+// NEW: Per page options with validation
+$per_page_options = [50, 100, 150, 200];
+$per_page = (int)($_GET['per_page'] ?? 150);
+if (!in_array($per_page, $per_page_options)) {
+    $per_page = 150; // Default to 150 as requested
+}
+
 $offset = ($page - 1) * $per_page;
 
 // Handle actions
@@ -732,6 +739,40 @@ try {
             color: #721c24;
             margin-bottom: 0.5rem;
         }
+
+        /* NEW: Per Page Selection Styles */
+        .per-page-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+            margin-bottom: 1rem;
+        }
+        
+        .per-page-selector label {
+            margin: 0;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .per-page-selector select {
+            width: auto;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .per-page-selector select:focus {
+            outline: 2px solid rgba(255, 255, 255, 0.8);
+            background: white;
+        }
         
         @media (max-width: 768px) {
             .container { padding: 1rem; }
@@ -740,6 +781,7 @@ try {
             table { font-size: 0.8rem; }
             th, td { padding: 0.5rem; }
             .action-group { flex-direction: column; }
+            .per-page-selector { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -760,6 +802,19 @@ try {
         <?php if ($error): ?>
             <div class="alert alert-error"><?= sanitizeInput($error) ?></div>
         <?php endif; ?>
+
+        <!-- NEW: Per Page Selection -->
+        <div class="per-page-selector">
+            <label for="per_page_select">Tampilkan per halaman:</label>
+            <select id="per_page_select" onchange="changePerPage(this.value)">
+                <?php foreach ($per_page_options as $option): ?>
+                    <option value="<?= $option ?>" <?= $per_page === $option ? 'selected' : '' ?>>
+                        <?= $option ?> mahasiswa
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <span style="opacity: 0.9;">Saat ini menampilkan: <?= min($per_page, $total_records) ?> dari <?= number_format($total_records) ?> mahasiswa</span>
+        </div>
         
         <!-- 🆕 NEW: Export Section -->
         <div class="export-section">
@@ -802,6 +857,9 @@ try {
         <div class="filters">
             <h3 style="margin-bottom: 1rem;">Filter & Pencarian</h3>
             <form method="GET">
+                <!-- NEW: Include per_page in filters -->
+                <input type="hidden" name="per_page" value="<?= $per_page ?>">
+                
                 <div class="filter-row">
                     <div class="form-group">
                         <label for="search">Cari (NIM/Nama/Tempat Tugas)</label>
@@ -1023,7 +1081,7 @@ try {
             
             <div style="text-align: center; color: #666; margin-bottom: 2rem;">
                 Halaman <?= $page ?> dari <?= $total_pages ?> 
-                (<?= number_format($total_records) ?> total data)
+                (<?= number_format($total_records) ?> total data, menampilkan <?= count($mahasiswa_list) ?> per halaman)
             </div>
         <?php endif; ?>
     </div>
@@ -1047,6 +1105,14 @@ try {
     
     <script>
         let allSelected = false;
+        
+        // NEW: Change per page function
+        function changePerPage(perPage) {
+            const url = new URL(window.location);
+            url.searchParams.set('per_page', perPage);
+            url.searchParams.set('page', 1); // Reset to first page when changing per_page
+            window.location.href = url.toString();
+        }
         
         function toggleSelectAll() {
             const checkboxes = document.querySelectorAll('.mahasiswa-checkbox');

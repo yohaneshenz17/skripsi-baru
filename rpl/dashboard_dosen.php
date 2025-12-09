@@ -44,6 +44,93 @@ try {
     $progress_persen = 0;
 }
 
+// FITUR BARU: Ambil statistik nilai RPL per bidang (hanya yang sudah final)
+$statistik_rpl = [];
+try {
+    $stmt = $pdo->prepare("
+        SELECT 
+            rpl01_pedagogik, rpl02_perangkat, rpl03_profesional, 
+            rpl04_administrasi, rpl05_inovasi
+        FROM penilaian_rpl 
+        WHERE dosen_penilai_id = ? AND status_penilaian = 'final'
+    ");
+    $stmt->execute([$dosen_id]);
+    $all_nilai = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Proses statistik untuk setiap bidang
+    $bidang_list = [
+        'rpl01_pedagogik' => 'RPL01 - Pedagogik',
+        'rpl02_perangkat' => 'RPL02 - Perangkat',
+        'rpl03_profesional' => 'RPL03 - Profesional',
+        'rpl04_administrasi' => 'RPL04 - Administrasi',
+        'rpl05_inovasi' => 'RPL05 - Inovasi'
+    ];
+    
+    foreach ($bidang_list as $key => $label) {
+        $nilai_array = array_filter(array_column($all_nilai, $key), function($v) {
+            return $v !== null && $v !== '';
+        });
+        
+        if (count($nilai_array) > 0) {
+            $max = max($nilai_array);
+            $min = min($nilai_array);
+            $avg = round(array_sum($nilai_array) / count($nilai_array), 2);
+            
+            // Hitung jumlah nilai A, B, C, D, E
+            $count_a = count(array_filter($nilai_array, fn($v) => $v >= 80 && $v <= 100));
+            $count_b = count(array_filter($nilai_array, fn($v) => $v >= 70 && $v < 80));
+            $count_c = count(array_filter($nilai_array, fn($v) => $v >= 60 && $v < 70));
+            $count_d = count(array_filter($nilai_array, fn($v) => $v >= 50 && $v < 60));
+            $count_e = count(array_filter($nilai_array, fn($v) => $v >= 0 && $v < 50));
+        } else {
+            $max = 0;
+            $min = 0;
+            $avg = 0;
+            $count_a = 0;
+            $count_b = 0;
+            $count_c = 0;
+            $count_d = 0;
+            $count_e = 0;
+        }
+        
+        $statistik_rpl[$key] = [
+            'label' => $label,
+            'max' => $max,
+            'min' => $min,
+            'avg' => $avg,
+            'count_a' => $count_a,
+            'count_b' => $count_b,
+            'count_c' => $count_c,
+            'count_d' => $count_d,
+            'count_e' => $count_e
+        ];
+    }
+    
+} catch (PDOException $e) {
+    // Jika error, buat data kosong
+    $bidang_list = [
+        'rpl01_pedagogik' => 'RPL01 - Pedagogik',
+        'rpl02_perangkat' => 'RPL02 - Perangkat',
+        'rpl03_profesional' => 'RPL03 - Profesional',
+        'rpl04_administrasi' => 'RPL04 - Administrasi',
+        'rpl05_inovasi' => 'RPL05 - Inovasi'
+    ];
+    
+    foreach ($bidang_list as $key => $label) {
+        $statistik_rpl[$key] = [
+            'label' => $label,
+            'max' => 0,
+            'min' => 0,
+            'avg' => 0,
+            'count_a' => 0,
+            'count_b' => 0,
+            'count_c' => 0,
+            'count_d' => 0,
+            'count_e' => 0
+        ];
+    }
+}
+
 // Ambil daftar mahasiswa yang ditugaskan
 try {
     $stmt = $pdo->prepare("
@@ -101,6 +188,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
         } catch (PDOException $e) {
             $error = 'Gagal memulai penilaian: ' . $e->getMessage();
+        }
+    }
+    
+    // Handle ubah password - FITUR BARU
+    if ($action === 'ubah_password') {
+        $password_lama = $_POST['password_lama'] ?? '';
+        $password_baru = $_POST['password_baru'] ?? '';
+        $konfirmasi_password = $_POST['konfirmasi_password'] ?? '';
+        
+        if (empty($password_lama) || empty($password_baru) || empty($konfirmasi_password)) {
+            $error = 'Semua field harus diisi!';
+        } elseif ($password_baru !== $konfirmasi_password) {
+            $error = 'Password baru dan konfirmasi password tidak cocok!';
+        } elseif (strlen($password_baru) < 6) {
+            $error = 'Password baru minimal 6 karakter!';
+        } else {
+            try {
+                // Ambil password lama dari database
+                $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
+                $stmt->execute([$dosen_id]);
+                $user = $stmt->fetch();
+                
+                // Verifikasi password lama
+                if (!password_verify($password_lama, $user['password'])) {
+                    $error = 'Password lama tidak sesuai!';
+                } else {
+                    // Hash password baru
+                    $password_hash = password_hash($password_baru, PASSWORD_BCRYPT);
+                    
+                    // Update password
+                    $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                    $stmt->execute([$password_hash, $dosen_id]);
+                    
+                    logAktivitas($pdo, $dosen_id, 'Ubah Password', 'Dosen mengubah password sendiri');
+                    
+                    $message = 'Password berhasil diubah!';
+                }
+            } catch (PDOException $e) {
+                $error = 'Gagal mengubah password: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -327,6 +454,200 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #f8f9fa;
         }
         
+        /* MODAL STYLES - FITUR BARU */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .modal-header h2 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+        
+        .close {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #95a5a6;
+            cursor: pointer;
+            transition: color 0.3s;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            color: #e74c3c;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #27ae60;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+        
+        /* STATISTIK RPL STYLES - FITUR BARU */
+        .statistik-rpl-card {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .statistik-rpl-card h3 {
+            margin-bottom: 0.8rem;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .table-statistik {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        
+        .table-statistik th {
+            background: #34495e;
+            color: white;
+            padding: 0.5rem 0.4rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .table-statistik td {
+            padding: 0.5rem 0.4rem;
+            text-align: center;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .table-statistik tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .table-statistik td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .nilai-max {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .nilai-min {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .nilai-avg {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .grade-a {
+            background: #d4edda;
+            color: #155724;
+            font-weight: 600;
+        }
+        
+        .grade-b {
+            background: #d1ecf1;
+            color: #0c5460;
+            font-weight: 600;
+        }
+        
+        .grade-c {
+            background: #fff3cd;
+            color: #856404;
+            font-weight: 600;
+        }
+        
+        .grade-d {
+            background: #f8d7da;
+            color: #721c24;
+            font-weight: 600;
+        }
+        
+        .grade-e {
+            background: #f8d7da;
+            color: #721c24;
+            font-weight: 600;
+        }
+        
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
@@ -346,14 +667,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 padding: 0.4rem 0.8rem;
                 font-size: 0.8rem;
             }
+            
+            .modal-content {
+                margin: 20% auto;
+                width: 95%;
+                padding: 1.5rem;
+            }
+            
+            .table-statistik {
+                font-size: 0.75rem;
+            }
+            
+            .table-statistik th,
+            .table-statistik td {
+                padding: 0.4rem 0.2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Dashboard Dosen RPL</h1>
+        <h1>Dashboard Dosen Penilai RPL</h1>
         <div class="user-info">
             <span>Selamat datang, <?= sanitizeInput($_SESSION['nama_lengkap']) ?></span>
+            <button onclick="openModal()" class="btn btn-warning">🔒 Ubah Password</button>
             <a href="logout.php" class="btn btn-danger">Logout</a>
         </div>
     </div>
@@ -388,6 +725,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="stat-number"><?= $belum_dinilai ?></div>
                 <div class="stat-label">Belum Dinilai</div>
             </div>
+        </div>
+        
+        <!-- STATISTIK NILAI RPL PER BIDANG - FITUR BARU -->
+        <div class="statistik-rpl-card">
+            <h3>📊 Statistik Nilai Per Bidang RPL (Penilaian Final)</h3>
+            <table class="table-statistik">
+                <thead>
+                    <tr>
+                        <th>Bidang</th>
+                        <th>Nilai Maks.</th>
+                        <th>Nilai Min.</th>
+                        <th>Rata-rata</th>
+                        <th>Nilai A</th>
+                        <th>Nilai B</th>
+                        <th>Nilai C</th>
+                        <th>Nilai D</th>
+                        <th>Nilai E</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($statistik_rpl as $stat): ?>
+                        <tr>
+                            <td><?= sanitizeInput($stat['label']) ?></td>
+                            <td class="nilai-max"><?= $stat['max'] > 0 ? number_format($stat['max'], 2) : '-' ?></td>
+                            <td class="nilai-min"><?= $stat['min'] > 0 ? number_format($stat['min'], 2) : '-' ?></td>
+                            <td class="nilai-avg"><?= $stat['avg'] > 0 ? number_format($stat['avg'], 2) : '-' ?></td>
+                            <td class="grade-a"><?= $stat['count_a'] ?></td>
+                            <td class="grade-b"><?= $stat['count_b'] ?></td>
+                            <td class="grade-c"><?= $stat['count_c'] ?></td>
+                            <td class="grade-d"><?= $stat['count_d'] ?></td>
+                            <td class="grade-e"><?= $stat['count_e'] ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #7f8c8d;">
+                <strong>Keterangan:</strong> A = 80-100 | B = 70-79.9 | C = 60-69.9 | D = 50-59.9 | E = 0-49.9
+            </p>
         </div>
         
         <!-- Progress Bar -->
@@ -483,5 +858,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
     </div>
+    
+    <!-- MODAL UBAH PASSWORD - FITUR BARU -->
+    <div id="modalPassword" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔒 Ubah Password</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form method="POST" onsubmit="return validatePassword()">
+                <input type="hidden" name="action" value="ubah_password">
+                
+                <div class="form-group">
+                    <label for="password_lama">Password Lama</label>
+                    <input type="password" id="password_lama" name="password_lama" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_baru">Password Baru (minimal 6 karakter)</label>
+                    <input type="password" id="password_baru" name="password_baru" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="konfirmasi_password">Konfirmasi Password Baru</label>
+                    <input type="password" id="konfirmasi_password" name="konfirmasi_password" required minlength="6">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal()" class="btn btn-danger">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // JAVASCRIPT UNTUK MODAL - FITUR BARU
+        function openModal() {
+            document.getElementById('modalPassword').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('modalPassword').classList.remove('active');
+            document.getElementById('password_lama').value = '';
+            document.getElementById('password_baru').value = '';
+            document.getElementById('konfirmasi_password').value = '';
+        }
+        
+        function validatePassword() {
+            var passwordBaru = document.getElementById('password_baru').value;
+            var konfirmasiPassword = document.getElementById('konfirmasi_password').value;
+            
+            if (passwordBaru !== konfirmasiPassword) {
+                alert('Password baru dan konfirmasi password tidak cocok!');
+                return false;
+            }
+            
+            if (passwordBaru.length < 6) {
+                alert('Password baru minimal 6 karakter!');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            var modal = document.getElementById('modalPassword');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+        
+        // Auto-close alert after 5 seconds
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.display = 'none';
+            });
+        }, 5000);
+    </script>
 </body>
 </html>

@@ -174,8 +174,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Ambil data dosen dengan jumlah mahasiswa yang di-assign
+// ===== FITUR SORTING BARU =====
+// Ambil parameter sorting dari URL
+$sort_by = $_GET['sort_by'] ?? 'nama_lengkap';
+$sort_order = $_GET['sort_order'] ?? 'asc';
+
+// Validasi parameter sorting untuk keamanan
+$valid_sort_columns = ['nama_lengkap', 'email', 'jumlah_mahasiswa', 'sudah_dinilai', 'progress'];
+if (!in_array($sort_by, $valid_sort_columns)) {
+    $sort_by = 'nama_lengkap';
+}
+if (!in_array($sort_order, ['asc', 'desc'])) {
+    $sort_order = 'asc';
+}
+
+// Ambil data dosen dengan sorting dinamis
 try {
+    // Build ORDER BY clause berdasarkan parameter
+    $order_clause = '';
+    switch ($sort_by) {
+        case 'nama_lengkap':
+            $order_clause = "u.nama_lengkap {$sort_order}";
+            break;
+        case 'email':
+            $order_clause = "u.email {$sort_order}";
+            break;
+        case 'jumlah_mahasiswa':
+            $order_clause = "jumlah_mahasiswa {$sort_order}, u.nama_lengkap ASC";
+            break;
+        case 'sudah_dinilai':
+            $order_clause = "sudah_dinilai {$sort_order}, u.nama_lengkap ASC";
+            break;
+        case 'progress':
+            // Progress dihitung dari (sudah_dinilai / jumlah_mahasiswa)
+            $order_clause = "CASE WHEN jumlah_mahasiswa > 0 
+                             THEN (sudah_dinilai * 100.0 / jumlah_mahasiswa) 
+                             ELSE 0 END {$sort_order}, u.nama_lengkap ASC";
+            break;
+        default:
+            $order_clause = "u.nama_lengkap ASC";
+    }
+    
     $stmt = $pdo->query("
         SELECT u.id, u.nama_lengkap, u.email, 
                COUNT(m.id) as jumlah_mahasiswa,
@@ -185,11 +224,30 @@ try {
         LEFT JOIN penilaian_rpl p ON m.id = p.mahasiswa_id AND p.status_penilaian = 'final'
         WHERE u.role = 'dosen' AND u.status = 'active'
         GROUP BY u.id, u.nama_lengkap, u.email
-        ORDER BY u.nama_lengkap
+        ORDER BY {$order_clause}
     ");
     $dosen_data = $stmt->fetchAll();
 } catch (PDOException $e) {
     $dosen_data = [];
+}
+
+// Fungsi helper untuk generate URL sorting
+function getSortUrl($column, $current_sort, $current_order) {
+    $new_order = 'asc';
+    if ($column === $current_sort && $current_order === 'asc') {
+        $new_order = 'desc';
+    }
+    return "?sort_by={$column}&sort_order={$new_order}";
+}
+
+// Fungsi helper untuk generate icon sorting
+function getSortIcon($column, $current_sort, $current_order) {
+    if ($column !== $current_sort) {
+        return '<span class="sort-icon">⇅</span>';
+    }
+    return $current_order === 'asc' ? 
+        '<span class="sort-icon active">↑</span>' : 
+        '<span class="sort-icon active">↓</span>';
 }
 ?>
 <!DOCTYPE html>
@@ -356,6 +414,33 @@ try {
             background: #f8f9fa;
             font-weight: 600;
             color: #2c3e50;
+            user-select: none;
+        }
+        
+        /* SORTING STYLES - BARU */
+        .sortable-header {
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+            padding-right: 1.5rem;
+        }
+        
+        .sortable-header:hover {
+            background: #e9ecef;
+        }
+        
+        .sort-icon {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            font-size: 0.9rem;
+        }
+        
+        .sort-icon.active {
+            color: #3498db;
+            font-weight: bold;
         }
         
         .alert {
@@ -526,17 +611,32 @@ try {
             </div>
         </div>
         
-        <!-- Data Dosen -->
+        <!-- Data Dosen dengan Sorting -->
         <div class="card">
             <h3>Data Dosen Penilai</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Nama Dosen</th>
-                        <th>Email</th>
-                        <th>Mahasiswa Ditugaskan</th>
-                        <th>Sudah Dinilai</th>
-                        <th>Progress</th>
+                        <th class="sortable-header" onclick="window.location.href='<?= getSortUrl('nama_lengkap', $sort_by, $sort_order) ?>'">
+                            Nama Dosen
+                            <?= getSortIcon('nama_lengkap', $sort_by, $sort_order) ?>
+                        </th>
+                        <th class="sortable-header" onclick="window.location.href='<?= getSortUrl('email', $sort_by, $sort_order) ?>'">
+                            Email
+                            <?= getSortIcon('email', $sort_by, $sort_order) ?>
+                        </th>
+                        <th class="sortable-header" onclick="window.location.href='<?= getSortUrl('jumlah_mahasiswa', $sort_by, $sort_order) ?>'">
+                            Mahasiswa Ditugaskan
+                            <?= getSortIcon('jumlah_mahasiswa', $sort_by, $sort_order) ?>
+                        </th>
+                        <th class="sortable-header" onclick="window.location.href='<?= getSortUrl('sudah_dinilai', $sort_by, $sort_order) ?>'">
+                            Sudah Dinilai
+                            <?= getSortIcon('sudah_dinilai', $sort_by, $sort_order) ?>
+                        </th>
+                        <th class="sortable-header" onclick="window.location.href='<?= getSortUrl('progress', $sort_by, $sort_order) ?>'">
+                            Progress
+                            <?= getSortIcon('progress', $sort_by, $sort_order) ?>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>

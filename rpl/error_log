@@ -13604,3 +13604,10 @@ Stack trace:
 [20-Nov-2025 09:43:08 Asia/Jakarta] PHP Warning:  Undefined array key "email" in /home/stkp7133/public_html/rpl/laporan.php on line 260
 [20-Nov-2025 09:43:08 Asia/Jakarta] PHP Warning:  Undefined array key "email" in /home/stkp7133/public_html/rpl/laporan.php on line 260
 [20-Nov-2025 09:43:08 Asia/Jakarta] PHP Warning:  Undefined array key "email" in /home/stkp7133/public_html/rpl/laporan.php on line 260
+[10-Dec-2025 07:27:49 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/rpl/config.php on line 3
+[10-Dec-2025 07:28:04 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/rpl/config.php on line 3
+[10-Dec-2025 07:28:07 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/rpl/config.php on line 3
+[10-Dec-2025 07:29:54 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/rpl/config.php on line 3
+[10-Dec-2025 07:30:07 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/rpl/config.php on line 3
+[10-Dec-2025 07:30:08 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/rpl/config.php on line 3
+[10-Dec-2025 07:31:10 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/rpl/config.php on line 3

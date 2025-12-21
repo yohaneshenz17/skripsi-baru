@@ -308,6 +308,43 @@ $rubrik = getRubrikPenilaian();
             color: #2c3e50;
         }
         
+        /* Foto Mahasiswa Styling */
+        .mahasiswa-foto-container {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+        
+        .foto-mahasiswa {
+            flex-shrink: 0;
+        }
+        
+        .foto-mahasiswa img {
+            width: 120px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 3px solid #3498db;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .foto-placeholder {
+            width: 120px;
+            height: 160px;
+            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+            border-radius: 8px;
+            border: 3px dashed #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 3rem;
+        }
+        
+        .info-content {
+            flex: 1;
+        }
+        
         /* =============================================================================
            TAMBAHAN: CSS UNTUK WHATSAPP BUTTON (LETAKKAN SEBELUM .form-section)
            ============================================================================= */
@@ -624,7 +661,23 @@ $rubrik = getRubrikPenilaian();
             <!-- Info Mahasiswa -->
             <div class="mahasiswa-info">
                 <h3>Informasi Mahasiswa</h3>
-                <div class="info-grid">
+                
+                <div class="mahasiswa-foto-container">
+                    <!-- Foto Mahasiswa -->
+                    <div class="foto-mahasiswa">
+                        <?php if (!empty($data['foto']) && file_exists(__DIR__ . '/uploads/foto_mahasiswa/' . $data['foto'])): ?>
+                            <img src="uploads/foto_mahasiswa/<?= sanitizeInput($data['foto']) ?>" 
+                                 alt="Foto <?= sanitizeInput($data['nama_lengkap']) ?>">
+                        <?php else: ?>
+                            <div class="foto-placeholder">
+                                👤
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Info Content -->
+                    <div class="info-content">
+                        <div class="info-grid">
                     <!-- Row 1 -->
                     <div class="info-item">
                         <span class="info-label">NIM</span>
@@ -717,6 +770,8 @@ $rubrik = getRubrikPenilaian();
                                 <span class="badge badge-danger">⏳ Belum Dinilai</span>
                             <?php endif; ?>
                         </span>
+                    </div>
+                        </div>
                     </div>
                 </div>
             </div>

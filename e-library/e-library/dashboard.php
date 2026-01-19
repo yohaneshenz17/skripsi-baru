@@ -33,8 +33,11 @@ $query = "SELECT COUNT(*) as total FROM peminjaman WHERE status = 'terlambat'";
 $result = $conn->query($query);
 $stats['keterlambatan'] = $result->fetch_assoc()['total'];
 
-// Total denda belum dibayar
-$query = "SELECT SUM(sisa_denda) as total FROM pengembalian WHERE sisa_denda > 0";
+// Total denda belum dibayar (dari peminjaman aktif + sisa denda pengembalian)
+$query = "SELECT 
+            (SELECT IFNULL(SUM(denda), 0) FROM peminjaman WHERE denda > 0 AND status != 'dikembalikan') +
+            (SELECT IFNULL(SUM(sisa_denda), 0) FROM pengembalian WHERE sisa_denda > 0)
+          as total";
 $result = $conn->query($query);
 $stats['total_denda'] = $result->fetch_assoc()['total'] ?? 0;
 
@@ -599,25 +602,25 @@ $stmt->close();
 
         <div class="row g-3 mb-3">
             <div class="col-lg-6">
-                <div class="stat-card text-white" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                <a href="modules/peminjaman/index.php?status=terlambat" style="text-decoration: none; color: inherit; display: block;"><div class="stat-card text-white" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
                     <div class="card-body">
                         <h6>Keterlambatan</h6>
                         <h2><?= number_format($stats['keterlambatan']) ?></h2>
                         <small><i class="bi bi-exclamation-triangle"></i> Perlu Tindak Lanjut</small>
                         <i class="bi bi-exclamation-triangle-fill stat-icon"></i>
                     </div>
-                </div>
+                </div></a>
             </div>
             
             <div class="col-lg-6">
-                <div class="stat-card text-white" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
+                <a href="modules/denda/index.php" style="text-decoration: none; color: inherit; display: block;"><div class="stat-card text-white" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
                     <div class="card-body">
                         <h6>Total Denda Belum Dibayar</h6>
                         <h2><?= formatRupiah($stats['total_denda']) ?></h2>
                         <small><i class="bi bi-wallet2"></i> Tunggakan</small>
                         <i class="bi bi-cash-stack stat-icon"></i>
                     </div>
-                </div>
+                </div></a>
             </div>
         </div>
 

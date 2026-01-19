@@ -1,0 +1,8 @@
+[19-Jan-2026 19:16:20 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_result::fetch_all() in /home/stkp7133/public_html/e-library/modules/peminjaman/add.php:179
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/peminjaman/add.php on line 179
+[19-Jan-2026 19:17:04 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_result::fetch_all() in /home/stkp7133/public_html/e-library/modules/peminjaman/add.php:179
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/peminjaman/add.php on line 179

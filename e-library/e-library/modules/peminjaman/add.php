@@ -9,8 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $peminjam_id = intval($_POST['peminjam_id']);
     $buku_ids = $_POST['buku_id']; // Array of book IDs
     
-    // Validasi maksimal 3 buku
-    if (count($buku_ids) > 3) {
+    // Validasi input
+    if (empty($buku_ids)) {
+        setAlert('danger', 'Pilih minimal 1 buku!');
+    } elseif (count($buku_ids) > 3) {
         setAlert('danger', 'Maksimal 3 buku per peminjaman!');
     } else {
         // Cek peminjaman aktif
@@ -20,13 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $conn->prepare($check);
         $stmt->bind_param("si", $jenis_peminjam, $peminjam_id);
         $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
+        $stmt->bind_result($current_total);
+        $stmt->fetch();
+        $stmt->close();
         
-        $total_pinjam = $row['total'] + count($buku_ids);
+        $total_pinjam = $current_total + count($buku_ids);
         
         if ($total_pinjam > 3) {
-            setAlert('danger', 'Peminjam sudah memiliki ' . $row['total'] . ' buku dipinjam. Maksimal total 3 buku!');
+            setAlert('danger', 'Peminjam sudah memiliki ' . $current_total . ' buku dipinjam. Maksimal total 3 buku!');
         } else {
             $success = true;
             $tanggal_pinjam = date('Y-m-d');
@@ -34,15 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             foreach ($buku_ids as $buku_id) {
                 // Cek stok
-                $check_stok = "SELECT stok_tersedia FROM buku WHERE id = ?";
+                $check_stok = "SELECT stok_tersedia, judul FROM buku WHERE id = ?";
                 $stmt2 = $conn->prepare($check_stok);
                 $stmt2->bind_param("i", $buku_id);
                 $stmt2->execute();
-                $result2 = $stmt2->get_result();
-                $buku = $result2->fetch_assoc();
+                $stmt2->bind_result($stok, $judul_buku);
+                $stmt2->fetch();
+                $stmt2->close();
                 
-                if ($buku['stok_tersedia'] <= 0) {
-                    setAlert('danger', 'Stok buku tidak tersedia!');
+                if ($stok <= 0) {
+                    setAlert('danger', 'Stok buku "' . $judul_buku . '" tidak tersedia!');
                     $success = false;
                     break;
                 }
@@ -56,29 +60,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 if (!$stmt3->execute()) {
                     $success = false;
+                    setAlert('danger', 'Gagal menyimpan peminjaman!');
                     break;
                 }
+                $stmt3->close();
                 
                 // Update stok
                 $update = "UPDATE buku SET stok_tersedia = stok_tersedia - 1 WHERE id = ?";
                 $stmt4 = $conn->prepare($update);
                 $stmt4->bind_param("i", $buku_id);
                 $stmt4->execute();
+                $stmt4->close();
             }
             
             if ($success) {
-                setAlert('success', 'Peminjaman berhasil ditambahkan!');
+                setAlert('success', 'Peminjaman berhasil ditambahkan! ' . count($buku_ids) . ' buku dipinjam.');
                 header('Location: index.php');
                 exit;
             }
         }
     }
 }
-
-// Get mahasiswa dan dosen
-$mahasiswa = $conn->query("SELECT * FROM mahasiswa ORDER BY nama");
-$dosen = $conn->query("SELECT * FROM dosen ORDER BY nama");
-$buku = $conn->query("SELECT * FROM buku WHERE stok_tersedia > 0 ORDER BY judul");
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -88,79 +90,388 @@ $buku = $conn->query("SELECT * FROM buku WHERE stok_tersedia > 0 ORDER BY judul"
     <title>Tambah Peminjaman - E-Library STK Yakobus</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.8rem 1.5rem;
+        }
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .navbar-brand i { color: #ffd700; }
+        .navbar .nav-link { color: rgba(255,255,255,0.95) !important; }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            width: 250px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 2px 0 15px rgba(0,0,0,0.08);
+            overflow-y: auto;
+        }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 3px; }
+        .sidebar-heading {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 1rem 1.2rem 0.5rem;
+            color: #64748b;
+            background: linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.1) 50%, transparent 100%);
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        .sidebar-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 1.2rem;
+            right: 1.2rem;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%);
+        }
+        .sidebar .nav-link {
+            font-weight: 500;
+            color: #475569;
+            padding: 0.75rem 1.2rem;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin: 0.2rem 0;
+        }
+        .sidebar .nav-link i {
+            width: 22px;
+            font-size: 1.1rem;
+            margin-right: 0.7rem;
+        }
+        .sidebar .nav-link:hover {
+            color: #667eea;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, transparent 100%);
+            border-left-color: #667eea;
+            transform: translateX(3px);
+        }
+        .sidebar .nav-link.active {
+            color: #667eea;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, rgba(102, 126, 234, 0.05) 100%);
+            border-left-color: #667eea;
+            font-weight: 600;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 56px;
+            padding: 1.5rem;
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #f093fb;
+        }
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+        
+        /* Card */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Form */
+        .form-label {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            padding: 0.6rem 1rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #f093fb;
+            box-shadow: 0 0 0 0.2rem rgba(240, 147, 251, 0.15);
+        }
+        
+        /* Select2 Custom */
+        .select2-container--bootstrap-5 .select2-selection {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            min-height: 45px;
+        }
+        
+        .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+        .select2-container--bootstrap-5.select2-container--open .select2-selection {
+            border-color: #f093fb;
+            box-shadow: 0 0 0 0.2rem rgba(240, 147, 251, 0.15);
+        }
+        
+        .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+            background-color: #f093fb;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            padding: 0.35rem 0.7rem;
+        }
+        
+        /* Button */
+        .btn {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            border: none;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        /* Alert */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            border-left: 4px solid;
+        }
+        
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            border-left: 4px solid #3b82f6;
+            border-radius: 10px;
+            padding: 1.2rem;
+        }
+        
+        .info-box ul {
+            margin-bottom: 0;
+            padding-left: 1.2rem;
+        }
+        
+        .info-box li {
+            margin-bottom: 0.4rem;
+        }
+        
+        /* Selected Books Display */
+        #selectedBooksDisplay {
+            display: none;
+            margin-top: 1rem;
+        }
+        
+        .selected-book-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .selected-book-item:hover {
+            border-color: #f093fb;
+        }
+        
+        .badge-count {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 0.35rem 0.7rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
-    <?php include '../../includes/navbar.php'; ?>
-    
-    <div class="container-fluid">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">
+                <i class="bi bi-book-fill me-2"></i>
+                <strong>E-Library STK Yakobus</strong>
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <?= $_SESSION['admin_username'] ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>change_password.php"><i class="bi bi-key me-2"></i>Ganti Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>dashboard.php">
+                    <i class="bi bi-speedometer2"></i>Dashboard
+                </a>
+            </li>
+            <li class="sidebar-heading">DATA MASTER</li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/buku/index.php">
+                    <i class="bi bi-book"></i>Data Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/mahasiswa/index.php">
+                    <i class="bi bi-people"></i>Data Mahasiswa
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/dosen/index.php">
+                    <i class="bi bi-person-badge"></i>Data Dosen
+                </a>
+            </li>
+            <li class="sidebar-heading">TRANSAKSI</li>
+            <li class="nav-item">
+                <a class="nav-link active" href="<?= BASE_URL ?>modules/peminjaman/index.php">
+                    <i class="bi bi-arrow-left-right"></i>Peminjaman Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/perpanjangan/index.php">
+                    <i class="bi bi-arrow-clockwise"></i>Perpanjangan Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/pengembalian/index.php">
+                    <i class="bi bi-arrow-return-left"></i>Pengembalian Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/denda/index.php">
+                    <i class="bi bi-cash-stack"></i>Manajemen Denda
+                </a>
+            </li>
+            <li class="sidebar-heading">LAYANAN</li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/surat_keterangan/index.php">
+                    <i class="bi bi-file-earmark-text"></i>Surat Keterangan
+                </a>
+            </li>
+            <li class="sidebar-heading">LAPORAN & UTILITAS</li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/laporan/index.php">
+                    <i class="bi bi-file-bar-graph"></i>Laporan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/backup/index.php">
+                    <i class="bi bi-cloud-download"></i>Backup Database
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-plus-circle me-2"></i>Tambah Peminjaman Buku</h1>
+        </div>
+
+        <?php showAlert(); ?>
+
         <div class="row">
-            <?php include '../../includes/sidebar.php'; ?>
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><i class="bi bi-plus-circle me-2"></i>Tambah Peminjaman</h1>
-                </div>
-
-                <?php showAlert(); ?>
-
+            <div class="col-lg-8">
                 <div class="card">
                     <div class="card-body">
                         <form method="POST" action="" id="formPeminjaman">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Jenis Peminjam <span class="text-danger">*</span></label>
-                                        <select class="form-select" name="jenis_peminjam" id="jenisPeminjam" required>
-                                            <option value="">Pilih...</option>
-                                            <option value="mahasiswa">Mahasiswa</option>
-                                            <option value="dosen">Dosen</option>
-                                        </select>
-                                    </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-person-check me-1"></i>
+                                        Jenis Peminjam <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" name="jenis_peminjam" id="jenisPeminjam" required>
+                                        <option value="">-- Pilih Jenis Peminjam --</option>
+                                        <option value="mahasiswa">👨‍🎓 Mahasiswa</option>
+                                        <option value="dosen">👨‍🏫 Dosen</option>
+                                    </select>
                                 </div>
                                 
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Nama Peminjam <span class="text-danger">*</span></label>
-                                        <select class="form-select" name="peminjam_id" id="peminjamId" required>
-                                            <option value="">Pilih jenis peminjam dulu...</option>
-                                        </select>
-                                    </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-person-fill me-1"></i>
+                                        Nama Peminjam <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" name="peminjam_id" id="peminjamSelect" required disabled>
+                                        <option value="">-- Pilih jenis peminjam terlebih dahulu --</option>
+                                    </select>
+                                    <small class="text-muted">💡 Ketik untuk mencari nama atau NIM/NUPTK</small>
                                 </div>
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Pilih Buku (Maksimal 3) <span class="text-danger">*</span></label>
-                                <div class="row">
-                                    <?php while ($b = $buku->fetch_assoc()): ?>
-                                    <div class="col-md-4 mb-2">
-                                        <div class="form-check">
-                                            <input class="form-check-input buku-checkbox" type="checkbox" name="buku_id[]" value="<?= $b['id'] ?>" id="buku<?= $b['id'] ?>">
-                                            <label class="form-check-label" for="buku<?= $b['id'] ?>">
-                                                <strong><?= $b['judul'] ?></strong><br>
-                                                <small class="text-muted"><?= $b['pengarang'] ?> | Tersedia: <?= $b['stok_tersedia'] ?></small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <?php endwhile; ?>
-                                </div>
-                                <small class="text-danger" id="errorBuku"></small>
+                                <label class="form-label">
+                                    <i class="bi bi-book-fill me-1"></i>
+                                    Pilih Buku <span class="text-danger">*</span>
+                                    <span class="badge-count" id="bukuCounter">0/3</span>
+                                </label>
+                                <select class="form-select" name="buku_id[]" id="bukuSelect" multiple required>
+                                    <!-- Options will be loaded dynamically -->
+                                </select>
+                                <small class="text-muted">💡 Ketik untuk mencari judul atau nomor buku | Maksimal 3 buku</small>
                             </div>
                             
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle me-2"></i>
-                                <strong>Informasi:</strong>
-                                <ul class="mb-0">
-                                    <li>Maksimal 3 buku per peminjaman</li>
-                                    <li>Durasi peminjaman: 7 hari</li>
-                                    <li>Denda keterlambatan: Rp 1.000/hari</li>
-                                    <li>Perpanjangan maksimal 1x (7 hari tambahan)</li>
-                                </ul>
-                            </div>
+                            <!-- Selected Books Display -->
+                            <div id="selectedBooksDisplay"></div>
                             
-                            <div class="d-flex gap-2">
+                            <div class="d-flex gap-2 mt-4">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save me-2"></i>Simpan
+                                    <i class="bi bi-save me-2"></i>Simpan Peminjaman
                                 </button>
                                 <a href="index.php" class="btn btn-secondary">
                                     <i class="bi bi-x-circle me-2"></i>Batal
@@ -169,41 +480,137 @@ $buku = $conn->query("SELECT * FROM buku WHERE stok_tersedia > 0 ORDER BY judul"
                         </form>
                     </div>
                 </div>
-            </main>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="info-box">
+                    <h5 class="mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Informasi Peminjaman
+                    </h5>
+                    <ul>
+                        <li><strong>Durasi:</strong> 7 hari dari tanggal pinjam</li>
+                        <li><strong>Maksimal:</strong> 3 buku per peminjam</li>
+                        <li><strong>Denda:</strong> Rp 1.000 per hari keterlambatan</li>
+                        <li><strong>Perpanjangan:</strong> Maksimal 1x (7 hari tambahan)</li>
+                        <li><strong>Stok:</strong> Hanya buku dengan stok tersedia yang bisa dipinjam</li>
+                    </ul>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Perhatian!</strong><br>
+                    Pastikan data peminjam dan buku sudah benar sebelum menyimpan.
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
     <script>
-        // Data peminjam
-        const mahasiswa = <?= json_encode($mahasiswa->fetch_all(MYSQLI_ASSOC)) ?>;
-        const dosen = <?= json_encode($dosen->fetch_all(MYSQLI_ASSOC)) ?>;
-        
-        // Update peminjam dropdown
-        document.getElementById('jenisPeminjam').addEventListener('change', function() {
-            const select = document.getElementById('peminjamId');
-            select.innerHTML = '<option value="">Pilih...</option>';
-            
-            const data = this.value === 'mahasiswa' ? mahasiswa : dosen;
-            const idField = this.value === 'mahasiswa' ? 'nim' : 'nuptk';
-            
-            data.forEach(item => {
-                select.innerHTML += `<option value="${item.id}">${item.nama} (${item[idField]})</option>`;
+        $(document).ready(function() {
+            // Initialize Select2 for Peminjam
+            $('#peminjamSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: '🔍 Ketik nama atau NIM/NUPTK...',
+                allowClear: true,
+                width: '100%'
             });
-        });
-        
-        // Limit checkbox to 3
-        const checkboxes = document.querySelectorAll('.buku-checkbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const checked = document.querySelectorAll('.buku-checkbox:checked');
-                if (checked.length > 3) {
-                    this.checked = false;
-                    document.getElementById('errorBuku').textContent = 'Maksimal 3 buku!';
-                } else {
-                    document.getElementById('errorBuku').textContent = '';
+            
+            // Initialize Select2 for Buku
+            $('#bukuSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: '🔍 Ketik judul atau nomor buku...',
+                allowClear: true,
+                width: '100%',
+                maximumSelectionLength: 3,
+                language: {
+                    maximumSelected: function() {
+                        return "Maksimal 3 buku dapat dipilih!";
+                    }
                 }
             });
+            
+            // Load books on page load
+            loadBuku();
+            
+            // Handle jenis peminjam change
+            $('#jenisPeminjam').on('change', function() {
+                const jenis = $(this).val();
+                if (jenis) {
+                    loadPeminjam(jenis);
+                    $('#peminjamSelect').prop('disabled', false);
+                } else {
+                    $('#peminjamSelect').html('<option value="">-- Pilih jenis peminjam terlebih dahulu --</option>').prop('disabled', true);
+                }
+            });
+            
+            // Track selected books count
+            $('#bukuSelect').on('change', function() {
+                const count = $(this).val() ? $(this).val().length : 0;
+                $('#bukuCounter').text(count + '/3');
+                
+                if (count >= 3) {
+                    $('#bukuCounter').removeClass('badge-count').addClass('badge bg-warning text-dark');
+                } else {
+                    $('#bukuCounter').removeClass('badge bg-warning text-dark').addClass('badge-count');
+                }
+            });
+            
+            // Function to load peminjam
+            function loadPeminjam(jenis) {
+                $.ajax({
+                    url: 'get_peminjam.php',
+                    type: 'GET',
+                    data: { jenis: jenis },
+                    dataType: 'json',
+                    success: function(response) {
+                        $('#peminjamSelect').empty();
+                        $('#peminjamSelect').append('<option value="">-- Pilih Peminjam --</option>');
+                        
+                        if (response.success && response.data.length > 0) {
+                            $.each(response.data, function(index, item) {
+                                const identifier = jenis === 'mahasiswa' ? item.nim : item.nuptk;
+                                const text = item.nama + ' (' + identifier + ')';
+                                $('#peminjamSelect').append(new Option(text, item.id, false, false));
+                            });
+                        } else {
+                            $('#peminjamSelect').append('<option value="">Tidak ada data</option>');
+                        }
+                    },
+                    error: function() {
+                        alert('Gagal memuat data peminjam!');
+                    }
+                });
+            }
+            
+            // Function to load buku
+            function loadBuku() {
+                $.ajax({
+                    url: 'get_buku.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        $('#bukuSelect').empty();
+                        
+                        if (response.success && response.data.length > 0) {
+                            $.each(response.data, function(index, item) {
+                                const text = item.judul + ' (' + item.nomor_buku + ') - Tersedia: ' + item.stok_tersedia;
+                                $('#bukuSelect').append(new Option(text, item.id, false, false));
+                            });
+                        } else {
+                            $('#bukuSelect').append('<option value="">Tidak ada buku tersedia</option>');
+                        }
+                    },
+                    error: function() {
+                        alert('Gagal memuat data buku!');
+                    }
+                });
+            }
         });
     </script>
 </body>

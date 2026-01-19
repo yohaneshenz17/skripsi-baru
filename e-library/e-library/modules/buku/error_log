@@ -1,0 +1,8 @@
+[19-Jan-2026 13:45:05 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/buku/delete.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/buku/delete.php on line 14
+[19-Jan-2026 13:47:24 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/buku/delete.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/buku/delete.php on line 14

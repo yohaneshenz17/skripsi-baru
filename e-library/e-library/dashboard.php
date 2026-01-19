@@ -42,19 +42,18 @@ $stats['total_denda'] = $result->fetch_assoc()['total'] ?? 0;
 $query = "SELECT * FROM buku WHERE stok_tersedia <= 0 AND stok > 0";
 $buku_habis = $conn->query($query);
 
-// Peminjaman akan jatuh tempo (3 hari ke depan)
+// Peminjaman akan jatuh tempo (3 hari ke depan) - FIXED VERSION
 $today = date('Y-m-d');
 $three_days = date('Y-m-d', strtotime('+3 days'));
+
+// Use direct query instead of prepared statement with get_result()
 $query = "SELECT p.*, b.judul, b.nomor_buku 
           FROM peminjaman p
           JOIN buku b ON p.buku_id = b.id
-          WHERE p.tanggal_jatuh_tempo BETWEEN ? AND ?
+          WHERE p.tanggal_jatuh_tempo BETWEEN '$today' AND '$three_days'
           AND p.status IN ('dipinjam', 'diperpanjang')
           ORDER BY p.tanggal_jatuh_tempo ASC";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("ss", $today, $three_days);
-$stmt->execute();
-$akan_jatuh_tempo = $stmt->get_result();
+$akan_jatuh_tempo = $conn->query($query);
 ?>
 <!DOCTYPE html>
 <html lang="id">

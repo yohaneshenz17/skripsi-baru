@@ -58,12 +58,12 @@ function generateKodePeminjaman() {
     return 'PJM' . date('Ymd') . rand(1000, 9999);
 }
 
-// Generate nomor surat
+// Generate nomor surat - FIXED VERSION
 function generateNomorSurat($conn) {
     $tahun = date('Y');
     $bulan_romawi = formatBulanRomawi(date('n'));
     
-    // Cek counter tahun ini
+    // Cek counter tahun ini - FIXED
     $query = "SELECT counter FROM nomor_surat_counter WHERE tahun = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $tahun);
@@ -148,7 +148,7 @@ function sanitize($data) {
     return htmlspecialchars(strip_tags(trim($data)));
 }
 
-// Get nama peminjam
+// Get nama peminjam - FIXED VERSION
 function getNamaPeminjam($conn, $jenis, $id) {
     if ($jenis == 'mahasiswa') {
         $query = "SELECT nama FROM mahasiswa WHERE id = ?";
@@ -170,7 +170,7 @@ function getNamaPeminjam($conn, $jenis, $id) {
     return '-';
 }
 
-// Get identifier peminjam (NIM/NUPTK)
+// Get identifier peminjam (NIM/NUPTK) - FIXED VERSION
 function getIdentifierPeminjam($conn, $jenis, $id) {
     if ($jenis == 'mahasiswa') {
         $query = "SELECT nim as identifier FROM mahasiswa WHERE id = ?";
@@ -205,5 +205,6 @@ function updateStatusPeminjaman($conn) {
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $today);
     $stmt->execute();
+    $stmt->close();
 }
 ?>

@@ -12,26 +12,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tahun_terbit = sanitize($_POST['tahun_terbit']);
     $stok = intval($_POST['stok']);
     
-    // Check if nomor_buku already exists
-    $check = "SELECT * FROM buku WHERE nomor_buku = ?";
+    // Check if nomor_buku already exists - FIXED VERSION
+    $check = "SELECT id FROM buku WHERE nomor_buku = ?";
     $stmt = $conn->prepare($check);
     $stmt->bind_param("s", $nomor_buku);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->bind_result($found_id);
     
-    if ($result->num_rows > 0) {
+    if ($stmt->fetch()) {
+        // Nomor buku sudah ada
+        $stmt->close();
         setAlert('danger', 'Nomor buku sudah digunakan!');
     } else {
+        $stmt->close();
+        
+        // Insert new book
         $query = "INSERT INTO buku (nomor_buku, judul, pengarang, penerbit, tahun_terbit, stok, stok_tersedia) 
                   VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("sssssii", $nomor_buku, $judul, $pengarang, $penerbit, $tahun_terbit, $stok, $stok);
         
         if ($stmt->execute()) {
+            $stmt->close();
             setAlert('success', 'Buku berhasil ditambahkan!');
             header('Location: index.php');
             exit;
         } else {
+            $stmt->close();
             setAlert('danger', 'Gagal menambahkan buku!');
         }
     }

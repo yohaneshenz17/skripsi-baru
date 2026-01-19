@@ -8,7 +8,7 @@ if (isLoggedIn()) {
     exit;
 }
 
-// Process login
+// Process login - FIXED VERSION
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     $username = sanitize($_POST['username']);
     $password = $_POST['password'];
@@ -17,6 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $username);
     $stmt->execute();
+    
+    // Use bind_result instead of get_result
     $stmt->bind_result($id, $db_username, $db_password, $email);
     
     if ($stmt->fetch()) {

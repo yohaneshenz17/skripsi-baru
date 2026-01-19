@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 20 Jan 2026 pada 05.44
+-- Waktu pembuatan: 20 Jan 2026 pada 05.56
 -- Versi server: 10.3.39-MariaDB-cll-lve
 -- Versi PHP: 8.1.34
 
@@ -67,7 +67,7 @@ CREATE TABLE `buku` (
 
 INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun_terbit`, `stok`, `stok_tersedia`, `created_at`, `updated_at`) VALUES
 (10, '001.011.6.Sur.F', 'Filsafat Ilmu Sebuah  Pengantar Populer', 'Jujun S. Suriasumantri', 'Jakarta, PT. Pancaranintan Indahgraha', '2007', 1, 1, '2026-01-19 07:15:56', '2026-01-19 12:43:30'),
-(11, '001.1.8.Mus.M', 'Mengembangkan TALENTA untuk sesama', 'Herman Musakabe', 'Yayasan Citra Insan Pembaru', '2008', 29, 29, '2026-01-19 07:15:56', '2026-01-19 13:00:35'),
+(11, '001.1.8.Mus.M', 'Mengembangkan TALENTA untuk sesama', 'Herman Musakabe', 'Yayasan Citra Insan Pembaru', '2008', 29, 28, '2026-01-19 07:15:56', '2026-01-19 22:52:13'),
 (12, '001.2.1.Emz.M', 'Metodologi Penelitian Pendidikan', 'Prof. Dr. Emzir, M.Pd.', 'Jakarta, Rajawali Pers', '2012', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (13, '001.2.2.Suk.M', 'Metode Penelitian Pendidikan', 'Prof. Drs. Sukestiyarno, MS, Ph.D', 'Semarang, UNNES Press', '2020', 2, 2, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (14, '001.2.3 Sug.M', 'Metode Penelitian & Pengembangan Research and Development \' Untuk Bidang Pendidikan, Manajemen, Sosial, Teknik', 'Prof. Dr. Sugiyono', 'Bandung, Alfa Beta', '2016', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
@@ -79,12 +79,12 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (20, '001.3.8. Sar. M', 'Metode Penelitian Kuantitatif & Kualitatif', 'Jonathan Sarwwono', 'Graha Ilmu', '2006', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (21, '001.4.1.Sup.M', 'Metode Penelitian Praktis', 'Drs.  M. Suparmoko, M.A.,Ph.D.', 'Yogyakarta, BPFE', '1999', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (22, '001.4.2.Fih. P', 'Penelitian Tindakan Kelas', 'Albertus Fiharsono,  S.Pd., M.Hum', 'Yogyakarta, Kanisius', '2014', 2, 2, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
-(23, '001.4.3.Str.C', 'Cara Menulis Makalah Filsafat', 'James S. Stramel', 'Yogyakarta, Pustaka Pelajar (Anggota IKAPI)', '2002', 3, 3, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
+(23, '001.4.3.Str.C', 'Cara Menulis Makalah Filsafat', 'James S. Stramel', 'Yogyakarta, Pustaka Pelajar (Anggota IKAPI)', '2002', 3, 2, '2026-01-19 07:15:56', '2026-01-19 22:51:51'),
 (24, '001.4.4. Moo.C', 'Cara Meneliti', 'Nick Moore', 'ITB Bandung', '1995', 10, 9, '2026-01-19 07:15:56', '2026-01-19 13:05:21'),
 (25, '001.4.6.Tji. S', 'Strategi Riset Lewat Internet', 'Fandy Tjiptono & Totok Budi Santoso', 'Yogyakarta, Andi', '2000', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (26, '001.4.7.War.P', 'Penelitian Tindakan Kelas', 'Igak Wardhani, dkk', 'Universitas Terbuka', '2007', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (27, '001.4.8.Tae.P', 'Petualangan Intelektual Menuju Metode Penelitian Pendidikan', 'Dr. Paulus Taek, MS', 'Gita Kasih', '2009', 17, 17, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
-(28, '001.4.9. Ind.M', 'Menulis Karya Ilmiah, Artikel, Skripsi, Thesis dan Disertasi', 'Etty Indriati, Ph.D', 'PT. Gramedia Pustaka Utama', '2005', 4, 4, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
+(28, '001.4.9. Ind.M', 'Menulis Karya Ilmiah, Artikel, Skripsi, Thesis dan Disertasi', 'Etty Indriati, Ph.D', 'PT. Gramedia Pustaka Utama', '2005', 4, 3, '2026-01-19 07:15:56', '2026-01-19 22:56:39'),
 (29, '001.4.10 Suk.M', 'Manajemen Penelitian Tindakan Kelas', 'Sukidin, Basrowi, Suranto', 'Insan Cendekia', '2008', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56');
 
 -- --------------------------------------------------------
@@ -495,7 +495,10 @@ CREATE TABLE `peminjaman` (
 --
 
 INSERT INTO `peminjaman` (`id`, `kode_peminjaman`, `jenis_peminjam`, `peminjam_id`, `buku_id`, `tanggal_pinjam`, `tanggal_jatuh_tempo`, `tanggal_kembali`, `status`, `denda`, `created_at`, `updated_at`) VALUES
-(4, 'PJM202601195509', 'mahasiswa', 50, 24, '2026-01-13', '2026-01-20', NULL, 'dipinjam', 0, '2026-01-19 13:05:21', '2026-01-19 13:05:21');
+(4, 'PJM202601195509', 'mahasiswa', 50, 24, '2026-01-13', '2026-01-27', NULL, 'diperpanjang', 0, '2026-01-19 13:05:21', '2026-01-19 22:50:59'),
+(5, 'PJM202601203855', 'mahasiswa', 222, 23, '2026-01-11', '2026-01-18', NULL, 'terlambat', 0, '2026-01-19 22:51:51', '2026-01-19 22:51:51'),
+(6, 'PJM202601201766', 'dosen', 1, 11, '2026-01-14', '2026-01-21', NULL, 'dipinjam', 0, '2026-01-19 22:52:13', '2026-01-19 22:52:13'),
+(7, 'PJM202601208098', 'mahasiswa', 186, 28, '2026-01-06', '2026-01-13', NULL, 'terlambat', 0, '2026-01-19 22:56:39', '2026-01-19 22:56:39');
 
 -- --------------------------------------------------------
 
@@ -530,6 +533,13 @@ CREATE TABLE `perpanjangan` (
   `jatuh_tempo_baru` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data untuk tabel `perpanjangan`
+--
+
+INSERT INTO `perpanjangan` (`id`, `peminjaman_id`, `tanggal_perpanjangan`, `jatuh_tempo_lama`, `jatuh_tempo_baru`, `created_at`) VALUES
+(1, 4, '2026-01-20', '2026-01-20', '2026-01-27', '2026-01-19 22:50:59');
 
 -- --------------------------------------------------------
 
@@ -657,7 +667,7 @@ ALTER TABLE `nomor_surat_counter`
 -- AUTO_INCREMENT untuk tabel `peminjaman`
 --
 ALTER TABLE `peminjaman`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengembalian`
@@ -669,7 +679,7 @@ ALTER TABLE `pengembalian`
 -- AUTO_INCREMENT untuk tabel `perpanjangan`
 --
 ALTER TABLE `perpanjangan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT untuk tabel `surat_keterangan`

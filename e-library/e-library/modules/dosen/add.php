@@ -1,5 +1,4 @@
 <?php
-// FILE 1: dosen/add.php
 require_once '../../config/database.php';
 require_once '../../config/functions.php';
 
@@ -102,9 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <label class="form-label">Program Studi <span class="text-danger">*</span></label>
                                         <select class="form-select" name="program_studi" required>
                                             <option value="">Pilih...</option>
-                                            <option value="S1 Kateketik">S1 Kateketik</option>
-                                            <option value="S1 Teologi">S1 Teologi</option>
-                                            <option value="S2 Teologi">S2 Teologi</option>
+                                            <option value="S1 Pendidikan Keagamaan Katolik">S1 Pendidikan Keagamaan Katolik</option>
+                                            <option value="S1 Pendidikan Guru Sekolah Dasar">S1 Pendidikan Guru Sekolah Dasar</option>
+                                            <option value="Profesi Pendidikan Guru PAK">Profesi Pendidikan Guru PAK</option>
                                         </select>
                                     </div>
                                 </div>

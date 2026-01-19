@@ -1,0 +1,4 @@
+[19-Jan-2026 18:48:13 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/mahasiswa/index.php:51
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/mahasiswa/index.php on line 51

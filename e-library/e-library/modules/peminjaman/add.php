@@ -32,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             setAlert('danger', 'Peminjam sudah memiliki ' . $current_total . ' buku dipinjam. Maksimal total 3 buku!');
         } else {
             $success = true;
-            $tanggal_pinjam = date('Y-m-d');
-            $tanggal_jatuh_tempo = date('Y-m-d', strtotime('+7 days'));
+            $tanggal_pinjam = sanitize($_POST['tanggal_pinjam']); // Admin tentukan tanggal
+            $tanggal_jatuh_tempo = date('Y-m-d', strtotime($tanggal_pinjam . ' +7 days'));
             
             foreach ($buku_ids as $buku_id) {
                 // Cek stok
@@ -429,6 +429,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="card">
                     <div class="card-body">
                         <form method="POST" action="" id="formPeminjaman">
+                            <!-- Input Tanggal Peminjaman -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        Tanggal Peminjaman <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="date" class="form-control" name="tanggal_pinjam" id="tanggalPinjam" 
+                                           value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        Jatuh Tempo
+                                    </label>
+                                    <input type="text" class="form-control" id="tanggalJatuhTempo" 
+                                           value="<?= date('d M Y', strtotime('+7 days')) ?>" readonly>
+                                    <small class="text-muted">💡 Otomatis +7 hari dari tanggal peminjaman</small>
+                                </div>
+                            </div>
+                            
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">
@@ -611,6 +632,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
                 });
             }
+            
+            // Auto-update tanggal jatuh tempo saat tanggal peminjaman berubah
+            $('#tanggalPinjam').on('change', function() {
+                const tanggalPinjam = new Date($(this).val());
+                const tanggalJatuhTempo = new Date(tanggalPinjam);
+                tanggalJatuhTempo.setDate(tanggalJatuhTempo.getDate() + 7);
+                
+                // Format tanggal Indonesia
+                const options = { day: 'numeric', month: 'short', year: 'numeric' };
+                const formatted = tanggalJatuhTempo.toLocaleDateString('id-ID', options);
+                
+                $('#tanggalJatuhTempo').val(formatted);
+            });
         });
     </script>
 </body>

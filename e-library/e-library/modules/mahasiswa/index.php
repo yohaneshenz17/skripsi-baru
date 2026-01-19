@@ -4,15 +4,36 @@ require_once '../../config/functions.php';
 
 requireLogin();
 
-// Get all mahasiswa with search
+// Pagination settings
+$records_per_page = 30;
+$current_page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+if ($current_page < 1) $current_page = 1;
+$offset = ($current_page - 1) * $records_per_page;
+
+// Get search query
 $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
+
+// Build WHERE clause
 $where = '';
+$count_where = '';
 if (!empty($search)) {
     $where = "WHERE nim LIKE '%$search%' OR nama LIKE '%$search%' OR program_studi LIKE '%$search%'";
+    $count_where = $where;
 }
 
-$query = "SELECT * FROM mahasiswa $where ORDER BY id DESC";
+// Get total records
+$count_query = "SELECT COUNT(*) as total FROM mahasiswa $count_where";
+$count_result = $conn->query($count_query);
+$total_records = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_records / $records_per_page);
+
+// Get data with pagination
+$query = "SELECT * FROM mahasiswa $where ORDER BY id DESC LIMIT $records_per_page OFFSET $offset";
 $result = $conn->query($query);
+
+// Calculate showing range
+$showing_from = $total_records > 0 ? $offset + 1 : 0;
+$showing_to = min($offset + $records_per_page, $total_records);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -226,6 +247,51 @@ $result = $conn->query($query);
             border-radius: 10px;
             border-left: 4px solid;
         }
+        
+        /* Pagination */
+        .pagination-info {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .pagination {
+            margin: 0;
+        }
+        
+        .pagination .page-link {
+            color: #11998e;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin: 0 3px;
+            padding: 0.5rem 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination .page-link:hover {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-color: #11998e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(17, 153, 142, 0.3);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-color: #11998e;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .pagination .page-item.disabled .page-link {
+            color: #cbd5e0;
+            background-color: #f8f9fa;
+            border-color: #e2e8f0;
+        }
+        
+        .pagination .page-link i {
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -337,16 +403,27 @@ $result = $conn->query($query);
 
         <div class="card">
             <div class="card-body">
-                <div class="row mb-3">
+                <div class="row mb-3 align-items-center">
                     <div class="col-md-6">
                         <form method="GET" action="">
                             <div class="input-group search-box">
-                                <input type="text" class="form-control" name="search" placeholder="Cari NIM, nama, atau program studi..." value="<?= $search ?>">
+                                <input type="text" class="form-control" name="search" placeholder="Cari NIM, nama, atau program studi..." value="<?= htmlspecialchars($search) ?>">
                                 <button class="btn btn-success" type="submit">
                                     <i class="bi bi-search"></i>
                                 </button>
+                                <?php if (!empty($search)): ?>
+                                <a href="index.php" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i>
+                                </a>
+                                <?php endif; ?>
                             </div>
                         </form>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <span class="pagination-info">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Menampilkan <strong><?= number_format($showing_from) ?></strong> - <strong><?= number_format($showing_to) ?></strong> dari <strong><?= number_format($total_records) ?></strong> mahasiswa
+                        </span>
                     </div>
                 </div>
 
@@ -366,7 +443,7 @@ $result = $conn->query($query);
                         </thead>
                         <tbody>
                             <?php 
-                            $no = 1;
+                            $no = $offset + 1;
                             if ($result->num_rows > 0):
                                 while ($row = $result->fetch_assoc()): 
                             ?>
@@ -381,11 +458,11 @@ $result = $conn->query($query);
                                         </div>
                                     <?php endif; ?>
                                 </td>
-                                <td><code><?= $row['nim'] ?></code></td>
-                                <td><strong><?= $row['nama'] ?></strong></td>
-                                <td><?= $row['program_studi'] ?></td>
-                                <td><span class="badge bg-info"><?= $row['angkatan'] ?></span></td>
-                                <td><?= $row['no_hp'] ?></td>
+                                <td><code><?= htmlspecialchars($row['nim']) ?></code></td>
+                                <td><strong><?= htmlspecialchars($row['nama']) ?></strong></td>
+                                <td><?= htmlspecialchars($row['program_studi']) ?></td>
+                                <td><span class="badge bg-info"><?= htmlspecialchars($row['angkatan']) ?></span></td>
+                                <td><?= htmlspecialchars($row['no_hp']) ?></td>
                                 <td>
                                     <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i>
@@ -402,13 +479,73 @@ $result = $conn->query($query);
                             <tr>
                                 <td colspan="8" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    Tidak ada data mahasiswa
+                                    <?= !empty($search) ? 'Tidak ada hasil pencarian' : 'Tidak ada data mahasiswa' ?>
                                 </td>
                             </tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
+
+                <?php if ($total_pages > 1): ?>
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div class="pagination-info">
+                        Halaman <strong><?= $current_page ?></strong> dari <strong><?= $total_pages ?></strong>
+                    </div>
+                    
+                    <nav>
+                        <ul class="pagination mb-0">
+                            <!-- Previous Button -->
+                            <li class="page-item <?= $current_page <= 1 ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= $current_page - 1 ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </a>
+                            </li>
+
+                            <?php
+                            // Pagination logic
+                            $range = 2; // Show 2 pages before and after current page
+                            $start_page = max(1, $current_page - $range);
+                            $end_page = min($total_pages, $current_page + $range);
+
+                            // First page
+                            if ($start_page > 1) {
+                                echo '<li class="page-item"><a class="page-link" href="?page=1' . (!empty($search) ? '&search=' . urlencode($search) : '') . '">1</a></li>';
+                                if ($start_page > 2) {
+                                    echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
+                                }
+                            }
+
+                            // Page numbers
+                            for ($i = $start_page; $i <= $end_page; $i++):
+                            ?>
+                                <li class="page-item <?= $i == $current_page ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $i ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>">
+                                        <?= $i ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <?php
+                            // Last page
+                            if ($end_page < $total_pages) {
+                                if ($end_page < $total_pages - 1) {
+                                    echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
+                                }
+                                echo '<li class="page-item"><a class="page-link" href="?page=' . $total_pages . (!empty($search) ? '&search=' . urlencode($search) : '') . '">' . $total_pages . '</a></li>';
+                            }
+                            ?>
+
+                            <!-- Next Button -->
+                            <li class="page-item <?= $current_page >= $total_pages ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= $current_page + 1 ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </main>

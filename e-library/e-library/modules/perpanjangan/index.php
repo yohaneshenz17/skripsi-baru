@@ -5,24 +5,13 @@ require_once '../../config/functions.php';
 requireLogin();
 updateStatusPeminjaman($conn);
 
-// Filter status
-$status_filter = isset($_GET['status']) ? sanitize($_GET['status']) : '';
-$search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
-
-// Build query
-$where = "WHERE 1=1";
-if (!empty($status_filter)) {
-    $where .= " AND p.status = '$status_filter'";
-}
-if (!empty($search)) {
-    $where .= " AND (p.kode_peminjaman LIKE '%$search%' OR b.judul LIKE '%$search%' OR b.nomor_buku LIKE '%$search%')";
-}
-
-$query = "SELECT p.*, b.judul, b.nomor_buku 
+// Get peminjaman yang bisa diperpanjang (status: dipinjam/terlambat, belum pernah diperpanjang)
+$query = "SELECT p.*, b.judul, b.nomor_buku,
+          (SELECT COUNT(*) FROM perpanjangan WHERE peminjaman_id = p.id) as jumlah_perpanjangan
           FROM peminjaman p
           JOIN buku b ON p.buku_id = b.id
-          $where
-          ORDER BY p.id DESC";
+          WHERE p.status IN ('dipinjam', 'terlambat')
+          ORDER BY p.tanggal_jatuh_tempo ASC";
 $result = $conn->query($query);
 ?>
 <!DOCTYPE html>
@@ -30,7 +19,7 @@ $result = $conn->query($query);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peminjaman Buku - E-Library STK Yakobus</title>
+    <title>Perpanjangan Buku - E-Library STK Yakobus</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -127,7 +116,7 @@ $result = $conn->query($query);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border-left: 4px solid #f093fb;
+            border-left: 4px solid #38ef7d;
         }
         .page-header h1 {
             font-size: 1.5rem;
@@ -162,7 +151,7 @@ $result = $conn->query($query);
             transition: all 0.2s ease;
         }
         .table tbody tr:hover {
-            background: rgba(240, 147, 251, 0.05);
+            background: rgba(56, 239, 125, 0.05);
             transform: scale(1.01);
         }
         .table tbody td {
@@ -177,13 +166,13 @@ $result = $conn->query($query);
             font-weight: 500;
             transition: all 0.3s ease;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             border: none;
         }
-        .btn-primary:hover {
+        .btn-success:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(56, 239, 125, 0.4);
         }
         .btn-sm {
             padding: 0.35rem 0.7rem;
@@ -197,23 +186,6 @@ $result = $conn->query($query);
             border-radius: 6px;
         }
         
-        /* Search Box */
-        .search-box {
-            max-width: 400px;
-        }
-        .search-box .form-control {
-            border-radius: 8px;
-            border: 2px solid #e2e8f0;
-            padding: 0.6rem 1rem;
-        }
-        .search-box .form-control:focus {
-            border-color: #f093fb;
-            box-shadow: 0 0 0 0.2rem rgba(240, 147, 251, 0.15);
-        }
-        .search-box .btn {
-            border-radius: 8px;
-        }
-        
         /* Alert */
         .alert {
             border: none;
@@ -222,11 +194,16 @@ $result = $conn->query($query);
         }
         
         .info-box {
-            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
             border-left: 4px solid #0284c7;
             border-radius: 10px;
             padding: 1rem 1.2rem;
             margin-bottom: 1.5rem;
+        }
+        
+        .expired-soon {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 3px solid #f59e0b;
         }
     </style>
 </head>
@@ -282,12 +259,12 @@ $result = $conn->query($query);
             </li>
             <li class="sidebar-heading">TRANSAKSI</li>
             <li class="nav-item">
-                <a class="nav-link active" href="<?= BASE_URL ?>modules/peminjaman/index.php">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/peminjaman/index.php">
                     <i class="bi bi-arrow-left-right"></i>Peminjaman Buku
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= BASE_URL ?>modules/perpanjangan/index.php">
+                <a class="nav-link active" href="<?= BASE_URL ?>modules/perpanjangan/index.php">
                     <i class="bi bi-arrow-clockwise"></i>Perpanjangan Buku
                 </a>
             </li>
@@ -323,46 +300,25 @@ $result = $conn->query($query);
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="page-header d-flex justify-content-between align-items-center">
-            <h1><i class="bi bi-arrow-left-right me-2"></i>Peminjaman Buku</h1>
-            <a href="add.php" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-2"></i>Tambah Peminjaman
-            </a>
+        <div class="page-header">
+            <h1><i class="bi bi-arrow-clockwise me-2"></i>Perpanjangan Buku</h1>
         </div>
 
         <?php showAlert(); ?>
         
         <div class="info-box">
             <i class="bi bi-info-circle-fill me-2"></i>
-            <strong>Informasi:</strong> Menampilkan 3 peminjaman aktif. Durasi peminjaman: <strong>7 hari</strong>. Denda keterlambatan: <strong>Rp 1.000/hari</strong>. Maksimal peminjaman: <strong>3 buku per orang</strong>.
+            <strong>Ketentuan Perpanjangan:</strong>
+            <ul class="mb-0 mt-2">
+                <li>Perpanjangan hanya bisa dilakukan <strong>1 kali</strong> untuk <strong>7 hari tambahan</strong></li>
+                <li>Perpanjangan dapat dilakukan mulai <strong>H-1 sebelum jatuh tempo</strong></li>
+                <li>Jika perpanjang <strong>setelah jatuh tempo</strong>, akan dikenakan <strong>denda Rp 1.000/hari</strong></li>
+                <li>Jatuh tempo baru dihitung dari <strong>tanggal jatuh tempo lama + 7 hari</strong></li>
+            </ul>
         </div>
 
         <div class="card">
             <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <form method="GET" action="">
-                            <div class="input-group search-box">
-                                <input type="text" class="form-control" name="search" placeholder="Cari kode, judul buku, atau nomor buku..." value="<?= $search ?>">
-                                <button class="btn btn-primary" type="submit">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
-                        <form method="GET" action="">
-                            <select class="form-select" name="status" onchange="this.form.submit()">
-                                <option value="">Semua Status</option>
-                                <option value="dipinjam" <?= $status_filter == 'dipinjam' ? 'selected' : '' ?>>Dipinjam</option>
-                                <option value="diperpanjang" <?= $status_filter == 'diperpanjang' ? 'selected' : '' ?>>Diperpanjang</option>
-                                <option value="terlambat" <?= $status_filter == 'terlambat' ? 'selected' : '' ?>>Terlambat</option>
-                                <option value="dikembalikan" <?= $status_filter == 'dikembalikan' ? 'selected' : '' ?>>Dikembalikan</option>
-                            </select>
-                        </form>
-                    </div>
-                </div>
-
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
@@ -374,8 +330,8 @@ $result = $conn->query($query);
                                 <th width="10%">TGL PINJAM</th>
                                 <th width="10%">JATUH TEMPO</th>
                                 <th width="10%">STATUS</th>
-                                <th width="8%">DENDA</th>
-                                <th width="12%">AKSI</th>
+                                <th width="10%">PERPANJANGAN</th>
+                                <th width="10%">AKSI</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -387,14 +343,22 @@ $result = $conn->query($query);
                                     $nama_peminjam = getNamaPeminjam($conn, $row['jenis_peminjam'], $row['peminjam_id']);
                                     $identifier = getIdentifierPeminjam($conn, $row['jenis_peminjam'], $row['peminjam_id']);
                                     
-                                    // Hitung denda jika terlambat
-                                    $denda = 0;
-                                    if ($row['status'] == 'terlambat') {
-                                        $hari_terlambat = hitungKeterlambatan($row['tanggal_jatuh_tempo']);
-                                        $denda = hitungDenda($hari_terlambat);
-                                    }
+                                    // Cek apakah sudah pernah diperpanjang
+                                    $sudah_perpanjang = $row['jumlah_perpanjangan'] > 0;
+                                    
+                                    // Cek apakah sudah H-1
+                                    $today = new DateTime();
+                                    $jatuh_tempo = new DateTime($row['tanggal_jatuh_tempo']);
+                                    $diff = $today->diff($jatuh_tempo);
+                                    $hari_tersisa = $jatuh_tempo >= $today ? $diff->days : -$diff->days;
+                                    
+                                    // Cek apakah bisa perpanjang (H-1 atau sudah lewat)
+                                    $bisa_perpanjang = ($hari_tersisa <= 1) && !$sudah_perpanjang;
+                                    
+                                    // Highlight jika hampir jatuh tempo
+                                    $row_class = ($hari_tersisa <= 1 && $hari_tersisa >= 0) ? 'expired-soon' : '';
                             ?>
-                            <tr>
+                            <tr class="<?= $row_class ?>">
                                 <td><?= $no++ ?></td>
                                 <td><code><?= $row['kode_peminjaman'] ?></code></td>
                                 <td>
@@ -406,42 +370,37 @@ $result = $conn->query($query);
                                     <small class="text-muted"><?= $row['nomor_buku'] ?></small>
                                 </td>
                                 <td><?= formatTanggalIndo($row['tanggal_pinjam']) ?></td>
-                                <td><?= formatTanggalIndo($row['tanggal_jatuh_tempo']) ?></td>
+                                <td>
+                                    <?= formatTanggalIndo($row['tanggal_jatuh_tempo']) ?>
+                                    <?php if ($hari_tersisa >= 0): ?>
+                                        <br><small class="badge bg-warning">H-<?= $hari_tersisa ?></small>
+                                    <?php else: ?>
+                                        <br><small class="badge bg-danger">Lewat <?= abs($hari_tersisa) ?> hari</small>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <?php if ($row['status'] == 'dipinjam'): ?>
                                         <span class="badge bg-info">Dipinjam</span>
-                                    <?php elseif ($row['status'] == 'diperpanjang'): ?>
-                                        <span class="badge bg-warning">Diperpanjang</span>
-                                    <?php elseif ($row['status'] == 'terlambat'): ?>
+                                    <?php else: ?>
                                         <span class="badge bg-danger">Terlambat</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-success">Dikembalikan</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($denda > 0): ?>
-                                        <span class="text-danger"><strong><?= formatRupiah($denda) ?></strong></span>
+                                    <?php if ($sudah_perpanjang): ?>
+                                        <span class="badge bg-secondary">Sudah Perpanjang</span>
                                     <?php else: ?>
-                                        -
+                                        <span class="badge bg-success">Belum</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($row['status'] != 'dikembalikan'): ?>
-                                        <?php if ($row['status'] == 'dipinjam'): ?>
-                                        <a href="../perpanjangan/add.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-info" title="Perpanjang">
-                                            <i class="bi bi-arrow-clockwise"></i>
+                                    <?php if ($bisa_perpanjang): ?>
+                                        <a href="add.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-success" title="Perpanjang">
+                                            <i class="bi bi-arrow-clockwise"></i> Perpanjang
                                         </a>
-                                        <?php endif; ?>
-                                        <a href="../pengembalian/add.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-success" title="Kembalikan">
-                                            <i class="bi bi-arrow-return-left"></i>
-                                        </a>
-                                        <?php if ($row['status'] == 'dipinjam'): ?>
-                                        <a href="delete.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus peminjaman ini? Stok buku akan dikembalikan.')" title="Hapus">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                        <?php endif; ?>
+                                    <?php elseif ($sudah_perpanjang): ?>
+                                        <small class="text-muted">Sudah 1x</small>
                                     <?php else: ?>
-                                        <span class="badge bg-secondary">Selesai</span>
+                                        <small class="text-muted">Belum H-1</small>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -452,7 +411,7 @@ $result = $conn->query($query);
                             <tr>
                                 <td colspan="9" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    Tidak ada data peminjaman
+                                    Tidak ada peminjaman yang perlu diperpanjang
                                 </td>
                             </tr>
                             <?php endif; ?>

@@ -1,0 +1,16 @@
+[19-Jan-2026 20:05:26 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/perpanjangan/add.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/perpanjangan/add.php on line 18
+[19-Jan-2026 20:06:24 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/perpanjangan/add.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/perpanjangan/add.php on line 18
+[19-Jan-2026 20:06:36 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/perpanjangan/add.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/perpanjangan/add.php on line 18
+[19-Jan-2026 20:07:45 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/perpanjangan/add.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/perpanjangan/add.php on line 18

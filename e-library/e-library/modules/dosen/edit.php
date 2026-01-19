@@ -1,5 +1,4 @@
 <?php
-// SAVE AS: modules/dosen/edit.php
 require_once '../../config/database.php';
 require_once '../../config/functions.php';
 
@@ -113,9 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <div class="mb-3">
                                         <label class="form-label">Program Studi <span class="text-danger">*</span></label>
                                         <select class="form-select" name="program_studi" required>
-                                            <option value="S1 Kateketik" <?= $dosen['program_studi'] == 'S1 Kateketik' ? 'selected' : '' ?>>S1 Kateketik</option>
-                                            <option value="S1 Teologi" <?= $dosen['program_studi'] == 'S1 Teologi' ? 'selected' : '' ?>>S1 Teologi</option>
-                                            <option value="S2 Teologi" <?= $dosen['program_studi'] == 'S2 Teologi' ? 'selected' : '' ?>>S2 Teologi</option>
+                                            <option value="S1 Pendidikan Keagamaan Katolik" <?= $dosen['program_studi'] == 'S1 Pendidikan Keagamaan Katolik' ? 'selected' : '' ?>>S1 Pendidikan Keagamaan Katolik</option>
+                                            <option value="S1 Pendidikan Guru Sekolah Dasar" <?= $dosen['program_studi'] == 'S1 Pendidikan Guru Sekolah Dasar' ? 'selected' : '' ?>>S1 Pendidikan Guru Sekolah Dasar</option>
+                                            <option value="Profesi Pendidikan Guru PAK" <?= $dosen['program_studi'] == 'Profesi Pendidikan Guru PAK' ? 'selected' : '' ?>>Profesi Pendidikan Guru PAK</option>
                                         </select>
                                     </div>
                                 </div>

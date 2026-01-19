@@ -1,0 +1,40 @@
+[19-Jan-2026 10:16:32 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/index.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/index.php on line 18
+[19-Jan-2026 10:17:00 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/index.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/index.php on line 18
+[19-Jan-2026 10:23:36 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/index.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/index.php on line 20
+[19-Jan-2026 10:23:53 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/index.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/index.php on line 20
+[19-Jan-2026 10:28:30 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/dashboard.php:57
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/dashboard.php on line 57
+[19-Jan-2026 10:28:32 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/dashboard.php:57
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/dashboard.php on line 57
+[19-Jan-2026 10:28:34 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/dashboard.php:57
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/dashboard.php on line 57
+[19-Jan-2026 10:28:45 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/dashboard.php:57
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/dashboard.php on line 57
+[19-Jan-2026 10:28:49 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/dashboard.php:57
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/dashboard.php on line 57
+[19-Jan-2026 10:28:56 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/dashboard.php:57
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/dashboard.php on line 57

@@ -13,6 +13,25 @@ $query = "SELECT p.*, b.judul, b.nomor_buku,
           WHERE p.status IN ('dipinjam', 'terlambat')
           ORDER BY p.tanggal_jatuh_tempo ASC";
 $result = $conn->query($query);
+
+// Get riwayat perpanjangan yang sudah dilakukan
+$query_riwayat = "SELECT 
+                    pr.id as perpanjangan_id,
+                    pr.tanggal_perpanjangan,
+                    pr.jatuh_tempo_lama,
+                    pr.jatuh_tempo_baru,
+                    p.id as peminjaman_id,
+                    p.kode_peminjaman,
+                    p.jenis_peminjam,
+                    p.peminjam_id,
+                    p.status,
+                    b.judul,
+                    b.nomor_buku
+                  FROM perpanjangan pr
+                  JOIN peminjaman p ON pr.peminjaman_id = p.id
+                  JOIN buku b ON p.buku_id = b.id
+                  ORDER BY pr.tanggal_perpanjangan DESC";
+$result_riwayat = $conn->query($query_riwayat);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -419,6 +438,96 @@ $result = $conn->query($query);
                     </table>
                 </div>
             </div>
+        </div>
+
+        <!-- RIWAYAT PERPANJANGAN -->
+        <div class="card mt-4">
+            <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 1.5rem;">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Riwayat Perpanjangan</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="5%">NO</th>
+                                <th width="10%">KODE</th>
+                                <th width="18%">PEMINJAM</th>
+                                <th width="20%">BUKU</th>
+                                <th width="10%">TGL PERPANJANGAN</th>
+                                <th width="10%">TEMPO LAMA</th>
+                                <th width="10%">TEMPO BARU</th>
+                                <th width="8%">STATUS</th>
+                                <th width="9%">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            $no = 1;
+                            if ($result_riwayat->num_rows > 0):
+                                while ($row = $result_riwayat->fetch_assoc()):
+                                    // Get nama peminjam
+                                    $nama_peminjam = getNamaPeminjam($conn, $row['jenis_peminjam'], $row['peminjam_id']);
+                                    $identifier = getIdentifierPeminjam($conn, $row['jenis_peminjam'], $row['peminjam_id']);
+                            ?>
+                            <tr>
+                                <td><?= $no++ ?></td>
+                                <td><code><?= $row['kode_peminjaman'] ?></code></td>
+                                <td>
+                                    <strong><?= $nama_peminjam ?></strong><br>
+                                    <small class="text-muted"><i class="bi bi-person-badge"></i> <?= $identifier ?></small>
+                                </td>
+                                <td>
+                                    <strong><?= $row['judul'] ?></strong><br>
+                                    <small class="text-muted"><?= $row['nomor_buku'] ?></small>
+                                </td>
+                                <td><?= formatTanggalIndo($row['tanggal_perpanjangan']) ?></td>
+                                <td><span class="badge bg-warning text-dark"><?= formatTanggalIndo($row['jatuh_tempo_lama']) ?></span></td>
+                                <td><span class="badge bg-success"><?= formatTanggalIndo($row['jatuh_tempo_baru']) ?></span></td>
+                                <td>
+                                    <?php if ($row['status'] == 'diperpanjang'): ?>
+                                        <span class="badge bg-info">Diperpanjang</span>
+                                    <?php elseif ($row['status'] == 'dikembalikan'): ?>
+                                        <span class="badge bg-secondary">Dikembalikan</span>
+                                    <?php elseif ($row['status'] == 'terlambat'): ?>
+                                        <span class="badge bg-danger">Terlambat</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-primary">Dipinjam</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($row['status'] == 'diperpanjang'): ?>
+                                        <a href="delete.php?id=<?= $row['perpanjangan_id'] ?>" 
+                                           class="btn btn-sm btn-danger" 
+                                           onclick="return confirm('Yakin ingin membatalkan perpanjangan ini?\n\nStatus peminjaman akan dikembalikan ke \'Dipinjam\' dan tanggal jatuh tempo akan kembali ke kondisi sebelum diperpanjang.')">
+                                            <i class="bi bi-trash"></i> Hapus
+                                        </a>
+                                    <?php else: ?>
+                                        <small class="text-muted">Selesai</small>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php 
+                                endwhile;
+                            else:
+                            ?>
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    Belum ada riwayat perpanjangan
+                                </td>
+                            </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-3">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Informasi Hapus Perpanjangan:</strong> Tombol hapus hanya tersedia untuk perpanjangan dengan status "Diperpanjang". 
+            Menghapus perpanjangan akan mengembalikan status peminjaman ke "Dipinjam" dan tanggal jatuh tempo ke kondisi sebelum diperpanjang.
         </div>
     </main>
 

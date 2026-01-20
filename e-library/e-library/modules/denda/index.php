@@ -4,6 +4,45 @@ require_once '../../config/functions.php';
 
 requireLogin();
 
+// Fungsi hitung denda berjalan
+function hitungDendaBerjalan($conn) {
+    $today = date('Y-m-d');
+    
+    // Query untuk mendapatkan peminjaman yang terlambat
+    $query = "SELECT p.id, p.tanggal_jatuh_tempo, p.tanggal_pinjam
+              FROM peminjaman p
+              WHERE p.tanggal_jatuh_tempo < '$today'
+              AND p.tanggal_kembali IS NULL
+              AND p.status NOT IN ('dikembalikan', 'selesai')";
+    
+    $result = $conn->query($query);
+    
+    $total_denda = 0;
+    $total_buku = 0;
+    $total_hari_terlambat = 0;
+    
+    // TARIF TETAP - ganti sesuai kebijakan perpustakaan
+    $tarif_denda = 1000; // Rp 1.000 per hari keterlambatan
+    
+    while ($row = $result->fetch_assoc()) {
+        $tanggal_jatuh_tempo = new DateTime($row['tanggal_jatuh_tempo']);
+        $today_date = new DateTime($today);
+        $hari_terlambat = $tanggal_jatuh_tempo->diff($today_date)->days;
+        
+        if ($hari_terlambat > 0) {
+            $total_denda += ($hari_terlambat * $tarif_denda);
+            $total_buku++;
+            $total_hari_terlambat += $hari_terlambat;
+        }
+    }
+    
+    return [
+        'total_denda' => $total_denda,
+        'total_buku' => $total_buku,
+        'total_hari' => $total_hari_terlambat
+    ];
+}
+
 // Filter
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'belum_lunas';
 $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -42,6 +81,12 @@ $stats_query = "SELECT
                 WHERE denda > 0";
 $stats_result = $conn->query($stats_query);
 $stats = $stats_result->fetch_assoc();
+
+// Hitung denda berjalan
+$denda_berjalan = hitungDendaBerjalan($conn);
+
+// Total exposure = denda berjalan + sisa denda yang belum dibayar
+$total_exposure = $denda_berjalan['total_denda'] + $stats['total_sisa'];
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -184,56 +229,71 @@ $stats = $stats_result->fetch_assoc();
         .table tbody tr:hover {
             background-color: #f8fafc;
         }
-        .table tbody td {
-            padding: 0.9rem 0.75rem;
-            vertical-align: middle;
-        }
         
-        /* Stat Cards */
+        /* Stat Card Mini */
         .stat-card-mini {
             background: white;
             border-radius: 12px;
-            padding: 1.5rem;
-            border-left: 4px solid;
+            padding: 1.2rem;
+            border-left: 4px solid #667eea;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card-mini:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
         }
         .stat-card-mini h6 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             color: #64748b;
-            font-size: 0.875rem;
             margin-bottom: 0.5rem;
+            font-weight: 600;
         }
         .stat-card-mini h3 {
-            margin: 0;
+            font-size: 1.5rem;
             font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+        .stat-card-mini small {
+            font-size: 0.75rem;
         }
         
-        /* Buttons */
-        .btn {
-            border-radius: 6px;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s;
+        /* Stat Card Clickable */
+        .stat-card-clickable {
+            cursor: pointer;
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        .stat-card-clickable:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
-        
-        /* Badges */
-        .badge {
-            padding: 0.4rem 0.7rem;
-            font-weight: 500;
-            border-radius: 6px;
+        .stat-card-clickable h6 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
-        
-        /* Form */
-        .form-control, .form-select {
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
+        .stat-card-clickable h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
         }
-        .form-control:focus, .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        .stat-card-clickable small {
+            font-size: 0.75rem;
+        }
+        .stat-card-clickable .detail-info {
+            font-size: 0.7rem;
+            margin-top: 0.3rem;
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -242,15 +302,26 @@ $stats = $stats_result->fetch_assoc();
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">
-                <i class="bi bi-book-fill me-2"></i>E-Library STK Yakobus
+                <i class="bi bi-book-half"></i> E-Library STK Yakobus
             </a>
-            <div class="ms-auto d-flex align-items-center">
-                <span class="text-white me-3">
-                    <i class="bi bi-person-circle me-1"></i><?= $_SESSION['admin_username'] ?>
-                </span>
-                <a href="<?= BASE_URL ?>logout.php" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right me-1"></i>Logout
-                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> <?= $_SESSION['admin_username'] ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>modules/profile/index.php">
+                                <i class="bi bi-person"></i> Profil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>logout.php">
+                                <i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -258,52 +329,42 @@ $stats = $stats_result->fetch_assoc();
     <!-- Sidebar -->
     <nav class="sidebar">
         <ul class="nav flex-column">
+            <li class="sidebar-heading">MENU UTAMA</li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>dashboard.php">
                     <i class="bi bi-speedometer2"></i>Dashboard
                 </a>
             </li>
-            <li class="sidebar-heading">DATA MASTER</li>
+            <li class="sidebar-heading">MASTER DATA</li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/buku/index.php">
-                    <i class="bi bi-book"></i>Data Buku
+                    <i class="bi bi-book"></i>Buku
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/mahasiswa/index.php">
-                    <i class="bi bi-people"></i>Data Mahasiswa
+                    <i class="bi bi-mortarboard"></i>Mahasiswa
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/dosen/index.php">
-                    <i class="bi bi-person-badge"></i>Data Dosen
+                    <i class="bi bi-person-workspace"></i>Dosen
                 </a>
             </li>
             <li class="sidebar-heading">TRANSAKSI</li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/peminjaman/index.php">
-                    <i class="bi bi-arrow-left-right"></i>Peminjaman Buku
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="<?= BASE_URL ?>modules/perpanjangan/index.php">
-                    <i class="bi bi-arrow-clockwise"></i>Perpanjangan Buku
+                    <i class="bi bi-arrow-left-right"></i>Peminjaman
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/pengembalian/index.php">
-                    <i class="bi bi-arrow-return-left"></i>Pengembalian Buku
+                    <i class="bi bi-box-arrow-in-down"></i>Pengembalian
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link active" href="<?= BASE_URL ?>modules/denda/index.php">
-                    <i class="bi bi-cash-stack"></i>Manajemen Denda
-                </a>
-            </li>
-            <li class="sidebar-heading">LAYANAN</li>
-            <li class="nav-item">
-                <a class="nav-link" href="<?= BASE_URL ?>modules/surat_keterangan/index.php">
-                    <i class="bi bi-file-earmark-text"></i>Surat Keterangan
+                    <i class="bi bi-cash-stack"></i>Denda
                 </a>
             </li>
             <li class="sidebar-heading">LAPORAN & UTILITAS</li>
@@ -333,28 +394,56 @@ $stats = $stats_result->fetch_assoc();
 
         <!-- Statistik Denda -->
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="stat-card-mini" style="border-left-color: #f093fb;">
-                    <h6>Total Transaksi Denda</h6>
-                    <h3 class="text-primary"><?= number_format($stats['total_denda']) ?></h3>
-                    <small class="text-muted">Transaksi</small>
+            <!-- Denda Berjalan (NEW) -->
+            <div class="col-md-4">
+                <div class="stat-card-clickable" style="border-left-color: #ffa500;" 
+                     onclick="window.location.href='<?= BASE_URL ?>modules/peminjaman/index.php?filter=terlambat'">
+                    <h6 style="color: #ff8800;">Denda Berjalan Hari Ini</h6>
+                    <h3 class="text-warning">
+                        <i class="bi bi-hourglass-split me-2"></i>
+                        <?= formatRupiah($denda_berjalan['total_denda']) ?>
+                    </h3>
+                    <small class="text-muted">
+                        <?= $denda_berjalan['total_buku'] ?> buku • Total <?= $denda_berjalan['total_hari'] ?> hari keterlambatan
+                    </small>
+                    <div class="detail-info text-warning">
+                        <i class="bi bi-cursor-fill"></i> Klik untuk lihat detail peminjaman terlambat
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
+
+            <!-- Total Exposure (NEW) -->
+            <div class="col-md-4">
+                <div class="stat-card-mini" style="border-left-color: #dc3545;">
+                    <h6 style="color: #dc3545;">Total Exposure Denda</h6>
+                    <h3 class="text-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <?= formatRupiah($total_exposure) ?>
+                    </h3>
+                    <small class="text-muted">Denda Berjalan + Belum Dibayar</small>
+                </div>
+            </div>
+
+            <!-- Total Nominal Denda (EXISTING) -->
+            <div class="col-md-4">
                 <div class="stat-card-mini" style="border-left-color: #ff6b6b;">
                     <h6>Total Nominal Denda</h6>
                     <h3 class="text-danger"><?= formatRupiah($stats['total_nominal_denda']) ?></h3>
-                    <small class="text-muted">Akumulasi denda</small>
+                    <small class="text-muted"><?= number_format($stats['total_denda']) ?> transaksi</small>
                 </div>
             </div>
-            <div class="col-md-3">
+
+            <!-- Sudah Dibayar (EXISTING) -->
+            <div class="col-md-4">
                 <div class="stat-card-mini" style="border-left-color: #51cf66;">
                     <h6>Sudah Dibayar</h6>
                     <h3 class="text-success"><?= formatRupiah($stats['total_dibayar']) ?></h3>
                     <small class="text-muted"><?= $stats['sudah_lunas'] ?> transaksi lunas</small>
                 </div>
             </div>
-            <div class="col-md-3">
+
+            <!-- Belum Dibayar (EXISTING) -->
+            <div class="col-md-4">
                 <div class="stat-card-mini" style="border-left-color: #ffa94d;">
                     <h6>Belum Dibayar</h6>
                     <h3 class="text-warning"><?= formatRupiah($stats['total_sisa']) ?></h3>

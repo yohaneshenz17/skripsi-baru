@@ -4,33 +4,83 @@ require_once '../../config/functions.php';
 
 requireLogin();
 
+// Fungsi hitung denda berjalan
+function hitungDendaBerjalan($conn) {
+    $today = date('Y-m-d');
+    
+    $query = "SELECT p.id, p.tanggal_jatuh_tempo, p.kode_peminjaman
+              FROM peminjaman p
+              WHERE p.tanggal_jatuh_tempo < '$today'
+              AND p.tanggal_kembali IS NULL
+              AND p.status NOT IN ('dikembalikan', 'selesai')";
+    
+    $result = $conn->query($query);
+    
+    $total_denda = 0;
+    $total_buku = 0;
+    $total_hari_terlambat = 0;
+    $tarif_denda = 1000;
+    
+    $detail = array();
+    
+    while ($row = $result->fetch_assoc()) {
+        $tanggal_jatuh_tempo = new DateTime($row['tanggal_jatuh_tempo']);
+        $today_date = new DateTime($today);
+        $hari_terlambat = $tanggal_jatuh_tempo->diff($today_date)->days;
+        
+        if ($hari_terlambat > 0) {
+            $denda_item = $hari_terlambat * $tarif_denda;
+            $total_denda += $denda_item;
+            $total_buku++;
+            $total_hari_terlambat += $hari_terlambat;
+            
+            $detail[] = array(
+                'kode' => $row['kode_peminjaman'],
+                'hari' => $hari_terlambat,
+                'denda' => $denda_item
+            );
+        }
+    }
+    
+    return [
+        'total_denda' => $total_denda,
+        'total_buku' => $total_buku,
+        'total_hari' => $total_hari_terlambat,
+        'detail' => $detail
+    ];
+}
+
 // Filter
 $bulan = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
 $tahun = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
 $metode_filter = isset($_GET['metode']) ? $_GET['metode'] : 'all';
 
-// Query laporan denda
+// Query laporan denda - PAKAI QUERY LANGSUNG
+$where_query = "WHERE pg.denda > 0 
+                AND MONTH(pg.tanggal_kembali) = $bulan 
+                AND YEAR(pg.tanggal_kembali) = $tahun";
+
+if ($metode_filter != 'all') {
+    $where_query .= " AND pg.metode_pembayaran = '" . $conn->real_escape_string($metode_filter) . "'";
+}
+
 $query = "SELECT pg.*, p.kode_peminjaman, p.jenis_peminjam, p.peminjam_id, 
           b.judul, b.nomor_buku
           FROM pengembalian pg
           JOIN peminjaman p ON pg.peminjaman_id = p.id
           JOIN buku b ON p.buku_id = b.id
-          WHERE pg.denda > 0 
-          AND MONTH(pg.tanggal_kembali) = ? 
-          AND YEAR(pg.tanggal_kembali) = ?";
+          $where_query
+          ORDER BY pg.tanggal_kembali ASC";
 
-if ($metode_filter != 'all') {
-    $query .= " AND pg.metode_pembayaran = '" . $conn->real_escape_string($metode_filter) . "'";
+$result = $conn->query($query);
+$data_laporan = array();
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $data_laporan[] = $row;
+    }
 }
 
-$query .= " ORDER BY pg.tanggal_kembali ASC";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("ii", $bulan, $tahun);
-$stmt->execute();
-$result = $stmt->get_result();
-$stmt->close();
-
-// Statistik periode
+// Statistik periode denda yang sudah tercatat
 $stats_query = "SELECT 
                 COUNT(*) as total_transaksi,
                 SUM(denda) as total_denda,
@@ -40,17 +90,27 @@ $stats_query = "SELECT
                 SUM(CASE WHEN metode_pembayaran = 'transfer' THEN denda_dibayar ELSE 0 END) as transfer,
                 SUM(CASE WHEN metode_pembayaran = 'tagihan_studi' THEN denda_dibayar ELSE 0 END) as tagihan_studi,
                 SUM(CASE WHEN metode_pembayaran = 'waive' THEN denda ELSE 0 END) as waive
-                FROM pengembalian
-                WHERE denda > 0 
-                AND MONTH(tanggal_kembali) = ? 
-                AND YEAR(tanggal_kembali) = ?";
-$stmt = $conn->prepare($stats_query);
-$stmt->bind_param("ii", $bulan, $tahun);
-$stmt->execute();
-$stmt->bind_result($total_transaksi, $total_denda, $total_dibayar, $total_sisa, 
-                   $cash, $transfer, $tagihan_studi, $waive);
-$stmt->fetch();
-$stmt->close();
+                FROM pengembalian pg
+                $where_query";
+$stats_result = $conn->query($stats_query);
+if ($stats_result) {
+    $stats_data = $stats_result->fetch_assoc();
+    $total_transaksi = $stats_data['total_transaksi'] ?? 0;
+    $total_denda = $stats_data['total_denda'] ?? 0;
+    $total_dibayar = $stats_data['total_dibayar'] ?? 0;
+    $total_sisa = $stats_data['total_sisa'] ?? 0;
+    $cash = $stats_data['cash'] ?? 0;
+    $transfer = $stats_data['transfer'] ?? 0;
+    $tagihan_studi = $stats_data['tagihan_studi'] ?? 0;
+    $waive = $stats_data['waive'] ?? 0;
+} else {
+    $total_transaksi = $total_denda = $total_dibayar = $total_sisa = 0;
+    $cash = $transfer = $tagihan_studi = $waive = 0;
+}
+
+// Hitung denda berjalan per tanggal generate
+$denda_berjalan = hitungDendaBerjalan($conn);
+$tanggal_generate = date('Y-m-d H:i:s');
 
 // Nama bulan
 $nama_bulan = [
@@ -183,104 +243,57 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
         
         /* Table */
         .table {
-            font-size: 0.9rem;
-        }
-        .table thead th {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            color: #475569;
-            border: 1px solid #dee2e6;
-            padding: 0.7rem 0.5rem;
-        }
-        .table tbody tr {
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .table tbody td {
-            padding: 0.7rem 0.5rem;
-            vertical-align: middle;
-            border: 1px solid #dee2e6;
-        }
-        .table-bordered {
-            border: 1px solid #dee2e6;
+            font-size: 0.85rem;
         }
         
         /* Stat Summary */
         .stat-summary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem;
+            background: white;
             border-radius: 12px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
-        }
-        .stat-summary h3 {
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
         }
         .stat-item {
-            background: rgba(255,255,255,0.1);
+            text-align: center;
             padding: 1rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 8px;
         }
         .stat-item label {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            margin-bottom: 0.25rem;
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.5rem;
         }
         .stat-item h4 {
-            font-size: 1.5rem;
-            font-weight: 700;
             margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
         }
         
-        /* Buttons */
-        .btn {
-            border-radius: 6px;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s;
-        }
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        /* Denda Berjalan Box */
+        .denda-berjalan-box {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 4px solid #ff9800;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
         
-        /* Form */
-        .form-control, .form-select {
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
-        }
-        
-        /* Print Styles */
         @media print {
             .no-print { display: none !important; }
-            .sidebar { display: none !important; }
-            .navbar { display: none !important; }
-            .main-content { margin-left: 0 !important; margin-top: 0 !important; }
-            .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
-            .page-header { border: none !important; }
-            body { background: white !important; }
-            .stat-summary { 
-                background: white !important; 
-                color: black !important; 
-                border: 2px solid #667eea !important; 
-            }
-            .stat-item { 
-                background: white !important; 
-                border: 1px solid #dee2e6 !important; 
-            }
-            .table { font-size: 0.8rem; }
+            .sidebar { display: none; }
+            .navbar { display: none; }
+            .main-content { margin-left: 0; margin-top: 0; }
+            .page-header { display: none; }
         }
     </style>
 </head>
@@ -289,14 +302,14 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top no-print">
         <div class="container-fluid">
             <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">
-                <i class="bi bi-book-fill me-2"></i>E-Library STK Yakobus
+                <i class="bi bi-book-half"></i> E-Library STK Yakobus
             </a>
-            <div class="ms-auto d-flex align-items-center">
-                <span class="text-white me-3">
-                    <i class="bi bi-person-circle me-1"></i><?= $_SESSION['admin_username'] ?>
-                </span>
-                <a href="<?= BASE_URL ?>logout.php" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+            <div class="ms-auto">
+                <button onclick="window.print()" class="btn btn-light btn-sm">
+                    <i class="bi bi-printer-fill me-1"></i>Cetak
+                </button>
+                <a href="index.php" class="btn btn-outline-light btn-sm ms-2">
+                    <i class="bi bi-arrow-left me-1"></i>Kembali
                 </a>
             </div>
         </div>
@@ -305,52 +318,42 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
     <!-- Sidebar -->
     <nav class="sidebar no-print">
         <ul class="nav flex-column">
+            <li class="sidebar-heading">MENU UTAMA</li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>dashboard.php">
                     <i class="bi bi-speedometer2"></i>Dashboard
                 </a>
             </li>
-            <li class="sidebar-heading">DATA MASTER</li>
+            <li class="sidebar-heading">MASTER DATA</li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/buku/index.php">
-                    <i class="bi bi-book"></i>Data Buku
+                    <i class="bi bi-book"></i>Buku
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/mahasiswa/index.php">
-                    <i class="bi bi-people"></i>Data Mahasiswa
+                    <i class="bi bi-mortarboard"></i>Mahasiswa
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/dosen/index.php">
-                    <i class="bi bi-person-badge"></i>Data Dosen
+                    <i class="bi bi-person-workspace"></i>Dosen
                 </a>
             </li>
             <li class="sidebar-heading">TRANSAKSI</li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/peminjaman/index.php">
-                    <i class="bi bi-arrow-left-right"></i>Peminjaman Buku
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="<?= BASE_URL ?>modules/perpanjangan/index.php">
-                    <i class="bi bi-arrow-clockwise"></i>Perpanjangan Buku
+                    <i class="bi bi-arrow-left-right"></i>Peminjaman
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/pengembalian/index.php">
-                    <i class="bi bi-arrow-return-left"></i>Pengembalian Buku
+                    <i class="bi bi-box-arrow-in-down"></i>Pengembalian
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link active" href="<?= BASE_URL ?>modules/denda/index.php">
-                    <i class="bi bi-cash-stack"></i>Manajemen Denda
-                </a>
-            </li>
-            <li class="sidebar-heading">LAYANAN</li>
-            <li class="nav-item">
-                <a class="nav-link" href="<?= BASE_URL ?>modules/surat_keterangan/index.php">
-                    <i class="bi bi-file-earmark-text"></i>Surat Keterangan
+                    <i class="bi bi-cash-stack"></i>Denda
                 </a>
             </li>
             <li class="sidebar-heading">LAPORAN & UTILITAS</li>
@@ -369,28 +372,19 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="page-header d-flex justify-content-between align-items-center no-print">
+        <div class="page-header no-print">
             <h1><i class="bi bi-file-earmark-bar-graph me-2"></i>Laporan Denda</h1>
-            <div>
-                <button onclick="window.print()" class="btn btn-secondary me-2">
-                    <i class="bi bi-printer me-2"></i>Cetak PDF
-                </button>
-                <a href="index.php" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Kembali
-                </a>
-            </div>
         </div>
 
         <!-- Filter -->
-        <div class="card mb-3 no-print">
+        <div class="card no-print">
             <div class="card-body">
                 <form method="GET" action="" class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Bulan</label>
-                        <select name="bulan" class="form-select" onchange="this.form.submit()">
+                        <select name="bulan" class="form-select" required>
                             <?php for ($m = 1; $m <= 12; $m++): ?>
-                                <option value="<?= str_pad($m, 2, '0', STR_PAD_LEFT) ?>" 
-                                        <?= $bulan == str_pad($m, 2, '0', STR_PAD_LEFT) ? 'selected' : '' ?>>
+                                <option value="<?= $m ?>" <?= $bulan == $m ? 'selected' : '' ?>>
                                     <?= $nama_bulan[str_pad($m, 2, '0', STR_PAD_LEFT)] ?>
                                 </option>
                             <?php endfor; ?>
@@ -398,7 +392,7 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Tahun</label>
-                        <select name="tahun" class="form-select" onchange="this.form.submit()">
+                        <select name="tahun" class="form-select" required>
                             <?php for ($y = date('Y'); $y >= 2020; $y--): ?>
                                 <option value="<?= $y ?>" <?= $tahun == $y ? 'selected' : '' ?>><?= $y ?></option>
                             <?php endfor; ?>
@@ -406,8 +400,8 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Metode Pembayaran</label>
-                        <select name="metode" class="form-select" onchange="this.form.submit()">
-                            <option value="all" <?= $metode_filter == 'all' ? 'selected' : '' ?>>Semua</option>
+                        <select name="metode" class="form-select">
+                            <option value="all" <?= $metode_filter == 'all' ? 'selected' : '' ?>>Semua Metode</option>
                             <option value="cash" <?= $metode_filter == 'cash' ? 'selected' : '' ?>>Cash</option>
                             <option value="transfer" <?= $metode_filter == 'transfer' ? 'selected' : '' ?>>Transfer</option>
                             <option value="tagihan_studi" <?= $metode_filter == 'tagihan_studi' ? 'selected' : '' ?>>Tagihan Studi</option>
@@ -432,12 +426,50 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
             <?php if ($metode_filter != 'all'): ?>
                 <p class="mb-0">Metode: <strong><?= ucfirst($metode_filter) ?></strong></p>
             <?php endif; ?>
+            <p class="mb-0"><small>Digenerate: <?= formatTanggalIndo(date('Y-m-d')) ?>, <?= date('H:i') ?> WIT</small></p>
             <hr>
         </div>
 
-        <!-- Statistik Ringkasan -->
+        <!-- DENDA BERJALAN -->
+        <?php if ($denda_berjalan['total_denda'] > 0): ?>
+        <div class="denda-berjalan-box">
+            <h5 class="text-warning mb-3">
+                <i class="bi bi-hourglass-split me-2"></i>
+                DENDA BERJALAN PER <?= strtoupper(formatTanggalIndo(date('Y-m-d'))) ?>
+            </h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center p-3 bg-white rounded">
+                        <h6 class="text-muted mb-2">Total Denda Berjalan</h6>
+                        <h3 class="text-warning mb-0"><?= formatRupiah($denda_berjalan['total_denda']) ?></h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3 bg-white rounded">
+                        <h6 class="text-muted mb-2">Jumlah Buku Terlambat</h6>
+                        <h3 class="text-warning mb-0"><?= $denda_berjalan['total_buku'] ?> buku</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center p-3 bg-white rounded">
+                        <h6 class="text-muted mb-2">Total Hari Keterlambatan</h6>
+                        <h3 class="text-warning mb-0"><?= $denda_berjalan['total_hari'] ?> hari</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-warning mt-3 mb-0">
+                <small>
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    <strong>Catatan:</strong> Denda berjalan adalah denda yang masih berjalan (belum dikembalikan) per tanggal laporan digenerate. 
+                    Nilai ini akan berubah setiap hari seiring bertambahnya hari keterlambatan.
+                </small>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Statistik Ringkasan DENDA TERCATAT -->
         <div class="stat-summary">
-            <h3><i class="bi bi-bar-chart-fill me-2"></i>Ringkasan Statistik</h3>
+            <h3><i class="bi bi-bar-chart-fill me-2"></i>Ringkasan Denda Tercatat (Sudah Dikembalikan)</h3>
             <div class="stat-grid">
                 <div class="stat-item">
                     <label>Total Transaksi</label>
@@ -477,8 +509,30 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
             </div>
         </div>
 
+        <!-- TOTAL KESELURUHAN -->
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="bi bi-calculator-fill me-2"></i>Total Keseluruhan</h5>
+                <div class="row text-center">
+                    <div class="col-md-6">
+                        <h6>Total Exposure Denda</h6>
+                        <h2><?= formatRupiah($denda_berjalan['total_denda'] + $total_sisa) ?></h2>
+                        <small>Denda Berjalan + Sisa Denda Belum Dibayar</small>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Total Denda Periode <?= $periode_text ?></h6>
+                        <h2><?= formatRupiah($total_denda) ?></h2>
+                        <small>Dari <?= number_format($total_transaksi) ?> transaksi</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Tabel Detail -->
         <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Detail Denda Periode <?= $periode_text ?></h5>
+            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm">
@@ -499,8 +553,8 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
                         <tbody>
                             <?php 
                             $no = 1;
-                            if ($result->num_rows > 0):
-                                while ($row = $result->fetch_assoc()):
+                            if (count($data_laporan) > 0):
+                                foreach ($data_laporan as $row):
                                     $nama_peminjam = getNamaPeminjam($conn, $row['jenis_peminjam'], $row['peminjam_id']);
                                     $identifier = getIdentifierPeminjam($conn, $row['jenis_peminjam'], $row['peminjam_id']);
                             ?>
@@ -541,7 +595,7 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
                                 </td>
                             </tr>
                             <?php 
-                                endwhile;
+                                endforeach;
                             else:
                             ?>
                             <tr>
@@ -551,7 +605,7 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
                             </tr>
                             <?php endif; ?>
                         </tbody>
-                        <?php if ($result->num_rows > 0): ?>
+                        <?php if (count($data_laporan) > 0): ?>
                         <tfoot class="table-light fw-bold">
                             <tr>
                                 <td colspan="6" class="text-end">TOTAL:</td>
@@ -574,7 +628,7 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
             </div>
             <div class="col-6 text-end">
                 <p class="mb-1">Merauke, <?= date('d F Y') ?></p>
-                <p class="mb-1">Petugas Perpustakaan</p>
+                <p class="mb-1">Kepala Perpustakaan</p>
                 <br><br>
                 <p class="mb-0">____________________</p>
             </div>

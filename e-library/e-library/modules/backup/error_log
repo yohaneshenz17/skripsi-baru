@@ -1,0 +1,4 @@
+[20-Jan-2026 08:41:47 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function exec() in /home/stkp7133/public_html/e-library/modules/backup/index.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/backup/index.php on line 19

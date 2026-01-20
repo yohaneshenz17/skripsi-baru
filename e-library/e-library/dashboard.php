@@ -33,13 +33,43 @@ $query = "SELECT COUNT(*) as total FROM peminjaman WHERE status = 'terlambat'";
 $result = $conn->query($query);
 $stats['keterlambatan'] = $result->fetch_assoc()['total'];
 
-// Total denda belum dibayar (dari peminjaman aktif + sisa denda pengembalian)
-$query = "SELECT 
-            (SELECT IFNULL(SUM(denda), 0) FROM peminjaman WHERE denda > 0 AND status != 'dikembalikan') +
-            (SELECT IFNULL(SUM(sisa_denda), 0) FROM pengembalian WHERE sisa_denda > 0)
-          as total";
+// Fungsi hitung denda berjalan (sama seperti di denda/index.php)
+function hitungDendaBerjalan($conn) {
+    $today = date('Y-m-d');
+    
+    $query = "SELECT p.id, p.tanggal_jatuh_tempo
+              FROM peminjaman p
+              WHERE p.tanggal_jatuh_tempo < '$today'
+              AND p.tanggal_kembali IS NULL
+              AND p.status NOT IN ('dikembalikan', 'selesai')";
+    
+    $result = $conn->query($query);
+    $total_denda = 0;
+    $tarif_denda = 1000;
+    
+    while ($row = $result->fetch_assoc()) {
+        $tanggal_jatuh_tempo = new DateTime($row['tanggal_jatuh_tempo']);
+        $today_date = new DateTime($today);
+        $hari_terlambat = $tanggal_jatuh_tempo->diff($today_date)->days;
+        
+        if ($hari_terlambat > 0) {
+            $total_denda += ($hari_terlambat * $tarif_denda);
+        }
+    }
+    
+    return $total_denda;
+}
+
+// Hitung denda berjalan
+$denda_berjalan = hitungDendaBerjalan($conn);
+
+// Total denda belum dibayar dari pengembalian
+$query = "SELECT IFNULL(SUM(sisa_denda), 0) as total FROM pengembalian WHERE sisa_denda > 0";
 $result = $conn->query($query);
-$stats['total_denda'] = $result->fetch_assoc()['total'] ?? 0;
+$sisa_denda_pengembalian = $result->fetch_assoc()['total'];
+
+// Total Exposure = Denda Berjalan + Sisa Denda Belum Dibayar
+$stats['total_denda'] = $denda_berjalan + $sisa_denda_pengembalian;
 
 // Buku habis
 $query = "SELECT * FROM buku WHERE stok_tersedia <= 0 AND stok > 0 LIMIT 5";

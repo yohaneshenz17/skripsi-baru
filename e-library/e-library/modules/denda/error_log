@@ -6,3 +6,38 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 30
+[20-Jan-2026 08:03:37 Asia/Jakarta] PHP Warning:  Undefined array key "nama" in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 320
+[20-Jan-2026 08:03:51 Asia/Jakarta] PHP Warning:  Undefined array key "nama" in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 320
+[20-Jan-2026 08:04:24 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:30
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 30
+[20-Jan-2026 08:04:32 Asia/Jakarta] PHP Warning:  Undefined array key "nama" in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 320
+[20-Jan-2026 08:07:55 Asia/Jakarta] PHP Parse error:  Unmatched '}' in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 50
+[20-Jan-2026 08:08:42 Asia/Jakarta] PHP Warning:  Undefined array key "nama" in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 314
+[20-Jan-2026 08:08:46 Asia/Jakarta] PHP Warning:  Undefined array key "nama" in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 314
+[20-Jan-2026 08:13:09 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:30
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 30
+[20-Jan-2026 08:18:01 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:30
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 30
+[20-Jan-2026 08:31:09 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:77
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 77
+[20-Jan-2026 08:31:17 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:77
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 77
+[20-Jan-2026 08:35:26 Asia/Jakarta] PHP Warning:  Undefined variable $stmt in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 84
+[20-Jan-2026 08:35:26 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_result() on null in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:84
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 84
+[20-Jan-2026 08:36:12 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:77
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 77

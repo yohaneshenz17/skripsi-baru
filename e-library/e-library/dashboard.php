@@ -613,10 +613,11 @@ $stmt->close();
             </div>
             
             <div class="col-lg-6">
-                <a href="modules/denda/index.php" style="text-decoration: none; color: inherit; display: block;"><div class="stat-card text-white" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
-                    <div class="card-body">
-                        <h6>Total Denda Belum Dibayar</h6>
-                        <h2><?= formatRupiah($stats['total_denda']) ?></h2>
+                <a href="modules/denda/index.php" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="stat-card text-white" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
+                        <div class="card-body">
+                            <h6>Total Denda Belum Dibayar</h6>
+                            <h2><?= formatRupiah($stats['total_denda']) ?></h2>
                         <small><i class="bi bi-wallet2"></i> Tunggakan</small>
                         <i class="bi bi-cash-stack stat-icon"></i>
                     </div>

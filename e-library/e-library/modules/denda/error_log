@@ -1,0 +1,8 @@
+[20-Jan-2026 07:21:40 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:30
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 30
+[20-Jan-2026 07:23:01 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/denda/laporan.php:30
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/laporan.php on line 30

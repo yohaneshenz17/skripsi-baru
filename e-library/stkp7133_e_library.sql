@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 20 Jan 2026 pada 09.31
+-- Waktu pembuatan: 20 Jan 2026 pada 13.08
 -- Versi server: 10.3.39-MariaDB-cll-lve
 -- Versi PHP: 8.1.34
 
@@ -66,7 +66,7 @@ CREATE TABLE `buku` (
 --
 
 INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun_terbit`, `stok`, `stok_tersedia`, `created_at`, `updated_at`) VALUES
-(10, '001.011.6.Sur.F', 'Filsafat Ilmu Sebuah  Pengantar Populer', 'Jujun S. Suriasumantri', 'Jakarta, PT. Pancaranintan Indahgraha', '2007', 1, 1, '2026-01-19 07:15:56', '2026-01-19 12:43:30'),
+(10, '001.011.6.Sur.F', 'Filsafat Ilmu Sebuah  Pengantar Populer', 'Jujun S. Suriasumantri', 'Jakarta, PT. Pancaranintan Indahgraha', '2007', 1, 0, '2026-01-19 07:15:56', '2026-01-20 04:01:58'),
 (11, '001.1.8.Mus.M', 'Mengembangkan TALENTA untuk sesama', 'Herman Musakabe', 'Yayasan Citra Insan Pembaru', '2008', 29, 28, '2026-01-19 07:15:56', '2026-01-20 00:27:04'),
 (12, '001.2.1.Emz.M', 'Metodologi Penelitian Pendidikan', 'Prof. Dr. Emzir, M.Pd.', 'Jakarta, Rajawali Pers', '2012', 1, 1, '2026-01-19 07:15:56', '2026-01-20 01:17:33'),
 (13, '001.2.2.Suk.M', 'Metode Penelitian Pendidikan', 'Prof. Drs. Sukestiyarno, MS, Ph.D', 'Semarang, UNNES Press', '2020', 2, 2, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
@@ -526,7 +526,8 @@ INSERT INTO `peminjaman` (`id`, `kode_peminjaman`, `jenis_peminjam`, `peminjam_i
 (8, 'PJM202601207590', 'mahasiswa', 107, 11, '2026-01-06', '2026-01-13', NULL, 'terlambat', 0, '2026-01-20 00:27:04', '2026-01-20 00:27:04'),
 (9, 'PJM202601205325', 'mahasiswa', 107, 16, '2026-01-06', '2026-01-13', '2026-01-20', 'dikembalikan', 7000, '2026-01-20 00:27:04', '2026-01-20 01:39:04'),
 (10, 'PJM202601208875', 'mahasiswa', 223, 12, '2026-01-20', '2026-01-27', '2026-01-20', 'dikembalikan', 0, '2026-01-20 00:27:27', '2026-01-20 01:17:33'),
-(11, 'PJM202601204305', 'mahasiswa', 111, 18, '2026-01-11', '2026-01-18', NULL, 'terlambat', 0, '2026-01-20 00:27:40', '2026-01-20 00:27:41');
+(11, 'PJM202601204305', 'mahasiswa', 111, 18, '2026-01-11', '2026-01-18', NULL, 'terlambat', 0, '2026-01-20 00:27:40', '2026-01-20 00:27:41'),
+(12, 'PJM202601208800', 'mahasiswa', 1, 10, '2026-01-20', '2026-01-27', NULL, 'dipinjam', 0, '2026-01-20 04:01:58', '2026-01-20 04:01:58');
 
 -- --------------------------------------------------------
 
@@ -591,14 +592,17 @@ CREATE TABLE `surat_keterangan` (
   `id` int(11) NOT NULL,
   `nomor_surat` varchar(50) NOT NULL,
   `nim` varchar(20) NOT NULL,
-  `nama` varchar(255) NOT NULL,
-  `program_studi` varchar(100) NOT NULL,
-  `keperluan` enum('ujian_akhir','pengambilan_ijazah') NOT NULL,
+  `jenis_surat` enum('UAS','PPA') NOT NULL COMMENT 'UAS = Ujian Akhir Semester, PPA = Penilaian Pembelajaran Akhir',
   `tanggal_terbit` date NOT NULL,
-  `qr_code` text DEFAULT NULL,
-  `file_pdf` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  `tahun_periode` year(4) NOT NULL COMMENT 'Untuk tracking reset nomor surat',
+  `status` enum('terbit','dibatalkan') NOT NULL DEFAULT 'terbit',
+  `catatan` text DEFAULT NULL COMMENT 'Catatan admin, misal: override tunggakan karena alasan X',
+  `admin_id` int(11) DEFAULT NULL COMMENT 'ID admin yang menerbitkan',
+  `file_pdf` varchar(255) DEFAULT NULL COMMENT 'Path file PDF yang di-generate',
+  `override_tunggakan` tinyint(1) DEFAULT 0 COMMENT '1 jika admin override validasi tunggakan',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Tabel untuk menyimpan riwayat surat keterangan bebas perpustakaan';
 
 --
 -- Indexes for dumped tables
@@ -674,7 +678,13 @@ ALTER TABLE `perpanjangan`
 ALTER TABLE `surat_keterangan`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `nomor_surat` (`nomor_surat`),
-  ADD KEY `nim` (`nim`);
+  ADD KEY `idx_nim` (`nim`),
+  ADD KEY `idx_jenis_surat` (`jenis_surat`),
+  ADD KEY `idx_tahun_periode` (`tahun_periode`),
+  ADD KEY `idx_tanggal_terbit` (`tanggal_terbit`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_nim_tanggal` (`nim`,`tanggal_terbit`),
+  ADD KEY `idx_tahun_jenis` (`tahun_periode`,`jenis_surat`);
 
 --
 -- AUTO_INCREMENT untuk tabel yang dibuang
@@ -720,7 +730,7 @@ ALTER TABLE `pembayaran_denda_detail`
 -- AUTO_INCREMENT untuk tabel `peminjaman`
 --
 ALTER TABLE `peminjaman`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengembalian`
@@ -767,12 +777,6 @@ ALTER TABLE `pengembalian`
 --
 ALTER TABLE `perpanjangan`
   ADD CONSTRAINT `perpanjangan_ibfk_1` FOREIGN KEY (`peminjaman_id`) REFERENCES `peminjaman` (`id`) ON DELETE CASCADE;
-
---
--- Ketidakleluasaan untuk tabel `surat_keterangan`
---
-ALTER TABLE `surat_keterangan`
-  ADD CONSTRAINT `surat_keterangan_ibfk_1` FOREIGN KEY (`nim`) REFERENCES `mahasiswa` (`nim`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 20 Jan 2026 pada 13.08
+-- Waktu pembuatan: 20 Jan 2026 pada 18.57
 -- Versi server: 10.3.39-MariaDB-cll-lve
 -- Versi PHP: 8.1.34
 
@@ -66,7 +66,7 @@ CREATE TABLE `buku` (
 --
 
 INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun_terbit`, `stok`, `stok_tersedia`, `created_at`, `updated_at`) VALUES
-(10, '001.011.6.Sur.F', 'Filsafat Ilmu Sebuah  Pengantar Populer', 'Jujun S. Suriasumantri', 'Jakarta, PT. Pancaranintan Indahgraha', '2007', 1, 0, '2026-01-19 07:15:56', '2026-01-20 04:01:58'),
+(10, '001.011.6.Sur.F', 'Filsafat Ilmu Sebuah  Pengantar Populer', 'Jujun S. Suriasumantri', 'Jakarta, PT. Pancaranintan Indahgraha', '2007', 1, 1, '2026-01-19 07:15:56', '2026-01-20 11:19:11'),
 (11, '001.1.8.Mus.M', 'Mengembangkan TALENTA untuk sesama', 'Herman Musakabe', 'Yayasan Citra Insan Pembaru', '2008', 29, 28, '2026-01-19 07:15:56', '2026-01-20 00:27:04'),
 (12, '001.2.1.Emz.M', 'Metodologi Penelitian Pendidikan', 'Prof. Dr. Emzir, M.Pd.', 'Jakarta, Rajawali Pers', '2012', 1, 1, '2026-01-19 07:15:56', '2026-01-20 01:17:33'),
 (13, '001.2.2.Suk.M', 'Metode Penelitian Pendidikan', 'Prof. Drs. Sukestiyarno, MS, Ph.D', 'Semarang, UNNES Press', '2020', 2, 2, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
@@ -85,7 +85,7 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (26, '001.4.7.War.P', 'Penelitian Tindakan Kelas', 'Igak Wardhani, dkk', 'Universitas Terbuka', '2007', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (27, '001.4.8.Tae.P', 'Petualangan Intelektual Menuju Metode Penelitian Pendidikan', 'Dr. Paulus Taek, MS', 'Gita Kasih', '2009', 17, 17, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (28, '001.4.9. Ind.M', 'Menulis Karya Ilmiah, Artikel, Skripsi, Thesis dan Disertasi', 'Etty Indriati, Ph.D', 'PT. Gramedia Pustaka Utama', '2005', 4, 4, '2026-01-19 07:15:56', '2026-01-20 00:26:12'),
-(29, '001.4.10 Suk.M', 'Manajemen Penelitian Tindakan Kelas', 'Sukidin, Basrowi, Suranto', 'Insan Cendekia', '2008', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56');
+(29, '001.4.10 Suk.M', 'Manajemen Penelitian Tindakan Kelas', 'Sukidin, Basrowi, Suranto', 'Insan Cendekia', '2008', 1, 0, '2026-01-19 07:15:56', '2026-01-20 11:19:33');
 
 -- --------------------------------------------------------
 
@@ -527,7 +527,7 @@ INSERT INTO `peminjaman` (`id`, `kode_peminjaman`, `jenis_peminjam`, `peminjam_i
 (9, 'PJM202601205325', 'mahasiswa', 107, 16, '2026-01-06', '2026-01-13', '2026-01-20', 'dikembalikan', 7000, '2026-01-20 00:27:04', '2026-01-20 01:39:04'),
 (10, 'PJM202601208875', 'mahasiswa', 223, 12, '2026-01-20', '2026-01-27', '2026-01-20', 'dikembalikan', 0, '2026-01-20 00:27:27', '2026-01-20 01:17:33'),
 (11, 'PJM202601204305', 'mahasiswa', 111, 18, '2026-01-11', '2026-01-18', NULL, 'terlambat', 0, '2026-01-20 00:27:40', '2026-01-20 00:27:41'),
-(12, 'PJM202601208800', 'mahasiswa', 1, 10, '2026-01-20', '2026-01-27', NULL, 'dipinjam', 0, '2026-01-20 04:01:58', '2026-01-20 04:01:58');
+(13, 'PJM202601207407', 'mahasiswa', 188, 29, '2026-01-20', '2026-01-27', NULL, 'dipinjam', 0, '2026-01-20 11:19:33', '2026-01-20 11:19:33');
 
 -- --------------------------------------------------------
 
@@ -603,6 +603,16 @@ CREATE TABLE `surat_keterangan` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Tabel untuk menyimpan riwayat surat keterangan bebas perpustakaan';
+
+--
+-- Dumping data untuk tabel `surat_keterangan`
+--
+
+INSERT INTO `surat_keterangan` (`id`, `nomor_surat`, `nim`, `jenis_surat`, `tanggal_terbit`, `tahun_periode`, `status`, `catatan`, `admin_id`, `file_pdf`, `override_tunggakan`, `created_at`, `updated_at`) VALUES
+(2, '002/SKP-PERP/STK/I/2026', '2586206047', 'PPA', '2026-01-20', '2026', 'terbit', '', 1, 'Surat_Keterangan_2586206047_20260120164558.pdf', 0, '2026-01-20 07:27:27', '2026-01-20 09:45:58'),
+(3, '003/SKP-PERP/STK/I/2026', '2586208035', 'UAS', '2026-01-20', '2026', 'terbit', '', 1, 'Surat_Keterangan_2586208035_20260120165422.pdf', 0, '2026-01-20 09:54:20', '2026-01-20 09:54:22'),
+(4, '004/SKP-PERP/STK/I/2026', '2486208010', 'UAS', '2026-01-20', '2026', 'terbit', '', 1, 'Surat_Keterangan_2486208010_20260120165450.pdf', 0, '2026-01-20 09:54:48', '2026-01-20 09:54:50'),
+(5, '005/SKP-PERP/STK/I/2026', '2586208010', 'UAS', '2026-01-20', '2026', 'terbit', '', 1, 'Surat_Keterangan_2586208010_20260120175310.pdf', 0, '2026-01-20 10:53:08', '2026-01-20 10:53:10');
 
 --
 -- Indexes for dumped tables
@@ -730,7 +740,7 @@ ALTER TABLE `pembayaran_denda_detail`
 -- AUTO_INCREMENT untuk tabel `peminjaman`
 --
 ALTER TABLE `peminjaman`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengembalian`
@@ -748,7 +758,7 @@ ALTER TABLE `perpanjangan`
 -- AUTO_INCREMENT untuk tabel `surat_keterangan`
 --
 ALTER TABLE `surat_keterangan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

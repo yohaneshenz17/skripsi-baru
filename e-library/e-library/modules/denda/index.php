@@ -329,42 +329,52 @@ $total_exposure = $denda_berjalan['total_denda'] + $stats['total_sisa'];
     <!-- Sidebar -->
     <nav class="sidebar">
         <ul class="nav flex-column">
-            <li class="sidebar-heading">MENU UTAMA</li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>dashboard.php">
                     <i class="bi bi-speedometer2"></i>Dashboard
                 </a>
             </li>
-            <li class="sidebar-heading">MASTER DATA</li>
+            <li class="sidebar-heading">DATA MASTER</li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/buku/index.php">
-                    <i class="bi bi-book"></i>Buku
+                    <i class="bi bi-book"></i>Data Buku
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/mahasiswa/index.php">
-                    <i class="bi bi-mortarboard"></i>Mahasiswa
+                    <i class="bi bi-people"></i>Data Mahasiswa
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/dosen/index.php">
-                    <i class="bi bi-person-workspace"></i>Dosen
+                    <i class="bi bi-person-badge"></i>Data Dosen
                 </a>
             </li>
             <li class="sidebar-heading">TRANSAKSI</li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= BASE_URL ?>modules/peminjaman/index.php">
-                    <i class="bi bi-arrow-left-right"></i>Peminjaman
+                <a class="nav-link active" href="<?= BASE_URL ?>modules/peminjaman/index.php">
+                    <i class="bi bi-arrow-left-right"></i>Peminjaman Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/perpanjangan/index.php">
+                    <i class="bi bi-arrow-clockwise"></i>Perpanjangan Buku
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="<?= BASE_URL ?>modules/pengembalian/index.php">
-                    <i class="bi bi-box-arrow-in-down"></i>Pengembalian
+                    <i class="bi bi-arrow-return-left"></i>Pengembalian Buku
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="<?= BASE_URL ?>modules/denda/index.php">
-                    <i class="bi bi-cash-stack"></i>Denda
+                <a class="nav-link" href="<?= BASE_URL ?>modules/denda/index.php">
+                    <i class="bi bi-cash-stack"></i>Manajemen Denda
+                </a>
+            </li>
+            <li class="sidebar-heading">LAYANAN</li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/surat_keterangan/index.php">
+                    <i class="bi bi-file-earmark-text"></i>Surat Keterangan
                 </a>
             </li>
             <li class="sidebar-heading">LAPORAN & UTILITAS</li>

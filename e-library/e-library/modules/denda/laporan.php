@@ -510,7 +510,7 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
         </div>
 
         <!-- TOTAL KESELURUHAN -->
-        <div class="card bg-dark text-white mb-4">
+        <div class="card bg-light text-black mb-4">
             <div class="card-body">
                 <h5 class="mb-3"><i class="bi bi-calculator-fill me-2"></i>Total Keseluruhan</h5>
                 <div class="row text-center">

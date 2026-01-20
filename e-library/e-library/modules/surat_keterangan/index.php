@@ -1,362 +1,585 @@
 <?php
-/**
- * Halaman Utama Modul Surat Keterangan
- * Sekolah Tinggi Katolik Santo Yakobus Merauke
- */
+// Start session
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-require_once 'config.php';
-cekLoginAdmin();
+// Check login
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: ../../login.php');
+    exit();
+}
+
+require_once '../../config/database.php';
 
 $pageTitle = "Surat Keterangan Bebas Perpustakaan";
-include '../../includes/header.php'; // Sesuaikan dengan struktur Anda
+$admin_username = $_SESSION['admin_username'] ?? 'Admin';
 ?>
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-file-alt"></i> Surat Keterangan Bebas Perpustakaan
-                    </h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalBuatSurat">
-                            <i class="fas fa-plus"></i> Buat Surat Baru
-                        </button>
-                        <a href="laporan.php" class="btn btn-sm btn-info">
-                            <i class="fas fa-chart-bar"></i> Laporan
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= $pageTitle ?> - E-Library STK Yakobus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.8rem 1.5rem;
+        }
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        .navbar-brand i { color: #ffd700; }
+        .navbar .nav-link { color: rgba(255,255,255,0.95) !important; }
+        
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            width: 250px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 2px 0 15px rgba(0,0,0,0.08);
+            overflow-y: auto;
+        }
+        .sidebar-heading {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 1rem 1.2rem 0.5rem;
+            color: #64748b;
+        }
+        .sidebar .nav-link {
+            font-weight: 500;
+            color: #475569;
+            padding: 0.75rem 1.2rem;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link i {
+            width: 22px;
+            margin-right: 0.7rem;
+        }
+        .sidebar .nav-link:hover {
+            color: #667eea;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, transparent 100%);
+            border-left-color: #667eea;
+        }
+        .sidebar .nav-link.active {
+            color: #667eea;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, rgba(102, 126, 234, 0.05) 100%);
+            border-left-color: #667eea;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            margin-top: 56px;
+            padding: 1.5rem;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #f093fb;
+        }
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #475569;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            border: none;
+            padding: 1rem 0.75rem;
+        }
+        .table tbody tr:hover {
+            background: rgba(240, 147, 251, 0.05);
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        #search_results {
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .search-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .search-item:hover {
+            background: rgba(102, 126, 234, 0.08);
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../../dashboard.php">
+                <i class="bi bi-book-fill me-2"></i>
+                <strong>E-Library STK Yakobus</strong>
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i><?= $admin_username ?>
                         </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="../../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>dashboard.php">
+                    <i class="bi bi-speedometer2"></i>Dashboard
+                </a>
+            </li>
+            <li class="sidebar-heading">DATA MASTER</li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/buku/index.php">
+                    <i class="bi bi-book"></i>Data Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/mahasiswa/index.php">
+                    <i class="bi bi-people"></i>Data Mahasiswa
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/dosen/index.php">
+                    <i class="bi bi-person-badge"></i>Data Dosen
+                </a>
+            </li>
+            <li class="sidebar-heading">TRANSAKSI</li>
+            <li class="nav-item">
+                <a class="nav-link active" href="<?= BASE_URL ?>modules/peminjaman/index.php">
+                    <i class="bi bi-arrow-left-right"></i>Peminjaman Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/perpanjangan/index.php">
+                    <i class="bi bi-arrow-clockwise"></i>Perpanjangan Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/pengembalian/index.php">
+                    <i class="bi bi-arrow-return-left"></i>Pengembalian Buku
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/denda/index.php">
+                    <i class="bi bi-cash-stack"></i>Manajemen Denda
+                </a>
+            </li>
+            <li class="sidebar-heading">LAYANAN</li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/surat_keterangan/index.php">
+                    <i class="bi bi-file-earmark-text"></i>Surat Keterangan
+                </a>
+            </li>
+            <li class="sidebar-heading">LAPORAN & UTILITAS</li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/laporan/index.php">
+                    <i class="bi bi-file-bar-graph"></i>Laporan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>modules/backup/index.php">
+                    <i class="bi bi-cloud-download"></i>Backup Database
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <h1><i class="bi bi-file-earmark-text me-2"></i><?= $pageTitle ?></h1>
+            <div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuatSurat">
+                    <i class="bi bi-plus-circle me-2"></i>Buat Surat Baru
+                </button>
+                <a href="laporan.php" class="btn btn-info text-white">
+                    <i class="bi bi-file-bar-graph me-2"></i>Laporan
+                </a>
+            </div>
+        </div>
+
+                <div class="d-flex justify-content-between mb-3 align-items-center">
+                    <div class="d-flex gap-2">
+                       <input type="text" id="filterNIM" class="form-control" placeholder="Cari NIM..." style="width: 150px;">
+                       <button class="btn btn-primary" onclick="loadData()"><i class="bi bi-search"></i></button>
+                       <button class="btn btn-secondary" onclick="resetFilter()"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger" id="btnHapusBatch" onclick="hapusBatch()" style="display:none;">
+                            <i class="bi bi-trash-fill me-2"></i>Hapus (<span id="countHapus">0</span>)
+                        </button>
+                
+                        <button class="btn btn-secondary" onclick="cetakBatch()">
+                            <i class="bi bi-printer-fill me-2"></i>Cetak (<span id="countSelected">0</span>)
+                        </button>
                     </div>
                 </div>
-                <div class="card-body">
-                    <!-- Filter -->
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <input type="text" id="filterNIM" class="form-control" placeholder="Cari NIM...">
-                        </div>
-                        <div class="col-md-3">
-                            <select id="filterJenis" class="form-control">
-                                <option value="">Semua Jenis Surat</option>
-                                <option value="UAS">UAS</option>
-                                <option value="PPA">PPA</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select id="filterTahun" class="form-control">
-                                <option value="">Semua Tahun</option>
-                                <?php 
-                                $tahun_sekarang = date('Y');
-                                for ($i = $tahun_sekarang; $i >= $tahun_sekarang - 5; $i--) {
-                                    echo "<option value='{$i}'>{$i}</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-primary" onclick="loadData()">
-                                <i class="fas fa-search"></i> Filter
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="resetFilter()">
-                                <i class="fas fa-redo"></i> Reset
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Tabel Riwayat Surat -->
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover" id="tableSurat">
-                            <thead>
-                                <tr>
-                                    <th width="5%">No</th>
-                                    <th width="15%">Nomor Surat</th>
-                                    <th width="10%">NIM</th>
-                                    <th width="20%">Nama Mahasiswa</th>
-                                    <th width="10%">Jenis</th>
-                                    <th width="12%">Tanggal Terbit</th>
-                                    <th width="8%">Status</th>
-                                    <th width="20%">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-surat">
-                                <tr>
-                                    <td colspan="8" class="text-center">
-                                        <i class="fas fa-spinner fa-spin"></i> Memuat data...
-                                    </td>
-                                </tr>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="5%"><input type="checkbox" id="checkAll" class="form-check-input"></th>
+                                <th width="5%">No</th>
+                                
+                                <th style="cursor: pointer;" onclick="changeSort('nomor_surat')">
+                                    Nomor Surat <i class="bi bi-arrow-down-up text-muted small ms-1" id="icon-nomor_surat"></i>
+                                </th>
+                                <th style="cursor: pointer;" onclick="changeSort('nim')">
+                                    NIM <i class="bi bi-arrow-down-up text-muted small ms-1" id="icon-nim"></i>
+                                </th>
+                                <th style="cursor: pointer;" onclick="changeSort('nama')">
+                                    Nama <i class="bi bi-arrow-down-up text-muted small ms-1" id="icon-nama"></i>
+                                </th>
+                                <th style="cursor: pointer;" onclick="changeSort('jenis')">
+                                    Jenis <i class="bi bi-arrow-down-up text-muted small ms-1" id="icon-jenis"></i>
+                                </th>
+                                <th style="cursor: pointer;" onclick="changeSort('tanggal')">
+                                    Tanggal <i class="bi bi-arrow-down-up text-muted small ms-1" id="icon-tanggal"></i>
+                                </th>
+                                <th style="cursor: pointer;" onclick="changeSort('status')">
+                                    Status <i class="bi bi-arrow-down-up text-muted small ms-1" id="icon-status"></i>
+                                </th>
+                                
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-surat">
                             </tbody>
-                        </table>
-                    </div>
+                    </table>
+                </div>
+                <div id="pagination"></div>
+            </div>
+        </div>
+    </main>
 
-                    <!-- Pagination -->
-                    <div id="pagination" class="mt-3"></div>
+    <!-- Modal Buat Surat -->
+    <div class="modal fade" id="modalBuatSurat">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="modal-title">Buat Surat Baru</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formBuatSurat">
+                        <div id="step1">
+                            <div class="mb-3">
+                                <label>Jenis Surat <span class="text-danger">*</span></label>
+                                <select name="jenis_surat" id="jenis_surat" class="form-select" required>
+                                    <option value="">-- Pilih --</option>
+                                    <option value="UAS">UAS</option>
+                                    <option value="PPA">PPA</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 position-relative">
+                                <label>Cari Mahasiswa <span class="text-danger">*</span></label>
+                                <input type="text" id="search_mahasiswa" class="form-control" placeholder="Ketik NIM atau nama (min 3 karakter)..." autocomplete="off">
+                                <input type="hidden" name="nim" id="nim" required>
+                                <div id="search_results" style="display: none;"></div>
+                            </div>
+                            <div id="infoMahasiswa" style="display: none;">
+                                <div class="alert alert-info">
+                                    <h6><i class="bi bi-person-check"></i> Data Mahasiswa</h6>
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr><td width="30%">Nama</td><td>: <strong id="info_nama"></strong></td></tr>
+                                        <tr><td>NIM</td><td>: <strong id="info_nim"></strong></td></tr>
+                                        <tr><td>Prodi</td><td>: <strong id="info_prodi"></strong></td></tr>
+                                        <tr><td>Angkatan</td><td>: <strong id="info_angkatan"></strong></td></tr>
+                                    </table>
+                                </div>
+                                <div id="validasiStatus"></div>
+                                <div id="overrideForm" style="display: none;">
+                                    <div class="alert alert-warning">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="override_tunggakan" name="override_tunggakan" value="1">
+                                            <label class="form-check-label">Override tunggakan</label>
+                                        </div>
+                                        <div id="catatanOverride" style="display: none;" class="mt-2">
+                                            <label>Alasan</label>
+                                            <textarea name="catatan" id="catatan" class="form-control" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end" id="btnLanjut" style="display: none;">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="button" class="btn btn-success" onclick="previewSurat()"><i class="bi bi-eye"></i> Preview</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="step2" style="display: none;">
+                            <div class="alert alert-success">
+                                <h6><i class="bi bi-check-circle"></i> Surat Siap</h6>
+                                <p class="mb-0">Nomor: <strong id="preview_nomor"></strong></p>
+                            </div>
+                            <div id="previewContent" style="border: 1px solid #ddd; padding: 15px; max-height: 400px; overflow-y: auto; background: #f9f9f9;"></div>
+                            <div class="text-end mt-3">
+                                <button type="button" class="btn btn-secondary" onclick="kembaliStep1()"><i class="bi bi-arrow-left"></i> Kembali</button>
+                                <button type="submit" class="btn btn-primary" id="btnTerbitkan"><i class="bi bi-printer"></i> Terbitkan</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Buat Surat -->
-<div class="modal fade" id="modalBuatSurat" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Buat Surat Keterangan Baru</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="formBuatSurat">
-                    <!-- Step 1: Pilih Jenis & Input NIM -->
-                    <div id="step1">
-                        <div class="form-group">
-                            <label>Jenis Surat <span class="text-danger">*</span></label>
-                            <select name="jenis_surat" id="jenis_surat" class="form-control" required>
-                                <option value="">-- Pilih Jenis Surat --</option>
-                                <option value="UAS">Ujian Akhir Semester (UAS)</option>
-                                <option value="PPA">Penilaian Pembelajaran Akhir (PPA)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>NIM Mahasiswa <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <input type="text" name="nim" id="nim" class="form-control" 
-                                       placeholder="Masukkan NIM" required>
-                                <div class="input-group-append">
-                                    <button type="button" class="btn btn-primary" onclick="cekMahasiswa()">
-                                        <i class="fas fa-search"></i> Cek
-                                    </button>
-                                </div>
-                            </div>
-                            <small class="form-text text-muted">
-                                Masukkan NIM mahasiswa dan klik tombol Cek
-                            </small>
-                        </div>
-
-                        <div id="infoMahasiswa" style="display: none;">
-                            <div class="alert alert-info">
-                                <h5><i class="fas fa-user"></i> Data Mahasiswa</h5>
-                                <table class="table table-sm table-borderless mb-0">
-                                    <tr>
-                                        <td width="30%">Nama</td>
-                                        <td>: <span id="info_nama"></span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>NIM</td>
-                                        <td>: <span id="info_nim"></span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Program Studi</td>
-                                        <td>: <span id="info_prodi"></span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Angkatan</td>
-                                        <td>: <span id="info_angkatan"></span></td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <!-- Validasi Status -->
-                            <div id="validasiStatus"></div>
-
-                            <!-- Override Form -->
-                            <div id="overrideForm" style="display: none;">
-                                <div class="alert alert-warning">
-                                    <div class="form-group mb-0">
-                                        <label>
-                                            <input type="checkbox" id="override_tunggakan" name="override_tunggakan" value="1">
-                                            Override validasi tunggakan (Admin dapat mengabaikan tunggakan)
-                                        </label>
-                                    </div>
-                                    <div class="form-group mb-0 mt-2" id="catatanOverride" style="display: none;">
-                                        <label>Alasan Override <span class="text-danger">*</span></label>
-                                        <textarea name="catatan" id="catatan" class="form-control" rows="2" 
-                                                  placeholder="Jelaskan alasan mengapa tunggakan diabaikan..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Buttons -->
-                            <div class="text-right" id="btnLanjut" style="display: none;">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                <button type="button" class="btn btn-success" onclick="previewSurat()">
-                                    <i class="fas fa-eye"></i> Preview Surat
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Preview -->
-                    <div id="step2" style="display: none;">
-                        <div class="alert alert-success">
-                            <h5><i class="fas fa-check-circle"></i> Surat Siap Diterbitkan</h5>
-                            <p class="mb-0">Nomor Surat: <strong id="preview_nomor"></strong></p>
-                        </div>
-
-                        <div id="previewContent" class="border p-3" style="background: #f9f9f9;">
-                            <!-- Preview surat akan dimuat di sini -->
-                        </div>
-
-                        <div class="text-right mt-3">
-                            <button type="button" class="btn btn-secondary" onclick="kembaliStep1()">
-                                <i class="fas fa-arrow-left"></i> Kembali
-                            </button>
-                            <button type="submit" class="btn btn-primary" id="btnTerbitkan">
-                                <i class="fas fa-print"></i> Terbitkan & Cetak
-                            </button>
-                        </div>
-                    </div>
-                </form>
+    <!-- Modal Detail -->
+    <div class="modal fade" id="modalDetail">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5>Detail Surat</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detailContent"></div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Detail Surat -->
-<div class="modal fade" id="modalDetail" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detail Surat Keterangan</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="detailContent">
-                <!-- Content loaded via AJAX -->
-            </div>
-        </div>
-    </div>
-</div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// --- VARIABEL GLOBAL UNTUK SORTING & PAGINATION ---
+let currentSort = 'created_at'; // Default sort berdasarkan waktu dibuat
+let currentOrder = 'DESC';      // Default urutan terbaru (DESC)
+let currentPage = 1;            // Halaman saat ini
+
 $(document).ready(function() {
-    loadData();
+    loadData(); // Load data pertama kali
+    
+    // Logic Pencarian Mahasiswa di Modal (Auto-complete)
+    let searchTimeout;
+    $('#search_mahasiswa').on('input', function() {
+        clearTimeout(searchTimeout);
+        const term = $(this).val();
+        
+        if (term.length < 3) {
+            $('#search_results').hide();
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            $.ajax({
+                url: 'ajax_handler.php',
+                type: 'POST',
+                data: { action: 'search_mahasiswa', term: term },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.length > 0) {
+                        let html = '';
+                        data.forEach(function(item) {
+                            html += '<div class="search-item" data-nim="' + item.nim + '" data-nama="' + item.nama + '" data-prodi="' + item.program_studi + '" data-angkatan="' + item.angkatan + '">' + item.label + '</div>';
+                        });
+                        $('#search_results').html(html).show();
+                    } else {
+                        $('#search_results').html('<div class="search-item text-muted">Tidak ditemukan</div>').show();
+                    }
+                }
+            });
+        }, 500);
+    });
+    
+    // Klik item hasil pencarian
+    $(document).on('click', '.search-item', function() {
+        if ($(this).data('nim')) {
+            $('#nim').val($(this).data('nim'));
+            $('#search_mahasiswa').val($(this).data('nama'));
+            $('#search_results').hide();
+            setTimeout(cekMahasiswa, 300);
+        }
+    });
+    
+    // Tutup dropdown search jika klik di luar
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#search_mahasiswa, #search_results').length) {
+            $('#search_results').hide();
+        }
+    });
 });
 
-// Load data surat
+// --- FUNGSI LOAD DATA (UPDATE: Support Sorting & Pagination) ---
 function loadData(page = 1) {
-    const nim = $('#filterNIM').val();
-    const jenis = $('#filterJenis').val();
-    const tahun = $('#filterTahun').val();
+    currentPage = page;
+    
+    // Ambil nilai filter
+    let nim = $('#filterNIM').val();
+    let jenis = $('#filterJenis').val();
+    let tahun = $('#filterTahun').val();
     
     $.ajax({
         url: 'ajax_handler.php',
         type: 'POST',
-        data: {
-            action: 'load_data',
-            nim: nim,
-            jenis: jenis,
-            tahun: tahun,
-            page: page
+        data: { 
+            action: 'load_data', 
+            nim: nim, 
+            jenis: jenis, 
+            tahun: tahun, 
+            page: page,
+            sort_by: currentSort,   // Kirim parameter sort
+            order: currentOrder     // Kirim parameter order
         },
         dataType: 'json',
         success: function(response) {
-            if (response.success) {
-                $('#tbody-surat').html(response.html);
-                $('#pagination').html(response.pagination);
-            } else {
-                $('#tbody-surat').html('<tr><td colspan="8" class="text-center text-danger">' + response.message + '</td></tr>');
-            }
+            $('#tbody-surat').html(response.success ? response.html : '<tr><td colspan="9" class="text-center text-danger">' + response.message + '</td></tr>');
+            $('#pagination').html(response.pagination || '');
+            
+            // Reset checkbox "Pilih Semua" setiap kali data berubah
+            $('#checkAll').prop('checked', false);
+            updateCount();
+            
+            // Update ikon panah di header tabel
+            updateSortIcons();
         },
-        error: function() {
-            $('#tbody-surat').html('<tr><td colspan="8" class="text-center text-danger">Gagal memuat data</td></tr>');
+        error: function(xhr) {
+            console.error('Load data error:', xhr);
+            $('#tbody-surat').html('<tr><td colspan="9" class="text-center text-danger">Error loading data</td></tr>');
         }
     });
 }
 
-// Reset filter
-function resetFilter() {
-    $('#filterNIM').val('');
-    $('#filterJenis').val('');
-    $('#filterTahun').val('');
-    loadData();
+// --- FUNGSI SORTING (BARU) ---
+function changeSort(column) {
+    // Jika klik kolom yang sama, balik urutannya (ASC <-> DESC)
+    if (currentSort === column) {
+        currentOrder = (currentOrder === 'ASC') ? 'DESC' : 'ASC';
+    } else {
+        // Jika klik kolom baru, set default jadi ASC
+        currentSort = column;
+        currentOrder = 'ASC';
+    }
+    // Reload data dari halaman 1
+    loadData(1);
 }
 
-// Cek mahasiswa
+function updateSortIcons() {
+    // Reset semua ikon jadi netral (atas-bawah abu-abu)
+    $('i[id^="icon-"]').attr('class', 'bi bi-arrow-down-up text-muted small ms-1');
+    
+    // Set ikon pada kolom yang aktif (biru)
+    let activeIcon = $('#icon-' + currentSort);
+    if (currentOrder === 'ASC') {
+        activeIcon.attr('class', 'bi bi-arrow-up text-primary small ms-1');
+    } else {
+        activeIcon.attr('class', 'bi bi-arrow-down text-primary small ms-1');
+    }
+}
+
+function resetFilter() {
+    $('#filterNIM, #filterJenis, #filterTahun').val('');
+    loadData(1);
+}
+
+// --- FUNGSI-FUNGSI LOGIKA SURAT ---
+
 function cekMahasiswa() {
     const nim = $('#nim').val();
-    const jenis_surat = $('#jenis_surat').val();
+    const jenis = $('#jenis_surat').val();
     
-    if (!nim) {
-        Swal.fire('Perhatian', 'Masukkan NIM terlebih dahulu', 'warning');
-        return;
-    }
-    
-    if (!jenis_surat) {
-        Swal.fire('Perhatian', 'Pilih jenis surat terlebih dahulu', 'warning');
+    if (!nim || !jenis) {
+        Swal.fire('Perhatian', 'Pilih jenis surat dan mahasiswa', 'warning');
         return;
     }
     
     $.ajax({
         url: 'ajax_handler.php',
         type: 'POST',
-        data: {
-            action: 'cek_mahasiswa',
-            nim: nim,
-            jenis_surat: jenis_surat
-        },
+        data: { action: 'cek_mahasiswa', nim: nim, jenis_surat: jenis },
         dataType: 'json',
         beforeSend: function() {
-            Swal.fire({
-                title: 'Memvalidasi...',
-                text: 'Mohon tunggu sebentar',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading()
-                }
-            });
+            Swal.fire({ title: 'Memvalidasi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         },
         success: function(response) {
             Swal.close();
-            
             if (response.success) {
-                // Tampilkan data mahasiswa
                 $('#info_nama').text(response.data.nama_mahasiswa);
                 $('#info_nim').text(response.data.nim);
                 $('#info_prodi').text(response.data.nama_prodi);
                 $('#info_angkatan').text(response.data.angkatan);
                 $('#infoMahasiswa').show();
                 
-                // Tampilkan status validasi
-                let validasiHtml = '';
-                
-                if (response.peminjaman_aktif) {
-                    validasiHtml += '<div class="alert alert-danger"><i class="fas fa-times-circle"></i> Mahasiswa masih memiliki peminjaman aktif</div>';
-                }
-                
+                let html = '';
+                if (response.peminjaman_aktif) html += '<div class="alert alert-danger"><i class="bi bi-x"></i> Masih ada peminjaman aktif</div>';
                 if (response.tunggakan.ada_tunggakan) {
-                    validasiHtml += '<div class="alert alert-danger">';
-                    validasiHtml += '<i class="fas fa-exclamation-triangle"></i> ';
-                    validasiHtml += 'Mahasiswa memiliki tunggakan denda: <strong>' + response.tunggakan.jumlah + ' tunggakan</strong> ';
-                    validasiHtml += '(Total: Rp ' + number_format(response.tunggakan.total_denda) + ')';
-                    validasiHtml += '</div>';
+                    html += '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Ada tunggakan: Rp ' + new Intl.NumberFormat('id-ID').format(response.tunggakan.total_denda) + '</div>';
                     $('#overrideForm').show();
                 } else {
                     $('#overrideForm').hide();
                 }
-                
                 if (!response.peminjaman_aktif && !response.tunggakan.ada_tunggakan) {
-                    validasiHtml += '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Mahasiswa memenuhi syarat untuk mendapatkan surat keterangan</div>';
+                    html += '<div class="alert alert-success"><i class="bi bi-check"></i> Memenuhi syarat</div>';
                     $('#btnLanjut').show();
                 }
-                
-                $('#validasiStatus').html(validasiHtml);
-                
+                $('#validasiStatus').html(html);
             } else {
                 Swal.fire('Error', response.message, 'error');
-                $('#infoMahasiswa').hide();
             }
         },
-        error: function() {
+        error: function(xhr) {
             Swal.close();
-            Swal.fire('Error', 'Gagal memvalidasi mahasiswa', 'error');
+            Swal.fire('Error', 'Gagal validasi', 'error');
         }
     });
 }
 
-// Override checkbox event
 $(document).on('change', '#override_tunggakan', function() {
     if ($(this).is(':checked')) {
         $('#catatanOverride').show();
@@ -364,20 +587,16 @@ $(document).on('change', '#override_tunggakan', function() {
         $('#btnLanjut').show();
     } else {
         $('#catatanOverride').hide();
-        $('#catatan').attr('required', false);
-        $('#catatan').val('');
+        $('#catatan').attr('required', false).val('');
         $('#btnLanjut').hide();
     }
 });
 
-// Preview surat
 function previewSurat() {
-    const formData = $('#formBuatSurat').serialize();
-    
     $.ajax({
         url: 'ajax_handler.php',
         type: 'POST',
-        data: formData + '&action=preview_surat',
+        data: $('#formBuatSurat').serialize() + '&action=preview_surat',
         dataType: 'json',
         success: function(response) {
             if (response.success) {
@@ -388,127 +607,89 @@ function previewSurat() {
             } else {
                 Swal.fire('Error', response.message, 'error');
             }
-        },
-        error: function() {
-            Swal.fire('Error', 'Gagal membuat preview', 'error');
         }
     });
 }
 
-// Kembali ke step 1
 function kembaliStep1() {
     $('#step2').hide();
     $('#step1').show();
 }
 
-// Submit form
 $('#formBuatSurat').submit(function(e) {
     e.preventDefault();
-    
-    const formData = $(this).serialize();
-    
     Swal.fire({
         title: 'Konfirmasi',
-        text: 'Terbitkan surat keterangan ini?',
+        text: 'Terbitkan surat ini?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Ya, Terbitkan',
+        confirmButtonText: 'Ya',
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
                 url: 'ajax_handler.php',
                 type: 'POST',
-                data: formData + '&action=terbitkan_surat',
+                data: $(this).serialize() + '&action=terbitkan_surat',
                 dataType: 'json',
                 beforeSend: function() {
-                    $('#btnTerbitkan').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memproses...');
+                    $('#btnTerbitkan').prop('disabled', true).html('<i class="bi bi-hourglass"></i> Proses...');
                 },
                 success: function(response) {
                     if (response.success) {
-                        Swal.fire({
-                            title: 'Berhasil',
-                            text: 'Surat berhasil diterbitkan',
-                            icon: 'success'
-                        }).then(() => {
-                            // Buka PDF di tab baru
+                        Swal.fire('Berhasil', 'Surat diterbitkan', 'success').then(() => {
                             window.open(response.pdf_url, '_blank');
-                            
-                            // Reset form dan reload data
-                            $('#modalBuatSurat').modal('hide');
-                            $('#formBuatSurat')[0].reset();
-                            $('#step2').hide();
-                            $('#step1').show();
-                            $('#infoMahasiswa').hide();
-                            loadData();
+                            location.reload();
                         });
                     } else {
                         Swal.fire('Error', response.message, 'error');
                     }
                 },
-                error: function() {
-                    Swal.fire('Error', 'Gagal menerbitkan surat', 'error');
-                },
                 complete: function() {
-                    $('#btnTerbitkan').prop('disabled', false).html('<i class="fas fa-print"></i> Terbitkan & Cetak');
+                    $('#btnTerbitkan').prop('disabled', false).html('<i class="bi bi-printer"></i> Terbitkan');
                 }
             });
         }
     });
 });
 
-// Lihat detail
 function lihatDetail(id) {
     $.ajax({
         url: 'ajax_handler.php',
         type: 'POST',
-        data: {
-            action: 'detail_surat',
-            id: id
-        },
+        data: { action: 'detail_surat', id: id },
         dataType: 'json',
         success: function(response) {
             if (response.success) {
                 $('#detailContent').html(response.html);
-                $('#modalDetail').modal('show');
-            } else {
-                Swal.fire('Error', response.message, 'error');
+                new bootstrap.Modal(document.getElementById('modalDetail')).show();
             }
         }
     });
 }
 
-// Cetak ulang
 function cetakUlang(id) {
     window.open('generate_pdf.php?id=' + id, '_blank');
 }
 
-// Batalkan surat
 function batalkanSurat(id) {
     Swal.fire({
         title: 'Konfirmasi',
-        text: 'Batalkan surat ini? Surat yang dibatalkan tidak dapat diaktifkan kembali.',
+        text: 'Batalkan surat?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Ya, Batalkan',
-        cancelButtonText: 'Tidak',
         confirmButtonColor: '#d33'
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
                 url: 'ajax_handler.php',
                 type: 'POST',
-                data: {
-                    action: 'batalkan_surat',
-                    id: id
-                },
+                data: { action: 'batalkan_surat', id: id },
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {
                         Swal.fire('Berhasil', response.message, 'success');
-                        loadData();
-                    } else {
-                        Swal.fire('Error', response.message, 'error');
+                        loadData(currentPage); // Reload halaman yang sama
                     }
                 }
             });
@@ -516,10 +697,131 @@ function batalkanSurat(id) {
     });
 }
 
-// Helper function
-function number_format(number) {
-    return new Intl.NumberFormat('id-ID').format(number);
+// --- LOGIKA BATCH PRINT (CETAK BANYAK) ---
+
+// 1. Handle "Pilih Semua"
+$('#checkAll').change(function() {
+    $('.chk-surat').prop('checked', $(this).prop('checked'));
+    updateCount();
+});
+
+// 2. Handle Klik Checkbox Individual
+$(document).on('change', '.chk-surat', function() {
+    updateCount();
+    if(false === $(this).prop('checked')) {
+        $('#checkAll').prop('checked', false);
+    }
+});
+
+// 3. Fungsi Update Counter Jumlah
+// --- UPDATE FUNGSI updateCount ---
+function updateCount() {
+    let count = $('.chk-surat:checked').length;
+    $('#countSelected').text(count);
+    $('#countHapus').text(count); // Update angka di tombol hapus
+    
+    // Tampilkan tombol hapus jika ada yg dicentang
+    if(count > 0) {
+        $('#btnHapusBatch').show();
+    } else {
+        $('#btnHapusBatch').hide();
+    }
+}
+
+// 4. Fungsi Utama: Cetak Batch
+function cetakBatch() {
+    let selectedIds = [];
+    $('.chk-surat:checked').each(function() {
+        selectedIds.push($(this).val());
+    });
+
+    if (selectedIds.length === 0) {
+        Swal.fire('Peringatan', 'Pilih minimal satu surat untuk dicetak!', 'warning');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Cetak Massal',
+        text: 'Akan mencetak ' + selectedIds.length + ' surat dalam format hemat kertas (2 surat/halaman). Lanjutkan?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Cetak',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let idsString = selectedIds.join(',');
+            window.open('generate_batch_pdf.php?ids=' + idsString, '_blank');
+        }
+    });
+}
+
+// --- FUNGSI HAPUS SATUAN (Dari tombol sampah di tabel) ---
+function hapusSatu(id) {
+    Swal.fire({
+        title: 'Hapus Permanen?',
+        text: "Data dan file PDF akan dihapus permanen. QR Code tidak akan valid lagi.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            eksekusiHapus(id);
+        }
+    });
+}
+
+// --- FUNGSI HAPUS MASSAL (Batch) ---
+function hapusBatch() {
+    let selectedIds = [];
+    $('.chk-surat:checked').each(function() {
+        selectedIds.push($(this).val());
+    });
+
+    if (selectedIds.length === 0) return;
+
+    Swal.fire({
+        title: 'Hapus ' + selectedIds.length + ' Data?',
+        text: "PERINGATAN: Data yang dihapus tidak dapat dikembalikan. Gunakan fitur ini untuk membersihkan data lama.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Ya, Bersihkan!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            eksekusiHapus(selectedIds.join(','));
+        }
+    });
+}
+
+// --- FUNGSI EKSEKUSI AJAX HAPUS ---
+function eksekusiHapus(ids) {
+    $.ajax({
+        url: 'ajax_handler.php',
+        type: 'POST',
+        data: { action: 'hapus_data', ids: ids },
+        dataType: 'json',
+        beforeSend: function() {
+            Swal.fire({title: 'Menghapus...', didOpen: () => Swal.showLoading()});
+        },
+        success: function(response) {
+            if (response.success) {
+                Swal.fire('Terhapus!', response.message, 'success');
+                loadData(currentPage); // Refresh halaman
+                $('#checkAll').prop('checked', false);
+                $('#btnHapusBatch').hide();
+            } else {
+                Swal.fire('Gagal', response.message, 'error');
+            }
+        },
+        error: function() {
+            Swal.fire('Error', 'Terjadi kesalahan server', 'error');
+        }
+    });
 }
 </script>
-
-<?php include '../../includes/footer.php'; ?>
+</body>
+</html>

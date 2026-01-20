@@ -1,0 +1,44 @@
+[20-Jan-2026 14:18:44 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/surat_keterangan/debug_error.php:160
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/debug_error.php on line 160
+[20-Jan-2026 14:26:23 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php:28
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php on line 28
+[20-Jan-2026 14:26:30 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php:28
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php on line 28
+[20-Jan-2026 14:26:33 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php:28
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php on line 28
+[20-Jan-2026 14:26:44 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php:28
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php on line 28
+[20-Jan-2026 14:27:28 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php:28
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php on line 28
+[20-Jan-2026 14:37:00 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php:28
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php on line 28
+[20-Jan-2026 14:40:06 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php:28
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php on line 28
+[20-Jan-2026 14:45:56 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method PDF_SuratKeterangan::SetDash() in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php:244
+Stack trace:
+#0 /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php(258): PDF_SuratKeterangan->buatSurat()
+#1 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php on line 244
+[20-Jan-2026 16:38:42 Asia/Jakarta] PHP Fatal error:  Uncaught Exception: FPDF error: Some data has already been output, can't send PDF file in /home/stkp7133/public_html/e-library/modules/surat_keterangan/lib/fpdf/fpdf.php:267
+Stack trace:
+#0 /home/stkp7133/public_html/e-library/modules/surat_keterangan/lib/fpdf/fpdf.php(1058): FPDF->Error()
+#1 /home/stkp7133/public_html/e-library/modules/surat_keterangan/lib/fpdf/fpdf.php(1004): FPDF->_checkoutput()
+#2 /home/stkp7133/public_html/e-library/modules/surat_keterangan/generate_pdf.php(304): FPDF->Output()
+#3 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/surat_keterangan/lib/fpdf/fpdf.php on line 267

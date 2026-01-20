@@ -29,11 +29,13 @@ php_value error_log /var/log/php_errors.log
     Deny from all
 </FilesMatch>
 
-# Except for main PHP files
-<FilesMatch "^(index|config|ajax_handler|generate_pdf|validasi_qr|laporan|ajax_laporan)\.php$">
+# --- BAGIAN INI YANG DIPERBAIKI ---
+# Except for main PHP files (Tambahkan generate_batch_pdf di sini)
+<FilesMatch "^(index|config|ajax_handler|generate_pdf|generate_batch_pdf|validasi_qr|laporan|ajax_laporan)\.php$">
     Order Allow,Deny
     Allow from all
 </FilesMatch>
+# ----------------------------------
 
 # CORS Headers (untuk validasi QR dari mobile app)
 <IfModule mod_headers.c>

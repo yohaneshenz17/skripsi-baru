@@ -1,17 +1,50 @@
 <?php
-/**
- * AJAX Handler untuk Laporan Surat Keterangan
- */
+session_start();
+
+// Cek sesi admin
+if (!isset($_SESSION['admin_id'])) {
+    if (isset($_POST['action'])) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Sesi habis, silakan login kembali.']);
+        exit;
+    }
+}
 
 require_once 'config.php';
-cekLoginAdmin();
 
 $action = $_REQUEST['action'] ?? '';
 
-if ($action == 'load_laporan') {
-    loadLaporan();
-} elseif ($action == 'export_excel') {
-    exportExcel();
+switch ($action) {
+    case 'load_laporan':
+        loadLaporan();
+        break;
+    case 'export_excel':
+        exportExcel();
+        break;
+    default:
+        echo json_encode(['success' => false, 'message' => 'Invalid action']);
+}
+
+/**
+ * Membangun Query WHERE berdasarkan filter
+ */
+function buildWhereClause($tahun, $bulan, $jenis) {
+    global $conn;
+    $where = ["1=1"];
+    
+    if (!empty($tahun)) {
+        $where[] = "sk.tahun_periode = " . intval($tahun);
+    }
+    
+    if (!empty($bulan)) {
+        $where[] = "MONTH(sk.tanggal_terbit) = " . intval($bulan);
+    }
+    
+    if (!empty($jenis)) {
+        $where[] = "sk.jenis_surat = '" . $conn->real_escape_string($jenis) . "'";
+    }
+    
+    return implode(' AND ', $where);
 }
 
 function loadLaporan() {
@@ -21,224 +54,152 @@ function loadLaporan() {
     $bulan = $_POST['bulan'] ?? '';
     $jenis = $_POST['jenis'] ?? '';
     
-    // Build query
-    $where = ["sk.status = 'terbit'"];
-    $params = [];
-    $types = '';
+    $whereClause = buildWhereClause($tahun, $bulan, $jenis);
     
-    if ($tahun) {
-        $where[] = "sk.tahun_periode = ?";
-        $params[] = $tahun;
-        $types .= 'i';
-    }
-    
-    if ($bulan) {
-        $where[] = "MONTH(sk.tanggal_terbit) = ?";
-        $params[] = $bulan;
-        $types .= 'i';
-    }
-    
-    if ($jenis) {
-        $where[] = "sk.jenis_surat = ?";
-        $params[] = $jenis;
-        $types .= 's';
-    }
-    
-    $where_clause = implode(' AND ', $where);
-    
-    // Get statistik
-    $sql_stat = "SELECT 
-                    COUNT(*) as total,
-                    SUM(CASE WHEN jenis_surat = 'UAS' THEN 1 ELSE 0 END) as uas,
-                    SUM(CASE WHEN jenis_surat = 'PPA' THEN 1 ELSE 0 END) as ppa,
-                    SUM(override_tunggakan) as override
-                 FROM surat_keterangan sk
-                 WHERE {$where_clause}";
-    
-    $stmt_stat = $conn->prepare($sql_stat);
-    if ($types) {
-        $stmt_stat->bind_param($types, ...$params);
-    }
-    $stmt_stat->execute();
-    $statistik = $stmt_stat->get_result()->fetch_assoc();
-    
-    // Get data detail
-    $sql = "SELECT sk.*, m.nama_mahasiswa, m.angkatan, ps.nama_prodi, a.nama as admin_nama
+    // Query Data Utama dengan Join ke Admin dan Mahasiswa
+    $sql = "SELECT sk.*, m.nama as nama_mhs, m.program_studi, a.username as nama_admin
             FROM surat_keterangan sk
             JOIN mahasiswa m ON sk.nim = m.nim
-            LEFT JOIN program_studi ps ON m.id_prodi = ps.id_prodi
             LEFT JOIN admin a ON sk.admin_id = a.id
-            WHERE {$where_clause}
-            ORDER BY sk.tanggal_terbit DESC, sk.nomor_surat ASC";
+            WHERE {$whereClause}
+            ORDER BY sk.tanggal_terbit DESC, sk.id DESC";
+            
+    $result = $conn->query($sql);
     
-    $stmt = $conn->prepare($sql);
-    if ($types) {
-        $stmt->bind_param($types, ...$params);
-    }
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Inisialisasi Statistik
+    $stats = [
+        'total' => 0,
+        'uas' => 0,
+        'ppa' => 0,
+        'override' => 0
+    ];
     
     $html = '';
     $no = 1;
     
-    if ($result->num_rows > 0) {
+    if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $badge_jenis = $row['jenis_surat'] == 'UAS' ? 'badge-primary' : 'badge-info';
-            $tanggal = formatTanggalIndonesia($row['tanggal_terbit']);
-            $status = $row['override_tunggakan'] ? '<span class="badge badge-warning">Override</span>' : '<span class="badge badge-success">Normal</span>';
+            // Hitung Statistik
+            $stats['total']++;
+            if ($row['jenis_surat'] == 'UAS') $stats['uas']++;
+            if ($row['jenis_surat'] == 'PPA') $stats['ppa']++;
+            if ($row['override_tunggakan'] == 1) $stats['override']++;
             
-            $html .= "<tr>";
+            // Format Tampilan
+            $tgl = date('d/m/Y', strtotime($row['tanggal_terbit']));
+            $badge_jenis = $row['jenis_surat'] == 'UAS' ? 'bg-primary' : 'bg-info';
+            
+            // Status Logic
+            $status_label = '';
+            $row_class = '';
+            
+            if ($row['status'] == 'dibatalkan') {
+                $status_label = "<span class='badge bg-danger'>Dibatalkan</span>";
+                $row_class = 'table-danger'; // Merahkan baris
+            } else {
+                $status_label = "<span class='badge bg-success'>Terbit</span>";
+            }
+            
+            // Override Logic (Audit Trail Highlighting)
+            $override_icon = '';
+            if ($row['override_tunggakan'] == 1) {
+                $override_icon = "<i class='fas fa-exclamation-triangle text-warning' title='Override Tunggakan: " . htmlspecialchars($row['catatan']) . "'></i>";
+                if ($row_class == '') $row_class = 'table-warning'; // Kuningkan baris jika override (tapi tidak batal)
+            }
+            
+            $html .= "<tr class='{$row_class}'>";
             $html .= "<td>{$no}</td>";
-            $html .= "<td><small>{$row['nomor_surat']}</small></td>";
-            $html .= "<td><small>{$tanggal}</small></td>";
+            $html .= "<td><strong>{$row['nomor_surat']}</strong></td>";
+            $html .= "<td>{$tgl}</td>";
             $html .= "<td>{$row['nim']}</td>";
-            $html .= "<td>{$row['nama_mahasiswa']}</td>";
-            $html .= "<td><small>{$row['nama_prodi']}</small></td>";
+            $html .= "<td>{$row['nama_mhs']}</td>";
+            $html .= "<td>{$row['program_studi']}</td>";
             $html .= "<td><span class='badge {$badge_jenis}'>{$row['jenis_surat']}</span></td>";
-            $html .= "<td><small>{$row['admin_nama']}</small></td>";
-            $html .= "<td>{$status}</td>";
+            $html .= "<td>" . ($row['nama_admin'] ?? 'System') . "</td>";
+            $html .= "<td>{$status_label} {$override_icon}</td>";
+            
+            // Kolom Catatan (Penting untuk Audit)
+            $catatan = !empty($row['catatan']) ? $row['catatan'] : '-';
+            $html .= "<td class='small text-muted'>{$catatan}</td>";
+            
             $html .= "</tr>";
             $no++;
         }
     } else {
-        $html = "<tr><td colspan='9' class='text-center'>Tidak ada data</td></tr>";
+        $html = "<tr><td colspan='10' class='text-center'>Tidak ada data ditemukan</td></tr>";
     }
     
-    header('Content-Type: application/json');
     echo json_encode([
         'success' => true,
-        'statistik' => $statistik,
-        'html' => $html
+        'html' => $html,
+        'statistik' => $stats
     ]);
 }
 
 function exportExcel() {
-    global $conn, $BULAN_INDONESIA;
+    global $conn;
     
     $tahun = $_GET['tahun'] ?? '';
     $bulan = $_GET['bulan'] ?? '';
     $jenis = $_GET['jenis'] ?? '';
     
-    // Build query
-    $where = ["sk.status = 'terbit'"];
-    $params = [];
-    $types = '';
+    $filename = "Laporan_Surat_Keterangan_" . date('Ymd_His') . ".xls";
     
-    if ($tahun) {
-        $where[] = "sk.tahun_periode = ?";
-        $params[] = $tahun;
-        $types .= 'i';
-    }
+    header("Content-Type: application/vnd.ms-excel");
+    header("Content-Disposition: attachment; filename=\"$filename\"");
     
-    if ($bulan) {
-        $where[] = "MONTH(sk.tanggal_terbit) = ?";
-        $params[] = $bulan;
-        $types .= 'i';
-    }
+    $whereClause = buildWhereClause($tahun, $bulan, $jenis);
     
-    if ($jenis) {
-        $where[] = "sk.jenis_surat = ?";
-        $params[] = $jenis;
-        $types .= 's';
-    }
-    
-    $where_clause = implode(' AND ', $where);
-    
-    // Get data
-    $sql = "SELECT sk.nomor_surat, sk.tanggal_terbit, sk.nim, m.nama_mahasiswa, m.angkatan, 
-                   ps.nama_prodi, sk.jenis_surat, a.nama as admin_nama, sk.override_tunggakan,
-                   sk.catatan
+    $sql = "SELECT sk.*, m.nama as nama_mhs, m.program_studi, a.username as nama_admin
             FROM surat_keterangan sk
             JOIN mahasiswa m ON sk.nim = m.nim
-            LEFT JOIN program_studi ps ON m.id_prodi = ps.id_prodi
             LEFT JOIN admin a ON sk.admin_id = a.id
-            WHERE {$where_clause}
-            ORDER BY sk.tanggal_terbit DESC, sk.nomor_surat ASC";
+            WHERE {$whereClause}
+            ORDER BY sk.tanggal_terbit DESC";
+            
+    $result = $conn->query($sql);
     
-    $stmt = $conn->prepare($sql);
-    if ($types) {
-        $stmt->bind_param($types, ...$params);
-    }
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    // Nama file
-    $periode = '';
-    if ($bulan && $tahun) {
-        $periode = $BULAN_INDONESIA[$bulan] . '_' . $tahun;
-    } elseif ($tahun) {
-        $periode = 'Tahun_' . $tahun;
-    } else {
-        $periode = 'Semua_Periode';
-    }
-    
-    $filename = 'Laporan_Surat_Keterangan_' . $periode . '_' . date('YmdHis') . '.xls';
-    
-    // Set header untuk Excel
-    header('Content-Type: application/vnd.ms-excel');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-    
-    // Output Excel
-    echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
-    echo '<head>';
-    echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-    echo '</head>';
-    echo '<body>';
-    
-    echo '<table border="1">';
-    echo '<thead>';
-    echo '<tr style="background-color: #4CAF50; color: white; font-weight: bold;">';
-    echo '<th colspan="10" style="text-align: center; padding: 10px;">LAPORAN SURAT KETERANGAN BEBAS PERPUSTAKAAN</th>';
-    echo '</tr>';
-    echo '<tr style="background-color: #4CAF50; color: white; font-weight: bold;">';
-    echo '<th colspan="10" style="text-align: center; padding: 5px;">Sekolah Tinggi Katolik Santo Yakobus Merauke</th>';
-    echo '</tr>';
-    echo '<tr>';
-    echo '<th colspan="10" style="text-align: center; padding: 5px;">Periode: ' . $periode . '</th>';
-    echo '</tr>';
-    echo '<tr></tr>'; // Empty row
-    echo '<tr style="background-color: #f2f2f2; font-weight: bold;">';
-    echo '<th>No</th>';
-    echo '<th>Nomor Surat</th>';
-    echo '<th>Tanggal Terbit</th>';
-    echo '<th>NIM</th>';
-    echo '<th>Nama Mahasiswa</th>';
-    echo '<th>Angkatan</th>';
-    echo '<th>Program Studi</th>';
-    echo '<th>Jenis Surat</th>';
-    echo '<th>Admin</th>';
-    echo '<th>Override/Catatan</th>';
-    echo '</tr>';
-    echo '</thead>';
-    echo '<tbody>';
-    
+    echo "
+    <table border='1'>
+        <thead>
+            <tr style='background-color: #f2f2f2;'>
+                <th>No</th>
+                <th>Nomor Surat</th>
+                <th>Tanggal Terbit</th>
+                <th>NIM</th>
+                <th>Nama Mahasiswa</th>
+                <th>Program Studi</th>
+                <th>Jenis Surat</th>
+                <th>Admin Penerbit</th>
+                <th>Status</th>
+                <th>Override Tunggakan</th>
+                <th>Catatan Audit</th>
+            </tr>
+        </thead>
+        <tbody>";
+        
     $no = 1;
     while ($row = $result->fetch_assoc()) {
-        $tanggal = formatTanggalIndonesia($row['tanggal_terbit']);
-        $override = $row['override_tunggakan'] ? 'YA - ' . $row['catatan'] : 'TIDAK';
+        $override = $row['override_tunggakan'] == 1 ? 'YA' : 'TIDAK';
+        $tgl = date('d-m-Y', strtotime($row['tanggal_terbit']));
         
-        echo '<tr>';
-        echo '<td>' . $no . '</td>';
-        echo '<td>' . $row['nomor_surat'] . '</td>';
-        echo '<td>' . $tanggal . '</td>';
-        echo '<td>' . $row['nim'] . '</td>';
-        echo '<td>' . $row['nama_mahasiswa'] . '</td>';
-        echo '<td>' . $row['angkatan'] . '</td>';
-        echo '<td>' . $row['nama_prodi'] . '</td>';
-        echo '<td>' . $row['jenis_surat'] . '</td>';
-        echo '<td>' . $row['admin_nama'] . '</td>';
-        echo '<td>' . $override . '</td>';
-        echo '</tr>';
+        echo "<tr>
+            <td>{$no}</td>
+            <td>{$row['nomor_surat']}</td>
+            <td>{$tgl}</td>
+            <td>'{$row['nim']}</td>
+            <td>{$row['nama_mhs']}</td>
+            <td>{$row['program_studi']}</td>
+            <td>{$row['jenis_surat']}</td>
+            <td>{$row['nama_admin']}</td>
+            <td>{$row['status']}</td>
+            <td>{$override}</td>
+            <td>{$row['catatan']}</td>
+        </tr>";
         $no++;
     }
     
-    echo '</tbody>';
-    echo '</table>';
-    echo '</body>';
-    echo '</html>';
-    
+    echo "</tbody></table>";
     exit;
 }
 ?>

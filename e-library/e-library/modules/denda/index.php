@@ -704,7 +704,7 @@ $total_exposure = $denda_berjalan['total_denda'] + $stats['total_sisa'];
                     </div>
                 </div>
                 <?php endif; ?>
-        </div>
+            </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

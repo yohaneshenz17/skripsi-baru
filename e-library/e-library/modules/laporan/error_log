@@ -68,3 +68,9 @@ Stack trace:
 [21-Jan-2026 06:28:04 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8
 [21-Jan-2026 06:28:37 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8
 [21-Jan-2026 06:28:43 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8
+[21-Jan-2026 09:21:19 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8
+[21-Jan-2026 09:21:21 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8
+[21-Jan-2026 09:55:34 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8
+[21-Jan-2026 09:57:26 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8
+[21-Jan-2026 10:06:47 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8
+[21-Jan-2026 10:10:09 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 8

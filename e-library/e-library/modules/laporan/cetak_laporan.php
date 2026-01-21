@@ -130,6 +130,10 @@ $t_dosen  = ($q_dosen) ? mysqli_fetch_assoc($q_dosen)['c'] : 0;
 $q_mhs    = mysqli_query($conn, "SELECT COUNT(*) as c FROM mahasiswa");
 $t_mhs    = ($q_mhs) ? mysqli_fetch_assoc($q_mhs)['c'] : 0;
 
+// ===== QUERY BUKU HILANG/RUSAK (NEW) =====
+$q_hilang = mysqli_query($conn, "SELECT COUNT(*) as c FROM pengembalian WHERE status_buku IN ('hilang','rusak_parah')");
+$t_hilang = ($q_hilang) ? mysqli_fetch_assoc($q_hilang)['c'] : 0;
+
 $pdf->SetFont('Times','',10);
 $pdf->Cell(95, 8, "Total Judul Buku: $t_buku Judul", 1);
 $pdf->Cell(95, 8, "Total Anggota Dosen: $t_dosen Orang", 1);
@@ -138,6 +142,12 @@ $pdf->Cell(95, 8, "Total Exemplar Buku: $t_stok Buku", 1);
 $pdf->Cell(95, 8, "Total Anggota Mahasiswa: $t_mhs Orang", 1);
 $pdf->Ln();
 $pdf->Cell(190, 8, "Buku Sedang Dipinjam (Realtime): $t_pinjam Buku", 1, 1, 'C');
+
+// ===== TAMBAHAN BARU - BUKU HILANG (NEW) =====
+$pdf->SetTextColor(192, 57, 43); // Merah
+$pdf->Cell(190, 8, "Jumlah Buku Hilang atau Rusak Parah: $t_hilang Buku", 1, 1, 'C');
+$pdf->SetTextColor(0); // Reset warna
+
 
 // --- BAGIAN B: DAFTAR PEMINJAMAN BERJALAN ---
 $pdf->SectionTitle("B. DAFTAR PEMINJAMAN BERJALAN (BELUM KEMBALI)");
@@ -296,6 +306,49 @@ if(mysqli_num_rows($q_habis) > 0){
     }
 } else {
     $pdf->Cell(190, 6, 'Tidak ada buku dengan stok 0.', 1, 1, 'C');
+}
+
+// ===== DAFTAR BUKU HILANG/RUSAK (NEW SECTION) =====
+$pdf->Ln(5);
+$pdf->SetFont('Times','B',10);
+$pdf->Cell(0,8,'3. Daftar Buku Hilang atau Rusak Parah',0,1);
+
+$q_hilang_detail = mysqli_query($conn, "
+    SELECT pg.tanggal_kembali, pg.status_buku, pg.denda, pg.sisa_denda,
+           b.judul, b.nomor_buku,
+           COALESCE(m.nama, d.nama) as nama_peminjam
+    FROM pengembalian pg
+    JOIN peminjaman p ON pg.peminjaman_id = p.id
+    JOIN buku b ON p.buku_id = b.id
+    LEFT JOIN mahasiswa m ON (p.peminjam_id = m.id AND p.jenis_peminjam='mahasiswa')
+    LEFT JOIN dosen d ON (p.peminjam_id = d.id AND p.jenis_peminjam='dosen')
+    WHERE pg.status_buku IN ('hilang','rusak_parah')
+    ORDER BY pg.tanggal_kembali DESC
+");
+
+$header = ['No', 'Tgl Lapor', 'Peminjam', 'Judul Buku', 'Status', 'Denda (Rp)'];
+$w = [10, 20, 50, 65, 25, 20];
+$pdf->TableHeader($header, $w);
+
+$no = 1;
+if(mysqli_num_rows($q_hilang_detail) > 0){
+    while($row = mysqli_fetch_assoc($q_hilang_detail)){
+        $pdf->Cell($w[0], 6, $no++, 1, 0, 'C');
+        $pdf->Cell($w[1], 6, date('d/m/y', strtotime($row['tanggal_kembali'])), 1, 0, 'C');
+        $pdf->Cell($w[2], 6, substr($row['nama_peminjam'] ?? '-', 0, 25), 1, 0, 'L');
+        $pdf->Cell($w[3], 6, substr($row['judul'], 0, 35), 1, 0, 'L');
+        
+        // Status dengan warna
+        $status_text = ($row['status_buku'] == 'hilang') ? 'Hilang' : 'Rusak Parah';
+        $pdf->SetTextColor(192, 57, 43); // Merah
+        $pdf->Cell($w[4], 6, $status_text, 1, 0, 'C');
+        $pdf->SetTextColor(0); // Reset warna
+        
+        $pdf->Cell($w[5], 6, number_format($row['denda'],0,',','.'), 1, 0, 'R');
+        $pdf->Ln();
+    }
+} else {
+    $pdf->Cell(190, 6, 'Tidak ada buku hilang/rusak parah.', 1, 1, 'C');
 }
 
 // --- BAGIAN E: STATISTIK TOP 10 ---

@@ -51,6 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $metode_pembayaran = $_POST['metode_pembayaran'];
     $keterangan = isset($_POST['keterangan']) ? trim($_POST['keterangan']) : '';
     
+    // CEK BUKU HILANG/RUSAK (NEW)
+    $status_buku = isset($_POST['status_buku']) && !empty($_POST['status_buku']) ? $_POST['status_buku'] : 'normal';
+    $nominal_denda_buku = isset($_POST['nominal_denda_buku']) ? floatval($_POST['nominal_denda_buku']) : 0;
+    $keterangan_kehilangan = isset($_POST['keterangan_kehilangan']) ? trim($_POST['keterangan_kehilangan']) : null;
+    
+    $is_buku_hilang = ($status_buku != 'normal');
+    
     // Hitung keterlambatan dan denda
     $jatuh_tempo = new DateTime($pinjam['tanggal_jatuh_tempo']);
     $tgl_kembali = new DateTime($tanggal_kembali);
@@ -58,10 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($tgl_kembali > $jatuh_tempo) {
         $selisih = $jatuh_tempo->diff($tgl_kembali);
         $keterlambatan_hari = $selisih->days;
-        $total_denda = $keterlambatan_hari * 1000;
+        $denda_keterlambatan = $keterlambatan_hari * 1000;
     } else {
         $keterlambatan_hari = 0;
-        $total_denda = 0;
+        $denda_keterlambatan = 0;
+    }
+    
+    // TENTUKAN TOTAL DENDA (MAX) (NEW)
+    if ($is_buku_hilang) {
+        $total_denda = max($denda_keterlambatan, $nominal_denda_buku);
+    } else {
+        $total_denda = $denda_keterlambatan;
     }
     
     // Hitung pembayaran denda
@@ -97,7 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
     
-    // Start transaction
     // Generate nomor bukti jika LUNAS
     $nomor_bukti = null;
     $tanggal_lunas_val = null;
@@ -108,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $bulan = date('n');
         $bulan_romawi = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
         
-        // Get last number
+        // Get last number - COMPATIBLE dengan bind_result()
         $query_last = "SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(nomor_bukti, '/', 1), '-', -1) AS UNSIGNED)) as last_number 
                       FROM pengembalian 
                       WHERE nomor_bukti LIKE 'BP-DENDA-%' AND YEAR(tanggal_lunas) = ?";
@@ -128,15 +141,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->begin_transaction();
     
     try {
-        // 1. Insert ke tabel pengembalian
+        // 1. Insert ke tabel pengembalian (DENGAN FIELD BARU)
         $query = "INSERT INTO pengembalian 
                   (peminjaman_id, tanggal_kembali, keterlambatan_hari, denda, denda_dibayar, 
-                   uang_kembali, sisa_denda, metode_pembayaran, keterangan, nomor_bukti, tanggal_lunas) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                   uang_kembali, sisa_denda, metode_pembayaran, keterangan, nomor_bukti, tanggal_lunas,
+                   status_buku, nominal_denda_buku, keterangan_kehilangan) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("isiiiisssss", $id, $tanggal_kembali, $keterlambatan_hari, $total_denda, 
-                          $denda_dibayar, $uang_kembali, $sisa_denda, $metode_pembayaran, $keterangan, 
-                          $nomor_bukti, $tanggal_lunas_val);
+        $stmt->bind_param("isiiiisssssids", 
+            $id, $tanggal_kembali, $keterlambatan_hari, $total_denda, $denda_dibayar, 
+            $uang_kembali, $sisa_denda, $metode_pembayaran, $keterangan, $nomor_bukti, $tanggal_lunas_val,
+            $status_buku, $nominal_denda_buku, $keterangan_kehilangan
+        );
         $stmt->execute();
         $pengembalian_id = $conn->insert_id;
         $stmt->close();
@@ -161,18 +177,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute();
         $stmt->close();
         
-        // 4. Update stok buku (tambah 1)
-        $query = "UPDATE buku SET stok_tersedia = stok_tersedia + 1 WHERE id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("i", $pinjam['buku_id']);
-        $stmt->execute();
-        $stmt->close();
+        // 4. Update stok buku (CONDITIONAL - HANYA JIKA NORMAL)
+        if (!$is_buku_hilang) {
+            $query = "UPDATE buku SET stok_tersedia = stok_tersedia + 1 WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $pinjam['buku_id']);
+            $stmt->execute();
+            $stmt->close();
+        }
+        // Jika hilang/rusak, stok TIDAK ditambah
         
         // Commit transaction
         $conn->commit();
         
         // Success message
         $msg = 'Pengembalian berhasil dicatat!';
+        if ($is_buku_hilang) {
+            $msg .= ' Status buku: ' . ucwords(str_replace('_', ' ', $status_buku)) . '.';
+        }
         if ($total_denda > 0) {
             $msg .= ' Denda: ' . formatRupiah($total_denda);
             if ($sisa_denda > 0) {
@@ -532,6 +554,81 @@ if ($today > $jatuh_tempo) {
                             <strong>Denda Keterlambatan:</strong> <?= formatRupiah($denda) ?> 
                             (<?= $keterlambatan ?> hari × Rp 1.000)
                         </div>
+                        
+                        <!-- SECTION BUKU HILANG (INSERT HERE) -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white">
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" id="bukuHilang" onchange="toggleBukuHilang()">
+                                            <label class="form-check-label fw-bold" for="bukuHilang">
+                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Buku Hilang / Rusak Parah
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" id="sectionBukuHilang" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">
+                                                    <i class="bi bi-tag me-1"></i>
+                                                    Kategori Kehilangan <span class="text-danger">*</span>
+                                                </label>
+                                                <select class="form-select" id="statusBuku" name="status_buku">
+                                                    <option value="">- Pilih Kategori -</option>
+                                                    <option value="hilang">Hilang</option>
+                                                    <option value="rusak_parah">Rusak Parah</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">
+                                                    <i class="bi bi-currency-dollar me-1"></i>
+                                                    Nominal Denda Buku <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">Rp</span>
+                                                    <input type="number" class="form-control" id="nominalDendaBuku" 
+                                                           name="nominal_denda_buku" placeholder="0" min="0" onkeyup="hitungTotalDenda()">
+                                                </div>
+                                                <small class="text-muted">Harga penggantian buku</small>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label">
+                                                    <i class="bi bi-chat-left-text me-1"></i>
+                                                    Keterangan Kehilangan/Kerusakan
+                                                </label>
+                                                <textarea class="form-control" name="keterangan_kehilangan" 
+                                                          rows="2" placeholder="Kronologi singkat (opsional)"></textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- PERHITUNGAN DENDA -->
+                                        <div class="alert alert-info mb-0">
+                                            <h6 class="alert-heading">
+                                                <i class="bi bi-calculator me-2"></i>Perhitungan Denda Final:
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small>Denda Keterlambatan: <strong id="displayDendaTelat"><?= formatRupiah($denda) ?></strong></small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small>Nominal Buku: <strong id="displayNominalBuku">Rp 0</strong></small>
+                                                </div>
+                                            </div>
+                                            <hr class="my-2">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <strong class="text-primary">Total Denda: <span id="displayTotalDenda"><?= formatRupiah($denda) ?></span></strong>
+                                                    <br><small class="text-muted">Sistem mengambil nilai yang lebih besar</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <?php endif; ?>
 
                         <form method="POST" action="" id="formPengembalian">
@@ -716,5 +813,45 @@ if ($today > $jatuh_tempo) {
             }
         });
     </script>
+    
+    <script>
+// Denda keterlambatan dari PHP
+const dendaKeterlambatan = <?= $denda ?>;
+
+function toggleBukuHilang() {
+    const checkbox = document.getElementById('bukuHilang');
+    const section = document.getElementById('sectionBukuHilang');
+    const statusBuku = document.getElementById('statusBuku');
+    const nominalDendaBuku = document.getElementById('nominalDendaBuku');
+    
+    if (checkbox.checked) {
+        section.style.display = 'block';
+        statusBuku.setAttribute('required', 'required');
+        nominalDendaBuku.setAttribute('required', 'required');
+    } else {
+        section.style.display = 'none';
+        statusBuku.removeAttribute('required');
+        nominalDendaBuku.removeAttribute('required');
+        // Reset values
+        statusBuku.value = '';
+        nominalDendaBuku.value = '';
+        document.querySelector('textarea[name="keterangan_kehilangan"]').value = '';
+        hitungTotalDenda();
+    }
+}
+
+function hitungTotalDenda() {
+    const nominalBuku = parseInt(document.getElementById('nominalDendaBuku').value) || 0;
+    const totalDenda = Math.max(dendaKeterlambatan, nominalBuku);
+    
+    // Format rupiah
+    const formatRp = (angka) => 'Rp ' + angka.toLocaleString('id-ID');
+    
+    document.getElementById('displayDendaTelat').textContent = formatRp(dendaKeterlambatan);
+    document.getElementById('displayNominalBuku').textContent = formatRp(nominalBuku);
+    document.getElementById('displayTotalDenda').textContent = formatRp(totalDenda);
+}
+</script>
+
 </body>
 </html>

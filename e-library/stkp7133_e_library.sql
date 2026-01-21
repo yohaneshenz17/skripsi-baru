@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 21 Jan 2026 pada 08.16
+-- Waktu pembuatan: 21 Jan 2026 pada 10.13
 -- Versi server: 10.3.39-MariaDB-cll-lve
 -- Versi PHP: 8.1.34
 
@@ -79,7 +79,7 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (20, '001.3.8. Sar. M', 'Metode Penelitian Kuantitatif & Kualitatif', 'Jonathan Sarwwono', 'Graha Ilmu', '2006', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (21, '001.4.1.Sup.M', 'Metode Penelitian Praktis', 'Drs.  M. Suparmoko, M.A.,Ph.D.', 'Yogyakarta, BPFE', '1999', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (22, '001.4.2.Fih. P', 'Penelitian Tindakan Kelas', 'Albertus Fiharsono,  S.Pd., M.Hum', 'Yogyakarta, Kanisius', '2014', 2, 2, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
-(23, '001.4.3.Str.C', 'Cara Menulis Makalah Filsafat', 'James S. Stramel', 'Yogyakarta, Pustaka Pelajar (Anggota IKAPI)', '2002', 3, 2, '2026-01-19 07:15:56', '2026-01-21 01:12:54'),
+(23, '001.4.3.Str.C', 'Cara Menulis Makalah Filsafat', 'James S. Stramel', 'Yogyakarta, Pustaka Pelajar (Anggota IKAPI)', '2002', 3, 3, '2026-01-19 07:15:56', '2026-01-21 02:57:17'),
 (24, '001.4.4. Moo.C', 'Cara Meneliti', 'Nick Moore', 'ITB Bandung', '1995', 10, 10, '2026-01-19 07:15:56', '2026-01-20 23:19:27'),
 (25, '001.4.6.Tji. S', 'Strategi Riset Lewat Internet', 'Fandy Tjiptono & Totok Budi Santoso', 'Yogyakarta, Andi', '2000', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (26, '001.4.7.War.P', 'Penelitian Tindakan Kelas', 'Igak Wardhani, dkk', 'Universitas Terbuka', '2007', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
@@ -94,7 +94,7 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (35, '001.508.1. Som.A', 'Aplikasi Statistika Dalam Penelitian', 'Drs. Ating Somantri & Sambas Ali Muhidin, S.Pd.', 'Bandung, Pustaka Setia', '2006', 1, 0, '2026-01-20 23:45:31', '2026-01-21 01:12:39'),
 (36, '001.509.1. San.S', 'Statistik Nonparametrik Konsep dan Aplikasi dengan SPSS', 'Singgih Santoso', 'PT. Gramedia Pustaka Utama', '2010', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
 (37, '001.510.3.Sup.S', 'Statistika Dalam Kajian Deskriptif Inferensi dan Nonparametrik', 'Drs. Andi Supangat, M.Si', 'Jakarta, Kencana Prenada Media Group', '2008', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
-(38, '001.511.4.Wij.A', 'Analisis Data Penelitian Menggunakan SPSS', 'Tony Wijaya', 'Universitas Atma Jaya Yogyakarta', '2013', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(38, '001.511.4.Wij.A', 'Analisis Data Penelitian Menggunakan SPSS', 'Tony Wijaya', 'Universitas Atma Jaya Yogyakarta', '2013', 1, 1, '2026-01-20 23:45:31', '2026-01-21 03:08:48'),
 (39, '001.512.1.Pri.S', 'SPSS untuk Analisis Korelasi, Regresi dan Multivariate', 'Duwi Priyatno', 'Gava Media, Yogyakarta', '2009', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
 (40, '002.1.4.Keb.L', 'Lampiran Hasil Studi Implementasi Program Pengalaman Lapangan', 'Departemen Pendidikan dan Kebudayaan', 'Departemen Pendidikan dan Kebudayaan', '1985', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
 (41, '002.2.1.Sup.P', 'Petunjuk Praktis Penelitian Ilmiah untuk Menyusun Skripsi, Tesis dan Disertasi Edisi 1', 'Prof. J. Supranto.,MA., APU', 'Jakarta, Mitra Waena Media', '2012', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
@@ -517,7 +517,10 @@ INSERT INTO `pembayaran_denda_detail` (`id`, `pengembalian_id`, `tanggal_bayar`,
 (8, 12, '2026-01-21', 13000, 'cash', '', '2026-01-21 00:31:12'),
 (9, 13, '2026-01-21', 12000, 'cash', '', '2026-01-21 00:34:49'),
 (10, 14, '2026-01-21', 10000, 'cash', '', '2026-01-21 00:35:32'),
-(11, 14, '2026-01-21', 3000, 'cash', '', '2026-01-21 00:38:59');
+(11, 14, '2026-01-21', 3000, 'cash', '', '2026-01-21 00:38:59'),
+(12, 15, '2026-01-21', 13000, 'tagihan_studi', '', '2026-01-21 02:57:17'),
+(13, 16, '2026-01-21', 100000, 'cash', '', '2026-01-21 03:00:25'),
+(14, 17, '2026-01-21', 12000, 'tagihan_studi', '', '2026-01-21 03:08:48');
 
 -- --------------------------------------------------------
 
@@ -563,7 +566,9 @@ INSERT INTO `peminjaman` (`id`, `kode_peminjaman`, `jenis_peminjam`, `peminjam_i
 (20, 'PJM202601215482', 'mahasiswa', 222, 35, '2026-01-02', '2026-01-09', '2026-01-21', 'dikembalikan', 12000, '2026-01-21 00:33:19', '2026-01-21 00:34:49'),
 (21, 'PJM202601219271', 'mahasiswa', 222, 23, '2026-01-01', '2026-01-08', '2026-01-21', 'dikembalikan', 13000, '2026-01-21 00:35:12', '2026-01-21 00:35:32'),
 (22, 'PJM202601219579', 'mahasiswa', 50, 35, '2026-01-21', '2026-01-28', NULL, 'dipinjam', 0, '2026-01-21 01:12:39', '2026-01-21 01:12:39'),
-(23, 'PJM202601218564', 'mahasiswa', 246, 23, '2026-01-01', '2026-01-08', NULL, 'terlambat', 0, '2026-01-21 01:12:54', '2026-01-21 01:12:54');
+(23, 'PJM202601218564', 'mahasiswa', 246, 23, '2026-01-01', '2026-01-08', '2026-01-21', 'dikembalikan', 13000, '2026-01-21 01:12:54', '2026-01-21 02:57:17'),
+(24, 'PJM202601216670', 'mahasiswa', 222, 38, '2025-12-04', '2025-12-11', '2026-01-21', 'dikembalikan', 41000, '2026-01-21 02:58:56', '2026-01-21 03:00:25'),
+(25, 'PJM202601211119', 'mahasiswa', 222, 38, '2026-01-02', '2026-01-09', '2026-01-21', 'dikembalikan', 12000, '2026-01-21 03:02:35', '2026-01-21 03:08:48');
 
 -- --------------------------------------------------------
 
@@ -584,6 +589,9 @@ CREATE TABLE `pengembalian` (
   `tanggal_lunas` datetime DEFAULT NULL,
   `metode_pembayaran` enum('cash','transfer','tagihan_studi','waive') DEFAULT 'cash',
   `keterangan` text DEFAULT NULL,
+  `status_buku` enum('normal','hilang','rusak_parah') DEFAULT 'normal',
+  `nominal_denda_buku` decimal(10,2) DEFAULT 0.00,
+  `keterangan_kehilangan` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
@@ -591,21 +599,24 @@ CREATE TABLE `pengembalian` (
 -- Dumping data untuk tabel `pengembalian`
 --
 
-INSERT INTO `pengembalian` (`id`, `peminjaman_id`, `tanggal_kembali`, `keterlambatan_hari`, `denda`, `denda_dibayar`, `uang_kembali`, `sisa_denda`, `nomor_bukti`, `tanggal_lunas`, `metode_pembayaran`, `keterangan`, `created_at`) VALUES
-(1, 6, '2026-01-20', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 00:22:19'),
-(2, 5, '2026-01-20', 2, 2000, 2000, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 00:22:34'),
-(3, 7, '2026-01-20', 7, 7000, 0, 0, 0, NULL, NULL, 'waive', 'Bencana Alam', '2026-01-20 00:26:12'),
-(4, 10, '2026-01-20', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 01:17:33'),
-(5, 9, '2026-01-20', 7, 7000, 7000, 0, 0, NULL, NULL, 'tagihan_studi', '', '2026-01-20 01:39:04'),
-(6, 4, '2026-01-21', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 23:19:27'),
-(7, 8, '2026-01-21', 8, 8000, 8000, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 23:21:02'),
-(8, 11, '2026-01-21', 3, 3000, 3000, 0, 0, NULL, NULL, 'tagihan_studi', '', '2026-01-20 23:21:44'),
-(9, 16, '2026-01-21', 7, 7000, 0, 0, 0, NULL, NULL, 'waive', 'KEDUKAAN', '2026-01-20 23:22:56'),
-(10, 17, '2026-01-21', 8, 8000, 8000, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 23:24:37'),
-(11, 18, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-001/I/2026', '2026-01-21 07:30:54', 'cash', '', '2026-01-21 00:30:54'),
-(12, 19, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-002/I/2026', '2026-01-21 07:31:12', 'cash', '', '2026-01-21 00:31:12'),
-(13, 20, '2026-01-21', 12, 12000, 12000, 0, 0, 'BP-DENDA-003/I/2026', '2026-01-21 07:34:49', 'cash', '', '2026-01-21 00:34:49'),
-(14, 21, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-001/I/2026', '2026-01-21 07:38:59', 'cash', '', '2026-01-21 00:35:32');
+INSERT INTO `pengembalian` (`id`, `peminjaman_id`, `tanggal_kembali`, `keterlambatan_hari`, `denda`, `denda_dibayar`, `uang_kembali`, `sisa_denda`, `nomor_bukti`, `tanggal_lunas`, `metode_pembayaran`, `keterangan`, `status_buku`, `nominal_denda_buku`, `keterangan_kehilangan`, `created_at`) VALUES
+(1, 6, '2026-01-20', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', 'normal', 0.00, NULL, '2026-01-20 00:22:19'),
+(2, 5, '2026-01-20', 2, 2000, 2000, 0, 0, NULL, NULL, 'cash', '', 'normal', 0.00, NULL, '2026-01-20 00:22:34'),
+(3, 7, '2026-01-20', 7, 7000, 0, 0, 0, NULL, NULL, 'waive', 'Bencana Alam', 'normal', 0.00, NULL, '2026-01-20 00:26:12'),
+(4, 10, '2026-01-20', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', 'normal', 0.00, NULL, '2026-01-20 01:17:33'),
+(5, 9, '2026-01-20', 7, 7000, 7000, 0, 0, NULL, NULL, 'tagihan_studi', '', 'normal', 0.00, NULL, '2026-01-20 01:39:04'),
+(6, 4, '2026-01-21', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', 'normal', 0.00, NULL, '2026-01-20 23:19:27'),
+(7, 8, '2026-01-21', 8, 8000, 8000, 0, 0, NULL, NULL, 'cash', '', 'normal', 0.00, NULL, '2026-01-20 23:21:02'),
+(8, 11, '2026-01-21', 3, 3000, 3000, 0, 0, NULL, NULL, 'tagihan_studi', '', 'normal', 0.00, NULL, '2026-01-20 23:21:44'),
+(9, 16, '2026-01-21', 7, 7000, 0, 0, 0, NULL, NULL, 'waive', 'KEDUKAAN', 'normal', 0.00, NULL, '2026-01-20 23:22:56'),
+(10, 17, '2026-01-21', 8, 8000, 8000, 0, 0, NULL, NULL, 'cash', '', 'normal', 0.00, NULL, '2026-01-20 23:24:37'),
+(11, 18, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-001/I/2026', '2026-01-21 07:30:54', 'cash', '', 'normal', 0.00, NULL, '2026-01-21 00:30:54'),
+(12, 19, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-002/I/2026', '2026-01-21 07:31:12', 'cash', '', 'normal', 0.00, NULL, '2026-01-21 00:31:12'),
+(13, 20, '2026-01-21', 12, 12000, 12000, 0, 0, 'BP-DENDA-003/I/2026', '2026-01-21 07:34:49', 'cash', '', 'normal', 0.00, NULL, '2026-01-21 00:34:49'),
+(14, 21, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-001/I/2026', '2026-01-21 07:38:59', 'cash', '', 'normal', 0.00, NULL, '2026-01-21 00:35:32'),
+(15, 23, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-004/I/2026', '2026-01-21 09:57:17', 'tagihan_studi', '', '', 0.00, NULL, '2026-01-21 02:57:17'),
+(16, 24, '2026-01-21', 41, 41000, 100000, 59000, 0, 'BP-DENDA-005/I/2026', '2026-01-21 10:00:25', 'cash', '', '', 0.00, NULL, '2026-01-21 03:00:25'),
+(17, 25, '2026-01-21', 12, 12000, 12000, 0, 0, 'BP-DENDA-006/I/2026', '2026-01-21 10:08:48', 'tagihan_studi', '', '', 0.00, NULL, '2026-01-21 03:08:48');
 
 -- --------------------------------------------------------
 
@@ -723,7 +734,8 @@ ALTER TABLE `peminjaman`
 ALTER TABLE `pengembalian`
   ADD PRIMARY KEY (`id`),
   ADD KEY `peminjaman_id` (`peminjaman_id`),
-  ADD KEY `idx_nomor_bukti` (`nomor_bukti`);
+  ADD KEY `idx_nomor_bukti` (`nomor_bukti`),
+  ADD KEY `idx_status_buku` (`status_buku`);
 
 --
 -- Indeks untuk tabel `perpanjangan`
@@ -784,19 +796,19 @@ ALTER TABLE `nomor_surat_counter`
 -- AUTO_INCREMENT untuk tabel `pembayaran_denda_detail`
 --
 ALTER TABLE `pembayaran_denda_detail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT untuk tabel `peminjaman`
 --
 ALTER TABLE `peminjaman`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengembalian`
 --
 ALTER TABLE `pengembalian`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT untuk tabel `perpanjangan`

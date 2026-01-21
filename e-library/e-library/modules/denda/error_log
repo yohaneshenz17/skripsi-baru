@@ -70,3 +70,13 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 9
+[21-Jan-2026 09:58:02 Asia/Jakarta] PHP Fatal error:  Uncaught ArgumentCountError: Number of bind variables doesn't match number of fields in prepared statement in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php:57
+Stack trace:
+#0 /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php(57): mysqli_stmt->bind_result()
+#1 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 57
+[21-Jan-2026 09:58:15 Asia/Jakarta] PHP Fatal error:  Uncaught ArgumentCountError: Number of bind variables doesn't match number of fields in prepared statement in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php:57
+Stack trace:
+#0 /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php(57): mysqli_stmt->bind_result()
+#1 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 57

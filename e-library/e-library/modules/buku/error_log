@@ -6,3 +6,19 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/stkp7133/public_html/e-library/modules/buku/delete.php on line 14
+[21-Jan-2026 06:48:08 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/buku/edit.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/buku/edit.php on line 14
+[21-Jan-2026 06:48:18 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/buku/edit.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/buku/edit.php on line 14
+[21-Jan-2026 06:53:10 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/buku/edit.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/buku/edit.php on line 14
+[21-Jan-2026 06:53:18 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined method mysqli_stmt::get_result() in /home/stkp7133/public_html/e-library/modules/buku/edit.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/buku/edit.php on line 14

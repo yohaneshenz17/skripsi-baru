@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 21 Jan 2026 pada 06.34
+-- Waktu pembuatan: 21 Jan 2026 pada 08.16
 -- Versi server: 10.3.39-MariaDB-cll-lve
 -- Versi PHP: 8.1.34
 
@@ -79,13 +79,29 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (20, '001.3.8. Sar. M', 'Metode Penelitian Kuantitatif & Kualitatif', 'Jonathan Sarwwono', 'Graha Ilmu', '2006', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (21, '001.4.1.Sup.M', 'Metode Penelitian Praktis', 'Drs.  M. Suparmoko, M.A.,Ph.D.', 'Yogyakarta, BPFE', '1999', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (22, '001.4.2.Fih. P', 'Penelitian Tindakan Kelas', 'Albertus Fiharsono,  S.Pd., M.Hum', 'Yogyakarta, Kanisius', '2014', 2, 2, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
-(23, '001.4.3.Str.C', 'Cara Menulis Makalah Filsafat', 'James S. Stramel', 'Yogyakarta, Pustaka Pelajar (Anggota IKAPI)', '2002', 3, 3, '2026-01-19 07:15:56', '2026-01-20 00:22:34'),
+(23, '001.4.3.Str.C', 'Cara Menulis Makalah Filsafat', 'James S. Stramel', 'Yogyakarta, Pustaka Pelajar (Anggota IKAPI)', '2002', 3, 2, '2026-01-19 07:15:56', '2026-01-21 01:12:54'),
 (24, '001.4.4. Moo.C', 'Cara Meneliti', 'Nick Moore', 'ITB Bandung', '1995', 10, 10, '2026-01-19 07:15:56', '2026-01-20 23:19:27'),
 (25, '001.4.6.Tji. S', 'Strategi Riset Lewat Internet', 'Fandy Tjiptono & Totok Budi Santoso', 'Yogyakarta, Andi', '2000', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (26, '001.4.7.War.P', 'Penelitian Tindakan Kelas', 'Igak Wardhani, dkk', 'Universitas Terbuka', '2007', 1, 1, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (27, '001.4.8.Tae.P', 'Petualangan Intelektual Menuju Metode Penelitian Pendidikan', 'Dr. Paulus Taek, MS', 'Gita Kasih', '2009', 17, 17, '2026-01-19 07:15:56', '2026-01-19 07:15:56'),
 (28, '001.4.9. Ind.M', 'Menulis Karya Ilmiah, Artikel, Skripsi, Thesis dan Disertasi', 'Etty Indriati, Ph.D', 'PT. Gramedia Pustaka Utama', '2005', 4, 4, '2026-01-19 07:15:56', '2026-01-20 00:26:12'),
-(29, '001.4.10 Suk.M', 'Manajemen Penelitian Tindakan Kelas', 'Sukidin, Basrowi, Suranto', 'Insan Cendekia', '2008', 1, 0, '2026-01-19 07:15:56', '2026-01-20 11:19:33');
+(29, '001.4.10 Suk.M', 'Manajemen Penelitian Tindakan Kelas', 'Sukidin, Basrowi, Suranto', 'Insan Cendekia', '2008', 1, 0, '2026-01-19 07:15:56', '2026-01-20 11:19:33'),
+(30, '001.5.2.Zed.M', 'Metode Penelitian Kepustakaan', 'Mestika Zed', 'Yayasan Obor Indonesia', '2008', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(31, '001.43.1 Gas.M', 'Teknik Penarikan Contoh Untuk Penelitian Suvei', 'Ir. Vincent Gaspersz, M.Sc', 'Bandung, Tarsito', '1991', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(32, '001.43.2 Man.T', 'Teknik Menambah dan Mengembangkan Ilmu Pengetahuan', 'A.M. Mangunhardjana', 'Yogyakarta, Kanisius', '2002', 2, 2, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(33, '001.43.6.Tir.P', 'Panduan Penjamin Mutu Penelitan', 'Muhammad Ariel Tiro', 'Makassar, Badan Penerbit Universitas Negeri Makassar.', '2008', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(34, '001.411.3.Rob.S', 'Studi Kasus Desain & Metode', 'Prof. Dr. Robert K. Yin', 'Jakarta,PT. Raja Grafindo Persada', '2012', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(35, '001.508.1. Som.A', 'Aplikasi Statistika Dalam Penelitian', 'Drs. Ating Somantri & Sambas Ali Muhidin, S.Pd.', 'Bandung, Pustaka Setia', '2006', 1, 0, '2026-01-20 23:45:31', '2026-01-21 01:12:39'),
+(36, '001.509.1. San.S', 'Statistik Nonparametrik Konsep dan Aplikasi dengan SPSS', 'Singgih Santoso', 'PT. Gramedia Pustaka Utama', '2010', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(37, '001.510.3.Sup.S', 'Statistika Dalam Kajian Deskriptif Inferensi dan Nonparametrik', 'Drs. Andi Supangat, M.Si', 'Jakarta, Kencana Prenada Media Group', '2008', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(38, '001.511.4.Wij.A', 'Analisis Data Penelitian Menggunakan SPSS', 'Tony Wijaya', 'Universitas Atma Jaya Yogyakarta', '2013', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(39, '001.512.1.Pri.S', 'SPSS untuk Analisis Korelasi, Regresi dan Multivariate', 'Duwi Priyatno', 'Gava Media, Yogyakarta', '2009', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(40, '002.1.4.Keb.L', 'Lampiran Hasil Studi Implementasi Program Pengalaman Lapangan', 'Departemen Pendidikan dan Kebudayaan', 'Departemen Pendidikan dan Kebudayaan', '1985', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(41, '002.2.1.Sup.P', 'Petunjuk Praktis Penelitian Ilmiah untuk Menyusun Skripsi, Tesis dan Disertasi Edisi 1', 'Prof. J. Supranto.,MA., APU', 'Jakarta, Mitra Waena Media', '2012', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(42, '002.8.1.Pur.P', 'Pedoman Dan Perangkat Pelayanan Kasus Perkawinan Gerejawi', 'Drs. FX. S. Purwaharsanto, Pr., Lic. I.C', 'Yogyakarta, Kanisius', '2000', 2, 2, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(43, '002.8.2. Pur.P', 'Perlunya Pendataan Umat Bagi Paroki', 'Francis Purwanto, SCJ', 'Adhigama Sentosa', '2011', 1, 1, '2026-01-20 23:45:31', '2026-01-20 23:45:31'),
+(44, '002.510.1.Sup.S', 'Statistika dan Sistem Informasi untuk Pimpinan', 'J. Supranto', 'Jakarta, Erlangga', '1992', 1, 1, '2026-01-20 23:45:31', '2026-01-21 00:04:19'),
+(45, '003.1.1.Pur.D', 'Data Akurat? (Olah Data, Analisis dan Pelaporan Menuju Pastoral Terencana)', 'Francis Purwanto, SCJ', 'Adhigama Sentosa', '2012', 3, 3, '2026-01-20 23:45:31', '2026-01-21 00:31:12');
 
 -- --------------------------------------------------------
 
@@ -495,7 +511,13 @@ INSERT INTO `pembayaran_denda_detail` (`id`, `pengembalian_id`, `tanggal_bayar`,
 (2, 5, '2026-01-20', 7000, 'tagihan_studi', '', '2026-01-20 01:39:04'),
 (3, 7, '2026-01-21', 8000, 'cash', '', '2026-01-20 23:21:02'),
 (4, 8, '2026-01-21', 3000, 'tagihan_studi', '', '2026-01-20 23:21:44'),
-(5, 10, '2026-01-21', 5000, 'cash', '', '2026-01-20 23:24:37');
+(5, 10, '2026-01-21', 5000, 'cash', '', '2026-01-20 23:24:37'),
+(6, 10, '2026-01-21', 3000, 'cash', '', '2026-01-20 23:59:06'),
+(7, 11, '2026-01-21', 13000, 'cash', '', '2026-01-21 00:30:54'),
+(8, 12, '2026-01-21', 13000, 'cash', '', '2026-01-21 00:31:12'),
+(9, 13, '2026-01-21', 12000, 'cash', '', '2026-01-21 00:34:49'),
+(10, 14, '2026-01-21', 10000, 'cash', '', '2026-01-21 00:35:32'),
+(11, 14, '2026-01-21', 3000, 'cash', '', '2026-01-21 00:38:59');
 
 -- --------------------------------------------------------
 
@@ -535,7 +557,13 @@ INSERT INTO `peminjaman` (`id`, `kode_peminjaman`, `jenis_peminjam`, `peminjam_i
 (14, 'PJM202601215761', 'mahasiswa', 104, 10, '2026-01-20', '2026-01-27', NULL, 'dipinjam', 0, '2026-01-20 23:15:18', '2026-01-20 23:15:18'),
 (15, 'PJM202601216483', 'mahasiswa', 223, 14, '2026-01-14', '2026-01-28', NULL, 'diperpanjang', 0, '2026-01-20 23:16:23', '2026-01-20 23:18:17'),
 (16, 'PJM202601216199', 'mahasiswa', 1, 16, '2026-01-07', '2026-01-14', '2026-01-21', 'dikembalikan', 7000, '2026-01-20 23:22:23', '2026-01-20 23:22:56'),
-(17, 'PJM202601216136', 'mahasiswa', 186, 16, '2026-01-06', '2026-01-13', '2026-01-21', 'dikembalikan', 8000, '2026-01-20 23:24:05', '2026-01-20 23:24:37');
+(17, 'PJM202601216136', 'mahasiswa', 186, 16, '2026-01-06', '2026-01-13', '2026-01-21', 'dikembalikan', 8000, '2026-01-20 23:24:05', '2026-01-20 23:24:37'),
+(18, 'PJM202601216777', 'mahasiswa', 1, 23, '2026-01-01', '2026-01-08', '2026-01-21', 'dikembalikan', 13000, '2026-01-21 00:04:51', '2026-01-21 00:30:54'),
+(19, 'PJM202601216598', 'mahasiswa', 1, 45, '2026-01-01', '2026-01-08', '2026-01-21', 'dikembalikan', 13000, '2026-01-21 00:04:51', '2026-01-21 00:31:12'),
+(20, 'PJM202601215482', 'mahasiswa', 222, 35, '2026-01-02', '2026-01-09', '2026-01-21', 'dikembalikan', 12000, '2026-01-21 00:33:19', '2026-01-21 00:34:49'),
+(21, 'PJM202601219271', 'mahasiswa', 222, 23, '2026-01-01', '2026-01-08', '2026-01-21', 'dikembalikan', 13000, '2026-01-21 00:35:12', '2026-01-21 00:35:32'),
+(22, 'PJM202601219579', 'mahasiswa', 50, 35, '2026-01-21', '2026-01-28', NULL, 'dipinjam', 0, '2026-01-21 01:12:39', '2026-01-21 01:12:39'),
+(23, 'PJM202601218564', 'mahasiswa', 246, 23, '2026-01-01', '2026-01-08', NULL, 'terlambat', 0, '2026-01-21 01:12:54', '2026-01-21 01:12:54');
 
 -- --------------------------------------------------------
 
@@ -552,6 +580,8 @@ CREATE TABLE `pengembalian` (
   `denda_dibayar` int(11) DEFAULT 0,
   `uang_kembali` int(11) DEFAULT 0,
   `sisa_denda` int(11) DEFAULT 0,
+  `nomor_bukti` varchar(50) DEFAULT NULL,
+  `tanggal_lunas` datetime DEFAULT NULL,
   `metode_pembayaran` enum('cash','transfer','tagihan_studi','waive') DEFAULT 'cash',
   `keterangan` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -561,17 +591,21 @@ CREATE TABLE `pengembalian` (
 -- Dumping data untuk tabel `pengembalian`
 --
 
-INSERT INTO `pengembalian` (`id`, `peminjaman_id`, `tanggal_kembali`, `keterlambatan_hari`, `denda`, `denda_dibayar`, `uang_kembali`, `sisa_denda`, `metode_pembayaran`, `keterangan`, `created_at`) VALUES
-(1, 6, '2026-01-20', 0, 0, 0, 0, 0, 'cash', '', '2026-01-20 00:22:19'),
-(2, 5, '2026-01-20', 2, 2000, 2000, 0, 0, 'cash', '', '2026-01-20 00:22:34'),
-(3, 7, '2026-01-20', 7, 7000, 0, 0, 0, 'waive', 'Bencana Alam', '2026-01-20 00:26:12'),
-(4, 10, '2026-01-20', 0, 0, 0, 0, 0, 'cash', '', '2026-01-20 01:17:33'),
-(5, 9, '2026-01-20', 7, 7000, 7000, 0, 0, 'tagihan_studi', '', '2026-01-20 01:39:04'),
-(6, 4, '2026-01-21', 0, 0, 0, 0, 0, 'cash', '', '2026-01-20 23:19:27'),
-(7, 8, '2026-01-21', 8, 8000, 8000, 0, 0, 'cash', '', '2026-01-20 23:21:02'),
-(8, 11, '2026-01-21', 3, 3000, 3000, 0, 0, 'tagihan_studi', '', '2026-01-20 23:21:44'),
-(9, 16, '2026-01-21', 7, 7000, 0, 0, 0, 'waive', 'KEDUKAAN', '2026-01-20 23:22:56'),
-(10, 17, '2026-01-21', 8, 8000, 5000, 0, 3000, 'cash', '', '2026-01-20 23:24:37');
+INSERT INTO `pengembalian` (`id`, `peminjaman_id`, `tanggal_kembali`, `keterlambatan_hari`, `denda`, `denda_dibayar`, `uang_kembali`, `sisa_denda`, `nomor_bukti`, `tanggal_lunas`, `metode_pembayaran`, `keterangan`, `created_at`) VALUES
+(1, 6, '2026-01-20', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 00:22:19'),
+(2, 5, '2026-01-20', 2, 2000, 2000, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 00:22:34'),
+(3, 7, '2026-01-20', 7, 7000, 0, 0, 0, NULL, NULL, 'waive', 'Bencana Alam', '2026-01-20 00:26:12'),
+(4, 10, '2026-01-20', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 01:17:33'),
+(5, 9, '2026-01-20', 7, 7000, 7000, 0, 0, NULL, NULL, 'tagihan_studi', '', '2026-01-20 01:39:04'),
+(6, 4, '2026-01-21', 0, 0, 0, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 23:19:27'),
+(7, 8, '2026-01-21', 8, 8000, 8000, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 23:21:02'),
+(8, 11, '2026-01-21', 3, 3000, 3000, 0, 0, NULL, NULL, 'tagihan_studi', '', '2026-01-20 23:21:44'),
+(9, 16, '2026-01-21', 7, 7000, 0, 0, 0, NULL, NULL, 'waive', 'KEDUKAAN', '2026-01-20 23:22:56'),
+(10, 17, '2026-01-21', 8, 8000, 8000, 0, 0, NULL, NULL, 'cash', '', '2026-01-20 23:24:37'),
+(11, 18, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-001/I/2026', '2026-01-21 07:30:54', 'cash', '', '2026-01-21 00:30:54'),
+(12, 19, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-002/I/2026', '2026-01-21 07:31:12', 'cash', '', '2026-01-21 00:31:12'),
+(13, 20, '2026-01-21', 12, 12000, 12000, 0, 0, 'BP-DENDA-003/I/2026', '2026-01-21 07:34:49', 'cash', '', '2026-01-21 00:34:49'),
+(14, 21, '2026-01-21', 13, 13000, 13000, 0, 0, 'BP-DENDA-001/I/2026', '2026-01-21 07:38:59', 'cash', '', '2026-01-21 00:35:32');
 
 -- --------------------------------------------------------
 
@@ -688,7 +722,8 @@ ALTER TABLE `peminjaman`
 --
 ALTER TABLE `pengembalian`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `peminjaman_id` (`peminjaman_id`);
+  ADD KEY `peminjaman_id` (`peminjaman_id`),
+  ADD KEY `idx_nomor_bukti` (`nomor_bukti`);
 
 --
 -- Indeks untuk tabel `perpanjangan`
@@ -725,7 +760,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT untuk tabel `buku`
 --
 ALTER TABLE `buku`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT untuk tabel `dosen`
@@ -749,19 +784,19 @@ ALTER TABLE `nomor_surat_counter`
 -- AUTO_INCREMENT untuk tabel `pembayaran_denda_detail`
 --
 ALTER TABLE `pembayaran_denda_detail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT untuk tabel `peminjaman`
 --
 ALTER TABLE `peminjaman`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengembalian`
 --
 ALTER TABLE `pengembalian`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT untuk tabel `perpanjangan`

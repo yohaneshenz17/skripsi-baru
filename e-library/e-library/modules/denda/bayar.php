@@ -7,7 +7,10 @@ requireLogin();
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Get data pengembalian dengan sisa denda
-$query = "SELECT pg.*, p.kode_peminjaman, p.jenis_peminjam, p.peminjam_id, 
+$query = "SELECT pg.id, pg.peminjaman_id, pg.tanggal_kembali, pg.keterlambatan_hari, 
+          pg.denda, pg.denda_dibayar, pg.uang_kembali, pg.sisa_denda, 
+          pg.metode_pembayaran, pg.keterangan, pg.created_at, pg.nomor_bukti, pg.tanggal_lunas,
+          p.kode_peminjaman, p.jenis_peminjam, p.peminjam_id, 
           b.judul, b.nomor_buku
           FROM pengembalian pg
           JOIN peminjaman p ON pg.peminjaman_id = p.id
@@ -16,15 +19,40 @@ $query = "SELECT pg.*, p.kode_peminjaman, p.jenis_peminjam, p.peminjam_id,
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $id);
 $stmt->execute();
-$result = $stmt->get_result();
+$stmt->bind_result(
+    $pg_id, $pg_peminjaman_id, $pg_tanggal_kembali, $pg_keterlambatan_hari, 
+    $pg_denda, $pg_denda_dibayar, $pg_uang_kembali, $pg_sisa_denda, 
+    $pg_metode_pembayaran, $pg_keterangan, $pg_created_at, $pg_nomor_bukti, $pg_tanggal_lunas,
+    $kode_peminjaman, $jenis_peminjam, $peminjam_id, $judul, $nomor_buku
+);
 
-if ($result->num_rows === 0) {
+if (!$stmt->fetch()) {
+    $stmt->close();
     setAlert('danger', 'Data tidak ditemukan atau denda sudah lunas!');
     header('Location: index.php');
     exit;
 }
 
-$data = $result->fetch_assoc();
+$data = [
+    'id' => $pg_id,
+    'peminjaman_id' => $pg_peminjaman_id,
+    'tanggal_kembali' => $pg_tanggal_kembali,
+    'keterlambatan_hari' => $pg_keterlambatan_hari,
+    'denda' => $pg_denda,
+    'denda_dibayar' => $pg_denda_dibayar,
+    'uang_kembali' => $pg_uang_kembali,
+    'sisa_denda' => $pg_sisa_denda,
+    'metode_pembayaran' => $pg_metode_pembayaran,
+    'keterangan' => $pg_keterangan,
+    'created_at' => $pg_created_at,
+    'nomor_bukti' => $pg_nomor_bukti,
+    'tanggal_lunas' => $pg_tanggal_lunas,
+    'kode_peminjaman' => $kode_peminjaman,
+    'jenis_peminjam' => $jenis_peminjam,
+    'peminjam_id' => $peminjam_id,
+    'judul' => $judul,
+    'nomor_buku' => $nomor_buku
+];
 $stmt->close();
 
 // Get nama peminjam
@@ -32,12 +60,26 @@ $nama_peminjam = getNamaPeminjam($conn, $data['jenis_peminjam'], $data['peminjam
 $identifier = getIdentifierPeminjam($conn, $data['jenis_peminjam'], $data['peminjam_id']);
 
 // Get riwayat pembayaran denda
-$query_detail = "SELECT * FROM pembayaran_denda_detail WHERE pengembalian_id = ? ORDER BY created_at DESC";
-$stmt = $conn->prepare($query_detail);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result_detail = $stmt->get_result();
-$stmt->close();
+$query_detail = "SELECT id, pengembalian_id, tanggal_bayar, nominal, metode_pembayaran, keterangan, created_at 
+                 FROM pembayaran_denda_detail WHERE pengembalian_id = ? ORDER BY created_at DESC";
+$stmt_detail = $conn->prepare($query_detail);
+$stmt_detail->bind_param("i", $id);
+$stmt_detail->execute();
+$stmt_detail->bind_result($det_id, $det_pengembalian_id, $det_tanggal_bayar, $det_nominal, $det_metode, $det_keterangan, $det_created_at);
+
+$detail_bayar = [];
+while ($stmt_detail->fetch()) {
+    $detail_bayar[] = [
+        'id' => $det_id,
+        'pengembalian_id' => $det_pengembalian_id,
+        'tanggal_bayar' => $det_tanggal_bayar,
+        'nominal' => $det_nominal,
+        'metode_pembayaran' => $det_metode,
+        'keterangan' => $det_keterangan,
+        'created_at' => $det_created_at
+    ];
+}
+$stmt_detail->close();
 
 // Process pembayaran
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -87,15 +129,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute();
         $stmt->close();
         
-        // 2. Update tabel pengembalian
+        // 2. Generate nomor bukti jika LUNAS
+        $nomor_bukti = null;
+        $tanggal_lunas_val = null;
+        
+        if ($sisa_denda_baru == 0) {
+            // Generate nomor bukti format: BP-DENDA/XXX/MM/YYYY
+            $tahun = date('Y');
+            $bulan = date('n');
+            $bulan_romawi = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+            
+            // Get last number
+            $query_last = "SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(nomor_bukti, '/', 1), '-', -1) AS UNSIGNED)) as last_number 
+                          FROM pengembalian 
+                          WHERE nomor_bukti LIKE 'BP-DENDA/%' AND YEAR(tanggal_lunas) = ?";
+            $stmt_last = $conn->prepare($query_last);
+            $stmt_last->bind_param("i", $tahun);
+            $stmt_last->execute();
+            $stmt_last->bind_result($last_number);
+            $stmt_last->fetch();
+            $stmt_last->close();
+            
+            $next_number = str_pad(($last_number ?? 0) + 1, 3, '0', STR_PAD_LEFT);
+            $nomor_bukti = "BP-DENDA-{$next_number}/{$bulan_romawi[$bulan]}/{$tahun}";
+            $tanggal_lunas_val = date('Y-m-d H:i:s');
+        }
+        
+        // 3. Update tabel pengembalian
         $denda_dibayar_total = $data['denda_dibayar'] + $nominal_bayar;
         $uang_kembali_total = $data['uang_kembali'] + $uang_kembali;
         
         $query = "UPDATE pengembalian 
-                  SET denda_dibayar = ?, uang_kembali = ?, sisa_denda = ? 
+                  SET denda_dibayar = ?, uang_kembali = ?, sisa_denda = ?, nomor_bukti = ?, tanggal_lunas = ? 
                   WHERE id = ?";
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("iiii", $denda_dibayar_total, $uang_kembali_total, $sisa_denda_baru, $id);
+        $stmt->bind_param("iiissi", $denda_dibayar_total, $uang_kembali_total, $sisa_denda_baru, $nomor_bukti, $tanggal_lunas_val, $id);
         $stmt->execute();
         $stmt->close();
         
@@ -105,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Success message
         $msg = 'Pembayaran denda berhasil dicatat!';
         if ($sisa_denda_baru == 0) {
-            $msg .= ' Denda sudah LUNAS.';
+            $msg .= ' Denda sudah LUNAS. <a href="cetak_bukti.php?id=' . $id . '" target="_blank" class="alert-link">Download Bukti Pembayaran</a>';
         } else {
             $msg .= ' Sisa denda: ' . formatRupiah($sisa_denda_baru);
         }

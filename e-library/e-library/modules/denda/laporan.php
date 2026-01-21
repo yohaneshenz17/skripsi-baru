@@ -353,7 +353,7 @@ $periode_text = $nama_bulan[str_pad($bulan, 2, '0', STR_PAD_LEFT)] . ' ' . $tahu
             </li>
             <li class="nav-item">
                 <a class="nav-link active" href="<?= BASE_URL ?>modules/denda/index.php">
-                    <i class="bi bi-cash-stack"></i>Denda
+                    <i class="bi bi-cash-stack"></i>Manajemen Denda
                 </a>
             </li>
             <li class="sidebar-heading">LAPORAN & UTILITAS</li>

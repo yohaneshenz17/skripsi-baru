@@ -47,12 +47,51 @@ function hitungDendaBerjalan($conn) {
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'belum_lunas';
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-// Query denda
-$query = "SELECT pg.*, p.kode_peminjaman, p.jenis_peminjam, p.peminjam_id, p.tanggal_pinjam, 
+// TAMBAHKAN INI (PAGINATION) ↓↓↓
+// Pagination
+$records_per_page = 20;
+$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$offset = ($page - 1) * $records_per_page;
+// SAMPAI SINI ↑↑↑
+
+// Count total records untuk pagination
+$count_query = "SELECT COUNT(DISTINCT pg.id) as total
+                FROM pengembalian pg
+                JOIN peminjaman p ON pg.peminjaman_id = p.id
+                JOIN buku b ON p.buku_id = b.id
+                LEFT JOIN mahasiswa m ON (p.jenis_peminjam = 'mahasiswa' AND p.peminjam_id = m.id)
+                LEFT JOIN dosen d ON (p.jenis_peminjam = 'dosen' AND p.peminjam_id = d.id)
+                WHERE pg.denda > 0";
+
+if ($status_filter == 'belum_lunas') {
+    $count_query .= " AND pg.sisa_denda > 0";
+} elseif ($status_filter == 'lunas') {
+    $count_query .= " AND pg.sisa_denda = 0";
+}
+
+if (!empty($search)) {
+    $count_query .= " AND (p.kode_peminjaman LIKE '%" . $conn->real_escape_string($search) . "%' 
+                    OR b.judul LIKE '%" . $conn->real_escape_string($search) . "%'
+                    OR m.nama LIKE '%" . $conn->real_escape_string($search) . "%'
+                    OR d.nama LIKE '%" . $conn->real_escape_string($search) . "%')";
+}
+
+$count_result = $conn->query($count_query);
+$total_records = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_records / $records_per_page);
+
+// Query data dengan pagination
+$query = "SELECT pg.id, pg.peminjaman_id, pg.tanggal_kembali, pg.keterlambatan_hari, 
+          pg.denda, pg.denda_dibayar, pg.uang_kembali, pg.sisa_denda, 
+          pg.metode_pembayaran, pg.keterangan, pg.created_at, 
+          pg.nomor_bukti, pg.tanggal_lunas,
+          p.kode_peminjaman, p.jenis_peminjam, p.peminjam_id, p.tanggal_pinjam, 
           p.tanggal_jatuh_tempo, b.judul, b.nomor_buku
           FROM pengembalian pg
           JOIN peminjaman p ON pg.peminjaman_id = p.id
           JOIN buku b ON p.buku_id = b.id
+          LEFT JOIN mahasiswa m ON (p.jenis_peminjam = 'mahasiswa' AND p.peminjam_id = m.id)
+          LEFT JOIN dosen d ON (p.jenis_peminjam = 'dosen' AND p.peminjam_id = d.id)
           WHERE pg.denda > 0";
 
 if ($status_filter == 'belum_lunas') {
@@ -63,10 +102,12 @@ if ($status_filter == 'belum_lunas') {
 
 if (!empty($search)) {
     $query .= " AND (p.kode_peminjaman LIKE '%" . $conn->real_escape_string($search) . "%' 
-                OR b.judul LIKE '%" . $conn->real_escape_string($search) . "%')";
+                OR b.judul LIKE '%" . $conn->real_escape_string($search) . "%'
+                OR m.nama LIKE '%" . $conn->real_escape_string($search) . "%'
+                OR d.nama LIKE '%" . $conn->real_escape_string($search) . "%')";
 }
 
-$query .= " ORDER BY pg.created_at DESC";
+$query .= " ORDER BY pg.created_at DESC LIMIT $records_per_page OFFSET $offset";
 $result = $conn->query($query);
 
 // Statistik denda
@@ -476,8 +517,7 @@ $total_exposure = $denda_berjalan['total_denda'] + $stats['total_sisa'];
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Cari</label>
-                        <input type="text" name="search" class="form-control" 
-                               placeholder="Kode peminjaman atau judul buku..." value="<?= htmlspecialchars($search) ?>">
+                        <input type="text" class="form-control" name="search" placeholder="Cari: kode peminjaman, judul buku, atau nama peminjam..." value="<?= htmlspecialchars($search) ?>">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">&nbsp;</label>
@@ -502,15 +542,16 @@ $total_exposure = $denda_berjalan['total_denda'] + $stats['total_sisa'];
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th width="4%">NO</th>
-                                <th width="10%">KODE</th>
-                                <th width="16%">PEMINJAM</th>
-                                <th width="16%">BUKU</th>
-                                <th width="10%">TGL KEMBALI</th>
-                                <th width="7%">TERLAMBAT</th>
-                                <th width="10%">DENDA</th>
-                                <th width="10%">DIBAYAR</th>
-                                <th width="10%">SISA</th>
+                                <th width="3%">NO</th>
+                                <th width="9%">KODE</th>
+                                <th width="14%">PEMINJAM</th>
+                                <th width="14%">BUKU</th>
+                                <th width="9%">TGL KEMBALI</th>
+                                <th width="6%">TERLAMBAT</th>
+                                <th width="9%">DENDA</th>
+                                <th width="9%">DIBAYAR</th>
+                                <th width="8%">SISA</th>
+                                <th width="12%">NOMOR BUKTI</th>
                                 <th width="7%">AKSI</th>
                             </tr>
                         </thead>
@@ -549,9 +590,24 @@ $total_exposure = $denda_berjalan['total_denda'] + $stats['total_sisa'];
                                 </td>
                                 <td>
                                     <?php if ($row['sisa_denda'] > 0): ?>
-                                        <strong class="text-warning"><?= formatRupiah($row['sisa_denda']) ?></strong>
+                                        <span class="badge bg-danger"><?= formatRupiah($row['sisa_denda']) ?></span>
                                     <?php else: ?>
                                         <span class="badge bg-success">LUNAS</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($row['sisa_denda'] == 0 && !empty($row['nomor_bukti'])): ?>
+                                        <div class="d-flex flex-column gap-1">
+                                            <small class="text-primary fw-bold">
+                                                <i class="bi bi-file-earmark-check"></i>
+                                                <?= $row['nomor_bukti'] ?>
+                                            </small>
+                                            <small class="text-muted">
+                                                <?= date('d/m/Y H:i', strtotime($row['tanggal_lunas'])) ?>
+                                            </small>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -559,9 +615,13 @@ $total_exposure = $denda_berjalan['total_denda'] + $stats['total_sisa'];
                                         <a href="bayar.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning" title="Bayar Denda">
                                             <i class="bi bi-cash"></i> Bayar
                                         </a>
+                                    <?php elseif (!empty($row['nomor_bukti'])): ?>
+                                        <a href="cetak_bukti.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-success" title="Cetak Bukti Pembayaran" target="_blank">
+                                            <i class="bi bi-printer"></i> Cetak Bukti
+                                        </a>
                                     <?php else: ?>
-                                        <button class="btn btn-sm btn-secondary" disabled>
-                                            <i class="bi bi-check-circle"></i> Lunas
+                                        <button class="btn btn-sm btn-secondary" disabled title="Bukti tidak tersedia (data lama)">
+                                            <i class="bi bi-x-circle"></i> N/A
                                         </button>
                                     <?php endif; ?>
                                 </td>
@@ -581,6 +641,69 @@ $total_exposure = $denda_berjalan['total_denda'] + $stats['total_sisa'];
                     </table>
                 </div>
             </div>
+                            <!-- Pagination -->
+                <?php if ($total_pages > 1): ?>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">
+                                Menampilkan <?= min($offset + 1, $total_records) ?> - <?= min($offset + $records_per_page, $total_records) ?> 
+                                dari <?= $total_records ?> data
+                            </small>
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <!-- Previous -->
+                                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                    <a class="page-link" href="?status=<?= $status_filter ?>&search=<?= urlencode($search) ?>&page=<?= $page-1 ?>">
+                                        <i class="bi bi-chevron-left"></i> Prev
+                                    </a>
+                                </li>
+                                
+                                <!-- Page Numbers -->
+                                <?php 
+                                $start_page = max(1, $page - 2);
+                                $end_page = min($total_pages, $page + 2);
+                                
+                                if ($start_page > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?status=<?= $status_filter ?>&search=<?= urlencode($search) ?>&page=1">1</a>
+                                    </li>
+                                    <?php if ($start_page > 2): ?>
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                
+                                <?php for($i = $start_page; $i <= $end_page; $i++): ?>
+                                    <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
+                                        <a class="page-link" href="?status=<?= $status_filter ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>">
+                                            <?= $i ?>
+                                        </a>
+                                    </li>
+                                <?php endfor; ?>
+                                
+                                <?php if ($end_page < $total_pages): ?>
+                                    <?php if ($end_page < $total_pages - 1): ?>
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    <?php endif; ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?status=<?= $status_filter ?>&search=<?= urlencode($search) ?>&page=<?= $total_pages ?>">
+                                            <?= $total_pages ?>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+                                
+                                <!-- Next -->
+                                <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                                    <a class="page-link" href="?status=<?= $status_filter ?>&search=<?= urlencode($search) ?>&page=<?= $page+1 ?>">
+                                        Next <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <?php endif; ?>
         </div>
     </main>
 

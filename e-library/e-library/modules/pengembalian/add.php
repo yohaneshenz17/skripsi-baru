@@ -98,17 +98,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Start transaction
+    // Generate nomor bukti jika LUNAS
+    $nomor_bukti = null;
+    $tanggal_lunas_val = null;
+    
+    if ($sisa_denda == 0 && $total_denda > 0) {
+        // Generate nomor bukti format: BP-DENDA/XXX/MM/YYYY
+        $tahun = date('Y');
+        $bulan = date('n');
+        $bulan_romawi = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+        
+        // Get last number
+        $query_last = "SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(nomor_bukti, '/', 1), '-', -1) AS UNSIGNED)) as last_number 
+                      FROM pengembalian 
+                      WHERE nomor_bukti LIKE 'BP-DENDA-%' AND YEAR(tanggal_lunas) = ?";
+        $stmt_last = $conn->prepare($query_last);
+        $stmt_last->bind_param("i", $tahun);
+        $stmt_last->execute();
+        $stmt_last->bind_result($last_number);
+        $stmt_last->fetch();
+        $stmt_last->close();
+        
+        $next_number = str_pad(($last_number ?? 0) + 1, 3, '0', STR_PAD_LEFT);
+        $nomor_bukti = "BP-DENDA-{$next_number}/{$bulan_romawi[$bulan]}/{$tahun}";
+        $tanggal_lunas_val = date('Y-m-d H:i:s');
+    }
+    
+    // Start transaction
     $conn->begin_transaction();
     
     try {
         // 1. Insert ke tabel pengembalian
         $query = "INSERT INTO pengembalian 
                   (peminjaman_id, tanggal_kembali, keterlambatan_hari, denda, denda_dibayar, 
-                   uang_kembali, sisa_denda, metode_pembayaran, keterangan) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                   uang_kembali, sisa_denda, metode_pembayaran, keterangan, nomor_bukti, tanggal_lunas) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("isiiiisss", $id, $tanggal_kembali, $keterlambatan_hari, $total_denda, 
-                          $denda_dibayar, $uang_kembali, $sisa_denda, $metode_pembayaran, $keterangan);
+        $stmt->bind_param("isiiiisssss", $id, $tanggal_kembali, $keterlambatan_hari, $total_denda, 
+                          $denda_dibayar, $uang_kembali, $sisa_denda, $metode_pembayaran, $keterangan, 
+                          $nomor_bukti, $tanggal_lunas_val);
         $stmt->execute();
         $pengembalian_id = $conn->insert_id;
         $stmt->close();

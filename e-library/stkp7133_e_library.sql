@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Waktu pembuatan: 26 Jan 2026 pada 15.32
+-- Waktu pembuatan: 27 Jan 2026 pada 06.25
 -- Versi server: 10.3.39-MariaDB-cll-lve
 -- Versi PHP: 8.1.34
 
@@ -165,7 +165,7 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (98, '150.71.51.Ham.P', 'Psikologi Sosial', 'Dr. Bambang Syamsul Arifin, M.Si', 'Pustaka Setia Bandung', '2015', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (99, '150.72.1. Azw.P', 'Penyusunan Skala Psikologi', 'Dr. Saifuddin Azwar. M.A', 'Pustaka Pelajar', '2011', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (100, '150.360. Baw. P', 'Pengantar Psychologi Kriminal', 'Drs. Gerson W. Bawengan, SH', 'PT. Pradnya Pramita', '1974', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
-(101, '152.3.1. Rog. W', '\"WAJAHKU PRIBADIKU\" Mengenal 16 Tipe Kepribadian Lewat Wajah', 'Mary Rebecca \'Rivkha\' E. Rogacion, RGS', 'Yogyakarta, Kanisius', '2012', 54, 54, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
+(101, '152.3.1. Rog. W', '\"WAJAHKU PRIBADIKU\" Mengenal 16 Tipe Kepribadian Lewat Wajah', 'Mary Rebecca \'Rivkha\' E. Rogacion, RGS', 'Yogyakarta, Kanisius', '2012', 54, 54, '2026-01-24 13:19:39', '2026-01-26 10:22:58'),
 (102, '152.3.2.San. M', 'Manajemen Bimbingan dan Konseling Komprehensif', 'Fajar Santoadi', 'Yogyakarta, Universitas Sanata Dharma', '2010', 19, 19, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (103, '152.3.3.Ekm.M', 'Membaca Emosi Orang', 'Paul Ekman', 'Think  Jogjakarta', '2013', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (104, '152.3.4.Yan.P', 'Pintar Membaca Bahasa Wajah dan Tubuh Istri Ragam Cara Suami Mdembahagiakan Istri', 'Yanuar A.', 'Diva Press', '2014', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
@@ -803,7 +803,7 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (734, '248.16.4. Low.T', 'Tanya Jawab Tentang Iman Hukum dan Praktek Hidup Katolik', 'Daniel L. Lowery, CSsR', 'Yogyakarta, Kanisius', '2006', 30, 30, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (735, '248.18.3. Mel. A', 'Awareness Butir-Butir Mutiara Pencerahan', 'Anthony de Mello, SJ', 'Gramedia Pustaka Utama', '1998', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (736, '248.18.7 Arn.F', 'Freedom From Sinful Thoughts', 'J. Heinrich Arnold', 'Yogyakarta, Kanisius', '2007', 2, 2, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
-(737, '248.19.1. Bee.100', '100 Renungan Singkat untuk Anak-anak', 'V. Gilbert Beers', 'Yayasan Kalam Hidup', '2000', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
+(737, '248.19.1. Bee.100', '100 Renungan Singkat untuk Anak-anak', 'V. Gilbert Beers', 'Yayasan Kalam Hidup', '2000', 1, 1, '2026-01-24 13:19:39', '2026-01-26 23:00:09'),
 (738, '248.19.3.Mon.22', '22 Metode Renungan', 'A.M. Mangunhardjana, S.J', 'Yogyakarta, Kanisius', '2007', 44, 44, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (739, '248.19.5. Pha.K', 'Kalau Kamu Makan Hamburger ( Renungan bagi kawula muda)', 'Benny Phang O.Carm', 'Dioma', '2005', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (740, '248.19.7. Mar.A', 'Allah, Bapa semua orang', 'E. Martasudjita, Pr', 'Yogyakarta, Kanisius', '2003', 2, 2, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
@@ -853,7 +853,7 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (784, '253.10.6. Soe. K', 'Kamu Adalah Saksiku Sebuah Pedoman Imam', 'Leo Soekoto, S.J', 'Para Wali Gereja Regio Jawa', '1985', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (785, '253.13.9.Cah. P.', 'Pastoral Gereja', 'Krispurwana Cahyadi, SJ', 'Yogyakarta, Kanisius', '2013', 9, 9, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (786, '253.17.2 Kwi.P', 'Pedoman Reksa Pastoral', 'KWI', 'Komisi Pendidikan, KWI', '2006', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
-(787, '253.82.1 Ban. 10', '10 Agenda Pastoral Trans-formatif', 'J.B. Banawiratma, SJ', 'Yogyakarta, Kanisius', '2006', 6, 6, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
+(787, '253.82.1 Ban. 10', '10 Agenda Pastoral Trans-formatif', 'J.B. Banawiratma, SJ', 'Yogyakarta, Kanisius', '2006', 6, 6, '2026-01-24 13:19:39', '2026-01-26 23:00:07'),
 (788, '253.981.1.Pur.R', 'Romo Mangun Iman Bagi Kaum Kecil', 'M. Purwatma, Pr., dkk', 'Yogyakarta, Kanisius', '2005', 2, 2, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (789, '254.02.1. Git.S', 'Seputar Dewan Paroki', 'St. Gitowiratmo, Pr.', 'Yogyakarta, Kanisius', '2011', 2, 2, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (790, '254.3.9.Pra.P', 'Panduan Tim Kerja Pewartaan Paroki', 'L. Prasetya, Pr.', 'Yogyakarta, Kanisius', '2011', 4, 4, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
@@ -891,7 +891,7 @@ INSERT INTO `buku` (`id`, `nomor_buku`, `judul`, `pengarang`, `penerbit`, `tahun
 (822, '259.031.4.Bat.C', 'Cinta adalah perbuatan, 9 prinsip mendidik anak secara sempurna', 'Phil Batchelor', 'Yogyakarta, Kanisius', '2003', 3, 3, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (823, '259.031.7.Aug.P', 'Pendampingan Kaum Muda', 'Sr. M.Augusta', 'Komisi Kepemudaan KWI', '1988', 1, 1, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (824, '259.1.5. Pa.K', 'Kamulah Sahabatku (pegangan pendampingan bina iman anak dan remaja misioner)', 'P. Patrisius Pa, SVD.dkk', 'Karya Kepausan Indonesia', '2007', 2, 2, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
-(825, '259.1.6. Kat.10', '10 Langkah Menjadi Remaja Pemimpin', 'Bina Iman Remaja Komisi Kateketik KAJ', 'Jakarta', '2003', 11, 11, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
+(825, '259.1.6. Kat.10', '10 Langkah Menjadi Remaja Pemimpin', 'Bina Iman Remaja Komisi Kateketik KAJ', 'Jakarta', '2003', 11, 11, '2026-01-24 13:19:39', '2026-01-26 10:22:56'),
 (826, '259.1.8.Sny.365', '365 Fakta Jenaka untuk Anak-Anak', 'Bernadette Mc Carver Snyder', 'Yogyakarta, Kanisius', '2010', 21, 21, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (827, '259.2.6. Kat.12', '12 Rahasia Tumbuh Bersama Orang Lain', 'Bina Iman Remaja Komisi Kateketik KAJ', 'Jakarta', '2003', 11, 11, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
 (828, '259.3.2. Kat. 15', '15 Pedoman Menjadi Katolik Oke!', 'Bina Iman Remaja Komisi Kateketik KAJ', 'Jakarta', '2003', 8, 8, '2026-01-24 13:19:39', '2026-01-24 13:19:39'),
@@ -1619,7 +1619,7 @@ ALTER TABLE `pembayaran_denda_detail`
 -- AUTO_INCREMENT untuk tabel `peminjaman`
 --
 ALTER TABLE `peminjaman`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengembalian`

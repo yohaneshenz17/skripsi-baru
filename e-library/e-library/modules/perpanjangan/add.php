@@ -72,7 +72,7 @@ $identifier = getIdentifierPeminjam($conn, $pinjam['jenis_peminjam'], $pinjam['p
 
 // Hitung jatuh tempo baru (jatuh tempo lama + 7 hari)
 $tgl_tempo_lama = $pinjam['tanggal_jatuh_tempo'];
-$tgl_tempo_baru = date('Y-m-d', strtotime($tgl_tempo_lama . ' +7 days'));
+$tgl_tempo_baru = date('Y-m-d', strtotime($tgl_tempo_lama . ' +14 days'));
 
 // Process perpanjangan
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -474,7 +474,7 @@ if ($hari_tersisa < 0) {
                                     <span class="badge bg-success">
                                         <?= formatTanggalIndo($tgl_tempo_baru) ?>
                                     </span>
-                                    <small class="text-muted ms-2">(+7 hari dari jatuh tempo lama)</small>
+                                    <small class="text-muted ms-2">(+14 hari dari jatuh tempo lama)</small>
                                 </td>
                             </tr>
                             <?php if ($denda > 0): ?>
@@ -527,7 +527,7 @@ if ($hari_tersisa < 0) {
                     </div>
                     <div class="card-body">
                         <ul class="mb-0">
-                            <li class="mb-2"><strong>Durasi Perpanjangan:</strong> 7 hari tambahan</li>
+                            <li class="mb-2"><strong>Durasi Perpanjangan:</strong> 14 hari tambahan</li>
                             <li class="mb-2"><strong>Maksimal Perpanjangan:</strong> 1 kali</li>
                             <li class="mb-2"><strong>Waktu Perpanjangan:</strong> H-1 sebelum jatuh tempo atau setelahnya</li>
                             <li><strong>Denda Keterlambatan:</strong> Rp 1.000 per hari</li>

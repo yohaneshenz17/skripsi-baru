@@ -16,9 +16,9 @@ $stmt->bind_result($buku_id, $status);
 if ($stmt->fetch()) {
     $stmt->close();
     
-    // Hanya bisa hapus peminjaman dengan status 'dipinjam'
-    if ($status !== 'dipinjam') {
-        setAlert('danger', 'Hanya peminjaman dengan status "Dipinjam" yang bisa dihapus!');
+    // Hanya bisa hapus peminjaman dengan status 'dipinjam atau terlambat'
+    if ($status !== 'dipinjam' && $status !== 'terlambat') {
+        setAlert('danger', 'Hanya peminjaman dengan status "Dipinjam atau Terlambat" yang bisa dihapus!');
         header('Location: index.php');
         exit;
     }

@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $success = true;
             $tanggal_pinjam = sanitize($_POST['tanggal_pinjam']); // Admin tentukan tanggal
-            $tanggal_jatuh_tempo = date('Y-m-d', strtotime($tanggal_pinjam . ' +7 days'));
+            $tanggal_jatuh_tempo = date('Y-m-d', strtotime($tanggal_pinjam . ' +14 days'));
             
             foreach ($buku_ids as $buku_id) {
                 // Cek stok
@@ -445,8 +445,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         Jatuh Tempo
                                     </label>
                                     <input type="text" class="form-control" id="tanggalJatuhTempo" 
-                                           value="<?= date('d M Y', strtotime('+7 days')) ?>" readonly>
-                                    <small class="text-muted">💡 Otomatis +7 hari dari tanggal peminjaman</small>
+                                           value="<?= date('d M Y', strtotime('+14 days')) ?>" readonly>
+                                    <small class="text-muted">💡 Otomatis +14 hari dari tanggal peminjaman</small>
                                 </div>
                             </div>
                             
@@ -510,10 +510,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         Informasi Peminjaman
                     </h5>
                     <ul>
-                        <li><strong>Durasi:</strong> 7 hari dari tanggal pinjam</li>
+                        <li><strong>Durasi:</strong> 14 hari dari tanggal pinjam</li>
                         <li><strong>Maksimal:</strong> 3 buku per peminjam</li>
                         <li><strong>Denda:</strong> Rp 1.000 per hari keterlambatan</li>
-                        <li><strong>Perpanjangan:</strong> Maksimal 1x (7 hari tambahan)</li>
+                        <li><strong>Perpanjangan:</strong> Maksimal 1x (14 hari tambahan)</li>
                         <li><strong>Stok:</strong> Hanya buku dengan stok tersedia yang bisa dipinjam</li>
                     </ul>
                 </div>
@@ -637,7 +637,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $('#tanggalPinjam').on('change', function() {
                 const tanggalPinjam = new Date($(this).val());
                 const tanggalJatuhTempo = new Date(tanggalPinjam);
-                tanggalJatuhTempo.setDate(tanggalJatuhTempo.getDate() + 7);
+                tanggalJatuhTempo.setDate(tanggalJatuhTempo.getDate() + 14);
                 
                 // Format tanggal Indonesia
                 const options = { day: 'numeric', month: 'short', year: 'numeric' };

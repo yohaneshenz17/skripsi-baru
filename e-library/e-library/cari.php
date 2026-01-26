@@ -136,7 +136,7 @@ if (isset($_GET['cek_id'])) {
     <div class="hero-section text-center">
         <div class="container">
             <img src="assets/images/stk.png" alt="Logo" height="60" class="mb-3 bg-white rounded-circle p-1">
-            <h1 class="fw-bold">E-Library STK Yakobus</h1>
+            <h1 class="fw-bold">E-Library STK St. Yakobus Merauke</h1>
             <p class="lead opacity-75">Katalog Publik & Cek Status Peminjaman Mandiri</p>
         </div>
     </div>
@@ -309,7 +309,7 @@ if (isset($_GET['cek_id'])) {
                 </div>
                 
                 <div class="text-center mt-4 text-muted small">
-                    &copy; <?= date('Y') ?> E-Library STK Santo Yakobus Merauke. <a href="index.php" class="text-decoration-none">Login Admin</a>
+                    &copy; <?= date('Y') ?> E-Library STK Santo Yakobus Merauke. Made with Love by SIPD. <a href="index.php" class="text-decoration-none">Login Admin</a>
                 </div>
             </div>
         </div>

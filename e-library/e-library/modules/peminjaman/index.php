@@ -399,7 +399,7 @@ function getSortIcon($col) {
                                         <a href="../pengembalian/add.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-success" title="Kembalikan">
                                             <i class="bi bi-arrow-return-left"></i>
                                         </a>
-                                        <?php if ($row['status'] == 'dipinjam'): ?>
+                                        <?php if ($row['status'] == 'dipinjam' || $row['status'] == 'terlambat'): ?>
                                         <a href="delete.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus peminjaman ini? Stok buku akan dikembalikan.')" title="Hapus">
                                             <i class="bi bi-trash"></i>
                                         </a>

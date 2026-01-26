@@ -376,10 +376,10 @@ function getSortIcon($col) {
             <i class="bi bi-info-circle-fill me-2"></i>
             <strong>Ketentuan Perpanjangan:</strong>
             <ul class="mb-0 mt-2">
-                <li>Perpanjangan hanya bisa dilakukan <strong>1 kali</strong> untuk <strong>7 hari tambahan</strong></li>
+                <li>Perpanjangan hanya bisa dilakukan <strong>1 kali</strong> untuk <strong>14 hari tambahan</strong></li>
                 <li>Perpanjangan dapat dilakukan mulai <strong>H-1 sebelum jatuh tempo</strong></li>
                 <li>Jika perpanjang <strong>setelah jatuh tempo</strong>, akan dikenakan <strong>denda Rp 1.000/hari</strong></li>
-                <li>Jatuh tempo baru dihitung dari <strong>tanggal jatuh tempo lama + 7 hari</strong></li>
+                <li>Jatuh tempo baru dihitung dari <strong>tanggal jatuh tempo lama + 14 hari</strong></li>
             </ul>
         </div>
 

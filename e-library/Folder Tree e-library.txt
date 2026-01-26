@@ -1,0 +1,47 @@
+e-library/
+├── .htaccess
+├── .htaccess_backup
+├── assets/
+│   ├── css/
+│   │   └── style.css
+│   └── images/
+│       └── stk.png
+├── cleanup_data.php
+├── modules/
+│   ├── backup/
+│   ├── buku/
+│   ├── denda/
+│   ├── dosen/
+│   │   ├── import.php
+│   │   └── template_csv.php
+│   ├── laporan/
+│   ├── mahasiswa/
+│   ├── peminjaman/
+│   ├── pengembalian/
+│   ├── perpanjangan/
+│   └── surat_keterangan/
+│       └── lib/
+│           ├── fpdf/
+│           │   ├── changelog.htm
+│           │   ├── doc/
+│           │   │   └── setxy.htm
+│           │   ├── font/
+│           │   │   └── zapfdingbats.php
+│           │   └── makefont/
+│           │       └── cp1252.map
+│           └── phpqrcode/
+│               ├── cache/
+│               │   ├── frame_1.dat
+│               │   ├── frame_1.png
+│               │   ├── frame_22.png
+│               │   └── (file cache lainnya...)
+│               ├── qrimage.php
+│               └── qrinput.php
+├── storage/
+│   └── bukti_denda/
+└── uploads/
+    ├── backup/
+    ├── dosen/
+    ├── excel/
+    ├── mahasiswa/
+    └── pdf/

@@ -1,7 +1,7 @@
 <?php
 /**
  * Generator PDF Bukti Pembayaran Denda
- * Format: BP-DENDA/XXX/MM/YYYY
+ * Format: A5 (Hemat Kertas) - Fixed Layout
  */
 
 require_once '../../config/database.php';
@@ -10,420 +10,317 @@ require_once '../surat_keterangan/lib/fpdf/fpdf.php';
 
 requireLogin();
 
-// Fungsi pembersih PDF lama (> 1 hari)
+// Fungsi pembersih PDF lama
 function bersihkanPDFLama($directory, $batas_hari = 1) {
-    if (!is_dir($directory)) {
-        return;
-    }
-    
-    $batas_usia_detik = $batas_hari * 24 * 3600;
-    $waktu_sekarang = time();
+    if (!is_dir($directory)) return;
     $files = glob($directory . '*.pdf');
-    
+    $now = time();
     foreach ($files as $file) {
-        if (is_file($file)) {
-            if (($waktu_sekarang - filemtime($file)) > $batas_usia_detik) {
-                @unlink($file);
-            }
+        if (is_file($file) && ($now - filemtime($file)) > ($batas_hari * 86400)) {
+            @unlink($file);
         }
     }
 }
 
-// Bersihkan PDF lama
+// Setup Folder
 $pdf_path = '../../storage/bukti_denda/';
-if (!file_exists($pdf_path)) {
-    mkdir($pdf_path, 0777, true);
-}
+if (!file_exists($pdf_path)) mkdir($pdf_path, 0777, true);
 bersihkanPDFLama($pdf_path, 1);
 
-// Get pengembalian ID
+// Get ID
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-if (!$id) {
-    die('ID tidak valid');
-}
-
-// Query data pengembalian - FIXED untuk PHP tanpa mysqlnd
-$query = "SELECT pg.*, p.kode_peminjaman, p.jenis_peminjam, p.peminjam_id, p.tanggal_pinjam,
-          b.judul, b.nomor_buku, b.pengarang
+// =================================================================================
+// 1. QUERY DATA LENGKAP (Termasuk Status Buku)
+// =================================================================================
+$query = "SELECT 
+            pg.id, 
+            pg.peminjaman_id, 
+            pg.tanggal_kembali, 
+            pg.keterlambatan_hari, 
+            pg.denda, 
+            pg.denda_dibayar, 
+            pg.uang_kembali, 
+            pg.sisa_denda, 
+            pg.metode_pembayaran, 
+            pg.keterangan, 
+            pg.created_at, 
+            pg.nomor_bukti, 
+            pg.tanggal_lunas,
+            pg.status_buku, 
+            pg.nominal_denda_buku,
+            
+            p.kode_peminjaman, 
+            b.judul, 
+            b.nomor_buku,
+            
+            m.nama as nama_mhs, m.nim, m.program_studi as prodi_mhs,
+            d.nama as nama_dosen, d.nuptk, d.program_studi as prodi_dosen,
+            p.jenis_peminjam
           FROM pengembalian pg
           JOIN peminjaman p ON pg.peminjaman_id = p.id
           JOIN buku b ON p.buku_id = b.id
-          WHERE pg.id = ? AND pg.sisa_denda = 0 AND pg.nomor_bukti IS NOT NULL";
+          LEFT JOIN mahasiswa m ON (p.peminjam_id = m.id AND p.jenis_peminjam = 'mahasiswa')
+          LEFT JOIN dosen d ON (p.peminjam_id = d.id AND p.jenis_peminjam = 'dosen')
+          WHERE pg.id = ?";
+
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $stmt->bind_result(
-    $pg_id, $pg_peminjaman_id, $pg_tanggal_kembali, $pg_keterlambatan_hari,
-    $pg_denda, $pg_denda_dibayar, $pg_uang_kembali, $pg_sisa_denda,
-    $pg_metode_pembayaran, $pg_keterangan, $pg_created_at, $pg_nomor_bukti, $pg_tanggal_lunas,
-    $kode_peminjaman, $jenis_peminjam, $peminjam_id, $tanggal_pinjam,
-    $judul, $nomor_buku, $pengarang
+    $id, 
+    $pjm_id, 
+    $tgl_kembali, 
+    $telat, 
+    $denda, 
+    $dibayar, 
+    $kembali, 
+    $sisa, 
+    $metode, 
+    $ket, 
+    $created, 
+    $no_bukti, 
+    $tgl_lunas,
+    $status_buku, 
+    $nom_denda_buku,
+    
+    $kode, 
+    $judul, 
+    $nomor_buku,
+    
+    $nama_mhs, $nim, $prodi_mhs,
+    $nama_dosen, $nuptk, $prodi_dosen,
+    $jenis
 );
 
-if (!$stmt->fetch()) {
-    $stmt->close();
-    die('Data tidak ditemukan atau denda belum lunas!');
-}
-
-$data = [
-    'id' => $pg_id,
-    'peminjaman_id' => $pg_peminjaman_id,
-    'tanggal_kembali' => $pg_tanggal_kembali,
-    'keterlambatan_hari' => $pg_keterlambatan_hari,
-    'denda' => $pg_denda,
-    'denda_dibayar' => $pg_denda_dibayar,
-    'uang_kembali' => $pg_uang_kembali,
-    'sisa_denda' => $pg_sisa_denda,
-    'metode_pembayaran' => $pg_metode_pembayaran,
-    'keterangan' => $pg_keterangan,
-    'nomor_bukti' => $pg_nomor_bukti,
-    'tanggal_lunas' => $pg_tanggal_lunas,
-    'kode_peminjaman' => $kode_peminjaman,
-    'jenis_peminjam' => $jenis_peminjam,
-    'peminjam_id' => $peminjam_id,
-    'tanggal_pinjam' => $tanggal_pinjam,
-    'judul' => $judul,
-    'nomor_buku' => $nomor_buku,
-    'pengarang' => $pengarang
-];
+if (!$stmt->fetch()) die("Data pembayaran tidak ditemukan.");
 $stmt->close();
 
-// Get data peminjam
-$nama_peminjam = getNamaPeminjam($conn, $data['jenis_peminjam'], $data['peminjam_id']);
-$identifier = getIdentifierPeminjam($conn, $data['jenis_peminjam'], $data['peminjam_id']);
-
-// Get detail info peminjam
-if ($data['jenis_peminjam'] == 'mahasiswa') {
-    $query = "SELECT nim, angkatan, program_studi FROM mahasiswa WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $data['peminjam_id']);
-    $stmt->execute();
-    $stmt->bind_result($nim, $angkatan, $prodi);
-    $stmt->fetch();
-    $stmt->close();
-    
-    $peminjam_detail = [
-        'label' => 'NIM',
-        'identifier' => $nim,
-        'angkatan' => $angkatan,
-        'unit' => $prodi
-    ];
+// Identitas Peminjam (FULL UPPERCASE)
+if ($jenis == 'mahasiswa') {
+    $nama_peminjam = strtoupper($nama_mhs);
+    $identitas = $nim;
+    $prodi = $prodi_mhs;
+    $tipe_user = "Mahasiswa";
 } else {
-    $query = "SELECT nip, jabatan FROM dosen WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $data['peminjam_id']);
-    $stmt->execute();
-    $stmt->bind_result($nip, $jabatan);
-    $stmt->fetch();
-    $stmt->close();
-    
-    $peminjam_detail = [
-        'label' => 'NIP',
-        'identifier' => $nip,
-        'angkatan' => '-',
-        'unit' => $jabatan
-    ];
+    $nama_peminjam = strtoupper($nama_dosen);
+    $identitas = $nuptk;
+    $prodi = $prodi_dosen;
+    $tipe_user = "Dosen";
 }
 
-// Get riwayat pembayaran - FIXED
-$query_detail = "SELECT tanggal_bayar, nominal, metode_pembayaran, keterangan 
-                 FROM pembayaran_denda_detail WHERE pengembalian_id = ? ORDER BY created_at ASC";
-$stmt_detail = $conn->prepare($query_detail);
-$stmt_detail->bind_param("i", $id);
-$stmt_detail->execute();
-$stmt_detail->bind_result($det_tanggal, $det_nominal, $det_metode, $det_keterangan);
+// Generate Nomor & Tanggal
+if (empty($no_bukti)) $no_bukti = 'BP/'.date('Y').'/'.str_pad($id, 4, '0', STR_PAD_LEFT);
+if (empty($tgl_lunas)) $tgl_lunas = $created;
 
-$riwayat_bayar = [];
-while ($stmt_detail->fetch()) {
-    $riwayat_bayar[] = [
-        'tanggal_bayar' => $det_tanggal,
-        'nominal' => $det_nominal,
-        'metode_pembayaran' => $det_metode,
-        'keterangan' => $det_keterangan
-    ];
-}
-$stmt_detail->close();
-
-// Extend FPDF
-class PDF_BuktiDenda extends FPDF {
-    
+// =================================================================================
+// 2. CLASS PDF (UKURAN A5)
+// =================================================================================
+class PDF extends FPDF {
     function Header() {
-        // Kosong
-    }
-    
-    function Footer() {
-        // Kosong
-    }
-    
-    function buatBukti($data, $peminjam_detail, $nama_peminjam, $riwayat_bayar) {
-        $start_y = 10;
-        $this->SetY($start_y);
-        
-        // --- LOGO ---
+        // Logo Kampus (stk.png)
         $path_logo = dirname(__FILE__) . '/../../assets/images/stk.png';
         if (file_exists($path_logo)) {
-            $this->Image($path_logo, 20, $start_y - 1, 17);
+            $this->Image($path_logo, 10, 8, 18); 
         }
+
+        // KOP TEKS
+        $this->SetFont('Arial','B',11);
+        $this->Cell(8); // Indent logo
+        $this->Cell(0,5,'PERPUSTAKAAN STK ST. YAKOBUS MERAUKE',0,1,'C');
         
-        // KOP SURAT
-        $this->SetFont('Arial', '', 8);
-        $this->SetX(15);
-        $this->Cell(0, 3, 'KEMENTERIAN PENDIDIKAN, KEBUDAYAAN, RISET, DAN TEKNOLOGI', 0, 1, 'C');
+        $this->SetFont('Arial','',8);
+        $this->Cell(8);
+        $this->Cell(0,4,'Jl. Missi 2, Mandala, Merauke, Papua Selatan',0,1,'C');
+        $this->Cell(8);
+        $this->Cell(0,4,'Website: stkyakobus.ac.id/e-library',0,1,'C');
         
-        $this->SetFont('Arial', '', 8);
-        $this->SetX(15);
-        $this->Cell(0, 3, 'YAYASAN PENDIDIKAN KATOLIK SANTO YAKOBUS MERAUKE', 0, 1, 'C');
+        // Garis Pembatas
+        $this->SetLineWidth(0.4);
+        $this->Line(10, 26, 138, 26);
+        $this->Ln(8);
         
-        $this->SetFont('Arial', 'B', 10);
-        $this->SetX(15);
-        $this->Cell(0, 4, 'SEKOLAH TINGGI KEGURUAN SANTO YAKOBUS MERAUKE', 0, 1, 'C');
-        
-        $this->SetFont('Arial', '', 7);
-        $this->SetX(15);
-        $this->Cell(0, 3, 'Jl. Dr. Soetomo Rimba Jaya Merauke 99615, Telp. (0971) 321512', 0, 1, 'C');
-        
-        $this->SetX(15);
-        $this->Cell(0, 3, 'Email: stkyakobus@gmail.com, Website: www.stkyakobus.ac.id', 0, 1, 'C');
-        
-        // Garis pemisah
-        $this->SetY($this->GetY() + 1);
-        $this->SetLineWidth(0.5);
-        $this->Line(15, $this->GetY(), 195, $this->GetY());
-        $this->SetLineWidth(0.2);
-        $this->Line(15, $this->GetY() + 0.5, 195, $this->GetY() + 0.5);
-        
-        $this->Ln(5);
-        
-        // JUDUL
-        $this->SetFont('Arial', 'B', 12);
-        $this->SetX(15);
-        $this->Cell(0, 5, 'BUKTI PEMBAYARAN DENDA PERPUSTAKAAN', 0, 1, 'C');
-        
-        $this->SetFont('Arial', '', 10);
-        $this->SetX(15);
-        $this->Cell(0, 4, 'No. ' . $data['nomor_bukti'], 0, 1, 'C');
-        
-        $this->Ln(5);
-        
-        // KOLOM KIRI & KANAN
-        $col1_width = 35;
-        $col2_width = 3;
-        $col3_width = 60;
-        
-        // --- DATA PEMINJAM ---
-        $this->SetFont('Arial', 'B', 10);
-        $this->SetX(15);
-        $this->Cell(0, 5, 'DATA PEMINJAM', 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Nama', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->SetFont('Arial', 'B', 9);
-        $this->Cell($col3_width, 4, strtoupper($nama_peminjam), 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, $peminjam_detail['label'], 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->SetFont('Arial', 'B', 9);
-        $this->Cell($col3_width, 4, $peminjam_detail['identifier'], 0, 1);
-        
-        if ($peminjam_detail['angkatan'] != '-') {
-            $this->SetFont('Arial', '', 9);
-            $this->SetX(15);
-            $this->Cell($col1_width, 4, 'Angkatan', 0, 0);
-            $this->Cell($col2_width, 4, ':', 0, 0);
-            $this->SetFont('Arial', '', 9);
-            $this->Cell($col3_width, 4, $peminjam_detail['angkatan'], 0, 1);
-        }
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, $peminjam_detail['angkatan'] != '-' ? 'Program Studi' : 'Jabatan', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->SetFont('Arial', '', 9);
-        $this->MultiCell($col3_width, 4, $peminjam_detail['unit'], 0, 'L');
-        
+        // Judul
+        $this->SetFont('Arial','B',11);
+        $this->Cell(0,5,'BUKTI PEMBAYARAN DENDA',0,1,'C');
         $this->Ln(3);
-        
-        // --- DATA PEMINJAMAN ---
-        $this->SetFont('Arial', 'B', 10);
-        $this->SetX(15);
-        $this->Cell(0, 5, 'DATA PEMINJAMAN', 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Kode Peminjaman', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->SetFont('Arial', 'B', 9);
-        $this->Cell($col3_width, 4, $data['kode_peminjaman'], 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Judul Buku', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->SetFont('Arial', '', 9);
-        $this->MultiCell($col3_width, 4, $data['judul'], 0, 'L');
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Pengarang', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->Cell($col3_width, 4, $data['pengarang'], 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Nomor Buku', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->Cell($col3_width, 4, $data['nomor_buku'], 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Tanggal Pinjam', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->Cell($col3_width, 4, date('d/m/Y', strtotime($data['tanggal_pinjam'])), 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Tanggal Kembali', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->Cell($col3_width, 4, date('d/m/Y', strtotime($data['tanggal_kembali'])), 0, 1);
-        
-        $this->Ln(3);
-        
-        // --- DETAIL DENDA ---
-        $this->SetFont('Arial', 'B', 10);
-        $this->SetX(15);
-        $this->Cell(0, 5, 'DETAIL DENDA', 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Keterlambatan', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->SetFont('Arial', 'B', 9);
-        $this->Cell($col3_width, 4, $data['keterlambatan_hari'] . ' hari @ Rp 1.000', 0, 1);
-        
-        $this->SetFont('Arial', '', 9);
-        $this->SetX(15);
-        $this->Cell($col1_width, 4, 'Total Denda', 0, 0);
-        $this->Cell($col2_width, 4, ':', 0, 0);
-        $this->SetFont('Arial', 'B', 9);
-        $this->Cell($col3_width, 4, 'Rp ' . number_format($data['denda'], 0, ',', '.'), 0, 1);
-        
-        $this->Ln(3);
-        
-        // --- RIWAYAT PEMBAYARAN ---
-        if (count($riwayat_bayar) > 0) {
-            $this->SetFont('Arial', 'B', 10);
-            $this->SetX(15);
-            $this->Cell(0, 5, 'RIWAYAT PEMBAYARAN', 0, 1);
-            
-            // Header tabel
-            $this->SetFont('Arial', 'B', 8);
-            $this->SetFillColor(230, 230, 230);
-            $this->SetX(15);
-            $this->Cell(10, 6, 'No', 1, 0, 'C', true);
-            $this->Cell(30, 6, 'Tanggal', 1, 0, 'C', true);
-            $this->Cell(35, 6, 'Nominal', 1, 0, 'C', true);
-            $this->Cell(30, 6, 'Metode', 1, 0, 'C', true);
-            $this->Cell(75, 6, 'Keterangan', 1, 1, 'C', true);
-            
-            // Isi tabel
-            $this->SetFont('Arial', '', 8);
-            $no = 1;
-            foreach ($riwayat_bayar as $row) {
-                $this->SetX(15);
-                $this->Cell(10, 5, $no++, 1, 0, 'C');
-                $this->Cell(30, 5, date('d/m/Y', strtotime($row['tanggal_bayar'])), 1, 0, 'C');
-                $this->Cell(35, 5, 'Rp ' . number_format($row['nominal'], 0, ',', '.'), 1, 0, 'R');
-                
-                $metode_label = [
-                    'cash' => 'Cash',
-                    'transfer' => 'Transfer',
-                    'tagihan_studi' => 'Tagihan Studi',
-                    'waive' => 'Waive'
-                ];
-                $this->Cell(30, 5, $metode_label[$row['metode_pembayaran']] ?? $row['metode_pembayaran'], 1, 0, 'C');
-                $this->Cell(75, 5, $row['keterangan'], 1, 1, 'L');
-            }
-            
-            $this->Ln(2);
-        }
-        
-        // --- TOTAL PEMBAYARAN ---
-        $this->SetFont('Arial', 'B', 10);
-        $this->SetFillColor(220, 240, 220);
-        $this->SetX(15);
-        $this->Cell(105, 6, 'TOTAL PEMBAYARAN (LUNAS)', 1, 0, 'C', true);
-        $this->Cell(75, 6, 'Rp ' . number_format($data['denda_dibayar'], 0, ',', '.'), 1, 1, 'C', true);
-        
-        // Uang kembali (jika ada)
-        if ($data['uang_kembali'] > 0) {
-            $this->SetFont('Arial', '', 9);
-            $this->SetX(15);
-            $this->Cell(105, 5, 'Uang Kembali', 1, 0, 'C');
-            $this->Cell(75, 5, 'Rp ' . number_format($data['uang_kembali'], 0, ',', '.'), 1, 1, 'C');
-        }
-        
-        $this->Ln(3);
-        
-        // --- KETERANGAN KHUSUS ---
-        if ($data['metode_pembayaran'] == 'tagihan_studi') {
-            $this->SetFont('Arial', 'I', 9);
-            $this->SetX(15);
-            $this->Cell(0, 4, '* Denda dialihkan ke tagihan studi berjalan', 0, 1);
-        } elseif ($data['metode_pembayaran'] == 'waive') {
-            $this->SetFont('Arial', 'I', 9);
-            $this->SetX(15);
-            $this->MultiCell(0, 4, '* Denda dibebaskan dengan alasan: ' . $data['keterangan'], 0, 'L');
-        }
-        
-        $this->Ln(5);
-        
-        // --- TANDA TANGAN ---
-        $ttd_y = $this->GetY();
-        
-        $this->SetFont('Arial', '', 10);
-        $this->SetXY(130, $ttd_y);
-        $tanggal = date('d F Y', strtotime($data['tanggal_lunas']));
-        $bulan_id = ['January'=>'Januari','February'=>'Februari','March'=>'Maret','April'=>'April',
-                     'May'=>'Mei','June'=>'Juni','July'=>'Juli','August'=>'Agustus',
-                     'September'=>'September','October'=>'Oktober','November'=>'November','December'=>'Desember'];
-        foreach ($bulan_id as $en => $id) {
-            $tanggal = str_replace($en, $id, $tanggal);
-        }
-        $this->Cell(60, 4, 'Merauke, ' . $tanggal, 0, 1, 'C');
-        
-        $this->SetX(130);
-        $this->Cell(60, 4, 'Kepala Perpustakaan', 0, 1, 'C');
-        
-        $y_img_ttd = $this->GetY();
-        
-        // --- TTD IMAGE ---
-        $path_ttd = dirname(__FILE__) . '/../../assets/images/ttd_yuli.png';
-        if (file_exists($path_ttd)) {
-            $this->Image($path_ttd, 145, $y_img_ttd - 1, 27);
-        }
-        
-        $this->Ln(15);
-        
-        $this->SetFont('Arial', 'BU', 10);
-        $this->SetX(130);
-        $this->Cell(60, 4, 'Yuliana Mangera, S.S.I', 0, 1, 'C');
     }
 }
 
-// Generate PDF
-$pdf = new PDF_BuktiDenda('P', 'mm', 'A4');
+// Init PDF A5 Portrait
+$pdf = new PDF('P','mm','A5');
 $pdf->SetMargins(10, 10, 10);
+$pdf->AliasNbPages();
 $pdf->AddPage();
-$pdf->SetAutoPageBreak(false);
 
-$pdf->buatBukti($data, $peminjam_detail, $nama_peminjam, $riwayat_bayar);
+$pdf->SetFont('Arial','',9);
 
-// Output
-$filename = 'Bukti_Denda_' . $data['nomor_bukti'] . '.pdf';
-$pdf->Output('I', str_replace('/', '_', $filename));
+// --- INFO TRANSAKSI ---
+$pdf->Cell(30, 5, 'No. Bukti', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(50, 5, $no_bukti, 0, 0);
+
+$pdf->Cell(20, 5, 'Tanggal', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(0, 5, date('d/m/Y', strtotime($tgl_lunas)), 0, 1);
+
+$pdf->Cell(30, 5, 'Kode Pinjam', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(0, 5, $kode, 0, 1);
+$pdf->Ln(3);
+
+// --- DATA PEMINJAM ---
+$pdf->SetFillColor(230, 230, 230);
+$pdf->SetFont('Arial','B',9);
+$pdf->Cell(0, 6, 'DATA PEMINJAM', 1, 1, 'L', true);
+
+$pdf->SetFont('Arial','',9);
+$pdf->Cell(30, 5, 'Nama', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(0, 5, $nama_peminjam, 0, 1);
+
+$pdf->Cell(30, 5, 'NIM/NUPTK', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(0, 5, $identitas . ' (' . $tipe_user . ')', 0, 1);
+
+$pdf->Cell(30, 5, 'Prodi', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(0, 5, $prodi, 0, 1);
+$pdf->Ln(3);
+
+// --- DETAIL DENDA ---
+$pdf->SetFont('Arial','B',9);
+$pdf->Cell(0, 6, 'DETAIL BUKU & JENIS DENDA', 1, 1, 'L', true);
+
+$pdf->SetFont('Arial','',9);
+// Judul Buku
+$pdf->Cell(30, 5, 'Judul Buku', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->MultiCell(0, 5, $judul, 0, 'L');
+
+// --- LOGIC PENENTUAN LABEL & KETERANGAN ---
+// Default (Terlambat)
+$label_denda = "KETERLAMBATAN";
+$keterangan_denda = "Terlambat: " . $telat . " Hari";
+
+// Cek Jika Buku Hilang/Rusak (Prioritas Tinggi)
+if ($status_buku === 'hilang') {
+    $label_denda = "GANTI RUGI BUKU HILANG";
+    $keterangan_denda = "Status Buku: Hilang (Denda Full)";
+} elseif ($status_buku === 'rusak_parah') {
+    $label_denda = "GANTI RUGI BUKU RUSAK";
+    $keterangan_denda = "Status Buku: Rusak Parah";
+}
+
+// Tampilkan Jenis Denda
+$pdf->Cell(30, 5, 'Jenis Denda', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->SetFont('Arial','B',9);
+$pdf->Cell(0, 5, $label_denda, 0, 1);
+
+// Tampilkan Keterangan/Hitungan
+$pdf->SetFont('Arial','',9);
+$pdf->Cell(30, 5, 'Keterangan', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(0, 5, $keterangan_denda, 0, 1);
+$pdf->Ln(3);
+
+
+// --- RINCIAN PEMBAYARAN ---
+$pdf->SetFont('Arial','B',9);
+$pdf->Cell(0, 6, 'RINCIAN PEMBAYARAN', 1, 1, 'L', true);
+
+$pdf->SetFont('Arial','',9);
+
+// 1. TOTAL TAGIHAN
+$pdf->Cell(85, 6, 'TOTAL TAGIHAN', 0, 0);
+$pdf->Cell(3, 6, ':', 0, 0);
+$pdf->SetFont('Arial','B',10);
+$pdf->Cell(0, 6, 'Rp ' . number_format($denda, 0, ',', '.'), 0, 1, 'R');
+
+// 2. LOGIC LABEL PEMBAYARAN
+$metode_display = strtoupper(str_replace('_', ' ', $metode));
+$nominal_display = $dibayar;
+$label_status_lunas = "LUNAS";
+
+// Override Label Jika Tagihan Studi
+if ($metode == 'tagihan_studi') {
+    $metode_display = "TAGIHAN STUDI (AKADEMIK)";
+    $label_status_lunas = "LUNAS (DIALIHKAN KE TAGIHAN AKADEMIK)";
+    // Jika via tagihan studi, nominal yang ditampilkan adalah total dendanya
+    $nominal_display = $denda; 
+}
+
+$pdf->SetFont('Arial','',9);
+$pdf->Cell(85, 6, 'JUMLAH DIBAYAR (' . $metode_display . ')', 0, 0);
+$pdf->Cell(3, 6, ':', 0, 0);
+$pdf->Cell(0, 6, 'Rp ' . number_format($nominal_display, 0, ',', '.'), 0, 1, 'R');
+
+// Garis Total
+$pdf->Line(10, $pdf->GetY(), 138, $pdf->GetY());
+
+// 3. STATUS SISA
+$pdf->SetFont('Arial','B',10);
+if ($sisa > 0 && $metode != 'tagihan_studi') {
+    $pdf->SetTextColor(192, 0, 0); // Merah
+    $pdf->Cell(85, 8, 'SISA KEKURANGAN', 0, 0);
+    $pdf->Cell(3, 8, ':', 0, 0);
+    $pdf->Cell(0, 8, 'Rp ' . number_format($sisa, 0, ',', '.'), 0, 1, 'R');
+    
+    $pdf->SetFont('Arial','B',12);
+    $pdf->Cell(0, 8, '[ BELUM LUNAS ]', 0, 1, 'C');
+} else {
+    $pdf->SetTextColor(0, 100, 0); // Hijau Tua
+    $pdf->Cell(85, 8, 'STATUS', 0, 0);
+    $pdf->Cell(3, 8, ':', 0, 0);
+    $pdf->Cell(0, 8, $label_status_lunas, 0, 1, 'R');
+}
+$pdf->SetTextColor(0);
+$pdf->Ln(5);
+
+// Catatan Tambahan
+if (!empty($ket)) {
+    $pdf->SetFont('Arial','I',8);
+    $pdf->MultiCell(0, 4, 'Catatan: ' . $ket, 0, 'L');
+}
+
+$pdf->Ln(8);
+
+// --- TANDA TANGAN (COMPACT A5) ---
+$ttd_y = $pdf->GetY();
+
+// Kiri: Penyetor
+$pdf->SetXY(10, $ttd_y);
+$pdf->SetFont('Arial','',9);
+$pdf->Cell(50, 4, 'Penyetor', 0, 1, 'C');
+$pdf->Ln(15);
+// NAMA FULL TANPA KURUNG TANPA SINGKATAN
+$pdf->Cell(50, 4, $nama_peminjam, 0, 1, 'C'); 
+
+// Kanan: Petugas
+$pdf->SetXY(80, $ttd_y);
+// Tanggal Indo
+$bulan_indo = [1=>'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+$tgl_parts = explode('-', date('Y-n-d', strtotime($tgl_lunas)));
+$tgl_cetak = $tgl_parts[2] . ' ' . $bulan_indo[(int)$tgl_parts[1]] . ' ' . $tgl_parts[0];
+
+$pdf->Cell(50, 4, 'Merauke, ' . $tgl_cetak, 0, 1, 'C');
+$pdf->SetX(80);
+$pdf->Cell(50, 4, 'Kepala Perpustakaan', 0, 1, 'C');
+
+// TTD Image
+$y_img = $pdf->GetY();
+$path_ttd = dirname(__FILE__) . '/../../assets/images/ttd_yuli.png';
+if (file_exists($path_ttd)) {
+    // Resize image TTD agar pas di A5
+    $pdf->Image($path_ttd, 93, $y_img, 22); 
+}
+
+$pdf->Ln(15);
+$pdf->SetX(80);
+$pdf->SetFont('Arial', 'BU', 9);
+$pdf->Cell(50, 4, 'Yuliana Mangera, S.S.I', 0, 1, 'C');
+
+// Output PDF
+$pdf->Output('I', 'Bukti_A5_'.$id.'.pdf');
 ?>

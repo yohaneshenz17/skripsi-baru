@@ -1,8 +1,10 @@
 <?php
-// --- 1. PENGATURAN KONEKSI & LIBRARY ---
-require_once '../../config/database.php';
-// require_once '../../config/functions.php'; 
+/**
+ * LAPORAN BULANAN PERPUSTAKAAN LENGKAP
+ * Update: Menambahkan Fitur Analisis Lengkap (A-I)
+ */
 
+require_once '../../config/database.php';
 require('../../modules/surat_keterangan/lib/fpdf/fpdf.php');
 
 session_start();
@@ -10,453 +12,519 @@ if (!isset($_SESSION['admin_logged_in'])) {
     die("Akses ditolak. Silakan login terlebih dahulu.");
 }
 
-// Ambil Data dari Form
-$bulan = isset($_POST['bulan']) ? $_POST['bulan'] : date('m');
-$tahun = isset($_POST['tahun']) ? $_POST['tahun'] : date('Y');
+// FILTER INPUT
+$bulan = isset($_GET['bulan']) ? $_GET['bulan'] : date('m');
+$tahun = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
 
 $nama_bulan_ind = [
     '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
     '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
     '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
 ];
-$periode = $nama_bulan_ind[$bulan] . " " . $tahun;
+$periode_teks = strtoupper($nama_bulan_ind[$bulan]) . " " . $tahun;
 
-// --- 2. EXTEND CLASS FPDF (KOP SURAT BARU) ---
+// =========================================================================
+// KELAS PDF CUSTOM
+// =========================================================================
 class PDF extends FPDF {
-function Header() {
-        // --- 1. LOGO ---
-        // Posisi: X=10, Y=8, Lebar=23
-        $this->Image('../../assets/images/stk.png', 13, 12, 23);
+    function Header() {
+        $path_logo = '../../assets/images/stk.png';
+        if (file_exists($path_logo)) {
+            $this->Image($path_logo, 15, 10, 25);
+        }
         
-        // --- 2. TEKS KOP SURAT (DIGESER KE KANAN) ---
+        $this->SetFont('Arial','B',14);
+        $this->Cell(30);
+        $this->Cell(0,5,'SEKOLAH TINGGI KATOLIK SANTO YAKOBUS MERAUKE',0,1,'C');
         
-        // TRIK: Set Margin Kiri sementara ke 35mm agar teks kop tidak menabrak logo
-        // dan titik tengahnya (Center) bergeser menyesuaikan sisa ruang kanan.
-        $this->SetLeftMargin(25); 
+        $this->SetFont('Arial','B',13);
+        $this->Cell(30);
+        $this->Cell(0,10,'UNIT PELAKSANA TEKNIS PERPUSTAKAAN',0,1,'C');
         
-        // Baris 1: KEMENTERIAN AGAMA
-        $this->SetFont('Times','',12); 
-        $this->Cell(0,5,'KEMENTERIAN AGAMA REPUBLIK INDONESIA',0,1,'C');
+        $this->SetFont('Arial','I',10);
+        $this->Cell(30);
+        $this->Cell(0,5,'Jl. Missi 2, Mandala, Merauke, Papua Selatan, 99616',0,1,'C');
+        $this->Cell(30);
+        $this->Cell(0,5,'Website: www.stkyakobus.ac.id | Email: humas@stkyakobus.ac.id',0,1,'C');
         
-        // Baris 2: NAMA KAMPUS
-        $this->SetFont('Times','B',13);
-        $this->Cell(0,6,'SEKOLAH TINGGI KATOLIK SANTO YAKOBUS MERAUKE',0,1,'C');
-        
-        // Baris 3: UNIT PERPUSTAKAAN
-        $this->SetFont('Times','B',12);
-        $this->Cell(0,6,'UNIT PELAKSANA TEKNIS PERPUSTAKAAN',0,1,'C');
-        
-        // Baris 4: ALAMAT
-        $this->SetFont('Times','',10);
-        $this->Cell(0,5,'Jalan Missi II Merauke Papua Selatan 99616',0,1,'C');
-        
-        // Baris 5: KONTAK
-        $this->SetFont('Times','',10);
-        $this->Cell(0,5,'Telp. 0971-3330264, Email: humas@stkyakobus.ac.id, Web: www.stkyakobus.ac.id',0,1,'C');
-        
-        // PENTING: Kembalikan Margin Kiri ke 10mm untuk badan laporan (agar tabel full lebar)
-        $this->SetLeftMargin(10); 
-        
-        // --- 3. GARIS PEMBATAS (DINAKKAN KE ATAS) ---
-        // Jarak spasi kecil dari teks terakhir
-        $this->Ln(2); 
-        
-        // Koordinat Y diubah dari 42 menjadi 38 (Lebih naik/dekat ke teks)
         $this->SetLineWidth(1);
-        $this->Line(10, 38, 200, 38); // Garis Tebal
-        
-        $this->SetLineWidth(0.5);
-        $this->Line(10, 39, 200, 39); // Garis Tipis
-        
-        // --- 4. JUDUL LAPORAN (DINAIKKAN KE ATAS) ---
-        // Jarak spasi ke judul diubah dari 10 menjadi 5 (Lebih dekat ke garis)
-        $this->Ln(3); 
+        $this->Line(10, 37, 200, 37);
+        $this->SetLineWidth(0.2);
+        $this->Line(10, 38, 200, 38);
+        $this->Ln(8);
     }
 
     function Footer() {
         $this->SetY(-15);
-        $this->SetFont('Times','I',8);
-        $this->Cell(0,10,'Halaman '.$this->PageNo().'/{nb} - Digenerate otomatis melalui aplikasi https://stkyakobus.ac.id/e-library/ pada: '.date('d/m/Y H:i'),0,0,'C');
+        $this->SetFont('Arial','I',8);
+        $this->Cell(0,10,'Laporan Bulanan Digenerate Otomatis dari https://stkyakobus.ac.id/e-library | Halaman '.$this->PageNo().'/{nb}',0,0,'C');
     }
 
-    function SectionTitle($label) {
+    function SectionTitle($text) {
         $this->Ln(5);
-        $this->SetFont('Times','B',11); // Ubah ke Times
-        $this->SetFillColor(230,230,230);
-        $this->Cell(0,8, $label, 0, 1, 'L', true);
+        $this->SetFont('Arial','B',11);
+        $this->SetFillColor(240,240,240);
+        $this->Cell(0, 8, strtoupper($text), 1, 1, 'L', true);
         $this->Ln(2);
     }
 
-    function TableHeader($header, $widths) {
-        $this->SetFont('Times','B',9); // Ubah ke Times
-        $this->SetFillColor(52, 152, 219); 
-        $this->SetTextColor(255);
-        for($i=0; $i<count($header); $i++) {
-            $this->Cell($widths[$i], 7, $header[$i], 1, 0, 'C', true);
+    function CheckPageBreak($h) {
+        if($this->GetY()+$h > $this->PageBreakTrigger)
+            $this->AddPage($this->CurOrientation);
+    }
+
+    function TableHeader($headers, $widths) {
+        $this->SetFont('Arial','B',8); // Font Header Tabel
+        $this->SetFillColor(230,230,230);
+        for($i=0; $i<count($headers); $i++) {
+            $this->Cell($widths[$i], 7, $headers[$i], 1, 0, 'C', true);
         }
         $this->Ln();
-        $this->SetTextColor(0);
-        $this->SetFont('Times','',9); // Ubah ke Times
     }
 }
 
-// Inisialisasi PDF
 $pdf = new PDF('P','mm','A4');
+$pdf->SetMargins(15, 10, 15);
 $pdf->AliasNbPages();
 $pdf->AddPage();
 
-// JUDUL UTAMA (Font Times)
-$pdf->SetFont('Times','B',16);
-$pdf->Cell(0,10,'LAPORAN BULANAN PERPUSTAKAAN',0,1,'C');
-$pdf->SetFont('Times','B',12);
-$pdf->Cell(0,5,"Periode: $periode",0,1,'C');
+// JUDUL LAPORAN
+$pdf->SetFont('Arial','B',12);
+$pdf->Cell(0, 8, 'LAPORAN BULANAN PERPUSTAKAAN', 0, 1, 'C');
+$pdf->SetFont('Arial','B',11);
+$pdf->Cell(0, 8, 'PERIODE: ' . $periode_teks, 0, 1, 'C');
 $pdf->Ln(5);
 
-// --- BAGIAN A: RINGKASAN DATA ---
-$pdf->SectionTitle("A. RINGKASAN DATA & ASET");
 
-$q_buku   = mysqli_query($conn, "SELECT COUNT(*) as c FROM buku");
-$t_buku   = ($q_buku) ? mysqli_fetch_assoc($q_buku)['c'] : 0;
+// =========================================================================
+// A. RINGKASAN DATA ASET & TRANSAKSI
+// =========================================================================
+$pdf->SectionTitle('A. RINGKASAN DATA ASET & TRANSAKSI BULAN INI');
 
-$q_stok   = mysqli_query($conn, "SELECT SUM(stok) as c FROM buku");
-$t_stok   = ($q_stok) ? mysqli_fetch_assoc($q_stok)['c'] : 0;
+// [FIX] Menggunakan COUNT(*) murni tanpa WHERE status='aktif' untuk memastikan angka keluar
+$total_judul = $conn->query("SELECT COUNT(*) FROM buku")->fetch_row()[0];
+$total_eksemplar = $conn->query("SELECT SUM(stok) FROM buku")->fetch_row()[0]; // Pastikan kolom 'stok' benar
+$jml_mhs = $conn->query("SELECT COUNT(*) FROM mahasiswa")->fetch_row()[0];
+$jml_dosen = $conn->query("SELECT COUNT(*) FROM dosen")->fetch_row()[0];
 
-$q_pinjam = mysqli_query($conn, "SELECT COUNT(*) as c FROM peminjaman WHERE status IN ('dipinjam','diperpanjang')");
-$t_pinjam = ($q_pinjam) ? mysqli_fetch_assoc($q_pinjam)['c'] : 0;
+// Transaksi Bulan Ini
+$pinjam_bln = $conn->query("SELECT COUNT(*) FROM peminjaman WHERE MONTH(tanggal_pinjam) = '$bulan' AND YEAR(tanggal_pinjam) = '$tahun'")->fetch_row()[0];
+$kembali_bln = $conn->query("SELECT COUNT(*) FROM pengembalian WHERE MONTH(tanggal_kembali) = '$bulan' AND YEAR(tanggal_kembali) = '$tahun'")->fetch_row()[0];
 
-$q_dosen  = mysqli_query($conn, "SELECT COUNT(*) as c FROM dosen");
-$t_dosen  = ($q_dosen) ? mysqli_fetch_assoc($q_dosen)['c'] : 0;
+// [UPDATE] Query Keuangan
+$denda_cash = $conn->query("SELECT SUM(denda_dibayar) FROM pengembalian WHERE MONTH(tanggal_kembali) = '$bulan' AND YEAR(tanggal_kembali) = '$tahun' AND metode_pembayaran IN ('cash', 'transfer')")->fetch_row()[0];
+$denda_tagihan = $conn->query("SELECT SUM(denda) FROM pengembalian WHERE MONTH(tanggal_kembali) = '$bulan' AND YEAR(tanggal_kembali) = '$tahun' AND metode_pembayaran = 'tagihan_studi'")->fetch_row()[0];
+// [BARU] Query Waive
+$denda_waive = $conn->query("SELECT SUM(denda) FROM pengembalian WHERE MONTH(tanggal_kembali) = '$bulan' AND YEAR(tanggal_kembali) = '$tahun' AND metode_pembayaran = 'waive'")->fetch_row()[0];
 
-$q_mhs    = mysqli_query($conn, "SELECT COUNT(*) as c FROM mahasiswa");
-$t_mhs    = ($q_mhs) ? mysqli_fetch_assoc($q_mhs)['c'] : 0;
+// Display Tabel Ringkasan
+$pdf->SetFont('Arial','',10);
+$h_cell = 6;
+$w_label = 80; $w_val = 40; $w_satuan = 60;
 
-// ===== QUERY BUKU HILANG/RUSAK (NEW) =====
-$q_hilang = mysqli_query($conn, "SELECT COUNT(*) as c FROM pengembalian WHERE status_buku IN ('hilang','rusak_parah')");
-$t_hilang = ($q_hilang) ? mysqli_fetch_assoc($q_hilang)['c'] : 0;
+$pdf->SetFont('Arial','B',9);
+$pdf->Cell($w_label, $h_cell, 'Keterangan', 1, 0, 'C');
+$pdf->Cell($w_val, $h_cell, 'Jumlah', 1, 0, 'C');
+$pdf->Cell($w_satuan, $h_cell, 'Satuan', 1, 1, 'C');
 
-$pdf->SetFont('Times','',10);
-$pdf->Cell(95, 8, "Total Judul Buku: $t_buku Judul", 1);
-$pdf->Cell(95, 8, "Total Anggota Dosen: $t_dosen Orang", 1);
-$pdf->Ln();
-$pdf->Cell(95, 8, "Total Exemplar Buku: $t_stok Buku", 1);
-$pdf->Cell(95, 8, "Total Anggota Mahasiswa: $t_mhs Orang", 1);
-$pdf->Ln();
-$pdf->Cell(190, 8, "Buku Sedang Dipinjam (Realtime): $t_pinjam Buku", 1, 1, 'C');
+$pdf->SetFont('Arial','',9);
+// Rows [UPDATE: Menambahkan baris Waive]
+$data_aset = [
+    ['Total Judul Buku', number_format($total_judul), 'Judul'],
+    ['Total Eksemplar Buku', number_format((float)$total_eksemplar), 'Eksemplar'],
+    ['Total Mahasiswa Terdaftar', number_format($jml_mhs), 'Orang'],
+    ['Total Dosen/Staf Terdaftar', number_format($jml_dosen), 'Orang'],
+    ['Peminjaman Baru (Bulan Ini)', number_format($pinjam_bln), 'Transaksi'],
+    ['Pengembalian (Bulan Ini)', number_format($kembali_bln), 'Transaksi'],
+    ['Pemasukan Denda (Cash)', 'Rp ' . number_format((float)$denda_cash, 0, ',', '.'), 'Rupiah (Kas)'],
+    ['Tagihan Studi (Piutang)', 'Rp ' . number_format((float)$denda_tagihan, 0, ',', '.'), 'Rupiah (Akademik)'],
+    ['Tagihan Dihapuskan (Waive)', 'Rp ' . number_format((float)$denda_waive, 0, ',', '.'), 'Rupiah (Non-Tunai)'],
+];
 
-// ===== TAMBAHAN BARU - BUKU HILANG (NEW) =====
-$pdf->SetTextColor(192, 57, 43); // Merah
-$pdf->Cell(190, 8, "Jumlah Buku Hilang atau Rusak Parah: $t_hilang Buku", 1, 1, 'C');
-$pdf->SetTextColor(0); // Reset warna
+foreach ($data_aset as $row) {
+    $pdf->Cell($w_label, $h_cell, $row[0], 1, 0, 'L');
+    $pdf->Cell($w_val, $h_cell, $row[1], 1, 0, 'C');
+    $pdf->Cell($w_satuan, $h_cell, $row[2], 1, 1, 'L');
+}
 
 
-// --- BAGIAN B: DAFTAR PEMINJAMAN BERJALAN ---
-$pdf->SectionTitle("B. DAFTAR PEMINJAMAN BERJALAN (BELUM KEMBALI)");
-$q_berjalan = mysqli_query($conn, "
-    SELECT p.kode_peminjaman, b.judul, p.tanggal_pinjam, p.tanggal_jatuh_tempo,
-    COALESCE(m.nama, d.nama) as nama_peminjam
+// =========================================================================
+// B. DAFTAR PEMINJAMAN BERJALAN (AKTIF HINGGA SAAT INI)
+// =========================================================================
+$pdf->SectionTitle('B. DAFTAR PEMINJAMAN BERJALAN (AKTIF/TERLAMBAT)');
+$pdf->SetFont('Arial','I',8);
+$pdf->Cell(0, 5, 'Menampilkan semua buku yang belum dikembalikan s.d. saat ini (termasuk dari bulan sebelumnya).', 0, 1);
+
+$header_b = ['No', 'Tgl Pinjam', 'Peminjam', 'Judul Buku', 'Jatuh Tempo', 'Status'];
+$width_b = [8, 20, 50, 65, 20, 27];
+$pdf->TableHeader($header_b, $width_b);
+
+// Query: Ambil yg statusnya bukan 'dikembalikan' atau 'selesai'
+// Sort: Dipinjam (1) -> Diperpanjang (2) -> Terlambat (3)
+$q_berjalan = $conn->query("
+    SELECT p.*, b.judul,
+           m.nama as mhs, d.nama as dsn
     FROM peminjaman p
     JOIN buku b ON p.buku_id = b.id
-    LEFT JOIN mahasiswa m ON (p.peminjam_id = m.id AND p.jenis_peminjam='mahasiswa')
-    LEFT JOIN dosen d ON (p.peminjam_id = d.id AND p.jenis_peminjam='dosen')
-    WHERE p.status IN ('dipinjam','diperpanjang')
+    LEFT JOIN mahasiswa m ON p.peminjam_id=m.id AND p.jenis_peminjam='mahasiswa'
+    LEFT JOIN dosen d ON p.peminjam_id=d.id AND p.jenis_peminjam='dosen'
+    WHERE p.status IN ('dipinjam', 'diperpanjang', 'terlambat')
+    ORDER BY 
+        CASE 
+            WHEN p.status = 'dipinjam' THEN 1 
+            WHEN p.status = 'diperpanjang' THEN 2 
+            WHEN p.status = 'terlambat' THEN 3 
+        END ASC, 
+        p.tanggal_pinjam ASC
+");
+
+$pdf->SetFont('Arial','',8);
+$no = 1;
+if ($q_berjalan && $q_berjalan->num_rows > 0) {
+    while ($r = $q_berjalan->fetch_assoc()) {
+        $nama = ($r['jenis_peminjam']=='mahasiswa') ? $r['mhs'] : $r['dsn'];
+        
+        // Status Badge Logic (Color simulation)
+        $status_upper = strtoupper($r['status']);
+        $pdf->SetTextColor(0);
+        if($r['status'] == 'terlambat') $pdf->SetTextColor(192,0,0);
+        
+        $pdf->CheckPageBreak(6);
+        $pdf->Cell($width_b[0], 6, $no++, 1, 0, 'C');
+        $pdf->Cell($width_b[1], 6, date('d/m/y', strtotime($r['tanggal_pinjam'])), 1, 0, 'C');
+        $pdf->Cell($width_b[2], 6, substr($nama, 0, 28), 1, 0, 'L');
+        $pdf->Cell($width_b[3], 6, substr($r['judul'], 0, 40), 1, 0, 'L');
+        $pdf->Cell($width_b[4], 6, date('d/m/y', strtotime($r['tanggal_jatuh_tempo'])), 1, 0, 'C');
+        $pdf->Cell($width_b[5], 6, $status_upper, 1, 0, 'C');
+        $pdf->Ln();
+    }
+    $pdf->SetTextColor(0);
+} else {
+    $pdf->Cell(array_sum($width_b), 6, 'Tidak ada peminjaman berjalan saat ini.', 1, 1, 'C');
+}
+
+
+// =========================================================================
+// C. DAFTAR PEMINJAMAN PERIODE INI (SEMUA)
+// =========================================================================
+$pdf->SectionTitle('C. DAFTAR PEMINJAMAN BUKU PERIODE INI');
+$pdf->TableHeader($header_b, $width_b); // Pakai header yg sama dgn B
+
+$q_periode = $conn->query("
+    SELECT p.*, b.judul, m.nama as mhs, d.nama as dsn
+    FROM peminjaman p
+    JOIN buku b ON p.buku_id = b.id
+    LEFT JOIN mahasiswa m ON p.peminjam_id=m.id AND p.jenis_peminjam='mahasiswa'
+    LEFT JOIN dosen d ON p.peminjam_id=d.id AND p.jenis_peminjam='dosen'
+    WHERE MONTH(p.tanggal_pinjam) = '$bulan' AND YEAR(p.tanggal_pinjam) = '$tahun'
     ORDER BY p.tanggal_pinjam ASC
 ");
 
-$header = ['No', 'Peminjam', 'Judul Buku', 'Tgl Pinjam', 'Jatuh Tempo'];
-$w = [10, 60, 80, 20, 20];
-$pdf->TableHeader($header, $w);
-
+$pdf->SetFont('Arial','',8);
 $no = 1;
-if(mysqli_num_rows($q_berjalan) > 0){
-    while($row = mysqli_fetch_assoc($q_berjalan)) {
-        $pdf->Cell($w[0], 6, $no++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, substr($row['nama_peminjam'] ?? '-', 0, 30), 1, 0, 'L');
-        $pdf->Cell($w[2], 6, substr($row['judul'], 0, 45), 1, 0, 'L');
-        $pdf->Cell($w[3], 6, date('d/m/y', strtotime($row['tanggal_pinjam'])), 1, 0, 'C');
-        $pdf->Cell($w[4], 6, date('d/m/y', strtotime($row['tanggal_jatuh_tempo'])), 1, 0, 'C');
+if ($q_periode && $q_periode->num_rows > 0) {
+    while ($r = $q_periode->fetch_assoc()) {
+        $nama = ($r['jenis_peminjam']=='mahasiswa') ? $r['mhs'] : $r['dsn'];
+        
+        $pdf->CheckPageBreak(6);
+        $pdf->Cell($width_b[0], 6, $no++, 1, 0, 'C');
+        $pdf->Cell($width_b[1], 6, date('d/m/y', strtotime($r['tanggal_pinjam'])), 1, 0, 'C');
+        $pdf->Cell($width_b[2], 6, substr($nama, 0, 28), 1, 0, 'L');
+        $pdf->Cell($width_b[3], 6, substr($r['judul'], 0, 40), 1, 0, 'L');
+        $pdf->Cell($width_b[4], 6, date('d/m/y', strtotime($r['tanggal_jatuh_tempo'])), 1, 0, 'C');
+        $pdf->Cell($width_b[5], 6, strtoupper($r['status']), 1, 0, 'C');
         $pdf->Ln();
     }
 } else {
-    $pdf->Cell(190, 6, 'Tidak ada data peminjaman berjalan.', 1, 1, 'C');
+    $pdf->Cell(array_sum($width_b), 6, 'Tidak ada transaksi peminjaman baru bulan ini.', 1, 1, 'C');
 }
 
-// --- BAGIAN C: TRANSAKSI BULAN INI ---
-$pdf->AddPage();
-$pdf->SectionTitle("C. AKTIVITAS TRANSAKSI BULAN INI ($periode)");
 
-// 1. Peminjaman Baru
-$pdf->SetFont('Times','B',10);
-$pdf->Cell(0,8,'1. Peminjaman Baru',0,1);
-$q_pinjam_baru = mysqli_query($conn, "
-    SELECT p.kode_peminjaman, b.judul, p.tanggal_pinjam,
-    COALESCE(m.nama, d.nama) as nama_peminjam
-    FROM peminjaman p
-    JOIN buku b ON p.buku_id = b.id
-    LEFT JOIN mahasiswa m ON (p.peminjam_id = m.id AND p.jenis_peminjam='mahasiswa')
-    LEFT JOIN dosen d ON (p.peminjam_id = d.id AND p.jenis_peminjam='dosen')
-    WHERE MONTH(p.tanggal_pinjam) = '$bulan' AND YEAR(p.tanggal_pinjam) = '$tahun'
+// =========================================================================
+// D. LAPORAN DENDA & STATUS BUKU
+// =========================================================================
+$pdf->SectionTitle('D. LAPORAN DENDA, KETERLAMBATAN & STATUS BUKU');
+$header_d = ['No', 'Tgl Kembali', 'Nama', 'Status Buku', 'Tagihan', 'Dibayar', 'Metode'];
+$width_d = [8, 20, 50, 30, 25, 25, 32];
+$pdf->TableHeader($header_d, $width_d);
+
+$q_denda = $conn->query("
+    SELECT pg.*, pg.status_buku, m.nama as mhs, d.nama as dsn, p.jenis_peminjam
+    FROM pengembalian pg
+    JOIN peminjaman p ON pg.peminjaman_id = p.id
+    LEFT JOIN mahasiswa m ON p.peminjam_id=m.id AND p.jenis_peminjam='mahasiswa'
+    LEFT JOIN dosen d ON p.peminjam_id=d.id AND p.jenis_peminjam='dosen'
+    WHERE pg.denda > 0 
+      AND MONTH(pg.tanggal_kembali) = '$bulan' 
+      AND YEAR(pg.tanggal_kembali) = '$tahun'
+    ORDER BY pg.tanggal_kembali ASC
 ");
 
-$header = ['No', 'Kode', 'Peminjam', 'Judul Buku', 'Tgl Pinjam'];
-$w = [10, 30, 60, 70, 20];
-$pdf->TableHeader($header, $w);
+$pdf->SetFont('Arial','',8);
 $no = 1;
-if(mysqli_num_rows($q_pinjam_baru) > 0){
-    while($row = mysqli_fetch_assoc($q_pinjam_baru)){
-        $pdf->Cell($w[0], 6, $no++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, $row['kode_peminjaman'], 1, 0, 'C');
-        $pdf->Cell($w[2], 6, substr($row['nama_peminjam'] ?? '-', 0, 30), 1, 0, 'L');
-        $pdf->Cell($w[3], 6, substr($row['judul'], 0, 40), 1, 0, 'L');
-        $pdf->Cell($w[4], 6, date('d/m/y', strtotime($row['tanggal_pinjam'])), 1, 0, 'C');
+$total_terbayar = 0; // Ubah nama variabel biar jelas
+
+    if ($q_denda && $q_denda->num_rows > 0) {
+    while ($r = $q_denda->fetch_assoc()) {
+        $nama = ($r['jenis_peminjam']=='mahasiswa') ? $r['mhs'] : $r['dsn'];
+        
+        $status_lbl = ($r['status_buku'] == 'hilang') ? "HILANG" : (($r['status_buku'] == 'rusak_parah') ? "RUSAK" : "Terlambat");
+        
+        // Logika Tampilan & Hitungan
+        $tampil_dibayar = $r['denda_dibayar'];
+        $metode = ucfirst(str_replace('_',' ',$r['metode_pembayaran']));
+        
+        if ($r['metode_pembayaran'] == 'tagihan_studi') {
+            $tampil_dibayar = $r['denda']; // Tagihan studi dianggap 'terbayar' secara administratif
+        } 
+        if ($r['metode_pembayaran'] == 'waive') {
+            $tampil_dibayar = 0; // Waive tidak dihitung
+        }
+
+        // [UPDATE] Penjumlahan Total hanya dari kolom 'Dibayar' yang valid
+        $total_terbayar += $tampil_dibayar;
+
+        if ($status_lbl != "Terlambat") $pdf->SetFont('Arial','B',8); else $pdf->SetFont('Arial','',8);
+
+        $pdf->CheckPageBreak(6);
+        $pdf->Cell($width_d[0], 6, $no++, 1, 0, 'C');
+        $pdf->Cell($width_d[1], 6, date('d/m/y', strtotime($r['tanggal_kembali'])), 1, 0, 'C');
+        $pdf->Cell($width_d[2], 6, substr($nama, 0, 28), 1, 0, 'L');
+        $pdf->Cell($width_d[3], 6, $status_lbl, 1, 0, 'C');
+        $pdf->Cell($width_d[4], 6, number_format($r['denda'],0,',','.'), 1, 0, 'R');
+        $pdf->Cell($width_d[5], 6, number_format($tampil_dibayar,0,',','.'), 1, 0, 'R'); // Kolom Dibayar
+        $pdf->Cell($width_d[6], 6, $metode, 1, 0, 'L');
+        $pdf->Ln();
+    }
+    
+    // [UPDATE] Footer Total: Menampilkan total di bawah kolom "Dibayar" (Index 5)
+    $pdf->SetFont('Arial','B',8);
+    $pdf->Cell(array_sum(array_slice($width_d,0,5)), 6, 'TOTAL PEMASUKAN (Cash + Tagihan Studi):', 1, 0, 'R');
+    $pdf->Cell($width_d[5], 6, number_format($total_terbayar,0,',','.'), 1, 0, 'R');
+    $pdf->Cell($width_d[6], 6, '', 1, 0, 'R');
+    $pdf->Ln();
+} else {
+    $pdf->SetFont('Arial','',8);
+    $pdf->Cell(array_sum($width_d), 6, 'Tidak ada denda diproses bulan ini.', 1, 1, 'C');
+}
+
+
+// =========================================================================
+// E. DAFTAR BUKU STOK HABIS
+// =========================================================================
+$pdf->SectionTitle('E. DAFTAR BUKU STOK HABIS (SAAT INI)');
+$header_e = ['No', 'Nomor Buku', 'Judul Buku', 'Kategori', 'Total Aset'];
+$width_e = [10, 30, 90, 40, 20];
+$pdf->TableHeader($header_e, $width_e);
+
+$q_stok = $conn->query("SELECT * FROM buku WHERE stok_tersedia <= 0 ORDER BY judul ASC");
+
+$pdf->SetFont('Arial','',8);
+$no = 1;
+if ($q_stok && $q_stok->num_rows > 0) {
+    while ($r = $q_stok->fetch_assoc()) {
+        $pdf->CheckPageBreak(6);
+        $pdf->Cell($width_e[0], 6, $no++, 1, 0, 'C');
+        $pdf->Cell($width_e[1], 6, $r['nomor_buku'], 1, 0, 'L');
+        $pdf->Cell($width_e[2], 6, substr($r['judul'], 0, 55), 1, 0, 'L');
+        $pdf->Cell($width_e[3], 6, substr($r['kategori'], 0, 22), 1, 0, 'L');
+        $pdf->Cell($width_e[4], 6, $r['stok'], 1, 0, 'C');
         $pdf->Ln();
     }
 } else {
-    $pdf->Cell(190, 6, 'Tidak ada peminjaman baru bulan ini.', 1, 1, 'C');
+    $pdf->Cell(array_sum($width_e), 6, 'Semua judul buku memiliki stok tersedia.', 1, 1, 'C');
 }
 
-// 2. Pengembalian
-$pdf->Ln(5);
-$pdf->SetFont('Times','B',10);
-$pdf->Cell(0,8,'2. Pengembalian Buku',0,1);
-$q_kembali = mysqli_query($conn, "
-    SELECT pg.tanggal_kembali, b.judul, pg.denda,
-    COALESCE(m.nama, d.nama) as nama_peminjam
+
+// =========================================================================
+// F. DAFTAR BUKU HILANG (PERIODE INI)
+// =========================================================================
+$pdf->SectionTitle('F. DAFTAR BUKU HILANG (DILAPORKAN PERIODE INI)');
+$header_f = ['No', 'Tgl Lapor', 'Judul Buku', 'Nomor Buku', 'Peminjam Terakhir', 'Ket'];
+$width_f = [10, 20, 65, 25, 45, 25];
+$pdf->TableHeader($header_f, $width_f);
+
+$q_hilang = $conn->query("
+    SELECT pg.tanggal_kembali, b.judul, b.nomor_buku, pg.keterangan_kehilangan,
+           m.nama as mhs, d.nama as dsn, p.jenis_peminjam
     FROM pengembalian pg
     JOIN peminjaman p ON pg.peminjaman_id = p.id
     JOIN buku b ON p.buku_id = b.id
-    LEFT JOIN mahasiswa m ON (p.peminjam_id = m.id AND p.jenis_peminjam='mahasiswa')
-    LEFT JOIN dosen d ON (p.peminjam_id = d.id AND p.jenis_peminjam='dosen')
-    WHERE MONTH(pg.tanggal_kembali) = '$bulan' AND YEAR(pg.tanggal_kembali) = '$tahun'
+    LEFT JOIN mahasiswa m ON p.peminjam_id=m.id AND p.jenis_peminjam='mahasiswa'
+    LEFT JOIN dosen d ON p.peminjam_id=d.id AND p.jenis_peminjam='dosen'
+    WHERE pg.status_buku = 'hilang'
+      AND MONTH(pg.tanggal_kembali) = '$bulan' 
+      AND YEAR(pg.tanggal_kembali) = '$tahun'
 ");
-$header = ['No', 'Tgl Kembali', 'Peminjam', 'Judul Buku', 'Denda (Rp)'];
-$w = [10, 25, 60, 65, 30];
-$pdf->TableHeader($header, $w);
+
+$pdf->SetFont('Arial','',8);
 $no = 1;
-$total_denda = 0;
-if(mysqli_num_rows($q_kembali) > 0){
-    while($row = mysqli_fetch_assoc($q_kembali)){
-        $pdf->Cell($w[0], 6, $no++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, date('d/m/y', strtotime($row['tanggal_kembali'])), 1, 0, 'C');
-        $pdf->Cell($w[2], 6, substr($row['nama_peminjam'] ?? '-', 0, 30), 1, 0, 'L');
-        $pdf->Cell($w[3], 6, substr($row['judul'], 0, 35), 1, 0, 'L');
-        $pdf->Cell($w[4], 6, number_format($row['denda'],0,',','.'), 1, 0, 'R');
-        $total_denda += $row['denda'];
+if ($q_hilang && $q_hilang->num_rows > 0) {
+    while ($r = $q_hilang->fetch_assoc()) {
+        $nama = ($r['jenis_peminjam']=='mahasiswa') ? $r['mhs'] : $r['dsn'];
+        $pdf->CheckPageBreak(6);
+        $pdf->Cell($width_f[0], 6, $no++, 1, 0, 'C');
+        $pdf->Cell($width_f[1], 6, date('d/m/y', strtotime($r['tanggal_kembali'])), 1, 0, 'C');
+        $pdf->Cell($width_f[2], 6, substr($r['judul'], 0, 40), 1, 0, 'L');
+        $pdf->Cell($width_f[3], 6, $r['nomor_buku'], 1, 0, 'L');
+        $pdf->Cell($width_f[4], 6, substr($nama, 0, 25), 1, 0, 'L');
+        $pdf->Cell($width_f[5], 6, 'Ganti Rugi', 1, 0, 'C');
         $pdf->Ln();
     }
 } else {
-    $pdf->Cell(190, 6, 'Tidak ada pengembalian bulan ini.', 1, 1, 'C');
+    $pdf->Cell(array_sum($width_f), 6, 'Tidak ada buku hilang dilaporkan bulan ini.', 1, 1, 'C');
 }
-// Total Denda Row
-$pdf->SetFont('Times','B',9);
-$pdf->Cell(160, 6, 'Total Denda Bulan Ini', 1, 0, 'R');
-$pdf->Cell(30, 6, 'Rp '.number_format($total_denda,0,',','.'), 1, 1, 'R');
 
-// --- BAGIAN D: KETERLAMBATAN & STOK ---
-$pdf->AddPage();
-$pdf->SectionTitle("D. KETERLAMBATAN & STOK BUKU");
 
-// Keterlambatan
-$pdf->SetFont('Times','B',10);
-$pdf->Cell(0,8,'1. Daftar Keterlambatan Saat Ini',0,1);
-$q_telat = mysqli_query($conn, "
-    SELECT p.kode_peminjaman, b.judul, p.tanggal_jatuh_tempo,
-    COALESCE(m.nama, d.nama) as nama_peminjam,
-    DATEDIFF(CURDATE(), p.tanggal_jatuh_tempo) as lewat_hari
+// =========================================================================
+// G. TOP 15 PEMINJAM (PERIODE INI)
+// =========================================================================
+$pdf->SectionTitle('G. TOP 15 PEMINJAM TERAKTIF BULAN INI');
+$header_g = ['Rank', 'Nama Peminjam', 'Status', 'Jumlah Peminjaman'];
+$width_g = [15, 90, 40, 45];
+$pdf->TableHeader($header_g, $width_g);
+
+$q_top_user = $conn->query("
+    SELECT p.peminjam_id, p.jenis_peminjam, COUNT(*) as total,
+           MAX(CASE WHEN p.jenis_peminjam = 'mahasiswa' THEN m.nama ELSE d.nama END) as nama
     FROM peminjaman p
-    JOIN buku b ON p.buku_id = b.id
-    LEFT JOIN mahasiswa m ON (p.peminjam_id = m.id AND p.jenis_peminjam='mahasiswa')
-    LEFT JOIN dosen d ON (p.peminjam_id = d.id AND p.jenis_peminjam='dosen')
-    WHERE (p.status = 'terlambat' OR (p.status IN ('dipinjam') AND CURDATE() > p.tanggal_jatuh_tempo))
-");
-$header = ['No', 'Peminjam', 'Judul Buku', 'Jatuh Tempo', 'Telat (Hari)'];
-$w = [10, 60, 80, 25, 15];
-$pdf->TableHeader($header, $w);
-$no = 1;
-if(mysqli_num_rows($q_telat) > 0){
-    while($row = mysqli_fetch_assoc($q_telat)){
-        $pdf->Cell($w[0], 6, $no++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, substr($row['nama_peminjam'] ?? '-', 0, 30), 1, 0, 'L');
-        $pdf->Cell($w[2], 6, substr($row['judul'], 0, 45), 1, 0, 'L');
-        $pdf->Cell($w[3], 6, date('d/m/y', strtotime($row['tanggal_jatuh_tempo'])), 1, 0, 'C');
-        $pdf->SetTextColor(192, 57, 43); // Merah
-        $pdf->Cell($w[4], 6, $row['lewat_hari'], 1, 0, 'C');
-        $pdf->SetTextColor(0);
-        $pdf->Ln();
-    }
-} else {
-    $pdf->Cell(190, 6, 'Tidak ada keterlambatan saat ini.', 1, 1, 'C');
-}
-
-// Stok Habis
-$pdf->Ln(5);
-$pdf->SetFont('Times','B',10);
-$pdf->Cell(0,8,'2. Daftar Buku Stok Fisik Habis (0)',0,1);
-$q_habis = mysqli_query($conn, "SELECT judul, pengarang, stok FROM buku WHERE stok_tersedia = 0");
-$header = ['No', 'Judul Buku', 'Pengarang', 'Total Aset'];
-$w = [10, 100, 60, 20];
-$pdf->TableHeader($header, $w);
-$no = 1;
-if(mysqli_num_rows($q_habis) > 0){
-    while($row = mysqli_fetch_assoc($q_habis)){
-        $pdf->Cell($w[0], 6, $no++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, substr($row['judul'], 0, 55), 1, 0, 'L');
-        $pdf->Cell($w[2], 6, substr($row['pengarang'], 0, 30), 1, 0, 'L');
-        $pdf->Cell($w[3], 6, $row['stok'], 1, 0, 'C');
-        $pdf->Ln();
-    }
-} else {
-    $pdf->Cell(190, 6, 'Tidak ada buku dengan stok 0.', 1, 1, 'C');
-}
-
-// ===== DAFTAR BUKU HILANG/RUSAK (NEW SECTION) =====
-$pdf->Ln(5);
-$pdf->SetFont('Times','B',10);
-$pdf->Cell(0,8,'3. Daftar Buku Hilang atau Rusak Parah',0,1);
-
-$q_hilang_detail = mysqli_query($conn, "
-    SELECT pg.tanggal_kembali, pg.status_buku, pg.denda, pg.sisa_denda,
-           b.judul, b.nomor_buku,
-           COALESCE(m.nama, d.nama) as nama_peminjam
-    FROM pengembalian pg
-    JOIN peminjaman p ON pg.peminjaman_id = p.id
-    JOIN buku b ON p.buku_id = b.id
-    LEFT JOIN mahasiswa m ON (p.peminjam_id = m.id AND p.jenis_peminjam='mahasiswa')
-    LEFT JOIN dosen d ON (p.peminjam_id = d.id AND p.jenis_peminjam='dosen')
-    WHERE pg.status_buku IN ('hilang','rusak_parah')
-    ORDER BY pg.tanggal_kembali DESC
-");
-
-$header = ['No', 'Tgl Lapor', 'Peminjam', 'Judul Buku', 'Status', 'Denda (Rp)'];
-$w = [10, 20, 50, 65, 25, 20];
-$pdf->TableHeader($header, $w);
-
-$no = 1;
-if(mysqli_num_rows($q_hilang_detail) > 0){
-    while($row = mysqli_fetch_assoc($q_hilang_detail)){
-        $pdf->Cell($w[0], 6, $no++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, date('d/m/y', strtotime($row['tanggal_kembali'])), 1, 0, 'C');
-        $pdf->Cell($w[2], 6, substr($row['nama_peminjam'] ?? '-', 0, 25), 1, 0, 'L');
-        $pdf->Cell($w[3], 6, substr($row['judul'], 0, 35), 1, 0, 'L');
-        
-        // Status dengan warna
-        $status_text = ($row['status_buku'] == 'hilang') ? 'Hilang' : 'Rusak Parah';
-        $pdf->SetTextColor(192, 57, 43); // Merah
-        $pdf->Cell($w[4], 6, $status_text, 1, 0, 'C');
-        $pdf->SetTextColor(0); // Reset warna
-        
-        $pdf->Cell($w[5], 6, number_format($row['denda'],0,',','.'), 1, 0, 'R');
-        $pdf->Ln();
-    }
-} else {
-    $pdf->Cell(190, 6, 'Tidak ada buku hilang/rusak parah.', 1, 1, 'C');
-}
-
-// --- BAGIAN E: STATISTIK TOP 10 ---
-$pdf->SectionTitle("E. STATISTIK TERPOPULER BULAN INI");
-
-// Top Buku
-$pdf->SetFont('Times','B',10);
-$pdf->Cell(0,8,'1. Top 10 Buku Sering Dipinjam',0,1);
-$q_top_buku = mysqli_query($conn, "
-    SELECT b.judul, COUNT(p.id) as frekuensi
-    FROM peminjaman p
-    JOIN buku b ON p.buku_id = b.id
-    WHERE MONTH(p.tanggal_pinjam) = '$bulan' AND YEAR(p.tanggal_pinjam) = '$tahun'
-    GROUP BY p.buku_id
-    ORDER BY frekuensi DESC LIMIT 10
-");
-$header = ['Rank', 'Judul Buku', 'Frekuensi Pinjam'];
-$w = [15, 140, 35];
-$pdf->TableHeader($header, $w);
-$rank = 1;
-if(mysqli_num_rows($q_top_buku) > 0){
-    while($row = mysqli_fetch_assoc($q_top_buku)){
-        $pdf->Cell($w[0], 6, $rank++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, substr($row['judul'], 0, 75), 1, 0, 'L');
-        $pdf->Cell($w[2], 6, $row['frekuensi'].' x', 1, 0, 'C');
-        $pdf->Ln();
-    }
-} else {
-    $pdf->Cell(190, 6, 'Belum ada data statistik buku bulan ini.', 1, 1, 'C');
-}
-
-// Top User
-$pdf->Ln(5);
-$pdf->SetFont('Times','B',10);
-$pdf->Cell(0,8,'2. Top 10 Peminjam Paling Aktif',0,1);
-$q_top_user = mysqli_query($conn, "
-    SELECT
-        COALESCE(m.nama, d.nama) as nama_peminjam,
-        CASE WHEN p.jenis_peminjam = 'mahasiswa' THEN 'Mahasiswa' ELSE 'Dosen' END as tipe,
-        COUNT(p.id) as jumlah_pinjam
-    FROM peminjaman p
-    LEFT JOIN mahasiswa m ON (p.peminjam_id = m.id AND p.jenis_peminjam='mahasiswa')
-    LEFT JOIN dosen d ON (p.peminjam_id = d.id AND p.jenis_peminjam='dosen')
+    LEFT JOIN mahasiswa m ON p.peminjam_id = m.id AND p.jenis_peminjam = 'mahasiswa'
+    LEFT JOIN dosen d ON p.peminjam_id = d.id AND p.jenis_peminjam = 'dosen'
     WHERE MONTH(p.tanggal_pinjam) = '$bulan' AND YEAR(p.tanggal_pinjam) = '$tahun'
     GROUP BY p.peminjam_id, p.jenis_peminjam
-    ORDER BY jumlah_pinjam DESC
-    LIMIT 10
+    ORDER BY total DESC
+    LIMIT 15
 ");
-$header = ['Rank', 'Nama Peminjam', 'Status', 'Jumlah Transaksi'];
-$w = [15, 100, 40, 35];
-$pdf->TableHeader($header, $w);
+
+$pdf->SetFont('Arial','',8);
 $rank = 1;
-if(mysqli_num_rows($q_top_user) > 0){
-    while($row = mysqli_fetch_assoc($q_top_user)){
-        $pdf->Cell($w[0], 6, $rank++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, substr($row['nama_peminjam'] ?? '-', 0, 50), 1, 0, 'L');
-        $pdf->Cell($w[2], 6, $row['tipe'], 1, 0, 'C');
-        $pdf->Cell($w[3], 6, $row['jumlah_pinjam'].' x', 1, 0, 'C');
+if ($q_top_user && $q_top_user->num_rows > 0) {
+    while ($r = $q_top_user->fetch_assoc()) {
+        $pdf->CheckPageBreak(6);
+        $pdf->Cell($width_g[0], 6, $rank++, 1, 0, 'C');
+        $pdf->Cell($width_g[1], 6, substr($r['nama'], 0, 50), 1, 0, 'L');
+        $pdf->Cell($width_g[2], 6, ucfirst($r['jenis_peminjam']), 1, 0, 'L');
+        $pdf->Cell($width_g[3], 6, $r['total'] . ' Kali', 1, 0, 'C');
         $pdf->Ln();
     }
 } else {
-    $pdf->Cell(190, 6, 'Belum ada data peminjam aktif bulan ini.', 1, 1, 'C');
+    $pdf->Cell(array_sum($width_g), 6, 'Belum ada data peminjam.', 1, 1, 'C');
 }
 
-// --- BAGIAN F: SURAT KETERANGAN ---
-$pdf->AddPage();
-$pdf->SectionTitle("F. REKAP SURAT KETERANGAN BEBAS PUSTAKA");
-$q_surat = mysqli_query($conn, "
-    SELECT s.nomor_surat, s.nim, m.nama, s.jenis_surat, s.tanggal_terbit
-    FROM surat_keterangan s
-    JOIN mahasiswa m ON s.nim = m.nim
-    WHERE MONTH(s.tanggal_terbit) = '$bulan' AND YEAR(s.tanggal_terbit) = '$tahun'
+
+// =========================================================================
+// H. TOP 15 BUKU DIPINJAM (PERIODE INI)
+// =========================================================================
+$pdf->SectionTitle('H. TOP 15 BUKU PALING BANYAK DIPINJAM BULAN INI');
+// Ganti Header 'Kategori' jadi 'Pengarang'
+$header_h = ['Rank', 'Judul Buku', 'Pengarang', 'Dipinjam'];
+$width_h = [15, 100, 45, 30];
+$pdf->TableHeader($header_h, $width_h);
+
+// FIX QUERY: 
+// 1. Ganti b.kategori (Error) menjadi b.pengarang (Valid)
+// 2. Gunakan MAX() untuk judul & pengarang agar aman dari error Group By
+$q_top_book = $conn->query("
+    SELECT b.id, 
+           MAX(b.judul) as judul, 
+           MAX(b.pengarang) as pengarang, 
+           COUNT(p.id) as total
+    FROM peminjaman p
+    LEFT JOIN buku b ON p.buku_id = b.id
+    WHERE MONTH(p.tanggal_pinjam) = '$bulan' 
+      AND YEAR(p.tanggal_pinjam) = '$tahun'
+    GROUP BY b.id
+    ORDER BY total DESC
+    LIMIT 15
 ");
-$header = ['No', 'Nomor Surat', 'NIM', 'Nama Mahasiswa', 'Keperluan'];
-$w = [10, 50, 30, 70, 30];
-$pdf->TableHeader($header, $w);
-$no = 1;
-if(mysqli_num_rows($q_surat) > 0){
-    while($row = mysqli_fetch_assoc($q_surat)){
-        $pdf->Cell($w[0], 6, $no++, 1, 0, 'C');
-        $pdf->Cell($w[1], 6, $row['nomor_surat'], 1, 0, 'L');
-        $pdf->Cell($w[2], 6, $row['nim'], 1, 0, 'C');
-        $pdf->Cell($w[3], 6, substr($row['nama'], 0, 35), 1, 0, 'L');
-        $pdf->Cell($w[4], 6, $row['jenis_surat'], 1, 0, 'C');
+
+$pdf->SetFont('Arial','',8);
+$rank = 1;
+
+// Error Handling Visual di PDF
+if (!$q_top_book) {
+    $pdf->SetTextColor(255, 0, 0);
+    $pdf->Cell(0, 10, 'Error Database: ' . $conn->error, 1, 1, 'L');
+    $pdf->SetTextColor(0);
+} elseif ($q_top_book->num_rows > 0) {
+    while ($r = $q_top_book->fetch_assoc()) {
+        $judul = !empty($r['judul']) ? substr($r['judul'], 0, 60) : '[Tanpa Judul]';
+        $pengarang = !empty($r['pengarang']) ? substr($r['pengarang'], 0, 25) : '-';
+
+        $pdf->CheckPageBreak(6);
+        $pdf->Cell($width_h[0], 6, $rank++, 1, 0, 'C');
+        $pdf->Cell($width_h[1], 6, $judul, 1, 0, 'L');
+        $pdf->Cell($width_h[2], 6, $pengarang, 1, 0, 'L'); // Tampilkan Pengarang
+        $pdf->Cell($width_h[3], 6, $r['total'] . ' Kali', 1, 0, 'C');
         $pdf->Ln();
     }
 } else {
-    $pdf->Cell(190, 6, 'Belum ada surat keterangan diterbitkan bulan ini.', 1, 1, 'C');
+    $pdf->Cell(array_sum($width_h), 6, 'Belum ada data peminjaman buku bulan ini.', 1, 1, 'C');
+}
+$pdf->Ln(10);
+
+
+// =========================================================================
+// I. REKAP SURAT BEBAS PUSTAKA
+// =========================================================================
+$pdf->SectionTitle('I. REKAP SURAT KETERANGAN BEBAS PUSTAKA');
+$header_i = ['No', 'Tanggal', 'No. Surat', 'NIM', 'Nama Mahasiswa', 'Keperluan'];
+$width_i = [10, 20, 35, 25, 50, 50];
+$pdf->TableHeader($header_i, $width_i);
+
+$q_surat = $conn->query("
+    SELECT s.*, m.nama 
+    FROM surat_keterangan s
+    LEFT JOIN mahasiswa m ON s.nim = m.nim
+    WHERE MONTH(s.tanggal_terbit) = '$bulan' AND YEAR(s.tanggal_terbit) = '$tahun'
+    ORDER BY s.tanggal_terbit ASC
+");
+
+$pdf->SetFont('Arial','',8);
+$no=1;
+if ($q_surat && $q_surat->num_rows > 0) {
+    while ($r = $q_surat->fetch_assoc()) {
+        $pdf->CheckPageBreak(6);
+        $pdf->Cell($width_i[0], 6, $no++, 1, 0, 'C');
+        $pdf->Cell($width_i[1], 6, date('d/m/y', strtotime($r['tanggal_terbit'])), 1, 0, 'C');
+        $pdf->Cell($width_i[2], 6, $r['nomor_surat'], 1, 0, 'L');
+        $pdf->Cell($width_i[3], 6, $r['nim'], 1, 0, 'C');
+        $pdf->Cell($width_i[4], 6, substr($r['nama'], 0, 28), 1, 0, 'L');
+        $pdf->Cell($width_i[5], 6, substr($r['jenis_surat'], 0, 28), 1, 0, 'L');
+        $pdf->Ln();
+    }
+} else {
+    $pdf->Cell(array_sum($width_i), 6, 'Tidak ada surat keterangan diterbitkan.', 1, 1, 'C');
+}
+$pdf->Ln(10);
+
+
+// =========================================================================
+// TANDA TANGAN
+// =========================================================================
+$pdf->CheckPageBreak(40); // Pastikan cukup ruang untuk TTD
+$pdf->SetFont('Arial','',11);
+$x_ttd = 120; 
+
+$pdf->SetX($x_ttd);
+$pdf->Cell(60, 6, 'Merauke, ' . date('d F Y'), 0, 1, 'C');
+$pdf->SetX($x_ttd);
+$pdf->Cell(60, 6, 'Kepala Perpustakaan,', 0, 1, 'C');
+
+$y_ttd_start = $pdf->GetY();
+$path_ttd_img = '../../assets/images/ttd_yuli.png';
+
+if (file_exists($path_ttd_img)) {
+    $pdf->Image($path_ttd_img, $x_ttd + 10, $y_ttd_start + 2, 35); 
+    $pdf->Ln(30);
+} else {
+    $pdf->Ln(25);
 }
 
-// --- TANDA TANGAN ---
-$pdf->Ln(20);
-$pdf->SetFont('Times','',11);
+$pdf->SetX($x_ttd);
+$pdf->SetFont('Arial','BU',11);
+$pdf->Cell(60, -1, 'Yuliana Mangera, S.S.I', 0, 1, 'C');
 
-// Kolom Tanggal & Jabatan
-$pdf->Cell(120); 
-$pdf->Cell(70, 6, 'Merauke, '.date('d F Y'), 0, 1, 'C');
-
-$pdf->Cell(120);
-$pdf->Cell(70, 6, 'Kepala Perpustakaan,', 0, 1, 'C');
-
-$pdf->Ln(25); // Spasi
-
-// Nama Kepala Perpustakaan (Bold & Underline Style)
-$pdf->Cell(120);
-$pdf->SetFont('Times','BU',11); 
-$pdf->Cell(70, 6, 'Yuliana Mangera, S.S.I', 0, 1, 'C');
-
-// Output PDF
-$pdf->Output('I', "Laporan_Perpustakaan_$periode.pdf");
+// OUTPUT
+$pdf->Output('I', 'Laporan_Bulanan_'.$bulan.'_'.$tahun.'.pdf');
 ?>

@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - E-Library STK Yakobus</title>
+    <title>Login - E-Library STK St. Yakobus Merauke</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
             <div class="login-header">
                 <i class="bi bi-book fs-1 mb-3"></i>
                 <h3 class="mb-1">E-Library</h3>
-                <p class="mb-0">STK Yakobus Merauke</p>
+                <p class="mb-0">STK St. Yakobus Merauke</p>
             </div>
             <div class="login-body">
                 <?php if (isset($error)): ?>
@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
             </div>
         </div>
         <div class="text-center mt-3 text-white">
-            <small>&copy; 2026 STK Yakobus Merauke. All rights reserved.</small>
+            <small>&copy; 2026 PTIPD STK St. Yakobus. All rights reserved.</small>
         </div>
     </div>
 

@@ -315,6 +315,9 @@ $result = $conn->query($query);
         <div class="page-header d-flex justify-content-between align-items-center">
             <h1><i class="bi bi-book me-2"></i>Data Buku</h1>
             <div>
+                <a href="export.php" class="btn btn-info text-white me-2">
+                    <i class="bi bi-file-earmark-arrow-down me-2"></i>Export Data
+                </a>
                 <a href="import.php" class="btn btn-success me-2">
                     <i class="bi bi-file-earmark-excel me-2"></i>Import Excel
                 </a>

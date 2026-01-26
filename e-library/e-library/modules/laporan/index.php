@@ -97,36 +97,36 @@ requireLogin();
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header bg-gradient-green">
-                        <h5 class="mb-0"><i class="bi bi-list-stars me-2"></i>Laporan Daftar & Arsip</h5>
+                        <h5 class="mb-0"><i class="bi bi-folder2-open me-2"></i>Akses Cepat Data & Arsip</h5>
                     </div>
                     <div class="list-group list-group-flush">
-                        <a href="daftar_peminjaman.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-arrow-left-right me-2"></i>Daftar Peminjaman Berjalan</span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        <a href="../peminjaman/index.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-arrow-left-right me-2"></i>Data Peminjaman Berjalan</span>
+                            <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="daftar_keterlambatan.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-exclamation-triangle me-2"></i>Daftar Keterlambatan</span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        <a href="../denda/index.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-exclamation-triangle me-2"></i>Data Keterlambatan & Denda</span>
+                            <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="daftar_perpanjangan.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-arrow-clockwise me-2"></i>Daftar Perpanjangan Buku</span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        <a href="../perpanjangan/index.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-arrow-clockwise me-2"></i>Riwayat Perpanjangan Buku</span>
+                            <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="daftar_pengembalian.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-arrow-return-left me-2"></i>Daftar Pengembalian</span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        <a href="../pengembalian/index.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-arrow-return-left me-2"></i>Arsip Pengembalian</span>
+                            <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="daftar_buku_habis.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-inbox me-2"></i>Daftar Buku Stok Habis</span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        <a href="../buku/index.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-book me-2"></i>Cek Stok Buku</span>
+                            <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="daftar_mahasiswa.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-people me-2"></i>Daftar Mahasiswa</span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        <a href="../mahasiswa/index.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-people me-2"></i>Data Mahasiswa</span>
+                            <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="daftar_dosen.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-person-badge me-2"></i>Daftar Dosen</span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        <a href="../dosen/index.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-person-badge me-2"></i>Data Dosen</span>
+                            <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
                     </div>
                 </div>
@@ -180,7 +180,7 @@ requireLogin();
                                             <i class="bi bi-file-pdf text-danger fs-5 me-1 align-middle"></i> PDF Document
                                         </label>
                                     </div>
-                                    </div>
+                                </div>
                             </div>
                             
                             <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm">
@@ -194,10 +194,10 @@ requireLogin();
                                 <div>
                                     <h6 class="fw-bold mb-1">Cakupan Laporan Bulanan:</h6>
                                     <ul class="mb-0 ps-3 small" style="opacity: 0.9;">
-                                        <li>Statistik Aset & Anggota</li>
+                                        <li>Statistik Aset, Anggota & Stok Habis</li>
                                         <li>Rekap Peminjaman & Pengembalian</li>
-                                        <li>Daftar Keterlambatan & Denda</li>
-                                        <li>Analisis Buku Terpopuler & User Aktif</li>
+                                        <li>Daftar Buku Hilang & Denda</li>
+                                        <li>Analisis Top 15 Peminjam & Buku Populer</li>
                                         <li>Rekap Surat Keterangan</li>
                                     </ul>
                                 </div>

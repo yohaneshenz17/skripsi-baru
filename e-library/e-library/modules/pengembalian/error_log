@@ -1,0 +1,9 @@
+[21-Jan-2026 14:05:17 Asia/Jakarta] PHP Warning:  Undefined variable $total_denda in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 129
+[21-Jan-2026 14:05:17 Asia/Jakarta] PHP Warning:  Undefined variable $denda_dibayar in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 182
+[21-Jan-2026 14:07:29 Asia/Jakarta] PHP Warning:  Undefined variable $total_denda in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 129
+[21-Jan-2026 14:07:29 Asia/Jakarta] PHP Warning:  Undefined variable $denda_dibayar in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 182
+[21-Jan-2026 14:27:51 Asia/Jakarta] PHP Warning:  Undefined variable $total_denda in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 129
+[21-Jan-2026 14:27:51 Asia/Jakarta] PHP Warning:  Undefined variable $denda_dibayar in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 182
+[21-Jan-2026 14:36:10 Asia/Jakarta] PHP Warning:  Undefined variable $denda_dibayar in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 182
+[22-Jan-2026 06:30:47 Asia/Jakarta] PHP Warning:  Undefined variable $total_denda in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 129
+[22-Jan-2026 06:30:47 Asia/Jakarta] PHP Warning:  Undefined variable $denda_dibayar in /home/stkp7133/public_html/e-library/modules/pengembalian/add.php on line 182

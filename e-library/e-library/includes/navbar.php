@@ -2,7 +2,7 @@
     <div class="container-fluid">
         <a class="navbar-brand" href="dashboard.php">
             <i class="bi bi-book-fill me-2"></i>
-            <strong>E-Library STK Yakobus</strong>
+            <strong>E-Library STK St. Yakobus Merauke</strong>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>

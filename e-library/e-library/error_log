@@ -38,3 +38,10 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in /home/stkp7133/public_html/e-library/dashboard.php on line 57
+[22-Jan-2026 08:49:42 Asia/Jakarta] PHP Fatal error:  Uncaught Error: mysqli object is already closed in /home/stkp7133/public_html/e-library/cleanup_data.php:41
+Stack trace:
+#0 /home/stkp7133/public_html/e-library/cleanup_data.php(41): mysqli->ping()
+#1 /home/stkp7133/public_html/e-library/cleanup_data.php(68): connectDB()
+#2 /home/stkp7133/public_html/e-library/cleanup_data.php(365): createBackup()
+#3 {main}
+  thrown in /home/stkp7133/public_html/e-library/cleanup_data.php on line 41

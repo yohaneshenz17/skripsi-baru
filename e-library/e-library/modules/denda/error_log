@@ -80,3 +80,78 @@ Stack trace:
 #0 /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php(57): mysqli_stmt->bind_result()
 #1 {main}
   thrown in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 57
+[21-Jan-2026 12:49:32 Asia/Jakarta] PHP Warning:  Undefined variable $result_detail in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 12:49:32 Asia/Jakarta] PHP Warning:  Attempt to read property "num_rows" on null in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 12:49:56 Asia/Jakarta] PHP Warning:  Undefined variable $result_detail in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 12:49:56 Asia/Jakarta] PHP Warning:  Attempt to read property "num_rows" on null in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 12:50:10 Asia/Jakarta] PHP Fatal error:  Uncaught ArgumentCountError: Number of bind variables doesn't match number of fields in prepared statement in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php:57
+Stack trace:
+#0 /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php(57): mysqli_stmt->bind_result()
+#1 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 57
+[21-Jan-2026 12:56:45 Asia/Jakarta] PHP Fatal error:  Uncaught ArgumentCountError: Number of bind variables doesn't match number of fields in prepared statement in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php:57
+Stack trace:
+#0 /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php(57): mysqli_stmt->bind_result()
+#1 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 57
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_id in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 92
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_peminjaman_id in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 93
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_tanggal_kembali in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 94
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_keterlambatan_hari in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 95
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_denda in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 96
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_denda_dibayar in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 97
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_uang_kembali in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 98
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_sisa_denda in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 99
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_metode_pembayaran in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 100
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_keterangan in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 101
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_nomor_bukti in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 102
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pg_tanggal_lunas in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 103
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $kode_peminjaman in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 104
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $jenis_peminjam in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 105
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $peminjam_id in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 106
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $tanggal_pinjam in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 107
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Warning:  Undefined variable $pengarang in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 110
+[21-Jan-2026 13:08:16 Asia/Jakarta] PHP Fatal error:  Uncaught Error: mysqli_stmt object is already closed in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php:112
+Stack trace:
+#0 /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php(112): mysqli_stmt->close()
+#1 {main}
+  thrown in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 112
+[21-Jan-2026 13:24:03 Asia/Jakarta] PHP Parse error:  Unclosed '[' in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 272
+[21-Jan-2026 13:24:08 Asia/Jakarta] PHP Parse error:  Unclosed '[' in /home/stkp7133/public_html/e-library/modules/denda/cetak_bukti.php on line 272
+[21-Jan-2026 13:25:43 Asia/Jakarta] PHP Warning:  Undefined variable $result_detail in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 13:25:43 Asia/Jakarta] PHP Warning:  Attempt to read property "num_rows" on null in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 14:37:44 Asia/Jakarta] PHP Warning:  Undefined variable $result_detail in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 14:37:44 Asia/Jakarta] PHP Warning:  Attempt to read property "num_rows" on null in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 17:07:24 Asia/Jakarta] PHP Warning:  Undefined variable $result_detail in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 17:07:24 Asia/Jakarta] PHP Warning:  Attempt to read property "num_rows" on null in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 17:49:29 Asia/Jakarta] PHP Warning:  Undefined variable $total_pages in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 406
+[21-Jan-2026 17:50:15 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 434
+[21-Jan-2026 17:50:15 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:15 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:15 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 460
+[21-Jan-2026 17:50:17 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 434
+[21-Jan-2026 17:50:17 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:17 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:17 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 460
+[21-Jan-2026 17:50:23 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 434
+[21-Jan-2026 17:50:23 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:23 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:23 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 460
+[21-Jan-2026 17:50:28 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 434
+[21-Jan-2026 17:50:28 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:28 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:28 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 460
+[21-Jan-2026 17:50:34 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 434
+[21-Jan-2026 17:50:34 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:34 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:34 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 460
+[21-Jan-2026 17:50:49 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 434
+[21-Jan-2026 17:50:49 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:49 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:50:49 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 460
+[21-Jan-2026 17:51:52 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 434
+[21-Jan-2026 17:51:52 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:51:52 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 449
+[21-Jan-2026 17:51:52 Asia/Jakarta] PHP Warning:  Undefined variable $search in /home/stkp7133/public_html/e-library/modules/denda/index.php on line 460
+[21-Jan-2026 18:00:41 Asia/Jakarta] PHP Warning:  Undefined variable $result_detail in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618
+[21-Jan-2026 18:00:41 Asia/Jakarta] PHP Warning:  Attempt to read property "num_rows" on null in /home/stkp7133/public_html/e-library/modules/denda/bayar.php on line 618

@@ -45,68 +45,79 @@ $stmt->close();
 $nama_peminjam = getNamaPeminjam($conn, $pinjam['jenis_peminjam'], $pinjam['peminjam_id']);
 $identifier = getIdentifierPeminjam($conn, $pinjam['jenis_peminjam'], $pinjam['peminjam_id']);
 
-// Process pengembalian
+// =======================================================================
+// PROSES PENGEMBALIAN BUKU (STEP 1: LOGIC & VALIDASI)
+// =======================================================================
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $tanggal_kembali = $_POST['tanggal_kembali'];
-    $metode_pembayaran = $_POST['metode_pembayaran'];
-    $keterangan = isset($_POST['keterangan']) ? trim($_POST['keterangan']) : '';
+    // 1. Sanitasi Input (Wajib agar aman)
+    $tanggal_kembali   = sanitize($_POST['tanggal_kembali']);
+    $metode_pembayaran = sanitize($_POST['metode_pembayaran']);
+    $keterangan        = isset($_POST['keterangan']) ? sanitize($_POST['keterangan']) : '';
     
-    // CEK BUKU HILANG/RUSAK (NEW)
-    $status_buku = isset($_POST['status_buku']) && !empty($_POST['status_buku']) ? $_POST['status_buku'] : 'normal';
-    $nominal_denda_buku = isset($_POST['nominal_denda_buku']) ? floatval($_POST['nominal_denda_buku']) : 0;
-    $keterangan_kehilangan = isset($_POST['keterangan_kehilangan']) ? trim($_POST['keterangan_kehilangan']) : null;
+    // 2. Cek Status Buku Hilang/Rusak
+    // Default status = 'normal' jika tidak ada input
+    $status_buku           = isset($_POST['status_buku']) && !empty($_POST['status_buku']) ? sanitize($_POST['status_buku']) : 'normal';
+    $nominal_denda_buku    = isset($_POST['nominal_denda_buku']) ? intval($_POST['nominal_denda_buku']) : 0;
+    $keterangan_kehilangan = isset($_POST['keterangan_kehilangan']) ? sanitize($_POST['keterangan_kehilangan']) : '';
     
+    // Flagging boolean
     $is_buku_hilang = ($status_buku != 'normal');
     
-    // Hitung keterlambatan dan denda
+    // 3. Hitung Keterlambatan & Denda Telat
     $jatuh_tempo = new DateTime($pinjam['tanggal_jatuh_tempo']);
-    $tgl_kembali = new DateTime($tanggal_kembali);
+    $tgl_kembali_obj = new DateTime($tanggal_kembali);
     
-    if ($tgl_kembali > $jatuh_tempo) {
-        $selisih = $jatuh_tempo->diff($tgl_kembali);
+    $keterlambatan_hari = 0;
+    $denda_keterlambatan = 0;
+
+    if ($tgl_kembali_obj > $jatuh_tempo) {
+        $selisih = $jatuh_tempo->diff($tgl_kembali_obj);
         $keterlambatan_hari = $selisih->days;
-        $denda_keterlambatan = $keterlambatan_hari * 1000;
-    } else {
-        $keterlambatan_hari = 0;
-        $denda_keterlambatan = 0;
+        $denda_keterlambatan = $keterlambatan_hari * 1000; // Tarif Rp 1.000/hari
     }
     
-    // TENTUKAN TOTAL DENDA (MAX) (NEW)
+    // 4. Tentukan TOTAL TAGIHAN (Logic MAX)
+    // Jika buku hilang, denda telat biasanya diabaikan (diganti harga buku), 
+    // atau diambil mana yang paling merugikan (Max).
     if ($is_buku_hilang) {
-        $total_denda = max($denda_keterlambatan, $nominal_denda_buku);
+        $total_tagihan = max($denda_keterlambatan, $nominal_denda_buku);
     } else {
-        $total_denda = $denda_keterlambatan;
+        $total_tagihan = $denda_keterlambatan;
     }
     
-    // Hitung pembayaran denda
-    $denda_dibayar = 0;
-    $uang_kembali = 0;
-    $sisa_denda = 0;
+    // 5. Hitung Pembayaran
+    $nominal_bayar = 0; // Uang yang diterima fisik
+    $sisa_denda = 0;    // Sisa kewajiban di sistem perpus
     
-    if ($total_denda > 0) {
+    if ($total_tagihan > 0) {
         if ($metode_pembayaran == 'cash' || $metode_pembayaran == 'transfer') {
-            $nominal_bayar = intval($_POST['nominal_bayar']);
-            $denda_dibayar = $nominal_bayar;
+            // Jika bayar tunai/transfer, hitung uang masuk
+            $nominal_bayar = isset($_POST['nominal_bayar']) ? intval($_POST['nominal_bayar']) : 0;
             
-            if ($nominal_bayar >= $total_denda) {
-                $uang_kembali = $nominal_bayar - $total_denda;
-                $sisa_denda = 0;
+            if ($nominal_bayar >= $total_tagihan) {
+                $sisa_denda = 0; // Lunas
             } else {
-                $sisa_denda = $total_denda - $nominal_bayar;
+                $sisa_denda = $total_tagihan - $nominal_bayar; // Belum Lunas
             }
+            
         } elseif ($metode_pembayaran == 'tagihan_studi') {
-            // Tagihan studi dianggap lunas (dialihkan ke sistem akademik)
-            $denda_dibayar = $total_denda;
-            $sisa_denda = 0;
-        } elseif ($metode_pembayaran == 'waive') {
-            // Denda dibatalkan/dibebaskan
-            $denda_dibayar = 0;
+            // Jika tagihan studi: 
+            // - Uang fisik (nominal_bayar) = 0
+            // - Sisa denda di perpus = 0 (karena dianggap lunas/dialihkan)
+            $nominal_bayar = 0;
             $sisa_denda = 0;
             
-            // Validasi keterangan untuk waive
+        } elseif ($metode_pembayaran == 'waive') {
+            // Jika waive (pembebasan):
+            $nominal_bayar = 0;
+            $sisa_denda = 0;
+            
+            // Validasi wajib isi alasan
             if (empty($keterangan)) {
-                setAlert('warning', 'Keterangan wajib diisi untuk pembebasan denda!');
-                goto form_display;
+                setAlert('danger', 'Keterangan wajib diisi untuk pembebasan denda (Waive)!');
+                // Trik agar form tidak reset total, redirect kembali
+                header("Location: add.php?id=" . $id); 
+                exit;
             }
         }
     }
@@ -141,17 +152,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->begin_transaction();
     
     try {
-        // 1. Insert ke tabel pengembalian (DENGAN FIELD BARU)
+        // 2. Insert ke tabel pengembalian (UPDATE: TAMBAH KOLOM STATUS BUKU)
         $query = "INSERT INTO pengembalian 
-                  (peminjaman_id, tanggal_kembali, keterlambatan_hari, denda, denda_dibayar, 
-                   uang_kembali, sisa_denda, metode_pembayaran, keterangan, nomor_bukti, tanggal_lunas,
-                   status_buku, nominal_denda_buku, keterangan_kehilangan) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                  (peminjaman_id, tanggal_kembali, keterlambatan_hari, denda, denda_dibayar, sisa_denda, metode_pembayaran, keterangan, nomor_bukti, tanggal_lunas, status_buku, nominal_denda_buku, keterangan_kehilangan) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("isiiiisssssids", 
-            $id, $tanggal_kembali, $keterlambatan_hari, $total_denda, $denda_dibayar, 
-            $uang_kembali, $sisa_denda, $metode_pembayaran, $keterangan, $nomor_bukti, $tanggal_lunas_val,
-            $status_buku, $nominal_denda_buku, $keterangan_kehilangan
+        // Perhatikan string tipe data: "isi iiiisssssss" -> "isi iiiisssssis" (tambah i dan s di akhir)
+        $stmt->bind_param("isiiiisssssis", 
+            $id, 
+            $tanggal_kembali, 
+            $keterlambatan, 
+            $total_tagihan, // PENTING: Gunakan $total_tagihan (bukan $denda lama)
+            $nominal_bayar, 
+            $sisa_denda, 
+            $metode_pembayaran, 
+            $keterangan,
+            $nomor_bukti,
+            $tanggal_lunas,
+            $status_buku,         // Baru
+            $nominal_denda_buku,  // Baru
+            $keterangan_kehilangan // Baru
         );
         $stmt->execute();
         $pengembalian_id = $conn->insert_id;
@@ -177,8 +198,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute();
         $stmt->close();
         
-        // 4. Update stok buku (CONDITIONAL - HANYA JIKA NORMAL)
-        if (!$is_buku_hilang) {
+        // 4. Update stok buku (LOGIKA: HILANG vs NORMAL)
+        if ($status_buku == 'hilang' || $status_buku == 'rusak_parah') {
+            // SKENARIO A: BUKU HILANG/RUSAK
+            // Kurangi STOK MASTER (Aset), Stok Tersedia JANGAN ditambah (karena fisik tidak ada)
+            $query = "UPDATE buku SET stok = stok - 1 WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $pinjam['buku_id']);
+            $stmt->execute();
+            $stmt->close();
+        } else {
+            // SKENARIO B: NORMAL
+            // Kembalikan ke rak (Tambah Stok Tersedia +1)
             $query = "UPDATE buku SET stok_tersedia = stok_tersedia + 1 WHERE id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("i", $pinjam['buku_id']);
@@ -548,107 +579,70 @@ if ($today > $jatuh_tempo) {
                             </tr>
                         </table>
 
-                        <?php if ($denda > 0): ?>
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <strong>Denda Keterlambatan:</strong> <?= formatRupiah($denda) ?> 
-                            (<?= $keterlambatan ?> hari × Rp 1.000)
-                        </div>
+                        <form method="POST" action="" id="formPengembalian">
+                            
+                            <?php if ($denda > 0): ?>
+                            <div class="alert alert-warning mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>Denda Keterlambatan:</strong> <?= formatRupiah($denda) ?> 
+                                (<?= $keterlambatan ?> hari × Rp 1.000)
+                            </div>
+                            <?php endif; ?>
                         
-                        <!-- SECTION BUKU HILANG (INSERT HERE) -->
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="card border-danger">
-                                    <div class="card-header bg-danger text-white">
-                                        <div class="form-check form-switch mb-0">
-                                            <input class="form-check-input" type="checkbox" id="bukuHilang" onchange="toggleBukuHilang()">
-                                            <label class="form-check-label fw-bold" for="bukuHilang">
-                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Buku Hilang / Rusak Parah
-                                            </label>
+                            <div class="card border-danger mb-3">
+                                <div class="card-header bg-danger text-white">
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input" type="checkbox" id="bukuHilang" onchange="toggleBukuHilang()">
+                                        <label class="form-check-label fw-bold" for="bukuHilang">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Lapor Buku Hilang / Rusak Parah
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="card-body" id="sectionBukuHilang" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Kategori Kehilangan <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="statusBuku" name="status_buku">
+                                                <option value="">- Pilih Kategori -</option>
+                                                <option value="hilang">Hilang</option>
+                                                <option value="rusak_parah">Rusak Parah</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Nominal Denda Buku <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Rp</span>
+                                                <input type="number" class="form-control" id="nominalDendaBuku" 
+                                                       name="nominal_denda_buku" placeholder="0" min="0" onkeyup="hitungTotalDenda()">
+                                            </div>
+                                            <small class="text-muted">Harga penggantian buku</small>
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label">Keterangan</label>
+                                            <textarea class="form-control" name="keterangan_kehilangan" rows="2" placeholder="Kronologi singkat..."></textarea>
                                         </div>
                                     </div>
-                                    <div class="card-body" id="sectionBukuHilang" style="display: none;">
+                                    
+                                    <div class="alert alert-info mb-0">
                                         <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">
-                                                    <i class="bi bi-tag me-1"></i>
-                                                    Kategori Kehilangan <span class="text-danger">*</span>
-                                                </label>
-                                                <select class="form-select" id="statusBuku" name="status_buku">
-                                                    <option value="">- Pilih Kategori -</option>
-                                                    <option value="hilang">Hilang</option>
-                                                    <option value="rusak_parah">Rusak Parah</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">
-                                                    <i class="bi bi-currency-dollar me-1"></i>
-                                                    Nominal Denda Buku <span class="text-danger">*</span>
-                                                </label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">Rp</span>
-                                                    <input type="number" class="form-control" id="nominalDendaBuku" 
-                                                           name="nominal_denda_buku" placeholder="0" min="0" onkeyup="hitungTotalDenda()">
-                                                </div>
-                                                <small class="text-muted">Harga penggantian buku</small>
-                                            </div>
+                                            <div class="col-md-6"><small>Denda Telat: <strong id="displayDendaTelat"><?= formatRupiah($denda) ?></strong></small></div>
+                                            <div class="col-md-6"><small>Ganti Buku: <strong id="displayNominalBuku">Rp 0</strong></small></div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-12 mb-3">
-                                                <label class="form-label">
-                                                    <i class="bi bi-chat-left-text me-1"></i>
-                                                    Keterangan Kehilangan/Kerusakan
-                                                </label>
-                                                <textarea class="form-control" name="keterangan_kehilangan" 
-                                                          rows="2" placeholder="Kronologi singkat (opsional)"></textarea>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- PERHITUNGAN DENDA -->
-                                        <div class="alert alert-info mb-0">
-                                            <h6 class="alert-heading">
-                                                <i class="bi bi-calculator me-2"></i>Perhitungan Denda Final:
-                                            </h6>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <small>Denda Keterlambatan: <strong id="displayDendaTelat"><?= formatRupiah($denda) ?></strong></small>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <small>Nominal Buku: <strong id="displayNominalBuku">Rp 0</strong></small>
-                                                </div>
-                                            </div>
-                                            <hr class="my-2">
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <strong class="text-primary">Total Denda: <span id="displayTotalDenda"><?= formatRupiah($denda) ?></span></strong>
-                                                    <br><small class="text-muted">Sistem mengambil nilai yang lebih besar</small>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <hr class="my-2">
+                                        <strong class="text-primary">Total Bayar: <span id="displayTotalDenda"><?= formatRupiah($denda) ?></span></strong>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <?php endif; ?>
-
-                        <form method="POST" action="" id="formPengembalian">
+                        
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-calendar-check me-1"></i>
-                                        Tanggal Pengembalian <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="date" class="form-control" name="tanggal_kembali" 
-                                           value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                                    <label class="form-label"><i class="bi bi-calendar-check me-1"></i>Tanggal Pengembalian <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" name="tanggal_kembali" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
                                 </div>
                                 
-                                <?php if ($denda > 0): ?>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-cash me-1"></i>
-                                        Metode Pembayaran Denda <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select" name="metode_pembayaran" id="metodePembayaran" required>
+                                <div class="col-md-6 mb-3" id="paymentSection" style="display: <?= ($denda > 0) ? 'block' : 'none' ?>;">
+                                    <label class="form-label"><i class="bi bi-cash me-1"></i>Metode Pembayaran <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="metode_pembayaran" id="metodePembayaran" <?= ($denda > 0) ? 'required' : '' ?>>
                                         <option value="">-- Pilih Metode --</option>
                                         <option value="cash">Cash</option>
                                         <option value="transfer">Transfer</option>
@@ -656,56 +650,29 @@ if ($today > $jatuh_tempo) {
                                         <option value="waive">Waive (Pembebasan)</option>
                                     </select>
                                 </div>
-
+                        
+                                <input type="hidden" name="metode_pembayaran_default" value="cash" id="defaultPaymentMethod">
+                        
                                 <div class="col-12 mb-3" id="inputNominal" style="display:none;">
-                                    <label class="form-label">
-                                        <i class="bi bi-wallet2 me-1"></i>
-                                        Nominal Pembayaran <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="number" class="form-control" name="nominal_bayar" id="nominalBayar" 
-                                           min="0" placeholder="Masukkan nominal pembayaran">
-                                    <div class="form-text">
-                                        Total denda: <strong><?= formatRupiah($denda) ?></strong>
-                                    </div>
-                                    <div id="uangKembaliInfo" class="alert alert-success mt-2" style="display:none;">
-                                        <i class="bi bi-cash-stack me-2"></i>
-                                        Uang Kembali: <strong id="uangKembaliText">Rp 0</strong>
-                                    </div>
-                                    <div id="sisaDendaInfo" class="alert alert-danger mt-2" style="display:none;">
-                                        <i class="bi bi-exclamation-circle me-2"></i>
-                                        Sisa Denda: <strong id="sisaDendaText">Rp 0</strong>
-                                    </div>
+                                    <label class="form-label">Nominal Pembayaran <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="nominal_bayar" id="nominalBayar" min="0">
+                                    <div id="uangKembaliInfo" class="alert alert-success mt-2 p-2" style="display:none;">Kembali: <strong id="uangKembaliText">Rp 0</strong></div>
+                                    <div id="sisaDendaInfo" class="alert alert-danger mt-2 p-2" style="display:none;">Kurang: <strong id="sisaDendaText">Rp 0</strong></div>
                                 </div>
-
+                        
                                 <div class="col-12 mb-3" id="infoTagihan" style="display:none;">
-                                    <div class="alert alert-info">
-                                        <i class="bi bi-info-circle-fill me-2"></i>
-                                        <strong>Informasi:</strong> Denda sebesar <strong><?= formatRupiah($denda) ?></strong> 
-                                        akan dialihkan ke tagihan studi dan dianggap <strong>LUNAS</strong> di sistem e-library. 
-                                        Silakan serahkan laporan rekap denda ke bendahara kampus.
-                                    </div>
+                                    <div class="alert alert-info">Denda akan dialihkan ke tagihan studi akademik.</div>
                                 </div>
-
+                        
                                 <div class="col-12 mb-3" id="inputKeterangan" style="display:none;">
-                                    <label class="form-label">
-                                        <i class="bi bi-chat-left-text me-1"></i>
-                                        Keterangan <span class="text-danger">*</span>
-                                    </label>
-                                    <textarea class="form-control" name="keterangan" rows="3" 
-                                              placeholder="Alasan pembebasan denda..."></textarea>
+                                    <label class="form-label">Alasan Pembebasan <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" name="keterangan" rows="2"></textarea>
                                 </div>
-                                <?php else: ?>
-                                <input type="hidden" name="metode_pembayaran" value="cash">
-                                <?php endif; ?>
                             </div>
-
+                        
                             <div class="d-flex gap-2 mt-4">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-check-circle me-2"></i>Proses Pengembalian
-                                </button>
-                                <a href="index.php" class="btn btn-secondary">
-                                    <i class="bi bi-x-circle me-2"></i>Batal
-                                </a>
+                                <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-2"></i>Proses Pengembalian</button>
+                                <a href="index.php" class="btn btn-secondary">Batal</a>
                             </div>
                         </form>
                     </div>
@@ -740,117 +707,127 @@ if ($today > $jatuh_tempo) {
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const totalDenda = <?= $denda ?>;
-        const metodePembayaran = document.getElementById('metodePembayaran');
-        const inputNominal = document.getElementById('inputNominal');
-        const nominalBayar = document.getElementById('nominalBayar');
-        const uangKembaliInfo = document.getElementById('uangKembaliInfo');
-        const sisaDendaInfo = document.getElementById('sisaDendaInfo');
-        const infoTagihan = document.getElementById('infoTagihan');
-        const inputKeterangan = document.getElementById('inputKeterangan');
-
-        // Handle metode pembayaran change
-        if (metodePembayaran) {
-            metodePembayaran.addEventListener('change', function() {
-                const metode = this.value;
-                
-                // Reset semua
-                inputNominal.style.display = 'none';
-                infoTagihan.style.display = 'none';
-                inputKeterangan.style.display = 'none';
-                nominalBayar.required = false;
-                
-                if (metode === 'cash' || metode === 'transfer') {
-                    inputNominal.style.display = 'block';
-                    nominalBayar.required = true;
-                } else if (metode === 'tagihan_studi') {
-                    infoTagihan.style.display = 'block';
-                } else if (metode === 'waive') {
-                    inputKeterangan.style.display = 'block';
-                    document.querySelector('[name="keterangan"]').required = true;
-                }
-            });
-        }
-
-        // Handle nominal bayar change - hitung uang kembali
-        if (nominalBayar) {
-            nominalBayar.addEventListener('input', function() {
-                const nominal = parseInt(this.value) || 0;
-                
-                if (nominal >= totalDenda) {
-                    const kembali = nominal - totalDenda;
-                    uangKembaliInfo.style.display = 'block';
-                    sisaDendaInfo.style.display = 'none';
-                    document.getElementById('uangKembaliText').textContent = 'Rp ' + kembali.toLocaleString('id-ID');
-                } else if (nominal > 0) {
-                    const sisa = totalDenda - nominal;
-                    sisaDendaInfo.style.display = 'block';
-                    uangKembaliInfo.style.display = 'none';
-                    document.getElementById('sisaDendaText').textContent = 'Rp ' + sisa.toLocaleString('id-ID');
-                } else {
-                    uangKembaliInfo.style.display = 'none';
-                    sisaDendaInfo.style.display = 'none';
-                }
-            });
-        }
-
-        // Konfirmasi sebelum submit
-        document.getElementById('formPengembalian').addEventListener('submit', function(e) {
-            const metode = metodePembayaran ? metodePembayaran.value : 'cash';
-            let konfirmasiMsg = 'Yakin ingin memproses pengembalian ini?';
-            
-            if (totalDenda > 0) {
-                if (metode === 'tagihan_studi') {
-                    konfirmasiMsg = 'Denda akan dialihkan ke tagihan studi. Lanjutkan?';
-                } else if (metode === 'waive') {
-                    konfirmasiMsg = 'Denda akan dibebaskan. Pastikan alasan sudah benar. Lanjutkan?';
-                }
-            }
-            
-            if (!confirm(konfirmasiMsg)) {
-                e.preventDefault();
-            }
-        });
-    </script>
     
-    <script>
-// Denda keterlambatan dari PHP
-const dendaKeterlambatan = <?= $denda ?>;
+<script>
+    // === 1. INISIALISASI VARIABEL ===
+    const dendaKeterlambatan = <?= $denda ?>; // Dari PHP
+    let totalDendaGlobal = dendaKeterlambatan;
 
-function toggleBukuHilang() {
-    const checkbox = document.getElementById('bukuHilang');
-    const section = document.getElementById('sectionBukuHilang');
-    const statusBuku = document.getElementById('statusBuku');
-    const nominalDendaBuku = document.getElementById('nominalDendaBuku');
+    // Elements
+    const elPaymentSection = document.getElementById('paymentSection');
+    const elMetode = document.getElementById('metodePembayaran');
+    const elDefaultMethod = document.getElementById('defaultPaymentMethod');
     
-    if (checkbox.checked) {
-        section.style.display = 'block';
-        statusBuku.setAttribute('required', 'required');
-        nominalDendaBuku.setAttribute('required', 'required');
-    } else {
-        section.style.display = 'none';
-        statusBuku.removeAttribute('required');
-        nominalDendaBuku.removeAttribute('required');
-        // Reset values
-        statusBuku.value = '';
-        nominalDendaBuku.value = '';
-        document.querySelector('textarea[name="keterangan_kehilangan"]').value = '';
-        hitungTotalDenda();
+    // === 2. LOGIKA BUKU HILANG ===
+    function toggleBukuHilang() {
+        const checkbox = document.getElementById('bukuHilang');
+        const section = document.getElementById('sectionBukuHilang');
+        const statusBuku = document.getElementById('statusBuku');
+        const nominalDenda = document.getElementById('nominalDendaBuku');
+        
+        if (checkbox.checked) {
+            section.style.display = 'block';
+            statusBuku.setAttribute('required', 'required');
+            nominalDenda.setAttribute('required', 'required');
+        } else {
+            section.style.display = 'none';
+            statusBuku.removeAttribute('required');
+            nominalDenda.removeAttribute('required');
+            statusBuku.value = '';
+            nominalDenda.value = ''; // Reset nilai
+            hitungTotalDenda(); // Recalculate jadi 0 (atau denda telat)
+        }
     }
-}
 
-function hitungTotalDenda() {
-    const nominalBuku = parseInt(document.getElementById('nominalDendaBuku').value) || 0;
-    const totalDenda = Math.max(dendaKeterlambatan, nominalBuku);
-    
-    // Format rupiah
-    const formatRp = (angka) => 'Rp ' + angka.toLocaleString('id-ID');
-    
-    document.getElementById('displayDendaTelat').textContent = formatRp(dendaKeterlambatan);
-    document.getElementById('displayNominalBuku').textContent = formatRp(nominalBuku);
-    document.getElementById('displayTotalDenda').textContent = formatRp(totalDenda);
-}
+    // === 3. HITUNG TOTAL & KONTROL UI PEMBAYARAN ===
+    function hitungTotalDenda() {
+        const inputBuku = document.getElementById('nominalDendaBuku');
+        const nominalBuku = inputBuku ? (parseInt(inputBuku.value) || 0) : 0;
+        
+        // Logika Max: Ambil mana yang lebih besar (Telat vs Ganti Buku)
+        const totalDenda = Math.max(dendaKeterlambatan, nominalBuku);
+        totalDendaGlobal = totalDenda;
+        
+        // Update Teks Rupiah
+        const formatRp = (n) => 'Rp ' + n.toLocaleString('id-ID');
+        document.getElementById('displayNominalBuku').textContent = formatRp(nominalBuku);
+        document.getElementById('displayTotalDenda').textContent = formatRp(totalDenda);
+
+        // LOGIKA PENTING: Show/Hide Payment Section
+        if (totalDenda > 0) {
+            // Ada tagihan (Entah telat atau buku hilang) -> Munculkan Opsi Bayar
+            elPaymentSection.style.display = 'block';
+            elMetode.setAttribute('required', 'required');
+            elDefaultMethod.disabled = true; // Matikan default value
+        } else {
+            // Tidak ada tagihan sama sekali (Tepat waktu & Buku ada)
+            elPaymentSection.style.display = 'none';
+            elMetode.removeAttribute('required');
+            elMetode.value = '';
+            elDefaultMethod.disabled = false; // Aktifkan default value 'cash'
+            toggleMetodePembayaran(); // Reset inputan bawahnya
+        }
+
+        // Update kalkulasi uang pas/kembali jika user sudah ketik
+        if (document.getElementById('nominalBayar').value) {
+            hitungNominalBayar();
+        }
+    }
+
+    // === 4. LOGIKA METODE PEMBAYARAN ===
+    function toggleMetodePembayaran() {
+        const metode = elMetode.value;
+        const elNominalInput = document.getElementById('inputNominal');
+        const elTagihanInfo = document.getElementById('infoTagihan');
+        const elKetInput = document.getElementById('inputKeterangan');
+        const inpNominal = document.getElementById('nominalBayar');
+        const txtKet = document.querySelector('textarea[name="keterangan"]');
+
+        // Hide All First
+        elNominalInput.style.display = 'none';
+        elTagihanInfo.style.display = 'none';
+        elKetInput.style.display = 'none';
+        inpNominal.removeAttribute('required');
+        if(txtKet) txtKet.removeAttribute('required');
+
+        if (totalDendaGlobal > 0) {
+            if (metode === 'cash' || metode === 'transfer') {
+                elNominalInput.style.display = 'block';
+                inpNominal.setAttribute('required', 'required');
+            } else if (metode === 'tagihan_studi') {
+                elTagihanInfo.style.display = 'block';
+            } else if (metode === 'waive') {
+                elKetInput.style.display = 'block';
+                if(txtKet) txtKet.setAttribute('required', 'required');
+            }
+        }
+    }
+
+    // === 5. HITUNG KEMBALIAN ===
+    function hitungNominalBayar() {
+        const bayar = parseInt(document.getElementById('nominalBayar').value) || 0;
+        const elKembali = document.getElementById('uangKembaliInfo');
+        const elSisa = document.getElementById('sisaDendaInfo');
+        
+        if (bayar >= totalDendaGlobal) {
+            const kembali = bayar - totalDendaGlobal;
+            document.getElementById('uangKembaliText').textContent = 'Rp ' + kembali.toLocaleString('id-ID');
+            elKembali.style.display = 'block';
+            elSisa.style.display = 'none';
+        } else {
+            const kurang = totalDendaGlobal - bayar;
+            document.getElementById('sisaDendaText').textContent = 'Rp ' + kurang.toLocaleString('id-ID');
+            elSisa.style.display = 'block';
+            elKembali.style.display = 'none';
+        }
+    }
+
+    // Event Listeners
+    if(elMetode) elMetode.addEventListener('change', toggleMetodePembayaran);
+    document.getElementById('nominalBayar')?.addEventListener('input', hitungNominalBayar);
+
+    // Initial Check (Penting jika refresh halaman saat telat)
+    hitungTotalDenda();
 </script>
 
 </body>

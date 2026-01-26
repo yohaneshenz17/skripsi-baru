@@ -1,753 +1,397 @@
 <?php
+// =========================================================
+// DASHBOARD SISTEM INFORMASI PERPUSTAKAAN
+// STK SANTO YAKOBUS MERAUKE
+// =========================================================
+
+// 1. CONFIG & SESSION
 require_once 'config/database.php';
 require_once 'config/functions.php';
 
+// Cek Login & Update Status Otomatis
 requireLogin();
-updateStatusPeminjaman($conn);
+updateStatusPeminjaman($conn); // Auto-update status terlambat
 
-// Get statistics
-$stats = array();
+$admin_username = $_SESSION['admin_username'] ?? 'Administrator';
 
-// Total buku
-$query = "SELECT SUM(stok) as total FROM buku";
-$result = $conn->query($query);
-$stats['total_buku'] = $result->fetch_assoc()['total'] ?? 0;
+// 2. LOGIKA STATISTIK & DATA
+// ---------------------------------------------------------
 
-// Total mahasiswa
-$query = "SELECT COUNT(*) as total FROM mahasiswa";
-$result = $conn->query($query);
-$stats['total_mahasiswa'] = $result->fetch_assoc()['total'];
+// A. Statistik Utama (Card Atas)
+$stats = [
+    'total_buku' => $conn->query("SELECT SUM(stok) FROM buku")->fetch_row()[0] ?? 0,
+    'total_judul' => $conn->query("SELECT COUNT(*) FROM buku")->fetch_row()[0] ?? 0,
+    'total_anggota' => $conn->query("SELECT (SELECT COUNT(*) FROM mahasiswa) + (SELECT COUNT(*) FROM dosen)")->fetch_row()[0] ?? 0,
+    'sedang_dipinjam' => $conn->query("SELECT COUNT(*) FROM peminjaman WHERE status IN ('dipinjam', 'diperpanjang', 'terlambat')")->fetch_row()[0] ?? 0,
+    'terlambat' => $conn->query("SELECT COUNT(*) FROM peminjaman WHERE status = 'terlambat'")->fetch_row()[0] ?? 0
+];
 
-// Total dosen
-$query = "SELECT COUNT(*) as total FROM dosen";
-$result = $conn->query($query);
-$stats['total_dosen'] = $result->fetch_assoc()['total'];
-
-// Peminjaman aktif
-$query = "SELECT COUNT(*) as total FROM peminjaman WHERE status IN ('dipinjam', 'diperpanjang', 'terlambat')";
-$result = $conn->query($query);
-$stats['peminjaman_aktif'] = $result->fetch_assoc()['total'];
-
-// Keterlambatan
-$query = "SELECT COUNT(*) as total FROM peminjaman WHERE status = 'terlambat'";
-$result = $conn->query($query);
-$stats['keterlambatan'] = $result->fetch_assoc()['total'];
-
-// Fungsi hitung denda berjalan (sama seperti di denda/index.php)
-function hitungDendaBerjalan($conn) {
-    $today = date('Y-m-d');
-    
-    $query = "SELECT p.id, p.tanggal_jatuh_tempo
-              FROM peminjaman p
-              WHERE p.tanggal_jatuh_tempo < '$today'
-              AND p.tanggal_kembali IS NULL
-              AND p.status NOT IN ('dikembalikan', 'selesai')";
-    
-    $result = $conn->query($query);
-    $total_denda = 0;
-    $tarif_denda = 1000;
-    
-    while ($row = $result->fetch_assoc()) {
-        $tanggal_jatuh_tempo = new DateTime($row['tanggal_jatuh_tempo']);
-        $today_date = new DateTime($today);
-        $hari_terlambat = $tanggal_jatuh_tempo->diff($today_date)->days;
-        
-        if ($hari_terlambat > 0) {
-            $total_denda += ($hari_terlambat * $tarif_denda);
-        }
-    }
-    
-    return $total_denda;
-}
-
-// Hitung denda berjalan
-$denda_berjalan = hitungDendaBerjalan($conn);
-
-// Total denda belum dibayar dari pengembalian
-$query = "SELECT IFNULL(SUM(sisa_denda), 0) as total FROM pengembalian WHERE sisa_denda > 0";
-$result = $conn->query($query);
-$sisa_denda_pengembalian = $result->fetch_assoc()['total'];
-
-// Total Exposure = Denda Berjalan + Sisa Denda Belum Dibayar
-$stats['total_denda'] = $denda_berjalan + $sisa_denda_pengembalian;
-
-// Buku habis
-$query = "SELECT * FROM buku WHERE stok_tersedia <= 0 AND stok > 0 LIMIT 5";
-$buku_habis = $conn->query($query);
-
-// Peminjaman akan jatuh tempo (3 hari ke depan)
+// B. Hitung Potensi Denda Berjalan (Realtime)
+// Menghitung denda dari buku yang belum kembali dan sudah lewat jatuh tempo
 $today = date('Y-m-d');
-$three_days = date('Y-m-d', strtotime('+3 days'));
-$query = "SELECT p.*, b.judul, b.nomor_buku 
-          FROM peminjaman p
-          JOIN buku b ON p.buku_id = b.id
-          WHERE p.tanggal_jatuh_tempo BETWEEN ? AND ?
-          AND p.status IN ('dipinjam', 'diperpanjang')
-          ORDER BY p.tanggal_jatuh_tempo ASC
-          LIMIT 5";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("ss", $today, $three_days);
-$stmt->execute();
-$stmt->bind_result($pjm_id, $pjm_kode, $pjm_jenis, $pjm_peminjam_id, $pjm_buku_id, $pjm_tgl_pinjam, $pjm_tgl_tempo, $pjm_tgl_kembali, $pjm_status, $pjm_denda, $pjm_created, $pjm_updated, $pjm_judul, $pjm_nomor);
-$akan_jatuh_tempo = array();
-while ($stmt->fetch()) {
-    $akan_jatuh_tempo[] = array(
-        'kode_peminjaman' => $pjm_kode,
-        'jenis_peminjam' => $pjm_jenis,
-        'peminjam_id' => $pjm_peminjam_id,
-        'judul' => $pjm_judul,
-        'tanggal_jatuh_tempo' => $pjm_tgl_tempo
-    );
+$q_denda = "SELECT tanggal_jatuh_tempo FROM peminjaman 
+            WHERE tanggal_jatuh_tempo < '$today' 
+            AND tanggal_kembali IS NULL 
+            AND status NOT IN ('dikembalikan', 'selesai')";
+$res_denda = $conn->query($q_denda);
+$total_estimasi_denda = 0;
+while($r = $res_denda->fetch_assoc()){
+    $jt = new DateTime($r['tanggal_jatuh_tempo']);
+    $now = new DateTime($today);
+    $hari = $jt->diff($now)->days;
+    $total_estimasi_denda += ($hari * 1000); // Rp 1.000/hari
 }
-$stmt->close();
+
+// C. Data Grafik (6 Bulan Terakhir)
+$chart_labels = [];
+$chart_pinjam = [];
+$chart_kembali = [];
+
+for ($i = 5; $i >= 0; $i--) {
+    $m = date('m', strtotime("-$i months"));
+    $y = date('Y', strtotime("-$i months"));
+    $label = date('M Y', strtotime("-$i months"));
+    
+    $chart_labels[] = $label;
+    $chart_pinjam[] = $conn->query("SELECT COUNT(*) FROM peminjaman WHERE MONTH(tanggal_pinjam) = '$m' AND YEAR(tanggal_pinjam) = '$y'")->fetch_row()[0];
+    $chart_kembali[] = $conn->query("SELECT COUNT(*) FROM pengembalian WHERE MONTH(tanggal_kembali) = '$m' AND YEAR(tanggal_kembali) = '$y'")->fetch_row()[0];
+}
+
+// D. Peminjaman Terakhir (Tabel Bawah)
+$q_recent = "SELECT p.*, b.judul, 
+             CASE WHEN p.jenis_peminjam='mahasiswa' THEN m.nama ELSE d.nama END as peminjam
+             FROM peminjaman p
+             JOIN buku b ON p.buku_id = b.id
+             LEFT JOIN mahasiswa m ON p.peminjam_id=m.id AND p.jenis_peminjam='mahasiswa'
+             LEFT JOIN dosen d ON p.peminjam_id=d.id AND p.jenis_peminjam='dosen'
+             ORDER BY p.id DESC LIMIT 5";
+$res_recent = $conn->query($q_recent);
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - E-Library STK Yakobus</title>
+    <title>Dashboard Eksekutif - E-Library</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* --- 1. GLOBAL STYLES --- */
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f3f4f6; overflow-x: hidden; }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            overflow-x: hidden;
-        }
+        /* --- 2. NAVBAR & SIDEBAR (FIXED) --- */
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 0.8rem 1.5rem; box-shadow: 0 2px 15px rgba(0,0,0,0.1); z-index: 1040; }
+        .navbar-brand { font-weight: 700; letter-spacing: 0.5px; font-size: 1.4rem; }
+        
+        .sidebar { position: fixed; top: 60px; bottom: 0; left: 0; width: 260px; background: #ffffff; box-shadow: 2px 0 10px rgba(0,0,0,0.05); overflow-y: auto; z-index: 1000; padding-top: 1rem; }
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background-color: #ddd; border-radius: 5px; }
+        
+        .nav-link { color: #555; padding: 0.8rem 1.5rem; font-weight: 500; transition: all 0.3s; display: flex; align-items: center; }
+        .nav-link:hover { color: #667eea; background: #f8f9fa; padding-left: 1.8rem; }
+        .nav-link.active { color: #667eea; background: linear-gradient(90deg, rgba(102,126,234,0.1) 0%, rgba(255,255,255,0) 100%); border-left: 4px solid #667eea; font-weight: 600; }
+        .nav-link i { width: 25px; font-size: 1.2rem; margin-right: 10px; }
+        .sidebar-heading { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #adb5bd; padding: 1.5rem 1.5rem 0.5rem; font-weight: 700; }
 
-        /* Navbar - FIXED CONTRAST */
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 0.8rem 1.5rem;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
+        /* --- 3. MAIN CONTENT --- */
+        .main-content { margin-left: 260px; margin-top: 60px; padding: 2rem; min-height: 100vh; }
         
-        .navbar-brand {
-            color: #fff !important; /* FIXED: White text */
-            font-weight: 700;
-            font-size: 1.3rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
+        /* --- 4. DASHBOARD CARDS (Infografis) --- */
+        .stat-card { background: #fff; border-radius: 15px; padding: 1.5rem; box-shadow: 0 5px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; transition: transform 0.3s; border: none; height: 100%; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         
-        .navbar-brand i {
-            color: #ffd700; /* Gold icon */
-        }
+        .stat-card.primary { border-bottom: 4px solid #667eea; }
+        .stat-card.success { border-bottom: 4px solid #11998e; }
+        .stat-card.warning { border-bottom: 4px solid #f6d365; }
+        .stat-card.danger { border-bottom: 4px solid #ff6b6b; }
         
-        .navbar .nav-link {
-            color: rgba(255,255,255,0.95) !important; /* FIXED: White text */
-            font-weight: 500;
-        }
+        .stat-icon-bg { position: absolute; top: -10px; right: -10px; font-size: 5rem; opacity: 0.1; transform: rotate(15deg); }
+        .stat-value { font-size: 2.2rem; font-weight: 800; color: #333; margin-bottom: 0; line-height: 1.2; }
+        .stat-label { color: #888; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .navbar .dropdown-menu {
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        /* Sidebar - IMPROVED DESIGN */
-        .sidebar {
-            position: fixed;
-            top: 56px;
-            bottom: 0;
-            left: 0;
-            z-index: 100;
-            width: 250px;
-            padding: 0;
-            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-            box-shadow: 2px 0 15px rgba(0,0,0,0.08);
-            overflow-y: auto;
-        }
+        /* --- 5. WELCOME BANNER --- */
+        .welcome-banner { background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%); border-radius: 15px; padding: 2rem; color: #1a5c48; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(132, 250, 176, 0.4); position: relative; overflow: hidden; }
+        .welcome-deco { position: absolute; right: 20px; bottom: -20px; font-size: 8rem; opacity: 0.2; color: #fff; }
         
-        .sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
+        /* --- 6. QUICK ACTIONS --- */
+        .quick-btn { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 1.2rem; text-align: center; transition: all 0.3s; height: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #555; }
+        .quick-btn:hover { background: #fff; border-color: #667eea; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2); transform: translateY(-3px); color: #667eea; }
+        .quick-btn i { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
         
-        .sidebar::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 3px;
-        }
+        /* --- 7. TABLE STYLE --- */
+        .custom-table thead th { background: #f8f9fa; border-bottom: 2px solid #e9ecef; color: #6c757d; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
+        .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
         
-        .sidebar .nav {
-            padding: 1rem 0;
-        }
-        
-        /* Sidebar Heading - GRADIENT SEPARATOR */
-        .sidebar-heading {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            padding: 1rem 1.2rem 0.5rem;
-            color: #64748b;
-            background: linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.1) 50%, transparent 100%);
-            margin-top: 0.5rem;
-            position: relative;
-        }
-        
-        .sidebar-heading::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 1.2rem;
-            right: 1.2rem;
-            height: 2px;
-            background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%);
-        }
-        
-        /* Sidebar Links - MODERN STYLE */
-        .sidebar .nav-link {
-            font-weight: 500;
-            color: #475569;
-            padding: 0.75rem 1.2rem;
-            border-left: 3px solid transparent;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            margin: 0.2rem 0;
-        }
-        
-        .sidebar .nav-link i {
-            width: 22px;
-            font-size: 1.1rem;
-            margin-right: 0.7rem;
-            transition: transform 0.3s ease;
-        }
-        
-        .sidebar .nav-link:hover {
-            color: #667eea;
-            background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, transparent 100%);
-            border-left-color: #667eea;
-            transform: translateX(3px);
-        }
-        
-        .sidebar .nav-link:hover i {
-            transform: scale(1.15);
-        }
-        
-        .sidebar .nav-link.active {
-            color: #667eea;
-            background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, rgba(102, 126, 234, 0.05) 100%);
-            border-left-color: #667eea;
-            font-weight: 600;
-        }
-
-        /* Main Content - COMPACT */
-        .main-content {
-            margin-left: 250px;
-            margin-top: 56px;
-            padding: 1.2rem 1.5rem;
-            min-height: calc(100vh - 56px);
-        }
-        
-        /* Welcome Banner - COMPACT */
-        .welcome-banner {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 1.5rem;
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .welcome-banner h4 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .welcome-banner .date-time {
-            text-align: right;
-        }
-        
-        .welcome-banner .time {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1;
-        }
-        
-        .welcome-banner .date {
-            font-size: 0.9rem;
-            opacity: 0.95;
-        }
-
-        /* Stats Cards - COMPACT & MODERN */
-        .stat-card {
-            border: none;
-            border-radius: 12px;
-            padding: 1.3rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-        
-        .stat-card .card-body {
-            padding: 0;
-        }
-        
-        .stat-card h6 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            opacity: 0.95;
-        }
-        
-        .stat-card h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0.3rem 0;
-            line-height: 1;
-        }
-        
-        .stat-card .stat-icon {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 3rem;
-            opacity: 0.25;
-        }
-
-        /* Alert Cards - COMPACT */
-        .alert-card {
-            border-radius: 10px;
-            border: none;
-            padding: 1rem 1.2rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .alert-card h5 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-        }
-        
-        .alert-card ul {
-            margin: 0;
-            padding-left: 1.2rem;
-            font-size: 0.9rem;
-        }
-        
-        .alert-card li {
-            margin-bottom: 0.4rem;
-        }
-
-        /* Quick Actions - COMPACT */
-        .quick-action-card {
-            border: none;
-            border-radius: 10px;
-            padding: 1.2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            background: white;
-            height: 100%;
-        }
-        
-        .quick-action-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-        
-        .quick-action-card i {
-            font-size: 2.5rem;
-            margin-bottom: 0.6rem;
-            display: block;
-        }
-        
-        .quick-action-card h6 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin: 0;
-            color: #334155;
-        }
-
-        /* Table - COMPACT */
-        .table-compact {
-            font-size: 0.85rem;
-        }
-        
-        .table-compact th {
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            padding: 0.6rem 0.8rem;
-        }
-        
-        .table-compact td {
-            padding: 0.6rem 0.8rem;
-        }
-
-        /* Badge - MODERN */
-        .badge {
-            padding: 0.35rem 0.6rem;
-            font-weight: 500;
-            font-size: 0.75rem;
-        }
-
-        /* Responsive - Optimize for 15.5" laptop */
-        @media (max-width: 1920px) {
-            .stat-card h2 {
-                font-size: 1.8rem;
-            }
-            .stat-card .stat-icon {
-                font-size: 2.5rem;
-            }
-        }
-        
-        @media (max-width: 1366px) {
-            .main-content {
-                padding: 1rem;
-            }
-            .stat-card {
-                padding: 1rem;
-            }
-            .stat-card h2 {
-                font-size: 1.5rem;
-            }
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; transition: 0.3s; }
+            .sidebar.show { left: 0; }
+            .main-content { margin-left: 0; }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="dashboard.php">
-                <i class="bi bi-book-fill me-2"></i>
-                <strong>E-Library STK Yakobus</strong>
+                <i class="bi bi-journal-bookmark-fill me-2"></i>E-Library STK St. Yakobus Merauke
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" onclick="document.querySelector('.sidebar').classList.toggle('show')">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i>
-                            <?= $_SESSION['admin_username'] ?>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="change_password.php"><i class="bi bi-key me-2"></i>Ganti Password</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
+            <div class="ms-auto d-flex align-items-center text-white">
+                <div class="me-4 d-none d-md-block text-end">
+                    <div id="jam" class="fw-bold fs-5"></div>
+                    <small class="opacity-75"><?= date('l, d F Y') ?></small>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link text-white dropdown-toggle p-0" href="#" role="button" data-bs-toggle="dropdown">
+                        <img src="https://ui-avatars.com/api/?name=<?= urlencode($admin_username) ?>&background=random" class="rounded-circle border border-2 border-white" width="40">
+                        <span class="ms-2 d-none d-md-inline"><?= $admin_username ?></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Sidebar -->
     <nav class="sidebar">
-        <ul class="nav flex-column">
+        <div class="px-3 mb-3">
+            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Main Menu</small>
+        </div>
+        <ul class="nav flex-column mb-4">
             <li class="nav-item">
                 <a class="nav-link active" href="dashboard.php">
-                    <i class="bi bi-speedometer2"></i>
-                    Dashboard
-                </a>
-            </li>
-            
-            <li class="sidebar-heading">DATA MASTER</li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/buku/index.php">
-                    <i class="bi bi-book"></i>
-                    Data Buku
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/mahasiswa/index.php">
-                    <i class="bi bi-people"></i>
-                    Data Mahasiswa
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/dosen/index.php">
-                    <i class="bi bi-person-badge"></i>
-                    Data Dosen
-                </a>
-            </li>
-            
-            <li class="sidebar-heading">TRANSAKSI</li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/peminjaman/index.php">
-                    <i class="bi bi-arrow-left-right"></i>
-                    Peminjaman Buku
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/perpanjangan/index.php">
-                    <i class="bi bi-arrow-clockwise"></i>
-                    Perpanjangan Buku
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/pengembalian/index.php">
-                    <i class="bi bi-arrow-return-left"></i>
-                    Pengembalian Buku
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/denda/index.php">
-                    <i class="bi bi-cash-stack"></i>
-                    Manajemen Denda
-                </a>
-            </li>
-            
-            <li class="sidebar-heading">LAYANAN</li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/surat_keterangan/index.php">
-                    <i class="bi bi-file-earmark-text"></i>
-                    Surat Keterangan
-                </a>
-            </li>
-            
-            <li class="sidebar-heading">LAPORAN & UTILITAS</li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/laporan/index.php">
-                    <i class="bi bi-file-bar-graph"></i>
-                    Laporan
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href="modules/backup/index.php">
-                    <i class="bi bi-cloud-download"></i>
-                    Backup Database
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
                 </a>
             </li>
         </ul>
+
+        <div class="sidebar-heading mt-0">Master Data</div>
+        <ul class="nav flex-column mb-4">
+            <li class="nav-item"><a class="nav-link" href="modules/buku/index.php"><i class="bi bi-book"></i> Data Buku</a></li>
+            <li class="nav-item"><a class="nav-link" href="modules/mahasiswa/index.php"><i class="bi bi-people"></i> Mahasiswa</a></li>
+            <li class="nav-item"><a class="nav-link" href="modules/dosen/index.php"><i class="bi bi-person-badge"></i> Dosen</a></li>
+        </ul>
+
+        <div class="sidebar-heading mt-0">Sirkulasi</div>
+        <ul class="nav flex-column mb-4">
+            <li class="nav-item"><a class="nav-link" href="modules/peminjaman/index.php"><i class="bi bi-box-arrow-up-right"></i> Peminjaman</a></li>
+            <li class="nav-item"><a class="nav-link" href="modules/pengembalian/index.php"><i class="bi bi-box-arrow-in-down-left"></i> Pengembalian</a></li>
+            <li class="nav-item"><a class="nav-link" href="modules/perpanjangan/index.php"><i class="bi bi-arrow-repeat"></i> Perpanjangan</a></li>
+            <li class="nav-item"><a class="nav-link" href="modules/denda/index.php"><i class="bi bi-wallet2"></i> Manajemen Denda</a></li>
+        </ul>
+
+        <div class="sidebar-heading mt-0">Laporan & Tools</div>
+        <ul class="nav flex-column mb-5">
+            <li class="nav-item"><a class="nav-link" href="modules/surat_keterangan/index.php"><i class="bi bi-file-earmark-check"></i> Surat Keterangan</a></li>
+            <li class="nav-item"><a class="nav-link" href="modules/laporan/index.php"><i class="bi bi-printer"></i> Laporan</a></li>
+            <li class="nav-item"><a class="nav-link" href="modules/backup/index.php"><i class="bi bi-database-gear"></i> Backup & Restore</a></li>
+        </ul>
     </nav>
 
-    <!-- Main Content -->
     <main class="main-content">
-        <!-- Welcome Banner -->
+        
         <div class="welcome-banner">
-            <div>
-                <h4>Selamat Datang, <?= $_SESSION['admin_username'] ?>!</h4>
-                <small><i class="bi bi-calendar3 me-2"></i><?= formatTanggalIndo(date('Y-m-d')) ?></small>
-            </div>
-            <div class="date-time">
-                <div class="time" id="clock">14:16</div>
-                <div class="date">WIT</div>
-            </div>
+            <h2 class="fw-bold mb-1">Selamat Datang, Administrator!</h2>
+            <p class="mb-0 fs-5 opacity-75">Sistem Informasi Perpustakaan siap melayani.</p>
+            <i class="bi bi-book welcome-deco"></i>
         </div>
 
-        <?php if (isset($_SESSION['alert'])): $alert = $_SESSION['alert']; ?>
-        <div class="alert alert-<?= $alert['type'] ?> alert-dismissible fade show" role="alert">
-            <?= $alert['message'] ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <?php unset($_SESSION['alert']); endif; ?>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card primary">
+                    <div class="stat-label">Koleksi Buku</div>
+                    <div class="stat-value"><?= number_format($stats['total_judul']) ?> <small class="fs-6 text-muted fw-normal">Judul</small></div>
+                    <div class="text-muted small mt-1">Total <?= number_format($stats['total_buku']) ?> Eksemplar</div>
+                    <i class="bi bi-journal-bookmark-fill stat-icon-bg text-primary"></i>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card success">
+                    <div class="stat-label">Total Anggota</div>
+                    <div class="stat-value"><?= number_format($stats['total_anggota']) ?> <small class="fs-6 text-muted fw-normal">Orang</small></div>
+                    <div class="text-muted small mt-1">Mahasiswa & Dosen Aktif</div>
+                    <i class="bi bi-people-fill stat-icon-bg text-success"></i>
+                </div>
+            </div>
 
-        <!-- Statistics Cards - 2 ROWS COMPACT -->
-        <div class="row g-3 mb-3">
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="card-body">
-                        <h6>Total Buku</h6>
-                        <h2><?= number_format($stats['total_buku']) ?></h2>
-                        <small><i class="bi bi-box"></i> Koleksi Perpustakaan</small>
-                        <i class="bi bi-book-fill stat-icon"></i>
-                    </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card warning">
+                    <div class="stat-label">Sirkulasi Aktif</div>
+                    <div class="stat-value text-warning"><?= number_format($stats['sedang_dipinjam']) ?> <small class="fs-6 text-muted fw-normal">Buku</small></div>
+                    <div class="text-muted small mt-1">Sedang dipinjam saat ini</div>
+                    <i class="bi bi-arrow-left-right stat-icon-bg text-warning"></i>
                 </div>
             </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-white" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
-                    <div class="card-body">
-                        <h6>Mahasiswa</h6>
-                        <h2><?= number_format($stats['total_mahasiswa']) ?></h2>
-                        <small><i class="bi bi-mortarboard"></i> Anggota Aktif</small>
-                        <i class="bi bi-people-fill stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-white" style="background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);">
-                    <div class="card-body">
-                        <h6>Dosen</h6>
-                        <h2><?= number_format($stats['total_dosen']) ?></h2>
-                        <small><i class="bi bi-person-workspace"></i> Pengajar</small>
-                        <i class="bi bi-person-badge-fill stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <div class="card-body">
-                        <h6>Peminjaman Aktif</h6>
-                        <h2><?= number_format($stats['peminjaman_aktif']) ?></h2>
-                        <small><i class="bi bi-clock-history"></i> Sedang Dipinjam</small>
-                        <i class="bi bi-arrow-left-right stat-icon"></i>
-                    </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card danger">
+                    <div class="stat-label">Keterlambatan</div>
+                    <div class="stat-value text-danger"><?= number_format($stats['terlambat']) ?> <small class="fs-6 text-muted fw-normal">Buku</small></div>
+                    <div class="text-muted small mt-1">Belum dikembalikan</div>
+                    <i class="bi bi-exclamation-circle-fill stat-icon-bg text-danger"></i>
                 </div>
             </div>
         </div>
 
-        <div class="row g-3 mb-3">
-            <div class="col-lg-6">
-                <a href="modules/peminjaman/index.php?status=terlambat" style="text-decoration: none; color: inherit; display: block;"><div class="stat-card text-white" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100 rounded-4">
+                    <div class="card-header bg-white py-3 border-0">
+                        <h5 class="card-title fw-bold mb-0"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Tren Peminjaman (6 Bulan Terakhir)</h5>
+                    </div>
                     <div class="card-body">
-                        <h6>Keterlambatan</h6>
-                        <h2><?= number_format($stats['keterlambatan']) ?></h2>
-                        <small><i class="bi bi-exclamation-triangle"></i> Perlu Tindak Lanjut</small>
-                        <i class="bi bi-exclamation-triangle-fill stat-icon"></i>
+                        <canvas id="transaksiChart" height="120"></canvas>
                     </div>
-                </div></a>
+                </div>
             </div>
-            
-            <div class="col-lg-6">
-                <a href="modules/denda/index.php" style="text-decoration: none; color: inherit; display: block;">
-                    <div class="stat-card text-white" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
-                        <div class="card-body">
-                            <h6>Total Denda Belum Dibayar</h6>
-                            <h2><?= formatRupiah($stats['total_denda']) ?></h2>
-                        <small><i class="bi bi-wallet2"></i> Tunggakan</small>
-                        <i class="bi bi-cash-stack stat-icon"></i>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-danger text-white position-relative overflow-hidden">
+                    <div class="card-body p-4 text-center">
+                        <h6 class="text-uppercase opacity-75 fw-bold mb-2">Potensi Denda Berjalan</h6>
+                        <h2 class="display-5 fw-bold mb-0">Rp <?= number_format($total_estimasi_denda, 0, ',', '.') ?></h2>
+                        <p class="small opacity-75 mt-2 mb-3">Estimasi dari buku yang terlambat tapi belum kembali.</p>
+                        <a href="modules/denda/index.php" class="btn btn-light rounded-pill px-4 fw-bold text-danger stretched-link">Lihat Detail</a>
+                        <i class="bi bi-cash-coin position-absolute" style="font-size: 8rem; opacity: 0.1; right: -20px; bottom: -20px;"></i>
                     </div>
-                </div></a>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white py-3 border-0">
+                        <h6 class="fw-bold mb-0">Aksi Cepat</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <a href="modules/peminjaman/add.php" class="quick-btn">
+                                    <i class="bi bi-plus-circle-fill text-primary"></i>
+                                    <span class="fw-bold small">Pinjam Baru</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="modules/pengembalian/index.php" class="quick-btn">
+                                    <i class="bi bi-box-arrow-in-down text-success"></i>
+                                    <span class="fw-bold small">Kembali Buku</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="modules/surat_keterangan/index.php" class="quick-btn">
+                                    <i class="bi bi-file-earmark-text text-info"></i>
+                                    <span class="fw-bold small">Surat Bebas</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="modules/laporan/index.php" class="quick-btn">
+                                    <i class="bi bi-file-pdf text-danger"></i>
+                                    <span class="fw-bold small">Laporan</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Alerts & Quick Actions - SIDE BY SIDE -->
-        <div class="row g-3 mb-3">
-            <!-- Left Column: Alerts -->
-            <div class="col-lg-6">
-                <?php if ($buku_habis->num_rows > 0): ?>
-                <div class="alert-card" style="background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%); border-left: 4px solid #ffc107;">
-                    <h5 class="text-warning"><i class="bi bi-exclamation-circle-fill me-2"></i>Stok Buku Habis</h5>
-                    <ul class="mb-0">
-                        <?php while ($buku = $buku_habis->fetch_assoc()): ?>
-                        <li><strong><?= $buku['judul'] ?></strong> (<?= $buku['nomor_buku'] ?>)</li>
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-secondary"></i>Aktivitas Peminjaman Terbaru</h5>
+                <a href="modules/peminjaman/index.php" class="btn btn-sm btn-outline-primary rounded-pill">Lihat Semua</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table custom-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Tanggal</th>
+                            <th>Peminjam</th>
+                            <th>Buku</th>
+                            <th>Jatuh Tempo</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while($row = $res_recent->fetch_assoc()): ?>
+                        <tr>
+                            <td class="ps-4 text-muted small"><?= date('d/m/Y', strtotime($row['tanggal_pinjam'])) ?></td>
+                            <td class="fw-bold text-dark"><?= $row['peminjam'] ?> <br> <span class="badge bg-light text-secondary fw-normal"><?= ucfirst($row['jenis_peminjam']) ?></span></td>
+                            <td><?= substr($row['judul'], 0, 40) ?>...</td>
+                            <td class="text-muted small"><?= date('d/m/Y', strtotime($row['tanggal_jatuh_tempo'])) ?></td>
+                            <td class="text-center">
+                                <?php 
+                                    $st = $row['status'];
+                                    $badge = 'secondary';
+                                    if($st == 'dipinjam') $badge = 'primary';
+                                    if($st == 'terlambat') $badge = 'danger';
+                                    if($st == 'dikembalikan') $badge = 'success';
+                                ?>
+                                <span class="badge bg-<?= $badge ?> badge-status"><?= strtoupper($st) ?></span>
+                            </td>
+                        </tr>
                         <?php endwhile; ?>
-                    </ul>
-                </div>
-                <?php endif; ?>
-
-                <?php if (!empty($akan_jatuh_tempo)): ?>
-                <div class="alert-card" style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-left: 4px solid #ff9800;">
-                    <h5 class="text-warning"><i class="bi bi-clock-history me-2"></i>Jatuh Tempo (3 Hari)</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-compact mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Kode</th>
-                                    <th>Buku</th>
-                                    <th>Jatuh Tempo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($akan_jatuh_tempo as $pjm): ?>
-                                <tr>
-                                    <td><code><?= $pjm['kode_peminjaman'] ?></code></td>
-                                    <td><?= $pjm['judul'] ?></td>
-                                    <td><span class="badge bg-warning"><?= formatTanggalIndo($pjm['tanggal_jatuh_tempo']) ?></span></td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
+        </div>
 
-            <!-- Right Column: Quick Actions -->
-            <div class="col-lg-6">
-                <h5 class="mb-3"><i class="bi bi-lightning-fill text-warning me-2"></i>Aksi Cepat</h5>
-                <div class="row g-2">
-                    <div class="col-3">
-                        <a href="modules/peminjaman/add.php" class="text-decoration-none">
-                            <div class="quick-action-card">
-                                <i class="bi bi-plus-circle-fill text-primary"></i>
-                                <h6>Tambah Peminjaman</h6>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a href="modules/pengembalian/index.php" class="text-decoration-none">
-                            <div class="quick-action-card">
-                                <i class="bi bi-arrow-return-left text-success"></i>
-                                <h6>Pengembalian Buku</h6>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a href="modules/surat_keterangan/add.php" class="text-decoration-none">
-                            <div class="quick-action-card">
-                                <i class="bi bi-file-earmark-text-fill text-info"></i>
-                                <h6>Buat Surat</h6>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a href="modules/laporan/index.php" class="text-decoration-none">
-                            <div class="quick-action-card">
-                                <i class="bi bi-file-bar-graph-fill text-warning"></i>
-                                <h6>Laporan</h6>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Real-time clock
+        // 1. Clock Script
         function updateClock() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock').textContent = hours + ':' + minutes;
+            const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace('.', ':');
+            document.getElementById('jam').textContent = timeString + " WIT";
         }
-        updateClock();
         setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. Chart Script
+        const ctx = document.getElementById('transaksiChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: <?= json_encode($chart_labels) ?>,
+                datasets: [{
+                    label: 'Peminjaman',
+                    data: <?= json_encode($chart_pinjam) ?>,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4
+                }, {
+                    label: 'Pengembalian',
+                    data: <?= json_encode($chart_kembali) ?>,
+                    borderColor: '#11998e',
+                    backgroundColor: 'rgba(17, 153, 142, 0.05)',
+                    tension: 0.4,
+                    fill: true,
+                    borderDash: [5, 5],
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
     </script>
 </body>
 </html>

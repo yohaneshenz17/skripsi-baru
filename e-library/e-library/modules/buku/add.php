@@ -11,8 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $penerbit = sanitize($_POST['penerbit']);
     $tahun_terbit = sanitize($_POST['tahun_terbit']);
     $stok = intval($_POST['stok']);
+    $is_referensi = isset($_POST['is_referensi']) ? 1 : 0;
     
-    // Check if nomor_buku already exists - FIXED VERSION
+    // Check if nomor_buku already exists
     $check = "SELECT id FROM buku WHERE nomor_buku = ?";
     $stmt = $conn->prepare($check);
     $stmt->bind_param("s", $nomor_buku);
@@ -20,17 +21,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_result($found_id);
     
     if ($stmt->fetch()) {
-        // Nomor buku sudah ada
         $stmt->close();
         setAlert('danger', 'Nomor buku sudah digunakan!');
     } else {
         $stmt->close();
         
         // Insert new book
-        $query = "INSERT INTO buku (nomor_buku, judul, pengarang, penerbit, tahun_terbit, stok, stok_tersedia) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO buku (nomor_buku, judul, pengarang, penerbit, tahun_terbit, stok, stok_tersedia, is_referensi) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("sssssii", $nomor_buku, $judul, $pengarang, $penerbit, $tahun_terbit, $stok, $stok);
+        $stmt->bind_param("sssssiii", $nomor_buku, $judul, $pengarang, $penerbit, $tahun_terbit, $stok, $stok, $is_referensi);
         
         if ($stmt->execute()) {
             $stmt->close();
@@ -115,6 +115,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <div class="mb-3">
                                         <label class="form-label">Stok <span class="text-danger">*</span></label>
                                         <input type="number" class="form-control" name="stok" min="0" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <div class="card bg-light border-warning">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="is_referensi" id="is_referensi" value="1">
+                                                    <label class="form-check-label" for="is_referensi">
+                                                        <i class="bi bi-bookmark-check text-warning"></i> <strong>Buku Referensi</strong>
+                                                    </label>
+                                                    <div><small class="text-muted">Centang jika buku ini <strong>hanya boleh dibaca di ruang baca</strong> dan <strong>tidak dapat dipinjam</strong></small></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

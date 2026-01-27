@@ -6,9 +6,11 @@ requireLogin();
 
 header('Content-Type: application/json');
 
+// PENTING: Filter buku referensi (is_referensi = 0) agar tidak muncul di peminjaman
 $query = "SELECT id, nomor_buku, judul, pengarang, stok_tersedia 
           FROM buku 
           WHERE stok_tersedia > 0 
+          AND is_referensi = 0
           ORDER BY judul ASC";
 
 $result = $conn->query($query);

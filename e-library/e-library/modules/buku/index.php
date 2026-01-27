@@ -217,6 +217,16 @@ $result = $conn->query($query);
             border-radius: 10px;
             border-left: 4px solid;
         }
+        
+        /* Badge Referensi */
+        .badge-referensi {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -350,12 +360,13 @@ $result = $conn->query($query);
                             <tr>
                                 <th width="5%">No</th>
                                 <th width="10%">Nomor Buku</th>
-                                <th width="25%">Judul</th>
-                                <th width="15%">Pengarang</th>
-                                <th width="15%">Penerbit</th>
+                                <th width="22%">Judul</th>
+                                <th width="13%">Pengarang</th>
+                                <th width="13%">Penerbit</th>
                                 <th width="8%">Tahun</th>
                                 <th width="8%">Stok</th>
                                 <th width="8%">Tersedia</th>
+                                <th width="10%">Kategori</th>
                                 <th width="15%">Aksi</th>
                             </tr>
                         </thead>
@@ -379,6 +390,17 @@ $result = $conn->query($query);
                                     </span>
                                 </td>
                                 <td>
+                                    <?php if ($row['is_referensi'] == 1): ?>
+                                        <span class="badge-referensi">
+                                            <i class="bi bi-bookmark-check-fill"></i> REFERENSI
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle-fill"></i> Bisa Dipinjam
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
                                     <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i>
                                     </a>
@@ -392,7 +414,7 @@ $result = $conn->query($query);
                             else:
                             ?>
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-4">
+                                <td colspan="10" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                     Tidak ada data buku
                                 </td>

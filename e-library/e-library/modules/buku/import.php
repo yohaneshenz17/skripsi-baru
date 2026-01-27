@@ -1,6 +1,6 @@
 <?php
-// SAVE AS: modules/buku/import_csv.php
-// VERSI PERBAIKAN - Auto-detect delimiter (koma atau titik koma)
+// SAVE AS: modules/buku/import.php
+// VERSI PERBAIKAN - Auto-detect delimiter (koma atau titik koma) + IS_REFERENSI
 
 require_once '../../config/database.php';
 require_once '../../config/functions.php';
@@ -60,6 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['csv_file'])) {
                     $penerbit = isset($row[3]) ? trim($row[3]) : '';
                     $tahun_terbit = isset($row[4]) ? trim($row[4]) : '';
                     $stok = isset($row[5]) ? intval($row[5]) : 0;
+                    // TAMBAHAN: Handle kolom referensi (Ya/Tidak)
+                    $is_referensi = isset($row[6]) ? (strtolower(trim($row[6])) == 'ya' ? 1 : 0) : 0;
                     
                     // Extract year from tahun_terbit if it contains "Cet." or other text
                     if (!empty($tahun_terbit) && !is_numeric($tahun_terbit)) {
@@ -118,18 +120,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['csv_file'])) {
                     }
                     $stmt->close();
                     
-                    // Insert to database
-                    $query = "INSERT INTO buku (nomor_buku, judul, pengarang, penerbit, tahun_terbit, stok, stok_tersedia) 
-                              VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    // Insert to database - TAMBAH is_referensi
+                    $query = "INSERT INTO buku (nomor_buku, judul, pengarang, penerbit, tahun_terbit, stok, stok_tersedia, is_referensi) 
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $conn->prepare($query);
-                    $stmt->bind_param("sssssii", $nomor_buku, $judul, $pengarang, $penerbit, $tahun_terbit, $stok, $stok);
+                    $stmt->bind_param("sssssiii", $nomor_buku, $judul, $pengarang, $penerbit, $tahun_terbit, $stok, $stok, $is_referensi);
                     
                     if ($stmt->execute()) {
                         $results[] = array(
                             'status' => 'success',
                             'nomor' => $nomor_buku,
                             'judul' => $judul,
-                            'message' => 'Berhasil ditambahkan'
+                            'message' => 'Berhasil ditambahkan' . ($is_referensi ? ' (Referensi)' : '')
                         );
                         $success_count++;
                     } else {
@@ -246,6 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['csv_file'])) {
                                         <li><strong>Penerbit</strong> (opsional)</li>
                                         <li><strong>Tahun Terbit</strong> (opsional)</li>
                                         <li><strong>Stok</strong> (wajib, harus > 0)</li>
+                                        <li><strong>Referensi</strong> (Ya/Tidak)</li>
                                     </ol>
                                 </div>
                                 
@@ -256,6 +259,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['csv_file'])) {
                                         <li>Nomor buku harus unik</li>
                                         <li>Baris pertama adalah header</li>
                                         <li>Tahun bisa format: "2020" atau "Cet. 2.2020"</li>
+                                        <li>Referensi: isi "Ya" atau "Tidak"</li>
                                     </ul>
                                 </div>
                             </div>

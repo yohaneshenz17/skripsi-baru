@@ -19,8 +19,8 @@ $output = fopen('php://output', 'w');
 // 3. Tulis BOM (Byte Order Mark) agar Excel bisa membaca karakter UTF-8 dengan benar
 fputs($output, "\xEF\xBB\xBF");
 
-// 4. Tulis Baris Header (Judul Kolom)
-$csv_headers = array('No', 'Nomor Buku', 'Judul Buku', 'Pengarang', 'Penerbit', 'Tahun Terbit', 'Stok Total', 'Stok Tersedia');
+// 4. Tulis Baris Header (Judul Kolom) - TAMBAH KOLOM REFERENSI
+$csv_headers = array('No', 'Nomor Buku', 'Judul Buku', 'Pengarang', 'Penerbit', 'Tahun Terbit', 'Stok Total', 'Stok Tersedia', 'Referensi');
 fputcsv($output, $csv_headers);
 
 // 5. Ambil Data dari Database
@@ -30,7 +30,7 @@ $result = $conn->query($query);
 $no = 1;
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        // Siapkan baris data
+        // Siapkan baris data - TAMBAH IS_REFERENSI
         $csv_row = array(
             $no++,
             $row['nomor_buku'],
@@ -39,7 +39,8 @@ if ($result->num_rows > 0) {
             $row['penerbit'],
             $row['tahun_terbit'],
             $row['stok'],
-            $row['stok_tersedia']
+            $row['stok_tersedia'],
+            $row['is_referensi'] == 1 ? 'Ya' : 'Tidak'
         );
         
         // Tulis baris ke file CSV

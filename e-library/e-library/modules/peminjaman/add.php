@@ -36,17 +36,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $tanggal_jatuh_tempo = date('Y-m-d', strtotime($tanggal_pinjam . ' +14 days'));
             
             foreach ($buku_ids as $buku_id) {
-                // Cek stok
-                $check_stok = "SELECT stok_tersedia, judul FROM buku WHERE id = ?";
+                // FASE 3: Cek stok DAN is_referensi
+                $check_stok = "SELECT stok_tersedia, judul, is_referensi FROM buku WHERE id = ?";
                 $stmt2 = $conn->prepare($check_stok);
                 $stmt2->bind_param("i", $buku_id);
                 $stmt2->execute();
-                $stmt2->bind_result($stok, $judul_buku);
+                $stmt2->bind_result($stok, $judul_buku, $is_referensi);
                 $stmt2->fetch();
                 $stmt2->close();
                 
+                // VALIDASI 1: Cek stok
                 if ($stok <= 0) {
                     setAlert('danger', 'Stok buku "' . $judul_buku . '" tidak tersedia!');
+                    $success = false;
+                    break;
+                }
+                
+                // VALIDASI 2: Cek buku referensi (SAFETY LAYER)
+                if ($is_referensi == 1) {
+                    setAlert('danger', 'Buku "' . $judul_buku . '" adalah buku referensi dan tidak dapat dipinjam!');
                     $success = false;
                     break;
                 }

@@ -4,14 +4,29 @@ require_once '../../config/functions.php';
 
 requireLogin();
 
-// Get all books with search
+// ====================================
+// PAGINATION LOGIC - 25 BUKU PER PAGE
+// ====================================
+$limit = 25; // Jumlah buku per halaman
+$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$page = ($page < 1) ? 1 : $page; // Prevent negative page
+$offset = ($page - 1) * $limit;
+
+// Get search parameter
 $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $where = '';
 if (!empty($search)) {
     $where = "WHERE nomor_buku LIKE '%$search%' OR judul LIKE '%$search%' OR pengarang LIKE '%$search%'";
 }
 
-$query = "SELECT * FROM buku $where ORDER BY id DESC";
+// Count total records for pagination
+$count_query = "SELECT COUNT(*) as total FROM buku $where";
+$count_result = $conn->query($count_query);
+$total_records = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_records / $limit);
+
+// Get books with pagination
+$query = "SELECT * FROM buku $where ORDER BY id DESC LIMIT $limit OFFSET $offset";
 $result = $conn->query($query);
 ?>
 <!DOCTYPE html>
@@ -194,6 +209,16 @@ $result = $conn->query($query);
             border-radius: 6px;
         }
         
+        /* Badge Referensi */
+        .badge-referensi {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
         /* Search Box */
         .search-box {
             max-width: 400px;
@@ -218,14 +243,55 @@ $result = $conn->query($query);
             border-left: 4px solid;
         }
         
-        /* Badge Referensi */
-        .badge-referensi {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        /* ============================
+           PAGINATION STYLES
+           ============================ */
+        .pagination-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .pagination-summary {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .pagination {
+            margin: 0;
+        }
+        
+        .pagination .page-link {
+            border: 1px solid #e2e8f0;
+            color: #667eea;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination .page-link:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            font-size: 0.7rem;
-            padding: 0.3rem 0.6rem;
-            border-radius: 4px;
-            display: inline-block;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .pagination .page-item.disabled .page-link {
+            background: #f1f5f9;
+            color: #cbd5e0;
+            border-color: #e2e8f0;
         }
     </style>
 </head>
@@ -372,7 +438,8 @@ $result = $conn->query($query);
                         </thead>
                         <tbody>
                             <?php 
-                            $no = 1;
+                            // Hitung nomor urut sesuai halaman
+                            $no = $offset + 1;
                             if ($result->num_rows > 0):
                                 while ($row = $result->fetch_assoc()): 
                             ?>
@@ -423,6 +490,76 @@ $result = $conn->query($query);
                         </tbody>
                     </table>
                 </div>
+                
+                <?php if ($total_records > 0): ?>
+                <!-- ============================
+                     PAGINATION UI
+                     ============================ -->
+                <div class="pagination-info">
+                    <div class="pagination-summary">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Menampilkan <strong><?= $offset + 1 ?></strong> - <strong><?= min($offset + $limit, $total_records) ?></strong> 
+                        dari <strong><?= $total_records ?></strong> buku
+                    </div>
+                    
+                    <?php if ($total_pages > 1): ?>
+                    <nav>
+                        <ul class="pagination">
+                            <!-- First Page -->
+                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=1<?= !empty($search) ? '&search='.$search : '' ?>">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            </li>
+                            
+                            <!-- Previous Page -->
+                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= $page - 1 ?><?= !empty($search) ? '&search='.$search : '' ?>">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                            
+                            <?php
+                            // Smart pagination: Show 5 pages around current page
+                            $start_page = max(1, $page - 2);
+                            $end_page = min($total_pages, $page + 2);
+                            
+                            // Adjust if at beginning or end
+                            if ($page <= 3) {
+                                $end_page = min(5, $total_pages);
+                            }
+                            if ($page >= $total_pages - 2) {
+                                $start_page = max(1, $total_pages - 4);
+                            }
+                            
+                            for ($i = $start_page; $i <= $end_page; $i++):
+                            ?>
+                            <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?><?= !empty($search) ? '&search='.$search : '' ?>">
+                                    <?= $i ?>
+                                </a>
+                            </li>
+                            <?php endfor; ?>
+                            
+                            <!-- Next Page -->
+                            <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= $page + 1 ?><?= !empty($search) ? '&search='.$search : '' ?>">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            
+                            <!-- Last Page -->
+                            <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= $total_pages ?><?= !empty($search) ? '&search='.$search : '' ?>">
+                                    <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+                
             </div>
         </div>
     </main>

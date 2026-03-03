@@ -485,3 +485,10 @@ Stack trace:
 [26-Jan-2026 17:08:01 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 10
 [27-Jan-2026 05:59:11 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 10
 [27-Jan-2026 05:59:11 Asia/Jakarta] PHP Warning:  Undefined array key "kategori" in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 330
+[27-Jan-2026 17:20:02 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 10
+[27-Jan-2026 17:34:33 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 10
+[27-Jan-2026 17:35:11 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 10
+[28-Jan-2026 11:05:33 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 10
+[29-Jan-2026 12:36:41 Asia/Jakarta] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 10
+[29-Jan-2026 12:36:41 Asia/Jakarta] PHP Warning:  Undefined array key "kategori" in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 338
+[29-Jan-2026 12:36:41 Asia/Jakarta] PHP Warning:  Undefined array key "kategori" in /home/stkp7133/public_html/e-library/modules/laporan/cetak_laporan.php on line 338

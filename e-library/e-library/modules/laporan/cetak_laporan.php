@@ -103,7 +103,11 @@ $pdf->SectionTitle('A. RINGKASAN DATA ASET & TRANSAKSI BULAN INI');
 
 // [FIX] Menggunakan COUNT(*) murni tanpa WHERE status='aktif' untuk memastikan angka keluar
 $total_judul = $conn->query("SELECT COUNT(*) FROM buku")->fetch_row()[0];
-$total_eksemplar = $conn->query("SELECT SUM(stok) FROM buku")->fetch_row()[0]; // Pastikan kolom 'stok' benar
+$total_eksemplar = $conn->query("SELECT SUM(stok) FROM buku")->fetch_row()[0];
+$total_judul_referensi = $conn->query("SELECT COUNT(*) FROM buku WHERE is_referensi = 1")->fetch_row()[0];
+$total_judul_dipinjam = $conn->query("SELECT COUNT(*) FROM buku WHERE is_referensi = 0")->fetch_row()[0];
+$total_eks_referensi = $conn->query("SELECT SUM(stok) FROM buku WHERE is_referensi = 1")->fetch_row()[0];
+$total_eks_dipinjam = $conn->query("SELECT SUM(stok) FROM buku WHERE is_referensi = 0")->fetch_row()[0];
 $jml_mhs = $conn->query("SELECT COUNT(*) FROM mahasiswa")->fetch_row()[0];
 $jml_dosen = $conn->query("SELECT COUNT(*) FROM dosen")->fetch_row()[0];
 
@@ -130,8 +134,12 @@ $pdf->Cell($w_satuan, $h_cell, 'Satuan', 1, 1, 'C');
 $pdf->SetFont('Arial','',9);
 // Rows [UPDATE: Menambahkan baris Waive]
 $data_aset = [
-    ['Total Judul Buku', number_format($total_judul), 'Judul'],
-    ['Total Eksemplar Buku', number_format((float)$total_eksemplar), 'Eksemplar'],
+    ['Total Judul Buku (Semua)', number_format($total_judul), 'Judul'],
+    ['  - Buku Referensi (Ruang Baca)', number_format($total_judul_referensi), 'Judul'],
+    ['  - Buku Dapat Dipinjam', number_format($total_judul_dipinjam), 'Judul'],
+    ['Total Eksemplar Buku (Semua)', number_format((float)$total_eksemplar), 'Eksemplar'],
+    ['  - Eksemplar Referensi (Ruang Baca)', number_format((float)$total_eks_referensi), 'Eksemplar'],
+    ['  - Eksemplar Dapat Dipinjam', number_format((float)$total_eks_dipinjam), 'Eksemplar'],
     ['Total Mahasiswa Terdaftar', number_format($jml_mhs), 'Orang'],
     ['Total Dosen/Staf Terdaftar', number_format($jml_dosen), 'Orang'],
     ['Peminjaman Baru (Bulan Ini)', number_format($pinjam_bln), 'Transaksi'],
